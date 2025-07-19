@@ -8,6 +8,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoreHorizontal } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 
 const bookings = [
     {
@@ -88,64 +90,90 @@ const getStatusVariant = (status: string) => {
     }
 }
 
-const BookingTable = ({ bookings: bookingList }: { bookings: typeof bookings }) => (
-    <Card>
-        <CardContent className="p-0">
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Service</TableHead>
-                        <TableHead className="hidden md:table-cell">Client/Provider</TableHead>
-                        <TableHead className="hidden md:table-cell">Date</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                        <TableHead>
-                            <span className="sr-only">Actions</span>
-                        </TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {bookingList.length > 0 ? bookingList.map((booking) => (
-                        <TableRow key={booking.id}>
-                            <TableCell>
-                                <div className="font-medium">{booking.service}</div>
-                                <div className="text-sm text-muted-foreground md:hidden">{booking.user} - {booking.date}</div>
-                            </TableCell>
-                            <TableCell className="hidden md:table-cell">{booking.user}</TableCell>
-                            <TableCell className="hidden md:table-cell">{new Date(booking.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</TableCell>
-                            <TableCell>
-                                <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
-                            </TableCell>
-                            <TableCell className="text-right">₱{booking.price.toFixed(2)}</TableCell>
-                            <TableCell className="text-right">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                                            <MoreHorizontal className="h-4 w-4" />
-                                            <span className="sr-only">Toggle menu</span>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                        <DropdownMenuItem>View Details</DropdownMenuItem>
-                                        <DropdownMenuItem disabled={booking.status !== 'Upcoming'}>Reschedule</DropdownMenuItem>
-                                        <DropdownMenuItem disabled={booking.status !== 'Upcoming'} className="text-destructive">Cancel</DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </TableCell>
+const BookingTable = ({ bookings: bookingList }: { bookings: typeof bookings }) => {
+    const { toast } = useToast();
+
+    return (
+        <Card>
+            <CardContent className="p-0">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Service</TableHead>
+                            <TableHead className="hidden md:table-cell">Client/Provider</TableHead>
+                            <TableHead className="hidden md:table-cell">Date</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">Amount</TableHead>
+                            <TableHead>
+                                <span className="sr-only">Actions</span>
+                            </TableHead>
                         </TableRow>
-                    )) : (
-                         <TableRow>
-                            <TableCell colSpan={6} className="h-24 text-center">
-                                No bookings found.
-                            </TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
-        </CardContent>
-    </Card>
-);
+                    </TableHeader>
+                    <TableBody>
+                        {bookingList.length > 0 ? bookingList.map((booking) => (
+                            <TableRow key={booking.id}>
+                                <TableCell>
+                                    <div className="font-medium">{booking.service}</div>
+                                    <div className="text-sm text-muted-foreground md:hidden">{booking.user} - {booking.date}</div>
+                                </TableCell>
+                                <TableCell className="hidden md:table-cell">{booking.user}</TableCell>
+                                <TableCell className="hidden md:table-cell">{new Date(booking.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</TableCell>
+                                <TableCell>
+                                    <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
+                                </TableCell>
+                                <TableCell className="text-right">₱{booking.price.toFixed(2)}</TableCell>
+                                <TableCell className="text-right">
+                                     <AlertDialog>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                    <span className="sr-only">Toggle menu</span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <DropdownMenuItem onClick={() => toast({ title: "Navigating...", description: `Viewing details for booking ${booking.id}` })}>View Details</DropdownMenuItem>
+                                                <AlertDialogTrigger asChild>
+                                                    <DropdownMenuItem disabled={booking.status !== 'Upcoming'}>Reschedule</DropdownMenuItem>
+                                                </AlertDialogTrigger>
+                                                 <AlertDialogTrigger asChild>
+                                                    <DropdownMenuItem disabled={booking.status !== 'Upcoming'} className="text-destructive">Cancel</DropdownMenuItem>
+                                                 </AlertDialogTrigger>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+
+                                        {/* This is a shared dialog for both Reschedule and Cancel to simplify */}
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                   This action cannot be undone. This will permanently alter the booking details.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Close</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => toast({ title: 'Action Confirmed', description: 'The booking has been updated.' })}>
+                                                    Confirm
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                     </AlertDialog>
+                                </TableCell>
+                            </TableRow>
+                        )) : (
+                             <TableRow>
+                                <TableCell colSpan={6} className="h-24 text-center">
+                                    No bookings found.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+    );
+};
 
 
 export default function BookingsPage() {
