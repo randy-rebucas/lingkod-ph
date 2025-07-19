@@ -145,6 +145,13 @@ export default function SubscriptionPage() {
     
     const currentPlan = subscriptionTiers.find(tier => tier.id === subscription?.planId);
 
+    const PayPalIcon = () => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M10.29 11.86c.14.73.54 1.25.9 1.57.5.44 1.2.64 1.8.64.95 0 1.7-.44 1.7-1.32 0-.66-.4-1.1-1.3-1.47-1.2-.47-2.2-.9-2.2-2.32 0-1.12.8-1.84 2-1.84.88 0 1.58.4 1.9 1.15.11.23.18.44.2.62h2.2c-.05-.88-.5-1.93-1.5-2.5-1-.56-2.2-.8-3.5-.8-2.5 0-4.3 1.5-4.3 3.6 0 1.45.9 2.45 2.8 3.1zM8.9 8.2c0-.52.4-.92.9-.92.54 0 .9.37.9.95 0 .5-.37.92-.9.92-.5 0-.9-.4-.9-.95z"/>
+        <path d="M22 10.4c-.06-.58-.4-1.55-1.3-2.1-1-.58-2.3-.87-3.7-.87H9.2c-1.2 0-2.3.4-3.1 1.1-.9.8-1.4 2-1.4 3.3 0 2.6 2.3 4.2 4.9 4.2h1.2c.5 0 .9-.3 1-.8l.8-5h2.8c1.3 0 2.3.2 3.1.7.9.5 1.4 1.4 1.4 2.4 0 .6-.2 1.3-.7 1.8-.5.5-1.2.8-2 .8h-1.3c-.5 0-.9.3-1 .8l-.9 5.2c-.1.5.3.9.8.9h1.3c2.6 0 4.7-1.6 5.2-4 .1-.5.1-1 .1-1.4v-1.2z"/>
+      </svg>
+    )
+
     return (
         <div className="space-y-8">
             <div>
@@ -185,7 +192,6 @@ export default function SubscriptionPage() {
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {subscriptionTiers.map(tier => {
                         const isCurrentPlan = tier.id === subscription?.planId;
-                        const buttonText = isCurrentPlan ? 'Current Plan' : (currentPlan && tier.price > currentPlan.price ? 'Upgrade' : (currentPlan && tier.price < currentPlan.price ? 'Downgrade' : 'Choose Plan'));
 
                         return (
                             <Card key={tier.id} className={`flex flex-col ${tier.isFeatured ? 'border-primary shadow-lg' : ''}`}>
@@ -211,15 +217,27 @@ export default function SubscriptionPage() {
                                 </ul>
                                 </CardContent>
                                 <CardFooter>
-                                    <Button 
-                                        className="w-full" 
-                                        variant={tier.isFeatured && !isCurrentPlan ? 'default' : 'outline'} 
-                                        disabled={isCurrentPlan || isProcessing !== null}
-                                        onClick={() => handlePlanChange(tier.id)}
-                                    >
-                                        {isProcessing === tier.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : (isCurrentPlan && <Check className="mr-2 h-4 w-4" />)}
-                                        {isProcessing === tier.id ? 'Processing...' : buttonText}
-                                    </Button>
+                                    {isCurrentPlan ? (
+                                        <Button className="w-full" disabled>
+                                            <Check className="mr-2 h-4 w-4" />
+                                            Current Plan
+                                        </Button>
+                                    ) : (
+                                        <Button 
+                                            className="w-full" 
+                                            variant={tier.isFeatured ? 'default' : 'outline'}
+                                            disabled={isProcessing !== null}
+                                            onClick={() => handlePlanChange(tier.id)}
+                                            style={{backgroundColor: '#0070ba', color: 'white'}}
+                                        >
+                                            {isProcessing === tier.id ? (
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+                                            ) : (
+                                                <PayPalIcon />
+                                            )}
+                                            {isProcessing === tier.id ? 'Processing...' : 'Pay with PayPal'}
+                                        </Button>
+                                    )}
                                 </CardFooter>
                             </Card>
                         )
