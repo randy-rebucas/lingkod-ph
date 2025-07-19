@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle, Megaphone } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
 const subscriptionTiers = [
     {
@@ -45,27 +45,6 @@ const commissionRates = [
         jobType: "High-ticket (e.g. renovation, roofing)",
         commission: "15%",
         notes: "More value, so higher cut is fair",
-    }
-];
-
-const advertisingFees = [
-    {
-        type: "Featured Listing",
-        rate: "₱600/month",
-        duration: "30 days",
-        audience: "Top of category pages",
-    },
-    {
-        type: "Homepage Banner",
-        rate: "₱1,500/week",
-        duration: "7 days",
-        audience: "For big promos or seasonal ads",
-    },
-    {
-        type: "Boosted Service",
-        rate: "₱100/day",
-        duration: "1-day boost",
-        audience: "Boost individual listings like FB ads",
     }
 ];
 
@@ -140,27 +119,6 @@ export default function SubscriptionPage() {
                         </Table>
                     </CardContent>
                  </Card>
-            </section>
-
-            <section>
-                 <h2 className="text-2xl font-bold font-headline mb-4">Advertising Fees</h2>
-                 <div className="grid gap-8 md:grid-cols-3">
-                    {advertisingFees.map(ad => (
-                        <Card key={ad.type}>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2"><Megaphone className="h-6 w-6 text-accent" />{ad.type}</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-2">
-                                <p><span className="font-semibold">Rate:</span> {ad.rate}</p>
-                                <p><span className="font-semibold">Duration:</span> {ad.duration}</p>
-                                <p><span className="font-semibold">Audience:</span> {ad.audience}</p>
-                            </CardContent>
-                            <CardFooter>
-                                <Button className="w-full" variant="outline">Learn More</Button>
-                            </CardFooter>
-                        </Card>
-                    ))}
-                 </div>
             </section>
 
         </div>
