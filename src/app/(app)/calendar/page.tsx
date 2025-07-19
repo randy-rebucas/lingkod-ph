@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar';
 import format from 'date-fns/format';
 import parse from 'date-fns/parse';
 import startOfWeek from 'date-fns/startOfWeek';
@@ -12,8 +12,11 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, or, Timestamp } from 'firebase/firestore';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 
 const locales = {
   'en-US': enUS,
@@ -40,6 +43,8 @@ export default function CalendarPage() {
     const { user, userRole } = useAuth();
     const [events, setEvents] = useState<BookingEvent[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedEvent, setSelectedEvent] = useState<BookingEvent | null>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     
     useEffect(() => {
         if (!user) {
@@ -95,6 +100,20 @@ export default function CalendarPage() {
         };
     };
 
+    const handleSelectEvent = (event: BookingEvent) => {
+        setSelectedEvent(event);
+        setIsDialogOpen(true);
+    };
+
+    const getStatusVariant = (status: string) => {
+        switch (status) {
+            case "Upcoming": return "default";
+            case "Completed": return "secondary";
+            case "Cancelled": return "destructive";
+            default: return "outline";
+        }
+    };
+
     if (loading) {
         return (
              <div className="space-y-6">
@@ -118,17 +137,72 @@ export default function CalendarPage() {
                 <p className="text-muted-foreground">View your upcoming and past bookings.</p>
             </div>
              <Card>
-                <CardContent className="p-6 bg-card h-[70vh]">
-                    <Calendar
+                <CardContent className="p-4 bg-card h-[75vh]">
+                   <Calendar
                         localizer={localizer}
                         events={events}
                         startAccessor="start"
                         endAccessor="end"
                         style={{ height: '100%' }}
                         eventPropGetter={eventStyleGetter}
+                        onSelectEvent={handleSelectEvent}
+                        views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
+                        className="text-foreground"
+                        components={{
+                            toolbar: (toolbar) => {
+                                return (
+                                    <div className="rbc-toolbar mb-4">
+                                        <span className="rbc-btn-group">
+                                            <Button variant="outline" onClick={() => toolbar.onNavigate('PREV')}>Back</Button>
+                                            <Button variant="outline" onClick={() => toolbar.onNavigate('NEXT')}>Next</Button>
+                                            <Button variant="outline" onClick={() => toolbar.onNavigate('TODAY')}>Today</Button>
+                                        </span>
+                                        <span className="rbc-toolbar-label font-bold text-lg">{toolbar.label}</span>
+                                        <span className="rbc-btn-group">
+                                            {
+                                                (toolbar.views as string[]).map(view => (
+                                                    <Button 
+                                                        key={view} 
+                                                        variant={toolbar.view === view ? 'default' : 'outline'}
+                                                        onClick={() => toolbar.onView(view)}
+                                                    >
+                                                        {view.charAt(0).toUpperCase() + view.slice(1)}
+                                                    </Button>
+                                                ))
+                                            }
+                                        </span>
+                                    </div>
+                                )
+                            }
+                        }}
                     />
                 </CardContent>
             </Card>
+
+             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{selectedEvent?.title}</DialogTitle>
+                         <DialogDescription>
+                            Booking Details
+                        </DialogDescription>
+                    </DialogHeader>
+                    {selectedEvent && (
+                        <div className="space-y-4">
+                            <div>
+                                <h4 className="font-semibold">Status</h4>
+                                <Badge variant={getStatusVariant(selectedEvent.status)}>{selectedEvent.status}</Badge>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold">Time</h4>
+                                <p className="text-muted-foreground">
+                                    {format(selectedEvent.start, 'PPP p')}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
