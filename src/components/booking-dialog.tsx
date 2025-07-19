@@ -93,7 +93,7 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
                 serviceName: service.name,
                 price: service.price,
                 date: Timestamp.fromDate(bookingDateTime),
-                status: "Upcoming",
+                status: "Pending",
                 notes: data.notes,
                 createdAt: serverTimestamp(),
             };
