@@ -17,8 +17,8 @@ const Logo = () => (
 export function QuotePreview({ data }: { data: QuoteFormValues }) {
     const { user } = useAuth();
 
-    const subtotal = data.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
-    const taxAmount = subtotal * ((data.taxRate || 0) / 100);
+    const subtotal = data.lineItems.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
+    const taxAmount = subtotal * ((Number(data.taxRate) || 0) / 100);
     const total = subtotal + taxAmount;
 
     return (
@@ -57,8 +57,8 @@ export function QuotePreview({ data }: { data: QuoteFormValues }) {
                         <TableRow key={index}>
                             <TableCell>{item.description}</TableCell>
                             <TableCell className="text-center">{item.quantity}</TableCell>
-                            <TableCell className="text-right">₱{item.price.toFixed(2)}</TableCell>
-                            <TableCell className="text-right">₱{(item.quantity * item.price).toFixed(2)}</TableCell>
+                            <TableCell className="text-right">₱{Number(item.price).toFixed(2)}</TableCell>
+                            <TableCell className="text-right">₱{(Number(item.quantity) * Number(item.price)).toFixed(2)}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
