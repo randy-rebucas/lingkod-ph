@@ -1,14 +1,15 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Send, Search } from "lucide-react";
+import { Send, Search, Paperclip, X } from "lucide-react";
 
 const initialConversations = [
     {
@@ -39,7 +40,7 @@ const initialConversations = [
         id: 4,
         name: "Gabriela Silang",
         avatar: "https://placehold.co/100x100.png",
-        lastMessage: "I have a question about the booking.",
+        lastMessage: "Here is the photo of the broken pipe.",
         timestamp: "3 days ago",
         unread: 0,
     },
@@ -80,7 +81,8 @@ const messagesByConvoId: { [key: number]: any[] } = {
         { id: 1, sender: "Andres Bonifacio", text: "Can we reschedule to Friday?", isCurrentUser: false },
     ],
     4: [
-        { id: 1, sender: "Gabriela Silang", text: "I have a question about the booking.", isCurrentUser: false },
+        { id: 1, sender: "Gabriela Silang", text: "Here is the photo of the broken pipe.", isCurrentUser: false, imageUrl: "https://placehold.co/400x300.png", hint: "broken pipe" },
+        { id: 2, sender: "You", text: "Thanks for sending that. I see the issue. We'll bring the right parts.", isCurrentUser: true },
     ],
 };
 
@@ -97,9 +99,49 @@ const getAvatarFallback = (name: string | null | undefined) => {
 export default function MessagesPage() {
     const [conversations, setConversations] = useState(initialConversations);
     const [activeConversationId, setActiveConversationId] = useState(conversations[0]?.id);
+    const [messages, setMessages] = useState(activeConversationId ? messagesByConvoId[activeConversationId] : []);
+    const [newMessage, setNewMessage] = useState("");
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleSelectConversation = (id: number) => {
+        setActiveConversationId(id);
+        setMessages(messagesByConvoId[id] || []);
+        setSelectedImage(null);
+        setPreviewUrl(null);
+    }
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files[0]) {
+            const file = event.target.files[0];
+            setSelectedImage(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
     
+    const handleSendMessage = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newMessage.trim() && !selectedImage) return;
+
+        const message = {
+            id: Date.now(),
+            sender: "You",
+            text: newMessage,
+            isCurrentUser: true,
+            ...(previewUrl && { imageUrl: previewUrl }),
+        };
+
+        setMessages(prev => [...prev, message]);
+        setNewMessage("");
+        setSelectedImage(null);
+        setPreviewUrl(null);
+        if(fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
     const activeConversation = conversations.find(c => c.id === activeConversationId);
-    const messages = activeConversationId ? messagesByConvoId[activeConversationId] : [];
 
 
     return (
@@ -123,7 +165,7 @@ export default function MessagesPage() {
                         <div className="p-2 space-y-1">
                             {conversations.map((convo) => (
                                 <button key={convo.id} className={cn("w-full text-left p-3 rounded-lg transition-colors", activeConversationId === convo.id ? "bg-secondary" : "hover:bg-secondary/50")}
-                                    onClick={() => setActiveConversationId(convo.id)}
+                                    onClick={() => handleSelectConversation(convo.id)}
                                 >
                                     <div className="flex items-start gap-3">
                                         <Avatar className="h-10 w-10 border">
@@ -174,18 +216,56 @@ export default function MessagesPage() {
                                                 <AvatarFallback>{getAvatarFallback(activeConversation.name)}</AvatarFallback>
                                             </Avatar>
                                         )}
-                                        <div className={cn("max-w-xs md:max-w-md p-3 rounded-2xl shadow-sm", msg.isCurrentUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-card text-card-foreground rounded-bl-none")}>
-                                            <p className="text-sm">{msg.text}</p>
+                                        <div className={cn("max-w-xs md:max-w-md p-1 rounded-2xl shadow-sm", msg.isCurrentUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-card text-card-foreground rounded-bl-none")}>
+                                            {msg.imageUrl && (
+                                                <div className="p-2">
+                                                    <Image 
+                                                        src={msg.imageUrl} 
+                                                        alt="Sent image" 
+                                                        width={300} 
+                                                        height={200}
+                                                        data-ai-hint={msg.hint}
+                                                        className="rounded-lg object-cover"
+                                                    />
+                                                </div>
+                                            )}
+                                            {msg.text && (
+                                                <p className="text-sm px-3 py-2">{msg.text}</p>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         </ScrollArea>
                         <div className="p-4 border-t bg-background">
-                            <form className="relative">
-                                <Input placeholder="Type your message..." className="pr-12" />
-                                <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" type="submit">
-                                    <Send className="h-4 w-4"/>
+                            {previewUrl && (
+                                <div className="relative mb-2 w-24 h-24">
+                                    <Image src={previewUrl} alt="Image preview" layout="fill" className="object-cover rounded-md" />
+                                    <Button size="icon" variant="destructive" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => { setPreviewUrl(null); setSelectedImage(null); if(fileInputRef.current) fileInputRef.current.value = "";}}>
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
+                            <form className="relative flex items-center gap-2" onSubmit={handleSendMessage}>
+                                <Input 
+                                    placeholder="Type your message..." 
+                                    className="flex-1"
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                />
+                                 <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileChange}
+                                    accept="image/*"
+                                    className="hidden"
+                                />
+                                <Button size="icon" variant="ghost" type="button" onClick={() => fileInputRef.current?.click()}>
+                                    <Paperclip className="h-5 w-5"/>
+                                    <span className="sr-only">Attach File</span>
+                                </Button>
+                                <Button size="icon" type="submit">
+                                    <Send className="h-5 w-5"/>
                                     <span className="sr-only">Send Message</span>
                                 </Button>
                             </form>
@@ -193,7 +273,7 @@ export default function MessagesPage() {
                     </>
                    ) : (
                     <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8">
-                        <MessageSquare className="h-16 w-16 mb-4" />
+                        <Send className="h-16 w-16 mb-4" />
                         <h3 className="text-xl font-semibold">Select a conversation</h3>
                         <p>Choose a conversation from the left panel to start chatting.</p>
                     </div>
