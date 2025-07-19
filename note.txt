@@ -1,0 +1,9 @@
+# Firebase App credentials
+# Note: Make sure to prefix all variables with NEXT_PUBLIC_ so they are exposed to the browser.
+# You can find these values in your Firebase project settings.
+NEXT_PUBLIC_FIREBASE_API_KEY="AIzaSyBEg5Am28BsJ95j5Mzoujk0Tw-l0Lth9uY"
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="lingkod-ph-snphs.firebaseapp.com"
+NEXT_PUBLIC_FIREBASE_PROJECT_ID="lingkod-ph-snphs"
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="lingkod-ph-snphs.firebasestorage.app"
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="34924082188"
+NEXT_PUBLIC_FIREBASE_APP_ID="1:34924082188:web:c6aa43d7ef5fbc019daa29"
