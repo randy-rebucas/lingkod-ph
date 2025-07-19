@@ -5,12 +5,14 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { DollarSign, BookCheck, CalendarDays, Loader2 } from "lucide-react";
+import { DollarSign, BookCheck, CalendarDays, Loader2, WalletCards, CheckCircle } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 type CompletedBooking = {
     id: string;
@@ -58,6 +60,7 @@ const processChartData = (bookings: CompletedBooking[]) => {
 
 export default function EarningsPage() {
     const { user, userRole } = useAuth();
+    const { toast } = useToast();
     const [bookings, setBookings] = useState<CompletedBooking[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -100,12 +103,20 @@ export default function EarningsPage() {
     const totalPaidBookings = bookings.length;
     const chartData = processChartData(bookings);
 
+    const handlePayoutRequest = () => {
+        toast({
+            title: "Payout Requested",
+            description: "Your payout request has been submitted and will be processed within 3-5 business days.",
+        });
+    }
+
     if (loading) {
         return (
             <div className="space-y-6">
                 <Skeleton className="h-10 w-1/3" />
                 <Skeleton className="h-4 w-2/3" />
-                <div className="grid gap-6 md:grid-cols-3">
+                <div className="grid gap-6 md:grid-cols-4">
+                    <Skeleton className="h-28 w-full" />
                     <Skeleton className="h-28 w-full" />
                     <Skeleton className="h-28 w-full" />
                     <Skeleton className="h-28 w-full" />
@@ -132,11 +143,11 @@ export default function EarningsPage() {
             <div>
                 <h1 className="text-3xl font-bold font-headline">Earnings</h1>
                 <p className="text-muted-foreground">
-                    Track your revenue and payouts.
+                    Track your revenue and request payouts.
                 </p>
             </div>
             
-            <div className="grid gap-6 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
@@ -149,7 +160,7 @@ export default function EarningsPage() {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">This Month's Earnings</CardTitle>
+                        <CardTitle className="text-sm font-medium">This Month</CardTitle>
                         <CalendarDays className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -159,13 +170,28 @@ export default function EarningsPage() {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Paid Bookings</CardTitle>
+                        <CardTitle className="text-sm font-medium">Paid Bookings</CardTitle>
                         <BookCheck className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">+{totalPaidBookings}</div>
-                        <p className="text-xs text-muted-foreground">Number of successfully completed services</p>
+                        <p className="text-xs text-muted-foreground">Successfully completed services</p>
                     </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Available for Payout</CardTitle>
+                        <WalletCards className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">₱{totalRevenue.toFixed(2)}</div>
+                        <p className="text-xs text-muted-foreground">Minimum payout is ₱400.00</p>
+                    </CardContent>
+                    <CardFooter>
+                         <Button className="w-full" disabled={totalRevenue <= 400} onClick={handlePayoutRequest}>
+                            Request Payout
+                        </Button>
+                    </CardFooter>
                 </Card>
             </div>
 
