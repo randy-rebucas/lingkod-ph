@@ -37,7 +37,7 @@ type BookingEvent = {
 };
 
 export default function CalendarPage() {
-    const { user } = useAuth();
+    const { user, userRole } = useAuth();
     const [events, setEvents] = useState<BookingEvent[]>([]);
     const [loading, setLoading] = useState(true);
     
@@ -56,8 +56,12 @@ export default function CalendarPage() {
             const bookingEvents = snapshot.docs.map(doc => {
                 const data = doc.data();
                 const bookingDate = (data.date as Timestamp).toDate();
+                const eventTitle = userRole === 'client' 
+                    ? `${data.serviceName} w/ ${data.providerName}`
+                    : `${data.serviceName} for ${data.clientName}`;
+
                 return {
-                    title: `${data.serviceName} - ${data.clientName}`,
+                    title: eventTitle,
                     start: bookingDate,
                     end: new Date(bookingDate.getTime() + 60 * 60 * 1000), // Assuming 1-hour booking
                     status: data.status,
@@ -68,7 +72,7 @@ export default function CalendarPage() {
         });
 
         return () => unsubscribe();
-    }, [user]);
+    }, [user, userRole]);
 
     const eventStyleGetter = (event: BookingEvent) => {
         let backgroundColor = 'hsl(var(--primary))';
@@ -82,7 +86,7 @@ export default function CalendarPage() {
             backgroundColor,
             borderRadius: '5px',
             opacity: 0.8,
-            color: 'white',
+            color: 'hsl(var(--primary-foreground))',
             border: '0px',
             display: 'block',
         };
