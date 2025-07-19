@@ -6,12 +6,20 @@ import { QuoteFormValues } from "./quote-builder-client";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { Separator } from "./ui/separator";
+import type { Timestamp } from "firebase/firestore";
 
 const Logo = () => (
   <h1 className="text-2xl font-bold font-headline text-primary">
     Lingkod<span className="text-accent">PH</span>
   </h1>
 );
+
+const toDate = (date: Date | Timestamp): Date => {
+    if (date instanceof Date) {
+        return date;
+    }
+    return date.toDate();
+}
 
 
 export function QuotePreview({ data }: { data: QuoteFormValues }) {
@@ -20,6 +28,9 @@ export function QuotePreview({ data }: { data: QuoteFormValues }) {
     const subtotal = data.lineItems.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
     const taxAmount = subtotal * ((Number(data.taxRate) || 0) / 100);
     const total = subtotal + taxAmount;
+    
+    const issueDate = toDate(data.issueDate);
+    const validUntil = toDate(data.validUntil);
 
     return (
         <div className="p-8 bg-background text-foreground text-sm max-h-[80vh] overflow-y-auto">
@@ -32,7 +43,7 @@ export function QuotePreview({ data }: { data: QuoteFormValues }) {
                 <div className="text-right">
                     <h2 className="text-3xl font-bold text-muted-foreground mb-2">QUOTE</h2>
                     <p><span className="font-semibold">Quote #:</span> {data.quoteNumber}</p>
-                    <p><span className="font-semibold">Date:</span> {format(data.issueDate, "PPP")}</p>
+                    <p><span className="font-semibold">Date:</span> {format(issueDate, "PPP")}</p>
                 </div>
             </div>
 
@@ -83,7 +94,7 @@ export function QuotePreview({ data }: { data: QuoteFormValues }) {
             </div>
 
             <div className="mt-12 text-center text-xs text-muted-foreground">
-                <p>Quote valid until: {format(data.validUntil, "PPP")}</p>
+                <p>Quote valid until: {format(validUntil, "PPP")}</p>
                 <p className="mt-2">Thank you for your business!</p>
             </div>
         </div>
