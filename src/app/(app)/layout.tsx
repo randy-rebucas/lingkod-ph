@@ -104,6 +104,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
+  const isStarterOrHigher = isPaidSubscriber && (subscription?.planId === 'starter' || subscription?.planId === 'pro' || subscription?.planId === 'elite');
   const isProOrElite = isPaidSubscriber && (subscription?.planId === 'pro' || subscription?.planId === 'elite');
   const isElite = isPaidSubscriber && subscription?.planId === 'elite';
 
@@ -164,6 +165,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+
+                 {isStarterOrHigher && (
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/calendar")}>
+                        <Link href="/calendar">
+                          <Calendar />
+                          <span>Calendar</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                )}
 
                 {isPaidSubscriber && (
                   <SidebarMenuItem>
