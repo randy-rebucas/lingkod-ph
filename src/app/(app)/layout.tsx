@@ -56,7 +56,7 @@ const Logo = () => (
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, userRole } = useAuth();
+  const { user, loading, userRole, subscription } = useAuth();
   const { toast } = useToast();
 
   const handleLogout = async () => {
@@ -103,6 +103,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
     return name.substring(0, 2).toUpperCase();
   }
+
+  const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
 
 
   return (
@@ -154,14 +156,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/smart-rate")}>
-                    <Link href="/smart-rate">
-                      <Sparkles />
-                      <span>Smart Rate</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/services")}>
                     <Link href="/services">
                       <BriefcaseBusiness />
@@ -169,14 +163,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/earnings")}>
-                    <Link href="/earnings">
-                      <DollarSign />
-                      <span>Earnings</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+
+                {isPaidSubscriber && (
+                  <>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/smart-rate")}>
+                        <Link href="/smart-rate">
+                          <Sparkles />
+                          <span>Smart Rate</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/earnings")}>
+                        <Link href="/earnings">
+                          <DollarSign />
+                          <span>Earnings</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </>
+                )}
               </>
             )}
           </SidebarMenu>
