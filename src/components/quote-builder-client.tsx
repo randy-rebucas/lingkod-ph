@@ -1,13 +1,12 @@
 
 "use client";
 
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { CalendarIcon, PlusCircle, Sparkles, Trash2, Loader2, Eye, FileDown } from "lucide-react";
@@ -19,6 +18,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { generateQuoteDescription } from "@/ai/flows/generate-quote-description";
 import { Separator } from "./ui/separator";
+import { useAuth } from "@/context/auth-context";
+import { db } from "@/lib/firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { QuotePreview } from "./quote-preview";
+
 
 const lineItemSchema = z.object({
     description: z.string().min(1, "Description is required."),
@@ -37,12 +42,15 @@ const quoteSchema = z.object({
     taxRate: z.coerce.number().min(0, "Tax rate cannot be negative.").optional().default(0),
 });
 
-type QuoteFormValues = z.infer<typeof quoteSchema>;
-type LineItem = z.infer<typeof lineItemSchema>;
+export type QuoteFormValues = z.infer<typeof quoteSchema>;
+export type LineItem = z.infer<typeof lineItemSchema>;
 
 export default function QuoteBuilderClient() {
+    const { user } = useAuth();
     const { toast } = useToast();
     const [generatingDescriptionIndex, setGeneratingDescriptionIndex] = useState<number | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [previewData, setPreviewData] = useState<QuoteFormValues | null>(null);
 
     const form = useForm<QuoteFormValues>({
         resolver: zodResolver(quoteSchema),
@@ -105,184 +113,229 @@ export default function QuoteBuilderClient() {
     };
 
 
-    const onSubmit = (data: QuoteFormValues) => {
-        console.log(data);
-        toast({
-            title: "Quote Saved!",
-            description: "The quote has been successfully saved to your records.",
-        });
+    const onSubmit = async (data: QuoteFormValues) => {
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to save a quote.' });
+            return;
+        }
+        setIsSaving(true);
+        try {
+            await addDoc(collection(db, "quotes"), {
+                ...data,
+                providerId: user.uid,
+                createdAt: serverTimestamp(),
+                status: 'Draft', // Default status
+            });
+
+            toast({
+                title: "Quote Saved!",
+                description: "The quote has been successfully saved to your records.",
+            });
+            form.reset({
+                 ...form.getValues(),
+                 quoteNumber: `Q-${Date.now()}`
+            });
+
+        } catch (error) {
+            console.error("Error saving quote: ", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to save the quote.' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+    
+    const handlePreview = () => {
+        const data = form.getValues();
+        setPreviewData(data);
     };
 
     return (
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
-                <div className="lg:col-span-3 space-y-6">
-                    <Card>
-                         <CardContent className="p-6 space-y-6">
-                             {/* Client Info */}
-                            <div>
-                                <h3 className="text-lg font-medium mb-4">Client Information</h3>
-                                <div className="space-y-4">
-                                     <div className="grid md:grid-cols-2 gap-4">
-                                        <FormField control={form.control} name="clientName" render={({ field }) => (
+        <Dialog>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+                    <div className="lg:col-span-3 space-y-6">
+                        <Card>
+                             <CardContent className="p-6 space-y-6">
+                                 {/* Client Info */}
+                                <div>
+                                    <h3 className="text-lg font-medium mb-4">Client Information</h3>
+                                    <div className="space-y-4">
+                                         <div className="grid md:grid-cols-2 gap-4">
+                                            <FormField control={form.control} name="clientName" render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Client Name</FormLabel>
+                                                    <FormControl><Input placeholder="Juan Dela Cruz" {...field} /></FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )} />
+                                            <FormField control={form.control} name="clientEmail" render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Client Email</FormLabel>
+                                                    <FormControl><Input type="email" placeholder="juan@example.com" {...field} /></FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )} />
+                                        </div>
+                                         <FormField control={form.control} name="clientAddress" render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Client Name</FormLabel>
-                                                <FormControl><Input placeholder="Juan Dela Cruz" {...field} /></FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )} />
-                                        <FormField control={form.control} name="clientEmail" render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Client Email</FormLabel>
-                                                <FormControl><Input type="email" placeholder="juan@example.com" {...field} /></FormControl>
+                                                <FormLabel>Client Address</FormLabel>
+                                                <FormControl><Textarea placeholder="123 Rizal St, Brgy. Poblacion, Quezon City" {...field} rows={2} /></FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )} />
                                     </div>
-                                     <FormField control={form.control} name="clientAddress" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Client Address</FormLabel>
-                                            <FormControl><Textarea placeholder="123 Rizal St, Brgy. Poblacion, Quezon City" {...field} rows={2} /></FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
                                 </div>
-                            </div>
-                            
-                            <Separator />
+                                
+                                <Separator />
 
-                            {/* Quote Info */}
-                            <div>
-                                <h3 className="text-lg font-medium mb-4">Quote Details</h3>
-                                <div className="grid md:grid-cols-3 gap-4">
-                                    <FormField control={form.control} name="quoteNumber" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Quote Number</FormLabel>
-                                            <FormControl><Input {...field} /></FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                    <FormField control={form.control} name="issueDate" render={({ field }) => (
-                                        <FormItem className="flex flex-col pt-2">
-                                            <FormLabel className="mb-1">Issue Date</FormLabel>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <FormControl>
-                                                        <Button variant="outline" className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                                                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </FormControl>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0" align="start">
-                                                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} />
-                                                </PopoverContent>
-                                            </Popover>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                    <FormField control={form.control} name="validUntil" render={({ field }) => (
-                                        <FormItem className="flex flex-col pt-2">
-                                            <FormLabel className="mb-1">Valid Until</FormLabel>
-                                            <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <FormControl>
-                                                        <Button variant="outline" className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                                                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                        </Button>
-                                                    </FormControl>
-                                                </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0" align="start">
-                                                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} />
-                                                </PopoverContent>
-                                            </Popover>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Line Items</CardTitle>
-                            <CardDescription>Add the services or products included in this quote.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {fields.map((field, index) => (
-                                <div key={field.id} className="p-4 rounded-lg border bg-secondary/50 space-y-4 relative">
-                                    <FormField control={form.control} name={`lineItems.${index}.description`} render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Description</FormLabel>
-                                            <div className="flex gap-2 items-start">
-                                                <FormControl><Textarea placeholder="e.g., Basic Lawn Mowing" {...field} rows={2} className="bg-background" /></FormControl>
-                                                 <Button type="button" size="icon" variant="ghost" className="shrink-0" onClick={() => handleGenerateDescription(index)} disabled={generatingDescriptionIndex === index}>
-                                                    {generatingDescriptionIndex === index ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-accent" />}
-                                                    <span className="sr-only">Generate Description</span>
-                                                </Button>
-                                            </div>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <FormField control={form.control} name={`lineItems.${index}.quantity`} render={({ field }) => (
-                                            <FormItem><FormLabel>Qty</FormLabel><FormControl><Input type="number" {...field} className="bg-background" /></FormControl><FormMessage /></FormItem>
+                                {/* Quote Info */}
+                                <div>
+                                    <h3 className="text-lg font-medium mb-4">Quote Details</h3>
+                                    <div className="grid md:grid-cols-3 gap-4">
+                                        <FormField control={form.control} name="quoteNumber" render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Quote Number</FormLabel>
+                                                <FormControl><Input {...field} /></FormControl>
+                                                <FormMessage />
+                                            </FormItem>
                                         )} />
-                                        <FormField control={form.control} name={`lineItems.${index}.price`} render={({ field }) => (
-                                            <FormItem><FormLabel>Unit Price</FormLabel><FormControl><Input type="number" {...field} className="bg-background" /></FormControl><FormMessage /></FormItem>
+                                        <FormField control={form.control} name="issueDate" render={({ field }) => (
+                                            <FormItem className="flex flex-col pt-2">
+                                                <FormLabel className="mb-1">Issue Date</FormLabel>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <FormControl>
+                                                            <Button variant="outline" className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                                                {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                            </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0" align="start">
+                                                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} />
+                                                    </PopoverContent>
+                                                </Popover>
+                                                <FormMessage />
+                                            </FormItem>
                                         )} />
-                                        <FormItem>
-                                            <FormLabel>Total</FormLabel>
-                                            <div className="font-medium h-10 flex items-center px-3">
-                                                ₱{((watchedLineItems[index]?.quantity || 0) * (watchedLineItems[index]?.price || 0)).toFixed(2)}
-                                            </div>
-                                        </FormItem>
+                                        <FormField control={form.control} name="validUntil" render={({ field }) => (
+                                            <FormItem className="flex flex-col pt-2">
+                                                <FormLabel className="mb-1">Valid Until</FormLabel>
+                                                <Popover>
+                                                    <PopoverTrigger asChild>
+                                                        <FormControl>
+                                                            <Button variant="outline" className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                                                {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                            </Button>
+                                                        </FormControl>
+                                                    </PopoverTrigger>
+                                                    <PopoverContent className="w-auto p-0" align="start">
+                                                        <Calendar mode="single" selected={field.value} onSelect={field.onChange} />
+                                                    </PopoverContent>
+                                                </Popover>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )} />
                                     </div>
-                                    <Button type="button" size="icon" variant="destructive" className="absolute top-2 right-2 h-7 w-7" onClick={() => remove(index)}>
-                                        <Trash2 className="h-4 w-4" />
-                                        <span className="sr-only">Remove item</span>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Line Items</CardTitle>
+                                <CardDescription>Add the services or products included in this quote.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {fields.map((field, index) => (
+                                    <div key={field.id} className="p-4 rounded-lg border bg-secondary/50 space-y-4 relative">
+                                        <FormField control={form.control} name={`lineItems.${index}.description`} render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Description</FormLabel>
+                                                <div className="flex gap-2 items-start">
+                                                    <FormControl><Textarea placeholder="e.g., Basic Lawn Mowing" {...field} rows={2} className="bg-background" /></FormControl>
+                                                     <Button type="button" size="icon" variant="ghost" className="shrink-0" onClick={() => handleGenerateDescription(index)} disabled={generatingDescriptionIndex === index}>
+                                                        {generatingDescriptionIndex === index ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-accent" />}
+                                                        <span className="sr-only">Generate Description</span>
+                                                    </Button>
+                                                </div>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )} />
+                                        <div className="grid grid-cols-3 gap-4">
+                                            <FormField control={form.control} name={`lineItems.${index}.quantity`} render={({ field }) => (
+                                                <FormItem><FormLabel>Qty</FormLabel><FormControl><Input type="number" {...field} className="bg-background" /></FormControl><FormMessage /></FormItem>
+                                            )} />
+                                            <FormField control={form.control} name={`lineItems.${index}.price`} render={({ field }) => (
+                                                <FormItem><FormLabel>Unit Price</FormLabel><FormControl><Input type="number" {...field} className="bg-background" /></FormControl><FormMessage /></FormItem>
+                                            )} />
+                                            <FormItem>
+                                                <FormLabel>Total</FormLabel>
+                                                <div className="font-medium h-10 flex items-center px-3">
+                                                    ₱{((watchedLineItems[index]?.quantity || 0) * (watchedLineItems[index]?.price || 0)).toFixed(2)}
+                                                </div>
+                                            </FormItem>
+                                        </div>
+                                        <Button type="button" size="icon" variant="destructive" className="absolute top-2 right-2 h-7 w-7" onClick={() => remove(index)}>
+                                            <Trash2 className="h-4 w-4" />
+                                            <span className="sr-only">Remove item</span>
+                                        </Button>
+                                    </div>
+                                ))}
+                                <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => append({ description: "", quantity: 1, price: 0 })}>
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Add Line Item
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    <div className="lg:col-span-2">
+                         <Card className="sticky top-20">
+                            <CardHeader><CardTitle>Quote Summary</CardTitle></CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Subtotal</span>
+                                    <span className="font-medium">₱{subtotal.toFixed(2)}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <FormField control={form.control} name="taxRate" render={({ field }) => (
+                                        <FormItem className="flex items-center gap-2">
+                                            <FormLabel className="text-muted-foreground m-0">Tax (%)</FormLabel>
+                                            <FormControl><Input type="number" className="w-20 h-8" {...field} /></FormControl>
+                                        </FormItem>
+                                    )} />
+                                    <span className="font-medium">₱{taxAmount.toFixed(2)}</span>
+                                </div>
+                                <Separator />
+                                <div className="flex justify-between font-bold text-lg">
+                                    <span>Total</span>
+                                    <span>₱{total.toFixed(2)}</span>
+                                </div>
+                            </CardContent>
+                            <CardFooter className="flex flex-col gap-2">
+                                <Button type="submit" className="w-full" disabled={isSaving}>
+                                    {isSaving ? <Loader2 className="mr-2 animate-spin" /> : <FileDown className="mr-2" />}
+                                    {isSaving ? 'Saving...' : 'Save Quote'}
+                                </Button>
+                                <DialogTrigger asChild>
+                                    <Button type="button" variant="outline" className="w-full" onClick={handlePreview}>
+                                        <Eye className="mr-2" />
+                                        Preview
                                     </Button>
-                                </div>
-                            ))}
-                            <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => append({ description: "", quantity: 1, price: 0 })}>
-                                <PlusCircle className="mr-2 h-4 w-4" /> Add Line Item
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </div>
+                                </DialogTrigger>
+                            </CardFooter>
+                        </Card>
+                    </div>
+                </form>
+            </Form>
 
-                <div className="lg:col-span-2">
-                     <Card className="sticky top-20">
-                        <CardHeader><CardTitle>Quote Summary</CardTitle></CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Subtotal</span>
-                                <span className="font-medium">₱{subtotal.toFixed(2)}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <FormField control={form.control} name="taxRate" render={({ field }) => (
-                                    <FormItem className="flex items-center gap-2">
-                                        <FormLabel className="text-muted-foreground m-0">Tax (%)</FormLabel>
-                                        <FormControl><Input type="number" className="w-20 h-8" {...field} /></FormControl>
-                                    </FormItem>
-                                )} />
-                                <span className="font-medium">₱{taxAmount.toFixed(2)}</span>
-                            </div>
-                            <Separator />
-                            <div className="flex justify-between font-bold text-lg">
-                                <span>Total</span>
-                                <span>₱{total.toFixed(2)}</span>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="flex flex-col gap-2">
-                            <Button type="submit" className="w-full"><FileDown className="mr-2" />Save Quote</Button>
-                            <Button type="button" variant="outline" className="w-full"><Eye className="mr-2" />Preview</Button>
-                        </CardFooter>
-                    </Card>
-                </div>
-            </form>
-        </Form>
+            <DialogContent className="max-w-4xl">
+                 <DialogHeader>
+                    <DialogTitle>Quote Preview</DialogTitle>
+                </DialogHeader>
+                {previewData && <QuotePreview data={previewData} />}
+            </DialogContent>
+        </Dialog>
     );
 }
