@@ -1,4 +1,7 @@
 
+"use client";
+
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Send, Search } from "lucide-react";
 
-const conversations = [
+const initialConversations = [
     {
         id: 1,
         name: "Maria Dela Cruz",
@@ -15,7 +18,6 @@ const conversations = [
         lastMessage: "Okay, see you then!",
         timestamp: "10:42 AM",
         unread: 2,
-        active: true,
     },
     {
         id: 2,
@@ -24,7 +26,6 @@ const conversations = [
         lastMessage: "Thank you for the excellent service.",
         timestamp: "Yesterday",
         unread: 0,
-        active: false,
     },
     {
         id: 3,
@@ -33,7 +34,6 @@ const conversations = [
         lastMessage: "Can we reschedule to Friday?",
         timestamp: "2 days ago",
         unread: 0,
-        active: false,
     },
      {
         id: 4,
@@ -42,38 +42,66 @@ const conversations = [
         lastMessage: "I have a question about the booking.",
         timestamp: "3 days ago",
         unread: 0,
-        active: false,
     },
 ];
 
-const messages = [
-    {
-        id: 1,
-        sender: "Maria Dela Cruz",
-        text: "Hi! I'm excited for our appointment for Deep House Cleaning on August 15.",
-        isCurrentUser: false,
-    },
-    {
-        id: 2,
-        sender: "You",
-        text: "Hello Maria! We are too. We'll be there on time.",
-        isCurrentUser: true,
-    },
-    {
-        id: 3,
-        sender: "Maria Dela Cruz",
-        text: "Great to hear! Just wanted to confirm the address is correct.",
-        isCurrentUser: false,
-    },
-    {
-        id: 4,
-        sender: "Maria Dela Cruz",
-        text: "Okay, see you then!",
-        isCurrentUser: false,
-    },
-];
+const messagesByConvoId: { [key: number]: any[] } = {
+    1: [
+        {
+            id: 1,
+            sender: "Maria Dela Cruz",
+            text: "Hi! I'm excited for our appointment for Deep House Cleaning on August 15.",
+            isCurrentUser: false,
+        },
+        {
+            id: 2,
+            sender: "You",
+            text: "Hello Maria! We are too. We'll be there on time.",
+            isCurrentUser: true,
+        },
+        {
+            id: 3,
+            sender: "Maria Dela Cruz",
+            text: "Great to hear! Just wanted to confirm the address is correct.",
+            isCurrentUser: false,
+        },
+        {
+            id: 4,
+            sender: "Maria Dela Cruz",
+            text: "Okay, see you then!",
+            isCurrentUser: false,
+        },
+    ],
+    2: [
+        { id: 1, sender: "Jose Rizal", text: "Thank you for the excellent service.", isCurrentUser: false },
+        { id: 2, sender: "You", text: "You're most welcome, Jose!", isCurrentUser: true }
+    ],
+    3: [
+        { id: 1, sender: "Andres Bonifacio", text: "Can we reschedule to Friday?", isCurrentUser: false },
+    ],
+    4: [
+        { id: 1, sender: "Gabriela Silang", text: "I have a question about the booking.", isCurrentUser: false },
+    ],
+};
+
+const getAvatarFallback = (name: string | null | undefined) => {
+    if (!name) return "U";
+    const parts = name.split(" ");
+    if (parts.length > 1 && parts[0] && parts[1]) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+};
+
 
 export default function MessagesPage() {
+    const [conversations, setConversations] = useState(initialConversations);
+    const [activeConversationId, setActiveConversationId] = useState(conversations[0]?.id);
+    
+    const activeConversation = conversations.find(c => c.id === activeConversationId);
+    const messages = activeConversationId ? messagesByConvoId[activeConversationId] : [];
+
+
     return (
         <div className="space-y-6 h-full flex flex-col">
             <div>
@@ -82,31 +110,34 @@ export default function MessagesPage() {
                     Communicate with clients and service providers.
                 </p>
             </div>
-            <Card className="flex-1 grid grid-cols-1 md:grid-cols-[300px_1fr] shadow-lg">
-                <div className="flex flex-col border-r">
+            <Card className="flex-1 grid grid-cols-1 md:grid-cols-[300px_1fr] shadow-lg overflow-hidden">
+                {/* Conversation List */}
+                <div className="flex flex-col border-r bg-background/50">
                     <div className="p-4 border-b">
                          <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="Search conversations..." className="pl-9" />
+                            <Input placeholder="Search conversations..." className="pl-9 bg-background" />
                         </div>
                     </div>
                     <ScrollArea className="flex-1">
                         <div className="p-2 space-y-1">
                             {conversations.map((convo) => (
-                                <button key={convo.id} className={cn("w-full text-left p-3 rounded-lg transition-colors", convo.active ? "bg-secondary" : "hover:bg-secondary")}>
+                                <button key={convo.id} className={cn("w-full text-left p-3 rounded-lg transition-colors", activeConversationId === convo.id ? "bg-secondary" : "hover:bg-secondary/50")}
+                                    onClick={() => setActiveConversationId(convo.id)}
+                                >
                                     <div className="flex items-start gap-3">
                                         <Avatar className="h-10 w-10 border">
                                             <AvatarImage src={convo.avatar} alt={convo.name} />
-                                            <AvatarFallback>{convo.name.charAt(0)}</AvatarFallback>
+                                            <AvatarFallback>{getAvatarFallback(convo.name)}</AvatarFallback>
                                         </Avatar>
-                                        <div className="flex-1">
+                                        <div className="flex-1 overflow-hidden">
                                             <div className="flex justify-between items-center">
-                                                <p className="font-semibold">{convo.name}</p>
-                                                <p className="text-xs text-muted-foreground">{convo.timestamp}</p>
+                                                <p className="font-semibold truncate">{convo.name}</p>
+                                                <p className="text-xs text-muted-foreground flex-shrink-0">{convo.timestamp}</p>
                                             </div>
                                             <div className="flex justify-between items-end mt-1">
                                                 <p className="text-sm text-muted-foreground truncate max-w-[150px]">{convo.lastMessage}</p>
-                                                {convo.unread > 0 && <span className="flex items-center justify-center bg-primary text-primary-foreground text-xs rounded-full h-5 w-5">{convo.unread}</span>}
+                                                {convo.unread > 0 && <span className="flex items-center justify-center bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex-shrink-0">{convo.unread}</span>}
                                             </div>
                                         </div>
                                     </div>
@@ -116,42 +147,57 @@ export default function MessagesPage() {
                     </ScrollArea>
                 </div>
 
-                <div className="flex flex-col h-full">
-                    <div className="p-4 border-b flex items-center gap-3">
-                        <Avatar>
-                            <AvatarImage src="https://placehold.co/100x100.png" alt="Maria Dela Cruz" />
-                            <AvatarFallback>MD</AvatarFallback>
-                        </Avatar>
-                        <div>
-                            <p className="font-semibold">Maria Dela Cruz</p>
-                            <p className="text-xs text-muted-foreground">Online</p>
+                {/* Message View */}
+                <div className="flex flex-col h-full bg-secondary/30">
+                   {activeConversation ? (
+                    <>
+                        <div className="p-4 border-b flex items-center gap-3 bg-background">
+                            <Avatar>
+                                <AvatarImage src={activeConversation.avatar} alt={activeConversation.name} />
+                                <AvatarFallback>{getAvatarFallback(activeConversation.name)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold">{activeConversation.name}</p>
+                                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                                    <span className="h-2 w-2 rounded-full bg-green-500"></span>
+                                    Online
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                    <ScrollArea className="flex-1 p-4 bg-secondary/50">
-                        <div className="space-y-4">
-                            {messages.map((msg) => (
-                                <div key={msg.id} className={cn("flex items-end gap-2", msg.isCurrentUser ? "justify-end" : "justify-start")}>
-                                     {!msg.isCurrentUser && (
-                                         <Avatar className="h-8 w-8">
-                                            <AvatarImage src="https://placehold.co/100x100.png" />
-                                            <AvatarFallback>MD</AvatarFallback>
-                                        </Avatar>
-                                     )}
-                                    <div className={cn("max-w-xs md:max-w-md p-3 rounded-2xl", msg.isCurrentUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-card text-card-foreground rounded-bl-none")}>
-                                        <p className="text-sm">{msg.text}</p>
+                        <ScrollArea className="flex-1 p-4">
+                            <div className="space-y-4">
+                                {messages.map((msg) => (
+                                    <div key={msg.id} className={cn("flex items-end gap-2", msg.isCurrentUser ? "justify-end" : "justify-start")}>
+                                        {!msg.isCurrentUser && (
+                                            <Avatar className="h-8 w-8">
+                                                <AvatarImage src={activeConversation.avatar} />
+                                                <AvatarFallback>{getAvatarFallback(activeConversation.name)}</AvatarFallback>
+                                            </Avatar>
+                                        )}
+                                        <div className={cn("max-w-xs md:max-w-md p-3 rounded-2xl shadow-sm", msg.isCurrentUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-card text-card-foreground rounded-bl-none")}>
+                                            <p className="text-sm">{msg.text}</p>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
+                        </ScrollArea>
+                        <div className="p-4 border-t bg-background">
+                            <form className="relative">
+                                <Input placeholder="Type your message..." className="pr-12" />
+                                <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8" type="submit">
+                                    <Send className="h-4 w-4"/>
+                                    <span className="sr-only">Send Message</span>
+                                </Button>
+                            </form>
                         </div>
-                    </ScrollArea>
-                    <div className="p-4 border-t bg-background">
-                        <div className="relative">
-                            <Input placeholder="Type your message..." className="pr-12" />
-                            <Button size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
-                                <Send className="h-4 w-4"/>
-                            </Button>
-                        </div>
+                    </>
+                   ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8">
+                        <MessageSquare className="h-16 w-16 mb-4" />
+                        <h3 className="text-xl font-semibold">Select a conversation</h3>
+                        <p>Choose a conversation from the left panel to start chatting.</p>
                     </div>
+                   )}
                 </div>
             </Card>
         </div>
