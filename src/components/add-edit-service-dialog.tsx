@@ -16,7 +16,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
+import { generateServiceDescription } from '@/ai/flows/generate-service-description';
 
 export type Service = {
     id?: string;
@@ -48,6 +49,7 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
     const { user } = useAuth();
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
 
     const form = useForm<Service>({
         resolver: zodResolver(serviceSchema),
@@ -73,6 +75,39 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
             });
         }
     }, [service, form]);
+
+    const handleGenerateDescription = async () => {
+        const serviceName = form.getValues('name');
+        if (!serviceName || serviceName.trim().length < 3) {
+            toast({
+                variant: 'destructive',
+                title: 'Service Name Required',
+                description: 'Please enter a service name (at least 3 characters) first.',
+            });
+            return;
+        }
+
+        setIsGenerating(true);
+        try {
+            const result = await generateServiceDescription({ serviceName });
+            if (result.description) {
+                form.setValue('description', result.description, { shouldValidate: true });
+                toast({
+                    title: 'Description Generated!',
+                    description: 'The AI-powered description has been added.',
+                });
+            }
+        } catch (error) {
+            console.error('Error generating description:', error);
+            toast({
+                variant: 'destructive',
+                title: 'AI Error',
+                description: 'Could not generate a description at this time.',
+            });
+        } finally {
+            setIsGenerating(false);
+        }
+    };
 
     const onSubmit = async (data: Service) => {
         if (!user) {
@@ -159,9 +194,15 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Description</FormLabel>
+                                    <div className="flex justify-between items-center">
+                                        <FormLabel>Description</FormLabel>
+                                        <Button type="button" variant="ghost" size="sm" onClick={handleGenerateDescription} disabled={isGenerating}>
+                                            {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-accent" />}
+                                            <span className="ml-2">{isGenerating ? 'Generating...' : 'Generate with AI'}</span>
+                                        </Button>
+                                    </div>
                                     <FormControl>
-                                        <Textarea placeholder="Describe your service in detail..." {...field} />
+                                        <Textarea placeholder="Describe your service in detail..." {...field} rows={4} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -203,4 +244,3 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
         </Dialog>
     );
 }
-
