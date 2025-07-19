@@ -3,9 +3,10 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from 'next/image';
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { db, storage } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, doc, addDoc, serverTimestamp, orderBy, updateDoc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, addDoc, serverTimestamp, orderBy, updateDoc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -56,6 +57,7 @@ const getAvatarFallback = (name: string | null | undefined) => {
 export default function MessagesPage() {
     const { user } = useAuth();
     const { toast } = useToast();
+    const searchParams = useSearchParams();
 
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
@@ -71,6 +73,18 @@ export default function MessagesPage() {
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Effect to handle direct navigation to a conversation
+    useEffect(() => {
+        const conversationId = searchParams.get('conversationId');
+        if (conversationId && conversations.length > 0) {
+            const convoToOpen = conversations.find(c => c.id === conversationId);
+            if (convoToOpen) {
+                setActiveConversation(convoToOpen);
+            }
+        }
+    }, [searchParams, conversations]);
+
 
     // Fetch conversations for the current user
     useEffect(() => {
@@ -360,5 +374,3 @@ export default function MessagesPage() {
         </div>
     );
 }
-
-    

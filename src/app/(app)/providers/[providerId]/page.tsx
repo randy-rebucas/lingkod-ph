@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, query, where, getDocs, Timestamp } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp } from "firebase/firestore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Star, BriefcaseBusiness, MessageSquare, CalendarPlus, CheckCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/context/auth-context";
+import { useToast } from "@/hooks/use-toast";
 
 type Provider = {
     uid: string;
@@ -57,7 +59,11 @@ const getAvatarFallback = (name: string | null | undefined) => {
 
 export default function ProviderProfilePage() {
     const params = useParams();
+    const router = useRouter();
+    const { user } = useAuth();
+    const { toast } = useToast();
     const providerId = params.providerId as string;
+    const servicesRef = useRef<HTMLDivElement>(null);
 
     const [provider, setProvider] = useState<Provider | null>(null);
     const [services, setServices] = useState<Service[]>([]);
@@ -98,6 +104,62 @@ export default function ProviderProfilePage() {
 
         fetchProviderData();
     }, [providerId]);
+    
+    const handleSendMessage = async () => {
+        if (!user || !provider) {
+            toast({ variant: "destructive", title: "Error", description: "You must be logged in to send a message." });
+            return;
+        }
+
+        if (user.uid === provider.uid) {
+             toast({ variant: "destructive", title: "Error", description: "You cannot send a message to yourself." });
+            return;
+        }
+
+        try {
+            // Check if a conversation already exists
+            const conversationsRef = collection(db, "conversations");
+            const q = query(conversationsRef, where("participants", "array-contains", user.uid));
+            const querySnapshot = await getDocs(q);
+            
+            let existingConvoId: string | null = null;
+            querySnapshot.forEach(doc => {
+                const convo = doc.data();
+                if (convo.participants.includes(provider.uid)) {
+                    existingConvoId = doc.id;
+                }
+            });
+
+            if (existingConvoId) {
+                router.push(`/messages?conversationId=${existingConvoId}`);
+            } else {
+                // Create a new conversation
+                const newConvoRef = await addDoc(collection(db, "conversations"), {
+                    participants: [user.uid, provider.uid],
+                    participantInfo: {
+                        [user.uid]: {
+                            displayName: user.displayName,
+                            photoURL: user.photoURL,
+                        },
+                        [provider.uid]: {
+                            displayName: provider.displayName,
+                            photoURL: provider.photoURL,
+                        }
+                    },
+                    lastMessage: "Conversation started.",
+                    timestamp: serverTimestamp(),
+                });
+                router.push(`/messages?conversationId=${newConvoRef.id}`);
+            }
+        } catch (error) {
+            console.error("Error starting conversation:", error);
+            toast({ variant: "destructive", title: "Error", description: "Could not start a conversation." });
+        }
+    };
+    
+    const handleBookNow = () => {
+        servicesRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
 
     const overallRating = reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
 
@@ -142,15 +204,15 @@ export default function ProviderProfilePage() {
                             <p className="text-muted-foreground pt-2">{provider.bio || "This provider hasn't added a bio yet."}</p>
                         </div>
                         <div className="flex flex-col gap-2 w-full md:w-auto">
-                            <Button size="lg"><CalendarPlus className="mr-2" /> Book Now</Button>
-                            <Button size="lg" variant="outline"><MessageSquare className="mr-2" /> Send Message</Button>
+                            <Button size="lg" onClick={handleBookNow}><CalendarPlus className="mr-2" /> Book Now</Button>
+                            <Button size="lg" variant="outline" onClick={handleSendMessage}><MessageSquare className="mr-2" /> Send Message</Button>
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
             {/* Services Section */}
-            <div>
+            <div ref={servicesRef}>
                 <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><BriefcaseBusiness /> Services Offered</h2>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {services.length > 0 ? services.map(service => (
