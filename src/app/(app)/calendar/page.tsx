@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Link } from 'lucide-react';
 
 const locales = {
   'en-US': enUS,
@@ -132,9 +133,15 @@ export default function CalendarPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Calendar</h1>
-                <p className="text-muted-foreground">View your upcoming and past bookings.</p>
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold font-headline">Calendar</h1>
+                    <p className="text-muted-foreground">View your upcoming and past bookings.</p>
+                </div>
+                <Button variant="outline" disabled>
+                    <Link className="mr-2 h-4 w-4" />
+                    Sync with Google Calendar
+                </Button>
             </div>
              <Card>
                 <CardContent className="p-4 bg-card h-[75vh]">
