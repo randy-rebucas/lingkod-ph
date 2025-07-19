@@ -204,7 +204,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar>
-                  <AvatarImage src={user.photoURL || `https://placehold.co/100x100.png`} alt="User avatar" />
+                  <AvatarImage src={user.photoURL || ''} alt="User avatar" />
                   <AvatarFallback>{getAvatarFallback(user.displayName)}</AvatarFallback>
                 </Avatar>
               </Button>
@@ -237,3 +237,5 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
+    

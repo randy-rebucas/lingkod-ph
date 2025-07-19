@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,15 +11,29 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera } from "lucide-react";
+import { Camera, Upload } from "lucide-react";
+import { storage } from "@/lib/firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { updateProfile } from "firebase/auth";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
+
 
 export default function ProfilePage() {
     const { user, userRole, loading } = useAuth();
+    const { toast } = useToast();
     
     const [name, setName] = useState('');
     const [phone, setPhone] = useState(''); 
     const [bio, setBio] = useState('');
     
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     useEffect(() => {
         if (user) {
             setName(user.displayName || '');
@@ -35,6 +49,60 @@ export default function ProfilePage() {
         }
         return name.substring(0, 2).toUpperCase();
     };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setImageFile(e.target.files[0]);
+        }
+    };
+
+    const handleUpload = async () => {
+        if (!imageFile || !user) return;
+
+        setIsUploading(true);
+        setUploadProgress(0);
+
+        const storageRef = ref(storage, `profile-pictures/${user.uid}/${imageFile.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, imageFile);
+
+        uploadTask.on(
+            'state_changed',
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                setUploadProgress(progress);
+            },
+            (error) => {
+                console.error("Upload failed", error);
+                toast({ variant: "destructive", title: "Upload Failed", description: error.message });
+                setIsUploading(false);
+                setUploadProgress(null);
+                setImageFile(null);
+            },
+            async () => {
+                try {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    
+                    // Update Firebase Auth profile
+                    await updateProfile(user, { photoURL: downloadURL });
+
+                    // Update Firestore document
+                    const userDocRef = doc(db, "users", user.uid);
+                    await updateDoc(userDocRef, { photoURL: downloadURL });
+
+                    toast({ title: "Success", description: "Profile picture updated!" });
+                } catch (error: any) {
+                    toast({ variant: "destructive", title: "Update Failed", description: "Failed to update profile picture URL." });
+                } finally {
+                    setIsUploading(false);
+                    setUploadProgress(null);
+                    setImageFile(null);
+                    // The auth state listener in AuthProvider should automatically pick up the change.
+                    // You might need a manual refresh of the user object in context if it doesn't.
+                }
+            }
+        );
+    };
+
 
     if (loading) {
         return (
@@ -78,10 +146,11 @@ export default function ProfilePage() {
                                     <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
                                     <AvatarFallback className="text-3xl">{getAvatarFallback(user.displayName)}</AvatarFallback>
                                 </Avatar>
-                                <Button size="icon" className="absolute bottom-0 right-0 rounded-full h-8 w-8">
+                                <Button size="icon" className="absolute bottom-0 right-0 rounded-full h-8 w-8" onClick={() => fileInputRef.current?.click()}>
                                     <Camera className="h-4 w-4"/>
                                     <span className="sr-only">Change Photo</span>
                                 </Button>
+                                <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
                             </div>
                             <CardTitle className="mt-4">{user.displayName}</CardTitle>
                             <CardDescription className="flex items-center gap-2">
@@ -89,7 +158,20 @@ export default function ProfilePage() {
                                 <Badge variant="secondary" className="capitalize">{userRole}</Badge>
                             </CardDescription>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-4">
+                            {imageFile && (
+                                <div className="space-y-2 text-center">
+                                    <p className="text-sm text-muted-foreground truncate">Selected: {imageFile.name}</p>
+                                    {isUploading && uploadProgress !== null ? (
+                                        <Progress value={uploadProgress} className="w-full" />
+                                    ) : (
+                                        <Button onClick={handleUpload} disabled={isUploading} size="sm" className="w-full">
+                                            <Upload className="mr-2 h-4 w-4" />
+                                            {isUploading ? 'Uploading...' : 'Upload Picture'}
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
                             <Textarea 
                                 placeholder="Tell us a little about yourself or your business..."
                                 value={bio}
@@ -158,3 +240,5 @@ export default function ProfilePage() {
         </div>
     );
 }
+
+    
