@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,11 +16,17 @@ import { Camera } from "lucide-react";
 export default function ProfilePage() {
     const { user, userRole, loading } = useAuth();
     
-    // State for form fields, initialized with user data once available
-    const [name, setName] = useState(user?.displayName || '');
-    const [phone, setPhone] = useState(''); // Assuming phone is not in auth object, would fetch from Firestore
+    const [name, setName] = useState('');
+    const [phone, setPhone] = useState(''); 
     const [bio, setBio] = useState('');
     
+    useEffect(() => {
+        if (user) {
+            setName(user.displayName || '');
+            // Here you would typically fetch and set other user data like phone and bio from Firestore
+        }
+    }, [user]);
+
     const getAvatarFallback = (name: string | null | undefined) => {
         if (!name) return "U";
         const parts = name.split(" ");
@@ -126,7 +132,7 @@ export default function ProfilePage() {
                         <CardContent className="space-y-4">
                              <div className="space-y-2">
                                 <Label htmlFor="name">{userRole === 'agency' ? 'Business Name' : 'Full Name'}</Label>
-                                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} defaultValue={user.displayName || ''} />
+                                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
                             </div>
                             {userRole === 'agency' && (
                                 <div className="space-y-2">
