@@ -48,19 +48,29 @@ import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, Timest
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-
+import { AddEditInvoiceDialog } from "@/components/add-edit-invoice-dialog";
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
+
+type LineItem = {
+    description: string;
+    quantity: number;
+    price: number;
+};
 
 export type Invoice = {
   id: string;
   invoiceNumber: string;
   clientName: string;
   clientEmail: string;
-  amount: number;
+  clientAddress: string;
+  amount: number; // This will be the calculated total
   status: InvoiceStatus;
   issueDate: Timestamp;
   dueDate: Timestamp;
+  lineItems: LineItem[];
+  taxRate: number;
+  providerId: string;
 };
 
 const getStatusVariant = (status: InvoiceStatus) => {
@@ -79,12 +89,15 @@ export default function InvoicesPage() {
     const { toast } = useToast();
     const [invoices, setInvoices] = React.useState<Invoice[]>([]);
     const [loading, setLoading] = React.useState(true);
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+    const [selectedInvoice, setSelectedInvoice] = React.useState<Invoice | null>(null);
+
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
 
-    React.useEffect(() => {
+    const fetchInvoices = React.useCallback(() => {
         if (!user) {
             setLoading(false);
             return;
@@ -106,8 +119,13 @@ export default function InvoicesPage() {
             setLoading(false);
         });
 
-        return () => unsubscribe();
+        return unsubscribe;
     }, [user, toast]);
+
+    React.useEffect(() => {
+        const unsubscribe = fetchInvoices();
+        return () => unsubscribe?.();
+    }, [fetchInvoices]);
 
     const handleStatusUpdate = async (invoiceId: string, status: InvoiceStatus) => {
         const invoiceRef = doc(db, "invoices", invoiceId);
@@ -126,6 +144,16 @@ export default function InvoicesPage() {
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete invoice.' });
         }
+    };
+    
+    const handleAddInvoice = () => {
+        setSelectedInvoice(null);
+        setIsDialogOpen(true);
+    };
+    
+    const handleEditInvoice = (invoice: Invoice) => {
+        setSelectedInvoice(invoice);
+        setIsDialogOpen(true);
     };
 
     const columns: ColumnDef<Invoice>[] = [
@@ -220,10 +248,9 @@ export default function InvoicesPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => navigator.clipboard.writeText(invoice.id)}>
-                    Copy Invoice ID
+                  <DropdownMenuItem onClick={() => handleEditInvoice(invoice)}>
+                    View/Edit Details
                   </DropdownMenuItem>
-                   <DropdownMenuItem>View Details</DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => handleStatusUpdate(invoice.id, 'Paid')} disabled={invoice.status === 'Paid'}>
                     Mark as Paid
@@ -233,7 +260,7 @@ export default function InvoicesPage() {
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                    <AlertDialogTrigger asChild>
-                    <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                    <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">Delete</DropdownMenuItem>
                   </AlertDialogTrigger>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -288,7 +315,7 @@ export default function InvoicesPage() {
                       Create and manage invoices for your clients.
                   </p>
               </div>
-              <Button>
+              <Button onClick={handleAddInvoice}>
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Create Invoice
               </Button>
@@ -412,6 +439,15 @@ export default function InvoicesPage() {
               </div>
             </div>
           </div>
+          <AddEditInvoiceDialog
+              isOpen={isDialogOpen}
+              setIsOpen={setIsDialogOpen}
+              invoice={selectedInvoice}
+              onInvoiceSaved={() => {
+                  setIsDialogOpen(false);
+                  fetchInvoices();
+              }}
+          />
       </div>
     );
 }
