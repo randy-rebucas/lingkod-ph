@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { DollarSign, Calendar, Star, Users, Loader2, Search } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
@@ -154,7 +155,9 @@ const ProviderCard = ({ provider }: { provider: Provider }) => {
                 <p className="text-sm text-muted-foreground mt-2 h-10 line-clamp-2">{provider.bio || 'No bio available.'}</p>
             </CardContent>
             <CardFooter>
-                 <Button className="w-full">View Profile</Button>
+                 <Button className="w-full" asChild>
+                    <Link href={`/providers/${provider.uid}`}>View Profile</Link>
+                </Button>
             </CardFooter>
         </Card>
     );

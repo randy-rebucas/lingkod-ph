@@ -1,0 +1,208 @@
+
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { db } from "@/lib/firebase";
+import { doc, getDoc, collection, query, where, getDocs, Timestamp } from "firebase/firestore";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Star, BriefcaseBusiness, MessageSquare, CalendarPlus, CheckCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+
+type Provider = {
+    uid: string;
+    displayName: string;
+    email: string;
+    bio?: string;
+    photoURL?: string;
+    role: string;
+};
+
+type Service = {
+    id: string;
+    name: string;
+    category: string;
+    price: number;
+    description: string;
+    status: 'Active' | 'Inactive';
+};
+
+type Review = {
+    id: string;
+    clientName: string;
+    clientAvatar?: string;
+    rating: number;
+    comment: string;
+    createdAt: Timestamp;
+};
+
+const renderStars = (rating: number) => {
+    return Array(5).fill(0).map((_, i) => (
+        <Star key={i} className={`h-5 w-5 ${i < Math.round(rating) ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'}`} />
+    ));
+};
+
+const getAvatarFallback = (name: string | null | undefined) => {
+    if (!name) return "U";
+    const parts = name.split(" ");
+    if (parts.length > 1 && parts[0] && parts[1]) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+};
+
+export default function ProviderProfilePage() {
+    const params = useParams();
+    const providerId = params.providerId as string;
+
+    const [provider, setProvider] = useState<Provider | null>(null);
+    const [services, setServices] = useState<Service[]>([]);
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!providerId) return;
+
+        const fetchProviderData = async () => {
+            setLoading(true);
+            try {
+                // Fetch provider details
+                const providerDocRef = doc(db, "users", providerId);
+                const providerDoc = await getDoc(providerDocRef);
+                if (providerDoc.exists()) {
+                    setProvider(providerDoc.data() as Provider);
+                }
+
+                // Fetch services
+                const servicesQuery = query(collection(db, "services"), where("userId", "==", providerId), where("status", "==", "Active"));
+                const servicesSnapshot = await getDocs(servicesQuery);
+                const servicesData = servicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
+                setServices(servicesData);
+
+                // Fetch reviews
+                const reviewsQuery = query(collection(db, "reviews"), where("providerId", "==", providerId));
+                const reviewsSnapshot = await getDocs(reviewsQuery);
+                const reviewsData = reviewsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
+                setReviews(reviewsData);
+
+            } catch (error) {
+                console.error("Error fetching provider data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProviderData();
+    }, [providerId]);
+
+    const overallRating = reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
+
+    if (loading) {
+        return (
+            <div className="space-y-8">
+                <Card className="flex flex-col md:flex-row items-center gap-6 p-6">
+                    <Skeleton className="h-32 w-32 rounded-full" />
+                    <div className="space-y-4 flex-1">
+                        <Skeleton className="h-8 w-48" />
+                        <Skeleton className="h-5 w-32" />
+                        <Skeleton className="h-16 w-full" />
+                    </div>
+                </Card>
+                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-48 w-full" />
+            </div>
+        )
+    }
+
+    if (!provider) {
+        return <div>Provider not found.</div>
+    }
+
+    return (
+        <div className="max-w-6xl mx-auto space-y-8">
+            {/* Header Card */}
+            <Card className="shadow-lg">
+                <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+                        <Avatar className="h-32 w-32 border-4 border-primary">
+                            <AvatarImage src={provider.photoURL} alt={provider.displayName} />
+                            <AvatarFallback className="text-5xl">{getAvatarFallback(provider.displayName)}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 space-y-2">
+                            <CardTitle className="text-4xl font-bold font-headline">{provider.displayName}</CardTitle>
+                            <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
+                                {renderStars(overallRating)}
+                                <span>({reviews.length} reviews)</span>
+                                <Badge variant="secondary" className="capitalize">{provider.role}</Badge>
+                            </div>
+                            <p className="text-muted-foreground pt-2">{provider.bio || "This provider hasn't added a bio yet."}</p>
+                        </div>
+                        <div className="flex flex-col gap-2 w-full md:w-auto">
+                            <Button size="lg"><CalendarPlus className="mr-2" /> Book Now</Button>
+                            <Button size="lg" variant="outline"><MessageSquare className="mr-2" /> Send Message</Button>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Services Section */}
+            <div>
+                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><BriefcaseBusiness /> Services Offered</h2>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {services.length > 0 ? services.map(service => (
+                        <Card key={service.id}>
+                            <CardHeader>
+                                <CardTitle>{service.name}</CardTitle>
+                                <CardDescription>{service.category}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm text-muted-foreground h-20 line-clamp-4">{service.description}</p>
+                            </CardContent>
+                            <CardFooter className="flex justify-between items-center">
+                                <p className="text-xl font-bold text-primary">₱{service.price.toFixed(2)}</p>
+                                <Button>Book</Button>
+                            </CardFooter>
+                        </Card>
+                    )) : (
+                        <p className="text-muted-foreground col-span-full text-center py-8">This provider has not listed any services yet.</p>
+                    )}
+                </div>
+            </div>
+            
+            <Separator />
+
+            {/* Reviews Section */}
+            <div>
+                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Star /> Client Reviews</h2>
+                <Card>
+                    <CardContent className="p-6 space-y-6">
+                        {reviews.length > 0 ? reviews.map(review => (
+                            <div key={review.id} className="flex gap-4">
+                                <Avatar>
+                                    <AvatarImage src={review.clientAvatar} alt={review.clientName} />
+                                    <AvatarFallback>{getAvatarFallback(review.clientName)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-center">
+                                        <p className="font-semibold">{review.clientName}</p>
+                                        <div className="flex items-center gap-1">
+                                            {renderStars(review.rating)}
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">{review.createdAt.toDate().toLocaleDateString()}</p>
+                                    <p className="mt-2 text-sm">{review.comment}</p>
+                                </div>
+                            </div>
+                        )) : (
+                             <p className="text-muted-foreground text-center py-8">This provider has not received any reviews yet.</p>
+                        )}
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    );
+}
