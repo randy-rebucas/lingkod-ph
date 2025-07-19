@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
+import { BookingDialog } from "@/components/booking-dialog";
 
 type Provider = {
     uid: string;
@@ -24,7 +25,7 @@ type Provider = {
     role: string;
 };
 
-type Service = {
+export type Service = {
     id: string;
     name: string;
     category: string;
@@ -69,6 +70,9 @@ export default function ProviderProfilePage() {
     const [services, setServices] = useState<Service[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
+    const [selectedService, setSelectedService] = useState<Service | null>(null);
 
     useEffect(() => {
         if (!providerId) return;
@@ -161,6 +165,16 @@ export default function ProviderProfilePage() {
         servicesRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
 
+    const handleBookServiceClick = (service: Service) => {
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Login Required', description: 'Please log in to book a service.' });
+            router.push('/login');
+            return;
+        }
+        setSelectedService(service);
+        setIsBookingDialogOpen(true);
+    };
+
     const overallRating = reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
 
     if (loading) {
@@ -226,7 +240,7 @@ export default function ProviderProfilePage() {
                             </CardContent>
                             <CardFooter className="flex justify-between items-center">
                                 <p className="text-xl font-bold text-primary">₱{service.price.toFixed(2)}</p>
-                                <Button>Book</Button>
+                                <Button onClick={() => handleBookServiceClick(service)}>Book</Button>
                             </CardFooter>
                         </Card>
                     )) : (
@@ -265,6 +279,18 @@ export default function ProviderProfilePage() {
                     </CardContent>
                 </Card>
             </div>
+            {provider && selectedService && (
+                <BookingDialog 
+                    isOpen={isBookingDialogOpen}
+                    setIsOpen={setIsBookingDialogOpen}
+                    service={selectedService}
+                    provider={provider}
+                    onBookingConfirmed={() => {
+                        toast({ title: 'Booking Successful!', description: 'Your booking has been confirmed and is now visible in your bookings list.'});
+                        setIsBookingDialogOpen(false);
+                    }}
+                />
+            )}
         </div>
     );
 }

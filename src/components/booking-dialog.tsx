@@ -1,0 +1,188 @@
+
+"use client";
+
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { useAuth } from '@/context/auth-context';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from '@/hooks/use-toast';
+import { CalendarIcon, Loader2 } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { Calendar } from './ui/calendar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import type { Service } from '@/app/(app)/providers/[providerId]/page';
+
+const bookingSchema = z.object({
+  date: z.date({ required_error: "Please select a date." }),
+  time: z.string({ required_error: "Please select a time." }),
+  notes: z.string().optional(),
+});
+
+type BookingFormValues = z.infer<typeof bookingSchema>;
+
+type Provider = {
+    uid: string;
+    displayName: string;
+    email: string;
+    bio?: string;
+    photoURL?: string;
+    role: string;
+};
+
+type BookingDialogProps = {
+    isOpen: boolean;
+    setIsOpen: (open: boolean) => void;
+    service: Service;
+    provider: Provider;
+    onBookingConfirmed: () => void;
+};
+
+const generateTimeSlots = () => {
+    const slots = [];
+    for (let i = 8; i <= 17; i++) {
+        slots.push(`${String(i).padStart(2, '0')}:00`);
+    }
+    return slots;
+};
+
+export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingConfirmed }: BookingDialogProps) {
+    const { user } = useAuth();
+    const { toast } = useToast();
+    const [isSaving, setIsSaving] = useState(false);
+    const timeSlots = generateTimeSlots();
+
+    const form = useForm<BookingFormValues>({
+        resolver: zodResolver(bookingSchema),
+        defaultValues: {
+            date: new Date(),
+            time: undefined,
+            notes: "",
+        },
+    });
+    
+    useEffect(() => {
+        form.reset();
+    }, [isOpen, form]);
+
+    const onSubmit = async (data: BookingFormValues) => {
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' });
+            return;
+        }
+        setIsSaving(true);
+        try {
+            const [hours, minutes] = data.time.split(':').map(Number);
+            const bookingDateTime = new Date(data.date);
+            bookingDateTime.setHours(hours, minutes, 0, 0);
+
+            const bookingData = {
+                providerId: provider.uid,
+                providerName: provider.displayName,
+                clientId: user.uid,
+                clientName: user.displayName,
+                serviceId: service.id,
+                serviceName: service.name,
+                price: service.price,
+                date: Timestamp.fromDate(bookingDateTime),
+                status: "Upcoming",
+                notes: data.notes,
+                createdAt: serverTimestamp(),
+            };
+
+            await addDoc(collection(db, 'bookings'), bookingData);
+            onBookingConfirmed();
+        } catch (error) {
+            console.error("Error creating booking:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to create booking.' });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>Book: {service.name}</DialogTitle>
+                    <DialogDescription>
+                        Confirm date and time for your booking with {provider.displayName}.
+                    </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField control={form.control} name="date" render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel className="mb-1">Date</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button variant="outline" className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() -1))} />
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                             <FormField control={form.control} name="time" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Time</FormLabel>
+                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a time slot" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                        </div>
+                        <FormField control={form.control} name="notes" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Additional Notes (optional)</FormLabel>
+                                <FormControl>
+                                    <Textarea placeholder="e.g., Please call upon arrival." {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+
+                        <div className="rounded-lg border bg-secondary/50 p-4 flex justify-between items-center">
+                            <span className="font-semibold">Total Price:</span>
+                            <span className="font-bold text-lg text-primary">₱{service.price.toFixed(2)}</span>
+                        </div>
+                        
+                         <DialogFooter>
+                             <DialogClose asChild>
+                                <Button type="button" variant="outline" disabled={isSaving}>Cancel</Button>
+                            </DialogClose>
+                            <Button type="submit" disabled={isSaving}>
+                                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isSaving ? 'Confirming...' : 'Confirm Booking'}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    );
+}
