@@ -140,11 +140,16 @@ export default function EarningsPage() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Earnings</h1>
-                <p className="text-muted-foreground">
-                    Track your revenue and request payouts.
-                </p>
+             <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold font-headline">Earnings</h1>
+                    <p className="text-muted-foreground">
+                        Track your revenue and request payouts.
+                    </p>
+                </div>
+                 <Button disabled={totalRevenue <= 400} onClick={handlePayoutRequest}>
+                    Request Payout
+                </Button>
             </div>
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -187,11 +192,6 @@ export default function EarningsPage() {
                         <div className="text-2xl font-bold">₱{totalRevenue.toFixed(2)}</div>
                         <p className="text-xs text-muted-foreground">Minimum payout is ₱400.00</p>
                     </CardContent>
-                    <CardFooter>
-                         <Button className="w-full" disabled={totalRevenue <= 400} onClick={handlePayoutRequest}>
-                            Request Payout
-                        </Button>
-                    </CardFooter>
                 </Card>
             </div>
 
