@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 type Booking = {
     id: string;
+    clientId: string;
     clientName: string;
     serviceName: string;
     status: "Upcoming" | "Completed" | "Cancelled";
@@ -31,15 +32,6 @@ type Review = {
     clientAvatar: string;
 };
 
-const earningsData = [
-  { month: "Jan", earnings: 2200 },
-  { month: "Feb", earnings: 3100 },
-  { month: "Mar", earnings: 2800 },
-  { month: "Apr", earnings: 4500 },
-  { month: "May", earnings: 3800 },
-  { month: "Jun", earnings: 5200 },
-];
-
 const getStatusVariant = (status: string) => {
     switch (status.toLowerCase()) {
         case "upcoming": return "default";
@@ -54,7 +46,7 @@ const renderStars = (rating: number) => {
     ));
 }
 
-const DashboardCard = ({ title, icon: Icon, value, change, isLoading }: { title: string, icon: React.ElementType, value: string, change: string, isLoading: boolean }) => {
+const DashboardCard = ({ title, icon: Icon, value, change, isLoading }: { title: string, icon: React.ElementType, value: string, change?: string, isLoading: boolean }) => {
     if (isLoading) {
         return (
             <Card>
@@ -77,11 +69,53 @@ const DashboardCard = ({ title, icon: Icon, value, change, isLoading }: { title:
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">{value}</div>
-                <p className="text-xs text-muted-foreground">{change}</p>
+                {change && <p className="text-xs text-muted-foreground">{change}</p>}
             </CardContent>
         </Card>
     )
 }
+
+// Function to process bookings for the earnings chart
+const processEarningsData = (bookings: Booking[]) => {
+    const monthlyEarnings: { [key: string]: number } = {};
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    bookings.forEach(booking => {
+        if (booking.status === 'Completed') {
+            const date = booking.date.toDate();
+            const month = date.getMonth();
+            const year = date.getFullYear();
+            // Using a "YYYY-MM" key to handle data spanning multiple years
+            const key = `${year}-${month}`;
+
+            if (!monthlyEarnings[key]) {
+                monthlyEarnings[key] = 0;
+            }
+            monthlyEarnings[key] += booking.price;
+        }
+    });
+
+    // Get the last 6 months including the current one
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+
+    const chartData = Array.from({ length: 6 }, (_, i) => {
+        const date = new Date(sixMonthsAgo);
+        date.setMonth(date.getMonth() + i);
+        const month = date.getMonth();
+        const year = date.getFullYear();
+        const key = `${year}-${month}`;
+        
+        return {
+            month: monthNames[month],
+            earnings: monthlyEarnings[key] || 0,
+        };
+    });
+
+    return chartData;
+}
+
 
 export default function DashboardPage() {
     const { user, userRole } = useAuth();
@@ -112,6 +146,9 @@ export default function DashboardPage() {
             const bookingsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
             setBookings(bookingsData);
             setLoading(false);
+        }, (error) => {
+            console.error("Firestore Error:", error);
+            setLoading(false);
         });
 
         const unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
@@ -134,16 +171,17 @@ export default function DashboardPage() {
     const upcomingBookingsCount = bookings.filter(b => b.status === 'Upcoming').length;
 
     const uniqueClientIds = new Set(bookings.map(b => b.clientId));
-    const newClientsCount = uniqueClientIds.size;
+    const totalClientsCount = uniqueClientIds.size;
     
     const overallRating = reviews.length > 0
         ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
         : "N/A";
         
     const recentBookings = bookings.slice(0, 3);
+    const earningsData = processEarningsData(bookings);
 
     // If user is not a provider, show a different view
-    if (userRole === 'client' || userRole === 'agency') {
+    if (userRole && userRole !== 'provider') {
         return (
              <div className="space-y-6">
                 <div>
@@ -177,9 +215,9 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <DashboardCard isLoading={loading} title="Total Revenue" icon={DollarSign} value={`₱${totalRevenue.toFixed(2)}`} change="+20.1% from last month" />
-                <DashboardCard isLoading={loading} title="Upcoming Bookings" icon={Calendar} value={`${upcomingBookingsCount}`} change="+2 this week" />
-                <DashboardCard isLoading={loading} title="Total Clients" icon={Users} value={`+${newClientsCount}`} change="All time clients" />
+                <DashboardCard isLoading={loading} title="Total Revenue" icon={DollarSign} value={`₱${totalRevenue.toFixed(2)}`} />
+                <DashboardCard isLoading={loading} title="Upcoming Bookings" icon={Calendar} value={`${upcomingBookingsCount}`} />
+                <DashboardCard isLoading={loading} title="Total Clients" icon={Users} value={`${totalClientsCount}`} />
                 <DashboardCard isLoading={loading} title="Overall Rating" icon={Star} value={`${overallRating}`} change={`Based on ${reviews.length} reviews`} />
             </div>
 
@@ -190,11 +228,16 @@ export default function DashboardPage() {
                         <CardDescription>Your earnings for the last 6 months.</CardDescription>
                     </CardHeader>
                     <CardContent className="pl-2">
+                        {loading ? (
+                             <div className="flex items-center justify-center h-[300px]">
+                                <Skeleton className="w-full h-full" />
+                            </div>
+                        ) : (
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={earningsData}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                 <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₱${value / 1000}k`} />
+                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₱${value >= 1000 ? `${value/1000}k` : value}`} />
                                 <Tooltip
                                     contentStyle={{
                                         backgroundColor: "hsl(var(--background))",
@@ -206,6 +249,7 @@ export default function DashboardPage() {
                                 <Bar dataKey="earnings" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
+                        )}
                     </CardContent>
                 </Card>
                 <Card className="lg:col-span-3">
@@ -230,7 +274,7 @@ export default function DashboardPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {recentBookings.map((booking) => (
+                                {recentBookings.length > 0 ? recentBookings.map((booking) => (
                                     <TableRow key={booking.id}>
                                         <TableCell className="font-medium">{booking.clientName}</TableCell>
                                         <TableCell>{booking.serviceName}</TableCell>
@@ -238,7 +282,11 @@ export default function DashboardPage() {
                                             <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={3} className="h-24 text-center">No recent bookings.</TableCell>
+                                    </TableRow>
+                                )}
                             </TableBody>
                         </Table>
                         )}
@@ -299,5 +347,3 @@ export default function DashboardPage() {
         </div>
     );
 }
-
-    
