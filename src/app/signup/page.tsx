@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -5,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
@@ -21,7 +23,7 @@ const Logo = () => (
   </h1>
 );
 
-type UserType = 'Client' | 'Provider' | 'Agency';
+type UserType = 'client' | 'provider' | 'agency';
 
 const SignUpForm = ({ userType }: { userType: UserType }) => {
   const [name, setName] = useState('');
@@ -42,7 +44,7 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
-      const displayName = userType === 'Agency' ? businessName : name;
+      const displayName = userType === 'agency' ? businessName : name;
       await updateProfile(user, { displayName });
 
       await setDoc(doc(db, "users", user.uid), {
@@ -51,8 +53,8 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
         displayName: displayName,
         phone: phone,
         role: userType.toLowerCase(),
-        createdAt: new Date(),
-        ...(userType === 'Agency' && { contactPerson: contactPerson }),
+        createdAt: serverTimestamp(),
+        ...(userType === 'agency' && { contactPerson: contactPerson }),
       });
 
       toast({ title: "Success", description: "Account created successfully!" });
@@ -70,7 +72,7 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
 
   return (
     <form className="space-y-4" onSubmit={handleSignup}>
-      {userType === 'Agency' ? (
+      {userType === 'agency' ? (
         <>
           <div className="space-y-2">
             <Label htmlFor={`${userType}-business-name`}>Business Name</Label>
@@ -104,6 +106,7 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
+        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {loading ? 'Creating Account...' : 'Create Account'}
       </Button>
     </form>
@@ -114,11 +117,11 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
 export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<UserType>('Client');
+  const [loadingGoogle, setLoadingGoogle] = useState(false);
+  const [activeTab, setActiveTab] = useState<UserType>('client');
 
   const handleGoogleSignup = async () => {
-    setLoading(true);
+    setLoadingGoogle(true);
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
@@ -128,10 +131,11 @@ export default function SignupPage() {
         uid: user.uid,
         email: user.email,
         displayName: user.displayName,
+        photoURL: user.photoURL,
         phone: user.phoneNumber || '',
         role: activeTab.toLowerCase(),
-        createdAt: new Date(),
-      });
+        createdAt: serverTimestamp(),
+      }, { merge: true }); // Use merge to avoid overwriting data if doc exists
       
       toast({ title: "Success", description: "Signed up successfully with Google!" });
       router.push('/dashboard');
@@ -143,7 +147,7 @@ export default function SignupPage() {
         description: error.message,
       });
     } finally {
-      setLoading(false);
+      setLoadingGoogle(false);
     }
   };
 
@@ -167,22 +171,25 @@ export default function SignupPage() {
             </TabsList>
             <TabsContent value="client">
                 <p className="text-sm text-muted-foreground my-4 text-center">Create an account to find and book reliable services.</p>
-                <SignUpForm userType="Client" />
+                <SignUpForm userType="client" />
             </TabsContent>
             <TabsContent value="provider">
                 <p className="text-sm text-muted-foreground my-4 text-center">Offer your skills and services to a wider audience.</p>
-                <SignUpForm userType="Provider" />
+                <SignUpForm userType="provider" />
             </TabsContent>
             <TabsContent value="agency">
                 <p className="text-sm text-muted-foreground my-4 text-center">Manage your team and grow your service business.</p>
-                <SignUpForm userType="Agency" />
+                <SignUpForm userType="agency" />
             </TabsContent>
           </Tabs>
 
           <Separator className="my-6" />
 
           <div className="space-y-4">
-            <Button variant="outline" className="w-full" onClick={handleGoogleSignup} disabled={loading}>Sign up with Google</Button>
+            <Button variant="outline" className="w-full" onClick={handleGoogleSignup} disabled={loadingGoogle}>
+                {loadingGoogle && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Sign up with Google
+            </Button>
             <Button variant="outline" className="w-full" disabled>Sign up with Facebook</Button>
           </div>
 
