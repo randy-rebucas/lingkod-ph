@@ -11,14 +11,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, CheckCircle, Star } from "lucide-react";
+import { Camera, Upload, Loader2, CheckCircle, Star, CalendarIcon } from "lucide-react";
 import { storage } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { format } from 'date-fns';
 
 
 export default function ProfilePage() {
@@ -28,6 +33,8 @@ export default function ProfilePage() {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState(''); 
     const [bio, setBio] = useState('');
+    const [gender, setGender] = useState('');
+    const [birthdate, setBirthdate] = useState<Date | undefined>(undefined);
     
     const [isSaving, setIsSaving] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -45,6 +52,10 @@ export default function ProfilePage() {
                     const data = userDoc.data();
                     setPhone(data.phone || '');
                     setBio(data.bio || '');
+                    setGender(data.gender || '');
+                    if (data.birthdate && data.birthdate.toDate) {
+                        setBirthdate(data.birthdate.toDate());
+                    }
                 }
             }
         }
@@ -71,11 +82,16 @@ export default function ProfilePage() {
         setIsSaving(true);
         try {
             const userDocRef = doc(db, "users", user.uid);
-            const updates: { displayName: string; phone: string; bio: string; [key: string]: any } = {
+            const updates: { [key: string]: any } = {
                 displayName: name,
                 phone: phone,
                 bio: bio,
+                gender: gender,
             };
+
+             if (birthdate) {
+                updates.birthdate = Timestamp.fromDate(birthdate);
+            }
 
             // Update display name in Firebase Auth if it has changed
             if (user.displayName !== name) {
@@ -276,9 +292,53 @@ export default function ProfilePage() {
                                 <Label htmlFor="email">Email Address</Label>
                                 <Input id="email" type="email" value={user.email || ''} disabled />
                             </div>
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="phone">Mobile Number</Label>
+                                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., 09123456789" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="gender">Gender</Label>
+                                     <Select value={gender} onValueChange={setGender}>
+                                        <SelectTrigger id="gender">
+                                            <SelectValue placeholder="Select gender" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="male">Male</SelectItem>
+                                            <SelectItem value="female">Female</SelectItem>
+                                            <SelectItem value="other">Other</SelectItem>
+                                            <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
                             <div className="space-y-2">
-                                <Label htmlFor="phone">Mobile Number</Label>
-                                <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., 09123456789" />
+                                <Label>Birthdate</Label>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant={"outline"}
+                                            className={cn(
+                                                "w-full justify-start text-left font-normal",
+                                                !birthdate && "text-muted-foreground"
+                                            )}
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {birthdate ? format(birthdate, "PPP") : <span>Pick a date</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                        <Calendar
+                                            mode="single"
+                                            selected={birthdate}
+                                            onSelect={setBirthdate}
+                                            captionLayout="dropdown-buttons"
+                                            fromYear={1950}
+                                            toYear={new Date().getFullYear()}
+                                            initialFocus
+                                        />
+                                    </PopoverContent>
+                                </Popover>
                             </div>
                         </CardContent>
                         <CardFooter>
@@ -293,3 +353,5 @@ export default function ProfilePage() {
         </div>
     );
 }
+
+    
