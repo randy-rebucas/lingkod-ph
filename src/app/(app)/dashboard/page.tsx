@@ -1,9 +1,9 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { DollarSign, Calendar, Star, Users, Loader2 } from "lucide-react";
+import { DollarSign, Calendar, Star, Users, Loader2, Search } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,8 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, orderBy, limit, Timestamp } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 
 type Booking = {
     id: string;
@@ -26,10 +27,20 @@ type Booking = {
 
 type Review = {
     id: string;
+    providerId: string;
     clientName: string;
     rating: number;
     comment: string;
     clientAvatar: string;
+};
+
+type Provider = {
+    uid: string;
+    displayName: string;
+    bio?: string;
+    photoURL?: string;
+    rating: number;
+    reviewCount: number;
 };
 
 const getStatusVariant = (status: string) => {
@@ -116,13 +127,53 @@ const processEarningsData = (bookings: Booking[]) => {
     return chartData;
 }
 
+const ProviderCard = ({ provider }: { provider: Provider }) => {
+    const getAvatarFallback = (name: string | null | undefined) => {
+        if (!name) return "U";
+        const parts = name.split(" ");
+        if (parts.length > 1 && parts[0] && parts[1]) {
+            return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+        }
+        return name.substring(0, 2).toUpperCase();
+    };
+
+    return (
+        <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+            <CardContent className="p-6 text-center">
+                <Avatar className="h-24 w-24 mx-auto mb-4 border-2 border-primary">
+                    <AvatarImage src={provider.photoURL} alt={provider.displayName} />
+                    <AvatarFallback className="text-3xl">{getAvatarFallback(provider.displayName)}</AvatarFallback>
+                </Avatar>
+                <h3 className="text-xl font-bold">{provider.displayName}</h3>
+                {provider.reviewCount > 0 && (
+                     <div className="flex items-center justify-center gap-1 mt-1 text-muted-foreground">
+                        {renderStars(provider.rating)}
+                        <span className="text-sm">({provider.reviewCount})</span>
+                    </div>
+                )}
+                <p className="text-sm text-muted-foreground mt-2 h-10 line-clamp-2">{provider.bio || 'No bio available.'}</p>
+            </CardContent>
+            <CardFooter>
+                 <Button className="w-full">View Profile</Button>
+            </CardFooter>
+        </Card>
+    );
+};
+
 
 export default function DashboardPage() {
     const { user, userRole } = useAuth();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
+    
+    // For client dashboard
+    const [providers, setProviders] = useState<Provider[]>([]);
+    const [loadingProviders, setLoadingProviders] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
 
+
+    // Fetch data for provider dashboard
     useEffect(() => {
         if (!user || userRole !== 'provider') {
             setLoading(false);
@@ -163,7 +214,52 @@ export default function DashboardPage() {
 
     }, [user, userRole]);
 
-    // Derived stats
+    // Fetch data for client dashboard
+    useEffect(() => {
+        if (userRole && userRole !== 'provider') {
+            const fetchProviders = async () => {
+                setLoadingProviders(true);
+                try {
+                    // Fetch all reviews first to calculate ratings
+                    const reviewsSnapshot = await getDocs(collection(db, "reviews"));
+                    const allReviews = reviewsSnapshot.docs.map(doc => doc.data() as Review);
+                    
+                    const providerRatings: { [key: string]: { totalRating: number, count: number } } = {};
+                    allReviews.forEach(review => {
+                        if (!providerRatings[review.providerId]) {
+                            providerRatings[review.providerId] = { totalRating: 0, count: 0 };
+                        }
+                        providerRatings[review.providerId].totalRating += review.rating;
+                        providerRatings[review.providerId].count++;
+                    });
+
+                    // Fetch all providers
+                    const q = query(collection(db, "users"), where("role", "in", ["provider", "agency"]));
+                    const querySnapshot = await getDocs(q);
+                    const providersData = querySnapshot.docs.map(doc => {
+                        const data = doc.data();
+                        const ratingInfo = providerRatings[data.uid];
+                        return {
+                            uid: data.uid,
+                            displayName: data.displayName || 'Unnamed Provider',
+                            bio: data.bio,
+                            photoURL: data.photoURL,
+                            rating: ratingInfo ? ratingInfo.totalRating / ratingInfo.count : 0,
+                            reviewCount: ratingInfo ? ratingInfo.count : 0,
+                        } as Provider;
+                    });
+                    setProviders(providersData);
+                } catch (error) {
+                    console.error("Error fetching providers: ", error);
+                } finally {
+                    setLoadingProviders(false);
+                }
+            };
+            fetchProviders();
+        }
+    }, [userRole]);
+
+    // Derived stats for provider
     const totalRevenue = bookings
         .filter(b => b.status === 'Completed')
         .reduce((sum, b) => sum + b.price, 0);
@@ -180,33 +276,54 @@ export default function DashboardPage() {
     const recentBookings = bookings.slice(0, 3);
     const earningsData = processEarningsData(bookings);
 
-    // If user is not a provider, show a different view
+    // Filter providers for client view
+    const filteredProviders = useMemo(() => 
+        providers.filter(provider => 
+            provider.displayName.toLowerCase().includes(searchTerm.toLowerCase())
+        ), [providers, searchTerm]);
+
+
+    // If user is a client or agency
     if (userRole && userRole !== 'provider') {
         return (
              <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Welcome back, {user?.displayName || 'User'}!</h1>
-                    <p className="text-muted-foreground">Manage your account from here.</p>
+                    <h1 className="text-3xl font-bold font-headline">Find a Service Provider</h1>
+                    <p className="text-muted-foreground">Browse our network of trusted professionals.</p>
                 </div>
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>Dashboard</CardTitle>
-                        <CardDescription>Your personal dashboard is coming soon. For now, you can manage your bookings and profile.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <Users className="h-16 w-16 mb-4" />
-                        <p>Use the sidebar to navigate to your bookings or update your profile.</p>
-                         <div className="flex gap-4 mt-6">
-                            <Button asChild><a href="/bookings">View Bookings</a></Button>
-                            <Button variant="outline" asChild><a href="/profile">My Profile</a></Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                 <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                    <Input 
+                        placeholder="Search by provider name..." 
+                        className="w-full max-w-lg pl-10" 
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                {loadingProviders ? (
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                         {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+                    </div>
+                ) : (
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {filteredProviders.length > 0 ? (
+                            filteredProviders.map(provider => (
+                                <ProviderCard key={provider.uid} provider={provider} />
+                            ))
+                        ) : (
+                             <div className="lg:col-span-3 text-center text-muted-foreground p-12">
+                                <Users className="h-16 w-16 mx-auto mb-4" />
+                                <h3 className="text-xl font-semibold">No Providers Found</h3>
+                                <p>No providers match your search term. Try another search.</p>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         )
     }
     
-
+    // Provider Dashboard
     return (
         <div className="space-y-6">
             <div>
@@ -347,3 +464,5 @@ export default function DashboardPage() {
         </div>
     );
 }
+
+    
