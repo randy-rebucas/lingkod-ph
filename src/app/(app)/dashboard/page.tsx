@@ -1,7 +1,12 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DollarSign, Calendar, Star, BriefcaseBusiness } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
 
 export default function DashboardPage() {
+    const { user } = useAuth();
+
     const stats = [
         { title: "Total Earnings", value: "₱12,500", icon: <DollarSign className="h-6 w-6 text-muted-foreground" />, change: "+15% from last month" },
         { title: "Upcoming Bookings", value: "4", icon: <Calendar className="h-6 w-6 text-muted-foreground" />, change: "+2 this week" },
@@ -12,7 +17,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Welcome back, Juan!</h1>
+        <h1 className="text-3xl font-bold font-headline">Welcome back, {user?.displayName || 'User'}!</h1>
         <p className="text-muted-foreground">Here&apos;s a summary of your activity.</p>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

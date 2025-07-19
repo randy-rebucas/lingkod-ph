@@ -1,10 +1,19 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
@@ -12,47 +21,133 @@ const Logo = () => (
   </h1>
 );
 
-const SignUpForm = ({ userType }: { userType: 'Client' | 'Provider' | 'Agency' }) => (
-  <form className="space-y-4">
-    {userType === 'Agency' ? (
-      <>
-        <div className="space-y-2">
-          <Label htmlFor={`${userType}-business-name`}>Business Name</Label>
-          <Input id={`${userType}-business-name`} placeholder="Lingkod Inc." required />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor={`${userType}-contact-person`}>Contact Person</Label>
-          <Input id={`${userType}-contact-person`} placeholder="Juan Dela Cruz" required />
-        </div>
-      </>
-    ) : (
-      <div className="space-y-2">
-        <Label htmlFor={`${userType}-name`}>Full Name</Label>
-        <Input id={`${userType}-name`} placeholder="Juan Dela Cruz" required />
-      </div>
-    )}
+type UserType = 'Client' | 'Provider' | 'Agency';
 
-    <div className="space-y-2">
-      <Label htmlFor={`${userType}-email`}>Email</Label>
-      <Input id={`${userType}-email`} type="email" placeholder="m@example.com" required />
-    </div>
+const SignUpForm = ({ userType }: { userType: UserType }) => {
+  const [name, setName] = useState('');
+  const [businessName, setBusinessName] = useState('');
+  const [contactPerson, setContactPerson] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { toast } = useToast();
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
     
-    <div className="space-y-2">
-      <Label htmlFor={`${userType}-phone`}>Mobile Number</Label>
-      <Input id={`${userType}-phone`} type="tel" placeholder="09123456789" required />
-    </div>
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      const displayName = userType === 'Agency' ? businessName : name;
+      await updateProfile(user, { displayName });
 
-    <div className="space-y-2">
-      <Label htmlFor={`${userType}-password`}>Password</Label>
-      <Input id={`${userType}-password`} type="password" required />
-    </div>
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        email: user.email,
+        displayName: displayName,
+        phone: phone,
+        role: userType.toLowerCase(),
+        createdAt: new Date(),
+        ...(userType === 'Agency' && { contactPerson: contactPerson }),
+      });
 
-    <Button type="submit" className="w-full">Create Account</Button>
-  </form>
-);
+      toast({ title: "Success", description: "Account created successfully!" });
+      router.push('/dashboard');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Signup Failed",
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form className="space-y-4" onSubmit={handleSignup}>
+      {userType === 'Agency' ? (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor={`${userType}-business-name`}>Business Name</Label>
+            <Input id={`${userType}-business-name`} placeholder="Lingkod Inc." required value={businessName} onChange={e => setBusinessName(e.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`${userType}-contact-person`}>Contact Person</Label>
+            <Input id={`${userType}-contact-person`} placeholder="Juan Dela Cruz" required value={contactPerson} onChange={e => setContactPerson(e.target.value)} />
+          </div>
+        </>
+      ) : (
+        <div className="space-y-2">
+          <Label htmlFor={`${userType}-name`}>Full Name</Label>
+          <Input id={`${userType}-name`} placeholder="Juan Dela Cruz" required value={name} onChange={e => setName(e.target.value)} />
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <Label htmlFor={`${userType}-email`}>Email</Label>
+        <Input id={`${userType}-email`} type="email" placeholder="m@example.com" required value={email} onChange={e => setEmail(e.target.value)} />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor={`${userType}-phone`}>Mobile Number</Label>
+        <Input id={`${userType}-phone`} type="tel" placeholder="09123456789" required value={phone} onChange={e => setPhone(e.target.value)} />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor={`${userType}-password`}>Password</Label>
+        <Input id={`${userType}-password`} type="password" required value={password} onChange={e => setPassword(e.target.value)} />
+      </div>
+
+      <Button type="submit" className="w-full" disabled={loading}>
+        {loading ? 'Creating Account...' : 'Create Account'}
+      </Button>
+    </form>
+  );
+};
 
 
 export default function SignupPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<UserType>('Client');
+
+  const handleGoogleSignup = async () => {
+    setLoading(true);
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        phone: user.phoneNumber || '',
+        role: activeTab.toLowerCase(),
+        createdAt: new Date(),
+      });
+      
+      toast({ title: "Success", description: "Signed up successfully with Google!" });
+      router.push('/dashboard');
+
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Google Sign-up Failed",
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
       <Card className="w-full max-w-md shadow-2xl">
@@ -64,7 +159,7 @@ export default function SignupPage() {
           <CardDescription>Choose your account type and let&apos;s get started.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="client" className="w-full">
+          <Tabs defaultValue="client" className="w-full" onValueChange={(value) => setActiveTab(value as UserType)}>
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="client">Client</TabsTrigger>
               <TabsTrigger value="provider">Provider</TabsTrigger>
@@ -87,8 +182,8 @@ export default function SignupPage() {
           <Separator className="my-6" />
 
           <div className="space-y-4">
-            <Button variant="outline" className="w-full">Sign up with Google</Button>
-            <Button variant="outline" className="w-full">Sign up with Facebook</Button>
+            <Button variant="outline" className="w-full" onClick={handleGoogleSignup} disabled={loading}>Sign up with Google</Button>
+            <Button variant="outline" className="w-full" disabled>Sign up with Facebook</Button>
           </div>
 
           <div className="mt-6 text-center text-sm">
