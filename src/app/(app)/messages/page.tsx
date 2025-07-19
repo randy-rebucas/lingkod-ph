@@ -1,90 +1,47 @@
 
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from 'next/image';
+import { useAuth } from "@/context/auth-context";
+import { db, storage } from "@/lib/firebase";
+import { collection, query, where, onSnapshot, doc, addDoc, serverTimestamp, orderBy, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Send, Search, Paperclip, X } from "lucide-react";
+import { Send, Search, Paperclip, X, MessageSquare, Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
-const initialConversations = [
-    {
-        id: 1,
-        name: "Maria Dela Cruz",
-        avatar: "https://placehold.co/100x100.png",
-        lastMessage: "Okay, see you then!",
-        timestamp: "10:42 AM",
-        unread: 2,
-    },
-    {
-        id: 2,
-        name: "Jose Rizal",
-        avatar: "https://placehold.co/100x100.png",
-        lastMessage: "Thank you for the excellent service.",
-        timestamp: "Yesterday",
-        unread: 0,
-    },
-    {
-        id: 3,
-        name: "Andres Bonifacio",
-        avatar: "https://placehold.co/100x100.png",
-        lastMessage: "Can we reschedule to Friday?",
-        timestamp: "2 days ago",
-        unread: 0,
-    },
-     {
-        id: 4,
-        name: "Gabriela Silang",
-        avatar: "https://placehold.co/100x100.png",
-        lastMessage: "Here is the photo of the broken pipe.",
-        timestamp: "3 days ago",
-        unread: 0,
-    },
-];
 
-const messagesByConvoId: { [key: number]: any[] } = {
-    1: [
-        {
-            id: 1,
-            sender: "Maria Dela Cruz",
-            text: "Hi! I'm excited for our appointment for Deep House Cleaning on August 15.",
-            isCurrentUser: false,
-        },
-        {
-            id: 2,
-            sender: "You",
-            text: "Hello Maria! We are too. We'll be there on time.",
-            isCurrentUser: true,
-        },
-        {
-            id: 3,
-            sender: "Maria Dela Cruz",
-            text: "Great to hear! Just wanted to confirm the address is correct.",
-            isCurrentUser: false,
-        },
-        {
-            id: 4,
-            sender: "Maria Dela Cruz",
-            text: "Okay, see you then!",
-            isCurrentUser: false,
-        },
-    ],
-    2: [
-        { id: 1, sender: "Jose Rizal", text: "Thank you for the excellent service.", isCurrentUser: false },
-        { id: 2, sender: "You", text: "You're most welcome, Jose!", isCurrentUser: true }
-    ],
-    3: [
-        { id: 1, sender: "Andres Bonifacio", text: "Can we reschedule to Friday?", isCurrentUser: false },
-    ],
-    4: [
-        { id: 1, sender: "Gabriela Silang", text: "Here is the photo of the broken pipe.", isCurrentUser: false, imageUrl: "https://placehold.co/400x300.png", hint: "broken pipe" },
-        { id: 2, sender: "You", text: "Thanks for sending that. I see the issue. We'll bring the right parts.", isCurrentUser: true },
-    ],
+type Conversation = {
+    id: string;
+    participants: string[];
+    participantInfo: {
+        [key: string]: {
+            displayName: string;
+            photoURL: string;
+        }
+    };
+    lastMessage: string;
+    timestamp: any;
+    unread?: number; // This would require more logic to implement properly
 };
+
+type Message = {
+    id?: string;
+    senderId: string;
+    text: string;
+    imageUrl?: string;
+    timestamp: any;
+    hint?: string;
+};
+
 
 const getAvatarFallback = (name: string | null | undefined) => {
     if (!name) return "U";
@@ -97,17 +54,78 @@ const getAvatarFallback = (name: string | null | undefined) => {
 
 
 export default function MessagesPage() {
-    const [conversations, setConversations] = useState(initialConversations);
-    const [activeConversationId, setActiveConversationId] = useState(conversations[0]?.id);
-    const [messages, setMessages] = useState(activeConversationId ? messagesByConvoId[activeConversationId] : []);
+    const { user } = useAuth();
+    const { toast } = useToast();
+
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
+    const [messages, setMessages] = useState<Message[]>([]);
+    
+    const [loadingConversations, setLoadingConversations] = useState(true);
+    const [loadingMessages, setLoadingMessages] = useState(false);
+    
     const [newMessage, setNewMessage] = useState("");
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isSending, setIsSending] = useState(false);
+    
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    const handleSelectConversation = (id: number) => {
-        setActiveConversationId(id);
-        setMessages(messagesByConvoId[id] || []);
+    // Fetch conversations for the current user
+    useEffect(() => {
+        if (!user) return;
+        setLoadingConversations(true);
+        const q = query(collection(db, "conversations"), where("participants", "array-contains", user.uid));
+        
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const convos = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            } as Conversation)).sort((a,b) => b.timestamp - a.timestamp);
+            setConversations(convos);
+            setLoadingConversations(false);
+        }, (error) => {
+            console.error("Error fetching conversations: ", error);
+            toast({ variant: "destructive", title: "Error", description: "Could not fetch conversations."})
+            setLoadingConversations(false);
+        });
+
+        return () => unsubscribe();
+    }, [user, toast]);
+    
+    // Fetch messages for the active conversation
+    useEffect(() => {
+        if (!activeConversation) return;
+
+        setLoadingMessages(true);
+        const messagesRef = collection(db, "conversations", activeConversation.id, "messages");
+        const q = query(messagesRef, orderBy("timestamp", "asc"));
+
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const msgs = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            } as Message));
+            setMessages(msgs);
+            setLoadingMessages(false);
+        }, (error) => {
+            console.error("Error fetching messages: ", error);
+            toast({ variant: "destructive", title: "Error", description: "Could not fetch messages."})
+            setLoadingMessages(false);
+        });
+
+        return () => unsubscribe();
+
+    }, [activeConversation, toast]);
+    
+     useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
+
+    const handleSelectConversation = (convo: Conversation) => {
+        setActiveConversation(convo);
         setSelectedImage(null);
         setPreviewUrl(null);
     }
@@ -120,28 +138,62 @@ export default function MessagesPage() {
         }
     };
     
-    const handleSendMessage = (e: React.FormEvent) => {
+    const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newMessage.trim() && !selectedImage) return;
+        if ((!newMessage.trim() && !selectedImage) || !user || !activeConversation) return;
 
-        const message = {
-            id: Date.now(),
-            sender: "You",
-            text: newMessage,
-            isCurrentUser: true,
-            ...(previewUrl && { imageUrl: previewUrl }),
-        };
+        setIsSending(true);
 
-        setMessages(prev => [...prev, message]);
-        setNewMessage("");
-        setSelectedImage(null);
-        setPreviewUrl(null);
-        if(fileInputRef.current) {
-            fileInputRef.current.value = "";
+        try {
+            let imageUrl = '';
+            if (selectedImage) {
+                const storageRef = ref(storage, `chat-images/${activeConversation.id}/${Date.now()}_${selectedImage.name}`);
+                const uploadResult = await uploadBytes(storageRef, selectedImage);
+                imageUrl = await getDownloadURL(uploadResult.ref);
+            }
+
+            const messageData: Omit<Message, 'id'> = {
+                senderId: user.uid,
+                text: newMessage,
+                timestamp: serverTimestamp(),
+                ...(imageUrl && { imageUrl: imageUrl }),
+            };
+            
+            const messagesRef = collection(db, "conversations", activeConversation.id, "messages");
+            await addDoc(messagesRef, messageData);
+            
+            // Update last message on conversation
+            const conversationRef = doc(db, "conversations", activeConversation.id);
+            await updateDoc(conversationRef, {
+                lastMessage: newMessage || "Image sent",
+                timestamp: serverTimestamp()
+            });
+
+            setNewMessage("");
+            setSelectedImage(null);
+            setPreviewUrl(null);
+            if(fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+        } catch (error) {
+             console.error("Error sending message: ", error);
+             toast({ variant: "destructive", title: "Error", description: "Failed to send message."})
+        } finally {
+            setIsSending(false);
         }
     };
 
-    const activeConversation = conversations.find(c => c.id === activeConversationId);
+    const getOtherParticipantInfo = (convo: Conversation) => {
+        if (!user) return { name: 'User', avatar: '' };
+        const otherId = convo.participants.find(p => p !== user.uid);
+        if (otherId && convo.participantInfo[otherId]) {
+            return {
+                name: convo.participantInfo[otherId].displayName,
+                avatar: convo.participantInfo[otherId].photoURL
+            };
+        }
+        return { name: 'Unknown User', avatar: '' };
+    }
 
 
     return (
@@ -163,28 +215,44 @@ export default function MessagesPage() {
                     </div>
                     <ScrollArea className="flex-1">
                         <div className="p-2 space-y-1">
-                            {conversations.map((convo) => (
-                                <button key={convo.id} className={cn("w-full text-left p-3 rounded-lg transition-colors", activeConversationId === convo.id ? "bg-secondary" : "hover:bg-secondary/50")}
-                                    onClick={() => handleSelectConversation(convo.id)}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        <Avatar className="h-10 w-10 border">
-                                            <AvatarImage src={convo.avatar} alt={convo.name} />
-                                            <AvatarFallback>{getAvatarFallback(convo.name)}</AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex-1 overflow-hidden">
-                                            <div className="flex justify-between items-center">
-                                                <p className="font-semibold truncate">{convo.name}</p>
-                                                <p className="text-xs text-muted-foreground flex-shrink-0">{convo.timestamp}</p>
+                            {loadingConversations ? (
+                                <div className="p-4 space-y-4">
+                                    {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
+                                </div>
+                            ) : conversations.length > 0 ? (
+                                conversations.map((convo) => {
+                                    const { name, avatar } = getOtherParticipantInfo(convo);
+                                    return (
+                                        <button key={convo.id} className={cn("w-full text-left p-3 rounded-lg transition-colors", activeConversation?.id === convo.id ? "bg-secondary" : "hover:bg-secondary/50")}
+                                            onClick={() => handleSelectConversation(convo)}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <Avatar className="h-10 w-10 border">
+                                                    <AvatarImage src={avatar} alt={name} />
+                                                    <AvatarFallback>{getAvatarFallback(name)}</AvatarFallback>
+                                                </Avatar>
+                                                <div className="flex-1 overflow-hidden">
+                                                    <div className="flex justify-between items-center">
+                                                        <p className="font-semibold truncate">{name}</p>
+                                                        <p className="text-xs text-muted-foreground flex-shrink-0">
+                                                            {convo.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex justify-between items-end mt-1">
+                                                        <p className="text-sm text-muted-foreground truncate max-w-[150px]">{convo.lastMessage}</p>
+                                                        {/* Unread count UI can be added here */}
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div className="flex justify-between items-end mt-1">
-                                                <p className="text-sm text-muted-foreground truncate max-w-[150px]">{convo.lastMessage}</p>
-                                                {convo.unread > 0 && <span className="flex items-center justify-center bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex-shrink-0">{convo.unread}</span>}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </button>
-                            ))}
+                                        </button>
+                                    )
+                                })
+                            ) : (
+                                <div className="text-center text-muted-foreground p-8">
+                                    <MessageSquare className="mx-auto h-10 w-10 mb-2"/>
+                                    No conversations yet.
+                                </div>
+                            )}
                         </div>
                     </ScrollArea>
                 </div>
@@ -195,47 +263,55 @@ export default function MessagesPage() {
                     <>
                         <div className="p-4 border-b flex items-center gap-3 bg-background">
                             <Avatar>
-                                <AvatarImage src={activeConversation.avatar} alt={activeConversation.name} />
-                                <AvatarFallback>{getAvatarFallback(activeConversation.name)}</AvatarFallback>
+                                <AvatarImage src={getOtherParticipantInfo(activeConversation).avatar} alt={getOtherParticipantInfo(activeConversation).name} />
+                                <AvatarFallback>{getAvatarFallback(getOtherParticipantInfo(activeConversation).name)}</AvatarFallback>
                             </Avatar>
                             <div>
-                                <p className="font-semibold">{activeConversation.name}</p>
-                                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                                    <span className="h-2 w-2 rounded-full bg-green-500"></span>
-                                    Online
-                                </p>
+                                <p className="font-semibold">{getOtherParticipantInfo(activeConversation).name}</p>
+                                {/* Online status would require presence management (e.g., Firestore RTDB) */}
                             </div>
                         </div>
                         <ScrollArea className="flex-1 p-4">
-                            <div className="space-y-4">
-                                {messages.map((msg) => (
-                                    <div key={msg.id} className={cn("flex items-end gap-2", msg.isCurrentUser ? "justify-end" : "justify-start")}>
-                                        {!msg.isCurrentUser && (
-                                            <Avatar className="h-8 w-8">
-                                                <AvatarImage src={activeConversation.avatar} />
-                                                <AvatarFallback>{getAvatarFallback(activeConversation.name)}</AvatarFallback>
-                                            </Avatar>
-                                        )}
-                                        <div className={cn("max-w-xs md:max-w-md p-1 rounded-2xl shadow-sm", msg.isCurrentUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-card text-card-foreground rounded-bl-none")}>
-                                            {msg.imageUrl && (
-                                                <div className="p-2">
-                                                    <Image 
-                                                        src={msg.imageUrl} 
-                                                        alt="Sent image" 
-                                                        width={300} 
-                                                        height={200}
-                                                        data-ai-hint={msg.hint}
-                                                        className="rounded-lg object-cover"
-                                                    />
+                            {loadingMessages ? (
+                                <div className="flex justify-center items-center h-full">
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {messages.map((msg) => {
+                                        const isCurrentUser = msg.senderId === user?.uid;
+                                        const senderInfo = isCurrentUser ? {avatar: user?.photoURL, name: user?.displayName} : getOtherParticipantInfo(activeConversation)
+                                        return (
+                                            <div key={msg.id} className={cn("flex items-end gap-2", isCurrentUser ? "justify-end" : "justify-start")}>
+                                                {!isCurrentUser && (
+                                                    <Avatar className="h-8 w-8">
+                                                        <AvatarImage src={senderInfo.avatar} />
+                                                        <AvatarFallback>{getAvatarFallback(senderInfo.name)}</AvatarFallback>
+                                                    </Avatar>
+                                                )}
+                                                <div className={cn("max-w-xs md:max-w-md p-1 rounded-2xl shadow-sm", isCurrentUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-card text-card-foreground rounded-bl-none")}>
+                                                    {msg.imageUrl && (
+                                                        <div className="p-2">
+                                                            <Image 
+                                                                src={msg.imageUrl} 
+                                                                alt="Sent image" 
+                                                                width={300} 
+                                                                height={200}
+                                                                data-ai-hint={msg.hint}
+                                                                className="rounded-lg object-cover"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                    {msg.text && (
+                                                        <p className="text-sm px-3 py-2">{msg.text}</p>
+                                                    )}
                                                 </div>
-                                            )}
-                                            {msg.text && (
-                                                <p className="text-sm px-3 py-2">{msg.text}</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                                            </div>
+                                        )
+                                    })}
+                                    <div ref={messagesEndRef} />
+                                </div>
+                            )}
                         </ScrollArea>
                         <div className="p-4 border-t bg-background">
                             {previewUrl && (
@@ -252,6 +328,7 @@ export default function MessagesPage() {
                                     className="flex-1"
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
+                                    disabled={isSending}
                                 />
                                  <input
                                     type="file"
@@ -260,12 +337,12 @@ export default function MessagesPage() {
                                     accept="image/*"
                                     className="hidden"
                                 />
-                                <Button size="icon" variant="ghost" type="button" onClick={() => fileInputRef.current?.click()}>
+                                <Button size="icon" variant="ghost" type="button" onClick={() => fileInputRef.current?.click()} disabled={isSending}>
                                     <Paperclip className="h-5 w-5"/>
                                     <span className="sr-only">Attach File</span>
                                 </Button>
-                                <Button size="icon" type="submit">
-                                    <Send className="h-5 w-5"/>
+                                <Button size="icon" type="submit" disabled={isSending || (!newMessage.trim() && !selectedImage)}>
+                                    {isSending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5"/>}
                                     <span className="sr-only">Send Message</span>
                                 </Button>
                             </form>
@@ -273,7 +350,7 @@ export default function MessagesPage() {
                     </>
                    ) : (
                     <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8">
-                        <Send className="h-16 w-16 mb-4" />
+                        <MessageSquare className="h-16 w-16 mb-4" />
                         <h3 className="text-xl font-semibold">Select a conversation</h3>
                         <p>Choose a conversation from the left panel to start chatting.</p>
                     </div>
@@ -283,3 +360,5 @@ export default function MessagesPage() {
         </div>
     );
 }
+
+    
