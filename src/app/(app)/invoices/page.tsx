@@ -3,10 +3,11 @@
 
 import * as React from "react";
 import {
-  CaretSortIcon,
-  ChevronDownIcon,
-  DotsHorizontalIcon,
-} from "@radix-ui/react-icons";
+  ArrowUpDown,
+  ChevronDown,
+  MoreHorizontal,
+  PlusCircle,
+} from "lucide-react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -47,7 +48,6 @@ import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, Timest
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { PlusCircle } from "lucide-react";
 
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
@@ -164,7 +164,7 @@ export default function InvoicesPage() {
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Client
-            <CaretSortIcon className="ml-2 h-4 w-4" />
+            <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         ),
         cell: ({ row }) => <div>{row.getValue("clientName")}</div>,
@@ -215,7 +215,7 @@ export default function InvoicesPage() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0">
                     <span className="sr-only">Open menu</span>
-                    <DotsHorizontalIcon className="h-4 w-4" />
+                    <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
@@ -306,7 +306,7 @@ export default function InvoicesPage() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="ml-auto">
-                    Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
+                    Columns <ChevronDown className="ml-2 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
