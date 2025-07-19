@@ -50,6 +50,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { QuoteFormValues } from "./quote-builder-client";
 import { Card, CardContent } from "./ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { QuotePreview } from "./quote-preview";
 
 
 type QuoteStatus = "Draft" | "Sent" | "Accepted" | "Declined";
@@ -81,6 +83,7 @@ export function StoredQuotesList() {
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
+    const [selectedQuote, setSelectedQuote] = React.useState<Quote | null>(null);
 
     React.useEffect(() => {
         if (!user) {
@@ -89,7 +92,7 @@ export function StoredQuotesList() {
         }
 
         setLoading(true);
-        const q = query(collection(db, "quotes"), where("providerId", "==", user.uid));
+        const q = query(collection(db, "quotes"), where("providerId", "==", user.uid), orderBy("createdAt", "desc"));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const quotesData = snapshot.docs.map(doc => ({
@@ -181,10 +184,10 @@ export function StoredQuotesList() {
         ),
       },
       {
-        accessorKey: "issueDate",
-        header: "Issued",
+        accessorKey: "createdAt",
+        header: "Created",
         cell: ({ row }) => {
-            const date: Timestamp = row.getValue("issueDate");
+            const date: Timestamp = row.getValue("createdAt");
             return <div>{date.toDate().toLocaleDateString()}</div>
         }
       },
@@ -206,48 +209,61 @@ export function StoredQuotesList() {
         cell: ({ row }) => {
           const quote = row.original;
           return (
-             <AlertDialog>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuItem>View Details</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleStatusUpdate(quote.id, 'Sent')} disabled={quote.status === 'Sent'}>
-                    Mark as Sent
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleStatusUpdate(quote.id, 'Accepted')} disabled={quote.status === 'Accepted'}>
-                    Mark as Accepted
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                   <AlertDialogTrigger asChild>
-                    <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
-                  </AlertDialogTrigger>
-                </DropdownMenuContent>
-              </DropdownMenu>
-               <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete this quote.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-destructive hover:bg-destructive/90"
-                    onClick={() => handleDeleteQuote(quote.id)}
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <Dialog onOpenChange={(open) => !open && setSelectedQuote(null)}>
+              <AlertDialog>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DialogTrigger asChild>
+                        <DropdownMenuItem onClick={() => setSelectedQuote(quote)}>View Details</DropdownMenuItem>
+                    </DialogTrigger>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleStatusUpdate(quote.id, 'Sent')} disabled={quote.status === 'Sent'}>
+                      Mark as Sent
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleStatusUpdate(quote.id, 'Accepted')} disabled={quote.status === 'Accepted'}>
+                      Mark as Accepted
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                     <AlertDialogTrigger asChild>
+                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                    </AlertDialogTrigger>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                 <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete this quote.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive hover:bg-destructive/90"
+                      onClick={() => handleDeleteQuote(quote.id)}
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              
+              {selectedQuote && (
+                <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                        <DialogTitle>Quote Preview: {selectedQuote.quoteNumber}</DialogTitle>
+                    </DialogHeader>
+                    <QuotePreview data={selectedQuote} />
+                </DialogContent>
+              )}
+            </Dialog>
           );
         },
       },
