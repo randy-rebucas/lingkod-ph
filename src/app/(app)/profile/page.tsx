@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2 } from "lucide-react";
+import { Camera, Upload, Loader2, CheckCircle, Star } from "lucide-react";
 import { storage } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -22,7 +22,7 @@ import { Progress } from "@/components/ui/progress";
 
 
 export default function ProfilePage() {
-    const { user, userRole, loading, setUser: setAuthUser } = useAuth();
+    const { user, userRole, loading, subscription, setUser: setAuthUser } = useAuth();
     const { toast } = useToast();
     
     const [name, setName] = useState('');
@@ -165,6 +165,9 @@ export default function ProfilePage() {
     if (!user) {
         return <p>Please log in to view your profile.</p>;
     }
+    
+    const isPro = subscription?.planId === 'pro';
+    const isElite = subscription?.planId === 'elite';
 
     return (
         <div className="space-y-6">
@@ -190,7 +193,11 @@ export default function ProfilePage() {
                                 </Button>
                                 <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
                             </div>
-                            <CardTitle className="mt-4">{user.displayName}</CardTitle>
+                            <CardTitle className="mt-4 flex items-center gap-2">
+                                {user.displayName}
+                                {isPro && <Badge variant="secondary" className="bg-blue-100 text-blue-800"><CheckCircle className="h-4 w-4 mr-1"/>Verified</Badge>}
+                                {isElite && <Badge variant="secondary" className="bg-purple-100 text-purple-800"><Star className="h-4 w-4 mr-1"/>Premium</Badge>}
+                            </CardTitle>
                             <CardDescription className="flex items-center gap-2">
                                {user.email}
                                 <Badge variant="secondary" className="capitalize">{userRole}</Badge>
@@ -286,4 +293,3 @@ export default function ProfilePage() {
         </div>
     );
 }
-

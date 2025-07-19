@@ -10,13 +10,14 @@ import {
   MessageSquare,
   User,
   Sparkles,
-  Wrench,
   DollarSign,
   Settings,
   LogOut,
-  ChevronDown,
   BriefcaseBusiness,
   Star,
+  FileText,
+  Calculator,
+  BarChart2,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -29,7 +30,6 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,7 +45,6 @@ import { useAuth } from "@/context/auth-context";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const Logo = () => (
   <h1 className="text-2xl font-bold font-headline text-primary pl-2 group-data-[collapsible=icon]:hidden">
@@ -105,6 +104,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
+  const isProOrElite = isPaidSubscriber && (subscription?.planId === 'pro' || subscription?.planId === 'elite');
+  const isElite = isPaidSubscriber && subscription?.planId === 'elite';
 
 
   return (
@@ -165,20 +166,50 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </SidebarMenuItem>
 
                 {isPaidSubscriber && (
-                  <>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/smart-rate")}>
-                        <Link href="/smart-rate">
-                          <Sparkles />
-                          <span>Smart Rate</span>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/smart-rate")}>
+                      <Link href="/smart-rate">
+                        <Sparkles />
+                        <span>Smart Rate</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+                {isProOrElite && (
+                   <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/invoices")}>
+                        <Link href="/invoices">
+                          <FileText />
+                          <span>Invoices</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
+                )}
+                 {isPaidSubscriber && (
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild isActive={isActive("/earnings")}>
                         <Link href="/earnings">
                           <DollarSign />
                           <span>Earnings</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                )}
+                {isElite && (
+                  <>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/quote-builder")}>
+                        <Link href="/quote-builder">
+                          <Calculator />
+                          <span>Quote Builder</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                     <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/analytics")}>
+                        <Link href="/analytics">
+                          <BarChart2 />
+                          <span>Analytics</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

@@ -43,7 +43,7 @@ const subscriptionTiers: SubscriptionTier[] = [
         name: "Pro",
         price: 499,
         idealFor: "Full-time service providers",
-        features: ["Verified badge", "Priority listing", "Calendar + Invoice generator"],
+        features: ["Verified badge", "Priority listing", "Calendar", "Invoice generator"],
         badge: "Most Popular",
         isFeatured: true,
     },
@@ -52,7 +52,7 @@ const subscriptionTiers: SubscriptionTier[] = [
         name: "Elite",
         price: 899,
         idealFor: "Agencies or seasoned pros",
-        features: ["Premium badge", "Leads priority", "Quote builder", "Analytics"],
+        features: ["Premium badge", "Leads priority", "Quote builder", "Analytics", "Invoice generator"],
         badge: null,
     }
 ];
@@ -102,7 +102,7 @@ const processSubscriptionChange = async (userId: string, planId: SubscriptionTie
 
 
 export default function SubscriptionPage() {
-    const { user, userRole } = useAuth();
+    const { user } = useAuth();
     const { toast } = useToast();
     const [subscription, setSubscription] = useState<UserSubscription | null>(null);
     const [loading, setLoading] = useState(true);
