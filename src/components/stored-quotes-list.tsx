@@ -44,7 +44,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, Timestamp, orderBy } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -130,8 +130,8 @@ export function StoredQuotesList() {
     };
     
     const calculateTotal = (quote: Quote) => {
-        const subtotal = quote.lineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
-        const taxAmount = subtotal * ((quote.taxRate || 0) / 100);
+        const subtotal = quote.lineItems.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
+        const taxAmount = subtotal * ((Number(quote.taxRate) || 0) / 100);
         return subtotal + taxAmount;
     }
 
@@ -187,8 +187,11 @@ export function StoredQuotesList() {
         accessorKey: "createdAt",
         header: "Created",
         cell: ({ row }) => {
-            const date: Timestamp = row.getValue("createdAt");
-            return <div>{date.toDate().toLocaleDateString()}</div>
+            const date: Timestamp | { toDate: () => Date } = row.getValue("createdAt");
+            if (date && typeof date.toDate === 'function') {
+                return <div>{date.toDate().toLocaleDateString()}</div>
+            }
+            return <div>Invalid Date</div>
         }
       },
       {
@@ -230,6 +233,9 @@ export function StoredQuotesList() {
                     <DropdownMenuItem onClick={() => handleStatusUpdate(quote.id, 'Accepted')} disabled={quote.status === 'Accepted'}>
                       Mark as Accepted
                     </DropdownMenuItem>
+                     <DropdownMenuItem onClick={() => handleStatusUpdate(quote.id, 'Declined')} disabled={quote.status === 'Declined'}>
+                      Mark as Declined
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                      <AlertDialogTrigger asChild>
                       <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
@@ -255,7 +261,7 @@ export function StoredQuotesList() {
                 </AlertDialogContent>
               </AlertDialog>
               
-              {selectedQuote && (
+              {selectedQuote?.id === quote.id && (
                 <DialogContent className="max-w-4xl">
                     <DialogHeader>
                         <DialogTitle>Quote Preview: {selectedQuote.quoteNumber}</DialogTitle>
