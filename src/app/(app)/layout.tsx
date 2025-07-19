@@ -15,6 +15,7 @@ import {
   LogOut,
   ChevronDown,
   BriefcaseBusiness,
+  Star,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -143,6 +144,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             
             {(userRole === 'provider' || userRole === 'agency') && (
               <>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/subscription")}>
+                    <Link href="/subscription">
+                      <Star />
+                      <span>Subscription</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/smart-rate")}>
                     <Link href="/smart-rate">
