@@ -11,40 +11,50 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload } from "lucide-react";
+import { Camera, Upload, Loader2 } from "lucide-react";
 import { storage } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 
 
 export default function ProfilePage() {
-    const { user, userRole, loading } = useAuth();
+    const { user, userRole, loading, setUser: setAuthUser } = useAuth();
     const { toast } = useToast();
     
     const [name, setName] = useState('');
     const [phone, setPhone] = useState(''); 
     const [bio, setBio] = useState('');
     
+    const [isSaving, setIsSaving] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [uploadProgress, setUploadProgress] = useState<number | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (user) {
-            setName(user.displayName || '');
-            // Here you would typically fetch and set other user data like phone and bio from Firestore
+        const fetchUserData = async () => {
+            if (user) {
+                setName(user.displayName || '');
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    setPhone(data.phone || '');
+                    setBio(data.bio || '');
+                }
+            }
         }
+        fetchUserData();
     }, [user]);
 
     const getAvatarFallback = (name: string | null | undefined) => {
         if (!name) return "U";
         const parts = name.split(" ");
-        if (parts.length > 1) {
+        if (parts.length > 1 && parts[0] && parts[1]) {
             return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
         }
         return name.substring(0, 2).toUpperCase();
@@ -53,6 +63,35 @@ export default function ProfilePage() {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setImageFile(e.target.files[0]);
+        }
+    };
+    
+    const handleSaveChanges = async () => {
+        if (!user) return;
+        setIsSaving(true);
+        try {
+            const userDocRef = doc(db, "users", user.uid);
+            const updates: { displayName: string; phone: string; bio: string; [key: string]: any } = {
+                displayName: name,
+                phone: phone,
+                bio: bio,
+            };
+
+            // Update display name in Firebase Auth if it has changed
+            if (user.displayName !== name) {
+                await updateProfile(user, { displayName: name });
+            }
+            
+            await updateDoc(userDocRef, updates);
+
+            // Manually update user in auth context to reflect changes immediately
+            setAuthUser(prev => prev ? { ...prev, displayName: name } : null);
+
+            toast({ title: "Success", description: "Profile updated successfully!" });
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Update Failed", description: error.message });
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -82,12 +121,13 @@ export default function ProfilePage() {
                 try {
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                     
-                    // Update Firebase Auth profile
                     await updateProfile(user, { photoURL: downloadURL });
 
-                    // Update Firestore document
                     const userDocRef = doc(db, "users", user.uid);
                     await updateDoc(userDocRef, { photoURL: downloadURL });
+                    
+                    // Manually update user in auth context
+                    setAuthUser(prev => prev ? { ...prev, photoURL: downloadURL } : null);
 
                     toast({ title: "Success", description: "Profile picture updated!" });
                 } catch (error: any) {
@@ -96,8 +136,6 @@ export default function ProfilePage() {
                     setIsUploading(false);
                     setUploadProgress(null);
                     setImageFile(null);
-                    // The auth state listener in AuthProvider should automatically pick up the change.
-                    // You might need a manual refresh of the user object in context if it doesn't.
                 }
             }
         );
@@ -172,11 +210,16 @@ export default function ProfilePage() {
                                     )}
                                 </div>
                             )}
-                            <Textarea 
-                                placeholder="Tell us a little about yourself or your business..."
-                                value={bio}
-                                onChange={(e) => setBio(e.target.value)}
-                            />
+                             <div className="space-y-2">
+                                <Label htmlFor="bio">Bio</Label>
+                                <Textarea 
+                                    id="bio"
+                                    placeholder="Tell us a little about yourself or your business..."
+                                    value={bio}
+                                    onChange={(e) => setBio(e.target.value)}
+                                    rows={3}
+                                />
+                            </div>
                         </CardContent>
                     </Card>
 
@@ -200,7 +243,7 @@ export default function ProfilePage() {
                             </div>
                         </CardContent>
                         <CardFooter>
-                            <Button variant="outline" className="w-full">Change Password</Button>
+                            <Button variant="outline" className="w-full" disabled>Change Password</Button>
                         </CardFooter>
                     </Card>
                 </div>
@@ -232,7 +275,10 @@ export default function ProfilePage() {
                             </div>
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full md:w-auto">Save Changes</Button>
+                            <Button className="w-full md:w-auto" onClick={handleSaveChanges} disabled={isSaving}>
+                                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isSaving ? "Saving..." : "Save Changes"}
+                            </Button>
                         </CardFooter>
                     </Card>
                 </div>
@@ -241,4 +287,3 @@ export default function ProfilePage() {
     );
 }
 
-    

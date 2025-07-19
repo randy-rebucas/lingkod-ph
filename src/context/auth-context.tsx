@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
@@ -11,12 +12,14 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   userRole: UserRole;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   userRole: null,
+  setUser: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -44,7 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, userRole }}>
+    <AuthContext.Provider value={{ user, loading, userRole, setUser }}>
       {children}
     </AuthContext.Provider>
   );
