@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -97,7 +98,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const getAvatarFallback = (name: string | null | undefined) => {
     if (!name) return "U";
     const parts = name.split(" ");
-    if (parts.length > 1) {
+    if (parts.length > 1 && parts[0] && parts[1]) {
       return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
@@ -196,9 +197,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="md:hidden">
             <SidebarTrigger />
           </div>
-          <div className="flex-1 text-center font-semibold text-lg md:text-left">
+          <div className="flex-1 text-center font-semibold text-lg md:text-left capitalize">
             {/* Page title can be dynamic here */}
-            {pathname.split('/').pop()?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Dashboard'}
+            {pathname.split('/').pop()?.replace('-', ' ') || 'Dashboard'}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -237,5 +238,3 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    
