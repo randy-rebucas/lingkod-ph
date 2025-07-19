@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { DollarSign, Calendar, Star, Users, Loader2, Search } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -464,5 +464,7 @@ export default function DashboardPage() {
         </div>
     );
 }
+
+    
 
     
