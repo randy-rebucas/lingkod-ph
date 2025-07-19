@@ -1,12 +1,37 @@
 
+"use client";
+
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/auth-context";
+import { db } from "@/lib/firebase";
+import { doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2, Star, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const subscriptionTiers = [
+type SubscriptionTier = {
+    id: 'starter' | 'pro' | 'elite';
+    name: string;
+    price: number;
+    idealFor: string;
+    features: string[];
+    badge: string | null;
+    isFeatured?: boolean;
+};
+
+type UserSubscription = {
+    planId: 'starter' | 'pro' | 'elite' | 'free';
+    status: 'active' | 'cancelled' | 'none';
+    renewsOn: Timestamp | null;
+}
+
+const subscriptionTiers: SubscriptionTier[] = [
     {
+        id: "starter",
         name: "Starter",
         price: 299,
         idealFor: "Freelancers & part-timers",
@@ -14,6 +39,7 @@ const subscriptionTiers = [
         badge: null,
     },
     {
+        id: "pro",
         name: "Pro",
         price: 499,
         idealFor: "Full-time service providers",
@@ -22,6 +48,7 @@ const subscriptionTiers = [
         isFeatured: true,
     },
     {
+        id: "elite",
         name: "Elite",
         price: 899,
         idealFor: "Agencies or seasoned pros",
@@ -48,8 +75,76 @@ const commissionRates = [
     }
 ];
 
+// Mock function to simulate a backend payment process
+const processSubscriptionChange = async (userId: string, planId: SubscriptionTier['id']): Promise<UserSubscription> => {
+    console.log(`Processing subscription change for user ${userId} to plan ${planId}`);
+    // In a real app, this would call a payment gateway (e.g., Stripe) 
+    // and a backend function to update the subscription.
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+
+    const newRenewsOn = Timestamp.fromDate(new Date(new Date().setMonth(new Date().getMonth() + 1)));
+    
+    const userDocRef = doc(db, "users", userId);
+    await updateDoc(userDocRef, {
+        subscription: {
+            planId: planId,
+            status: 'active',
+            renewsOn: newRenewsOn,
+        }
+    });
+
+    return {
+        planId,
+        status: 'active',
+        renewsOn: newRenewsOn
+    };
+};
+
 
 export default function SubscriptionPage() {
+    const { user, userRole } = useAuth();
+    const { toast } = useToast();
+    const [subscription, setSubscription] = useState<UserSubscription | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [isProcessing, setIsProcessing] = useState<SubscriptionTier['id'] | null>(null);
+
+    useEffect(() => {
+        const fetchSubscription = async () => {
+            if (!user) return;
+            setLoading(true);
+            const userDocRef = doc(db, 'users', user.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists() && userDoc.data().subscription) {
+                setSubscription(userDoc.data().subscription);
+            } else {
+                // Default to free plan if no subscription data is found
+                setSubscription({ planId: 'free', status: 'active', renewsOn: null });
+            }
+            setLoading(false);
+        };
+        fetchSubscription();
+    }, [user]);
+
+    const handlePlanChange = async (planId: SubscriptionTier['id']) => {
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' });
+            return;
+        }
+        setIsProcessing(planId);
+        try {
+            const newSubscription = await processSubscriptionChange(user.uid, planId);
+            setSubscription(newSubscription);
+            toast({ title: 'Success!', description: `You have successfully subscribed to the ${subscriptionTiers.find(t => t.id === planId)?.name} plan.` });
+        } catch (error) {
+            console.error(error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to update your subscription.' });
+        } finally {
+            setIsProcessing(null);
+        }
+    }
+    
+    const currentPlan = subscriptionTiers.find(tier => tier.id === subscription?.planId);
+
     return (
         <div className="space-y-8">
             <div>
@@ -60,38 +155,75 @@ export default function SubscriptionPage() {
             </div>
 
             <section>
+                <h2 className="text-2xl font-bold font-headline mb-4">Current Plan</h2>
+                {loading ? (
+                    <Card><CardContent className="p-6"><Skeleton className="h-24 w-full" /></CardContent></Card>
+                ) : (
+                    <Card className="bg-secondary">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Star className="text-primary"/>
+                                {currentPlan ? `You are on the ${currentPlan.name} Plan` : 'You are on a Free Plan'}
+                            </CardTitle>
+                            <CardDescription>
+                                {currentPlan && subscription?.renewsOn ? 
+                                `Your plan renews on ${subscription.renewsOn.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}.`
+                                : `Upgrade to a paid plan to access more features.`}
+                            </CardDescription>
+                        </CardHeader>
+                        {currentPlan && (
+                            <CardFooter>
+                                <Button variant="outline">Manage Subscription</Button>
+                            </CardFooter>
+                        )}
+                    </Card>
+                )}
+            </section>
+
+            <section>
                  <h2 className="text-2xl font-bold font-headline mb-4">Provider Subscription Plans</h2>
                 <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {subscriptionTiers.map(tier => (
-                        <Card key={tier.name} className={`flex flex-col ${tier.isFeatured ? 'border-primary shadow-lg' : ''}`}>
-                             <CardHeader className="relative">
-                                {tier.badge && (
-                                    <Badge className="absolute top-4 right-4">{tier.badge}</Badge>
-                                )}
-                                <CardTitle>{tier.name}</CardTitle>
-                                <CardDescription>{tier.idealFor}</CardDescription>
-                                <div className="flex items-baseline">
-                                    <span className="text-4xl font-bold">₱{tier.price}</span>
-                                    <span className="text-muted-foreground">/month</span>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="flex-1 space-y-4">
-                               <ul className="space-y-3">
-                                    {tier.features.map(feature => (
-                                        <li key={feature} className="flex items-center gap-2">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                            <span className="text-muted-foreground">{feature}</span>
-                                        </li>
-                                    ))}
-                               </ul>
-                            </CardContent>
-                            <CardFooter>
-                                <Button className="w-full" variant={tier.isFeatured ? 'default' : 'outline'}>
-                                    {tier.isFeatured ? 'Choose Plan' : 'Get Started'}
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    ))}
+                    {subscriptionTiers.map(tier => {
+                        const isCurrentPlan = tier.id === subscription?.planId;
+                        const buttonText = isCurrentPlan ? 'Current Plan' : (currentPlan && tier.price > currentPlan.price ? 'Upgrade' : (currentPlan && tier.price < currentPlan.price ? 'Downgrade' : 'Choose Plan'));
+
+                        return (
+                            <Card key={tier.id} className={`flex flex-col ${tier.isFeatured ? 'border-primary shadow-lg' : ''}`}>
+                                <CardHeader className="relative">
+                                    {tier.badge && (
+                                        <Badge className="absolute top-4 right-4">{tier.badge}</Badge>
+                                    )}
+                                    <CardTitle>{tier.name}</CardTitle>
+                                    <CardDescription>{tier.idealFor}</CardDescription>
+                                    <div className="flex items-baseline">
+                                        <span className="text-4xl font-bold">₱{tier.price}</span>
+                                        <span className="text-muted-foreground">/month</span>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="flex-1 space-y-4">
+                                <ul className="space-y-3">
+                                        {tier.features.map(feature => (
+                                            <li key={feature} className="flex items-center gap-2">
+                                                <CheckCircle className="h-5 w-5 text-green-500" />
+                                                <span className="text-muted-foreground">{feature}</span>
+                                            </li>
+                                        ))}
+                                </ul>
+                                </CardContent>
+                                <CardFooter>
+                                    <Button 
+                                        className="w-full" 
+                                        variant={tier.isFeatured && !isCurrentPlan ? 'default' : 'outline'} 
+                                        disabled={isCurrentPlan || isProcessing !== null}
+                                        onClick={() => handlePlanChange(tier.id)}
+                                    >
+                                        {isProcessing === tier.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : (isCurrentPlan && <Check className="mr-2 h-4 w-4" />)}
+                                        {isProcessing === tier.id ? 'Processing...' : buttonText}
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        )
+                    })}
                 </div>
             </section>
             
