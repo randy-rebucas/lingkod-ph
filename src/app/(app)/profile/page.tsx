@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -11,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, Link as LinkIcon, Gift } from "lucide-react";
+import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, Link as LinkIcon, Gift, ShieldCheck } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -51,7 +52,7 @@ type Referral = {
 };
 
 export default function ProfilePage() {
-    const { user, userRole, loading, subscription } = useAuth();
+    const { user, userRole, loading, subscription, verificationStatus } = useAuth();
     const { toast } = useToast();
     
     // States for form fields
@@ -395,17 +396,16 @@ export default function ProfilePage() {
     tabsToShow.push(...TABS_CLIENT_FEATURES);
     
     const totalReferralPoints = referrals.reduce((sum, ref) => sum + ref.rewardPointsGranted, 0);
-  // Function to generate a unique referral code
-  const generateReferralCode = (userId: string): string => {
-    // Create a more unique and readable referral code
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const uidPart = userId.substring(0, 4).toUpperCase();
-    const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
+  
+    const generateReferralCode = (userId: string): string => {
+        const timestamp = Date.now().toString(36).toUpperCase();
+        const uidPart = userId.substring(0, 4).toUpperCase();
+        const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
+        return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
+    };
     
-    // Format: LP-XXXX-YYY-ZZZ (where XXXX is uid part, YYY is timestamp part, ZZZ is random part)
-    return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
-  };
-    const referralLink = `${window.location.origin}/signup?ref=${referralCode}`;
+    const referralLink = typeof window !== 'undefined' ? `${window.location.origin}/signup?ref=${referralCode}` : '';
+
 
     return (
         <div className="space-y-6">
@@ -432,6 +432,12 @@ export default function ProfilePage() {
                     <div>
                         <CardTitle className="flex items-center gap-2">
                             {user.displayName}
+                             {verificationStatus === 'Verified' && (
+                                <Badge variant="default" className="flex items-center gap-1 bg-green-100 text-green-800 border-green-200">
+                                    <ShieldCheck className="h-4 w-4" />
+                                    Verified
+                                </Badge>
+                            )}
                         </CardTitle>
                         <CardDescription className="flex items-center gap-2 mt-1">
                            {user.email}
@@ -872,3 +878,4 @@ export default function ProfilePage() {
         </div>
     );
 }
+
