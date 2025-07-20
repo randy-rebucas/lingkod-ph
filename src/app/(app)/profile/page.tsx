@@ -26,6 +26,7 @@ import IdentityVerification from "@/components/identity-verification";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
+import { X } from "lucide-react";
 
 type Reward = {
     id: string;
@@ -58,12 +59,15 @@ export default function ProfilePage() {
     const [name, setName] = useState('');
     const [phone, setPhone] = useState(''); 
     const [bio, setBio] = useState('');
+    const [address, setAddress] = useState('');
     const [gender, setGender] = useState('');
     const [birthDay, setBirthDay] = useState<string | undefined>();
     const [birthMonth, setBirthMonth] = useState<string | undefined>();
     const [birthYear, setBirthYear] = useState<string | undefined>();
     const [availabilityStatus, setAvailabilityStatus] = useState('');
     const [yearsOfExperience, setYearsOfExperience] = useState<number | string>('');
+    const [keyServices, setKeyServices] = useState<string[]>([]);
+    const [currentKeyService, setCurrentKeyService] = useState("");
     const [ownsToolsSupplies, setOwnsToolsSupplies] = useState(false);
     const [isLicensed, setIsLicensed] = useState(false);
     const [licenseNumber, setLicenseNumber] = useState('');
@@ -120,6 +124,7 @@ export default function ProfilePage() {
                 setName(data.displayName || user.displayName || '');
                 setPhone(data.phone || '');
                 setBio(data.bio || '');
+                setAddress(data.address || '');
                 setGender(data.gender || '');
                 setReferralCode(data.referralCode || generateReferralCode(user.uid));
                 if (data.birthdate && data.birthdate.toDate) {
@@ -133,6 +138,7 @@ export default function ProfilePage() {
                 if (userRole === 'provider' || userRole === 'agency') {
                     setAvailabilityStatus(data.availabilityStatus || '');
                     setYearsOfExperience(data.yearsOfExperience || '');
+                    setKeyServices(data.keyServices || []);
                     setOwnsToolsSupplies(data.ownsToolsSupplies || false);
                     setIsLicensed(data.isLicensed || false);
                     setLicenseNumber(data.licenseNumber || '');
@@ -254,6 +260,7 @@ export default function ProfilePage() {
             const updates: { [key: string]: any } = {
                 displayName: name,
                 bio: bio,
+                address: address,
             };
 
             if (user.displayName !== name) {
@@ -303,6 +310,7 @@ export default function ProfilePage() {
             const updates: { [key: string]: any } = {
                 availabilityStatus: availabilityStatus,
                 yearsOfExperience: Number(yearsOfExperience),
+                keyServices: keyServices,
                 ownsToolsSupplies: ownsToolsSupplies,
                 isLicensed: isLicensed,
                 licenseNumber: licenseNumber,
@@ -405,6 +413,16 @@ export default function ProfilePage() {
     
     const referralLink = typeof window !== 'undefined' ? `${window.location.origin}/signup?ref=${referralCode}` : '';
 
+    const handleAddKeyService = () => {
+        if(currentKeyService.trim() && !keyServices.includes(currentKeyService.trim())) {
+            setKeyServices([...keyServices, currentKeyService.trim()]);
+            setCurrentKeyService("");
+        }
+    };
+    const handleRemoveKeyService = (serviceToRemove: string) => {
+        setKeyServices(keyServices.filter(s => s !== serviceToRemove));
+    }
+
 
     return (
         <div className="space-y-6">
@@ -489,9 +507,15 @@ export default function ProfilePage() {
                             <CardDescription>This information will be displayed on your public profile.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">{userRole === 'agency' ? 'Business Name' : 'Full Name'}</Label>
-                                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">{userRole === 'agency' ? 'Business Name' : 'Full Name'}</Label>
+                                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="address">Address / Service Area</Label>
+                                    <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="e.g., Quezon City, Metro Manila"/>
+                                </div>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="bio">Bio / About</Label>
@@ -822,6 +846,31 @@ export default function ProfilePage() {
                                             </Select>
                                         </div>
                                     </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Key Services</Label>
+                                        <div className="flex gap-2">
+                                            <Input 
+                                                value={currentKeyService}
+                                                onChange={(e) => setCurrentKeyService(e.target.value)}
+                                                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddKeyService(); }}}
+                                                placeholder="e.g., Plumbing, Electrical"
+                                            />
+                                            <Button type="button" onClick={handleAddKeyService}>Add</Button>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 pt-2">
+                                            {keyServices.map(service => (
+                                                <Badge key={service} variant="secondary">
+                                                    {service}
+                                                    <button onClick={() => handleRemoveKeyService(service)} className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                                        <X className="h-3 w-3" />
+                                                    </button>
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">List up to 5 key services to highlight on your profile card.</p>
+                                    </div>
+
                                     <div className="flex items-center space-x-2">
                                         <Switch id="ownsToolsSupplies" checked={ownsToolsSupplies} onCheckedChange={setOwnsToolsSupplies} />
                                         <Label htmlFor="ownsToolsSupplies">I own my own tools and supplies</Label>

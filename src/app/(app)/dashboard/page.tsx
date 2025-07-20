@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { DollarSign, Calendar, Star, Users, Loader2, Search } from "lucide-react";
+import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -42,6 +42,9 @@ type Provider = {
     photoURL?: string;
     rating: number;
     reviewCount: number;
+    availabilityStatus?: 'available' | 'limited' | 'unavailable';
+    keyServices?: string[];
+    address?: string;
 };
 
 const getStatusVariant = (status: string) => {
@@ -128,6 +131,20 @@ const processEarningsData = (bookings: Booking[]) => {
     return chartData;
 }
 
+const getAvailabilityBadge = (status: Provider['availabilityStatus']) => {
+    switch (status) {
+        case 'available':
+            return <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">Available</Badge>;
+        case 'limited':
+            return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">Limited</Badge>;
+        case 'unavailable':
+            return <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">Unavailable</Badge>;
+        default:
+            return null;
+    }
+}
+
+
 const ProviderCard = ({ provider }: { provider: Provider }) => {
     const getAvatarFallback = (name: string | null | undefined) => {
         if (!name) return "U";
@@ -139,19 +156,43 @@ const ProviderCard = ({ provider }: { provider: Provider }) => {
     };
 
     return (
-        <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-            <CardContent className="p-6 text-center">
-                <Avatar className="h-24 w-24 mx-auto mb-4 border-2 border-primary">
+        <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col">
+            <CardHeader className="text-center">
+                 <Avatar className="h-24 w-24 mx-auto mb-4 border-2 border-primary">
                     <AvatarImage src={provider.photoURL} alt={provider.displayName} />
                     <AvatarFallback className="text-3xl">{getAvatarFallback(provider.displayName)}</AvatarFallback>
                 </Avatar>
-                <h3 className="text-xl font-bold">{provider.displayName}</h3>
-                {provider.reviewCount > 0 && (
+                <div className="flex items-center justify-center gap-2">
+                    <h3 className="text-xl font-bold">{provider.displayName}</h3>
+                     {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus)}
+                </div>
+                 {provider.reviewCount > 0 && (
                      <div className="flex items-center justify-center gap-1 mt-1 text-muted-foreground">
                         {renderStars(provider.rating)}
                         <span className="text-sm">({provider.reviewCount})</span>
                     </div>
                 )}
+            </CardHeader>
+            <CardContent className="flex-1 space-y-4">
+               
+                 {provider.address && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span>{provider.address}</span>
+                    </div>
+                )}
+
+                {provider.keyServices && provider.keyServices.length > 0 && (
+                    <div>
+                         <h4 className="font-semibold flex items-center gap-2 mb-2"><Briefcase className="h-4 w-4" /> Key Services</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {provider.keyServices.map(service => (
+                                <Badge key={service} variant="secondary">{service}</Badge>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 <p className="text-sm text-muted-foreground mt-2 h-10 line-clamp-2">{provider.bio || 'No bio available.'}</p>
             </CardContent>
             <CardFooter>
@@ -253,6 +294,9 @@ export default function DashboardPage() {
                             photoURL: data.photoURL,
                             rating: ratingInfo ? ratingInfo.totalRating / ratingInfo.count : 0,
                             reviewCount: ratingInfo ? ratingInfo.count : 0,
+                            availabilityStatus: data.availabilityStatus,
+                            keyServices: data.keyServices,
+                            address: data.address
                         } as Provider;
                     });
                     setProviders(providersData);
@@ -311,7 +355,7 @@ export default function DashboardPage() {
                         </div>
                         {loadingProviders ? (
                             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+                                {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
                             </div>
                         ) : (
                             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -475,7 +519,3 @@ export default function DashboardPage() {
         </div>
     );
 }
-
-    
-
-    
