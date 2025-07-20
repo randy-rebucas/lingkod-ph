@@ -198,7 +198,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                 )}
-                 {isPaidSubscriber && (
+                 {isPaidSubscriber && userRole === 'provider' && (
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild isActive={isActive("/earnings")}>
                         <Link href="/earnings">
