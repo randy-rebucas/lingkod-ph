@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings, Briefcase } from "lucide-react";
+import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings, Briefcase, Lock, Award, Users, ShieldCheck } from "lucide-react";
 import { storage } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 
 
 export default function ProfilePage() {
-    const { user, userRole, loading, subscription, setUser: setAuthUser } = useAuth();
+    const { user, userRole, loading, subscription } = useAuth();
     const { toast } = useToast();
     
     // General Info
@@ -335,89 +335,141 @@ export default function ProfilePage() {
                 </TabsContent>
                 
                 <TabsContent value="account-settings" className="mt-6">
-                    <div className="space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Personal Details</CardTitle>
-                                <CardDescription>This information is private and will not be shown on your profile.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="email">Email Address</Label>
-                                    <Input id="email" type="email" value={user.email || ''} disabled />
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="phone">Mobile Number</Label>
-                                        <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., 09123456789" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="gender">Gender</Label>
-                                         <Select value={gender} onValueChange={setGender}>
-                                            <SelectTrigger id="gender">
-                                                <SelectValue placeholder="Select gender" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="male">Male</SelectItem>
-                                                <SelectItem value="female">Female</SelectItem>
-                                                <SelectItem value="other">Other</SelectItem>
-                                                <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Birthdate</Label>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <Select value={birthMonth} onValueChange={setBirthMonth}>
-                                            <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
-                                            <SelectContent>
-                                                {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                        <Select value={birthDay} onValueChange={setBirthDay}>
-                                            <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
-                                            <SelectContent>
-                                                {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => (
-                                                    <SelectItem key={d} value={String(d)}>{d}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                         <Select value={birthYear} onValueChange={setBirthYear}>
-                                            <SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger>
-                                            <SelectContent>
-                                                {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                     <Tabs defaultValue="personal-details" className="w-full">
+                        <TabsList className="grid w-full grid-cols-5">
+                            <TabsTrigger value="personal-details"><User className="mr-2"/>Personal Details</TabsTrigger>
+                            <TabsTrigger value="password-security"><Lock className="mr-2"/>Password & Security</TabsTrigger>
+                            <TabsTrigger value="loyalty-program"><Award className="mr-2"/>Loyalty Program</TabsTrigger>
+                            <TabsTrigger value="referral-program"><Users className="mr-2"/>Referral Program</TabsTrigger>
+                            <TabsTrigger value="identity-verification"><ShieldCheck className="mr-2"/>Identity Verification</TabsTrigger>
+                        </TabsList>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Security</CardTitle>
-                                <CardDescription>Manage your password and account security.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                 <div className="space-y-2">
-                                    <Label htmlFor="current-password">Current Password</Label>
-                                    <Input id="current-password" type="password" />
-                                </div>
-                                 <div className="space-y-2">
-                                    <Label htmlFor="new-password">New Password</Label>
-                                    <Input id="new-password" type="password" />
-                                </div>
-                                 <div className="space-y-2">
-                                    <Label htmlFor="confirm-password">Confirm New Password</Label>
-                                    <Input id="confirm-password" type="password" />
-                                </div>
-                            </CardContent>
-                            <CardFooter>
-                                <Button variant="outline" className="w-full" disabled>Change Password</Button>
-                            </CardFooter>
-                        </Card>
-                    </div>
+                        <TabsContent value="personal-details" className="mt-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Personal Details</CardTitle>
+                                    <CardDescription>This information is private and will not be shown on your profile.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email">Email Address</Label>
+                                        <Input id="email" type="email" value={user.email || ''} disabled />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="phone">Mobile Number</Label>
+                                            <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., 09123456789" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="gender">Gender</Label>
+                                            <Select value={gender} onValueChange={setGender}>
+                                                <SelectTrigger id="gender">
+                                                    <SelectValue placeholder="Select gender" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="male">Male</SelectItem>
+                                                    <SelectItem value="female">Female</SelectItem>
+                                                    <SelectItem value="other">Other</SelectItem>
+                                                    <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Birthdate</Label>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <Select value={birthMonth} onValueChange={setBirthMonth}>
+                                                <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
+                                                <SelectContent>
+                                                    {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                            <Select value={birthDay} onValueChange={setBirthDay}>
+                                                <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
+                                                <SelectContent>
+                                                    {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => (
+                                                        <SelectItem key={d} value={String(d)}>{d}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            <Select value={birthYear} onValueChange={setBirthYear}>
+                                                <SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger>
+                                                <SelectContent>
+                                                    {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="password-security" className="mt-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Password & Security</CardTitle>
+                                    <CardDescription>Manage your password and account security settings.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="current-password">Current Password</Label>
+                                        <Input id="current-password" type="password" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="new-password">New Password</Label>
+                                        <Input id="new-password" type="password" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="confirm-password">Confirm New Password</Label>
+                                        <Input id="confirm-password" type="password" />
+                                    </div>
+                                </CardContent>
+                                <CardFooter>
+                                    <Button variant="outline" className="w-full" disabled>Change Password</Button>
+                                </CardFooter>
+                            </Card>
+                        </TabsContent>
+                        
+                        <TabsContent value="loyalty-program" className="mt-6">
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle>Loyalty Program</CardTitle>
+                                    <CardDescription>View your points and rewards.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="text-center text-muted-foreground p-12">
+                                    <Award className="h-12 w-12 mx-auto mb-4"/>
+                                    <p>Our loyalty program is coming soon! Stay tuned for exciting rewards.</p>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                         <TabsContent value="referral-program" className="mt-6">
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle>Referral Program</CardTitle>
+                                    <CardDescription>Invite friends and earn rewards.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="text-center text-muted-foreground p-12">
+                                    <Users className="h-12 w-12 mx-auto mb-4"/>
+                                    <p>Our referral program is under construction. Get ready to share and earn!</p>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="identity-verification" className="mt-6">
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle>Identity Verification</CardTitle>
+                                    <CardDescription>Verify your identity to build trust on the platform.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="text-center text-muted-foreground p-12">
+                                    <ShieldCheck className="h-12 w-12 mx-auto mb-4"/>
+                                    <p>The identity verification feature is coming soon to enhance security.</p>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                    </Tabs>
                 </TabsContent>
 
                 {userRole === 'provider' && (
@@ -507,3 +559,5 @@ export default function ProfilePage() {
         </div>
     );
 }
+
+    
