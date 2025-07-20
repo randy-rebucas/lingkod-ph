@@ -23,7 +23,7 @@ type NotificationSettings = {
 
 export default function SettingsPage() {
     const { theme, setTheme } = useTheme()
-    const { user } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
 
     const [settings, setSettings] = useState<NotificationSettings>({
@@ -135,13 +135,15 @@ export default function SettingsPage() {
                                     </Label>
                                     <Switch id="new-messages" checked={settings.newMessages} onCheckedChange={(v) => handleNotificationChange('newMessages', v)} />
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="agency-invites" className="flex items-center gap-3">
-                                        <UserPlus className="h-5 w-5 text-accent" />
-                                        <span className="font-semibold">Agency Invites</span>
-                                    </Label>
-                                    <Switch id="agency-invites" checked={settings.agencyInvites} onCheckedChange={(v) => handleNotificationChange('agencyInvites', v)} />
-                                </div>
+                                {userRole === 'provider' && (
+                                    <div className="flex items-center justify-between">
+                                        <Label htmlFor="agency-invites" className="flex items-center gap-3">
+                                            <UserPlus className="h-5 w-5 text-accent" />
+                                            <span className="font-semibold">Agency Invites</span>
+                                        </Label>
+                                        <Switch id="agency-invites" checked={settings.agencyInvites} onCheckedChange={(v) => handleNotificationChange('agencyInvites', v)} />
+                                    </div>
+                                )}
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="promotional-emails" className="flex items-center gap-3">
                                         <AtSign className="h-5 w-5 text-accent" />
