@@ -202,11 +202,20 @@ export default function ProfilePage() {
     const handleInviteResponse = async (inviteId: string, accepted: boolean) => {
         setIsRespondingToInvite(true);
         try {
-            await handleInviteAction({ inviteId, accepted });
-            toast({
-                title: `Invitation ${accepted ? 'Accepted' : 'Declined'}`,
-                description: `You have successfully ${accepted ? 'joined the agency' : 'declined the invitation'}.`,
-            });
+            const formData = new FormData();
+            formData.append('inviteId', inviteId);
+            formData.append('accepted', String(accepted));
+            
+            const result = await handleInviteAction({ error: null, message: '' }, formData);
+
+            if (result.error) {
+                 toast({ variant: 'destructive', title: 'Error', description: result.error });
+            } else {
+                toast({
+                    title: `Invitation ${accepted ? 'Accepted' : 'Declined'}`,
+                    description: `You have successfully ${accepted ? 'joined the agency' : 'declined the invitation'}.`,
+                });
+            }
         } catch (error) {
             console.error("Error responding to invite:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to respond to invitation.' });
@@ -413,16 +422,6 @@ export default function ProfilePage() {
         return <p>Please log in to view your profile.</p>;
     }
     
-    const TABS_BASE = ['public-profile', 'account-settings'];
-    const TABS_PROVIDER = ['provider-settings'];
-    const TABS_CLIENT_FEATURES = ['loyalty', 'referrals'];
-
-    let tabsToShow = [...TABS_BASE];
-    if (userRole === 'provider' || userRole === 'agency') {
-        tabsToShow.splice(1, 0, ...TABS_PROVIDER);
-    }
-    tabsToShow.push(...TABS_CLIENT_FEATURES);
-    
     const totalReferralPoints = referrals.reduce((sum, ref) => sum + ref.rewardPointsGranted, 0);
   
     const generateReferralCode = (userId: string): string => {
@@ -444,6 +443,8 @@ export default function ProfilePage() {
         setKeyServices(keyServices.filter(s => s !== serviceToRemove));
     }
 
+
+    const isProviderOrAgency = userRole === 'provider' || userRole === 'agency';
 
     return (
         <div className="space-y-6">
@@ -531,9 +532,9 @@ export default function ProfilePage() {
             )}
 
             <Tabs defaultValue="public-profile" className="w-full">
-                <TabsList className={cn("grid w-full", `grid-cols-${tabsToShow.length}`)}>
+                <TabsList className={cn("grid w-full", isProviderOrAgency ? "grid-cols-5" : "grid-cols-4")}>
                     <TabsTrigger value="public-profile"><User className="mr-2"/> Public Profile</TabsTrigger>
-                     {(userRole === 'provider' || userRole === 'agency') && (
+                    {isProviderOrAgency && (
                         <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> Provider</TabsTrigger>
                     )}
                     <TabsTrigger value="account-settings"><Settings className="mr-2"/> Account</TabsTrigger>
@@ -979,3 +980,5 @@ export default function ProfilePage() {
         </div>
     );
 }
+
+    
