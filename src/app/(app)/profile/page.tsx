@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings } from "lucide-react";
+import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings, Briefcase } from "lucide-react";
 import { storage } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -21,12 +21,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 
 
 export default function ProfilePage() {
     const { user, userRole, loading, subscription, setUser: setAuthUser } = useAuth();
     const { toast } = useToast();
     
+    // General Info
     const [name, setName] = useState('');
     const [phone, setPhone] = useState(''); 
     const [bio, setBio] = useState('');
@@ -35,6 +37,22 @@ export default function ProfilePage() {
     const [birthDay, setBirthDay] = useState<string | undefined>();
     const [birthMonth, setBirthMonth] = useState<string | undefined>();
     const [birthYear, setBirthYear] = useState<string | undefined>();
+
+    // Provider Specific Info
+    const [availabilityStatus, setAvailabilityStatus] = useState('');
+    const [yearsOfExperience, setYearsOfExperience] = useState<number | string>('');
+    const [ownsToolsSupplies, setOwnsToolsSupplies] = useState(false);
+    const [isLicensed, setIsLicensed] = useState(false);
+    const [licenseNumber, setLicenseNumber] = useState('');
+    const [licenseType, setLicenseType] = useState('');
+    const [licenseExpirationDate, setLicenseExpirationDate] = useState('');
+    const [licenseIssuingState, setLicenseIssuingState] = useState('');
+    const [licenseIssuingCountry, setLicenseIssuingCountry] = useState('');
+    const [location, setLocation] = useState('');
+    const [businessName, setBusinessName] = useState('');
+    const [tagline, setTagline] = useState('');
+    const [overview, setOverview] = useState('');
+
 
     const [isSaving, setIsSaving] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -58,7 +76,6 @@ export default function ProfilePage() {
         if (!birthMonth || !birthYear) return 31;
         const monthIndex = parseInt(birthMonth, 10);
         const year = parseInt(birthYear, 10);
-        // Day is 0-indexed for the *next* month, giving us the last day of the current month
         return new Date(year, monthIndex + 1, 0).getDate();
     }, [birthMonth, birthYear]);
 
@@ -70,6 +87,7 @@ export default function ProfilePage() {
                 const userDoc = await getDoc(userDocRef);
                 if (userDoc.exists()) {
                     const data = userDoc.data();
+                    // General
                     setPhone(data.phone || '');
                     setBio(data.bio || '');
                     setGender(data.gender || '');
@@ -79,11 +97,27 @@ export default function ProfilePage() {
                         setBirthMonth(String(date.getMonth()));
                         setBirthYear(String(date.getFullYear()));
                     }
+                    // Provider
+                    if (userRole === 'provider') {
+                        setAvailabilityStatus(data.availabilityStatus || '');
+                        setYearsOfExperience(data.yearsOfExperience || '');
+                        setOwnsToolsSupplies(data.ownsToolsSupplies || false);
+                        setIsLicensed(data.isLicensed || false);
+                        setLicenseNumber(data.licenseNumber || '');
+                        setLicenseType(data.licenseType || '');
+                        setLicenseExpirationDate(data.licenseExpirationDate || '');
+                        setLicenseIssuingState(data.licenseIssuingState || '');
+                        setLicenseIssuingCountry(data.licenseIssuingCountry || '');
+                        setLocation(data.location || '');
+                        setBusinessName(data.businessName || '');
+                        setTagline(data.tagline || '');
+                        setOverview(data.overview || '');
+                    }
                 }
             }
         }
         fetchUserData();
-    }, [user]);
+    }, [user, userRole]);
 
     const getAvatarFallback = (name: string | null | undefined) => {
         if (!name) return "U";
@@ -119,14 +153,27 @@ export default function ProfilePage() {
                 updates.birthdate = Timestamp.fromDate(new Date(year, month, day));
             }
 
-            // Update display name in Firebase Auth if it has changed
+            if(userRole === 'provider') {
+                updates.availabilityStatus = availabilityStatus;
+                updates.yearsOfExperience = Number(yearsOfExperience);
+                updates.ownsToolsSupplies = ownsToolsSupplies;
+                updates.isLicensed = isLicensed;
+                updates.licenseNumber = licenseNumber;
+                updates.licenseType = licenseType;
+                updates.licenseExpirationDate = licenseExpirationDate;
+                updates.licenseIssuingState = licenseIssuingState;
+                updates.licenseIssuingCountry = licenseIssuingCountry;
+                updates.location = location;
+                updates.businessName = businessName;
+                updates.tagline = tagline;
+                updates.overview = overview;
+            }
+
             if (user.displayName !== name) {
                 await updateProfile(user, { displayName: name });
             }
             
             await updateDoc(userDocRef, updates);
-
-            // Manually update user in auth context to reflect changes immediately
             setAuthUser(prev => prev ? { ...prev, displayName: name } : null);
 
             toast({ title: "Success", description: "Profile updated successfully!" });
@@ -164,11 +211,8 @@ export default function ProfilePage() {
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                     
                     await updateProfile(user, { photoURL: downloadURL });
-
                     const userDocRef = doc(db, "users", user.uid);
                     await updateDoc(userDocRef, { photoURL: downloadURL });
-                    
-                    // Manually update user in auth context
                     setAuthUser(prev => prev ? { ...prev, photoURL: downloadURL } : null);
 
                     toast({ title: "Success", description: "Profile picture updated!" });
@@ -209,6 +253,10 @@ export default function ProfilePage() {
     
     const isPro = subscription?.planId === 'pro';
     const isElite = subscription?.planId === 'elite';
+    const TABS = ['public-profile', 'account-settings'];
+    if (userRole === 'provider') {
+        TABS.push('provider-settings');
+    }
 
     return (
         <div className="space-y-6">
@@ -260,13 +308,18 @@ export default function ProfilePage() {
             </Card>
 
             <Tabs defaultValue="public-profile">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className={cn("grid w-full", TABS.length === 3 ? "grid-cols-3" : "grid-cols-2")}>
                     <TabsTrigger value="public-profile">
                         <User className="mr-2"/> Public Profile
                     </TabsTrigger>
                     <TabsTrigger value="account-settings">
                         <Settings className="mr-2"/> Account Settings
                     </TabsTrigger>
+                    {userRole === 'provider' && (
+                        <TabsTrigger value="provider-settings">
+                            <Briefcase className="mr-2"/> Provider Settings
+                        </TabsTrigger>
+                    )}
                 </TabsList>
 
                 <TabsContent value="public-profile" className="mt-6">
@@ -379,6 +432,110 @@ export default function ProfilePage() {
                         </Card>
                     </div>
                 </TabsContent>
+
+                {userRole === 'provider' && (
+                     <TabsContent value="provider-settings" className="mt-6">
+                        <div className="space-y-6">
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle>Business Information</CardTitle>
+                                    <CardDescription>Details about your service business.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="businessName">Business Name (Optional)</Label>
+                                            <Input id="businessName" value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="e.g., Juan's Cleaning Co." />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="tagline">Tagline (Optional)</Label>
+                                            <Input id="tagline" value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="e.g., Quality service you can trust" />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="overview">Business Overview</Label>
+                                        <Textarea id="overview" value={overview} onChange={(e) => setOverview(e.target.value)} placeholder="Describe your business, services, and what makes you unique." rows={4}/>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="location">Primary Service Location</Label>
+                                        <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g., Quezon City, Metro Manila" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Professional Details</CardTitle>
+                                    <CardDescription>Your professional experience and qualifications.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="yearsOfExperience">Years of Experience</Label>
+                                            <Input id="yearsOfExperience" type="number" value={yearsOfExperience} onChange={(e) => setYearsOfExperience(e.target.value)} placeholder="e.g., 5" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="availabilityStatus">Availability Status</Label>
+                                            <Select value={availabilityStatus} onValueChange={setAvailabilityStatus}>
+                                                <SelectTrigger id="availabilityStatus"><SelectValue placeholder="Select status" /></SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="available">Available for Bookings</SelectItem>
+                                                    <SelectItem value="limited">Limited Availability</SelectItem>
+                                                    <SelectItem value="unavailable">Not Available</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="ownsToolsSupplies" checked={ownsToolsSupplies} onCheckedChange={setOwnsToolsSupplies} />
+                                        <Label htmlFor="ownsToolsSupplies">I own my own tools and supplies</Label>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle>Licensing & Credentials</CardTitle>
+                                    <CardDescription>Add any relevant licenses or certifications.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="flex items-center space-x-2">
+                                        <Switch id="isLicensed" checked={isLicensed} onCheckedChange={setIsLicensed}/>
+                                        <Label htmlFor="isLicensed">I have a professional license or certification</Label>
+                                    </div>
+                                    {isLicensed && (
+                                        <div className="space-y-4 pt-4 border-t">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                 <div className="space-y-2">
+                                                    <Label htmlFor="licenseType">License/Certification Type</Label>
+                                                    <Input id="licenseType" value={licenseType} onChange={e => setLicenseType(e.target.value)} placeholder="e.g., TESDA NC II" />
+                                                </div>
+                                                 <div className="space-y-2">
+                                                    <Label htmlFor="licenseNumber">License Number</Label>
+                                                    <Input id="licenseNumber" value={licenseNumber} onChange={e => setLicenseNumber(e.target.value)} />
+                                                </div>
+                                            </div>
+                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                 <div className="space-y-2">
+                                                    <Label htmlFor="licenseExpirationDate">Expiration Date</Label>
+                                                    <Input id="licenseExpirationDate" type="date" value={licenseExpirationDate} onChange={e => setLicenseExpirationDate(e.target.value)} />
+                                                </div>
+                                                 <div className="space-y-2">
+                                                    <Label htmlFor="licenseIssuingState">Issuing State/Region</Label>
+                                                    <Input id="licenseIssuingState" value={licenseIssuingState} onChange={e => setLicenseIssuingState(e.target.value)} placeholder="e.g., NCR" />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="licenseIssuingCountry">Issuing Country</Label>
+                                                    <Input id="licenseIssuingCountry" value={licenseIssuingCountry} onChange={e => setLicenseIssuingCountry(e.target.value)} placeholder="e.g., Philippines" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </TabsContent>
+                )}
             </Tabs>
             
              <div className="flex justify-end mt-6">
@@ -390,3 +547,5 @@ export default function ProfilePage() {
         </div>
     );
 }
+
+    
