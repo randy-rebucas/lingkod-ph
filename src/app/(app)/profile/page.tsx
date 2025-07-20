@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings, Briefcase, Award, Users, ShieldCheck, Lock } from "lucide-react";
+import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings, Briefcase, Award, Users } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -22,9 +22,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import IdentityVerification from "@/components/identity-verification";
 
 export default function ProfilePage() {
-    const { user, userRole, loading, subscription, setUser } = useAuth();
+    const { user, userRole, loading, subscription } = useAuth();
     const { toast } = useToast();
     
     // States for form fields
@@ -290,11 +291,11 @@ export default function ProfilePage() {
                 <TabsList className={cn("grid w-full", `grid-cols-${TABS.length}`)}>
                     <TabsTrigger value="public-profile"><User className="mr-2"/> Public Profile</TabsTrigger>
                     <TabsTrigger value="account-settings"><Settings className="mr-2"/> Account</TabsTrigger>
-                    {(userRole === 'provider' || userRole === 'agency') && (
-                        <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> Provider</TabsTrigger>
-                    )}
                     <TabsTrigger value="loyalty"><Award className="mr-2"/> Loyalty</TabsTrigger>
                     <TabsTrigger value="referrals"><Users className="mr-2"/> Referrals</TabsTrigger>
+                     {(userRole === 'provider' || userRole === 'agency') && (
+                        <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> Provider</TabsTrigger>
+                    )}
                 </TabsList>
 
                 <TabsContent value="public-profile" className="mt-6">
@@ -323,7 +324,7 @@ export default function ProfilePage() {
                 </TabsContent>
                 
                 <TabsContent value="account-settings" className="mt-6 space-y-6">
-                     <Card>
+                    <Card>
                         <CardHeader>
                             <CardTitle>Personal Details</CardTitle>
                             <CardDescription>This information is private and will not be shown on your profile.</CardDescription>
@@ -399,14 +400,31 @@ export default function ProfilePage() {
                         </CardFooter>
                     </Card>
                     
+                    <IdentityVerification />
+                </TabsContent>
+
+                <TabsContent value="loyalty" className="mt-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Identity Verification</CardTitle>
-                            <CardDescription>Verify your identity to build trust on the platform.</CardDescription>
+                            <CardTitle>Loyalty Program</CardTitle>
+                            <CardDescription>View your points and rewards.</CardDescription>
                         </CardHeader>
                         <CardContent className="text-center text-muted-foreground p-12">
-                            <ShieldCheck className="h-12 w-12 mx-auto mb-4"/>
-                            <p>The identity verification feature is coming soon to enhance security.</p>
+                            <Award className="h-12 w-12 mx-auto mb-4"/>
+                            <p>Our loyalty program is coming soon! Stay tuned for exciting rewards.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="referrals" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Referral Program</CardTitle>
+                            <CardDescription>Invite friends and earn rewards.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="text-center text-muted-foreground p-12">
+                            <Users className="h-12 w-12 mx-auto mb-4"/>
+                            <p>Our referral program is under construction. Get ready to share and earn!</p>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -488,31 +506,6 @@ export default function ProfilePage() {
                     </TabsContent>
                 )}
                 
-                 <TabsContent value="loyalty" className="mt-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Loyalty Program</CardTitle>
-                            <CardDescription>View your points and rewards.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="text-center text-muted-foreground p-12">
-                            <Award className="h-12 w-12 mx-auto mb-4"/>
-                            <p>Our loyalty program is coming soon! Stay tuned for exciting rewards.</p>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="referrals" className="mt-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Referral Program</CardTitle>
-                            <CardDescription>Invite friends and earn rewards.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="text-center text-muted-foreground p-12">
-                            <Users className="h-12 w-12 mx-auto mb-4"/>
-                            <p>Our referral program is under construction. Get ready to share and earn!</p>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
             </Tabs>
             
              <div className="flex justify-end mt-6">
@@ -524,5 +517,3 @@ export default function ProfilePage() {
         </div>
     );
 }
-
-    

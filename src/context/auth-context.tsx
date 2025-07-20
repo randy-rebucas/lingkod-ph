@@ -14,11 +14,14 @@ type UserSubscription = {
     renewsOn: Timestamp | null;
 } | null;
 
+type VerificationStatus = 'Unverified' | 'Pending' | 'Verified' | 'Rejected';
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   userRole: UserRole;
   subscription: UserSubscription;
+  verificationStatus: VerificationStatus | null;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
@@ -27,6 +30,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   userRole: null,
   subscription: null,
+  verificationStatus: null,
   setUser: () => {},
 });
 
@@ -35,6 +39,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [subscription, setSubscription] = useState<UserSubscription>(null);
+  const [verificationStatus, setVerificationStatus] = useState<VerificationStatus | null>(null);
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -46,11 +52,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const data = userDoc.data();
           setUserRole(data.role || null);
           setSubscription(data.subscription || { planId: 'free', status: 'active', renewsOn: null });
+          setVerificationStatus(data.verification?.status || 'Unverified');
         }
       } else {
         setUser(null);
         setUserRole(null);
         setSubscription(null);
+        setVerificationStatus(null);
       }
       setLoading(false);
     });
@@ -59,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, userRole, subscription, setUser }}>
+    <AuthContext.Provider value={{ user, loading, userRole, subscription, verificationStatus, setUser }}>
       {children}
     </AuthContext.Provider>
   );
