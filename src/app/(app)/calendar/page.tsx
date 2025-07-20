@@ -72,7 +72,7 @@ export default function CalendarPage() {
                     end: new Date(bookingDate.getTime() + 60 * 60 * 1000), // Assuming 1-hour booking
                     status: data.status,
                 };
-            });
+            }).filter(event => event.status !== 'Pending'); // Exclude pending bookings from calendar view
             setEvents(bookingEvents as BookingEvent[]);
             setLoading(false);
         });
@@ -82,17 +82,21 @@ export default function CalendarPage() {
 
     const eventStyleGetter = (event: BookingEvent) => {
         let backgroundColor = 'hsl(var(--primary))';
+        let color = 'hsl(var(--primary-foreground))';
+
         if(event.status === 'Completed') {
-            backgroundColor = 'hsl(var(--secondary-foreground))';
+            backgroundColor = 'hsl(var(--secondary))';
+            color = 'hsl(var(--secondary-foreground))';
         } else if (event.status === 'Cancelled') {
             backgroundColor = 'hsl(var(--destructive))';
+            color = 'hsl(var(--destructive-foreground))';
         }
         
         const style = {
             backgroundColor,
+            color,
             borderRadius: '5px',
             opacity: 0.8,
-            color: 'hsl(var(--primary-foreground))',
             border: '0px',
             display: 'block',
         };
