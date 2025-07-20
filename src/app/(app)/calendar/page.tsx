@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Calendar, dateFnsLocalizer, Views, View } from 'react-big-calendar';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Calendar, dateFnsLocalizer, Views, View, ToolbarProps } from 'react-big-calendar';
 import format from 'date-fns/format';
 import parse from 'date-fns/parse';
 import startOfWeek from 'date-fns/startOfWeek';
@@ -17,7 +17,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Link } from 'lucide-react';
+import { Link, ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const locales = {
   'en-US': enUS,
@@ -37,8 +38,60 @@ type BookingEvent = {
     end: Date;
     allDay?: boolean;
     resource?: any;
-    status: "Upcoming" | "Completed" | "Cancelled";
+    status: "Upcoming" | "Completed" | "Cancelled" | "Pending";
 };
+
+const getStatusVariant = (status: BookingEvent['status']) => {
+    switch (status) {
+        case "Upcoming": return "default";
+        case "Completed": return "secondary";
+        case "Cancelled": return "destructive";
+        case "Pending": return "outline";
+        default: return "outline";
+    }
+};
+
+const CustomToolbar = (toolbar: ToolbarProps<BookingEvent, object>) => {
+    const { label, onNavigate, onView, view, views } = toolbar;
+
+    const navigate = (action: 'PREV' | 'NEXT' | 'TODAY') => {
+        onNavigate(action);
+    };
+
+    const handleViewChange = (newView: View) => {
+        onView(newView);
+    }
+    
+    return (
+        <div className="rbc-toolbar p-4 border-b">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                     <Button size="icon" variant="outline" onClick={() => navigate('PREV')}>
+                        <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                     <Button variant="outline" onClick={() => navigate('TODAY')}>Today</Button>
+                    <Button size="icon" variant="outline" onClick={() => navigate('NEXT')}>
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+                 <span className="rbc-toolbar-label text-xl font-bold">{label}</span>
+                <div className="flex items-center gap-2">
+                     {(views as View[]).map((v) => (
+                        <Button
+                            key={v}
+                            variant={view === v ? 'default' : 'outline'}
+                            onClick={() => handleViewChange(v)}
+                            className="capitalize"
+                        >
+                            {v}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 export default function CalendarPage() {
     const { user, userRole } = useAuth();
@@ -80,7 +133,7 @@ export default function CalendarPage() {
         return () => unsubscribe();
     }, [user, userRole]);
 
-    const eventStyleGetter = (event: BookingEvent) => {
+    const eventStyleGetter = useCallback((event: BookingEvent) => {
         let backgroundColor = 'hsl(var(--primary))';
         let color = 'hsl(var(--primary-foreground))';
 
@@ -103,20 +156,11 @@ export default function CalendarPage() {
         return {
             style: style,
         };
-    };
+    }, []);
 
     const handleSelectEvent = (event: BookingEvent) => {
         setSelectedEvent(event);
         setIsDialogOpen(true);
-    };
-
-    const getStatusVariant = (status: string) => {
-        switch (status) {
-            case "Upcoming": return "default";
-            case "Completed": return "secondary";
-            case "Cancelled": return "destructive";
-            default: return "outline";
-        }
     };
 
     if (loading) {
@@ -128,7 +172,7 @@ export default function CalendarPage() {
                 </div>
                 <Card>
                     <CardContent className="p-6">
-                        <Skeleton className="h-[600px] w-full" />
+                        <Skeleton className="h-[75vh] w-full" />
                     </CardContent>
                 </Card>
             </div>
@@ -147,47 +191,22 @@ export default function CalendarPage() {
                     Sync with Google Calendar
                 </Button>
             </div>
-             <Card>
-                <CardContent className="p-4 bg-card h-[75vh]">
+             <Card className="overflow-hidden">
+                <div className="h-[75vh] flex flex-col">
                    <Calendar
                         localizer={localizer}
                         events={events}
                         startAccessor="start"
                         endAccessor="end"
-                        style={{ height: '100%' }}
                         eventPropGetter={eventStyleGetter}
                         onSelectEvent={handleSelectEvent}
                         views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
-                        className="text-foreground"
+                        className="flex-1 p-4 bg-card text-foreground"
                         components={{
-                            toolbar: (toolbar) => {
-                                return (
-                                    <div className="rbc-toolbar mb-4">
-                                        <span className="rbc-btn-group">
-                                            <Button variant="outline" onClick={() => toolbar.onNavigate('PREV')}>Back</Button>
-                                            <Button variant="outline" onClick={() => toolbar.onNavigate('NEXT')}>Next</Button>
-                                            <Button variant="outline" onClick={() => toolbar.onNavigate('TODAY')}>Today</Button>
-                                        </span>
-                                        <span className="rbc-toolbar-label font-bold text-lg">{toolbar.label}</span>
-                                        <span className="rbc-btn-group">
-                                            {
-                                                (toolbar.views as string[]).map(view => (
-                                                    <Button 
-                                                        key={view} 
-                                                        variant={toolbar.view === view ? 'default' : 'outline'}
-                                                        onClick={() => toolbar.onView(view as View)}
-                                                    >
-                                                        {view.charAt(0).toUpperCase() + view.slice(1)}
-                                                    </Button>
-                                                ))
-                                            }
-                                        </span>
-                                    </div>
-                                )
-                            }
+                            toolbar: CustomToolbar
                         }}
                     />
-                </CardContent>
+                </div>
             </Card>
 
              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
