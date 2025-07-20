@@ -395,7 +395,16 @@ export default function ProfilePage() {
     tabsToShow.push(...TABS_CLIENT_FEATURES);
     
     const totalReferralPoints = referrals.reduce((sum, ref) => sum + ref.rewardPointsGranted, 0);
-
+  // Function to generate a unique referral code
+  const generateReferralCode = (userId: string): string => {
+    // Create a more unique and readable referral code
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const uidPart = userId.substring(0, 4).toUpperCase();
+    const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
+    
+    // Format: LP-XXXX-YYY-ZZZ (where XXXX is uid part, YYY is timestamp part, ZZZ is random part)
+    return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
+  };
     const referralLink = `${window.location.origin}/signup?ref=${referralCode}`;
 
     return (

@@ -27,12 +27,16 @@ const Logo = () => (
 
 type UserType = 'client' | 'provider' | 'agency';
 
-const generateReferralCode = (uid: string): string => {
-    const uidPart = uid.substring(0, 4).toUpperCase();
-    const timePart = Date.now().toString(36).slice(-3).toUpperCase();
+  // Function to generate a unique referral code
+  const generateReferralCode = (userId: string): string => {
+    // Create a more unique and readable referral code
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const uidPart = userId.substring(0, 4).toUpperCase();
     const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
-    return `LP-${uidPart}-${timePart}-${randomPart}`;
-};
+    
+    // Format: LP-XXXX-YYY-ZZZ (where XXXX is uid part, YYY is timestamp part, ZZZ is random part)
+    return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
+  };
 
 const handleReferral = async (referralCode: string, newUser: { uid: string; email: string | null }) => {
     if (!referralCode) return;
