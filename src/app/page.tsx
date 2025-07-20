@@ -275,7 +275,7 @@ export default function Home() {
                                    <p><span className="font-semibold">For Agencies:</span> Onboard your team, manage multiple providers, and access powerful analytics to scale your operations.</p>
                                </li>
                            </ul>
-                           <Button asChild variant="secondary" size="lg" className="mt-6 w-full text-primary-foreground bg-white hover:bg-white/90 text-primary">
+                           <Button asChild variant="secondary" size="lg" className="mt-6 w-full text-white bg-white/20 hover:bg-white/30">
                                <Link href="/signup">Join as a Provider or Agency</Link>
                            </Button>
                         </div>
