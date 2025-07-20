@@ -4,9 +4,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Search, Brush, Wrench, Sprout, Handshake, BriefcaseBusiness, UserCheck, Star, Sparkles, Building, ArrowRight } from 'lucide-react';
+import { UserCheck, Star, Sparkles, Building, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -53,17 +52,17 @@ const Footer = () => (
         <div>
             <h4 className="font-semibold mb-2">Company</h4>
             <ul className="space-y-2 text-sm">
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">About Us</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Careers</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Partners</Link></li>
+                <li><Link href="/about" className="text-muted-foreground hover:text-primary">About Us</Link></li>
+                <li><Link href="/careers" className="text-muted-foreground hover:text-primary">Careers</Link></li>
+                <li><Link href="/partners" className="text-muted-foreground hover:text-primary">Partners</Link></li>
             </ul>
         </div>
         <div>
             <h4 className="font-semibold mb-2">Support</h4>
             <ul className="space-y-2 text-sm">
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Help Center</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Contact Us</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Terms of Service</Link></li>
+                <li><Link href="/help-center" className="text-muted-foreground hover:text-primary">Help Center</Link></li>
+                <li><Link href="/contact-us" className="text-muted-foreground hover:text-primary">Contact Us</Link></li>
+                <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-primary">Terms of Service</Link></li>
             </ul>
         </div>
         <div>
@@ -89,9 +88,9 @@ const testimonials = [
 ];
 
 const topProviders = [
-    { name: 'Ricardo "Cardo" Gomez', specialty: 'Master Electrician', rating: 4.9, reviews: 128, avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=300', hint: 'man smiling', background: 'https://images.unsplash.com/photo-1621905252507-b3c69aecc61d?q=80&w=1287', bgHint: 'electrical tools' },
+    { name: 'Ricardo "Cardo" Gomez', specialty: 'Master Electrician', rating: 4.9, reviews: 128, avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=300', hint: 'man smiling', background: 'https://images.unsplash.com/photo-1517070208541-6ddc4d3ef95a?q=80&w=1470', bgHint: 'electrical wiring' },
     { name: 'Elena Reyes', specialty: 'Deep Cleaning Specialist', rating: 4.8, reviews: 214, avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=300', hint: 'woman happy', background: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=600', bgHint: 'cleaning supplies' },
-    { name: 'Benny Tan', specialty: 'HVAC & Refrigeration Expert', rating: 4.9, reviews: 98, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300', hint: 'man portrait', background: 'https://images.unsplash.com/photo-1534952767098-b99836e1b9b1?q=80&w=1470', bgHint: 'air conditioner' },
+    { name: 'Benny Tan', specialty: 'HVAC & Refrigeration Expert', rating: 4.9, reviews: 98, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300', hint: 'man portrait', background: 'https://images.unsplash.com/photo-1607542217528-7663486b2404?q=80&w=1470', bgHint: 'air conditioner unit' },
 ];
 
 export default function Home() {
@@ -268,11 +267,11 @@ export default function Home() {
                         <div className="bg-black/20 backdrop-blur-sm p-8 rounded-lg">
                            <ul className="space-y-4">
                                <li className="flex items-start gap-3">
-                                   <div className="mt-1"><UserCheck className="h-5 w-5" /></div>
+                                   <div className="mt-1"><UserCheck className="h-5 w-5 text-white" /></div>
                                    <p><span className="font-semibold">For Individual Providers:</span> Build your reputation, manage bookings effortlessly, and connect with a steady stream of clients.</p>
                                </li>
                                <li className="flex items-start gap-3">
-                                   <div className="mt-1"><Building className="h-5 w-5" /></div>
+                                   <div className="mt-1"><Building className="h-5 w-5 text-white" /></div>
                                    <p><span className="font-semibold">For Agencies:</span> Onboard your team, manage multiple providers, and access powerful analytics to scale your operations.</p>
                                </li>
                            </ul>
