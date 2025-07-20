@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, User } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { doc, setDoc, serverTimestamp, runTransaction, getDocs, query, where, collection, writeBatch, limit } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, runTransaction, getDocs, query, where, collection, writeBatch, limit, getDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -142,9 +142,11 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
         ...(userType === 'agency' && { contactPerson: contactPerson }),
       });
 
-      const referralError = await handleReferral(referralCode, user);
-      if (referralError) {
-          toast({ variant: 'destructive', title: 'Invalid Referral Code', description: referralError });
+      if (referralCode) {
+        const referralError = await handleReferral(referralCode, user);
+        if (referralError) {
+            toast({ variant: 'destructive', title: 'Invalid Referral Code', description: referralError });
+        }
       }
 
       toast({ title: "Success", description: "Account created successfully!" });
@@ -212,6 +214,7 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [activeTab, setActiveTab] = useState<UserType>('client');
@@ -223,19 +226,31 @@ export default function SignupPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       
-      const newReferralCode = generateReferralCode(user.uid);
+      const userRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userRef);
 
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        phone: user.phoneNumber || '',
-        role: activeTab.toLowerCase(),
-        createdAt: serverTimestamp(),
-        loyaltyPoints: 0,
-        referralCode: newReferralCode,
-      }, { merge: true }); // Use merge to avoid overwriting data if doc exists
+      if (!userDoc.exists()) {
+        const newReferralCode = generateReferralCode(user.uid);
+        await setDoc(userRef, {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            phone: user.phoneNumber || '',
+            role: activeTab.toLowerCase(),
+            createdAt: serverTimestamp(),
+            loyaltyPoints: 0,
+            referralCode: newReferralCode,
+        });
+
+        const refCode = searchParams.get('ref');
+        if (refCode) {
+          const referralError = await handleReferral(refCode, user);
+          if (referralError) {
+              toast({ variant: 'destructive', title: 'Invalid Referral Code', description: referralError });
+          }
+        }
+      }
       
       toast({ title: "Success", description: "Signed up successfully with Google!" });
       router.push('/dashboard');
