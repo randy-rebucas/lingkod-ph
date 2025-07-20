@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, CheckCircle, Star, CalendarIcon } from "lucide-react";
+import { Camera, Upload, Loader2, CheckCircle, Star, CalendarIcon, User, Settings } from "lucide-react";
 import { storage } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -24,6 +24,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { format } from 'date-fns';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 export default function ProfilePage() {
@@ -168,7 +169,6 @@ export default function ProfilePage() {
                 <div className="grid gap-6 md:grid-cols-3">
                     <div className="md:col-span-1 space-y-6">
                         <Skeleton className="h-64 w-full" />
-                        <Skeleton className="h-48 w-full" />
                     </div>
                     <div className="md:col-span-2">
                         <Skeleton className="h-96 w-full" />
@@ -194,164 +194,177 @@ export default function ProfilePage() {
                 </p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-3">
-                <div className="md:col-span-1 space-y-8">
-                    <Card>
-                        <CardHeader className="items-center text-center">
-                            <div className="relative">
-                                <Avatar className="h-24 w-24 border-2 border-primary">
-                                    <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
-                                    <AvatarFallback className="text-3xl">{getAvatarFallback(user.displayName)}</AvatarFallback>
-                                </Avatar>
-                                <Button size="icon" className="absolute bottom-0 right-0 rounded-full h-8 w-8" onClick={() => fileInputRef.current?.click()}>
-                                    <Camera className="h-4 w-4"/>
-                                    <span className="sr-only">Change Photo</span>
-                                </Button>
-                                <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+            <Card>
+                <CardHeader className="flex-row items-center gap-4 space-y-0">
+                    <div className="relative">
+                        <Avatar className="h-24 w-24 border-2 border-primary">
+                            <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
+                            <AvatarFallback className="text-3xl">{getAvatarFallback(user.displayName)}</AvatarFallback>
+                        </Avatar>
+                        <Button size="icon" className="absolute bottom-0 right-0 rounded-full h-8 w-8" onClick={() => fileInputRef.current?.click()}>
+                            <Camera className="h-4 w-4"/>
+                            <span className="sr-only">Change Photo</span>
+                        </Button>
+                        <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+                    </div>
+                    <div>
+                        <CardTitle className="flex items-center gap-2">
+                            {user.displayName}
+                            {isPro && <Badge variant="secondary" className="bg-blue-100 text-blue-800"><CheckCircle className="h-4 w-4 mr-1"/>Verified</Badge>}
+                            {isElite && <Badge variant="secondary" className="bg-purple-100 text-purple-800"><Star className="h-4 w-4 mr-1"/>Premium</Badge>}
+                        </CardTitle>
+                        <CardDescription className="flex items-center gap-2 mt-1">
+                           {user.email}
+                            <Badge variant="secondary" className="capitalize">{userRole}</Badge>
+                        </CardDescription>
+                         {imageFile && (
+                            <div className="mt-2 space-y-2 text-left">
+                                <p className="text-sm text-muted-foreground truncate">Selected: {imageFile.name}</p>
+                                {isUploading && uploadProgress !== null ? (
+                                    <Progress value={uploadProgress} className="w-full" />
+                                ) : (
+                                    <Button onClick={handleUpload} disabled={isUploading} size="sm">
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        {isUploading ? 'Uploading...' : 'Upload Picture'}
+                                    </Button>
+                                )}
                             </div>
-                            <CardTitle className="mt-4 flex items-center gap-2">
-                                {user.displayName}
-                                {isPro && <Badge variant="secondary" className="bg-blue-100 text-blue-800"><CheckCircle className="h-4 w-4 mr-1"/>Verified</Badge>}
-                                {isElite && <Badge variant="secondary" className="bg-purple-100 text-purple-800"><Star className="h-4 w-4 mr-1"/>Premium</Badge>}
-                            </CardTitle>
-                            <CardDescription className="flex items-center gap-2">
-                               {user.email}
-                                <Badge variant="secondary" className="capitalize">{userRole}</Badge>
-                            </CardDescription>
+                        )}
+                    </div>
+                </CardHeader>
+            </Card>
+
+            <Tabs defaultValue="public-profile">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="public-profile">
+                        <User className="mr-2"/> Public Profile
+                    </TabsTrigger>
+                    <TabsTrigger value="account-settings">
+                        <Settings className="mr-2"/> Account Settings
+                    </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="public-profile" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Public Profile Information</CardTitle>
+                            <CardDescription>This information will be displayed on your public profile.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {imageFile && (
-                                <div className="space-y-2 text-center">
-                                    <p className="text-sm text-muted-foreground truncate">Selected: {imageFile.name}</p>
-                                    {isUploading && uploadProgress !== null ? (
-                                        <Progress value={uploadProgress} className="w-full" />
-                                    ) : (
-                                        <Button onClick={handleUpload} disabled={isUploading} size="sm" className="w-full">
-                                            <Upload className="mr-2 h-4 w-4" />
-                                            {isUploading ? 'Uploading...' : 'Upload Picture'}
-                                        </Button>
-                                    )}
-                                </div>
-                            )}
-                             <div className="space-y-2">
-                                <Label htmlFor="bio">Bio</Label>
+                            <div className="space-y-2">
+                                <Label htmlFor="name">{userRole === 'agency' ? 'Business Name' : 'Full Name'}</Label>
+                                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="bio">Bio / About</Label>
                                 <Textarea 
                                     id="bio"
                                     placeholder="Tell us a little about yourself or your business..."
                                     value={bio}
                                     onChange={(e) => setBio(e.target.value)}
-                                    rows={3}
+                                    rows={5}
                                 />
                             </div>
                         </CardContent>
                     </Card>
+                </TabsContent>
+                
+                <TabsContent value="account-settings" className="mt-6">
+                    <div className="space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Personal Details</CardTitle>
+                                <CardDescription>This information is private and will not be shown on your profile.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">Email Address</Label>
+                                    <Input id="email" type="email" value={user.email || ''} disabled />
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="phone">Mobile Number</Label>
+                                        <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., 09123456789" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="gender">Gender</Label>
+                                         <Select value={gender} onValueChange={setGender}>
+                                            <SelectTrigger id="gender">
+                                                <SelectValue placeholder="Select gender" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="male">Male</SelectItem>
+                                                <SelectItem value="female">Female</SelectItem>
+                                                <SelectItem value="other">Other</SelectItem>
+                                                <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Birthdate</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal",
+                                                    !birthdate && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                                {birthdate ? format(birthdate, "PPP") : <span>Pick a date</span>}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={birthdate}
+                                                onSelect={setBirthdate}
+                                                captionLayout="dropdown-buttons"
+                                                fromYear={1950}
+                                                toYear={new Date().getFullYear()}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                     <Card>
-                        <CardHeader>
-                            <CardTitle>Security</CardTitle>
-                            <CardDescription>Manage your password and account security.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                             <div className="space-y-2">
-                                <Label htmlFor="current-password">Current Password</Label>
-                                <Input id="current-password" type="password" />
-                            </div>
-                             <div className="space-y-2">
-                                <Label htmlFor="new-password">New Password</Label>
-                                <Input id="new-password" type="password" />
-                            </div>
-                             <div className="space-y-2">
-                                <Label htmlFor="confirm-password">Confirm New Password</Label>
-                                <Input id="confirm-password" type="password" />
-                            </div>
-                        </CardContent>
-                        <CardFooter>
-                            <Button variant="outline" className="w-full" disabled>Change Password</Button>
-                        </CardFooter>
-                    </Card>
-                </div>
-
-                <div className="md:col-span-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Profile Information</CardTitle>
-                            <CardDescription>Update your personal or business details here.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                             <div className="space-y-2">
-                                <Label htmlFor="name">{userRole === 'agency' ? 'Business Name' : 'Full Name'}</Label>
-                                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
-                            </div>
-                            {userRole === 'agency' && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="contact-person">Contact Person</Label>
-                                    <Input id="contact-person" placeholder="e.g., Juan Dela Cruz"/>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Security</CardTitle>
+                                <CardDescription>Manage your password and account security.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                 <div className="space-y-2">
+                                    <Label htmlFor="current-password">Current Password</Label>
+                                    <Input id="current-password" type="password" />
                                 </div>
-                            )}
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email Address</Label>
-                                <Input id="email" type="email" value={user.email || ''} disabled />
-                            </div>
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="phone">Mobile Number</Label>
-                                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., 09123456789" />
+                                 <div className="space-y-2">
+                                    <Label htmlFor="new-password">New Password</Label>
+                                    <Input id="new-password" type="password" />
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="gender">Gender</Label>
-                                     <Select value={gender} onValueChange={setGender}>
-                                        <SelectTrigger id="gender">
-                                            <SelectValue placeholder="Select gender" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="male">Male</SelectItem>
-                                            <SelectItem value="female">Female</SelectItem>
-                                            <SelectItem value="other">Other</SelectItem>
-                                            <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                 <div className="space-y-2">
+                                    <Label htmlFor="confirm-password">Confirm New Password</Label>
+                                    <Input id="confirm-password" type="password" />
                                 </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Birthdate</Label>
-                                <Popover>
-                                    <PopoverTrigger asChild>
-                                        <Button
-                                            variant={"outline"}
-                                            className={cn(
-                                                "w-full justify-start text-left font-normal",
-                                                !birthdate && "text-muted-foreground"
-                                            )}
-                                        >
-                                            <CalendarIcon className="mr-2 h-4 w-4" />
-                                            {birthdate ? format(birthdate, "PPP") : <span>Pick a date</span>}
-                                        </Button>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0">
-                                        <Calendar
-                                            mode="single"
-                                            selected={birthdate}
-                                            onSelect={setBirthdate}
-                                            captionLayout="dropdown-buttons"
-                                            fromYear={1950}
-                                            toYear={new Date().getFullYear()}
-                                            initialFocus
-                                        />
-                                    </PopoverContent>
-                                </Popover>
-                            </div>
-                        </CardContent>
-                        <CardFooter>
-                            <Button className="w-full md:w-auto" onClick={handleSaveChanges} disabled={isSaving}>
-                                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isSaving ? "Saving..." : "Save Changes"}
-                            </Button>
-                        </CardFooter>
-                    </Card>
-                </div>
+                            </CardContent>
+                            <CardFooter>
+                                <Button variant="outline" className="w-full" disabled>Change Password</Button>
+                            </CardFooter>
+                        </Card>
+                    </div>
+                </TabsContent>
+            </Tabs>
+            
+             <div className="flex justify-end mt-6">
+                <Button onClick={handleSaveChanges} disabled={isSaving}>
+                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isSaving ? "Saving..." : "Save All Changes"}
+                </Button>
             </div>
         </div>
     );
 }
-
-    
