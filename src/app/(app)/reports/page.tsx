@@ -4,13 +4,24 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, getDocs } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DollarSign, BookCheck, Calculator, FilePieChart, Users, Loader2 } from "lucide-react";
+import { DollarSign, BookCheck, Calculator, FilePieChart, BarChart2 } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  Bar,
+} from 'recharts';
 
 type Booking = {
     id: string;
@@ -18,6 +29,7 @@ type Booking = {
     providerName: string;
     status: "Upcoming" | "Completed" | "Cancelled";
     price: number;
+    date: Timestamp;
 };
 
 type ProviderStats = {
@@ -27,12 +39,42 @@ type ProviderStats = {
     totalRevenue: number;
 };
 
+const processRevenueChartData = (bookings: Booking[]) => {
+    const monthlyData: { [key: string]: number } = {};
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+    bookings.forEach(booking => {
+        if (booking.status !== 'Completed') return;
+        const date = booking.date.toDate();
+        const key = `${date.getFullYear()}-${date.getMonth()}`;
+        if (!monthlyData[key]) {
+            monthlyData[key] = 0;
+        }
+        monthlyData[key] += booking.price;
+    });
+
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+    
+    return Array.from({ length: 12 }, (_, i) => {
+        const date = new Date(twelveMonthsAgo);
+        date.setMonth(date.getMonth() + i);
+        const key = `${date.getFullYear()}-${date.getMonth()}`;
+        return {
+            name: `${monthNames[date.getMonth()]} '${date.getFullYear().toString().slice(-2)}`,
+            'Revenue': monthlyData[key] || 0,
+        };
+    });
+};
+
+
 export default function ReportsPage() {
     const { user, userRole, subscription } = useAuth();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
 
     const isAgencyPaidSubscriber = userRole === 'agency' && subscription?.status === 'active' && subscription.planId !== 'free';
+    const isProOrCustom = isAgencyPaidSubscriber && (subscription?.planId === 'pro' || subscription?.planId === 'custom');
 
     useEffect(() => {
         if (!user || !isAgencyPaidSubscriber) {
@@ -67,9 +109,9 @@ export default function ReportsPage() {
             }
         };
 
-        const unsubscribe = fetchAgencyData();
+        const unsubscribePromise = fetchAgencyData();
         return () => {
-             unsubscribe.then(unsub => unsub && unsub());
+             unsubscribePromise.then(unsub => unsub && unsub());
         }
 
     }, [user, isAgencyPaidSubscriber]);
@@ -93,12 +135,16 @@ export default function ReportsPage() {
             providerStats[booking.providerId].completedBookings++;
             providerStats[booking.providerId].totalRevenue += booking.price;
         });
+        
+        const providerPerformance = Object.values(providerStats).sort((a,b) => b.totalRevenue - a.totalRevenue);
 
         return {
             totalRevenue,
             totalCompletedBookings: completedBookings.length,
             averageBookingValue,
-            providerPerformance: Object.values(providerStats).sort((a,b) => b.totalRevenue - a.totalRevenue),
+            providerPerformance,
+            revenueChartData: processRevenueChartData(completedBookings),
+            providerChartData: providerPerformance.map(p => ({name: p.providerName, Bookings: p.completedBookings}))
         };
     }, [bookings]);
 
@@ -106,7 +152,7 @@ export default function ReportsPage() {
         return (
             <div className="space-y-6">
                  <div>
-                    <h1 className="text-3xl font-bold font-headline">Basic Reports</h1>
+                    <h1 className="text-3xl font-bold font-headline">Reports</h1>
                     <p className="text-muted-foreground">This feature is for agency subscribers.</p>
                 </div>
                 <Card>
@@ -140,15 +186,18 @@ export default function ReportsPage() {
             </div>
         );
     }
+    
+    const pageTitle = isProOrCustom ? "Advanced Reports" : "Basic Reports";
+    const pageDescription = isProOrCustom 
+        ? "Deep dive into your agency's performance with charts and detailed tables." 
+        : "An overview of your agency's performance.";
 
     return (
         <div className="space-y-6">
              <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Basic Reports</h1>
-                    <p className="text-muted-foreground">
-                        An overview of your agency's performance.
-                    </p>
+                    <h1 className="text-3xl font-bold font-headline">{pageTitle}</h1>
+                    <p className="text-muted-foreground">{pageDescription}</p>
                 </div>
             </div>
             
@@ -181,6 +230,47 @@ export default function ReportsPage() {
                     </CardContent>
                 </Card>
             </div>
+            
+            {isProOrCustom && (
+                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+                    <Card className="lg:col-span-3">
+                        <CardHeader>
+                            <CardTitle>Monthly Revenue</CardTitle>
+                            <CardDescription>Total revenue over the last 12 months.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                             <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={reportData.revenueChartData}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false}/>
+                                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false}/>
+                                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false}/>
+                                    <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
+                                    <Legend />
+                                    <Line type="monotone" dataKey="Revenue" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                    <Card className="lg:col-span-2">
+                        <CardHeader>
+                            <CardTitle>Provider Bookings</CardTitle>
+                            <CardDescription>Number of completed bookings per provider.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           <ResponsiveContainer width="100%" height={300}>
+                                <BarChart2 data={reportData.providerChartData} layout="vertical" margin={{ left: 20 }}>
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false}/>
+                                    <XAxis type="number" allowDecimals={false} />
+                                    <YAxis type="category" dataKey="name" width={80} stroke="#888888" fontSize={12}/>
+                                    <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}/>
+                                    <Legend />
+                                    <Bar dataKey="Bookings" fill="hsl(var(--chart-2))" />
+                                </BarChart2>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
 
             <Card>
                 <CardHeader>
