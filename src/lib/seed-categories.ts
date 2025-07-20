@@ -67,7 +67,7 @@ export async function seedCategories() {
     categories.forEach(categoryName => {
         if (!existingCategoryNames.has(categoryName)) {
             const newCategoryRef = doc(categoriesRef); // Create a new doc reference
-            batch.set(newCategoryryRef, { name: categoryName });
+            batch.set(newCategoryRef, { name: categoryName });
             count++;
         }
     });
