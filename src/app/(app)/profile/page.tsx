@@ -121,7 +121,7 @@ export default function ProfilePage() {
                 setPhone(data.phone || '');
                 setBio(data.bio || '');
                 setGender(data.gender || '');
-                setReferralCode(data.referralCode || '');
+                setReferralCode(data.referralCode || generateReferralCode(user.uid));
                 if (data.birthdate && data.birthdate.toDate) {
                     const date = data.birthdate.toDate();
                     setBirthDay(String(date.getDate()));
@@ -388,9 +388,9 @@ export default function ProfilePage() {
     const TABS_PROVIDER = ['provider-settings'];
     const TABS_CLIENT_FEATURES = ['loyalty', 'referrals'];
 
-    const tabsToShow = [...TABS_BASE];
+    let tabsToShow = [...TABS_BASE];
     if (userRole === 'provider' || userRole === 'agency') {
-        tabsToShow.splice(2, 0, ...TABS_PROVIDER);
+        tabsToShow.splice(1, 0, ...TABS_PROVIDER);
     }
     tabsToShow.push(...TABS_CLIENT_FEATURES);
     
@@ -431,6 +431,12 @@ export default function ProfilePage() {
                     <div>
                         <CardTitle className="flex items-center gap-2">
                             {user.displayName}
+                             {verificationStatus === 'Verified' && (
+                                <Badge variant="default" className="flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-200">
+                                    <ShieldCheck className="h-4 w-4" />
+                                    Verified
+                                </Badge>
+                            )}
                              {subscription?.planId === 'pro' && (
                                 <Badge variant="default" className="flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-200">
                                     <ShieldCheck className="h-4 w-4" />
@@ -468,10 +474,10 @@ export default function ProfilePage() {
             <Tabs defaultValue="public-profile" className="w-full">
                 <TabsList className={cn("grid w-full", `grid-cols-${tabsToShow.length}`)}>
                     <TabsTrigger value="public-profile"><User className="mr-2"/> Public Profile</TabsTrigger>
-                    <TabsTrigger value="account-settings"><Settings className="mr-2"/> Account</TabsTrigger>
-                    {(userRole === 'provider' || userRole === 'agency') && (
+                     {(userRole === 'provider' || userRole === 'agency') && (
                         <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> Provider</TabsTrigger>
                     )}
+                    <TabsTrigger value="account-settings"><Settings className="mr-2"/> Account</TabsTrigger>
                     <TabsTrigger value="loyalty"><Award className="mr-2"/> Loyalty</TabsTrigger>
                     <TabsTrigger value="referrals"><Users className="mr-2"/> Referrals</TabsTrigger>
                 </TabsList>
@@ -883,5 +889,3 @@ export default function ProfilePage() {
         </div>
     );
 }
-
-    
