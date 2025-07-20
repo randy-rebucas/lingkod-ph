@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle, Loader2, Star, Check } from "lucide-react";
+import { CheckCircle, Loader2, Star, Check, FileDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -73,6 +73,30 @@ const commissionRates = [
         commission: "15%",
         notes: "More value, so higher cut is fair",
     }
+];
+
+const paymentHistory = [
+    {
+        date: "2024-06-25",
+        planName: "Pro",
+        amount: 499,
+        status: "Paid",
+        invoiceId: "INV-2024-001"
+    },
+    {
+        date: "2024-05-25",
+        planName: "Pro",
+        amount: 499,
+        status: "Paid",
+        invoiceId: "INV-2024-002"
+    },
+    {
+        date: "2024-04-25",
+        planName: "Starter",
+        amount: 299,
+        status: "Paid",
+        invoiceId: "INV-2024-003"
+    },
 ];
 
 // Mock function to simulate a backend payment process
@@ -263,6 +287,43 @@ export default function SubscriptionPage() {
                                         <TableCell className="font-medium">{rate.jobType}</TableCell>
                                         <TableCell>{rate.commission}</TableCell>
                                         <TableCell className="text-muted-foreground">{rate.notes}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                 </Card>
+            </section>
+
+             <section>
+                <h2 className="text-2xl font-bold font-headline mb-4">Payment History</h2>
+                 <Card>
+                    <CardContent className="p-0">
+                         <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Plan</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Invoice</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {paymentHistory.map(item => (
+                                    <TableRow key={item.invoiceId}>
+                                        <TableCell className="font-medium">{item.date}</TableCell>
+                                        <TableCell>{item.planName}</TableCell>
+                                        <TableCell>₱{item.amount.toFixed(2)}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="secondary">{item.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="outline" size="icon">
+                                                <FileDown className="h-4 w-4" />
+                                                <span className="sr-only">Download Invoice</span>
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
