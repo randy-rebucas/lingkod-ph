@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin } from "lucide-react";
+import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -727,10 +727,11 @@ export default function ProfilePage() {
                             {isLoaded && (
                                 <div className="space-y-2">
                                     <Label htmlFor="address">Address / Service Area</Label>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 items-center">
                                         <Autocomplete
                                             onLoad={onLoad}
                                             onPlaceChanged={onPlaceChanged}
+                                            className="w-full"
                                         >
                                             <Input 
                                                 id="address" 
@@ -740,9 +741,12 @@ export default function ProfilePage() {
                                                 className="w-full"
                                             />
                                         </Autocomplete>
-                                        <Button type="button" variant="outline" onClick={handleCurrentLocation}>
+                                        
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button type="button" variant="outline" className="w-full" onClick={handleCurrentLocation}>
                                             <MapPin className="mr-2 h-4 w-4"/>
-                                            Current Location
+                                            Use Current Location
                                         </Button>
                                     </div>
                                     <input type="hidden" value={latitude || ''} onChange={() => {}} />
