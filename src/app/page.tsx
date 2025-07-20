@@ -83,15 +83,15 @@ const renderStars = (rating: number, keyPrefix: string) => {
 }
 
 const testimonials = [
-    { name: 'Maria C.', rating: 5, comment: "Booking an electrician through LingkodPH was a breeze! The provider was professional, on-time, and fixed the issue in no time. Highly recommended!", avatar: 'https://placehold.co/100x100.png', hint: 'woman portrait' },
-    { name: 'John D.', rating: 5, comment: "As a small business owner, finding reliable contractors was always a challenge. LingkodPH connected us with a fantastic team for our office renovation.", avatar: 'https://placehold.co/100x100.png', hint: 'man portrait' },
-    { name: 'Anna S.', rating: 4, comment: "The platform is very user-friendly. I found a great weekly cleaning service that fits my budget. My only wish is for more providers in my specific area.", avatar: 'https://placehold.co/100x100.png', hint: 'woman smiling' },
+    { name: 'Maria C.', rating: 5, comment: "Booking an electrician through LingkodPH was a breeze! The provider was professional, on-time, and fixed the issue in no time. Highly recommended!", avatar: 'https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=300', hint: 'woman portrait' },
+    { name: 'John D.', rating: 5, comment: "As a small business owner, finding reliable contractors was always a challenge. LingkodPH connected us with a fantastic team for our office renovation.", avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300', hint: 'man portrait' },
+    { name: 'Anna S.', rating: 4, comment: "The platform is very user-friendly. I found a great weekly cleaning service that fits my budget. My only wish is for more providers in my specific area.", avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300', hint: 'woman smiling' },
 ];
 
 const topProviders = [
-    { name: 'Ricardo "Cardo" Gomez', specialty: 'Master Electrician', rating: 4.9, reviews: 128, avatar: 'https://placehold.co/200x200.png', hint: 'man smiling' },
-    { name: 'Elena Reyes', specialty: 'Deep Cleaning Specialist', rating: 4.8, reviews: 214, avatar: 'https://placehold.co/200x200.png', hint: 'woman happy' },
-    { name: 'Benny Tan', specialty: 'HVAC & Refrigeration Expert', rating: 4.9, reviews: 98, avatar: 'https://placehold.co/200x200.png', hint: 'man portrait' },
+    { name: 'Ricardo "Cardo" Gomez', specialty: 'Master Electrician', rating: 4.9, reviews: 128, avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=300', hint: 'man smiling', background: 'https://images.unsplash.com/photo-1487532322495-2c355823e595?q=80&w=600', bgHint: 'electrical tools' },
+    { name: 'Elena Reyes', specialty: 'Deep Cleaning Specialist', rating: 4.8, reviews: 214, avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=300', hint: 'woman happy', background: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=600', bgHint: 'cleaning supplies' },
+    { name: 'Benny Tan', specialty: 'HVAC & Refrigeration Expert', rating: 4.9, reviews: 98, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300', hint: 'man portrait', background: 'https://images.unsplash.com/photo-1542438408-42a3ce919793?q=80&w=600', bgHint: 'air conditioner' },
 ];
 
 const PartnerLogo = ({ name, hint }: {name: string, hint: string}) => (
@@ -219,20 +219,22 @@ export default function Home() {
                 </div>
                 <div className="grid gap-8 md:grid-cols-3">
                     {topProviders.map(provider => (
-                         <Card key={provider.name} className="overflow-hidden transform-gpu transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                            <CardHeader className="items-center text-center p-6 bg-secondary">
-                                <Avatar className="h-24 w-24 border-4 border-background ring-2 ring-primary">
+                         <Card key={provider.name} className="overflow-hidden transform-gpu transition-all duration-300 hover:-translate-y-2 hover:shadow-xl group">
+                            <div className="relative h-40">
+                                <Image src={provider.background} alt={provider.specialty} layout="fill" className="object-cover group-hover:scale-105 transition-transform duration-500" data-ai-hint={provider.bgHint} />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                <Avatar className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 h-24 w-24 border-4 border-background ring-2 ring-primary">
                                     <AvatarImage src={provider.avatar} alt={provider.name} data-ai-hint={provider.hint} />
                                     <AvatarFallback>{provider.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
                                 </Avatar>
-                                <CardTitle className="mt-4">{provider.name}</CardTitle>
+                            </div>
+                            <CardContent className="text-center p-6 pt-16">
+                               <CardTitle>{provider.name}</CardTitle>
                                 <CardDescription>{provider.specialty}</CardDescription>
-                            </CardHeader>
-                            <CardContent className="text-center p-6">
-                                <div className="flex items-center justify-center gap-2">
+                                <div className="flex items-center justify-center gap-2 mt-2">
                                     {renderStars(provider.rating, provider.name)}
                                 </div>
-                                <p className="text-sm text-muted-foreground mt-2">{provider.rating} average from {provider.reviews} reviews</p>
+                                <p className="text-sm text-muted-foreground mt-1">{provider.rating} stars ({provider.reviews} reviews)</p>
                                 <Button asChild variant="secondary" className="mt-4">
                                     <Link href="/signup">View Profile</Link>
                                 </Button>
@@ -276,25 +278,26 @@ export default function Home() {
         {/* Join Platform Section (B2B2C CTA) */}
         <section id="join" className="bg-background py-20">
             <div className="container">
-                <div className="relative rounded-xl overflow-hidden bg-primary text-primary-foreground p-12">
-                     <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-80"></div>
+                <div className="relative rounded-xl overflow-hidden p-12 text-primary-foreground">
+                    <Image src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1469" layout="fill" alt="Business team collaborating" className="object-cover" data-ai-hint="business team" />
+                     <div className="absolute inset-0 bg-primary/80 mix-blend-multiply"></div>
                      <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <h2 className="font-headline text-3xl font-bold">Ready to Grow Your Service Business?</h2>
-                            <p className="mt-2 opacity-90">Whether you're an individual provider or a growing agency, LingkodPH provides the tools, visibility, and support you need to succeed.</p>
+                            <h2 className="font-headline text-4xl font-bold">Ready to Grow Your Service Business?</h2>
+                            <p className="mt-4 text-lg opacity-90">Whether you're an individual provider or a growing agency, LingkodPH provides the tools, visibility, and support you need to succeed.</p>
                         </div>
                         <div className="bg-background/20 backdrop-blur-sm p-8 rounded-lg">
-                           <ul className="space-y-4">
+                           <ul className="space-y-4 text-primary-foreground">
                                <li className="flex items-start gap-3">
-                                   <div className="mt-1"><UserCheck className="h-5 w-5 text-background" /></div>
+                                   <div className="mt-1"><UserCheck className="h-5 w-5" /></div>
                                    <p><span className="font-semibold">For Individual Providers:</span> Build your reputation, manage bookings effortlessly, and connect with a steady stream of clients.</p>
                                </li>
                                <li className="flex items-start gap-3">
-                                   <div className="mt-1"><Building className="h-5 w-5 text-background" /></div>
+                                   <div className="mt-1"><Building className="h-5 w-5" /></div>
                                    <p><span className="font-semibold">For Agencies:</span> Onboard your team, manage multiple providers, and access powerful analytics to scale your operations.</p>
                                </li>
                            </ul>
-                           <Button asChild variant="secondary" size="lg" className="mt-6 w-full text-primary-foreground bg-white hover:bg-white/90">
+                           <Button asChild variant="secondary" size="lg" className="mt-6 w-full text-primary-foreground bg-white hover:bg-white/90 text-primary">
                                <Link href="/signup">Join as a Provider or Agency</Link>
                            </Button>
                         </div>
@@ -306,5 +309,4 @@ export default function Home() {
       <Footer />
     </div>
   );
-
-    
+}
