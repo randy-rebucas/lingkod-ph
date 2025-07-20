@@ -9,12 +9,19 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, BriefcaseBusiness, MessageSquare, CalendarPlus, CheckCircle } from "lucide-react";
+import { Star, BriefcaseBusiness, MessageSquare, CalendarPlus, CheckCircle, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { BookingDialog } from "@/components/booking-dialog";
+
+type Availability = {
+    day: string;
+    enabled: boolean;
+    startTime: string;
+    endTime: string;
+};
 
 type Provider = {
     uid: string;
@@ -23,6 +30,7 @@ type Provider = {
     bio?: string;
     photoURL?: string;
     role: string;
+    availabilitySchedule?: Availability[];
 };
 
 export type Service = {
@@ -198,6 +206,9 @@ export default function ProviderProfilePage() {
         return <div>Provider not found.</div>
     }
 
+    const today = new Date().toLocaleString('en-us', { weekday: 'long' });
+    const todaySchedule = provider.availabilitySchedule?.find(s => s.day === today);
+
     return (
         <div className="max-w-6xl mx-auto space-y-8">
             {/* Header Card */}
@@ -225,29 +236,56 @@ export default function ProviderProfilePage() {
                 </CardContent>
             </Card>
 
-            {/* Services Section */}
-            <div ref={servicesRef}>
-                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><BriefcaseBusiness /> Services Offered</h2>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {services.length > 0 ? services.map(service => (
-                        <Card key={service.id}>
-                            <CardHeader>
-                                <CardTitle>{service.name}</CardTitle>
-                                <CardDescription>{service.category}</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm text-muted-foreground h-20 line-clamp-4">{service.description}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="md:col-span-2">
+                    {/* Services Section */}
+                    <div ref={servicesRef}>
+                        <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><BriefcaseBusiness /> Services Offered</h2>
+                        <div className="grid gap-6 md:grid-cols-2">
+                            {services.length > 0 ? services.map(service => (
+                                <Card key={service.id}>
+                                    <CardHeader>
+                                        <CardTitle>{service.name}</CardTitle>
+                                        <CardDescription>{service.category}</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-sm text-muted-foreground h-20 line-clamp-4">{service.description}</p>
+                                    </CardContent>
+                                    <CardFooter className="flex justify-between items-center">
+                                        <p className="text-xl font-bold text-primary">₱{service.price.toFixed(2)}</p>
+                                        <Button onClick={() => handleBookServiceClick(service)}>Book</Button>
+                                    </CardFooter>
+                                </Card>
+                            )) : (
+                                <p className="text-muted-foreground col-span-full text-center py-8">This provider has not listed any services yet.</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+                <div className="md:col-span-1 space-y-8">
+                    {/* Availability Section */}
+                     <div>
+                        <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Clock /> Weekly Hours</h2>
+                         <Card>
+                             <CardContent className="p-6 space-y-3">
+                                {provider.availabilitySchedule && provider.availabilitySchedule.length > 0 ? (
+                                    provider.availabilitySchedule.map(schedule => (
+                                        <div key={schedule.day} className={`flex justify-between text-sm ${schedule.day === today ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
+                                            <span>{schedule.day}</span>
+                                            <span>
+                                                {schedule.enabled ? `${schedule.startTime} - ${schedule.endTime}` : 'Closed'}
+                                            </span>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-muted-foreground text-center py-4">Availability not set.</p>
+                                )}
                             </CardContent>
-                            <CardFooter className="flex justify-between items-center">
-                                <p className="text-xl font-bold text-primary">₱{service.price.toFixed(2)}</p>
-                                <Button onClick={() => handleBookServiceClick(service)}>Book</Button>
-                            </CardFooter>
                         </Card>
-                    )) : (
-                        <p className="text-muted-foreground col-span-full text-center py-8">This provider has not listed any services yet.</p>
-                    )}
+                    </div>
                 </div>
             </div>
+
             
             <Separator />
 

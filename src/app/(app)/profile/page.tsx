@@ -59,6 +59,29 @@ type Invite = {
     status: 'pending' | 'accepted' | 'declined';
 }
 
+type Availability = {
+    day: string;
+    enabled: boolean;
+    startTime: string;
+    endTime: string;
+};
+
+const initialAvailability: Availability[] = [
+    { day: "Monday", enabled: true, startTime: "09:00", endTime: "17:00" },
+    { day: "Tuesday", enabled: true, startTime: "09:00", endTime: "17:00" },
+    { day: "Wednesday", enabled: true, startTime: "09:00", endTime: "17:00" },
+    { day: "Thursday", enabled: true, startTime: "09:00", endTime: "17:00" },
+    { day: "Friday", enabled: true, startTime: "09:00", endTime: "17:00" },
+    { day: "Saturday", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Sunday", enabled: false, startTime: "09:00", endTime: "17:00" },
+];
+
+const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
+    const hours = Math.floor(i / 2);
+    const minutes = (i % 2) * 30;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+});
+
 export default function ProfilePage() {
     const { user, userRole, loading, subscription, verificationStatus } = useAuth();
     const { toast } = useToast();
@@ -83,6 +106,7 @@ export default function ProfilePage() {
     const [licenseExpirationDate, setLicenseExpirationDate] = useState('');
     const [licenseIssuingState, setLicenseIssuingState] = useState('');
     const [licenseIssuingCountry, setLicenseIssuingCountry] = useState('');
+    const [availabilitySchedule, setAvailabilitySchedule] = useState<Availability[]>(initialAvailability);
     
     const [isSavingPublic, setIsSavingPublic] = useState(false);
     const [isSavingPersonal, setIsSavingPersonal] = useState(false);
@@ -153,6 +177,7 @@ export default function ProfilePage() {
                     setLicenseExpirationDate(data.licenseExpirationDate || '');
                     setLicenseIssuingState(data.licenseIssuingState || '');
                     setLicenseIssuingCountry(data.licenseIssuingCountry || '');
+                    setAvailabilitySchedule(data.availabilitySchedule || initialAvailability);
                 }
             }
         });
@@ -331,7 +356,7 @@ export default function ProfilePage() {
             setIsSavingPersonal(false);
         }
     }
-
+    
     const handleProviderDetailsUpdate = async () => {
         if (!user) return;
         setIsSavingProvider(true);
@@ -348,6 +373,7 @@ export default function ProfilePage() {
                 licenseExpirationDate: licenseExpirationDate,
                 licenseIssuingState: licenseIssuingState,
                 licenseIssuingCountry: licenseIssuingCountry,
+                availabilitySchedule: availabilitySchedule,
             };
             
             await updateDoc(userDocRef, updates);
@@ -442,6 +468,12 @@ export default function ProfilePage() {
     const handleRemoveKeyService = (serviceToRemove: string) => {
         setKeyServices(keyServices.filter(s => s !== serviceToRemove));
     }
+
+    const handleAvailabilityChange = (day: string, field: keyof Availability, value: any) => {
+        setAvailabilitySchedule(prev => 
+            prev.map(item => item.day === day ? { ...item, [field]: value } : item)
+        );
+    };
 
 
     const isProviderOrAgency = userRole === 'provider' || userRole === 'agency';
@@ -922,6 +954,55 @@ export default function ProfilePage() {
                                     <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
                                         {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                         {isSavingProvider ? 'Saving...' : 'Update Professional Details'}
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Weekly Availability</CardTitle>
+                                    <CardDescription>Set your standard working hours for each day.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    {availabilitySchedule.map((item, index) => (
+                                        <div key={item.day} className="grid grid-cols-4 items-center gap-4">
+                                            <div className="col-span-1 flex items-center gap-2">
+                                                 <Switch 
+                                                    id={`enabled-${item.day}`} 
+                                                    checked={item.enabled}
+                                                    onCheckedChange={(checked) => handleAvailabilityChange(item.day, 'enabled', checked)}
+                                                />
+                                                <Label htmlFor={`enabled-${item.day}`}>{item.day}</Label>
+                                            </div>
+                                            <div className="col-span-3 grid grid-cols-2 gap-2">
+                                                 <Select 
+                                                    value={item.startTime}
+                                                    onValueChange={(value) => handleAvailabilityChange(item.day, 'startTime', value)}
+                                                    disabled={!item.enabled}
+                                                >
+                                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                                    <SelectContent>
+                                                        {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                                 <Select 
+                                                    value={item.endTime}
+                                                    onValueChange={(value) => handleAvailabilityChange(item.day, 'endTime', value)}
+                                                    disabled={!item.enabled}
+                                                >
+                                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                                    <SelectContent>
+                                                        {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </CardContent>
+                                 <CardFooter>
+                                    <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
+                                        {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        {isSavingProvider ? 'Saving...' : 'Update Availability'}
                                     </Button>
                                 </CardFooter>
                             </Card>
