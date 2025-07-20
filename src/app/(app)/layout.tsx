@@ -19,6 +19,8 @@ import {
   Calculator,
   BarChart2,
   Users2,
+  Moon,
+  Sun,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -47,6 +49,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationBell } from "@/components/notification-bell";
+import { useTheme } from "next-themes";
 
 const Logo = () => (
   <h1 className="text-2xl font-bold font-headline text-primary pl-2 group-data-[collapsible=icon]:hidden">
@@ -59,6 +62,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, loading, userRole, subscription } = useAuth();
   const { toast } = useToast();
+  const { setTheme } = useTheme();
 
   const handleLogout = async () => {
     try {
@@ -269,6 +273,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {pathname.split('/').pop()?.replace('-', ' ') || 'Dashboard'}
           </div>
            <div className="flex items-center gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                  <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                  <span className="sr-only">Toggle theme</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setTheme("light")}>
+                  Light
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("dark")}>
+                  Dark
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setTheme("system")}>
+                  System
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

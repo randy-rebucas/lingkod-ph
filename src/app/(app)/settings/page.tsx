@@ -2,12 +2,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Moon, Sun, Bell, AtSign, MessageSquare, Loader2, UserPlus } from "lucide-react"
+import { Bell, AtSign, MessageSquare, Loader2, UserPlus } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
@@ -22,7 +21,6 @@ type NotificationSettings = {
 }
 
 export default function SettingsPage() {
-    const { theme, setTheme } = useTheme()
     const { user, userRole } = useAuth();
     const { toast } = useToast();
 
@@ -80,34 +78,8 @@ export default function SettingsPage() {
                 </p>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                <Card className="lg:col-span-1">
-                    <CardHeader>
-                        <CardTitle>Appearance</CardTitle>
-                        <CardDescription>Customize the look and feel of the app.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between rounded-lg border p-4">
-                            <Label htmlFor="theme-mode" className="flex flex-col space-y-1">
-                                <span>Theme</span>
-                                <span className="font-normal leading-snug text-muted-foreground">
-                                    Select your preferred theme.
-                                </span>
-                            </Label>
-                             <div className="flex items-center gap-2">
-                                <Sun className={`h-6 w-6 ${theme === 'light' ? 'text-primary' : 'text-muted-foreground'}`} />
-                                <Switch 
-                                    id="theme-mode"
-                                    checked={theme === 'dark'}
-                                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-                                />
-                                <Moon className={`h-6 w-6 ${theme === 'dark' ? 'text-primary' : 'text-muted-foreground'}`} />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="lg:col-span-2">
+            <div className="grid gap-8">
+                <Card>
                     <CardHeader>
                         <CardTitle>Notifications</CardTitle>
                         <CardDescription>Choose how you want to be notified.</CardDescription>
