@@ -7,6 +7,7 @@ import {
   ChevronDown,
   MoreHorizontal,
   PlusCircle,
+  FileText
 } from "lucide-react";
 import {
   ColumnDef,
@@ -49,6 +50,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { AddEditInvoiceDialog } from "@/components/add-edit-invoice-dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
 
@@ -85,7 +88,7 @@ const getStatusVariant = (status: InvoiceStatus) => {
 
 
 export default function InvoicesPage() {
-    const { user } = useAuth();
+    const { user, subscription } = useAuth();
     const { toast } = useToast();
     const [invoices, setInvoices] = React.useState<Invoice[]>([]);
     const [loading, setLoading] = React.useState(true);
@@ -97,8 +100,10 @@ export default function InvoicesPage() {
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
 
+    const isProOrElite = subscription?.status === 'active' && (subscription.planId === 'pro' || subscription.planId === 'elite');
+
     const fetchInvoices = React.useCallback(() => {
-        if (!user) {
+        if (!user || !isProOrElite) {
             setLoading(false);
             return;
         }
@@ -120,7 +125,7 @@ export default function InvoicesPage() {
         });
 
         return unsubscribe;
-    }, [user, toast]);
+    }, [user, toast, isProOrElite]);
 
     React.useEffect(() => {
         const unsubscribe = fetchInvoices();
@@ -305,6 +310,32 @@ export default function InvoicesPage() {
             rowSelection,
         },
     });
+    
+    if (!isProOrElite) {
+         return (
+            <div className="space-y-6">
+                <div>
+                  <h1 className="text-3xl font-bold font-headline">Invoices</h1>
+                  <p className="text-muted-foreground">
+                      Create and manage invoices for your clients.
+                  </p>
+              </div>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Upgrade to Pro or Elite to Use Invoices</CardTitle>
+                        <CardDescription>This feature is available for Pro and Elite subscribers. Upgrade your plan to create and manage professional invoices.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
+                        <FileText className="h-16 w-16 mb-4" />
+                        <p className="mb-4">Streamline your billing process with our invoice generator.</p>
+                         <Button asChild>
+                            <Link href="/subscription">View Subscription Plans</Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
 
     return (
       <div className="space-y-6">

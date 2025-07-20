@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 type CompletedBooking = {
     id: string;
@@ -59,13 +60,14 @@ const processChartData = (bookings: CompletedBooking[]) => {
 };
 
 export default function EarningsPage() {
-    const { user, userRole } = useAuth();
+    const { user, userRole, subscription } = useAuth();
     const { toast } = useToast();
     const [bookings, setBookings] = useState<CompletedBooking[]>([]);
     const [loading, setLoading] = useState(true);
+    const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
 
     useEffect(() => {
-        if (!user || userRole !== 'provider') {
+        if (!user || userRole !== 'provider' || !isPaidSubscriber) {
             setLoading(false);
             return;
         }
@@ -87,7 +89,7 @@ export default function EarningsPage() {
         });
 
         return () => unsubscribe();
-    }, [user, userRole]);
+    }, [user, userRole, isPaidSubscriber]);
 
     const totalRevenue = bookings.reduce((sum, b) => sum + b.price, 0);
     
@@ -110,6 +112,43 @@ export default function EarningsPage() {
         });
     }
 
+    if (userRole !== 'provider') {
+        return (
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-3xl font-bold font-headline">Earnings</h1>
+                    <p className="text-muted-foreground">This page is for providers only.</p>
+                </div>
+            </div>
+        );
+    }
+    
+    if (!isPaidSubscriber) {
+         return (
+            <div className="space-y-6">
+                 <div>
+                    <h1 className="text-3xl font-bold font-headline">Earnings</h1>
+                    <p className="text-muted-foreground">
+                        Track your revenue and request payouts.
+                    </p>
+                </div>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Upgrade to Access Earnings</CardTitle>
+                        <CardDescription>This feature is available on our paid plans. Upgrade your plan to track your earnings and manage payouts.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
+                        <DollarSign className="h-16 w-16 mb-4" />
+                        <p className="mb-4">Take control of your finances and monitor your business growth.</p>
+                         <Button asChild>
+                            <Link href="/subscription">View Subscription Plans</Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
+
     if (loading) {
         return (
             <div className="space-y-6">
@@ -123,17 +162,6 @@ export default function EarningsPage() {
                 </div>
                 <Skeleton className="h-80 w-full" />
                 <Skeleton className="h-64 w-full" />
-            </div>
-        );
-    }
-
-     if (userRole !== 'provider') {
-        return (
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Earnings</h1>
-                    <p className="text-muted-foreground">This page is for providers only.</p>
-                </div>
             </div>
         );
     }

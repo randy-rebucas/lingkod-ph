@@ -21,6 +21,8 @@ import { useState, useEffect, useMemo } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 type Booking = {
     id: string;
@@ -83,9 +85,14 @@ export default function AnalyticsPage() {
     const { user, subscription } = useAuth();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
+    const isElite = subscription?.status === 'active' && subscription.planId === 'elite';
+
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || !isElite) {
+            setLoading(false);
+            return;
+        };
 
         setLoading(true);
         const bookingsQuery = query(collection(db, "bookings"), where("providerId", "==", user.uid));
@@ -100,7 +107,7 @@ export default function AnalyticsPage() {
         });
 
         return () => unsubscribe();
-    }, [user]);
+    }, [user, isElite]);
 
     const analyticsData = useMemo(() => {
         const completedBookings = bookings.filter(b => b.status === 'Completed');
@@ -125,7 +132,7 @@ export default function AnalyticsPage() {
         };
     }, [bookings]);
 
-    if (subscription?.planId !== 'elite') {
+    if (!isElite) {
         return (
             <div className="space-y-6">
                 <div>
@@ -141,7 +148,10 @@ export default function AnalyticsPage() {
                     </CardHeader>
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                         <BarChart2 className="h-16 w-16 mb-4" />
-                        <p>Your advanced analytics dashboard will be displayed here.</p>
+                        <p className="mb-4">Your advanced analytics dashboard will be displayed here.</p>
+                         <Button asChild>
+                            <Link href="/subscription">View Subscription Plans</Link>
+                        </Button>
                     </CardContent>
                 </Card>
             </div>
