@@ -21,6 +21,7 @@ import {
   Users2,
   Moon,
   Sun,
+  FilePieChart,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -112,6 +113,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
   const isProOrElite = isPaidSubscriber && (subscription?.planId === 'pro' || subscription?.planId === 'elite');
   const isElite = isPaidSubscriber && subscription?.planId === 'elite';
+  const isAgencyPaidSubscriber = userRole === 'agency' && isPaidSubscriber;
 
 
   return (
@@ -176,14 +178,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </SidebarMenuItem>
 
                 {userRole === 'agency' && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/manage-providers")}>
-                      <Link href="/manage-providers">
-                        <Users2 />
-                        <span>Manage Providers</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/manage-providers")}>
+                        <Link href="/manage-providers">
+                          <Users2 />
+                          <span>Manage Providers</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                     {isAgencyPaidSubscriber && (
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/reports")}>
+                          <Link href="/reports">
+                            <FilePieChart />
+                            <span>Reports</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )}
+                  </>
                 )}
 
                 {userRole === 'provider' && (
