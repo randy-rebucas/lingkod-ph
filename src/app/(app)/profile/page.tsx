@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -432,10 +431,16 @@ export default function ProfilePage() {
                     <div>
                         <CardTitle className="flex items-center gap-2">
                             {user.displayName}
-                             {verificationStatus === 'Verified' && (
-                                <Badge variant="default" className="flex items-center gap-1 bg-green-100 text-green-800 border-green-200">
+                             {subscription?.planId === 'pro' && (
+                                <Badge variant="default" className="flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-200">
                                     <ShieldCheck className="h-4 w-4" />
                                     Verified
+                                </Badge>
+                            )}
+                             {subscription?.planId === 'elite' && (
+                                <Badge variant="default" className="flex items-center gap-1 bg-purple-100 text-purple-800 border-purple-200">
+                                    <Star className="h-4 w-4" />
+                                    Premium
                                 </Badge>
                             )}
                         </CardTitle>
@@ -879,3 +884,4 @@ export default function ProfilePage() {
     );
 }
 
+    
