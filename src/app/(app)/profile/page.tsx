@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings, Briefcase, Award, Users, Database, Copy } from "lucide-react";
+import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, Link as LinkIcon, Gift } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -177,9 +177,9 @@ export default function ProfilePage() {
         };
     }, [user, userRole]);
 
-    const handleCopyReferralCode = () => {
-        navigator.clipboard.writeText(referralCode);
-        toast({ title: 'Copied!', description: 'Your referral code has been copied to the clipboard.' });
+    const handleCopy = (textToCopy: string, toastMessage: string) => {
+        navigator.clipboard.writeText(textToCopy);
+        toast({ title: 'Copied!', description: toastMessage });
     };
 
     const handleRedeemReward = async (reward: Reward) => {
@@ -384,12 +384,19 @@ export default function ProfilePage() {
         return <p>Please log in to view your profile.</p>;
     }
     
-    const TABS = ['public-profile', 'account-settings', 'loyalty', 'referrals'];
-    if (userRole === 'provider' || userRole === 'agency') {
-        TABS.splice(2, 0, 'provider-settings');
-    }
+    const TABS_BASE = ['public-profile', 'account-settings'];
+    const TABS_PROVIDER = ['provider-settings'];
+    const TABS_CLIENT_FEATURES = ['loyalty', 'referrals'];
 
+    const tabsToShow = [...TABS_BASE];
+    if (userRole === 'provider' || userRole === 'agency') {
+        tabsToShow.splice(2, 0, ...TABS_PROVIDER);
+    }
+    tabsToShow.push(...TABS_CLIENT_FEATURES);
+    
     const totalReferralPoints = referrals.reduce((sum, ref) => sum + ref.rewardPointsGranted, 0);
+
+    const referralLink = `${window.location.origin}/signup?ref=${referralCode}`;
 
     return (
         <div className="space-y-6">
@@ -438,8 +445,8 @@ export default function ProfilePage() {
                 </CardHeader>
             </Card>
 
-            <Tabs defaultValue="public-profile">
-                <TabsList className={cn("grid w-full", `grid-cols-${TABS.length}`)}>
+            <Tabs defaultValue="public-profile" className="w-full">
+                <TabsList className={cn("grid w-full", `grid-cols-${tabsToShow.length}`)}>
                     <TabsTrigger value="public-profile"><User className="mr-2"/> Public Profile</TabsTrigger>
                     <TabsTrigger value="account-settings"><Settings className="mr-2"/> Account</TabsTrigger>
                     {(userRole === 'provider' || userRole === 'agency') && (
@@ -657,73 +664,109 @@ export default function ProfilePage() {
                 </TabsContent>
 
                 <TabsContent value="referrals" className="mt-6 space-y-6">
-                     <div>
-                         <h2 className="text-2xl font-bold">Referral Program</h2>
-                         <p className="text-muted-foreground">Invite friends to LingkodPH and earn 250 points for each successful referral!</p>
+                    <div>
+                        <h2 className="text-2xl font-bold">Referral Program</h2>
+                        <p className="text-muted-foreground">Invite friends to LingkodPH and earn 250 points for each successful referral!</p>
                     </div>
-                     <Card>
-                        <CardHeader>
-                            <CardTitle>Your Unique Referral Code</CardTitle>
-                            <CardDescription>Share this code with your friends. When they sign up, you both get rewarded.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex w-full max-w-sm items-center space-x-2 p-4 border-2 border-dashed rounded-lg bg-secondary">
-                                <p className="text-2xl font-mono font-bold text-primary flex-1">{referralCode}</p>
-                                <Button size="icon" variant="ghost" onClick={handleCopyReferralCode}>
-                                    <Copy className="h-5 w-5" />
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Referral Stats</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex justify-between items-center p-3 rounded-md bg-secondary">
-                                    <p className="font-medium">Friends Joined</p>
-                                    <p className="text-2xl font-bold">{referrals.length}</p>
-                                </div>
-                                 <div className="flex justify-between items-center p-3 rounded-md bg-secondary">
-                                    <p className="font-medium">Total Points Earned</p>
-                                    <p className="text-2xl font-bold text-green-600">+{totalReferralPoints.toLocaleString()}</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                         <Card>
-                            <CardHeader>
-                                <CardTitle>Referral History</CardTitle>
-                                <CardDescription>Users who joined using your code.</CardDescription>
-                            </CardHeader>
-                             <CardContent>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Date Joined</TableHead>
-                                            <TableHead>Referred User</TableHead>
-                                            <TableHead className="text-right">Reward</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {referrals.length > 0 ? referrals.slice(0, 5).map(ref => (
-                                             <TableRow key={ref.id}>
-                                                <TableCell className="text-xs text-muted-foreground">{ref.createdAt ? format(ref.createdAt.toDate(), 'MMM d, yyyy') : ''}</TableCell>
-                                                <TableCell>{ref.referredEmail}</TableCell>
-                                                <TableCell className="text-right font-medium text-green-600">
-                                                   +{ref.rewardPointsGranted} pts
-                                                </TableCell>
-                                            </TableRow>
-                                        )) : (
-                                            <TableRow>
-                                                <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">No referrals yet.</TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2 space-y-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Your Referral Link & Code</CardTitle>
+                                    <CardDescription>Share these with friends. When they sign up, you both get rewarded.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div>
+                                        <Label htmlFor="referralCode" className="text-xs text-muted-foreground">Your Code</Label>
+                                        <div className="flex items-center space-x-2 p-3 border-2 border-dashed rounded-lg bg-secondary">
+                                            <p id="referralCode" className="text-lg font-mono font-bold text-primary flex-1">{referralCode}</p>
+                                            <Button size="icon" variant="ghost" onClick={() => handleCopy(referralCode, 'Your referral code has been copied.')}>
+                                                <Copy className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="referralLink" className="text-xs text-muted-foreground">Your Link</Label>
+                                        <div className="flex items-center space-x-2 p-3 border-2 border-dashed rounded-lg bg-secondary">
+                                            <p id="referralLink" className="text-sm text-primary flex-1 truncate">{referralLink}</p>
+                                            <Button size="icon" variant="ghost" onClick={() => handleCopy(referralLink, 'Your referral link has been copied.')}>
+                                                <Copy className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>How It Works</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="flex items-start gap-4">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">1</div>
+                                        <div>
+                                            <h4 className="font-semibold">Share Your Code</h4>
+                                            <p className="text-sm text-muted-foreground">Send your referral link or code to friends and family.</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">2</div>
+                                        <div>
+                                            <h4 className="font-semibold">Friend Signs Up</h4>
+                                            <p className="text-sm text-muted-foreground">Your friend signs up on LingkodPH using your referral code.</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-start gap-4">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">3</div>
+                                        <div>
+                                            <h4 className="font-semibold">You Both Earn Points</h4>
+                                            <p className="text-sm text-muted-foreground">You receive 250 loyalty points once their account is created!</p>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                        
+                        <div className="space-y-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Share</CardTitle>
+                                    <CardDescription>Share your link directly on social media.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="flex flex-col space-y-2">
+                                     <Button variant="outline" asChild>
+                                        <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`} target="_blank" rel="noopener noreferrer">Facebook</a>
+                                    </Button>
+                                    <Button variant="outline" asChild>
+                                        <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent('Join me on LingkodPH! Use my code: ' + referralCode)}`} target="_blank" rel="noopener noreferrer">Twitter / X</a>
+                                    </Button>
+                                    <Button variant="outline" asChild>
+                                        <a href={`https://wa.me/?text=${encodeURIComponent('Join me on LingkodPH! Use my referral code ' + referralCode + ' when you sign up: ' + referralLink)}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Referral History</CardTitle>
+                                    <CardDescription>Users who joined using your code.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    {referrals.length > 0 ? (
+                                        <ul className="space-y-2 text-sm">
+                                            {referrals.map(ref => (
+                                                <li key={ref.id} className="flex justify-between items-center">
+                                                    <span>{ref.referredEmail}</span>
+                                                    <span className="font-medium text-green-600">+{ref.rewardPointsGranted} pts</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground text-center py-4">No referrals yet.</p>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
                 </TabsContent>
 
