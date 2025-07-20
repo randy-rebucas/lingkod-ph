@@ -134,17 +134,38 @@ export default function ManageProvidersPage() {
 
         setIsInviting(true);
         try {
-            // Check if user already exists or is already invited
-            const existingUserQuery = query(collection(db, "users"), where("email", "==", inviteEmail));
-            const existingInviteQuery = query(collection(db, "invites"), where("email", "==", inviteEmail), where("status", "==", "pending"));
-            const [userSnapshot, inviteSnapshot] = await Promise.all([getDocs(existingUserQuery), getDocs(existingInviteQuery)]);
+            // Check if user already exists and is a provider
+            const userQuery = query(collection(db, "users"), where("email", "==", inviteEmail));
+            const userSnapshot = await getDocs(userQuery);
 
-            if (!userSnapshot.empty) {
-                toast({ variant: 'destructive', title: 'User Exists', description: 'This user already has an account.' });
+            if (userSnapshot.empty) {
+                toast({ variant: 'destructive', title: 'Provider Not Found', description: 'This user is not registered on LingkodPH. Please ask them to sign up as a provider first.' });
+                setIsInviting(false);
                 return;
             }
-            if (!inviteSnapshot.empty) {
-                 toast({ variant: 'destructive', title: 'Invite Pending', description: 'This user already has a pending invitation.' });
+
+            const providerDoc = userSnapshot.docs[0];
+            const providerData = providerDoc.data();
+
+            if (providerData.role !== 'provider') {
+                toast({ variant: 'destructive', title: 'Invalid User Role', description: 'This user is not a registered provider.' });
+                setIsInviting(false);
+                return;
+            }
+
+            if (providerData.agencyId) {
+                toast({ variant: 'destructive', title: 'Already in an Agency', description: 'This provider is already part of another agency.' });
+                setIsInviting(false);
+                return;
+            }
+
+            // Check if an invite is already pending for this provider
+            const existingInviteQuery = query(collection(db, "invites"), where("email", "==", inviteEmail), where("status", "==", "pending"));
+            const inviteSnapshot = await getDocs(existingInviteQuery);
+
+             if (!inviteSnapshot.empty) {
+                 toast({ variant: 'destructive', title: 'Invite Pending', description: 'This provider already has a pending invitation.' });
+                 setIsInviting(false);
                 return;
             }
 
@@ -155,6 +176,7 @@ export default function ManageProvidersPage() {
             batch.set(inviteRef, {
                 agencyId: user.uid,
                 agencyName: user.displayName,
+                providerId: providerDoc.id,
                 email: inviteEmail,
                 status: "pending",
                 createdAt: serverTimestamp(),
@@ -162,14 +184,14 @@ export default function ManageProvidersPage() {
 
             // 2. Create the email document to trigger a backend email function
             const mailRef = doc(collection(db, "mail"));
-            const signupLink = `${window.location.origin}/signup`;
+            const profileLink = `${window.location.origin}/profile`; // Link to their profile to accept
             batch.set(mailRef, {
                 to: inviteEmail,
                 template: {
                     name: "agency-invite",
                     data: {
                         agencyName: user.displayName,
-                        inviteLink: signupLink,
+                        inviteLink: profileLink,
                     },
                 },
             });
@@ -307,7 +329,7 @@ export default function ManageProvidersPage() {
                         <DialogHeader>
                             <DialogTitle>Invite a New Provider</DialogTitle>
                             <DialogDescription>
-                                Enter the email address of the provider you wish to invite. They will receive a notification to join your agency upon signup.
+                                Enter the email address of the provider you wish to invite. They must already be a registered provider on LingkodPH.
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
