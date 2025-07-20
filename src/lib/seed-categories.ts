@@ -1,5 +1,5 @@
 
-import { collection, addDoc, getDocs, query, where, writeBatch } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, writeBatch, doc } from "firebase/firestore";
 import { db } from "./firebase";
 
 const categories = [
@@ -67,7 +67,7 @@ export async function seedCategories() {
     categories.forEach(categoryName => {
         if (!existingCategoryNames.has(categoryName)) {
             const newCategoryRef = doc(categoriesRef); // Create a new doc reference
-            batch.set(newCategoryRef, { name: categoryName });
+            batch.set(newCategoryryRef, { name: categoryName });
             count++;
         }
     });
