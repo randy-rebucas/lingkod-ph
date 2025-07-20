@@ -18,6 +18,7 @@ import {
   FileText,
   Calculator,
   BarChart2,
+  Users2,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -104,7 +105,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
-  const isStarterOrHigher = isPaidSubscriber && (subscription?.planId === 'starter' || subscription?.planId === 'pro' || subscription?.planId === 'elite');
   const isProOrElite = isPaidSubscriber && (subscription?.planId === 'pro' || subscription?.planId === 'elite');
   const isElite = isPaidSubscriber && subscription?.planId === 'elite';
 
@@ -169,14 +169,29 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/services")}>
-                    <Link href="/services">
-                      <BriefcaseBusiness />
-                      <span>My Services</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+
+                {userRole === 'agency' && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/manage-providers")}>
+                      <Link href="/manage-providers">
+                        <Users2 />
+                        <span>Manage Providers</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+
+                {userRole === 'provider' && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/services")}>
+                      <Link href="/services">
+                        <BriefcaseBusiness />
+                        <span>My Services</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+
 
                 {isPaidSubscriber && (
                   <SidebarMenuItem>

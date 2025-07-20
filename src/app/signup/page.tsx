@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, User } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { doc, setDoc, serverTimestamp, runTransaction, getDocs, query, where, collection, writeBatch, limit, getDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, runTransaction, getDocs, query, where, collection, writeBatch, limit, getDoc, updateDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -111,6 +111,28 @@ const handleReferral = async (referralCode: string, newUser: { uid: string; emai
     return null; // Success
 };
 
+// This function checks for pending invites and associates the user with an agency
+const handleInvitationCheck = async (email: string, userId: string) => {
+    const invitesRef = collection(db, "invites");
+    const q = query(invitesRef, where("email", "==", email), where("status", "==", "pending"), limit(1));
+
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+        const inviteDoc = querySnapshot.docs[0];
+        const batch = writeBatch(db);
+
+        // Update user with agencyId
+        const userRef = doc(db, "users", userId);
+        batch.update(userRef, { agencyId: inviteDoc.data().agencyId });
+
+        // Update invite status to accepted
+        batch.update(inviteDoc.ref, { status: "accepted", acceptedAt: serverTimestamp(), acceptedUserId: userId });
+
+        await batch.commit();
+        console.log(`User ${email} associated with agency ${inviteDoc.data().agencyId}`);
+    }
+};
+
 
 const SignUpForm = ({ userType }: { userType: UserType }) => {
   const [name, setName] = useState('');
@@ -155,7 +177,13 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
         loyaltyPoints: 0, // Initial points
         referralCode: newReferralCode,
         ...(userType === 'agency' && { contactPerson: contactPerson }),
+        ...(userType === 'provider' && { agencyId: null }), // Initialize agencyId for providers
       });
+
+      // Check for pending agency invitations
+      if (userType === 'provider') {
+        await handleInvitationCheck(user.email!, user.uid);
+      }
 
       if (referralCode) {
         const referralError = await handleReferral(referralCode, user);
@@ -253,7 +281,7 @@ export default function SignupPage() {
 
       if (!userDoc.exists()) {
         const newReferralCode = generateReferralCode(user.uid);
-        await setDoc(userRef, {
+        const userData: any = {
             uid: user.uid,
             email: user.email,
             displayName: user.displayName,
@@ -263,7 +291,17 @@ export default function SignupPage() {
             createdAt: serverTimestamp(),
             loyaltyPoints: 0,
             referralCode: newReferralCode,
-        });
+        };
+
+        if(activeTab === 'provider') {
+            userData.agencyId = null;
+        }
+
+        await setDoc(userRef, userData);
+
+        if (activeTab === 'provider') {
+            await handleInvitationCheck(user.email!, user.uid);
+        }
 
         const refCode = searchParams.get('ref');
         if (refCode) {
@@ -271,6 +309,12 @@ export default function SignupPage() {
           if (referralError) {
               toast({ variant: 'destructive', title: 'Invalid Referral Code', description: referralError });
           }
+        }
+      } else {
+        // If user exists, but maybe they were invited and are now signing up.
+        // This is a good place to check for invites if they are a provider.
+        if(userDoc.data().role === 'provider' && !userDoc.data().agencyId) {
+             await handleInvitationCheck(user.email!, user.uid);
         }
       }
       
