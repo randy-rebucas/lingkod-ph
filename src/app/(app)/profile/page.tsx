@@ -12,11 +12,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings, Briefcase, Lock, Award, Users, ShieldCheck } from "lucide-react";
-import { storage } from "@/lib/firebase";
+import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
 import { doc, updateDoc, getDoc, Timestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -204,7 +203,7 @@ export default function ProfilePage() {
 
                     toast({ title: "Success", description: "Profile picture updated!" });
                 } catch (error: any) {
-                    toast({ variant: "destructive", title: "Update Failed", description: "Failed to update profile picture URL." });
+                     toast({ variant: "destructive", title: "Update Failed", description: "Failed to update profile picture URL." });
                 } finally {
                     setIsUploading(false);
                     setUploadProgress(null);
@@ -240,8 +239,9 @@ export default function ProfilePage() {
     
     const isPro = subscription?.planId === 'pro';
     const isElite = subscription?.planId === 'elite';
-    const TABS = ['public-profile', 'account-settings'];
-    if (userRole === 'provider') {
+    
+    const TABS = ['public-profile', 'account-settings', 'loyalty-program', 'referral-program'];
+    if (userRole === 'provider' || userRole === 'agency') {
         TABS.push('provider-settings');
     }
 
@@ -295,14 +295,20 @@ export default function ProfilePage() {
             </Card>
 
             <Tabs defaultValue="public-profile">
-                <TabsList className={cn("grid w-full", TABS.length === 3 ? "grid-cols-3" : "grid-cols-2")}>
+                <TabsList className={cn("grid w-full", `grid-cols-${TABS.length}`)}>
                     <TabsTrigger value="public-profile">
                         <User className="mr-2"/> Public Profile
                     </TabsTrigger>
                     <TabsTrigger value="account-settings">
                         <Settings className="mr-2"/> Account Settings
                     </TabsTrigger>
-                    {userRole === 'provider' && (
+                    <TabsTrigger value="loyalty-program">
+                        <Award className="mr-2"/> Loyalty Program
+                    </TabsTrigger>
+                     <TabsTrigger value="referral-program">
+                        <Users className="mr-2"/> Referral Program
+                    </TabsTrigger>
+                    {(userRole === 'provider' || userRole === 'agency') && (
                         <TabsTrigger value="provider-settings">
                             <Briefcase className="mr-2"/> Provider Settings
                         </TabsTrigger>
@@ -336,11 +342,9 @@ export default function ProfilePage() {
                 
                 <TabsContent value="account-settings" className="mt-6">
                      <Tabs defaultValue="personal-details" className="w-full">
-                        <TabsList className="grid w-full grid-cols-5">
+                        <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="personal-details"><User className="mr-2"/>Personal Details</TabsTrigger>
                             <TabsTrigger value="password-security"><Lock className="mr-2"/>Password & Security</TabsTrigger>
-                            <TabsTrigger value="loyalty-program"><Award className="mr-2"/>Loyalty Program</TabsTrigger>
-                            <TabsTrigger value="referral-program"><Users className="mr-2"/>Referral Program</TabsTrigger>
                             <TabsTrigger value="identity-verification"><ShieldCheck className="mr-2"/>Identity Verification</TabsTrigger>
                         </TabsList>
 
@@ -429,32 +433,6 @@ export default function ProfilePage() {
                                 </CardFooter>
                             </Card>
                         </TabsContent>
-                        
-                        <TabsContent value="loyalty-program" className="mt-6">
-                             <Card>
-                                <CardHeader>
-                                    <CardTitle>Loyalty Program</CardTitle>
-                                    <CardDescription>View your points and rewards.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="text-center text-muted-foreground p-12">
-                                    <Award className="h-12 w-12 mx-auto mb-4"/>
-                                    <p>Our loyalty program is coming soon! Stay tuned for exciting rewards.</p>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-
-                         <TabsContent value="referral-program" className="mt-6">
-                             <Card>
-                                <CardHeader>
-                                    <CardTitle>Referral Program</CardTitle>
-                                    <CardDescription>Invite friends and earn rewards.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="text-center text-muted-foreground p-12">
-                                    <Users className="h-12 w-12 mx-auto mb-4"/>
-                                    <p>Our referral program is under construction. Get ready to share and earn!</p>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
 
                         <TabsContent value="identity-verification" className="mt-6">
                              <Card>
@@ -471,8 +449,34 @@ export default function ProfilePage() {
 
                     </Tabs>
                 </TabsContent>
+                
+                 <TabsContent value="loyalty-program" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Loyalty Program</CardTitle>
+                            <CardDescription>View your points and rewards.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="text-center text-muted-foreground p-12">
+                            <Award className="h-12 w-12 mx-auto mb-4"/>
+                            <p>Our loyalty program is coming soon! Stay tuned for exciting rewards.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
 
-                {userRole === 'provider' && (
+                <TabsContent value="referral-program" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Referral Program</CardTitle>
+                            <CardDescription>Invite friends and earn rewards.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="text-center text-muted-foreground p-12">
+                            <Users className="h-12 w-12 mx-auto mb-4"/>
+                            <p>Our referral program is under construction. Get ready to share and earn!</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {(userRole === 'provider' || userRole === 'agency') && (
                      <TabsContent value="provider-settings" className="mt-6">
                         <div className="space-y-6">
                             <Card>
@@ -559,5 +563,3 @@ export default function ProfilePage() {
         </div>
     );
 }
-
-    
