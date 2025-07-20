@@ -179,7 +179,11 @@ export default function DashboardPage() {
     // Fetch data for provider dashboard
     useEffect(() => {
         if (!user || userRole !== 'provider') {
-            setLoading(false);
+            if (userRole && userRole !== 'provider') {
+                 // Is a client, no need to fetch provider data here, handled in separate effect
+            } else {
+                 setLoading(false);
+            }
             return;
         }
 
@@ -294,34 +298,38 @@ export default function DashboardPage() {
                     <h1 className="text-3xl font-bold font-headline">Find a Service Provider</h1>
                     <p className="text-muted-foreground">Browse our network of trusted professionals.</p>
                 </div>
-                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                    <Input 
-                        placeholder="Search by provider name..." 
-                        className="w-full max-w-lg pl-10" 
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                </div>
-                {loadingProviders ? (
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                         {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
-                    </div>
-                ) : (
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {filteredProviders.length > 0 ? (
-                            filteredProviders.map(provider => (
-                                <ProviderCard key={provider.uid} provider={provider} />
-                            ))
+                 <Card>
+                    <CardContent className="p-6 space-y-6">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                            <Input 
+                                placeholder="Search by provider name..." 
+                                className="w-full max-w-lg pl-10" 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        {loadingProviders ? (
+                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+                            </div>
                         ) : (
-                             <div className="lg:col-span-3 text-center text-muted-foreground p-12">
-                                <Users className="h-16 w-16 mx-auto mb-4" />
-                                <h3 className="text-xl font-semibold">No Providers Found</h3>
-                                <p>No providers match your search term. Try another search.</p>
+                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                {filteredProviders.length > 0 ? (
+                                    filteredProviders.map(provider => (
+                                        <ProviderCard key={provider.uid} provider={provider} />
+                                    ))
+                                ) : (
+                                    <div className="col-span-full text-center text-muted-foreground p-12">
+                                        <Users className="h-16 w-16 mx-auto mb-4" />
+                                        <h3 className="text-xl font-semibold">No Providers Found</h3>
+                                        <p>No providers match your search term. Try another search.</p>
+                                    </div>
+                                )}
                             </div>
                         )}
-                    </div>
-                )}
+                    </CardContent>
+                </Card>
             </div>
         )
     }
