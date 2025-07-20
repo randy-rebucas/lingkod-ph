@@ -94,9 +94,9 @@ const topProviders = [
     { name: 'Benny Tan', specialty: 'HVAC & Refrigeration Expert', rating: 4.9, reviews: 98, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300', hint: 'man portrait', background: 'https://images.unsplash.com/photo-1542438408-42a3ce919793?q=80&w=600', bgHint: 'air conditioner' },
 ];
 
-const PartnerLogo = ({ name, hint }: {name: string, hint: string}) => (
+const PartnerLogo = ({ name, hint, index }: {name: string, hint: string, index: number}) => (
     <div data-ai-hint={hint} className="flex items-center justify-center p-4 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all">
-        <Image src={`https://placehold.co/150x50.png`} alt={`${name} logo`} width={120} height={40} className="object-contain"/>
+        <Image src={`https://loremflickr.com/150/50/logo,brand?random=${index}`} alt={`${name} logo`} width={120} height={40} className="object-contain"/>
     </div>
 );
 
@@ -152,12 +152,12 @@ export default function Home() {
             <div className="container">
                 <h3 className="text-center text-sm font-semibold text-muted-foreground uppercase tracking-wider">Trusted by leading philippine businesses</h3>
                 <div className="mx-auto mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 items-center">
-                    <PartnerLogo name="Ayala Land" hint="corporate building" />
-                    <PartnerLogo name="SM Malls" hint="shopping mall" />
-                    <PartnerLogo name="Jollibee" hint="fast food" />
-                    <PartnerLogo name="BDO" hint="bank building" />
-                    <PartnerLogo name="Meralco" hint="electric power" />
-                    <PartnerLogo name="Globe Telecom" hint="telecommunications tower" />
+                    <PartnerLogo name="Ayala Land" hint="corporate building" index={1} />
+                    <PartnerLogo name="SM Malls" hint="shopping mall" index={2} />
+                    <PartnerLogo name="Jollibee" hint="fast food" index={3} />
+                    <PartnerLogo name="BDO" hint="bank building" index={4} />
+                    <PartnerLogo name="Meralco" hint="electric power" index={5} />
+                    <PartnerLogo name="Globe Telecom" hint="telecommunications tower" index={6} />
                 </div>
             </div>
         </section>
