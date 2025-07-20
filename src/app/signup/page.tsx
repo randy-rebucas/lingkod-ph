@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, User } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, setDoc, serverTimestamp, runTransaction, getDocs, query, where, collection, writeBatch, limit, getDoc, updateDoc } from "firebase/firestore";
@@ -110,9 +110,6 @@ const handleReferral = async (referralCode: string, newUser: { uid: string; emai
 
     return null; // Success
 };
-
-// This function is no longer needed here as providers must be registered first.
-// The logic to accept an invitation will be moved to the profile/notifications page.
 
 const SignUpForm = ({ userType }: { userType: UserType }) => {
   const [name, setName] = useState('');
@@ -229,20 +226,12 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
   );
 };
 
-
-export default function SignupPage() {
+const SignupFormContainer = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [activeTab, setActiveTab] = useState<UserType>('client');
-  const { user, loading: authLoading } = useAuth();
-
-  useEffect(() => {
-    if (!authLoading && user) {
-      router.push('/dashboard');
-    }
-  }, [user, authLoading, router]);
 
   const handleGoogleSignup = async () => {
     setLoadingGoogle(true);
@@ -297,6 +286,52 @@ export default function SignupPage() {
     }
   };
 
+  return (
+    <>
+      <Tabs defaultValue="client" className="w-full" onValueChange={(value) => setActiveTab(value as UserType)}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="client">Client</TabsTrigger>
+          <TabsTrigger value="provider">Provider</TabsTrigger>
+          <TabsTrigger value="agency">Agency</TabsTrigger>
+        </TabsList>
+        <TabsContent value="client">
+            <p className="text-sm text-muted-foreground my-4 text-center">Create an account to find and book reliable services.</p>
+            <SignUpForm userType="client" />
+        </TabsContent>
+        <TabsContent value="provider">
+            <p className="text-sm text-muted-foreground my-4 text-center">Offer your skills and services to a wider audience.</p>
+            <SignUpForm userType="provider" />
+        </TabsContent>
+        <TabsContent value="agency">
+            <p className="text-sm text-muted-foreground my-4 text-center">Manage your team and grow your service business.</p>
+            <SignUpForm userType="agency" />
+        </TabsContent>
+      </Tabs>
+
+      <Separator className="my-6" />
+
+      <div className="space-y-4">
+        <Button variant="outline" className="w-full" onClick={handleGoogleSignup} disabled={loadingGoogle}>
+            {loadingGoogle && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Sign up with Google
+        </Button>
+        <Button variant="outline" className="w-full" disabled>Sign up with Facebook</Button>
+      </div>
+    </>
+  );
+};
+
+
+export default function SignupPage() {
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
+
   if (authLoading || user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-secondary">
@@ -316,35 +351,9 @@ export default function SignupPage() {
           <CardDescription>Choose your account type and let&apos;s get started.</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="client" className="w-full" onValueChange={(value) => setActiveTab(value as UserType)}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="client">Client</TabsTrigger>
-              <TabsTrigger value="provider">Provider</TabsTrigger>
-              <TabsTrigger value="agency">Agency</TabsTrigger>
-            </TabsList>
-            <TabsContent value="client">
-                <p className="text-sm text-muted-foreground my-4 text-center">Create an account to find and book reliable services.</p>
-                <SignUpForm userType="client" />
-            </TabsContent>
-            <TabsContent value="provider">
-                <p className="text-sm text-muted-foreground my-4 text-center">Offer your skills and services to a wider audience.</p>
-                <SignUpForm userType="provider" />
-            </TabsContent>
-            <TabsContent value="agency">
-                <p className="text-sm text-muted-foreground my-4 text-center">Manage your team and grow your service business.</p>
-                <SignUpForm userType="agency" />
-            </TabsContent>
-          </Tabs>
-
-          <Separator className="my-6" />
-
-          <div className="space-y-4">
-            <Button variant="outline" className="w-full" onClick={handleGoogleSignup} disabled={loadingGoogle}>
-                {loadingGoogle && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Sign up with Google
-            </Button>
-            <Button variant="outline" className="w-full" disabled>Sign up with Facebook</Button>
-          </div>
+          <Suspense fallback={<div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin"/></div>}>
+            <SignupFormContainer />
+          </Suspense>
 
           <div className="mt-6 text-center text-sm">
             Already have an account?{" "}
