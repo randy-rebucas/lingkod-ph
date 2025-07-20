@@ -163,7 +163,6 @@ export default function ProfilePage() {
             }
             
             await updateDoc(userDocRef, updates);
-            setAuthUser(prev => prev ? { ...prev, displayName: name } : null);
 
             toast({ title: "Success", description: "Profile updated successfully!" });
         } catch (error: any) {
@@ -202,7 +201,6 @@ export default function ProfilePage() {
                     await updateProfile(user, { photoURL: downloadURL });
                     const userDocRef = doc(db, "users", user.uid);
                     await updateDoc(userDocRef, { photoURL: downloadURL });
-                    setAuthUser(prev => prev ? { ...prev, photoURL: downloadURL } : null);
 
                     toast({ title: "Success", description: "Profile picture updated!" });
                 } catch (error: any) {
