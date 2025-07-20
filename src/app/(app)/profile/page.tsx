@@ -11,11 +11,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings, Briefcase, Award, Users } from "lucide-react";
+import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings, Briefcase, Award, Users, Database } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
-import { doc, updateDoc, getDoc, Timestamp } from "firebase/firestore";
+import { doc, updateDoc, getDoc, Timestamp, collection, onSnapshot, query, orderBy, runTransaction, serverTimestamp, where, addDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,6 +23,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import IdentityVerification from "@/components/identity-verification";
+import { seedRewards } from "@/lib/seed-rewards";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { format } from "date-fns";
+
+type Reward = {
+    id: string;
+    title: string;
+    description: string;
+    pointsRequired: number;
+    isActive: boolean;
+};
+
+type LoyaltyTransaction = {
+    id: string;
+    points: number;
+    type: 'earn' | 'redeem';
+    description: string;
+    createdAt: Timestamp;
+};
 
 export default function ProfilePage() {
     const { user, userRole, loading, subscription } = useAuth();
@@ -55,6 +75,14 @@ export default function ProfilePage() {
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // States for Loyalty Program
+    const [isSeeding, setIsSeeding] = useState(false);
+    const [rewards, setRewards] = useState<Reward[]>([]);
+    const [loyaltyPoints, setLoyaltyPoints] = useState(0);
+    const [transactions, setTransactions] = useState<LoyaltyTransaction[]>([]);
+    const [isRedeeming, setIsRedeeming] = useState<string | null>(null);
+
+
     const years = useMemo(() => {
         const currentYear = new Date().getFullYear();
         return Array.from({ length: 100 }, (_, i) => String(currentYear - i));
@@ -75,38 +103,129 @@ export default function ProfilePage() {
     }, [birthMonth, birthYear]);
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            if (user) {
-                setName(user.displayName || '');
-                const userDocRef = doc(db, "users", user.uid);
-                const userDoc = await getDoc(userDocRef);
-                if (userDoc.exists()) {
-                    const data = userDoc.data();
-                    setPhone(data.phone || '');
-                    setBio(data.bio || '');
-                    setGender(data.gender || '');
-                    if (data.birthdate && data.birthdate.toDate) {
-                        const date = data.birthdate.toDate();
-                        setBirthDay(String(date.getDate()));
-                        setBirthMonth(String(date.getMonth()));
-                        setBirthYear(String(date.getFullYear()));
-                    }
-                    if (userRole === 'provider' || userRole === 'agency') {
-                        setAvailabilityStatus(data.availabilityStatus || '');
-                        setYearsOfExperience(data.yearsOfExperience || '');
-                        setOwnsToolsSupplies(data.ownsToolsSupplies || false);
-                        setIsLicensed(data.isLicensed || false);
-                        setLicenseNumber(data.licenseNumber || '');
-                        setLicenseType(data.licenseType || '');
-                        setLicenseExpirationDate(data.licenseExpirationDate || '');
-                        setLicenseIssuingState(data.licenseIssuingState || '');
-                        setLicenseIssuingCountry(data.licenseIssuingCountry || '');
-                    }
+        if (!user) return;
+        
+        const userDocRef = doc(db, "users", user.uid);
+        const unsubscribeUser = onSnapshot(userDocRef, (doc) => {
+            if (doc.exists()) {
+                const data = doc.data();
+                setName(data.displayName || user.displayName || '');
+                setPhone(data.phone || '');
+                setBio(data.bio || '');
+                setGender(data.gender || '');
+                if (data.birthdate && data.birthdate.toDate) {
+                    const date = data.birthdate.toDate();
+                    setBirthDay(String(date.getDate()));
+                    setBirthMonth(String(date.getMonth()));
+                    setBirthYear(String(date.getFullYear()));
+                }
+                setLoyaltyPoints(data.loyaltyPoints || 0);
+
+                if (userRole === 'provider' || userRole === 'agency') {
+                    setAvailabilityStatus(data.availabilityStatus || '');
+                    setYearsOfExperience(data.yearsOfExperience || '');
+                    setOwnsToolsSupplies(data.ownsToolsSupplies || false);
+                    setIsLicensed(data.isLicensed || false);
+                    setLicenseNumber(data.licenseNumber || '');
+                    setLicenseType(data.licenseType || '');
+                    setLicenseExpirationDate(data.licenseExpirationDate || '');
+                    setLicenseIssuingState(data.licenseIssuingState || '');
+                    setLicenseIssuingCountry(data.licenseIssuingCountry || '');
                 }
             }
-        }
-        fetchUserData();
+        });
+
+        // Fetch loyalty rewards
+        const rewardsRef = collection(db, "loyaltyRewards");
+        const qRewards = query(rewardsRef, where("isActive", "==", true));
+        const unsubscribeRewards = onSnapshot(qRewards, (snapshot) => {
+            const rewardsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reward));
+            setRewards(rewardsData);
+        });
+
+        // Fetch loyalty transactions
+        const transactionsRef = collection(db, `users/${user.uid}/loyaltyTransactions`);
+        const qTransactions = query(transactionsRef, orderBy("createdAt", "desc"));
+        const unsubscribeTransactions = onSnapshot(qTransactions, (snapshot) => {
+            const transData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LoyaltyTransaction));
+            setTransactions(transData);
+        });
+
+        return () => {
+            unsubscribeUser();
+            unsubscribeRewards();
+            unsubscribeTransactions();
+        };
     }, [user, userRole]);
+
+    const handleSeedRewards = async () => {
+        setIsSeeding(true);
+        try {
+            const count = await seedRewards();
+            toast({
+                title: 'Rewards Seeded',
+                description: `${count} new rewards have been added to the database.`,
+            });
+        } catch (error) {
+            console.error('Error seeding rewards:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Seeding Failed',
+                description: 'Could not seed rewards.',
+            });
+        } finally {
+            setIsSeeding(false);
+        }
+    };
+
+    const handleRedeemReward = async (reward: Reward) => {
+        if (!user || loyaltyPoints < reward.pointsRequired) {
+            toast({ variant: "destructive", title: "Error", description: "Not enough points to redeem this reward." });
+            return;
+        }
+
+        setIsRedeeming(reward.id);
+        const userRef = doc(db, "users", user.uid);
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                const userDoc = await transaction.get(userRef);
+                if (!userDoc.exists()) {
+                    throw "User document does not exist!";
+                }
+
+                const currentPoints = userDoc.data().loyaltyPoints || 0;
+                if (currentPoints < reward.pointsRequired) {
+                    throw "Not enough points.";
+                }
+
+                const newTotalPoints = currentPoints - reward.pointsRequired;
+                transaction.update(userRef, { loyaltyPoints: newTotalPoints });
+
+                const loyaltyTxRef = doc(collection(db, `users/${user.uid}/loyaltyTransactions`));
+                transaction.set(loyaltyTxRef, {
+                    points: reward.pointsRequired,
+                    type: 'redeem',
+                    description: `Redeemed: ${reward.title}`,
+                    rewardId: reward.id,
+                    createdAt: serverTimestamp()
+                });
+            });
+
+            toast({
+                title: "Reward Redeemed!",
+                description: `You have successfully redeemed "${reward.title}".`,
+            });
+
+        } catch (error) {
+            console.error("Error redeeming reward:", error);
+            const errorMessage = error instanceof Error ? error.message : "Could not redeem the reward.";
+            toast({ variant: "destructive", title: "Redemption Failed", description: errorMessage });
+        } finally {
+            setIsRedeeming(null);
+        }
+    };
+
 
     const getAvatarFallback = (name: string | null | undefined) => {
         if (!name) return "U";
@@ -261,14 +380,10 @@ export default function ProfilePage() {
         return <p>Please log in to view your profile.</p>;
     }
     
-    const isPro = subscription?.planId === 'pro';
-    const isElite = subscription?.planId === 'elite';
-    
-    const TABS = ['public-profile', 'account-settings'];
+    const TABS = ['public-profile', 'account-settings', 'loyalty', 'referrals'];
     if (userRole === 'provider' || userRole === 'agency') {
-        TABS.push('provider-settings');
+        TABS.splice(2, 0, 'provider-settings');
     }
-    TABS.push('loyalty', 'referrals');
 
     return (
         <div className="space-y-6">
@@ -295,8 +410,6 @@ export default function ProfilePage() {
                     <div>
                         <CardTitle className="flex items-center gap-2">
                             {user.displayName}
-                            {isPro && <Badge variant="secondary" className="bg-blue-100 text-blue-800"><CheckCircle className="h-4 w-4 mr-1"/>Verified</Badge>}
-                            {isElite && <Badge variant="secondary" className="bg-purple-100 text-purple-800"><Star className="h-4 w-4 mr-1"/>Premium</Badge>}
                         </CardTitle>
                         <CardDescription className="flex items-center gap-2 mt-1">
                            {user.email}
@@ -323,11 +436,11 @@ export default function ProfilePage() {
                 <TabsList className={cn("grid w-full", `grid-cols-${TABS.length}`)}>
                     <TabsTrigger value="public-profile"><User className="mr-2"/> Public Profile</TabsTrigger>
                     <TabsTrigger value="account-settings"><Settings className="mr-2"/> Account</TabsTrigger>
-                    <TabsTrigger value="loyalty"><Award className="mr-2"/> Loyalty</TabsTrigger>
-                    <TabsTrigger value="referrals"><Users className="mr-2"/> Referrals</TabsTrigger>
-                     {(userRole === 'provider' || userRole === 'agency') && (
+                    {(userRole === 'provider' || userRole === 'agency') && (
                         <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> Provider</TabsTrigger>
                     )}
+                    <TabsTrigger value="loyalty"><Award className="mr-2"/> Loyalty</TabsTrigger>
+                    <TabsTrigger value="referrals"><Users className="mr-2"/> Referrals</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="public-profile" className="mt-6">
@@ -447,17 +560,100 @@ export default function ProfilePage() {
                     <IdentityVerification />
                 </TabsContent>
 
-                <TabsContent value="loyalty" className="mt-6">
-                    <Card>
+                <TabsContent value="loyalty" className="mt-6 space-y-6">
+                    <div className="flex justify-between items-start">
+                        <div>
+                             <h2 className="text-2xl font-bold">Loyalty Program</h2>
+                             <p className="text-muted-foreground">Earn points for completed bookings and redeem them for exclusive rewards.</p>
+                        </div>
+                        <Button variant="outline" onClick={handleSeedRewards} disabled={isSeeding}>
+                            {isSeeding ? <Loader2 className="animate-spin mr-2" /> : <Database className="mr-2"/>}
+                            Seed Rewards
+                        </Button>
+                    </div>
+
+                    <Card className="bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg">
                         <CardHeader>
-                            <CardTitle>Loyalty Program</CardTitle>
-                            <CardDescription>View your points and rewards.</CardDescription>
+                            <CardTitle>Your Loyalty Points</CardTitle>
                         </CardHeader>
-                        <CardContent className="text-center text-muted-foreground p-12">
-                            <Award className="h-12 w-12 mx-auto mb-4"/>
-                            <p>Our loyalty program is coming soon! Stay tuned for exciting rewards.</p>
+                        <CardContent>
+                            <p className="text-5xl font-bold">{loyaltyPoints.toLocaleString()}</p>
                         </CardContent>
                     </Card>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card>
+                             <CardHeader>
+                                <CardTitle>Available Rewards</CardTitle>
+                                <CardDescription>Use your points to claim these rewards.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {rewards.length > 0 ? rewards.map(reward => (
+                                     <div key={reward.id} className="p-4 border rounded-lg flex justify-between items-center">
+                                        <div>
+                                            <p className="font-semibold">{reward.title}</p>
+                                            <p className="text-sm text-muted-foreground">{reward.description}</p>
+                                            <p className="text-sm font-bold text-primary">{reward.pointsRequired.toLocaleString()} points</p>
+                                        </div>
+                                         <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button 
+                                                    variant="secondary"
+                                                    disabled={isRedeeming === reward.id || loyaltyPoints < reward.pointsRequired}
+                                                >
+                                                    {isRedeeming === reward.id ? <Loader2 className="animate-spin" /> : 'Redeem'}
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Confirm Redemption</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Are you sure you want to redeem "{reward.title}" for {reward.pointsRequired.toLocaleString()} points? This action cannot be undone.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleRedeemReward(reward)}>Confirm</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                )) : <p className="text-muted-foreground text-center">No rewards available at the moment.</p>}
+                            </CardContent>
+                        </Card>
+                         <Card>
+                            <CardHeader>
+                                <CardTitle>Points History</CardTitle>
+                                <CardDescription>Your recent point transactions.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Date</TableHead>
+                                            <TableHead>Description</TableHead>
+                                            <TableHead className="text-right">Points</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {transactions.length > 0 ? transactions.slice(0, 5).map(tx => (
+                                             <TableRow key={tx.id}>
+                                                <TableCell className="text-xs text-muted-foreground">{format(tx.createdAt.toDate(), 'MMM d, yyyy')}</TableCell>
+                                                <TableCell>{tx.description}</TableCell>
+                                                <TableCell className={`text-right font-medium ${tx.type === 'earn' ? 'text-green-600' : 'text-destructive'}`}>
+                                                    {tx.type === 'earn' ? '+' : '-'}{tx.points.toLocaleString()}
+                                                </TableCell>
+                                            </TableRow>
+                                        )) : (
+                                            <TableRow>
+                                                <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">No transactions yet.</TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </TabsContent>
 
                 <TabsContent value="referrals" className="mt-6">

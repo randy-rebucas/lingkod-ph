@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, Timestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 
 type UserRole = 'client' | 'provider' | 'agency' | null;
@@ -43,27 +43,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      setLoading(true);
       if (user) {
         setUser(user);
         const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          setUserRole(data.role || null);
-          setSubscription(data.subscription || { planId: 'free', status: 'active', renewsOn: null });
-          setVerificationStatus(data.verification?.status || 'Unverified');
-        }
+        
+        const unsubscribeDoc = onSnapshot(userDocRef, (doc) => {
+          if (doc.exists()) {
+            const data = doc.data();
+            setUserRole(data.role || null);
+            setSubscription(data.subscription || { planId: 'free', status: 'active', renewsOn: null });
+            setVerificationStatus(data.verification?.status || 'Unverified');
+          }
+           setLoading(false);
+        });
+
+        return () => unsubscribeDoc();
       } else {
         setUser(null);
         setUserRole(null);
         setSubscription(null);
         setVerificationStatus(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => unsubscribeAuth();
   }, []);
 
   return (

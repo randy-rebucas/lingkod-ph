@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or, runTransaction, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
 
@@ -48,10 +48,42 @@ const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-    const handleStatusUpdate = async (bookingId: string, newStatus: BookingStatus, successMessage?: string) => {
-        const bookingRef = doc(db, "bookings", bookingId);
+    const handleStatusUpdate = async (booking: Booking, newStatus: BookingStatus, successMessage?: string) => {
+        const bookingRef = doc(db, "bookings", booking.id);
         try {
-            await updateDoc(bookingRef, { status: newStatus });
+            if (newStatus === 'Completed' && userRole === 'provider') {
+                // Use a transaction to ensure atomicity
+                await runTransaction(db, async (transaction) => {
+                    const clientRef = doc(db, "users", booking.clientId);
+                    const clientDoc = await transaction.get(clientRef);
+                    if (!clientDoc.exists()) {
+                        throw "Client document does not exist!";
+                    }
+
+                    const pointsToAward = Math.floor(booking.price / 10); // 1 point per 10 pesos
+                    const currentPoints = clientDoc.data().loyaltyPoints || 0;
+                    const newTotalPoints = currentPoints + pointsToAward;
+
+                    // Update booking status
+                    transaction.update(bookingRef, { status: newStatus });
+
+                    // Update client's loyalty points
+                    transaction.update(clientRef, { loyaltyPoints: newTotalPoints });
+
+                    // Create a loyalty transaction record
+                    const loyaltyTxRef = doc(collection(db, `users/${booking.clientId}/loyaltyTransactions`));
+                    transaction.set(loyaltyTxRef, {
+                        points: pointsToAward,
+                        type: 'earn',
+                        description: `Points for completing service: ${booking.serviceName}`,
+                        bookingId: booking.id,
+                        createdAt: serverTimestamp()
+                    });
+                });
+            } else {
+                 await updateDoc(bookingRef, { status: newStatus });
+            }
+           
             toast({
                 title: "Booking Updated",
                 description: successMessage || `The booking has been successfully updated to ${newStatus.toLowerCase()}.`,
@@ -155,12 +187,12 @@ const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings
                                                         {/* Provider Actions */}
                                                         {userRole === 'provider' && booking.status === 'Pending' && (
                                                             <>
-                                                                <DropdownMenuItem onClick={() => handleStatusUpdate(booking.id, 'Upcoming', 'Booking has been accepted.')}>Accept</DropdownMenuItem>
-                                                                <DropdownMenuItem onClick={() => handleStatusUpdate(booking.id, 'Cancelled', 'Booking has been declined.')} className="text-destructive focus:text-destructive focus:bg-destructive/10">Decline</DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => handleStatusUpdate(booking, 'Upcoming', 'Booking has been accepted.')}>Accept</DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => handleStatusUpdate(booking, 'Cancelled', 'Booking has been declined.')} className="text-destructive focus:text-destructive focus:bg-destructive/10">Decline</DropdownMenuItem>
                                                             </>
                                                         )}
                                                         {userRole === 'provider' && booking.status === 'Upcoming' && (
-                                                            <DropdownMenuItem onClick={() => handleStatusUpdate(booking.id, 'Completed')}>Mark as Completed</DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => handleStatusUpdate(booking, 'Completed')}>Mark as Completed</DropdownMenuItem>
                                                         )}
 
                                                         {/* Client Actions */}
@@ -184,7 +216,7 @@ const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings
                                                         <AlertDialogCancel>Close</AlertDialogCancel>
                                                         <AlertDialogAction
                                                             className="bg-destructive hover:bg-destructive/90"
-                                                            onClick={() => handleStatusUpdate(booking.id, "Cancelled")}>
+                                                            onClick={() => handleStatusUpdate(booking, "Cancelled")}>
                                                             Confirm Cancellation
                                                         </AlertDialogAction>
                                                     </AlertDialogFooter>
