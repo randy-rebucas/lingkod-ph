@@ -31,7 +31,7 @@ type Conversation = {
     };
     lastMessage: string;
     timestamp: any;
-    unread?: number; // This would require more logic to implement properly
+    unread?: number;
 };
 
 type Message = {
@@ -51,6 +51,29 @@ const getAvatarFallback = (name: string | null | undefined) => {
         return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
+};
+
+const createNotification = async (userId: string, senderName: string, message: string, link: string) => {
+    try {
+        const userNotifSettingsRef = doc(db, 'users', userId);
+        const docSnap = await getDoc(userNotifSettingsRef);
+
+        if (docSnap.exists() && docSnap.data().notificationSettings?.newMessages === false) {
+             return; 
+        }
+
+        const notificationsRef = collection(db, `users/${userId}/notifications`);
+        await addDoc(notificationsRef, {
+            userId,
+            message: `${senderName}: ${message}`,
+            link,
+            type: 'new_message',
+            read: false,
+            createdAt: serverTimestamp(),
+        });
+    } catch (error) {
+        console.error("Error creating notification: ", error);
+    }
 };
 
 
@@ -74,7 +97,6 @@ export default function MessagesPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Effect to handle direct navigation to a conversation
     useEffect(() => {
         const conversationId = searchParams.get('conversationId');
         if (conversationId && conversations.length > 0) {
@@ -85,8 +107,6 @@ export default function MessagesPage() {
         }
     }, [searchParams, conversations]);
 
-
-    // Fetch conversations for the current user
     useEffect(() => {
         if (!user) return;
         setLoadingConversations(true);
@@ -108,7 +128,6 @@ export default function MessagesPage() {
         return () => unsubscribe();
     }, [user, toast]);
     
-    // Fetch messages for the active conversation
     useEffect(() => {
         if (!activeConversation) return;
 
@@ -176,12 +195,16 @@ export default function MessagesPage() {
             const messagesRef = collection(db, "conversations", activeConversation.id, "messages");
             await addDoc(messagesRef, messageData);
             
-            // Update last message on conversation
             const conversationRef = doc(db, "conversations", activeConversation.id);
             await updateDoc(conversationRef, {
                 lastMessage: newMessage || "Image sent",
                 timestamp: serverTimestamp()
             });
+
+            const recipientId = activeConversation.participants.find(p => p !== user.uid);
+            if(recipientId) {
+                await createNotification(recipientId, user.displayName || 'Someone', newMessage || "sent an image.", `/messages?conversationId=${activeConversation.id}`);
+            }
 
             setNewMessage("");
             setSelectedImage(null);

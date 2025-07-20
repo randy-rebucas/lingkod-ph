@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or, runTransaction, serverTimestamp, orderBy } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or, runTransaction, serverTimestamp, orderBy, addDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
 
@@ -43,6 +43,30 @@ const getStatusVariant = (status: string) => {
     }
 }
 
+const createNotification = async (userId: string, message: string, link: string) => {
+    try {
+        const userNotifSettingsRef = doc(db, 'users', userId);
+        const docSnap = await getDoc(userNotifSettingsRef);
+
+        if (docSnap.exists() && docSnap.data().notificationSettings?.bookingUpdates === false) {
+             console.log(`User ${userId} has booking update notifications disabled.`);
+             return; // User has disabled this type of notification
+        }
+
+        const notificationsRef = collection(db, `users/${userId}/notifications`);
+        await addDoc(notificationsRef, {
+            userId,
+            message,
+            link,
+            type: 'booking_update',
+            read: false,
+            createdAt: serverTimestamp(),
+        });
+    } catch (error) {
+        console.error("Error creating notification: ", error);
+    }
+};
+
 const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings: Booking[], isLoading: boolean, userRole: string | null }) => {
     const { toast } = useToast();
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -52,34 +76,26 @@ const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings
         const bookingRef = doc(db, "bookings", booking.id);
         try {
             if (newStatus === 'Completed' && userRole === 'provider') {
-                // Use a transaction to ensure atomicity
                 await runTransaction(db, async (transaction) => {
                     const clientRef = doc(db, "users", booking.clientId);
                     const clientDoc = await transaction.get(clientRef);
-                    if (!clientDoc.exists()) {
-                        throw "Client document does not exist!";
-                    }
+                    if (!clientDoc.exists()) throw "Client document does not exist!";
 
-                    const pointsToAward = Math.floor(booking.price / 10); // 1 point per 10 pesos
+                    const pointsToAward = Math.floor(booking.price / 10);
                     const currentPoints = clientDoc.data().loyaltyPoints || 0;
                     const newTotalPoints = currentPoints + pointsToAward;
 
-                    // Update booking status
                     transaction.update(bookingRef, { status: newStatus });
-
-                    // Update client's loyalty points
                     transaction.update(clientRef, { loyaltyPoints: newTotalPoints });
 
-                    // Create a loyalty transaction record
                     const loyaltyTxRef = doc(collection(db, `users/${booking.clientId}/loyaltyTransactions`));
                     transaction.set(loyaltyTxRef, {
-                        points: pointsToAward,
-                        type: 'earn',
+                        points: pointsToAward, type: 'earn',
                         description: `Points for completing service: ${booking.serviceName}`,
-                        bookingId: booking.id,
-                        createdAt: serverTimestamp()
+                        bookingId: booking.id, createdAt: serverTimestamp()
                     });
                 });
+                await createNotification(booking.clientId, `Your booking for "${booking.serviceName}" has been marked as completed.`, '/bookings');
             } else {
                  await updateDoc(bookingRef, { status: newStatus });
             }
@@ -88,13 +104,23 @@ const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings
                 title: "Booking Updated",
                 description: successMessage || `The booking has been successfully updated to ${newStatus.toLowerCase()}.`,
             });
+            
+            // Send notifications based on who made the change
+            if (userRole === 'provider') {
+                 if (newStatus === 'Upcoming') {
+                    await createNotification(booking.clientId, `Your booking for "${booking.serviceName}" has been accepted by ${booking.providerName}.`, '/bookings');
+                 } else if (newStatus === 'Cancelled') {
+                    await createNotification(booking.clientId, `Your booking for "${booking.serviceName}" has been declined by ${booking.providerName}.`, '/bookings');
+                 }
+            } else if (userRole === 'client') {
+                 if (newStatus === 'Cancelled') {
+                    await createNotification(booking.providerId, `${booking.clientName} has cancelled their booking for "${booking.serviceName}".`, '/bookings');
+                 }
+            }
+
         } catch (error) {
             console.error("Error updating booking status:", error);
-            toast({
-                variant: "destructive",
-                title: "Update Failed",
-                description: "Could not update the booking status.",
-            });
+            toast({ variant: "destructive", title: "Update Failed", description: "Could not update the booking status." });
         }
     };
 

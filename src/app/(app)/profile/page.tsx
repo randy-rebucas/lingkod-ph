@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, Link as LinkIcon, Gift, ShieldCheck } from "lucide-react";
+import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -27,6 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
 import { X } from "lucide-react";
+import { handleInviteAction } from "./actions";
 
 type Reward = {
     id: string;
@@ -50,6 +51,13 @@ type Referral = {
     rewardPointsGranted: number;
     createdAt: Timestamp;
 };
+
+type Invite = {
+    id: string;
+    agencyId: string;
+    agencyName: string;
+    status: 'pending' | 'accepted' | 'declined';
+}
 
 export default function ProfilePage() {
     const { user, userRole, loading, subscription, verificationStatus } = useAuth();
@@ -76,7 +84,6 @@ export default function ProfilePage() {
     const [licenseIssuingState, setLicenseIssuingState] = useState('');
     const [licenseIssuingCountry, setLicenseIssuingCountry] = useState('');
     
-    // States for UI logic
     const [isSavingPublic, setIsSavingPublic] = useState(false);
     const [isSavingPersonal, setIsSavingPersonal] = useState(false);
     const [isSavingProvider, setIsSavingProvider] = useState(false);
@@ -85,15 +92,15 @@ export default function ProfilePage() {
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // States for Loyalty Program
     const [rewards, setRewards] = useState<Reward[]>([]);
     const [loyaltyPoints, setLoyaltyPoints] = useState(0);
     const [transactions, setTransactions] = useState<LoyaltyTransaction[]>([]);
     const [isRedeeming, setIsRedeeming] = useState<string | null>(null);
 
-    // States for Referral Program
     const [referralCode, setReferralCode] = useState('');
     const [referrals, setReferrals] = useState<Referral[]>([]);
+    const [invites, setInvites] = useState<Invite[]>([]);
+    const [isRespondingToInvite, setIsRespondingToInvite] = useState(false);
 
     const years = useMemo(() => {
         const currentYear = new Date().getFullYear();
@@ -174,14 +181,39 @@ export default function ProfilePage() {
             setReferrals(referralsData);
         });
 
+        // Fetch Agency Invites
+        const invitesRef = collection(db, "invites");
+        const qInvites = query(invitesRef, where("providerId", "==", user.uid), where("status", "==", "pending"));
+        const unsubscribeInvites = onSnapshot(qInvites, (snapshot) => {
+            const invitesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invite));
+            setInvites(invitesData);
+        });
+
 
         return () => {
             unsubscribeUser();
             unsubscribeRewards();
             unsubscribeTransactions();
             unsubscribeReferrals();
+            unsubscribeInvites();
         };
     }, [user, userRole]);
+
+    const handleInviteResponse = async (inviteId: string, accepted: boolean) => {
+        setIsRespondingToInvite(true);
+        try {
+            await handleInviteAction({ inviteId, accepted });
+            toast({
+                title: `Invitation ${accepted ? 'Accepted' : 'Declined'}`,
+                description: `You have successfully ${accepted ? 'joined the agency' : 'declined the invitation'}.`,
+            });
+        } catch (error) {
+            console.error("Error responding to invite:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to respond to invitation.' });
+        } finally {
+            setIsRespondingToInvite(false);
+        }
+    };
 
     const handleCopy = (textToCopy: string, toastMessage: string) => {
         navigator.clipboard.writeText(textToCopy);
@@ -200,33 +232,22 @@ export default function ProfilePage() {
         try {
             await runTransaction(db, async (transaction) => {
                 const userDoc = await transaction.get(userRef);
-                if (!userDoc.exists()) {
-                    throw "User document does not exist!";
-                }
+                if (!userDoc.exists()) throw "User document does not exist!";
 
                 const currentPoints = userDoc.data().loyaltyPoints || 0;
-                if (currentPoints < reward.pointsRequired) {
-                    throw "Not enough points.";
-                }
+                if (currentPoints < reward.pointsRequired) throw "Not enough points.";
 
                 const newTotalPoints = currentPoints - reward.pointsRequired;
                 transaction.update(userRef, { loyaltyPoints: newTotalPoints });
 
                 const loyaltyTxRef = doc(collection(db, `users/${user.uid}/loyaltyTransactions`));
                 transaction.set(loyaltyTxRef, {
-                    points: reward.pointsRequired,
-                    type: 'redeem',
+                    points: reward.pointsRequired, type: 'redeem',
                     description: `Redeemed: ${reward.title}`,
-                    rewardId: reward.id,
-                    createdAt: serverTimestamp()
+                    rewardId: reward.id, createdAt: serverTimestamp()
                 });
             });
-
-            toast({
-                title: "Reward Redeemed!",
-                description: `You have successfully redeemed "${reward.title}".`,
-            });
-
+            toast({ title: "Reward Redeemed!", description: `You have successfully redeemed "${reward.title}".` });
         } catch (error) {
             console.error("Error redeeming reward:", error);
             const errorMessage = error instanceof Error ? error.message : "Could not redeem the reward.";
@@ -458,13 +479,13 @@ export default function ProfilePage() {
                              {subscription?.planId === 'pro' && (
                                 <Badge variant="default" className="flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-200">
                                     <ShieldCheck className="h-4 w-4" />
-                                    Verified
+                                    Pro
                                 </Badge>
                             )}
                              {subscription?.planId === 'elite' && (
                                 <Badge variant="default" className="flex items-center gap-1 bg-purple-100 text-purple-800 border-purple-200">
                                     <Star className="h-4 w-4" />
-                                    Premium
+                                    Elite
                                 </Badge>
                             )}
                         </CardTitle>
@@ -488,6 +509,26 @@ export default function ProfilePage() {
                     </div>
                 </CardHeader>
             </Card>
+            
+            {userRole === 'provider' && invites.length > 0 && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Agency Invitations</CardTitle>
+                        <CardDescription>You have pending invitations to join an agency.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                        {invites.map(invite => (
+                             <div key={invite.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                <p>Invitation from <span className="font-semibold">{invite.agencyName}</span></p>
+                                <div className="flex gap-2">
+                                     <Button size="sm" variant="outline" onClick={() => handleInviteResponse(invite.id, true)} disabled={isRespondingToInvite}><ThumbsUp className="mr-2 h-4 w-4"/> Accept</Button>
+                                     <Button size="sm" variant="destructive" onClick={() => handleInviteResponse(invite.id, false)} disabled={isRespondingToInvite}><ThumbsDown className="mr-2 h-4 w-4"/> Decline</Button>
+                                </div>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+            )}
 
             <Tabs defaultValue="public-profile" className="w-full">
                 <TabsList className={cn("grid w-full", `grid-cols-${tabsToShow.length}`)}>

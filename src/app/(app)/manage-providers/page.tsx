@@ -4,9 +4,8 @@
 import * as React from "react";
 import {
   MoreHorizontal,
-  PlusCircle,
-  Users,
   UserPlus,
+  Users,
   AlertCircle,
   Loader2,
   Trash2,
@@ -101,7 +100,6 @@ export default function ManageProvidersPage() {
                 status: "Active"
             } as Provider));
             
-            // This logic combines both active and pending providers into one list
              setProviders(prev => [
                 ...activeProviders,
                 ...prev.filter(p => p.status !== 'Active')
@@ -134,7 +132,6 @@ export default function ManageProvidersPage() {
 
         setIsInviting(true);
         try {
-            // Check if user already exists and is a provider
             const userQuery = query(collection(db, "users"), where("email", "==", inviteEmail));
             const userSnapshot = await getDocs(userQuery);
 
@@ -159,7 +156,6 @@ export default function ManageProvidersPage() {
                 return;
             }
 
-            // Check if an invite is already pending for this provider
             const existingInviteQuery = query(collection(db, "invites"), where("email", "==", inviteEmail), where("status", "==", "pending"));
             const inviteSnapshot = await getDocs(existingInviteQuery);
 
@@ -170,8 +166,6 @@ export default function ManageProvidersPage() {
             }
 
             const batch = writeBatch(db);
-
-            // 1. Create the invitation document
             const inviteRef = doc(collection(db, "invites"));
             batch.set(inviteRef, {
                 agencyId: user.uid,
@@ -182,18 +176,16 @@ export default function ManageProvidersPage() {
                 createdAt: serverTimestamp(),
             });
 
-            // 2. Create the email document to trigger a backend email function
-            const mailRef = doc(collection(db, "mail"));
-            const profileLink = `${window.location.origin}/profile`; // Link to their profile to accept
-            batch.set(mailRef, {
-                to: inviteEmail,
-                template: {
-                    name: "agency-invite",
-                    data: {
-                        agencyName: user.displayName,
-                        inviteLink: profileLink,
-                    },
-                },
+            const notificationRef = doc(collection(db, `users/${providerDoc.id}/notifications`));
+            batch.set(notificationRef, {
+                type: 'agency_invite',
+                message: `You have been invited to join ${user.displayName}.`,
+                link: '/profile',
+                read: false,
+                createdAt: serverTimestamp(),
+                inviteId: inviteRef.id,
+                agencyName: user.displayName,
+                agencyId: user.uid,
             });
 
             await batch.commit();

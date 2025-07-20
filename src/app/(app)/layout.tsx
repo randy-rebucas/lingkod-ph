@@ -46,6 +46,7 @@ import { useAuth } from "@/context/auth-context";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { NotificationBell } from "@/components/notification-bell";
 
 const Logo = () => (
   <h1 className="text-2xl font-bold font-headline text-primary pl-2 group-data-[collapsible=icon]:hidden">
@@ -267,37 +268,40 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {/* Page title can be dynamic here */}
             {pathname.split('/').pop()?.replace('-', ' ') || 'Dashboard'}
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar>
-                  <AvatarImage src={user.photoURL || ''} alt="User avatar" />
-                  <AvatarFallback>{getAvatarFallback(user.displayName)}</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{user.displayName || 'User'}</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/profile">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/settings">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+           <div className="flex items-center gap-4">
+            <NotificationBell />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar>
+                    <AvatarImage src={user.photoURL || ''} alt="User avatar" />
+                    <AvatarFallback>{getAvatarFallback(user.displayName)}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{user.displayName || 'User'}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/profile">
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </header>
         <main className="flex-1 p-6 bg-secondary">{children}</main>
       </SidebarInset>
