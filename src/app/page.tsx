@@ -1,8 +1,14 @@
+
+"use client";
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Search, Brush, Wrench, Sprout, Handshake, BriefcaseBusiness, UserCheck } from 'lucide-react';
+import { useAuth } from '@/context/auth-context';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
@@ -46,6 +52,15 @@ const Footer = () => (
 );
 
 export default function Home() {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, loading, router]);
+  
   const services = [
     { name: 'Cleaning', icon: <Brush className="h-8 w-8" />, hint: "cleaning services" },
     { name: 'Repairs', icon: <Wrench className="h-8 w-8" />, hint: "home repair" },
@@ -60,6 +75,14 @@ export default function Home() {
     { title: "Book and Schedule", description: "Choose a provider, select a time that works for you, and book instantly.", icon: <BriefcaseBusiness className="h-10 w-10 text-primary" /> },
     { title: "Get the Job Done", description: "Your chosen provider arrives and completes the service to your satisfaction.", icon: <UserCheck className="h-10 w-10 text-primary" /> }
   ];
+
+  if (loading || user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-secondary">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col">

@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
@@ -38,61 +39,71 @@ const handleReferral = async (referralCode: string, newUser: { uid: string; emai
 
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('referralCode', '==', referralCode.toUpperCase()), limit(1));
-    const querySnapshot = await getDocs(q);
+    
+    try {
+        const querySnapshot = await getDocs(q);
 
-    if (querySnapshot.empty) {
-        console.warn('Referral code not found:', referralCode);
-        return 'Referral code not found';
+        if (querySnapshot.empty) {
+            console.warn('Referral code not found:', referralCode);
+            return 'Referral code not found';
+        }
+
+        const referrerDoc = querySnapshot.docs[0];
+        const referrerRef = referrerDoc.ref;
+        const pointsToAward = 250; // Referral bonus
+        
+        await runTransaction(db, async (transaction) => {
+            const freshReferrerDoc = await transaction.get(referrerRef);
+            if (!freshReferrerDoc.exists()) {
+                throw new Error("Referrer document does not exist!");
+            }
+
+            // Update referrer's points
+            const currentPoints = freshReferrerDoc.data().loyaltyPoints || 0;
+            transaction.update(referrerRef, { loyaltyPoints: currentPoints + pointsToAward });
+
+            // Add loyalty transaction for referrer
+            const referrerLoyaltyTxRef = doc(collection(referrerRef, 'loyaltyTransactions'));
+            transaction.set(referrerLoyaltyTxRef, {
+                points: pointsToAward,
+                type: 'referral',
+                description: `Referral bonus for ${newUser.email}`,
+                referredUserId: newUser.uid,
+                createdAt: serverTimestamp(),
+            });
+
+            // Add referral record
+            const referralRecordRef = doc(collection(db, 'referrals'));
+            transaction.set(referralRecordRef, {
+                referrerId: referrerDoc.id,
+                referredId: newUser.uid,
+                referredEmail: newUser.email,
+                rewardPointsGranted: pointsToAward,
+                createdAt: serverTimestamp(),
+            });
+            
+            // Mark the new user as referred and give them bonus points
+            const newUserRef = doc(db, 'users', newUser.uid);
+            transaction.update(newUserRef, { 
+                referredBy: referrerDoc.id,
+                loyaltyPoints: 100 // Welcome bonus for being referred
+            });
+
+            // Add loyalty transaction for the new user
+            const newUserLoyaltyTxRef = doc(collection(newUserRef, 'loyaltyTransactions'));
+            transaction.set(newUserLoyaltyTxRef, {
+                points: 100,
+                type: 'referral',
+                description: `Welcome bonus for using referral code`,
+                createdAt: serverTimestamp(),
+            });
+        });
+
+    } catch (error) {
+        console.error("Error processing referral: ", error);
+        return "Failed to process referral.";
     }
 
-    const referrerDoc = querySnapshot.docs[0];
-    const referrerRef = referrerDoc.ref;
-    const pointsToAward = 250; // Referral bonus
-
-    const batch = writeBatch(db);
-
-    // Update referrer's points
-    const currentPoints = referrerDoc.data().loyaltyPoints || 0;
-    batch.update(referrerRef, { loyaltyPoints: currentPoints + pointsToAward });
-
-    // Add loyalty transaction for referrer
-    const referrerLoyaltyTxRef = doc(collection(referrerRef, 'loyaltyTransactions'));
-    batch.set(referrerLoyaltyTxRef, {
-        points: pointsToAward,
-        type: 'referral',
-        description: `Referral bonus for ${newUser.email}`,
-        referredUserId: newUser.uid,
-        createdAt: serverTimestamp(),
-    });
-
-    // Add referral record
-    const referralRecordRef = doc(collection(db, 'referrals'));
-    batch.set(referralRecordRef, {
-        referrerId: referrerDoc.id,
-        referredId: newUser.uid,
-        referredEmail: newUser.email,
-        rewardPointsGranted: pointsToAward,
-        createdAt: serverTimestamp(),
-    });
-    
-    // Mark the new user as referred and give them bonus points
-    const newUserRef = doc(db, 'users', newUser.uid);
-    batch.update(newUserRef, { 
-        referredBy: referrerDoc.id,
-        loyaltyPoints: 100 // Welcome bonus for being referred
-    });
-
-    // Add loyalty transaction for the new user
-    const newUserLoyaltyTxRef = doc(collection(newUserRef, 'loyaltyTransactions'));
-     batch.set(newUserLoyaltyTxRef, {
-        points: 100,
-        type: 'referral',
-        description: `Welcome bonus for using referral code`,
-        createdAt: serverTimestamp(),
-    });
-
-
-    await batch.commit();
     return null; // Success
 };
 
@@ -218,6 +229,13 @@ export default function SignupPage() {
   const { toast } = useToast();
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [activeTab, setActiveTab] = useState<UserType>('client');
+  const { user, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
 
   const handleGoogleSignup = async () => {
     setLoadingGoogle(true);
@@ -266,6 +284,13 @@ export default function SignupPage() {
     }
   };
 
+  if (authLoading || user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-secondary">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
