@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase } from "lucide-react";
+import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs, getDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 
@@ -20,6 +20,8 @@ type Booking = {
     id: string;
     clientId: string;
     clientName: string;
+    providerId: string;
+    providerName: string;
     serviceName: string;
     status: "Upcoming" | "Completed" | "Cancelled";
     price: number;
@@ -45,6 +47,7 @@ type Provider = {
     availabilityStatus?: 'available' | 'limited' | 'unavailable';
     keyServices?: string[];
     address?: string;
+    totalRevenue?: number;
 };
 
 const getStatusVariant = (status: string) => {
@@ -144,17 +147,16 @@ const getAvailabilityBadge = (status: Provider['availabilityStatus']) => {
     }
 }
 
+const getAvatarFallback = (name: string | null | undefined) => {
+    if (!name) return "U";
+    const parts = name.split(" ");
+    if (parts.length > 1 && parts[0] && parts[1]) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+};
 
 const ProviderCard = ({ provider }: { provider: Provider }) => {
-    const getAvatarFallback = (name: string | null | undefined) => {
-        if (!name) return "U";
-        const parts = name.split(" ");
-        if (parts.length > 1 && parts[0] && parts[1]) {
-            return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-        }
-        return name.substring(0, 2).toUpperCase();
-    };
-
     return (
         <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col">
             <CardHeader className="text-center">
@@ -216,15 +218,16 @@ export default function DashboardPage() {
     const [loadingProviders, setLoadingProviders] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
 
+    // For agency dashboard
+    const [agencyProviders, setAgencyProviders] = useState<Provider[]>([]);
+    const [agencyBookings, setAgencyBookings] = useState<Booking[]>([]);
+    const [loadingAgencyData, setLoadingAgencyData] = useState(true);
+
 
     // Fetch data for provider dashboard
     useEffect(() => {
         if (!user || userRole !== 'provider') {
-            if (userRole && userRole !== 'provider') {
-                 // Is a client, no need to fetch provider data here, handled in separate effect
-            } else {
-                 setLoading(false);
-            }
+            setLoading(false);
             return;
         }
 
@@ -264,51 +267,108 @@ export default function DashboardPage() {
 
     // Fetch data for client dashboard
     useEffect(() => {
-        if (userRole && userRole !== 'provider') {
-            const fetchProviders = async () => {
-                setLoadingProviders(true);
-                try {
-                    // Fetch all reviews first to calculate ratings
-                    const reviewsSnapshot = await getDocs(collection(db, "reviews"));
-                    const allReviews = reviewsSnapshot.docs.map(doc => doc.data() as Review);
-                    
-                    const providerRatings: { [key: string]: { totalRating: number, count: number } } = {};
-                    allReviews.forEach(review => {
-                        if (!providerRatings[review.providerId]) {
-                            providerRatings[review.providerId] = { totalRating: 0, count: 0 };
-                        }
-                        providerRatings[review.providerId].totalRating += review.rating;
-                        providerRatings[review.providerId].count++;
-                    });
+        if (userRole !== 'client') return;
+        
+        const fetchProviders = async () => {
+            setLoadingProviders(true);
+            try {
+                // Fetch all reviews first to calculate ratings
+                const reviewsSnapshot = await getDocs(collection(db, "reviews"));
+                const allReviews = reviewsSnapshot.docs.map(doc => doc.data() as Review);
+                
+                const providerRatings: { [key: string]: { totalRating: number, count: number } } = {};
+                allReviews.forEach(review => {
+                    if (!providerRatings[review.providerId]) {
+                        providerRatings[review.providerId] = { totalRating: 0, count: 0 };
+                    }
+                    providerRatings[review.providerId].totalRating += review.rating;
+                    providerRatings[review.providerId].count++;
+                });
 
-                    // Fetch all providers
-                    const q = query(collection(db, "users"), where("role", "==", "provider"));
-                    const querySnapshot = await getDocs(q);
-                    const providersData = querySnapshot.docs.map(doc => {
-                        const data = doc.data();
-                        const ratingInfo = providerRatings[data.uid];
-                        return {
-                            uid: data.uid,
-                            displayName: data.displayName || 'Unnamed Provider',
-                            bio: data.bio,
-                            photoURL: data.photoURL,
-                            rating: ratingInfo ? ratingInfo.totalRating / ratingInfo.count : 0,
-                            reviewCount: ratingInfo ? ratingInfo.count : 0,
-                            availabilityStatus: data.availabilityStatus,
-                            keyServices: data.keyServices,
-                            address: data.address
-                        } as Provider;
-                    });
-                    setProviders(providersData);
-                } catch (error) {
-                    console.error("Error fetching providers: ", error);
-                } finally {
-                    setLoadingProviders(false);
-                }
-            };
-            fetchProviders();
-        }
+                // Fetch all providers
+                const q = query(collection(db, "users"), where("role", "==", "provider"));
+                const querySnapshot = await getDocs(q);
+                const providersData = querySnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    const ratingInfo = providerRatings[data.uid];
+                    return {
+                        uid: data.uid,
+                        displayName: data.displayName || 'Unnamed Provider',
+                        bio: data.bio,
+                        photoURL: data.photoURL,
+                        rating: ratingInfo ? ratingInfo.totalRating / ratingInfo.count : 0,
+                        reviewCount: ratingInfo ? ratingInfo.count : 0,
+                        availabilityStatus: data.availabilityStatus,
+                        keyServices: data.keyServices,
+                        address: data.address
+                    } as Provider;
+                });
+                setProviders(providersData);
+            } catch (error) {
+                console.error("Error fetching providers: ", error);
+            } finally {
+                setLoadingProviders(false);
+            }
+        };
+        fetchProviders();
     }, [userRole]);
+
+    // Fetch data for agency dashboard
+    useEffect(() => {
+        if (userRole !== 'agency' || !user) {
+             setLoadingAgencyData(false);
+            return;
+        }
+
+        const fetchAgencyData = async () => {
+            setLoadingAgencyData(true);
+            try {
+                // 1. Get all providers managed by the agency
+                const providersQuery = query(collection(db, "users"), where("agencyId", "==", user.uid));
+                const providersSnapshot = await getDocs(providersQuery);
+                const providerIds = providersSnapshot.docs.map(doc => doc.id);
+                 const fetchedProviders = providersSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as Provider));
+
+                if (providerIds.length === 0) {
+                    setAgencyProviders([]);
+                    setAgencyBookings([]);
+                    setLoadingAgencyData(false);
+                    return;
+                }
+                
+                // 2. Get all bookings for these providers
+                const bookingsQuery = query(collection(db, "bookings"), where("providerId", "in", providerIds));
+                const bookingsSnapshot = await getDocs(bookingsQuery);
+                const fetchedBookings = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
+                setAgencyBookings(fetchedBookings);
+                
+                 // 3. Get all reviews for these providers to calculate ratings and revenue
+                const reviewsQuery = query(collection(db, 'reviews'), where('providerId', 'in', providerIds));
+                const reviewsSnapshot = await getDocs(reviewsQuery);
+                const allReviews = reviewsSnapshot.docs.map(doc => doc.data() as Review);
+
+                const providerStats = fetchedProviders.map(p => {
+                    const providerReviews = allReviews.filter(r => r.providerId === p.uid);
+                    const providerBookings = fetchedBookings.filter(b => b.providerId === p.uid && b.status === 'Completed');
+                    const rating = providerReviews.length > 0 ? providerReviews.reduce((sum, r) => sum + r.rating, 0) / providerReviews.length : 0;
+                    const totalRevenue = providerBookings.reduce((sum, b) => sum + b.price, 0);
+
+                    return { ...p, rating, reviewCount: providerReviews.length, totalRevenue };
+                });
+
+                setAgencyProviders(providerStats);
+
+
+            } catch (error) {
+                console.error("Error fetching agency data:", error);
+            } finally {
+                setLoadingAgencyData(false);
+            }
+        };
+        fetchAgencyData();
+
+    }, [user, userRole]);
+
 
     // Derived stats for provider
     const totalRevenue = bookings
@@ -324,7 +384,7 @@ export default function DashboardPage() {
         ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
         : "N/A";
         
-    const recentBookings = bookings.slice(0, 3);
+    const recentBookings = bookings.slice(0, 5);
     const earningsData = processEarningsData(bookings);
 
     // Filter providers for client view
@@ -333,9 +393,20 @@ export default function DashboardPage() {
             provider.displayName.toLowerCase().includes(searchTerm.toLowerCase())
         ), [providers, searchTerm]);
 
+     // Derived stats for agency
+    const agencyTotalRevenue = agencyBookings.filter(b => b.status === 'Completed').reduce((sum, b) => sum + b.price, 0);
+    const agencyTotalBookings = agencyBookings.filter(b => b.status === 'Completed').length;
+    const agencyProviderCount = agencyProviders.length;
+    const agencyOverallRating = agencyProviders.length > 0
+        ? (agencyProviders.reduce((sum, p) => sum + p.rating, 0) / agencyProviders.length).toFixed(1)
+        : "N/A";
+    const agencyRecentBookings = agencyBookings.sort((a,b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5);
+    const topPerformingProviders = [...agencyProviders].sort((a,b) => (b.totalRevenue || 0) - (a.totalRevenue || 0)).slice(0, 5);
 
-    // If user is a client or agency
-    if (userRole && userRole !== 'provider') {
+
+
+    // If user is a client
+    if (userRole === 'client') {
         return (
              <div className="space-y-6">
                 <div>
@@ -377,8 +448,107 @@ export default function DashboardPage() {
             </div>
         )
     }
+
+    // Agency Dashboard
+    if (userRole === 'agency') {
+         return (
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-3xl font-bold font-headline">Agency Dashboard</h1>
+                    <p className="text-muted-foreground">An overview of your agency&apos;s performance.</p>
+                </div>
+
+                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                    <DashboardCard isLoading={loadingAgencyData} title="Total Revenue" icon={DollarSign} value={`₱${agencyTotalRevenue.toFixed(2)}`} />
+                    <DashboardCard isLoading={loadingAgencyData} title="Completed Bookings" icon={Calendar} value={`${agencyTotalBookings}`} />
+                    <DashboardCard isLoading={loadingAgencyData} title="Managed Providers" icon={Users2} value={`${agencyProviderCount}`} />
+                    <DashboardCard isLoading={loadingAgencyData} title="Agency Rating" icon={Star} value={`${agencyOverallRating}`} change={`Based on ${agencyProviders.reduce((sum, p) => sum + p.reviewCount, 0)} reviews`} />
+                </div>
+                
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+                    <Card className="lg:col-span-4">
+                        <CardHeader>
+                            <CardTitle>Recent Bookings</CardTitle>
+                            <CardDescription>The latest bookings across your agency.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                             {loadingAgencyData ? (
+                                <div className="space-y-4">
+                                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+                                </div>
+                            ) : (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Client</TableHead>
+                                        <TableHead>Provider</TableHead>
+                                        <TableHead>Status</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {agencyRecentBookings.length > 0 ? agencyRecentBookings.map((booking) => (
+                                        <TableRow key={booking.id}>
+                                            <TableCell className="font-medium">{booking.clientName}</TableCell>
+                                            <TableCell>{booking.providerName}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={3} className="h-24 text-center">No recent bookings.</TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                            )}
+                        </CardContent>
+                    </Card>
+                     <Card className="lg:col-span-3">
+                        <CardHeader>
+                            <CardTitle>Top Performing Providers</CardTitle>
+                            <CardDescription>Your most valuable providers by revenue.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {loadingAgencyData ? (
+                                <div className="space-y-4">
+                                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+                                </div>
+                            ) : (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Provider</TableHead>
+                                        <TableHead className="text-right">Revenue</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {topPerformingProviders.length > 0 ? topPerformingProviders.map((provider) => (
+                                        <TableRow key={provider.uid}>
+                                            <TableCell className="font-medium">{provider.displayName}</TableCell>
+                                            <TableCell className="text-right">₱{(provider.totalRevenue || 0).toFixed(2)}</TableCell>
+                                        </TableRow>
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={2} className="h-24 text-center">No provider data yet.</TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                            )}
+                        </CardContent>
+                         <CardFooter className="justify-center">
+                            <Button asChild variant="outline">
+                                <Link href="/manage-providers">Manage All Providers</Link>
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </div>
+            </div>
+        )
+    }
     
-    // Provider Dashboard
+    // Provider Dashboard (Default)
     return (
         <div className="space-y-6">
             <div>
@@ -492,7 +662,7 @@ export default function DashboardPage() {
                             <div key={review.id} className="flex items-start gap-4">
                                 <Avatar>
                                     <AvatarImage src={review.clientAvatar} alt={review.clientName} />
-                                    <AvatarFallback>{review.clientName.charAt(0)}</AvatarFallback>
+                                    <AvatarFallback>{getAvatarFallback(review.clientName)}</AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between">
