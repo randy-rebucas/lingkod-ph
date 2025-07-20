@@ -1,5 +1,26 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowRight, Building2, Handshake, Users, Wrench } from "lucide-react";
+import Link from "next/link";
+
+const partnershipTypes = [
+  {
+    icon: <Building2 className="h-12 w-12 text-primary" />,
+    title: "Corporate Partners",
+    description: "Offer LingkodPH's trusted services as a perk to your employees or integrate our network into your business offerings. Enhance your value proposition and support local professionals.",
+  },
+  {
+    icon: <Users className="h-12 w-12 text-primary" />,
+    title: "Community & LGU Partners",
+    description: "Collaborate with us on community-based programs, job fairs, and skills training initiatives. Empower your constituents by connecting them with legitimate work opportunities.",
+  },
+  {
+    icon: <Wrench className="h-12 w-12 text-primary" />,
+    title: "Supply & Material Partners",
+    description: "Become a preferred supplier for our network of service providers. Gain direct access to a growing market of professionals who need quality tools, materials, and equipment.",
+  },
+];
 
 export default function PartnersPage() {
   return (
@@ -7,23 +28,45 @@ export default function PartnersPage() {
       <div className="mx-auto max-w-3xl text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Partner with LingkodPH</h1>
         <p className="mt-6 text-lg leading-8 text-muted-foreground">
-          Collaborate with us to empower local businesses and communities.
+          Collaborate with us to empower local businesses and build stronger communities together.
         </p>
       </div>
 
-      <Card className="mt-12">
-        <CardHeader>
-          <CardTitle>Partnership Opportunities</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-muted-foreground">
-          <p>
-            We believe in the power of collaboration. If you are a business, a non-profit, or a government unit interested in partnering with us, please reach out.
-          </p>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-          </p>
-        </CardContent>
+      <div className="mx-auto mt-16 grid max-w-lg gap-8 lg:max-w-none lg:grid-cols-3">
+        {partnershipTypes.map((partner) => (
+          <Card key={partner.title} className="flex flex-col items-center text-center">
+            <CardHeader className="items-center">
+              <div className="rounded-full bg-primary/10 p-4">{partner.icon}</div>
+              <CardTitle className="mt-4">{partner.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">{partner.description}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="mt-20 max-w-4xl mx-auto bg-secondary">
+        <div className="p-8 md:flex md:items-center md:justify-between">
+          <div>
+            <h2 className="text-2xl font-bold font-headline flex items-center gap-2">
+              <Handshake />
+              Ready to Collaborate?
+            </h2>
+            <p className="mt-2 text-muted-foreground">
+              Let's work together to create a positive impact. Reach out to our partnerships team to get started.
+            </p>
+          </div>
+          <div className="mt-4 md:mt-0 flex-shrink-0">
+            <Button asChild size="lg">
+              <Link href="/contact-us">
+                Become a Partner <ArrowRight className="ml-2" />
+              </Link>
+            </Button>
+          </div>
+        </div>
       </Card>
+
     </div>
   );
 }
