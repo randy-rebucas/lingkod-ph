@@ -257,7 +257,7 @@ export default function Home() {
         {/* Join Platform Section (B2B2C CTA) */}
         <section id="join" className="bg-secondary py-20">
             <div className="container">
-                <div className="relative rounded-xl overflow-hidden p-12 text-primary-foreground">
+                <div className="relative rounded-xl overflow-hidden p-12 text-white">
                     <Image src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1469" layout="fill" alt="Business team collaborating" className="object-cover" data-ai-hint="business team" />
                      <div className="absolute inset-0 bg-primary/80 mix-blend-multiply"></div>
                      <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
@@ -265,8 +265,8 @@ export default function Home() {
                             <h2 className="font-headline text-4xl font-bold">Ready to Grow Your Service Business?</h2>
                             <p className="mt-4 text-lg opacity-90">Whether you're an individual provider or a growing agency, LingkodPH provides the tools, visibility, and support you need to succeed.</p>
                         </div>
-                        <div className="bg-background/20 backdrop-blur-sm p-8 rounded-lg">
-                           <ul className="space-y-4 text-primary-foreground">
+                        <div className="bg-black/20 backdrop-blur-sm p-8 rounded-lg">
+                           <ul className="space-y-4">
                                <li className="flex items-start gap-3">
                                    <div className="mt-1"><UserCheck className="h-5 w-5" /></div>
                                    <p><span className="font-semibold">For Individual Providers:</span> Build your reputation, manage bookings effortlessly, and connect with a steady stream of clients.</p>
@@ -289,5 +289,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
