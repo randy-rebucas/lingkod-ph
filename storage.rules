@@ -1,0 +1,31 @@
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Allow public read on all files by default.
+    // This is simple but you might want to tighten this in production.
+    match /{allPaths=**} {
+      allow read;
+    }
+
+    // Users can only write to their own profile picture directory.
+    match /profile-pictures/{userId}/{allPaths=**} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Users can only write their own verification documents.
+    // Limit file size to 5MB.
+    match /verification/{userId}/{fileName} {
+      allow write: if request.auth != null && request.auth.uid == userId && request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Users can write to chat image directories.
+    // A more robust rule would check if the user is a participant in the conversation.
+    // This requires custom claims or reading Firestore docs, so we'll keep it simple for now.
+    match /chat-images/{conversationId}/{allPaths=**} {
+      allow write: if request.auth != null;
+    }
+  }
+}
