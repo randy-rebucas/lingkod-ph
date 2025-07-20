@@ -123,15 +123,15 @@ export default function TermsOfServicePage() {
         </p>
       </div>
 
-      <div className="mx-auto max-w-3xl space-y-8 mt-12">
-        <p className="text-muted-foreground">
+      <div className="mx-auto max-w-3xl space-y-12 mt-12">
+        <p className="text-muted-foreground leading-relaxed">
           Welcome to LingkodPH. These Terms of Service (&quot;Terms&quot;) govern your use of our platform, which connects service providers with clients through our website and mobile applications (collectively, the &quot;Platform&quot;). By accessing or using LingkodPH, you agree to be bound by these Terms.
         </p>
 
         {sections.map(section => (
           <div key={section.title}>
-            <h2 className="text-2xl font-semibold mt-8 mb-4">{section.title}</h2>
-            <div className="space-y-4 text-muted-foreground">
+            <h2 className="text-2xl font-semibold mb-4">{section.title}</h2>
+            <div className="space-y-4 text-muted-foreground leading-relaxed">
               {section.content.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
               ))}
