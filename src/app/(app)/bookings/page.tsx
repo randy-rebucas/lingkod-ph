@@ -259,7 +259,8 @@ export default function BookingsPage() {
         // so we create a query that checks if the user's ID is in either the clientId or providerId field.
         const bookingsRef = collection(db, "bookings");
         const q = query(bookingsRef, 
-            or(where("clientId", "==", user.uid), where("providerId", "==", user.uid))
+            or(where("clientId", "==", user.uid), where("providerId", "==", user.uid)),
+            orderBy("date", "desc")
         );
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -267,7 +268,7 @@ export default function BookingsPage() {
                 id: doc.id,
                 ...doc.data()
             } as Booking));
-            setBookings(bookingsData.sort((a,b) => b.date.toMillis() - a.date.toMillis())); // Sort by most recent
+            setBookings(bookingsData);
             setLoading(false);
         }, (error) => {
             console.error("Error fetching bookings:", error);

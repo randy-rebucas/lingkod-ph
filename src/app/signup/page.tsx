@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, runTransaction, getDocs, query, where, collection, writeBatch, limit } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,65 @@ const Logo = () => (
 
 type UserType = 'client' | 'provider' | 'agency';
 
+const generateReferralCode = (length: number) => {
+    const chars = 'ABCDEFGHIJKLMNPQRSTUVWXYZ123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+};
+
+const handleReferral = async (referralCode: string, newUser: { uid: string; email: string | null }) => {
+    if (!referralCode) return;
+
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('referralCode', '==', referralCode.toUpperCase()), limit(1));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+        console.warn('Referral code not found:', referralCode);
+        return;
+    }
+
+    const referrerDoc = querySnapshot.docs[0];
+    const referrerRef = referrerDoc.ref;
+    const pointsToAward = 250; // Referral bonus
+
+    const batch = writeBatch(db);
+
+    // Update referrer's points
+    const currentPoints = referrerDoc.data().loyaltyPoints || 0;
+    batch.update(referrerRef, { loyaltyPoints: currentPoints + pointsToAward });
+
+    // Add loyalty transaction for referrer
+    const referrerLoyaltyTxRef = doc(collection(referrerRef, 'loyaltyTransactions'));
+    batch.set(referrerLoyaltyTxRef, {
+        points: pointsToAward,
+        type: 'referral',
+        description: `Referral bonus for ${newUser.email}`,
+        referredUserId: newUser.uid,
+        createdAt: serverTimestamp(),
+    });
+
+    // Add referral record
+    const referralRecordRef = doc(collection(db, 'referrals'));
+    batch.set(referralRecordRef, {
+        referrerId: referrerDoc.id,
+        referredId: newUser.uid,
+        referredEmail: newUser.email,
+        rewardPointsGranted: pointsToAward,
+        createdAt: serverTimestamp(),
+    });
+    
+    // Mark the new user as referred
+    const newUserRef = doc(db, 'users', newUser.uid);
+    batch.update(newUserRef, { referredBy: referrerDoc.id });
+
+    await batch.commit();
+};
+
+
 const SignUpForm = ({ userType }: { userType: UserType }) => {
   const [name, setName] = useState('');
   const [businessName, setBusinessName] = useState('');
@@ -32,6 +91,7 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [referralCode, setReferralCode] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
@@ -47,6 +107,8 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
       const displayName = userType === 'agency' ? businessName : name;
       await updateProfile(user, { displayName });
 
+      const newReferralCode = generateReferralCode(6);
+
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
@@ -54,8 +116,12 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
         phone: phone,
         role: userType.toLowerCase(),
         createdAt: serverTimestamp(),
+        loyaltyPoints: 0, // Initial points
+        referralCode: newReferralCode,
         ...(userType === 'agency' && { contactPerson: contactPerson }),
       });
+
+      await handleReferral(referralCode, user);
 
       toast({ title: "Success", description: "Account created successfully!" });
       router.push('/dashboard');
@@ -105,6 +171,12 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
         <Input id={`${userType}-password`} type="password" required value={password} onChange={e => setPassword(e.target.value)} />
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor={`${userType}-referral`}>Referral Code (Optional)</Label>
+        <Input id={`${userType}-referral`} placeholder="ABC123" value={referralCode} onChange={e => setReferralCode(e.target.value)} />
+      </div>
+
+
       <Button type="submit" className="w-full" disabled={loading}>
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         {loading ? 'Creating Account...' : 'Create Account'}
@@ -126,6 +198,10 @@ export default function SignupPage() {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
+      
+      // For Google Sign-Up, referral handling is more complex
+      // as there's no form field. This implementation focuses on email/pass sign up.
+      const newReferralCode = generateReferralCode(6);
 
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
@@ -135,6 +211,8 @@ export default function SignupPage() {
         phone: user.phoneNumber || '',
         role: activeTab.toLowerCase(),
         createdAt: serverTimestamp(),
+        loyaltyPoints: 0,
+        referralCode: newReferralCode,
       }, { merge: true }); // Use merge to avoid overwriting data if doc exists
       
       toast({ title: "Success", description: "Signed up successfully with Google!" });

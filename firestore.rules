@@ -3,85 +3,108 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Helper function to check if a user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
 
-    // Helper functions
+    // Helper function to check if the user is trying to access their own data
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
     
-    function isUserAuthenticated() {
-      return request.auth != null;
-    }
-
-    // Allow users to read/write their own user document
+    // Users Collection
     match /users/{userId} {
-      allow read, update, delete: if isOwner(userId);
-      allow create: if isUserAuthenticated();
+      // Any authenticated user can create their own user document
+      allow create: if isAuthenticated();
+      // Only the owner can read or update their own document
+      allow read, update: if isAuthenticated() && isOwner(userId);
     }
     
-    // Allow anyone to read provider profiles
-    match /users/{providerId} {
-      allow get: if resource.data.role == 'provider' || resource.data.role == 'agency';
-    }
-
-    // Allow providers to manage their own services
+    // Services Collection
     match /services/{serviceId} {
-      allow read; // Anyone can read services
-      allow create, update, delete: if isOwner(resource.data.userId);
+        // Anyone can read services (for browsing)
+        allow read: if true;
+        // Only authenticated users can create services
+        allow create: if isAuthenticated();
+        // Only the user who created the service can update or delete it
+        allow update, delete: if isAuthenticated() && isOwner(resource.data.userId);
     }
-    
-    // Categories can be read by anyone, but only managed internally (e.g. via scripts)
-    match /categories/{categoryId} {
-        allow read;
-        allow write: if false; // Protect from client-side writes
-    }
-    
-    // Allow users to manage their own bookings
-    // A provider can also update a booking they are part of
+
+    // Bookings Collection
     match /bookings/{bookingId} {
-      allow read, update: if isUserAuthenticated() && (isOwner(resource.data.clientId) || isOwner(resource.data.providerId));
-      allow create: if isUserAuthenticated();
-      allow delete: if isUserAuthenticated() && isOwner(resource.data.clientId); // Only client can delete (cancel)
+        // A user can create a booking if they are authenticated
+        allow create: if isAuthenticated();
+        // A user can read, update, or delete a booking if they are either the client or the provider
+        allow read, update, delete: if isAuthenticated() && (isOwner(resource.data.clientId) || isOwner(resource.data.providerId));
     }
 
-    // Chat conversations and messages
+    // Categories Collection
+    match /categories/{categoryId} {
+        // Allow public read for all users to populate dropdowns etc.
+        allow read: if true;
+        // Restrict write access (typically done via a trusted server or admin SDK)
+        allow write: if false; 
+    }
+    
+    // Conversations and Messages
     match /conversations/{conversationId} {
-      allow read, update: if isUserAuthenticated() && request.auth.uid in resource.data.participants;
-      allow create: if isUserAuthenticated();
-      
-      match /messages/{messageId} {
-        allow read, create: if isUserAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
-      }
+        // Allow read/write if user is a participant
+        allow read, create, update: if isAuthenticated() && request.auth.uid in resource.data.participants;
+        
+        match /messages/{messageId} {
+            // Allow read if user is a participant of the parent conversation
+            allow read: if isAuthenticated() && get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants.hasAny([request.auth.uid]);
+            // Allow create if user is a participant and the sender
+            allow create: if isAuthenticated() && get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants.hasAny([request.auth.uid]) && isOwner(request.resource.data.senderId);
+        }
     }
     
-    // Quotes management
-    match /quotes/{quoteId} {
-       allow read, create, update, delete: if isUserAuthenticated() && isOwner(resource.data.providerId);
+    // Reviews Collection
+    match /reviews/{reviewId} {
+        // Allow public read
+        allow read: if true;
+        // Authenticated users can create reviews
+        allow create: if isAuthenticated();
+        // Only the review author can update/delete
+        allow update, delete: if isAuthenticated() && isOwner(resource.data.clientId);
     }
-    
-    // Invoices management
+
+    // Invoices Collection
     match /invoices/{invoiceId} {
-       allow read, create, update, delete: if isUserAuthenticated() && isOwner(resource.data.providerId);
-    }
-
-    // Verification data subcollection on user
-    match /users/{userId}/verification/{docId} {
-        allow read, write: if isOwner(userId);
+        // Only the provider who created the invoice can access it
+        allow read, create, update, delete: if isAuthenticated() && isOwner(resource.data.providerId);
     }
     
-    // Loyalty Program
+    // Quotes Collection
+     match /quotes/{quoteId} {
+        // Only the provider who created the quote can access it
+        allow read, create, update, delete: if isAuthenticated() && isOwner(resource.data.providerId);
+    }
+    
+    // Loyalty Rewards Collection
     match /loyaltyRewards/{rewardId} {
-        allow read;
-        allow write: if false; // Only manageable from backend/scripts
+      // Publicly readable by all authenticated users
+      allow read: if isAuthenticated();
+      // Should only be written by an admin/backend process
+      allow write: if false;
     }
     
+    // Loyalty Transactions Subcollection
     match /users/{userId}/loyaltyTransactions/{transactionId} {
-      allow read: if isOwner(userId);
-      // Transactions should only be created via server-side logic (e.g. transaction in booking update)
-      // or redeeming a reward, which is also a transaction.
-      // We allow write here but the logic is controlled to prevent abuse.
-      allow write: if isOwner(userId);
+      // Only the owner of the user document can read or create transactions for themselves
+      allow read, create: if isAuthenticated() && isOwner(userId);
+      // Transactions should be immutable
+      allow update, delete: if false;
     }
-
+    
+    // Referrals Collection
+    match /referrals/{referralId} {
+      // Only the referrer or the referred user can read the record
+      allow read: if isAuthenticated() && (isOwner(resource.data.referrerId) || isOwner(resource.data.referredId));
+      // Creating referrals is handled by a backend process or transaction, so no direct client creation
+      allow create, update, delete: if false;
+    }
   }
 }

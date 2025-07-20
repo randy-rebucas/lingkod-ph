@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings, Briefcase, Award, Users, Database } from "lucide-react";
+import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings, Briefcase, Award, Users, Database, Copy } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -38,8 +38,15 @@ type Reward = {
 type LoyaltyTransaction = {
     id: string;
     points: number;
-    type: 'earn' | 'redeem';
+    type: 'earn' | 'redeem' | 'referral';
     description: string;
+    createdAt: Timestamp;
+};
+
+type Referral = {
+    id: string;
+    referredEmail: string;
+    rewardPointsGranted: number;
     createdAt: Timestamp;
 };
 
@@ -80,6 +87,9 @@ export default function ProfilePage() {
     const [transactions, setTransactions] = useState<LoyaltyTransaction[]>([]);
     const [isRedeeming, setIsRedeeming] = useState<string | null>(null);
 
+    // States for Referral Program
+    const [referralCode, setReferralCode] = useState('');
+    const [referrals, setReferrals] = useState<Referral[]>([]);
 
     const years = useMemo(() => {
         const currentYear = new Date().getFullYear();
@@ -111,6 +121,7 @@ export default function ProfilePage() {
                 setPhone(data.phone || '');
                 setBio(data.bio || '');
                 setGender(data.gender || '');
+                setReferralCode(data.referralCode || '');
                 if (data.birthdate && data.birthdate.toDate) {
                     const date = data.birthdate.toDate();
                     setBirthDay(String(date.getDate()));
@@ -149,12 +160,27 @@ export default function ProfilePage() {
             setTransactions(transData);
         });
 
+        // Fetch referrals
+        const referralsRef = collection(db, 'referrals');
+        const qReferrals = query(referralsRef, where("referrerId", "==", user.uid), orderBy("createdAt", "desc"));
+        const unsubscribeReferrals = onSnapshot(qReferrals, (snapshot) => {
+            const referralsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data()} as Referral));
+            setReferrals(referralsData);
+        });
+
+
         return () => {
             unsubscribeUser();
             unsubscribeRewards();
             unsubscribeTransactions();
+            unsubscribeReferrals();
         };
     }, [user, userRole]);
+
+    const handleCopyReferralCode = () => {
+        navigator.clipboard.writeText(referralCode);
+        toast({ title: 'Copied!', description: 'Your referral code has been copied to the clipboard.' });
+    };
 
     const handleRedeemReward = async (reward: Reward) => {
         if (!user || loyaltyPoints < reward.pointsRequired) {
@@ -362,6 +388,8 @@ export default function ProfilePage() {
     if (userRole === 'provider' || userRole === 'agency') {
         TABS.splice(2, 0, 'provider-settings');
     }
+
+    const totalReferralPoints = referrals.reduce((sum, ref) => sum + ref.rewardPointsGranted, 0);
 
     return (
         <div className="space-y-6">
@@ -610,10 +638,10 @@ export default function ProfilePage() {
                                     <TableBody>
                                         {transactions.length > 0 ? transactions.slice(0, 5).map(tx => (
                                              <TableRow key={tx.id}>
-                                                <TableCell className="text-xs text-muted-foreground">{format(tx.createdAt.toDate(), 'MMM d, yyyy')}</TableCell>
+                                                <TableCell className="text-xs text-muted-foreground">{tx.createdAt ? format(tx.createdAt.toDate(), 'MMM d, yyyy') : ''}</TableCell>
                                                 <TableCell>{tx.description}</TableCell>
-                                                <TableCell className={`text-right font-medium ${tx.type === 'earn' ? 'text-green-600' : 'text-destructive'}`}>
-                                                    {tx.type === 'earn' ? '+' : '-'}{tx.points.toLocaleString()}
+                                                <TableCell className={cn("text-right font-medium", tx.type === 'earn' || tx.type === 'referral' ? 'text-green-600' : 'text-destructive')}>
+                                                    {tx.type === 'earn' || tx.type === 'referral' ? '+' : '-'}{tx.points.toLocaleString()}
                                                 </TableCell>
                                             </TableRow>
                                         )) : (
@@ -628,17 +656,75 @@ export default function ProfilePage() {
                     </div>
                 </TabsContent>
 
-                <TabsContent value="referrals" className="mt-6">
-                    <Card>
+                <TabsContent value="referrals" className="mt-6 space-y-6">
+                     <div>
+                         <h2 className="text-2xl font-bold">Referral Program</h2>
+                         <p className="text-muted-foreground">Invite friends to LingkodPH and earn 250 points for each successful referral!</p>
+                    </div>
+                     <Card>
                         <CardHeader>
-                            <CardTitle>Referral Program</CardTitle>
-                            <CardDescription>Invite friends and earn rewards.</CardDescription>
+                            <CardTitle>Your Unique Referral Code</CardTitle>
+                            <CardDescription>Share this code with your friends. When they sign up, you both get rewarded.</CardDescription>
                         </CardHeader>
-                        <CardContent className="text-center text-muted-foreground p-12">
-                            <Users className="h-12 w-12 mx-auto mb-4"/>
-                            <p>Our referral program is under construction. Get ready to share and earn!</p>
+                        <CardContent>
+                            <div className="flex w-full max-w-sm items-center space-x-2 p-4 border-2 border-dashed rounded-lg bg-secondary">
+                                <p className="text-2xl font-mono font-bold text-primary flex-1">{referralCode}</p>
+                                <Button size="icon" variant="ghost" onClick={handleCopyReferralCode}>
+                                    <Copy className="h-5 w-5" />
+                                </Button>
+                            </div>
                         </CardContent>
                     </Card>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Referral Stats</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex justify-between items-center p-3 rounded-md bg-secondary">
+                                    <p className="font-medium">Friends Joined</p>
+                                    <p className="text-2xl font-bold">{referrals.length}</p>
+                                </div>
+                                 <div className="flex justify-between items-center p-3 rounded-md bg-secondary">
+                                    <p className="font-medium">Total Points Earned</p>
+                                    <p className="text-2xl font-bold text-green-600">+{totalReferralPoints.toLocaleString()}</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                         <Card>
+                            <CardHeader>
+                                <CardTitle>Referral History</CardTitle>
+                                <CardDescription>Users who joined using your code.</CardDescription>
+                            </CardHeader>
+                             <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Date Joined</TableHead>
+                                            <TableHead>Referred User</TableHead>
+                                            <TableHead className="text-right">Reward</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {referrals.length > 0 ? referrals.slice(0, 5).map(ref => (
+                                             <TableRow key={ref.id}>
+                                                <TableCell className="text-xs text-muted-foreground">{ref.createdAt ? format(ref.createdAt.toDate(), 'MMM d, yyyy') : ''}</TableCell>
+                                                <TableCell>{ref.referredEmail}</TableCell>
+                                                <TableCell className="text-right font-medium text-green-600">
+                                                   +{ref.rewardPointsGranted} pts
+                                                </TableCell>
+                                            </TableRow>
+                                        )) : (
+                                            <TableRow>
+                                                <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">No referrals yet.</TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </TabsContent>
 
                 {(userRole === 'provider' || userRole === 'agency') && (
