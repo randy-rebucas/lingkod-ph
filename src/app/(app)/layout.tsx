@@ -22,6 +22,8 @@ import {
   Moon,
   Sun,
   FilePieChart,
+  Lightbulb,
+  Check,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -44,6 +46,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/auth-context";
 import { signOut } from "firebase/auth";
@@ -57,6 +64,53 @@ const Logo = () => (
     Lingkod<span className="text-accent">PH</span>
   </h1>
 );
+
+const SuccessTips = () => (
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button
+        size="icon"
+        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-accent hover:bg-accent/90"
+      >
+        <Lightbulb className="h-6 w-6" />
+        <span className="sr-only">Tips for Success</span>
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent className="w-80 mb-2">
+      <div className="grid gap-4">
+        <div className="space-y-2">
+          <h4 className="font-medium leading-none">Tips for Success</h4>
+          <p className="text-sm text-muted-foreground">
+            Maximize your opportunities on LingkodPH.
+          </p>
+        </div>
+        <ul className="space-y-3">
+            <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                <span className="text-sm text-muted-foreground">Be punctual and respectful</span>
+            </li>
+             <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                <span className="text-sm text-muted-foreground">Bring your own tools (if possible)</span>
+            </li>
+             <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                <span className="text-sm text-muted-foreground">Keep your phone ready — jobs move fast</span>
+            </li>
+             <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                <span className="text-sm text-muted-foreground">Ask for a review after each job</span>
+            </li>
+             <li className="flex items-start gap-2">
+                <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+                <span className="text-sm text-muted-foreground">Build your rating = Get more jobs!</span>
+            </li>
+        </ul>
+      </div>
+    </PopoverContent>
+  </Popover>
+);
+
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -341,7 +395,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </DropdownMenu>
           </div>
         </header>
-        <main className="flex-1 p-6 bg-secondary">{children}</main>
+        <main className="flex-1 p-6 bg-secondary relative">
+            {children}
+            {(userRole === 'provider' || userRole === 'agency') && <SuccessTips />}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );
