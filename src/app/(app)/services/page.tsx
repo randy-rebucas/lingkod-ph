@@ -9,11 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreVertical, PlusCircle, Loader2, BriefcaseBusiness } from "lucide-react";
+import { MoreVertical, PlusCircle, Loader2, BriefcaseBusiness, Database } from "lucide-react";
 import { AddEditServiceDialog, Service } from '@/components/add-edit-service-dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { seedCategories } from '@/lib/seed-categories';
 
 
 const getStatusVariant = (status: string) => {
@@ -34,6 +35,7 @@ export default function ServicesPage() {
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedService, setSelectedService] = useState<Service | null>(null);
+    const [isSeeding, setIsSeeding] = useState(false);
 
     const fetchServices = async () => {
         if (!user) return;
@@ -84,6 +86,26 @@ export default function ServicesPage() {
         }
     };
 
+    const handleSeedCategories = async () => {
+        setIsSeeding(true);
+        try {
+            const count = await seedCategories();
+            toast({
+                title: "Seeding Complete",
+                description: `${count} new categories were added to the database.`,
+            });
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: "destructive",
+                title: "Seeding Failed",
+                description: "Could not seed categories. Check the console for errors.",
+            });
+        } finally {
+            setIsSeeding(false);
+        }
+    };
+
 
     const onServiceSaved = () => {
         setIsDialogOpen(false);
@@ -99,10 +121,16 @@ export default function ServicesPage() {
                         Manage the services you offer to clients.
                     </p>
                 </div>
-                <Button onClick={handleAddService}>
-                    <PlusCircle className="mr-2" />
-                    Add New Service
-                </Button>
+                 <div className="flex items-center gap-2">
+                    <Button onClick={handleAddService}>
+                        <PlusCircle className="mr-2" />
+                        Add New Service
+                    </Button>
+                     <Button variant="outline" onClick={handleSeedCategories} disabled={isSeeding}>
+                        {isSeeding ? <Loader2 className="mr-2 animate-spin" /> : <Database className="mr-2" />}
+                        {isSeeding ? 'Seeding...' : 'Seed Categories'}
+                    </Button>
+                </div>
             </div>
             
             {loading ? (

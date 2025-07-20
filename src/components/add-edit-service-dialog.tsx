@@ -7,11 +7,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, serverTimestamp, getDocs, query, orderBy } from 'firebase/firestore';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -30,9 +29,14 @@ export type Service = {
     createdAt?: Date;
 };
 
+type Category = {
+    id: string;
+    name: string;
+};
+
 const serviceSchema = z.object({
     name: z.string().min(3, { message: "Service name must be at least 3 characters." }),
-    category: z.string().min(3, { message: "Category must be at least 3 characters." }),
+    category: z.string().min(1, { message: "Please select a category." }),
     price: z.coerce.number().positive({ message: "Price must be a positive number." }),
     description: z.string().min(10, { message: "Description must be at least 10 characters." }),
     status: z.enum(['Active', 'Inactive']),
@@ -50,6 +54,7 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
 
     const form = useForm<Service>({
         resolver: zodResolver(serviceSchema),
@@ -63,6 +68,26 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
     });
 
     useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const categoriesRef = collection(db, "categories");
+                const q = query(categoriesRef, orderBy("name"));
+                const querySnapshot = await getDocs(q);
+                const fetchedCategories = querySnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+                setCategories(fetchedCategories);
+            } catch (error) {
+                console.error("Error fetching categories: ", error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch categories.' });
+            }
+        };
+
+        if (isOpen) {
+            fetchCategories();
+        }
+
+    }, [isOpen, toast]);
+
+    useEffect(() => {
         if (service) {
             form.reset(service);
         } else {
@@ -74,7 +99,7 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                 status: 'Active',
             });
         }
-    }, [service, form]);
+    }, [service, form, isOpen]);
 
     const handleGenerateDescription = async () => {
         const serviceName = form.getValues('name');
@@ -169,9 +194,18 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Category</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="e.g., Cleaning" {...field} />
-                                    </FormControl>
+                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a category" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {categories.map(cat => (
+                                                <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}
