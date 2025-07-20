@@ -15,7 +15,7 @@ import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users,
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
-import { doc, updateDoc, getDoc, Timestamp, collection, onSnapshot, query, orderBy, runTransaction, serverTimestamp, where, addDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc, Timestamp, collection, onSnapshot, query, orderBy, runTransaction, serverTimestamp, where, addDoc, getDocs } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -66,6 +66,11 @@ type Availability = {
     endTime: string;
 };
 
+type Category = {
+    id: string;
+    name: string;
+};
+
 const initialAvailability: Availability[] = [
     { day: "Monday", enabled: true, startTime: "9:00 AM", endTime: "5:00 PM" },
     { day: "Tuesday", enabled: true, startTime: "9:00 AM", endTime: "5:00 PM" },
@@ -110,6 +115,7 @@ export default function ProfilePage() {
     const [licenseIssuingState, setLicenseIssuingState] = useState('');
     const [licenseIssuingCountry, setLicenseIssuingCountry] = useState('');
     const [availabilitySchedule, setAvailabilitySchedule] = useState<Availability[]>(initialAvailability);
+    const [categories, setCategories] = useState<Category[]>([]);
     
     const [isSavingPublic, setIsSavingPublic] = useState(false);
     const [isSavingPersonal, setIsSavingPersonal] = useState(false);
@@ -184,6 +190,22 @@ export default function ProfilePage() {
                 }
             }
         });
+
+        const fetchCategories = async () => {
+            try {
+                const categoriesRef = collection(db, "categories");
+                const q = query(categoriesRef, orderBy("name"));
+                const querySnapshot = await getDocs(q);
+                const fetchedCategories = querySnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+                setCategories(fetchedCategories);
+            } catch (error) {
+                console.error("Error fetching categories: ", error);
+            }
+        };
+
+        if (userRole === 'provider' || userRole === 'agency') {
+            fetchCategories();
+        }
 
         // Fetch loyalty rewards
         const rewardsRef = collection(db, "loyaltyRewards");
@@ -463,7 +485,15 @@ export default function ProfilePage() {
     const referralLink = typeof window !== 'undefined' ? `${window.location.origin}/signup?ref=${referralCode}` : '';
 
     const handleAddKeyService = () => {
-        if(currentKeyService.trim() && !keyServices.includes(currentKeyService.trim())) {
+        if (currentKeyService.trim() && !keyServices.includes(currentKeyService.trim())) {
+            if (keyServices.length >= 5) {
+                toast({
+                    variant: "destructive",
+                    title: "Limit Reached",
+                    description: "You can only add up to 5 key services."
+                });
+                return;
+            }
             setKeyServices([...keyServices, currentKeyService.trim()]);
             setCurrentKeyService("");
         }
@@ -927,12 +957,18 @@ export default function ProfilePage() {
                                     <div className="space-y-2">
                                         <Label>Key Services</Label>
                                         <div className="flex gap-2">
-                                            <Input 
-                                                value={currentKeyService}
-                                                onChange={(e) => setCurrentKeyService(e.target.value)}
-                                                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddKeyService(); }}}
-                                                placeholder="e.g., Plumbing, Electrical"
-                                            />
+                                            <Select onValueChange={setCurrentKeyService} value={currentKeyService}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a key service" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {categories
+                                                        .filter(cat => !keyServices.includes(cat.name))
+                                                        .map(cat => (
+                                                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
                                             <Button type="button" onClick={handleAddKeyService}>Add</Button>
                                         </div>
                                         <div className="flex flex-wrap gap-2 pt-2">
