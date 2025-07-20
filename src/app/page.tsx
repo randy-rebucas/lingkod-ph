@@ -2,13 +2,17 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Brush, Wrench, Sprout, Handshake, BriefcaseBusiness, UserCheck } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Search, Brush, Wrench, Sprout, Handshake, BriefcaseBusiness, UserCheck, Star, Sparkles, Building, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
@@ -24,8 +28,8 @@ const Header = () => (
       </Link>
       <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
         <Link href="#features" className="transition-colors hover:text-primary">Features</Link>
-        <Link href="#services" className="transition-colors hover:text-primary">Services</Link>
-        <Link href="/signup" className="transition-colors hover:text-primary">For Providers</Link>
+        <Link href="#providers" className="transition-colors hover:text-primary">Providers</Link>
+        <Link href="#join" className="transition-colors hover:text-primary">For Businesses</Link>
       </nav>
       <div className="flex items-center space-x-2">
         <Button variant="ghost" asChild>
@@ -40,17 +44,60 @@ const Header = () => (
 );
 
 const Footer = () => (
-  <footer className="border-t">
-    <div className="container flex flex-col items-center justify-between gap-4 py-10 md:h-24 md:flex-row md:py-0">
-      <div className="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
-        <Logo />
-        <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-          Built to connect you with reliable services.
-        </p>
-      </div>
-      <p className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Lingkod PH. All rights reserved.</p>
+  <footer className="border-t bg-secondary">
+    <div className="container grid grid-cols-1 md:grid-cols-4 gap-8 py-12">
+        <div>
+            <Logo />
+            <p className="mt-2 text-muted-foreground text-sm">Your trusted partner for home & professional services in the Philippines.</p>
+        </div>
+        <div>
+            <h4 className="font-semibold mb-2">Company</h4>
+            <ul className="space-y-2 text-sm">
+                <li><Link href="#" className="text-muted-foreground hover:text-primary">About Us</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-primary">Careers</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-primary">Partners</Link></li>
+            </ul>
+        </div>
+        <div>
+            <h4 className="font-semibold mb-2">Support</h4>
+            <ul className="space-y-2 text-sm">
+                <li><Link href="#" className="text-muted-foreground hover:text-primary">Help Center</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-primary">Contact Us</Link></li>
+                <li><Link href="#" className="text-muted-foreground hover:text-primary">Terms of Service</Link></li>
+            </ul>
+        </div>
+        <div>
+             <h4 className="font-semibold mb-2">Stay Connected</h4>
+             <div className="flex space-x-4">
+                <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} Lingkod PH. All rights reserved.</p>
+             </div>
+        </div>
     </div>
   </footer>
+);
+
+const renderStars = (rating: number, keyPrefix: string) => {
+    return Array(5).fill(0).map((_, i) => (
+        <Star key={`${keyPrefix}-${i}`} className={`h-5 w-5 ${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-muted-foreground'}`} />
+    ));
+}
+
+const testimonials = [
+    { name: 'Maria C.', rating: 5, comment: "Booking an electrician through LingkodPH was a breeze! The provider was professional, on-time, and fixed the issue in no time. Highly recommended!", avatar: 'https://placehold.co/100x100.png', hint: 'woman portrait' },
+    { name: 'John D.', rating: 5, comment: "As a small business owner, finding reliable contractors was always a challenge. LingkodPH connected us with a fantastic team for our office renovation.", avatar: 'https://placehold.co/100x100.png', hint: 'man portrait' },
+    { name: 'Anna S.', rating: 4, comment: "The platform is very user-friendly. I found a great weekly cleaning service that fits my budget. My only wish is for more providers in my specific area.", avatar: 'https://placehold.co/100x100.png', hint: 'woman smiling' },
+];
+
+const topProviders = [
+    { name: 'Ricardo "Cardo" Gomez', specialty: 'Master Electrician', rating: 4.9, reviews: 128, avatar: 'https://placehold.co/200x200.png', hint: 'man smiling' },
+    { name: 'Elena Reyes', specialty: 'Deep Cleaning Specialist', rating: 4.8, reviews: 214, avatar: 'https://placehold.co/200x200.png', hint: 'woman happy' },
+    { name: 'Benny Tan', specialty: 'HVAC & Refrigeration Expert', rating: 4.9, reviews: 98, avatar: 'https://placehold.co/200x200.png', hint: 'man portrait' },
+];
+
+const PartnerLogo = ({ name, hint }: {name: string, hint: string}) => (
+    <div data-ai-hint={hint} className="flex items-center justify-center p-4 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all">
+        <Image src={`https://placehold.co/150x50.png`} alt={`${name} logo`} width={120} height={40} className="object-contain"/>
+    </div>
 );
 
 export default function Home() {
@@ -63,115 +110,201 @@ export default function Home() {
     }
   }, [user, loading, router]);
   
-  const services = [
-    { name: 'Cleaning', icon: <Brush className="h-8 w-8" />, hint: "cleaning services" },
-    { name: 'Repairs', icon: <Wrench className="h-8 w-8" />, hint: "home repair" },
-    { name: 'Gardening', icon: <Sprout className="h-8 w-8" />, hint: "gardening landscaping" },
-    { name: 'Consulting', icon: <Handshake className="h-8 w-8" />, hint: "business consultant" },
-    { name: 'Professional', icon: <BriefcaseBusiness className="h-8 w-8" />, hint: "professional services" },
-    { name: 'Personal Care', icon: <UserCheck className="h-8 w-8" />, hint: "personal care" },
-  ];
-
-  const howItWorks = [
-    { title: "Search for a Service", description: "Find the right professional by searching our diverse categories.", icon: <Search className="h-10 w-10 text-primary" /> },
-    { title: "Book and Schedule", description: "Choose a provider, select a time that works for you, and book instantly.", icon: <BriefcaseBusiness className="h-10 w-10 text-primary" /> },
-    { title: "Get the Job Done", description: "Your chosen provider arrives and completes the service to your satisfaction.", icon: <UserCheck className="h-10 w-10 text-primary" /> }
-  ];
-
   if (loading || user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-secondary">
-        <p>Loading...</p>
+        <div className="flex flex-col items-center gap-4">
+          <Logo />
+          <p>Loading your experience...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       <Header />
       <main className="flex-1">
-        <section className="bg-gradient-to-b from-secondary to-background">
-          <div className="container grid items-center gap-6 pb-20 pt-10 md:py-20">
-            <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 text-center">
-              <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-6xl">
-                Your Trusted Partner for <span className="text-primary">Home & Professional</span> Services
-              </h1>
-              <p className="max-w-2xl text-lg text-muted-foreground">
-                Easily find and book reliable service providers in the Philippines. From cleaning and repairs to professional consulting, we've got you covered.
-              </p>
-            </div>
-            <div className="mx-auto mt-4 w-full max-w-2xl">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input placeholder="Search for a service (e.g., 'plumber')" className="w-full rounded-full bg-background py-7 pl-12 pr-28 shadow-lg" />
-                <Button className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full px-6" size="lg">Find</Button>
-              </div>
-            </div>
-          </div>
-        </section>
-        
-        <section id="features" className="bg-background py-20">
-          <div className="container">
-            <div className="mx-auto mb-12 max-w-2xl text-center">
-              <h2 className="font-headline text-3xl font-bold">How Lingkod PH Works</h2>
-              <p className="mt-2 text-muted-foreground">A simple, streamlined process to get things done.</p>
-            </div>
-            <div className="grid gap-8 md:grid-cols-3">
-              {howItWorks.map(step => (
-                <Card key={step.title} className="transform-gpu transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
-                  <CardHeader className="items-center text-center">
-                    {step.icon}
-                    <CardTitle className="mt-4">{step.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-center text-muted-foreground">
-                    {step.description}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="services" className="bg-secondary py-20">
-          <div className="container">
-            <div className="mx-auto mb-12 max-w-2xl text-center">
-              <h2 className="font-headline text-3xl font-bold">Featured Services</h2>
-              <p className="mt-2 text-muted-foreground">Explore our wide range of service categories.</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-              {services.map(service => (
-                <div key={service.name} data-ai-hint={service.hint} className="group flex flex-col items-center justify-center gap-2 rounded-lg border bg-card p-6 text-card-foreground transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
-                  {service.icon}
-                  <span className="font-semibold text-center">{service.name}</span>
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-secondary">
+            <div className="container relative z-10 grid items-center gap-6 pb-20 pt-16 md:py-28">
+                <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 text-center">
+                    <Badge variant="default" className="py-2 px-4 rounded-full bg-primary/10 text-primary border-primary/20">
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Connecting Clients, Empowering Businesses
+                    </Badge>
+                    <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-6xl">
+                        Find Trusted Pros. Grow Your Business.
+                    </h1>
+                    <p className="max-w-2xl text-lg text-muted-foreground">
+                        LingkodPH is the all-in-one platform for discovering reliable service providers and empowering businesses to thrive in the digital marketplace.
+                    </p>
                 </div>
-              ))}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
+                    <Button size="lg" asChild><Link href="/signup">Find a Service Pro <ArrowRight className="ml-2" /></Link></Button>
+                    <Button size="lg" variant="outline" asChild><Link href="#join">For Businesses & Providers</Link></Button>
+                </div>
             </div>
-          </div>
         </section>
 
-        <section className="bg-background py-20">
-          <div className="container grid items-center gap-12 md:grid-cols-2">
-            <div data-ai-hint="service provider professional" className="w-full h-96 rounded-lg bg-gray-200">
-                <img src="https://placehold.co/600x400.png" alt="Service Provider" className="h-full w-full object-cover rounded-lg shadow-md"/>
+        {/* Partners Section */}
+        <section className="py-12 bg-background">
+            <div className="container">
+                <h3 className="text-center text-sm font-semibold text-muted-foreground uppercase tracking-wider">Trusted by leading philippine businesses</h3>
+                <div className="mx-auto mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 items-center">
+                    <PartnerLogo name="Ayala Land" hint="corporate building" />
+                    <PartnerLogo name="SM Malls" hint="shopping mall" />
+                    <PartnerLogo name="Jollibee" hint="fast food" />
+                    <PartnerLogo name="BDO" hint="bank building" />
+                    <PartnerLogo name="Meralco" hint="electric power" />
+                    <PartnerLogo name="Globe Telecom" hint="telecommunications tower" />
+                </div>
             </div>
-            <div className="flex flex-col items-start gap-4">
-              <h2 className="font-headline text-3xl font-bold">Become a Service Provider</h2>
-              <p className="text-muted-foreground">
-                Join our network of trusted professionals and grow your business. Reach more customers, manage bookings, and get paid seamlessly.
-              </p>
-              <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                <li>Flexible schedule and service areas</li>
-                <li>Secure payments and transparent fees</li>
-                <li>Tools to manage your bookings and clients</li>
-              </ul>
-              <Button size="lg" asChild>
-                <Link href="/signup">Register Now</Link>
-              </Button>
+        </section>
+
+        {/* How It Works Section */}
+        <section id="features" className="bg-secondary py-20">
+            <div className="container">
+                <div className="mx-auto mb-12 max-w-2xl text-center">
+                    <h2 className="font-headline text-3xl font-bold">A Seamless Experience for Everyone</h2>
+                    <p className="mt-2 text-muted-foreground">Whether you're hiring or providing a service, our process is simple and transparent.</p>
+                </div>
+                <Tabs defaultValue="client" className="w-full max-w-4xl mx-auto">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="client">For Clients</TabsTrigger>
+                        <TabsTrigger value="provider">For Providers & Agencies</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="client" className="mt-8">
+                        <div className="grid gap-8 md:grid-cols-3">
+                            <Card className="bg-background/50 border-none shadow-none text-center">
+                                <CardHeader><CardTitle>1. Search & Discover</CardTitle></CardHeader>
+                                <CardContent><p className="text-muted-foreground">Browse profiles, read reviews, and find the perfect professional for your job.</p></CardContent>
+                            </Card>
+                            <Card className="bg-background/50 border-none shadow-none text-center">
+                                <CardHeader><CardTitle>2. Book with Confidence</CardTitle></CardHeader>
+                                <CardContent><p className="text-muted-foreground">Schedule services directly through our secure platform at a time that works for you.</p></CardContent>
+                            </Card>
+                            <Card className="bg-background/50 border-none shadow-none text-center">
+                                <CardHeader><CardTitle>3. Job Done, Rate & Relax</CardTitle></CardHeader>
+                                <CardContent><p className="text-muted-foreground">Enjoy top-quality service, then leave a review to help our community grow.</p></CardContent>
+                            </Card>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="provider" className="mt-8">
+                         <div className="grid gap-8 md:grid-cols-3">
+                            <Card className="bg-background/50 border-none shadow-none text-center">
+                                <CardHeader><CardTitle>1. Create Your Profile</CardTitle></CardHeader>
+                                <CardContent><p className="text-muted-foreground">Showcase your skills, services, and pricing to attract clients.</p></CardContent>
+                            </Card>
+                            <Card className="bg-background/50 border-none shadow-none text-center">
+                                <CardHeader><CardTitle>2. Manage Bookings</CardTitle></CardHeader>
+                                <CardContent><p className="text-muted-foreground">Use our dashboard to manage your schedule, communicate with clients, and send quotes.</p></CardContent>
+                            </Card>
+                            <Card className="bg-background/50 border-none shadow-none text-center">
+                                <CardHeader><CardTitle>3. Grow Your Business</CardTitle></CardHeader>
+                                <CardContent><p className="text-muted-foreground">Get paid securely, build your reputation with reviews, and access business analytics.</p></CardContent>
+                            </Card>
+                        </div>
+                    </TabsContent>
+                </Tabs>
             </div>
-          </div>
+        </section>
+
+         {/* Top Providers Section */}
+        <section id="providers" className="bg-background py-20">
+            <div className="container">
+                <div className="mx-auto mb-12 max-w-2xl text-center">
+                    <h2 className="font-headline text-3xl font-bold">Meet Our Top-Rated Providers</h2>
+                    <p className="mt-2 text-muted-foreground">A glimpse of the trusted and skilled professionals in our network.</p>
+                </div>
+                <div className="grid gap-8 md:grid-cols-3">
+                    {topProviders.map(provider => (
+                         <Card key={provider.name} className="overflow-hidden transform-gpu transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+                            <CardHeader className="items-center text-center p-6 bg-secondary">
+                                <Avatar className="h-24 w-24 border-4 border-background ring-2 ring-primary">
+                                    <AvatarImage src={provider.avatar} alt={provider.name} data-ai-hint={provider.hint} />
+                                    <AvatarFallback>{provider.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
+                                </Avatar>
+                                <CardTitle className="mt-4">{provider.name}</CardTitle>
+                                <CardDescription>{provider.specialty}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="text-center p-6">
+                                <div className="flex items-center justify-center gap-2">
+                                    {renderStars(provider.rating, provider.name)}
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-2">{provider.rating} average from {provider.reviews} reviews</p>
+                                <Button asChild variant="secondary" className="mt-4">
+                                    <Link href="/signup">View Profile</Link>
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        {/* Testimonials Section */}
+        <section className="bg-secondary py-20">
+            <div className="container">
+                 <div className="mx-auto mb-12 max-w-2xl text-center">
+                    <h2 className="font-headline text-3xl font-bold">What Our Community Says</h2>
+                    <p className="mt-2 text-muted-foreground">Real stories from satisfied clients and successful providers.</p>
+                </div>
+                <div className="grid gap-8 lg:grid-cols-3">
+                    {testimonials.map((testimonial, index) => (
+                        <Card key={index} className="bg-background">
+                            <CardContent className="p-6">
+                                <div className="flex items-center mb-4">
+                                    <Avatar className="h-12 w-12 mr-4">
+                                        <AvatarImage src={testimonial.avatar} alt={testimonial.name} data-ai-hint={testimonial.hint} />
+                                        <AvatarFallback>{testimonial.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-semibold">{testimonial.name}</p>
+                                        <div className="flex">{renderStars(testimonial.rating, testimonial.name)}</div>
+                                    </div>
+                                </div>
+                                <p className="text-muted-foreground">"{testimonial.comment}"</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+
+        {/* Join Platform Section (B2B2C CTA) */}
+        <section id="join" className="bg-background py-20">
+            <div className="container">
+                <div className="relative rounded-xl overflow-hidden bg-primary text-primary-foreground p-12">
+                     <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-80"></div>
+                     <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h2 className="font-headline text-3xl font-bold">Ready to Grow Your Service Business?</h2>
+                            <p className="mt-2 opacity-90">Whether you're an individual provider or a growing agency, LingkodPH provides the tools, visibility, and support you need to succeed.</p>
+                        </div>
+                        <div className="bg-background/20 backdrop-blur-sm p-8 rounded-lg">
+                           <ul className="space-y-4">
+                               <li className="flex items-start gap-3">
+                                   <div className="mt-1"><UserCheck className="h-5 w-5 text-background" /></div>
+                                   <p><span className="font-semibold">For Individual Providers:</span> Build your reputation, manage bookings effortlessly, and connect with a steady stream of clients.</p>
+                               </li>
+                               <li className="flex items-start gap-3">
+                                   <div className="mt-1"><Building className="h-5 w-5 text-background" /></div>
+                                   <p><span className="font-semibold">For Agencies:</span> Onboard your team, manage multiple providers, and access powerful analytics to scale your operations.</p>
+                               </li>
+                           </ul>
+                           <Button asChild variant="secondary" size="lg" className="mt-6 w-full text-primary-foreground bg-white hover:bg-white/90">
+                               <Link href="/signup">Join as a Provider or Agency</Link>
+                           </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
       </main>
       <Footer />
     </div>
   );
-}
+
+    
