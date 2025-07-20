@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar';
+import { Calendar, dateFnsLocalizer, Views, View } from 'react-big-calendar';
 import format from 'date-fns/format';
 import parse from 'date-fns/parse';
 import startOfWeek from 'date-fns/startOfWeek';
@@ -175,7 +175,7 @@ export default function CalendarPage() {
                                                     <Button 
                                                         key={view} 
                                                         variant={toolbar.view === view ? 'default' : 'outline'}
-                                                        onClick={() => toolbar.onView(view)}
+                                                        onClick={() => toolbar.onView(view as View)}
                                                     >
                                                         {view.charAt(0).toUpperCase() + view.slice(1)}
                                                     </Button>
