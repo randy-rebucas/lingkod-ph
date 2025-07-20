@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, CheckCircle, Star, CalendarIcon, User, Settings } from "lucide-react";
+import { Camera, Upload, Loader2, CheckCircle, Star, User, Settings } from "lucide-react";
 import { storage } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -19,11 +19,7 @@ import { doc, updateDoc, getDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
@@ -35,13 +31,36 @@ export default function ProfilePage() {
     const [phone, setPhone] = useState(''); 
     const [bio, setBio] = useState('');
     const [gender, setGender] = useState('');
-    const [birthdate, setBirthdate] = useState<Date | undefined>(undefined);
     
+    const [birthDay, setBirthDay] = useState<string | undefined>();
+    const [birthMonth, setBirthMonth] = useState<string | undefined>();
+    const [birthYear, setBirthYear] = useState<string | undefined>();
+
     const [isSaving, setIsSaving] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [uploadProgress, setUploadProgress] = useState<number | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const years = useMemo(() => {
+        const currentYear = new Date().getFullYear();
+        return Array.from({ length: 100 }, (_, i) => String(currentYear - i));
+    }, []);
+
+    const months = useMemo(() => {
+        return Array.from({ length: 12 }, (_, i) => ({
+            value: String(i),
+            label: new Date(0, i).toLocaleString('default', { month: 'long' })
+        }));
+    }, []);
+
+    const daysInMonth = useMemo(() => {
+        if (!birthMonth || !birthYear) return 31;
+        const monthIndex = parseInt(birthMonth, 10);
+        const year = parseInt(birthYear, 10);
+        // Day is 0-indexed for the *next* month, giving us the last day of the current month
+        return new Date(year, monthIndex + 1, 0).getDate();
+    }, [birthMonth, birthYear]);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -55,7 +74,10 @@ export default function ProfilePage() {
                     setBio(data.bio || '');
                     setGender(data.gender || '');
                     if (data.birthdate && data.birthdate.toDate) {
-                        setBirthdate(data.birthdate.toDate());
+                        const date = data.birthdate.toDate();
+                        setBirthDay(String(date.getDate()));
+                        setBirthMonth(String(date.getMonth()));
+                        setBirthYear(String(date.getFullYear()));
                     }
                 }
             }
@@ -90,8 +112,11 @@ export default function ProfilePage() {
                 gender: gender,
             };
 
-             if (birthdate) {
-                updates.birthdate = Timestamp.fromDate(birthdate);
+            if (birthDay && birthMonth && birthYear) {
+                const day = parseInt(birthDay, 10);
+                const month = parseInt(birthMonth, 10);
+                const year = parseInt(birthYear, 10);
+                updates.birthdate = Timestamp.fromDate(new Date(year, month, day));
             }
 
             // Update display name in Firebase Auth if it has changed
@@ -303,31 +328,28 @@ export default function ProfilePage() {
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Birthdate</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                variant={"outline"}
-                                                className={cn(
-                                                    "w-full justify-start text-left font-normal",
-                                                    !birthdate && "text-muted-foreground"
-                                                )}
-                                            >
-                                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                                {birthdate ? format(birthdate, "PPP") : <span>Pick a date</span>}
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0">
-                                            <Calendar
-                                                mode="single"
-                                                selected={birthdate}
-                                                onSelect={setBirthdate}
-                                                captionLayout="dropdown-buttons"
-                                                fromYear={1950}
-                                                toYear={new Date().getFullYear()}
-                                                initialFocus
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <Select value={birthMonth} onValueChange={setBirthMonth}>
+                                            <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
+                                            <SelectContent>
+                                                {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                        <Select value={birthDay} onValueChange={setBirthDay}>
+                                            <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
+                                            <SelectContent>
+                                                {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => (
+                                                    <SelectItem key={d} value={String(d)}>{d}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                         <Select value={birthYear} onValueChange={setBirthYear}>
+                                            <SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger>
+                                            <SelectContent>
+                                                {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
