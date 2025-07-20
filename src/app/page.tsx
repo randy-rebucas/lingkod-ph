@@ -19,7 +19,9 @@ const Logo = () => (
 const Header = () => (
   <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
     <div className="container flex h-16 items-center justify-between">
-      <Logo />
+      <Link href="/" aria-label="Go to homepage">
+        <Logo />
+      </Link>
       <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
         <Link href="#features" className="transition-colors hover:text-primary">Features</Link>
         <Link href="#services" className="transition-colors hover:text-primary">Services</Link>
@@ -88,25 +90,27 @@ export default function Home() {
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
-        <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
-          <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 text-center">
-            <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-6xl">
-              Your Trusted Partner for <span className="text-primary">Home & Professional</span> Services
-            </h1>
-            <p className="max-w-2xl text-lg text-muted-foreground">
-              Easily find and book reliable service providers in the Philippines. From cleaning and repairs to professional consulting, we've got you covered.
-            </p>
-          </div>
-          <div className="mx-auto mt-4 w-full max-w-2xl">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input placeholder="Search for a service (e.g., 'plumber')" className="w-full rounded-full bg-background py-6 pl-10 shadow-lg" />
-              <Button className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full px-6" size="lg">Find</Button>
+        <section className="bg-gradient-to-b from-secondary to-background">
+          <div className="container grid items-center gap-6 pb-20 pt-10 md:py-20">
+            <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 text-center">
+              <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-6xl">
+                Your Trusted Partner for <span className="text-primary">Home & Professional</span> Services
+              </h1>
+              <p className="max-w-2xl text-lg text-muted-foreground">
+                Easily find and book reliable service providers in the Philippines. From cleaning and repairs to professional consulting, we've got you covered.
+              </p>
+            </div>
+            <div className="mx-auto mt-4 w-full max-w-2xl">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input placeholder="Search for a service (e.g., 'plumber')" className="w-full rounded-full bg-background py-7 pl-12 pr-28 shadow-lg" />
+                <Button className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full px-6" size="lg">Find</Button>
+              </div>
             </div>
           </div>
         </section>
-
-        <section id="features" className="bg-secondary py-20">
+        
+        <section id="features" className="bg-background py-20">
           <div className="container">
             <div className="mx-auto mb-12 max-w-2xl text-center">
               <h2 className="font-headline text-3xl font-bold">How Lingkod PH Works</h2>
@@ -128,7 +132,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="services" className="py-20">
+        <section id="services" className="bg-secondary py-20">
           <div className="container">
             <div className="mx-auto mb-12 max-w-2xl text-center">
               <h2 className="font-headline text-3xl font-bold">Featured Services</h2>
@@ -136,19 +140,19 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
               {services.map(service => (
-                <div key={service.name} data-ai-hint={service.hint} className="group flex flex-col items-center gap-2 rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer">
+                <div key={service.name} data-ai-hint={service.hint} className="group flex flex-col items-center justify-center gap-2 rounded-lg border bg-card p-6 text-card-foreground transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer">
                   {service.icon}
-                  <span className="font-semibold">{service.name}</span>
+                  <span className="font-semibold text-center">{service.name}</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="bg-secondary py-20">
-          <div className="container grid items-center gap-8 md:grid-cols-2">
-            <div data-ai-hint="service provider professional" className="w-full h-80 rounded-lg bg-gray-200">
-                <img src="https://placehold.co/600x400.png" alt="Service Provider" className="h-full w-full object-cover rounded-lg"/>
+        <section className="bg-background py-20">
+          <div className="container grid items-center gap-12 md:grid-cols-2">
+            <div data-ai-hint="service provider professional" className="w-full h-96 rounded-lg bg-gray-200">
+                <img src="https://placehold.co/600x400.png" alt="Service Provider" className="h-full w-full object-cover rounded-lg shadow-md"/>
             </div>
             <div className="flex flex-col items-start gap-4">
               <h2 className="font-headline text-3xl font-bold">Become a Service Provider</h2>
