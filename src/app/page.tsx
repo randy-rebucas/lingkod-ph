@@ -94,12 +94,6 @@ const topProviders = [
     { name: 'Benny Tan', specialty: 'HVAC & Refrigeration Expert', rating: 4.9, reviews: 98, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300', hint: 'man portrait', background: 'https://images.unsplash.com/photo-1542438408-42a3ce919793?q=80&w=600', bgHint: 'air conditioner' },
 ];
 
-const PartnerLogo = ({ name, hint, index }: {name: string, hint: string, index: number}) => (
-    <div data-ai-hint={hint} className="flex items-center justify-center p-4 grayscale opacity-60 hover:opacity-100 hover:grayscale-0 transition-all">
-        <Image src={`https://loremflickr.com/150/50/logo,brand?random=${index}`} alt={`${name} logo`} width={120} height={40} className="object-contain"/>
-    </div>
-);
-
 export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -147,23 +141,8 @@ export default function Home() {
             </div>
         </section>
 
-        {/* Partners Section */}
-        <section className="py-12 bg-background">
-            <div className="container">
-                <h3 className="text-center text-sm font-semibold text-muted-foreground uppercase tracking-wider">Trusted by leading philippine businesses</h3>
-                <div className="mx-auto mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 items-center">
-                    <PartnerLogo name="Ayala Land" hint="corporate building" index={1} />
-                    <PartnerLogo name="SM Malls" hint="shopping mall" index={2} />
-                    <PartnerLogo name="Jollibee" hint="fast food" index={3} />
-                    <PartnerLogo name="BDO" hint="bank building" index={4} />
-                    <PartnerLogo name="Meralco" hint="electric power" index={5} />
-                    <PartnerLogo name="Globe Telecom" hint="telecommunications tower" index={6} />
-                </div>
-            </div>
-        </section>
-
         {/* How It Works Section */}
-        <section id="features" className="bg-secondary py-20">
+        <section id="features" className="bg-background py-20">
             <div className="container">
                 <div className="mx-auto mb-12 max-w-2xl text-center">
                     <h2 className="font-headline text-3xl font-bold">A Seamless Experience for Everyone</h2>
@@ -211,7 +190,7 @@ export default function Home() {
         </section>
 
          {/* Top Providers Section */}
-        <section id="providers" className="bg-background py-20">
+        <section id="providers" className="bg-secondary py-20">
             <div className="container">
                 <div className="mx-auto mb-12 max-w-2xl text-center">
                     <h2 className="font-headline text-3xl font-bold">Meet Our Top-Rated Providers</h2>
@@ -246,7 +225,7 @@ export default function Home() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="bg-secondary py-20">
+        <section className="bg-background py-20">
             <div className="container">
                  <div className="mx-auto mb-12 max-w-2xl text-center">
                     <h2 className="font-headline text-3xl font-bold">What Our Community Says</h2>
@@ -254,7 +233,7 @@ export default function Home() {
                 </div>
                 <div className="grid gap-8 lg:grid-cols-3">
                     {testimonials.map((testimonial, index) => (
-                        <Card key={index} className="bg-background">
+                        <Card key={index} className="bg-secondary">
                             <CardContent className="p-6">
                                 <div className="flex items-center mb-4">
                                     <Avatar className="h-12 w-12 mr-4">
@@ -276,7 +255,7 @@ export default function Home() {
 
 
         {/* Join Platform Section (B2B2C CTA) */}
-        <section id="join" className="bg-background py-20">
+        <section id="join" className="bg-secondary py-20">
             <div className="container">
                 <div className="relative rounded-xl overflow-hidden p-12 text-primary-foreground">
                     <Image src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1469" layout="fill" alt="Business team collaborating" className="object-cover" data-ai-hint="business team" />
