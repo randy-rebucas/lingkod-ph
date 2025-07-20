@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Moon, Sun, Bell, AtSign, MessageSquare, Loader2 } from "lucide-react"
+import { Moon, Sun, Bell, AtSign, MessageSquare, Loader2, UserPlus } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
@@ -18,6 +18,7 @@ type NotificationSettings = {
     bookingUpdates: boolean;
     newMessages: boolean;
     promotionalEmails: boolean;
+    agencyInvites: boolean;
 }
 
 export default function SettingsPage() {
@@ -29,6 +30,7 @@ export default function SettingsPage() {
         bookingUpdates: true,
         newMessages: true,
         promotionalEmails: false,
+        agencyInvites: true,
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -132,6 +134,13 @@ export default function SettingsPage() {
                                         <span className="font-semibold">New Messages</span>
                                     </Label>
                                     <Switch id="new-messages" checked={settings.newMessages} onCheckedChange={(v) => handleNotificationChange('newMessages', v)} />
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="agency-invites" className="flex items-center gap-3">
+                                        <UserPlus className="h-5 w-5 text-accent" />
+                                        <span className="font-semibold">Agency Invites</span>
+                                    </Label>
+                                    <Switch id="agency-invites" checked={settings.agencyInvites} onCheckedChange={(v) => handleNotificationChange('agencyInvites', v)} />
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="promotional-emails" className="flex items-center gap-3">

@@ -35,7 +35,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, doc, addDoc, serverTimestamp, writeBatch, getDocs } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, addDoc, serverTimestamp, writeBatch, getDocs, getDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -176,17 +176,20 @@ export default function ManageProvidersPage() {
                 createdAt: serverTimestamp(),
             });
 
-            const notificationRef = doc(collection(db, `users/${providerDoc.id}/notifications`));
-            batch.set(notificationRef, {
-                type: 'agency_invite',
-                message: `You have been invited to join ${user.displayName}.`,
-                link: '/profile',
-                read: false,
-                createdAt: serverTimestamp(),
-                inviteId: inviteRef.id,
-                agencyName: user.displayName,
-                agencyId: user.uid,
-            });
+            const providerNotifSettings = providerData.notificationSettings;
+            if (providerNotifSettings?.agencyInvites !== false) {
+                 const notificationRef = doc(collection(db, `users/${providerDoc.id}/notifications`));
+                batch.set(notificationRef, {
+                    type: 'agency_invite',
+                    message: `You have been invited to join ${user.displayName}.`,
+                    link: '/profile',
+                    read: false,
+                    createdAt: serverTimestamp(),
+                    inviteId: inviteRef.id,
+                    agencyName: user.displayName,
+                    agencyId: user.uid,
+                });
+            }
 
             await batch.commit();
 
