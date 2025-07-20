@@ -47,7 +47,9 @@ export default function ProfilePage() {
     const [licenseIssuingCountry, setLicenseIssuingCountry] = useState('');
     
     // States for UI logic
-    const [isSaving, setIsSaving] = useState(false);
+    const [isSavingPublic, setIsSavingPublic] = useState(false);
+    const [isSavingPersonal, setIsSavingPersonal] = useState(false);
+    const [isSavingProvider, setIsSavingProvider] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [uploadProgress, setUploadProgress] = useState<number | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -120,16 +122,37 @@ export default function ProfilePage() {
             setImageFile(e.target.files[0]);
         }
     };
-    
-    const handleSaveChanges = async () => {
+
+    const handlePublicProfileUpdate = async () => {
         if (!user) return;
-        setIsSaving(true);
+        setIsSavingPublic(true);
         try {
             const userDocRef = doc(db, "users", user.uid);
             const updates: { [key: string]: any } = {
                 displayName: name,
-                phone: phone,
                 bio: bio,
+            };
+
+            if (user.displayName !== name) {
+                await updateProfile(user, { displayName: name });
+            }
+            
+            await updateDoc(userDocRef, updates);
+            toast({ title: "Success", description: "Public profile updated successfully!" });
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Update Failed", description: error.message });
+        } finally {
+            setIsSavingPublic(false);
+        }
+    }
+
+    const handlePersonalDetailsUpdate = async () => {
+        if (!user) return;
+        setIsSavingPersonal(true);
+        try {
+            const userDocRef = doc(db, "users", user.uid);
+            const updates: { [key: string]: any } = {
+                phone: phone,
                 gender: gender,
             };
 
@@ -140,32 +163,41 @@ export default function ProfilePage() {
                 updates.birthdate = Timestamp.fromDate(new Date(year, month, day));
             }
 
-            if(userRole === 'provider' || userRole === 'agency') {
-                updates.availabilityStatus = availabilityStatus;
-                updates.yearsOfExperience = Number(yearsOfExperience);
-                updates.ownsToolsSupplies = ownsToolsSupplies;
-                updates.isLicensed = isLicensed;
-                updates.licenseNumber = licenseNumber;
-                updates.licenseType = licenseType;
-                updates.licenseExpirationDate = licenseExpirationDate;
-                updates.licenseIssuingState = licenseIssuingState;
-                updates.licenseIssuingCountry = licenseIssuingCountry;
-            }
-
-            if (user.displayName !== name) {
-                await updateProfile(user, { displayName: name });
-            }
-            
             await updateDoc(userDocRef, updates);
-
-            toast({ title: "Success", description: "Profile updated successfully!" });
+            toast({ title: "Success", description: "Personal details updated successfully!" });
         } catch (error: any) {
             toast({ variant: "destructive", title: "Update Failed", description: error.message });
         } finally {
-            setIsSaving(false);
+            setIsSavingPersonal(false);
         }
-    };
+    }
 
+    const handleProviderDetailsUpdate = async () => {
+        if (!user) return;
+        setIsSavingProvider(true);
+         try {
+            const userDocRef = doc(db, "users", user.uid);
+            const updates: { [key: string]: any } = {
+                availabilityStatus: availabilityStatus,
+                yearsOfExperience: Number(yearsOfExperience),
+                ownsToolsSupplies: ownsToolsSupplies,
+                isLicensed: isLicensed,
+                licenseNumber: licenseNumber,
+                licenseType: licenseType,
+                licenseExpirationDate: licenseExpirationDate,
+                licenseIssuingState: licenseIssuingState,
+                licenseIssuingCountry: licenseIssuingCountry,
+            };
+            
+            await updateDoc(userDocRef, updates);
+            toast({ title: "Success", description: "Provider details updated successfully!" });
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Update Failed", description: error.message });
+        } finally {
+            setIsSavingProvider(false);
+        }
+    }
+    
     const handleUpload = async () => {
         if (!imageFile || !user) return;
 
@@ -320,6 +352,12 @@ export default function ProfilePage() {
                                 />
                             </div>
                         </CardContent>
+                         <CardFooter>
+                            <Button onClick={handlePublicProfileUpdate} disabled={isSavingPublic}>
+                                {isSavingPublic && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isSavingPublic ? 'Saving...' : 'Update Profile'}
+                            </Button>
+                        </CardFooter>
                     </Card>
                 </TabsContent>
                 
@@ -374,6 +412,12 @@ export default function ProfilePage() {
                                 </div>
                             </div>
                         </CardContent>
+                         <CardFooter>
+                            <Button onClick={handlePersonalDetailsUpdate} disabled={isSavingPersonal}>
+                                {isSavingPersonal && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isSavingPersonal ? 'Saving...' : 'Update Details'}
+                            </Button>
+                        </CardFooter>
                     </Card>
 
                     <Card>
@@ -460,6 +504,12 @@ export default function ProfilePage() {
                                         <Label htmlFor="ownsToolsSupplies">I own my own tools and supplies</Label>
                                     </div>
                                 </CardContent>
+                                <CardFooter>
+                                    <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
+                                        {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        {isSavingProvider ? 'Saving...' : 'Update Professional Details'}
+                                    </Button>
+                                </CardFooter>
                             </Card>
 
                              <Card>
@@ -501,19 +551,20 @@ export default function ProfilePage() {
                                         </div>
                                     )}
                                 </CardContent>
+                                 <CardFooter>
+                                    <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
+                                        {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        {isSavingProvider ? 'Saving...' : 'Update Credentials'}
+                                    </Button>
+                                </CardFooter>
                             </Card>
                         </div>
                     </TabsContent>
                 )}
                 
             </Tabs>
-            
-             <div className="flex justify-end mt-6">
-                <Button onClick={handleSaveChanges} disabled={isSaving}>
-                    {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isSaving ? "Saving..." : "Save All Changes"}
-                </Button>
-            </div>
         </div>
     );
 }
+
+    
