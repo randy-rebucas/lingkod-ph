@@ -7,7 +7,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DollarSign, BookCheck, Calculator, FilePieChart, BarChart2 } from "lucide-react";
+import { DollarSign, BookCheck, Calculator, FilePieChart } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -21,6 +21,7 @@ import {
   ResponsiveContainer,
   Legend,
   Bar,
+  BarChart,
 } from 'recharts';
 
 type Booking = {
@@ -258,14 +259,14 @@ export default function ReportsPage() {
                         </CardHeader>
                         <CardContent>
                            <ResponsiveContainer width="100%" height={300}>
-                                <BarChart2 data={reportData.providerChartData} layout="vertical" margin={{ left: 20 }}>
+                                <BarChart data={reportData.providerChartData} layout="vertical" margin={{ left: 20 }}>
                                     <CartesianGrid strokeDasharray="3 3" horizontal={false}/>
                                     <XAxis type="number" allowDecimals={false} />
                                     <YAxis type="category" dataKey="name" width={80} stroke="#888888" fontSize={12}/>
                                     <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}/>
                                     <Legend />
                                     <Bar dataKey="Bookings" fill="hsl(var(--chart-2))" />
-                                </BarChart2>
+                                </BarChart>
                             </ResponsiveContainer>
                         </CardContent>
                     </Card>
