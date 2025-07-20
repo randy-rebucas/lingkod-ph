@@ -89,9 +89,9 @@ const testimonials = [
 ];
 
 const topProviders = [
-    { name: 'Ricardo "Cardo" Gomez', specialty: 'Master Electrician', rating: 4.9, reviews: 128, avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=300', hint: 'man smiling', background: 'https://images.unsplash.com/photo-1487532322495-2c355823e595?q=80&w=600', bgHint: 'electrical tools' },
+    { name: 'Ricardo "Cardo" Gomez', specialty: 'Master Electrician', rating: 4.9, reviews: 128, avatar: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=300', hint: 'man smiling', background: 'https://images.unsplash.com/photo-1621905252507-b3c69aecc61d?q=80&w=1287', bgHint: 'electrical tools' },
     { name: 'Elena Reyes', specialty: 'Deep Cleaning Specialist', rating: 4.8, reviews: 214, avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=300', hint: 'woman happy', background: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=600', bgHint: 'cleaning supplies' },
-    { name: 'Benny Tan', specialty: 'HVAC & Refrigeration Expert', rating: 4.9, reviews: 98, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300', hint: 'man portrait', background: 'https://images.unsplash.com/photo-1542438408-42a3ce919793?q=80&w=600', bgHint: 'air conditioner' },
+    { name: 'Benny Tan', specialty: 'HVAC & Refrigeration Expert', rating: 4.9, reviews: 98, avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=300', hint: 'man portrait', background: 'https://images.unsplash.com/photo-1534952767098-b99836e1b9b1?q=80&w=1470', bgHint: 'air conditioner' },
 ];
 
 export default function Home() {
@@ -289,3 +289,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
