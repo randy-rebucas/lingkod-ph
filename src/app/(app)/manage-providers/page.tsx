@@ -148,13 +148,34 @@ export default function ManageProvidersPage() {
                 return;
             }
 
-            await addDoc(collection(db, "invites"), {
+            const batch = writeBatch(db);
+
+            // 1. Create the invitation document
+            const inviteRef = doc(collection(db, "invites"));
+            batch.set(inviteRef, {
                 agencyId: user.uid,
                 agencyName: user.displayName,
                 email: inviteEmail,
                 status: "pending",
                 createdAt: serverTimestamp(),
             });
+
+            // 2. Create the email document to trigger a backend email function
+            const mailRef = doc(collection(db, "mail"));
+            const signupLink = `${window.location.origin}/signup`;
+            batch.set(mailRef, {
+                to: inviteEmail,
+                template: {
+                    name: "agency-invite",
+                    data: {
+                        agencyName: user.displayName,
+                        inviteLink: signupLink,
+                    },
+                },
+            });
+
+            await batch.commit();
+
             toast({ title: "Invitation Sent!", description: `An invitation has been sent to ${inviteEmail}.` });
             setInviteEmail("");
             setInviteDialogOpen(false);
