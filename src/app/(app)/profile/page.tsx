@@ -49,10 +49,6 @@ export default function ProfilePage() {
     const [licenseExpirationDate, setLicenseExpirationDate] = useState('');
     const [licenseIssuingState, setLicenseIssuingState] = useState('');
     const [licenseIssuingCountry, setLicenseIssuingCountry] = useState('');
-    const [location, setLocation] = useState('');
-    const [businessName, setBusinessName] = useState('');
-    const [tagline, setTagline] = useState('');
-    const [overview, setOverview] = useState('');
 
 
     const [isSaving, setIsSaving] = useState(false);
@@ -109,10 +105,6 @@ export default function ProfilePage() {
                         setLicenseExpirationDate(data.licenseExpirationDate || '');
                         setLicenseIssuingState(data.licenseIssuingState || '');
                         setLicenseIssuingCountry(data.licenseIssuingCountry || '');
-                        setLocation(data.location || '');
-                        setBusinessName(data.businessName || '');
-                        setTagline(data.tagline || '');
-                        setOverview(data.overview || '');
                     }
                 }
             }
@@ -164,10 +156,6 @@ export default function ProfilePage() {
                 updates.licenseExpirationDate = licenseExpirationDate;
                 updates.licenseIssuingState = licenseIssuingState;
                 updates.licenseIssuingCountry = licenseIssuingCountry;
-                updates.location = location;
-                updates.businessName = businessName;
-                updates.tagline = tagline;
-                updates.overview = overview;
             }
 
             if (user.displayName !== name) {
@@ -437,33 +425,6 @@ export default function ProfilePage() {
                 {userRole === 'provider' && (
                      <TabsContent value="provider-settings" className="mt-6">
                         <div className="space-y-6">
-                             <Card>
-                                <CardHeader>
-                                    <CardTitle>Business Information</CardTitle>
-                                    <CardDescription>Details about your service business.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="businessName">Business Name (Optional)</Label>
-                                            <Input id="businessName" value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="e.g., Juan's Cleaning Co." />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="tagline">Tagline (Optional)</Label>
-                                            <Input id="tagline" value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="e.g., Quality service you can trust" />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="overview">Business Overview</Label>
-                                        <Textarea id="overview" value={overview} onChange={(e) => setOverview(e.target.value)} placeholder="Describe your business, services, and what makes you unique." rows={4}/>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="location">Primary Service Location</Label>
-                                        <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g., Quezon City, Metro Manila" />
-                                    </div>
-                                </CardContent>
-                            </Card>
-
                             <Card>
                                 <CardHeader>
                                     <CardTitle>Professional Details</CardTitle>
