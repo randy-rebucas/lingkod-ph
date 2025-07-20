@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -28,6 +28,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { format } from "date-fns";
 import { X } from "lucide-react";
 import { handleInviteAction } from "./actions";
+import { useLoadScript, Autocomplete } from "@react-google-maps/api";
+
 
 type Reward = {
     id: string;
@@ -99,6 +101,8 @@ export default function ProfilePage() {
     const [phone, setPhone] = useState(''); 
     const [bio, setBio] = useState('');
     const [address, setAddress] = useState('');
+    const [latitude, setLatitude] = useState<number | null>(null);
+    const [longitude, setLongitude] = useState<number | null>(null);
     const [gender, setGender] = useState('');
     const [birthDay, setBirthDay] = useState<string | undefined>();
     const [birthMonth, setBirthMonth] = useState<string | undefined>();
@@ -135,6 +139,12 @@ export default function ProfilePage() {
     const [invites, setInvites] = useState<Invite[]>([]);
     const [isRespondingToInvite, setIsRespondingToInvite] = useState(false);
 
+    const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+    const { isLoaded } = useLoadScript({
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+        libraries: ["places"],
+    });
+
     const years = useMemo(() => {
         const currentYear = new Date().getFullYear();
         return Array.from({ length: 100 }, (_, i) => String(currentYear - i));
@@ -165,6 +175,8 @@ export default function ProfilePage() {
                 setPhone(data.phone || '');
                 setBio(data.bio || '');
                 setAddress(data.address || '');
+                setLatitude(data.latitude || null);
+                setLongitude(data.longitude || null);
                 setGender(data.gender || '');
                 setReferralCode(data.referralCode || generateReferralCode(user.uid));
                 if (data.birthdate && data.birthdate.toDate) {
@@ -340,7 +352,6 @@ export default function ProfilePage() {
             const updates: { [key: string]: any } = {
                 displayName: name,
                 bio: bio,
-                address: address,
             };
 
             if (user.displayName !== name) {
@@ -364,6 +375,9 @@ export default function ProfilePage() {
             const updates: { [key: string]: any } = {
                 phone: phone,
                 gender: gender,
+                address: address,
+                latitude: latitude,
+                longitude: longitude,
             };
 
             if (birthDay && birthMonth && birthYear) {
@@ -511,6 +525,49 @@ export default function ProfilePage() {
 
     const isProviderOrAgency = userRole === 'provider' || userRole === 'agency';
 
+    const handleCurrentLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                setLatitude(lat);
+                setLongitude(lng);
+
+                // Reverse Geocode to get address
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+                    if (status === 'OK' && results && results[0]) {
+                        setAddress(results[0].formatted_address);
+                    } else {
+                        toast({ variant: 'destructive', title: 'Error', description: 'Could not retrieve address from coordinates.' });
+                    }
+                });
+            }, (error) => {
+                 toast({ variant: 'destructive', title: 'Geolocation Error', description: error.message });
+            });
+        } else {
+            toast({ variant: 'destructive', title: 'Unsupported', description: 'Geolocation is not supported by this browser.' });
+        }
+    };
+
+    const onLoad = (autocomplete: google.maps.places.Autocomplete) => {
+        autocompleteRef.current = autocomplete;
+    };
+
+    const onPlaceChanged = () => {
+        if (autocompleteRef.current) {
+            const place = autocompleteRef.current.getPlace();
+            if (place.formatted_address) {
+                setAddress(place.formatted_address);
+            }
+            if (place.geometry?.location) {
+                setLatitude(place.geometry.location.lat());
+                setLongitude(place.geometry.location.lng());
+            }
+        }
+    };
+
+
     return (
         <div className="space-y-6">
             <div>
@@ -614,15 +671,9 @@ export default function ProfilePage() {
                             <CardDescription>This information will be displayed on your public profile.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">{userRole === 'agency' ? 'Business Name' : 'Full Name'}</Label>
-                                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="address">Address / Service Area</Label>
-                                    <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="e.g., Quezon City, Metro Manila"/>
-                                </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="name">{userRole === 'agency' ? 'Business Name' : 'Full Name'}</Label>
+                                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="bio">Bio / About</Label>
@@ -655,7 +706,7 @@ export default function ProfilePage() {
                                 <Label htmlFor="email">Email Address</Label>
                                 <Input id="email" type="email" value={user.email || ''} disabled />
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="phone">Mobile Number</Label>
                                     <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., 09123456789" />
@@ -673,6 +724,31 @@ export default function ProfilePage() {
                                     </Select>
                                 </div>
                             </div>
+                            {isLoaded && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="address">Address / Service Area</Label>
+                                    <div className="flex gap-2">
+                                        <Autocomplete
+                                            onLoad={onLoad}
+                                            onPlaceChanged={onPlaceChanged}
+                                        >
+                                            <Input 
+                                                id="address" 
+                                                value={address} 
+                                                onChange={(e) => setAddress(e.target.value)} 
+                                                placeholder="e.g., Quezon City, Metro Manila"
+                                                className="w-full"
+                                            />
+                                        </Autocomplete>
+                                        <Button type="button" variant="outline" onClick={handleCurrentLocation}>
+                                            <MapPin className="mr-2 h-4 w-4"/>
+                                            Current Location
+                                        </Button>
+                                    </div>
+                                    <input type="hidden" value={latitude || ''} onChange={() => {}} />
+                                    <input type="hidden" value={longitude || ''} onChange={() => {}} />
+                                </div>
+                            )}
                             <div className="space-y-2">
                                 <Label>Birthdate</Label>
                                 <div className="grid grid-cols-3 gap-2">
