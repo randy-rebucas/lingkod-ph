@@ -49,7 +49,9 @@ type BookingDialogProps = {
 const generateTimeSlots = () => {
     const slots = [];
     for (let i = 8; i <= 17; i++) {
-        slots.push(`${String(i).padStart(2, '0')}:00`);
+        const hour = i % 12 === 0 ? 12 : i % 12;
+        const ampm = i < 12 ? 'AM' : 'PM';
+        slots.push(`${hour}:00 ${ampm}`);
     }
     return slots;
 };
@@ -80,7 +82,19 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
         }
         setIsSaving(true);
         try {
-            const [hours, minutes] = data.time.split(':').map(Number);
+            const timeParts = data.time.match(/(\d+):(\d+)\s(AM|PM)/);
+            if (!timeParts) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Invalid time format.' });
+                setIsSaving(false);
+                return;
+            }
+            let hours = parseInt(timeParts[1], 10);
+            const minutes = parseInt(timeParts[2], 10);
+            const ampm = timeParts[3];
+
+            if (ampm === 'PM' && hours < 12) hours += 12;
+            if (ampm === 'AM' && hours === 12) hours = 0;
+
             const bookingDateTime = new Date(data.date);
             bookingDateTime.setHours(hours, minutes, 0, 0);
 

@@ -67,19 +67,22 @@ type Availability = {
 };
 
 const initialAvailability: Availability[] = [
-    { day: "Monday", enabled: true, startTime: "09:00", endTime: "17:00" },
-    { day: "Tuesday", enabled: true, startTime: "09:00", endTime: "17:00" },
-    { day: "Wednesday", enabled: true, startTime: "09:00", endTime: "17:00" },
-    { day: "Thursday", enabled: true, startTime: "09:00", endTime: "17:00" },
-    { day: "Friday", enabled: true, startTime: "09:00", endTime: "17:00" },
-    { day: "Saturday", enabled: false, startTime: "09:00", endTime: "17:00" },
-    { day: "Sunday", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Monday", enabled: true, startTime: "9:00 AM", endTime: "5:00 PM" },
+    { day: "Tuesday", enabled: true, startTime: "9:00 AM", endTime: "5:00 PM" },
+    { day: "Wednesday", enabled: true, startTime: "9:00 AM", endTime: "5:00 PM" },
+    { day: "Thursday", enabled: true, startTime: "9:00 AM", endTime: "5:00 PM" },
+    { day: "Friday", enabled: true, startTime: "9:00 AM", endTime: "5:00 PM" },
+    { day: "Saturday", enabled: false, startTime: "9:00 AM", endTime: "5:00 PM" },
+    { day: "Sunday", enabled: false, startTime: "9:00 AM", endTime: "5:00 PM" },
 ];
 
 const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
-    const hours = Math.floor(i / 2);
-    const minutes = (i % 2) * 30;
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    const totalMinutes = i * 30;
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 === 0 ? 12 : hours % 12;
+    return `${formattedHours}:${String(minutes).padStart(2, '0')} ${ampm}`;
 });
 
 export default function ProfilePage() {
