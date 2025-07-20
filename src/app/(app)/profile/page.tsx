@@ -23,7 +23,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import IdentityVerification from "@/components/identity-verification";
-import { seedRewards } from "@/lib/seed-rewards";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { format } from "date-fns";
@@ -76,7 +75,6 @@ export default function ProfilePage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // States for Loyalty Program
-    const [isSeeding, setIsSeeding] = useState(false);
     const [rewards, setRewards] = useState<Reward[]>([]);
     const [loyaltyPoints, setLoyaltyPoints] = useState(0);
     const [transactions, setTransactions] = useState<LoyaltyTransaction[]>([]);
@@ -157,26 +155,6 @@ export default function ProfilePage() {
             unsubscribeTransactions();
         };
     }, [user, userRole]);
-
-    const handleSeedRewards = async () => {
-        setIsSeeding(true);
-        try {
-            const count = await seedRewards();
-            toast({
-                title: 'Rewards Seeded',
-                description: `${count} new rewards have been added to the database.`,
-            });
-        } catch (error) {
-            console.error('Error seeding rewards:', error);
-            toast({
-                variant: 'destructive',
-                title: 'Seeding Failed',
-                description: 'Could not seed rewards.',
-            });
-        } finally {
-            setIsSeeding(false);
-        }
-    };
 
     const handleRedeemReward = async (reward: Reward) => {
         if (!user || loyaltyPoints < reward.pointsRequired) {
@@ -561,15 +539,9 @@ export default function ProfilePage() {
                 </TabsContent>
 
                 <TabsContent value="loyalty" className="mt-6 space-y-6">
-                    <div className="flex justify-between items-start">
-                        <div>
-                             <h2 className="text-2xl font-bold">Loyalty Program</h2>
-                             <p className="text-muted-foreground">Earn points for completed bookings and redeem them for exclusive rewards.</p>
-                        </div>
-                        <Button variant="outline" onClick={handleSeedRewards} disabled={isSeeding}>
-                            {isSeeding ? <Loader2 className="animate-spin mr-2" /> : <Database className="mr-2"/>}
-                            Seed Rewards
-                        </Button>
+                    <div>
+                         <h2 className="text-2xl font-bold">Loyalty Program</h2>
+                         <p className="text-muted-foreground">Earn points for completed bookings and redeem them for exclusive rewards.</p>
                     </div>
 
                     <Card className="bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg">
@@ -762,5 +734,3 @@ export default function ProfilePage() {
         </div>
     );
 }
-
-    
