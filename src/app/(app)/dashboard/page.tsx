@@ -282,7 +282,7 @@ export default function DashboardPage() {
                     });
 
                     // Fetch all providers
-                    const q = query(collection(db, "users"), where("role", "in", ["provider", "agency"]));
+                    const q = query(collection(db, "users"), where("role", "==", "provider"));
                     const querySnapshot = await getDocs(q);
                     const providersData = querySnapshot.docs.map(doc => {
                         const data = doc.data();
@@ -519,3 +519,5 @@ export default function DashboardPage() {
         </div>
     );
 }
+
+    
