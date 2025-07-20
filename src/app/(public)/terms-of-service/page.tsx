@@ -1,5 +1,5 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
 
 export default function TermsOfServicePage() {
   const sections = [
@@ -129,16 +129,14 @@ export default function TermsOfServicePage() {
         </p>
 
         {sections.map(section => (
-           <Card key={section.title}>
-            <CardHeader>
-              <CardTitle>{section.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-muted-foreground">
-               {section.content.map((paragraph, index) => (
+          <div key={section.title}>
+            <h2 className="text-2xl font-semibold mt-8 mb-4">{section.title}</h2>
+            <div className="space-y-4 text-muted-foreground">
+              {section.content.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
     </div>
