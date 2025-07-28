@@ -24,6 +24,7 @@ import {
   FilePieChart,
   Lightbulb,
   Check,
+  PlusCircle,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -341,6 +342,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {pathname.split('/').pop()?.replace('-', ' ') || 'Dashboard'}
           </div>
            <div className="flex items-center gap-4">
+            {(userRole === 'client' || userRole === 'agency') && (
+              <Button asChild>
+                <Link href="/post-a-job">
+                  <PlusCircle />
+                  <span>Post a Job</span>
+                </Link>
+              </Button>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
