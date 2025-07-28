@@ -45,18 +45,13 @@ type Category = {
     name: string;
 };
 
-type AdditionalDetail = {
-    question: string;
-    answer: string;
-};
-
 const initialState: PostJobFormState = {
   error: null,
   message: "",
 };
 
 export default function PostAJobPage() {
-  const { user, userRole } = useAuth();
+  const { userRole } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [state, formAction, isSubmitting] = useActionState(handlePostJob, initialState);
@@ -100,7 +95,7 @@ export default function PostAJobPage() {
     }, []);
 
   useEffect(() => {
-    if (state.message) {
+    if (state.message && (state.error || !isSubmitting)) {
       toast({
         title: state.error ? "Error" : "Success!",
         description: state.message,
@@ -108,10 +103,12 @@ export default function PostAJobPage() {
       });
       if (!state.error) {
         form.reset();
+        setQuestions([]);
+        setAnswers({});
         router.push('/dashboard');
       }
     }
-  }, [state, toast, form, router]);
+  }, [state, toast, form, router, isSubmitting]);
 
   const handleGenerateDetails = () => {
     const jobDescription = form.getValues('description');
@@ -124,7 +121,7 @@ export default function PostAJobPage() {
         try {
             const result = await generateJobDetails({ jobDescription });
             if (result.suggestedBudget) {
-                form.setValue('budget', result.suggestedBudget);
+                form.setValue('budget', result.suggestedBudget, { shouldValidate: true });
             }
             if (result.questions) {
                 setQuestions(result.questions);
@@ -157,6 +154,11 @@ export default function PostAJobPage() {
 
       <Form {...form}>
         <form action={formAction} className="space-y-6">
+           <input type="hidden" name="additionalDetails" value={additionalDetailsForForm} />
+            <FormField control={form.control} name="deadline" render={({ field }) => (
+                <input type="hidden" name={field.name} value={field.value?.toISOString() || ''} />
+            )} />
+            
           <Card>
             <CardHeader>
               <CardTitle>1. Describe the Job</CardTitle>
@@ -221,7 +223,6 @@ export default function PostAJobPage() {
                         ))}
                     </div>
                 )}
-                 <input type="hidden" name="additionalDetails" value={additionalDetailsForForm} />
             </CardContent>
           </Card>
 
@@ -286,8 +287,6 @@ export default function PostAJobPage() {
                                     <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date()}/>
                                 </PopoverContent>
                             </Popover>
-                            {/* Hidden input to pass date to server action */}
-                             <input type="hidden" name={field.name} value={field.value?.toISOString() || ''} />
                             <FormMessage />
                         </FormItem>
                     )} />
