@@ -2,7 +2,7 @@
 "use client";
 
 import { useActionState, useEffect, useState, useTransition } from "react";
-import { useForm } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/context/auth-context";
@@ -308,5 +308,3 @@ export default function PostAJobPage() {
     </div>
   );
 }
-
-    
