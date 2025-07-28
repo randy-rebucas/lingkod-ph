@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useActionState, useEffect, useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/context/auth-context";
@@ -12,18 +12,21 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 import { handlePostJob, type PostJobFormState } from "./actions";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { generateJobDetails, type JobDetailQuestion } from "@/ai/flows/generate-job-details";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Loader2, Briefcase } from "lucide-react";
+import { Loader2, Briefcase, Sparkles, Wand2 } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 
 const postJobSchema = z.object({
   title: z.string().min(10, "Job title must be at least 10 characters."),
@@ -41,6 +44,11 @@ type Category = {
     name: string;
 };
 
+type AdditionalDetail = {
+    question: string;
+    answer: string;
+};
+
 const initialState: PostJobFormState = {
   error: null,
   message: "",
@@ -50,8 +58,11 @@ export default function PostAJobPage() {
   const { user, userRole } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(handlePostJob, initialState);
+  const [state, formAction, isSubmitting] = useActionState(handlePostJob, initialState);
+  const [isAiPending, startAiTransition] = useTransition();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [questions, setQuestions] = useState<JobDetailQuestion[]>([]);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
 
   const form = useForm<PostJobFormValues>({
     resolver: zodResolver(postJobSchema),
@@ -66,7 +77,7 @@ export default function PostAJobPage() {
   });
 
   useEffect(() => {
-    if (userRole !== 'client' && userRole !== 'agency') {
+    if (userRole && userRole !== 'client' && userRole !== 'agency') {
       toast({ variant: 'destructive', title: 'Access Denied', description: 'Only clients and agencies can post jobs.' });
       router.push('/dashboard');
     }
@@ -96,10 +107,56 @@ export default function PostAJobPage() {
       });
       if (!state.error) {
         form.reset();
-        router.push('/dashboard'); // Or a "My Jobs" page
+        router.push('/dashboard');
       }
     }
   }, [state, toast, form, router]);
+
+  const handleGenerateDetails = () => {
+    const jobDescription = form.getValues('description');
+    if (jobDescription.length < 20) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Please provide a more detailed job description (at least 20 characters).' });
+        return;
+    }
+
+    startAiTransition(async () => {
+        try {
+            const result = await generateJobDetails({ jobDescription });
+            if (result.suggestedBudget) {
+                form.setValue('budget', result.suggestedBudget);
+            }
+            if (result.questions) {
+                setQuestions(result.questions);
+            }
+        } catch(e) {
+            console.error(e);
+            toast({ variant: 'destructive', title: 'AI Error', description: 'Could not generate details at this time.' });
+        }
+    });
+  }
+  
+  const handleAnswerChange = (question: string, answer: string) => {
+    setAnswers(prev => ({...prev, [question]: answer}));
+  }
+
+  const handleFormSubmit = (data: PostJobFormValues) => {
+    const additionalDetails = questions.map(q => ({
+        question: q.question,
+        answer: answers[q.question] || ''
+    }));
+
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+        if (value instanceof Date) {
+            formData.append(key, value.toISOString());
+        } else if (value !== undefined && value !== null) {
+            formData.append(key, String(value));
+        }
+    });
+    formData.append('additionalDetails', JSON.stringify(additionalDetails));
+
+    formAction(formData);
+  };
 
   return (
     <div className="space-y-6">
@@ -110,130 +167,153 @@ export default function PostAJobPage() {
         </p>
       </div>
 
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>Job Details</CardTitle>
-          <CardDescription>Your job posting will be visible to relevant service providers.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form action={formAction} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Job Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Need a Plumber to Fix a Leaky Faucet" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="categoryId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Service Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a service category" />
-                            </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            {categories.map(cat => (
-                                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Job Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe the job in detail. Include what needs to be done, any specific requirements, and the desired outcome."
-                        rows={5}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>1. Describe the Job</CardTitle>
+              <CardDescription>Start with the basic details of the job you need done.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
                 <FormField
                     control={form.control}
-                    name="budget"
+                    name="title"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Budget (PHP)</FormLabel>
-                        <FormControl>
-                        <Input type="number" placeholder="e.g., 1500" {...field} />
-                        </FormControl>
+                        <FormLabel>Job Title</FormLabel>
+                        <FormControl><Input placeholder="e.g., Need a Plumber to Fix a Leaky Faucet" {...field} /></FormControl>
                         <FormMessage />
                     </FormItem>
                     )}
                 />
-
-                <FormField control={form.control} name="deadline" render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                        <FormLabel className="mb-1">Deadline (Optional)</FormLabel>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <FormControl>
-                                    <Button variant="outline" className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date()}/>
-                            </PopoverContent>
-                        </Popover>
+                <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Job Description</FormLabel>
+                        <FormControl><Textarea placeholder="Describe the job in detail. Include what needs to be done, any specific requirements, and the desired outcome." rows={5} {...field} /></FormControl>
                         <FormMessage />
                     </FormItem>
-                )} />
-              </div>
+                    )}
+                />
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+                <CardTitle>2. Add Specific Details</CardTitle>
+                <CardDescription>Generate questions to add more context, and set your budget.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 <Alert>
+                    <Sparkles className="h-4 w-4" />
+                    <AlertTitle>Get AI Assistance!</AlertTitle>
+                    <AlertDescription>
+                        Click the button below to generate specific questions for your job and get a budget suggestion based on your description.
+                    </AlertDescription>
+                    <Button type="button" size="sm" onClick={handleGenerateDetails} disabled={isAiPending} className="mt-2">
+                        {isAiPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                        {isAiPending ? 'Generating...' : 'Generate Details'}
+                    </Button>
+                </Alert>
+                
+                {questions.length > 0 && (
+                    <div className="space-y-4 pt-4">
+                        <h3 className="font-semibold">Job-Specific Questions</h3>
+                        {questions.map((q, index) => (
+                             <div key={index}>
+                                <Label htmlFor={`q-${index}`}>{q.question}</Label>
+                                {q.type === 'text' ? (
+                                    <Input id={`q-${index}`} placeholder={q.example} onChange={e => handleAnswerChange(q.question, e.target.value)} />
+                                ) : (
+                                    <Textarea id={`q-${index}`} placeholder={q.example} onChange={e => handleAnswerChange(q.question, e.target.value)} />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </CardContent>
+          </Card>
 
-               <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location / Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., 123 Rizal St, Brgy. Poblacion, Quezon City" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? (
-                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Posting Job...</>
-                ) : (
-                  <><Briefcase className="mr-2 h-4 w-4" /> Post Job</>
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+          <Card>
+             <CardHeader>
+                <CardTitle>3. Finalize Job Details</CardTitle>
+                <CardDescription>Set your budget, location, and timeline.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                        control={form.control}
+                        name="categoryId"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Service Category</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="Select a service category" /></SelectTrigger></FormControl>
+                                <SelectContent>{categories.map(cat => (<SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>))}</SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="budget"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Budget (PHP)</FormLabel>
+                            <FormControl><Input type="number" placeholder="e.g., 1500" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                        control={form.control}
+                        name="location"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Location / Address</FormLabel>
+                            <FormControl><Input placeholder="e.g., 123 Rizal St, Brgy. Poblacion, Quezon City" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <FormField control={form.control} name="deadline" render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                            <FormLabel className="mb-1">Deadline (Optional)</FormLabel>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <FormControl>
+                                        <Button variant="outline" className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                    </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date()}/>
+                                </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                </div>
+            </CardContent>
+            <CardFooter>
+                 <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Posting Job...</>
+                    ) : (
+                    <><Briefcase className="mr-2 h-4 w-4" /> Post Job</>
+                    )}
+                </Button>
+            </CardFooter>
+          </Card>
+        </form>
+      </Form>
     </div>
   );
 }

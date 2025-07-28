@@ -11,7 +11,8 @@ const postJobSchema = z.object({
   categoryId: z.string().min(1, "Please select a category."),
   budget: z.coerce.number().positive("Budget must be a positive number."),
   location: z.string().min(5, "Please provide a specific location."),
-  deadline: z.string().optional(), // Dates are passed as strings from FormData
+  deadline: z.string().optional(),
+  additionalDetails: z.string().optional(), // JSON string of questions and answers
 });
 
 export interface PostJobFormState {
@@ -35,6 +36,7 @@ export async function handlePostJob(
     budget: formData.get("budget"),
     location: formData.get("location"),
     deadline: formData.get("deadline"),
+    additionalDetails: formData.get("additionalDetails"),
   });
 
   if (!validatedFields.success) {
@@ -45,7 +47,7 @@ export async function handlePostJob(
     };
   }
 
-  const { title, description, categoryId, budget, location, deadline } = validatedFields.data;
+  const { title, description, categoryId, budget, location, deadline, additionalDetails } = validatedFields.data;
 
   try {
     const userDocRef = doc(db, "users", currentUser.uid);
@@ -79,6 +81,15 @@ export async function handlePostJob(
     
     if (deadline) {
         jobData.deadline = Timestamp.fromDate(new Date(deadline));
+    }
+
+    if (additionalDetails) {
+        try {
+            jobData.additionalDetails = JSON.parse(additionalDetails);
+        } catch (e) {
+            // Ignore if JSON is invalid, or handle as an error
+            console.warn("Invalid JSON for additional details");
+        }
     }
 
     await addDoc(collection(db, "jobs"), jobData);
