@@ -2,7 +2,7 @@
 "use client";
 
 import { useActionState, useEffect, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/context/auth-context";
@@ -139,25 +139,12 @@ export default function PostAJobPage() {
   const handleAnswerChange = (question: string, answer: string) => {
     setAnswers(prev => ({...prev, [question]: answer}));
   }
+  
+  const additionalDetailsForForm = JSON.stringify(questions.map(q => ({
+    question: q.question,
+    answer: answers[q.question] || ''
+  })));
 
-  const handleFormSubmit = (data: PostJobFormValues) => {
-    const additionalDetails = questions.map(q => ({
-        question: q.question,
-        answer: answers[q.question] || ''
-    }));
-
-    const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
-        if (value instanceof Date) {
-            formData.append(key, value.toISOString());
-        } else if (value !== undefined && value !== null) {
-            formData.append(key, String(value));
-        }
-    });
-    formData.append('additionalDetails', JSON.stringify(additionalDetails));
-
-    formAction(formData);
-  };
 
   return (
     <div className="space-y-6">
@@ -169,7 +156,7 @@ export default function PostAJobPage() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+        <form action={formAction} className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>1. Describe the Job</CardTitle>
@@ -223,7 +210,7 @@ export default function PostAJobPage() {
                     <div className="space-y-4 pt-4">
                         <h3 className="font-semibold">Job-Specific Questions</h3>
                         {questions.map((q, index) => (
-                             <div key={index}>
+                             <div key={index} className="space-y-2">
                                 <Label htmlFor={`q-${index}`}>{q.question}</Label>
                                 {q.type === 'text' ? (
                                     <Input id={`q-${index}`} placeholder={q.example} onChange={e => handleAnswerChange(q.question, e.target.value)} />
@@ -234,6 +221,7 @@ export default function PostAJobPage() {
                         ))}
                     </div>
                 )}
+                 <input type="hidden" name="additionalDetails" value={additionalDetailsForForm} />
             </CardContent>
           </Card>
 
@@ -250,7 +238,7 @@ export default function PostAJobPage() {
                         render={({ field }) => (
                         <FormItem>
                             <FormLabel>Service Category</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} name={field.name}>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Select a service category" /></SelectTrigger></FormControl>
                                 <SelectContent>{categories.map(cat => (<SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>))}</SelectContent>
                             </Select>
@@ -298,6 +286,8 @@ export default function PostAJobPage() {
                                     <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date()}/>
                                 </PopoverContent>
                             </Popover>
+                            {/* Hidden input to pass date to server action */}
+                             <input type="hidden" name={field.name} value={field.value?.toISOString()} />
                             <FormMessage />
                         </FormItem>
                     )} />
@@ -318,3 +308,5 @@ export default function PostAJobPage() {
     </div>
   );
 }
+
+    
