@@ -67,7 +67,7 @@ export default function PostAJobPage() {
       title: "",
       description: "",
       categoryId: "",
-      budget: undefined,
+      budget: '' as any, // Default to empty string to avoid uncontrolled to controlled error
       location: "",
       deadline: undefined,
     },
