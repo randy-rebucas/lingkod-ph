@@ -268,14 +268,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
-                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild isActive={isActive("/jobs")}>
-                          <Link href="/jobs">
-                            <Search />
-                            <span>Find Jobs</span>
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
                   </>
                 )}
 
@@ -355,6 +347,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {pathname.split('/').pop()?.replace('-', ' ') || 'Dashboard'}
           </div>
            <div className="flex items-center gap-4">
+            {userRole === 'provider' && (
+              <Button asChild variant="secondary">
+                <Link href="/jobs">
+                  <Search />
+                  <span>Find Jobs</span>
+                </Link>
+              </Button>
+            )}
             {(userRole === 'client' || userRole === 'agency') && (
               <Button asChild>
                 <Link href="/post-a-job">
