@@ -4,7 +4,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp, deleteDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp, deleteDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -129,8 +129,9 @@ export default function ProviderProfilePage() {
         const favoriteRef = doc(db, `users/${user.uid}/favorites`, providerId);
         const unsubscribe = onSnapshot(favoriteRef, (doc) => {
             setIsFavorited(doc.exists());
+            setIsFavoriteLoading(false);
         });
-        setIsFavoriteLoading(false);
+        
         return () => unsubscribe();
     }, [user, providerId]);
 
@@ -384,4 +385,3 @@ export default function ProviderProfilePage() {
     );
 }
 
-    
