@@ -8,7 +8,7 @@ import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, updateDoc, arrayUnion, Timestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star, ArrowLeft, MapPin, UserCircle, Briefcase, DollarSign, Clock, ShieldCheck, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -179,4 +179,3 @@ export default function JobDetailsPage() {
         </div>
     );
 }
-
