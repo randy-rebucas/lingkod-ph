@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart } from "lucide-react";
+import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -216,6 +216,32 @@ const ProviderCard = ({ provider, isFavorite, onToggleFavorite }: { provider: Pr
     );
 };
 
+const ProviderRow = ({ provider, isFavorite, onToggleFavorite }: { provider: Provider; isFavorite: boolean; onToggleFavorite: (provider: Provider) => void; }) => {
+    return (
+        <div className="flex items-center p-4 border-b last:border-b-0 hover:bg-secondary/50">
+            <Avatar className="h-12 w-12 mr-4">
+                <AvatarImage src={provider.photoURL} alt={provider.displayName} />
+                <AvatarFallback>{getAvatarFallback(provider.displayName)}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+                <Link href={`/providers/${provider.uid}`} className="font-bold hover:underline">{provider.displayName}</Link>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                    {renderStars(provider.rating)}
+                    <span>({provider.reviewCount} reviews)</span>
+                </div>
+                <div className="flex flex-wrap gap-1 mt-2">
+                    {provider.keyServices?.slice(0, 3).map(service => (
+                        <Badge key={service} variant="outline">{service}</Badge>
+                    ))}
+                </div>
+            </div>
+            <Button size="icon" variant="ghost" onClick={() => onToggleFavorite(provider)}>
+                 <Heart className={cn("h-5 w-5 text-muted-foreground", isFavorite && "fill-red-500 text-red-500")} />
+            </Button>
+        </div>
+    )
+}
+
 
 export default function DashboardPage() {
     const { user, userRole } = useAuth();
@@ -229,6 +255,7 @@ export default function DashboardPage() {
     const [loadingProviders, setLoadingProviders] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [favoriteProviderIds, setFavoriteProviderIds] = useState<string[]>([]);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
 
     // For agency dashboard
@@ -471,38 +498,63 @@ export default function DashboardPage() {
                 </div>
                  <Card>
                     <CardContent className="p-6 space-y-6">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <Input 
-                                placeholder="Search by provider name..." 
-                                className="w-full max-w-lg pl-10" 
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                        <div className="flex justify-between items-center">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <Input 
+                                    placeholder="Search by provider name..." 
+                                    className="w-full max-w-lg pl-10" 
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <div className="flex items-center gap-1 border p-1 rounded-lg">
+                                <Button size="icon" variant={viewMode === 'grid' ? 'secondary' : 'ghost'} onClick={() => setViewMode('grid')}>
+                                    <LayoutGrid className="h-5 w-5" />
+                                </Button>
+                                 <Button size="icon" variant={viewMode === 'list' ? 'secondary' : 'ghost'} onClick={() => setViewMode('list')}>
+                                    <List className="h-5 w-5" />
+                                </Button>
+                            </div>
                         </div>
                         {loadingProviders ? (
-                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                            <div className={cn("gap-6", viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-2')}>
                                 {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
                             </div>
                         ) : (
-                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                {filteredProviders.length > 0 ? (
-                                    filteredProviders.map(provider => (
-                                        <ProviderCard 
-                                            key={provider.uid} 
-                                            provider={provider} 
-                                            isFavorite={favoriteProviderIds.includes(provider.uid)}
-                                            onToggleFavorite={handleToggleFavorite}
-                                        />
-                                    ))
-                                ) : (
-                                    <div className="col-span-full text-center text-muted-foreground p-12">
-                                        <Users className="h-16 w-16 mx-auto mb-4" />
-                                        <h3 className="text-xl font-semibold">No Providers Found</h3>
-                                        <p>No providers match your search term. Try another search.</p>
+                             filteredProviders.length > 0 ? (
+                                viewMode === 'grid' ? (
+                                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                        {filteredProviders.map(provider => (
+                                            <ProviderCard 
+                                                key={provider.uid} 
+                                                provider={provider} 
+                                                isFavorite={favoriteProviderIds.includes(provider.uid)}
+                                                onToggleFavorite={handleToggleFavorite}
+                                            />
+                                        ))}
                                     </div>
-                                )}
-                            </div>
+                                ) : (
+                                    <Card>
+                                        <CardContent className="p-0">
+                                            {filteredProviders.map(provider => (
+                                                 <ProviderRow 
+                                                    key={provider.uid} 
+                                                    provider={provider} 
+                                                    isFavorite={favoriteProviderIds.includes(provider.uid)}
+                                                    onToggleFavorite={handleToggleFavorite}
+                                                />
+                                            ))}
+                                        </CardContent>
+                                    </Card>
+                                )
+                            ) : (
+                                <div className="col-span-full text-center text-muted-foreground p-12">
+                                    <Users className="h-16 w-16 mx-auto mb-4" />
+                                    <h3 className="text-xl font-semibold">No Providers Found</h3>
+                                    <p>No providers match your search term. Try another search.</p>
+                                </div>
+                            )
                         )}
                     </CardContent>
                 </Card>
@@ -750,7 +802,3 @@ export default function DashboardPage() {
         </div>
     );
 }
-
-    
-
-    
