@@ -95,7 +95,7 @@ export default function PostAJobPage() {
     }, []);
 
   useEffect(() => {
-    if (state.message && (state.error || !isSubmitting)) {
+    if (state.message && !isSubmitting) {
       toast({
         title: state.error ? "Error" : "Success!",
         description: state.message,
@@ -126,6 +126,10 @@ export default function PostAJobPage() {
             if (result.questions) {
                 setQuestions(result.questions);
             }
+            toast({
+              title: "AI Details Generated",
+              description: "A budget has been suggested and job-specific questions have been added below."
+            })
         } catch(e) {
             console.error(e);
             toast({ variant: 'destructive', title: 'AI Error', description: 'Could not generate details at this time.' });
@@ -155,9 +159,7 @@ export default function PostAJobPage() {
       <Form {...form}>
         <form action={formAction} className="space-y-6">
            <input type="hidden" name="additionalDetails" value={additionalDetailsForForm} />
-            <FormField control={form.control} name="deadline" render={({ field }) => (
-                <input type="hidden" name={field.name} value={field.value?.toISOString() || ''} />
-            )} />
+           <input type="hidden" name="deadline" value={form.watch('deadline')?.toISOString() ?? ''} />
             
           <Card>
             <CardHeader>
