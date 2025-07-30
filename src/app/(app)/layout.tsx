@@ -25,6 +25,7 @@ import {
   Lightbulb,
   Check,
   PlusCircle,
+  Briefcase,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -389,6 +390,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
+                {(userRole === 'client' || userRole === 'agency') && (
+                <DropdownMenuItem asChild>
+                  <Link href="/my-job-posts">
+                    <Briefcase className="mr-2 h-4 w-4" />
+                    <span>My Job Posts</span>
+                  </Link>
+                </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <Link href="/settings">
                     <Settings className="mr-2 h-4 w-4" />
