@@ -4,7 +4,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp, deleteDoc, setDoc } from "firebase/firestore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -125,14 +125,15 @@ export default function ProviderProfilePage() {
             setIsFavoriteLoading(false);
             return;
         }
+        setIsFavoriteLoading(true);
         const favoriteRef = doc(db, `users/${user.uid}/favorites`, providerId);
-        const checkFavorite = async () => {
-            const docSnap = await getDoc(favoriteRef);
-            setIsFavorited(docSnap.exists());
-            setIsFavoriteLoading(false);
-        }
-        checkFavorite();
+        const unsubscribe = onSnapshot(favoriteRef, (doc) => {
+            setIsFavorited(doc.exists());
+        });
+        setIsFavoriteLoading(false);
+        return () => unsubscribe();
     }, [user, providerId]);
+
 
     const handleToggleFavorite = async () => {
         if (!user || !provider) {
@@ -146,16 +147,14 @@ export default function ProviderProfilePage() {
             if (isFavorited) {
                 await deleteDoc(favoriteRef);
                 toast({ title: "Removed from Favorites" });
-                setIsFavorited(false);
             } else {
-                await addDoc(collection(db, `users/${user.uid}/favorites`), {
+                await setDoc(favoriteRef, {
                     providerId: provider.uid,
                     providerName: provider.displayName,
                     providerPhotoURL: provider.photoURL || null,
                     favoritedAt: serverTimestamp()
                 });
                 toast({ title: "Added to Favorites" });
-                setIsFavorited(true);
             }
         } catch (error) {
             console.error("Error updating favorite status:", error);
@@ -280,7 +279,7 @@ export default function ProviderProfilePage() {
                             <Button size="lg" onClick={handleBookNow}><CalendarPlus className="mr-2" /> Book Now</Button>
                             <Button size="lg" variant="outline" onClick={handleSendMessage}><MessageSquare className="mr-2" /> Send Message</Button>
                             <Button size="lg" variant="outline" onClick={handleToggleFavorite} disabled={isFavoriteLoading}>
-                                <Heart className={cn("mr-2", isFavorited && "fill-destructive text-destructive")} />
+                                <Heart className={cn("mr-2", isFavorited && "fill-red-500 text-red-500")} />
                                 {isFavorited ? 'Favorited' : 'Favorite'}
                             </Button>
                         </div>
@@ -384,3 +383,5 @@ export default function ProviderProfilePage() {
         </div>
     );
 }
+
+    

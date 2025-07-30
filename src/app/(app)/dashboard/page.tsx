@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2 } from "lucide-react";
+import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,9 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs, getDoc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs, getDoc, doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 type Booking = {
     id: string;
@@ -156,10 +158,18 @@ const getAvatarFallback = (name: string | null | undefined) => {
     return name.substring(0, 2).toUpperCase();
 };
 
-const ProviderCard = ({ provider }: { provider: Provider }) => {
+const ProviderCard = ({ provider, isFavorite, onToggleFavorite }: { provider: Provider; isFavorite: boolean; onToggleFavorite: (provider: Provider) => void; }) => {
     return (
         <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col">
-            <CardHeader className="text-center">
+            <CardHeader className="text-center relative">
+                 <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="absolute top-2 right-2 rounded-full h-8 w-8"
+                    onClick={() => onToggleFavorite(provider)}
+                >
+                    <Heart className={cn("h-5 w-5 text-muted-foreground", isFavorite && "fill-red-500 text-red-500")} />
+                </Button>
                  <Avatar className="h-24 w-24 mx-auto mb-4 border-2 border-primary">
                     <AvatarImage src={provider.photoURL} alt={provider.displayName} />
                     <AvatarFallback className="text-3xl">{getAvatarFallback(provider.displayName)}</AvatarFallback>
@@ -209,6 +219,7 @@ const ProviderCard = ({ provider }: { provider: Provider }) => {
 
 export default function DashboardPage() {
     const { user, userRole } = useAuth();
+    const { toast } = useToast();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
@@ -217,6 +228,8 @@ export default function DashboardPage() {
     const [providers, setProviders] = useState<Provider[]>([]);
     const [loadingProviders, setLoadingProviders] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [favoriteProviderIds, setFavoriteProviderIds] = useState<string[]>([]);
+
 
     // For agency dashboard
     const [agencyProviders, setAgencyProviders] = useState<Provider[]>([]);
@@ -313,6 +326,19 @@ export default function DashboardPage() {
         fetchProviders();
     }, [userRole]);
 
+    // Fetch client's favorites
+    useEffect(() => {
+        if (userRole !== 'client' || !user) return;
+
+        const favRef = collection(db, `users/${user.uid}/favorites`);
+        const unsubscribe = onSnapshot(favRef, (snapshot) => {
+            const favIds = snapshot.docs.map(doc => doc.id);
+            setFavoriteProviderIds(favIds);
+        });
+        return () => unsubscribe();
+    }, [user, userRole]);
+
+
     // Fetch data for agency dashboard
     useEffect(() => {
         if (userRole !== 'agency' || !user) {
@@ -403,6 +429,30 @@ export default function DashboardPage() {
     const agencyRecentBookings = agencyBookings.sort((a,b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5);
     const topPerformingProviders = [...agencyProviders].sort((a,b) => (b.totalRevenue || 0) - (a.totalRevenue || 0)).slice(0, 5);
 
+    const handleToggleFavorite = async (provider: Provider) => {
+        if (!user) return;
+        const favRef = doc(db, `users/${user.uid}/favorites`, provider.uid);
+        const isFavorited = favoriteProviderIds.includes(provider.uid);
+
+        try {
+            if (isFavorited) {
+                await deleteDoc(favRef);
+                toast({ title: "Removed from Favorites" });
+            } else {
+                await setDoc(favRef, {
+                    providerId: provider.uid,
+                    providerName: provider.displayName,
+                    providerPhotoURL: provider.photoURL || null,
+                    favoritedAt: serverTimestamp()
+                });
+                toast({ title: "Added to Favorites" });
+            }
+        } catch (error) {
+            console.error("Error toggling favorite:", error);
+            toast({ variant: "destructive", title: "Error", description: "Could not update favorites." });
+        }
+    };
+
 
 
     // If user is a client
@@ -432,7 +482,12 @@ export default function DashboardPage() {
                             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                 {filteredProviders.length > 0 ? (
                                     filteredProviders.map(provider => (
-                                        <ProviderCard key={provider.uid} provider={provider} />
+                                        <ProviderCard 
+                                            key={provider.uid} 
+                                            provider={provider} 
+                                            isFavorite={favoriteProviderIds.includes(provider.uid)}
+                                            onToggleFavorite={handleToggleFavorite}
+                                        />
                                     ))
                                 ) : (
                                     <div className="col-span-full text-center text-muted-foreground p-12">
@@ -689,5 +744,7 @@ export default function DashboardPage() {
         </div>
     );
 }
+
+    
 
     
