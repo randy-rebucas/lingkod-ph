@@ -104,6 +104,7 @@ export async function handlePostJob(
             throw new Error("User document not found.");
         }
         const userData = userDoc.data();
+        const clientIsVerified = userData.verification?.status === 'Verified';
 
         const newJobData = {
             ...jobData,
@@ -111,6 +112,7 @@ export async function handlePostJob(
             clientId: userId,
             clientName: userData.displayName,
             clientAvatar: userData.photoURL || null,
+            clientIsVerified: clientIsVerified,
             createdAt: serverTimestamp(),
             applications: [],
         };

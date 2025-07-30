@@ -4,14 +4,16 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, updateDoc, arrayUnion, Timestamp } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Briefcase, MapPin, DollarSign, UserCircle, Star } from "lucide-react";
+import { Briefcase, MapPin, Users, Star, ShieldCheck, Clock } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { formatDistanceToNow } from "date-fns";
+
 
 export type Job = {
     id: string;
@@ -22,6 +24,8 @@ export type Job = {
     location: string;
     clientName: string;
     clientId: string;
+    clientIsVerified?: boolean;
+    createdAt: Timestamp;
     applications?: string[]; // Array of provider IDs
 };
 
@@ -102,24 +106,43 @@ export default function JobsPage() {
                     {jobs.map(job => {
                         const hasApplied = job.applications?.includes(user?.uid || '');
                         return (
-                            <Card key={job.id} className="flex flex-col">
-                                <CardHeader>
-                                    <CardTitle>{job.title}</CardTitle>
-                                    <CardDescription>
-                                        <Badge variant="secondary">{job.categoryName}</Badge>
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="flex-1 space-y-4">
-                                    <p className="text-muted-foreground h-20 line-clamp-4">{job.description}</p>
-                                    <div className="text-sm space-y-2">
-                                        <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground" /> <span>{job.location}</span></div>
-                                        <div className="flex items-center gap-2"><UserCircle className="h-4 w-4 text-muted-foreground" /> <span>Posted by {job.clientName}</span></div>
-                                    </div>
-                                </CardContent>
+                            <Card key={job.id} className="flex flex-col hover:shadow-lg transition-shadow">
+                               <Link href={`/jobs/${job.id}`} className="flex flex-col flex-1">
+                                    <CardHeader>
+                                        <CardTitle className="hover:text-primary transition-colors">{job.title}</CardTitle>
+                                        <CardDescription>
+                                            <Badge variant="secondary">{job.categoryName}</Badge>
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="flex-1 space-y-4">
+                                        <p className="text-muted-foreground text-sm h-12 line-clamp-3">{job.description}</p>
+                                        <div className="text-sm space-y-2 text-muted-foreground">
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-2"><Clock className="h-4 w-4" /> <span>Posted {formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true })}</span></div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /> <span>{job.location}</span></div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                {job.clientIsVerified && (
+                                                    <div className="flex items-center gap-1 text-green-600">
+                                                        <ShieldCheck className="h-4 w-4" /> <span>Verified Client</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                             <div className="flex items-center gap-2">
+                                                <Users className="h-4 w-4" /> <span>{job.applications?.length || 0} Applicants</span>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Link>
                                 <CardFooter className="flex justify-between items-center bg-secondary/50 p-4">
                                     <div className="font-bold text-lg text-primary">₱{job.budget.toFixed(2)}</div>
                                     <Button
-                                        onClick={() => handleApply(job.id, user!.uid)}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleApply(job.id, user!.uid)
+                                        }}
                                         disabled={!isSubscribed || hasApplied}
                                         title={!isSubscribed ? "You need an active subscription to apply" : (hasApplied ? "You have already applied" : "Apply for this job")}
                                     >
@@ -142,4 +165,3 @@ export default function JobsPage() {
         </div>
     );
 }
-
