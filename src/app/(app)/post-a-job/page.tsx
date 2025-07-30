@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useEffect, useState, useTransition, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -51,7 +51,7 @@ const initialState: PostJobFormState = {
 };
 
 export default function PostAJobPage() {
-  const { userRole } = useAuth();
+  const { user, userRole } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [state, formAction, isSubmitting] = useActionState(handlePostJob, initialState);
@@ -59,6 +59,7 @@ export default function PostAJobPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [questions, setQuestions] = useState<JobDetailQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm<PostJobFormValues>({
     resolver: zodResolver(postJobSchema),
@@ -66,7 +67,7 @@ export default function PostAJobPage() {
       title: "",
       description: "",
       categoryId: "",
-      budget: 0,
+      budget: undefined,
       location: "",
       deadline: undefined,
     },
@@ -140,12 +141,20 @@ export default function PostAJobPage() {
   const handleAnswerChange = (question: string, answer: string) => {
     setAnswers(prev => ({...prev, [question]: answer}));
   }
-  
-  const additionalDetailsForForm = JSON.stringify(questions.map(q => ({
-    question: q.question,
-    answer: answers[q.question] || ''
-  })));
 
+  const handleFormAction = (formData: FormData) => {
+    if (!user) {
+        toast({ variant: "destructive", title: "Error", description: "You must be logged in to post a job." });
+        return;
+    }
+    const additionalDetails = JSON.stringify(questions.map(q => ({
+        question: q.question,
+        answer: answers[q.question] || ''
+    })));
+    formData.append('additionalDetails', additionalDetails);
+    formData.append('userId', user.uid);
+    formAction(formData);
+  }
 
   return (
     <div className="space-y-6">
@@ -157,9 +166,7 @@ export default function PostAJobPage() {
       </div>
 
       <Form {...form}>
-        <form action={formAction} className="space-y-6">
-           <input type="hidden" name="additionalDetails" value={additionalDetailsForForm} />
-           <input type="hidden" name="deadline" value={form.watch('deadline')?.toISOString() ?? ''} />
+        <form ref={formRef} action={handleFormAction} className="space-y-6">
             
           <Card>
             <CardHeader>
@@ -289,6 +296,8 @@ export default function PostAJobPage() {
                                     <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date()}/>
                                 </PopoverContent>
                             </Popover>
+                             {/* Hidden input to pass date to server action */}
+                             <input type="hidden" name={field.name} value={field.value?.toISOString() || ''} />
                             <FormMessage />
                         </FormItem>
                     )} />

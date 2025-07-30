@@ -2,7 +2,7 @@
 "use server";
 
 import { z } from "zod";
-import { db, auth } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp, doc, getDoc, Timestamp } from "firebase/firestore";
 
 const postJobSchema = z.object({
@@ -13,6 +13,7 @@ const postJobSchema = z.object({
   location: z.string().min(5, "Please provide a specific location."),
   deadline: z.string().optional(),
   additionalDetails: z.string().optional(), // JSON string of questions and answers
+  userId: z.string().min(1, "User ID is required."),
 });
 
 export interface PostJobFormState {
@@ -24,10 +25,6 @@ export async function handlePostJob(
   prevState: PostJobFormState,
   formData: FormData
 ): Promise<PostJobFormState> {
-  const currentUser = auth.currentUser;
-  if (!currentUser) {
-    return { error: "You must be logged in to post a job.", message: "Authentication failed." };
-  }
 
   const validatedFields = postJobSchema.safeParse({
     title: formData.get("title"),
@@ -37,6 +34,7 @@ export async function handlePostJob(
     location: formData.get("location"),
     deadline: formData.get("deadline"),
     additionalDetails: formData.get("additionalDetails"),
+    userId: formData.get("userId"),
   });
 
   if (!validatedFields.success) {
@@ -47,10 +45,14 @@ export async function handlePostJob(
     };
   }
 
-  const { title, description, categoryId, budget, location, deadline, additionalDetails } = validatedFields.data;
+  const { userId, title, description, categoryId, budget, location, deadline, additionalDetails } = validatedFields.data;
+
+  if (!userId) {
+    return { error: "You must be logged in to post a job.", message: "Authentication failed." };
+  }
 
   try {
-    const userDocRef = doc(db, "users", currentUser.uid);
+    const userDocRef = doc(db, "users", userId);
     const userDoc = await getDoc(userDocRef);
     if (!userDoc.exists()) {
         throw new Error("User document not found.");
@@ -72,7 +74,7 @@ export async function handlePostJob(
       budget,
       location,
       status: 'Open', // Initial status
-      clientId: currentUser.uid,
+      clientId: userId,
       clientName: userData.displayName,
       clientAvatar: userData.photoURL || null,
       createdAt: serverTimestamp(),
