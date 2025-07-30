@@ -7,9 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, getDoc, doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { handlePostJob, type PostJobFormState } from "./actions";
 import { generateJobDetails, type JobDetailQuestion } from "@/ai/flows/generate-job-details";
@@ -54,11 +54,14 @@ export default function PostAJobPage() {
   const { user, userRole } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editJobId = searchParams.get("edit");
   const [state, formAction, isSubmitting] = useActionState(handlePostJob, initialState);
   const [isAiPending, startAiTransition] = useTransition();
   const [categories, setCategories] = useState<Category[]>([]);
   const [questions, setQuestions] = useState<JobDetailQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [isLoadingJob, setIsLoadingJob] = useState(!!editJobId);
   const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm<PostJobFormValues>({
@@ -67,7 +70,7 @@ export default function PostAJobPage() {
       title: "",
       description: "",
       categoryId: "",
-      budget: '' as any, // Default to empty string to avoid uncontrolled to controlled error
+      budget: '' as any,
       location: "",
       deadline: undefined,
     },
@@ -94,6 +97,37 @@ export default function PostAJobPage() {
         };
         fetchCategories();
     }, []);
+    
+     useEffect(() => {
+        const fetchJobData = async () => {
+            if (!editJobId || !user) return;
+            setIsLoadingJob(true);
+            const jobRef = doc(db, "jobs", editJobId);
+            const jobSnap = await getDoc(jobRef);
+            if (jobSnap.exists() && jobSnap.data().clientId === user.uid) {
+                const jobData = jobSnap.data();
+                form.reset({
+                    title: jobData.title,
+                    description: jobData.description,
+                    categoryId: jobData.categoryId,
+                    budget: jobData.budget,
+                    location: jobData.location,
+                    deadline: jobData.deadline?.toDate(),
+                });
+                if (jobData.additionalDetails) {
+                    const loadedQuestions = jobData.additionalDetails.map((q: any) => ({ question: q.question, example: '', type: 'text' }));
+                    const loadedAnswers = jobData.additionalDetails.reduce((acc: any, q: any) => ({ ...acc, [q.question]: q.answer }), {});
+                    setQuestions(loadedQuestions);
+                    setAnswers(loadedAnswers);
+                }
+            } else {
+                 toast({ variant: "destructive", title: "Error", description: "Job not found or you don't have permission to edit it." });
+                 router.push("/my-job-posts");
+            }
+            setIsLoadingJob(false);
+        };
+        fetchJobData();
+    }, [editJobId, user, form, router, toast]);
 
   useEffect(() => {
     if (state.message && !isSubmitting) {
@@ -106,10 +140,10 @@ export default function PostAJobPage() {
         form.reset();
         setQuestions([]);
         setAnswers({});
-        router.push('/dashboard');
+        router.push(editJobId ? '/my-job-posts' : '/dashboard');
       }
     }
-  }, [state, toast, form, router, isSubmitting]);
+  }, [state, toast, form, router, isSubmitting, editJobId]);
 
   const handleGenerateDetails = () => {
     const jobDescription = form.getValues('description');
@@ -153,16 +187,24 @@ export default function PostAJobPage() {
     })));
     formData.append('additionalDetails', additionalDetails);
     formData.append('userId', user.uid);
+    if(editJobId) {
+        formData.append('jobId', editJobId);
+    }
     formAction(formData);
+  }
+
+  const pageTitle = editJobId ? "Edit Job Post" : "Post a New Job";
+  const pageDescription = editJobId ? "Update the details of your job post." : "Fill out the details below to find the perfect provider for your needs.";
+
+  if (isLoadingJob) {
+    return <div>Loading job details...</div>
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Post a New Job</h1>
-        <p className="text-muted-foreground">
-          Fill out the details below to find the perfect provider for your needs.
-        </p>
+        <h1 className="text-3xl font-bold font-headline">{pageTitle}</h1>
+        <p className="text-muted-foreground">{pageDescription}</p>
       </div>
 
       <Form {...form}>
@@ -224,9 +266,9 @@ export default function PostAJobPage() {
                              <div key={index} className="space-y-2">
                                 <Label htmlFor={`q-${index}`}>{q.question}</Label>
                                 {q.type === 'text' ? (
-                                    <Input id={`q-${index}`} placeholder={q.example} onChange={e => handleAnswerChange(q.question, e.target.value)} />
+                                    <Input id={`q-${index}`} placeholder={q.example} value={answers[q.question] || ''} onChange={e => handleAnswerChange(q.question, e.target.value)} />
                                 ) : (
-                                    <Textarea id={`q-${index}`} placeholder={q.example} onChange={e => handleAnswerChange(q.question, e.target.value)} />
+                                    <Textarea id={`q-${index}`} placeholder={q.example} value={answers[q.question] || ''} onChange={e => handleAnswerChange(q.question, e.target.value)} />
                                 )}
                             </div>
                         ))}
@@ -248,7 +290,7 @@ export default function PostAJobPage() {
                         render={({ field }) => (
                         <FormItem>
                             <FormLabel>Service Category</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value} name={field.name}>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                                 <FormControl><SelectTrigger><SelectValue placeholder="Select a service category" /></SelectTrigger></FormControl>
                                 <SelectContent>{categories.map(cat => (<SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>))}</SelectContent>
                             </Select>
@@ -296,7 +338,6 @@ export default function PostAJobPage() {
                                     <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date()}/>
                                 </PopoverContent>
                             </Popover>
-                             {/* Hidden input to pass date to server action */}
                              <input type="hidden" name={field.name} value={field.value?.toISOString() || ''} />
                             <FormMessage />
                         </FormItem>
@@ -306,9 +347,9 @@ export default function PostAJobPage() {
             <CardFooter>
                  <Button type="submit" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Posting Job...</>
+                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {editJobId ? 'Updating Job...' : 'Posting Job...'}</>
                     ) : (
-                    <><Briefcase className="mr-2 h-4 w-4" /> Post Job</>
+                    <><Briefcase className="mr-2 h-4 w-4" /> {editJobId ? 'Update Job' : 'Post Job'}</>
                     )}
                 </Button>
             </CardFooter>

@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import Link from "next/link";
 
 type JobStatus = "Open" | "In Progress" | "Completed" | "Closed";
 
@@ -139,8 +140,12 @@ export default function MyJobPostsPage() {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem><Eye className="mr-2 h-4 w-4" /> View Applicants</DropdownMenuItem>
-                                                    <DropdownMenuItem><Edit className="mr-2 h-4 w-4" /> Edit Post</DropdownMenuItem>
+                                                     <DropdownMenuItem asChild>
+                                                        <Link href={`/my-job-posts/${job.id}/applicants`}><Eye className="mr-2 h-4 w-4" /> View Applicants</Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/post-a-job?edit=${job.id}`}><Edit className="mr-2 h-4 w-4" /> Edit Post</Link>
+                                                    </DropdownMenuItem>
                                                     <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "Closed")}>Close Post</DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <AlertDialogTrigger asChild>
@@ -166,7 +171,7 @@ export default function MyJobPostsPage() {
                                     <TableCell colSpan={5} className="h-24 text-center">
                                         <Briefcase className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
                                         You haven't posted any jobs yet.
-                                        <Button variant="link" asChild><a href="/post-a-job">Post a Job</a></Button>
+                                        <Button variant="link" asChild><Link href="/post-a-job">Post a Job</Link></Button>
                                     </TableCell>
                                 </TableRow>
                             )}
