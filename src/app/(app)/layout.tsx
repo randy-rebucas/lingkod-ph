@@ -27,6 +27,7 @@ import {
   PlusCircle,
   Briefcase,
   Heart,
+  Search,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -258,14 +259,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 )}
 
                 {userRole === 'provider' && (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/services")}>
-                      <Link href="/services">
-                        <BriefcaseBusiness />
-                        <span>My Services</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/services")}>
+                        <Link href="/services">
+                          <BriefcaseBusiness />
+                          <span>My Services</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                     <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/jobs")}>
+                          <Link href="/jobs">
+                            <Search />
+                            <span>Find Jobs</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                  </>
                 )}
 
 
