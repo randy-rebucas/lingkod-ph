@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, doc, updateDoc, arrayUnion, Timestamp } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, updateDoc, arrayUnion, Timestamp, orderBy } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -43,7 +43,7 @@ export default function JobsPage() {
             return;
         }
 
-        const jobsQuery = query(collection(db, "jobs"), where("status", "==", "Open"));
+        const jobsQuery = query(collection(db, "jobs"), where("status", "==", "Open"), orderBy("createdAt", "desc"));
         const unsubscribe = onSnapshot(jobsQuery, (snapshot) => {
             const jobsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
             setJobs(jobsData);
@@ -89,7 +89,7 @@ export default function JobsPage() {
                     <p className="text-muted-foreground">Browse and apply for available jobs.</p>
                 </div>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-64" />)}
+                    {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-72" />)}
                 </div>
             </div>
         )
@@ -118,10 +118,10 @@ export default function JobsPage() {
                                         <p className="text-muted-foreground text-sm h-12 line-clamp-3">{job.description}</p>
                                         <div className="text-sm space-y-2 text-muted-foreground">
                                             <div className="flex items-center gap-2">
-                                                <div className="flex items-center gap-2"><Clock className="h-4 w-4" /> <span>Posted {formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true })}</span></div>
+                                                <Clock className="h-4 w-4" /> <span>Posted {job.createdAt ? formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true }) : '...'}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /> <span>{job.location}</span></div>
+                                                <MapPin className="h-4 w-4" /> <span>{job.location}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 {job.clientIsVerified && (
@@ -139,14 +139,25 @@ export default function JobsPage() {
                                 <CardFooter className="flex justify-between items-center bg-secondary/50 p-4">
                                     <div className="font-bold text-lg text-primary">₱{job.budget.toFixed(2)}</div>
                                     <Button
+                                        asChild={!isSubscribed}
                                         onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleApply(job.id, user!.uid)
+                                            if (isSubscribed) {
+                                                e.stopPropagation();
+                                                handleApply(job.id, user!.uid);
+                                            }
                                         }}
                                         disabled={!isSubscribed || hasApplied}
                                         title={!isSubscribed ? "You need an active subscription to apply" : (hasApplied ? "You have already applied" : "Apply for this job")}
                                     >
-                                        {hasApplied ? 'Applied' : (isSubscribed ? 'Apply Now' : <><Star className="mr-2 h-4 w-4" /> Upgrade to Apply</>)}
+                                        {isSubscribed ? (
+                                             <div className="flex items-center gap-2">
+                                                {hasApplied ? 'Applied' : 'Apply Now'}
+                                             </div>
+                                        ) : (
+                                            <Link href="/subscription" className="flex items-center gap-2">
+                                                <Star className="h-4 w-4" /> Upgrade to Apply
+                                            </Link>
+                                        )}
                                     </Button>
                                 </CardFooter>
                             </Card>
