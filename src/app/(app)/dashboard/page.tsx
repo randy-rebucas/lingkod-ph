@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs, getDoc, doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs, getDoc, doc, setDoc, deleteDoc, serverTimestamp, addDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -330,9 +330,11 @@ export default function DashboardPage() {
     useEffect(() => {
         if (userRole !== 'client' || !user) return;
 
-        const favRef = collection(db, `users/${user.uid}/favorites`);
-        const unsubscribe = onSnapshot(favRef, (snapshot) => {
-            const favIds = snapshot.docs.map(doc => doc.id);
+        const favRef = collection(db, 'favorites');
+        const q = query(favRef, where('userId', '==', user.uid));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const favIds = snapshot.docs.map(doc => doc.data().providerId);
             setFavoriteProviderIds(favIds);
         });
         return () => unsubscribe();
@@ -431,18 +433,22 @@ export default function DashboardPage() {
 
     const handleToggleFavorite = async (provider: Provider) => {
         if (!user) return;
-        const favRef = doc(db, `users/${user.uid}/favorites`, provider.uid);
+        const favoritesRef = collection(db, 'favorites');
         const isFavorited = favoriteProviderIds.includes(provider.uid);
 
         try {
             if (isFavorited) {
-                await deleteDoc(favRef);
+                const q = query(favoritesRef, where('userId', '==', user.uid), where('providerId', '==', provider.uid));
+                const snapshot = await getDocs(q);
+                if (!snapshot.empty) {
+                    const docId = snapshot.docs[0].id;
+                    await deleteDoc(doc(db, 'favorites', docId));
+                }
                 toast({ title: "Removed from Favorites" });
             } else {
-                await setDoc(favRef, {
+                await addDoc(favoritesRef, {
+                    userId: user.uid,
                     providerId: provider.uid,
-                    providerName: provider.displayName,
-                    providerPhotoURL: provider.photoURL || null,
                     favoritedAt: serverTimestamp()
                 });
                 toast({ title: "Added to Favorites" });

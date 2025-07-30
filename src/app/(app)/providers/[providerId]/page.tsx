@@ -126,9 +126,14 @@ export default function ProviderProfilePage() {
             return;
         }
         setIsFavoriteLoading(true);
-        const favoriteRef = doc(db, `users/${user.uid}/favorites`, providerId);
-        const unsubscribe = onSnapshot(favoriteRef, (doc) => {
-            setIsFavorited(doc.exists());
+        const favQuery = query(
+            collection(db, 'favorites'),
+            where('userId', '==', user.uid),
+            where('providerId', '==', providerId)
+        );
+
+        const unsubscribe = onSnapshot(favQuery, (snapshot) => {
+            setIsFavorited(!snapshot.empty);
             setIsFavoriteLoading(false);
         });
         
@@ -142,17 +147,20 @@ export default function ProviderProfilePage() {
             return;
         }
         setIsFavoriteLoading(true);
-        const favoriteRef = doc(db, `users/${user.uid}/favorites`, provider.uid);
+        const favoritesRef = collection(db, 'favorites');
         
         try {
             if (isFavorited) {
-                await deleteDoc(favoriteRef);
+                const q = query(favoritesRef, where('userId', '==', user.uid), where('providerId', '==', provider.uid));
+                const snapshot = await getDocs(q);
+                if (!snapshot.empty) {
+                    await deleteDoc(snapshot.docs[0].ref);
+                }
                 toast({ title: "Removed from Favorites" });
             } else {
-                await setDoc(favoriteRef, {
+                 await addDoc(favoritesRef, {
+                    userId: user.uid,
                     providerId: provider.uid,
-                    providerName: provider.displayName,
-                    providerPhotoURL: provider.photoURL || null,
                     favoritedAt: serverTimestamp()
                 });
                 toast({ title: "Added to Favorites" });
@@ -384,4 +392,3 @@ export default function ProviderProfilePage() {
         </div>
     );
 }
-

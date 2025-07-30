@@ -95,8 +95,10 @@ export default function MyFavoritesPage() {
             return;
         }
 
-        const favoritesRef = collection(db, `users/${user.uid}/favorites`);
-        const unsubscribe = onSnapshot(favoritesRef, async (snapshot) => {
+        const favoritesRef = collection(db, 'favorites');
+        const q = query(favoritesRef, where('userId', '==', user.uid));
+        
+        const unsubscribe = onSnapshot(q, async (snapshot) => {
             setLoading(true);
             const favoriteProviderIds = snapshot.docs.map(doc => doc.data().providerId);
 
