@@ -28,6 +28,7 @@ import {
   Briefcase,
   Heart,
   Search,
+  CheckSquare,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -350,7 +351,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {userRole === 'provider' && (
               <Button asChild variant="secondary">
                 <Link href="/jobs">
-                  <Search />
+                  <Search className="mr-2" />
                   <span>Find Jobs</span>
                 </Link>
               </Button>
@@ -358,7 +359,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {(userRole === 'client' || userRole === 'agency') && (
               <Button asChild>
                 <Link href="/post-a-job">
-                  <PlusCircle />
+                  <PlusCircle className="mr-2" />
                   <span>Post a Job</span>
                 </Link>
               </Button>
@@ -403,6 +404,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
+
+                {userRole === 'provider' && (
+                   <DropdownMenuItem asChild>
+                      <Link href="/applied-jobs">
+                        <CheckSquare className="mr-2 h-4 w-4" />
+                        <span>Applied Jobs</span>
+                      </Link>
+                    </DropdownMenuItem>
+                )}
+
                 {(userRole === 'client' || userRole === 'agency') && (
                   <>
                     <DropdownMenuItem asChild>
@@ -442,5 +453,3 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    
