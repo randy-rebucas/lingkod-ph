@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit } from "lucide-react";
+import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit, Wallet } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -139,6 +139,14 @@ export default function ProfilePage() {
     const [invites, setInvites] = useState<Invite[]>([]);
     const [isRespondingToInvite, setIsRespondingToInvite] = useState(false);
 
+    // Payout fields
+    const [payoutMethod, setPayoutMethod] = useState('');
+    const [gCashNumber, setGCashNumber] = useState('');
+    const [bankName, setBankName] = useState('');
+    const [bankAccountNumber, setBankAccountNumber] = useState('');
+    const [bankAccountName, setBankAccountName] = useState('');
+    const [isSavingPayout, setIsSavingPayout] = useState(false);
+
     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
     const { isLoaded } = useLoadScript({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -199,6 +207,12 @@ export default function ProfilePage() {
                     setLicenseIssuingState(data.licenseIssuingState || '');
                     setLicenseIssuingCountry(data.licenseIssuingCountry || '');
                     setAvailabilitySchedule(data.availabilitySchedule || initialAvailability);
+                    // Load payout details
+                    setPayoutMethod(data.payoutDetails?.method || '');
+                    setGCashNumber(data.payoutDetails?.gCashNumber || '');
+                    setBankName(data.payoutDetails?.bankName || '');
+                    setBankAccountNumber(data.payoutDetails?.bankAccountNumber || '');
+                    setBankAccountName(data.payoutDetails?.bankAccountName || '');
                 }
             }
         });
@@ -423,6 +437,28 @@ export default function ProfilePage() {
             setIsSavingProvider(false);
         }
     }
+
+    const handlePayoutDetailsUpdate = async () => {
+        if (!user) return;
+        setIsSavingPayout(true);
+        try {
+            const userDocRef = doc(db, "users", user.uid);
+            const payoutDetails: any = { method: payoutMethod };
+            if (payoutMethod === 'gcash') {
+                payoutDetails.gCashNumber = gCashNumber;
+            } else if (payoutMethod === 'bank') {
+                payoutDetails.bankName = bankName;
+                payoutDetails.bankAccountNumber = bankAccountNumber;
+                payoutDetails.bankAccountName = bankAccountName;
+            }
+            await updateDoc(userDocRef, { payoutDetails });
+            toast({ title: "Success", description: "Payout details updated successfully!" });
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Update Failed", description: error.message });
+        } finally {
+            setIsSavingPayout(false);
+        }
+    };
     
     const handleUpload = async () => {
         if (!imageFile || !user) return;
@@ -524,6 +560,8 @@ export default function ProfilePage() {
 
 
     const isProviderOrAgency = userRole === 'provider' || userRole === 'agency';
+    const isProvider = userRole === 'provider';
+
 
     const handleCurrentLocation = () => {
         if (navigator.geolocation) {
@@ -654,10 +692,13 @@ export default function ProfilePage() {
             )}
 
             <Tabs defaultValue="public-profile" className="w-full">
-                <TabsList className={cn("grid w-full", isProviderOrAgency ? "grid-cols-5" : "grid-cols-4")}>
+                <TabsList className={cn("grid w-full", isProviderOrAgency ? (isProvider ? "grid-cols-6" : "grid-cols-5") : "grid-cols-4")}>
                     <TabsTrigger value="public-profile"><User className="mr-2"/> Public Profile</TabsTrigger>
                     {isProviderOrAgency && (
                         <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> Provider</TabsTrigger>
+                    )}
+                    {isProvider && (
+                        <TabsTrigger value="payout-settings"><Wallet className="mr-2" /> Payout</TabsTrigger>
                     )}
                     <TabsTrigger value="account-settings"><Settings className="mr-2"/> Account</TabsTrigger>
                     <TabsTrigger value="loyalty"><Award className="mr-2"/> Loyalty</TabsTrigger>
@@ -1007,7 +1048,7 @@ export default function ProfilePage() {
                     </div>
                 </TabsContent>
 
-                {(userRole === 'provider' || userRole === 'agency') && (
+                {isProviderOrAgency && (
                      <TabsContent value="provider-settings" className="mt-6">
                         <div className="space-y-6">
                             <Card>
@@ -1173,6 +1214,57 @@ export default function ProfilePage() {
                                 </CardFooter>
                             </Card>
                         </div>
+                    </TabsContent>
+                )}
+
+                 {isProvider && (
+                    <TabsContent value="payout-settings" className="mt-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Payout Details</CardTitle>
+                                <CardDescription>Set your preferred method for receiving payments.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                 <div className="space-y-2">
+                                    <Label>Payout Method</Label>
+                                    <Select value={payoutMethod} onValueChange={setPayoutMethod}>
+                                        <SelectTrigger><SelectValue placeholder="Select a method" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="gcash">GCash</SelectItem>
+                                            <SelectItem value="bank">Bank Transfer</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                {payoutMethod === 'gcash' && (
+                                    <div className="space-y-2 border-l-2 border-primary pl-4">
+                                        <Label htmlFor="gCashNumber">GCash Number</Label>
+                                        <Input id="gCashNumber" value={gCashNumber} onChange={e => setGCashNumber(e.target.value)} placeholder="09123456789"/>
+                                    </div>
+                                )}
+                                {payoutMethod === 'bank' && (
+                                     <div className="space-y-4 border-l-2 border-primary pl-4">
+                                         <div className="space-y-2">
+                                            <Label htmlFor="bankName">Bank Name</Label>
+                                            <Input id="bankName" value={bankName} onChange={e => setBankName(e.target.value)} placeholder="e.g., BDO Unibank"/>
+                                        </div>
+                                         <div className="space-y-2">
+                                            <Label htmlFor="bankAccountNumber">Account Number</Label>
+                                            <Input id="bankAccountNumber" value={bankAccountNumber} onChange={e => setBankAccountNumber(e.target.value)} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="bankAccountName">Account Name</Label>
+                                            <Input id="bankAccountName" value={bankAccountName} onChange={e => setBankAccountName(e.target.value)} />
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                            <CardFooter>
+                                <Button onClick={handlePayoutDetailsUpdate} disabled={isSavingPayout}>
+                                    {isSavingPayout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSavingPayout ? 'Saving...' : 'Save Payout Details'}
+                                </Button>
+                            </CardFooter>
+                        </Card>
                     </TabsContent>
                 )}
                 

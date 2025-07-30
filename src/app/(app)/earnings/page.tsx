@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, Timestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, Timestamp, doc, getDoc } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { handleRequestPayout } from '@/ai/flows/request-payout';
+import { TooltipProvider, Tooltip as TooltipUI, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 type CompletedBooking = {
     id: string;
@@ -64,7 +66,10 @@ export default function EarningsPage() {
     const { toast } = useToast();
     const [bookings, setBookings] = useState<CompletedBooking[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isRequestingPayout, setIsRequestingPayout] = useState(false);
     const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
+
+    const isSaturday = new Date().getDay() === 6;
 
     useEffect(() => {
         if (!user || userRole !== 'provider' || !isPaidSubscriber) {
@@ -105,12 +110,39 @@ export default function EarningsPage() {
     const totalPaidBookings = bookings.length;
     const chartData = processChartData(bookings);
 
-    const handlePayoutRequest = () => {
-        toast({
-            title: "Payout Requested",
-            description: "Your payout request has been submitted and will be processed within 3-5 business days.",
-        });
-    }
+    const handlePayoutRequest = async () => {
+        if (!user) return;
+        
+        // Final check for payout details before proceeding
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (!userDoc.exists() || !userDoc.data()?.payoutDetails?.method) {
+            toast({
+                variant: "destructive",
+                title: "Payout Details Missing",
+                description: "Please set up your payout method in your profile before requesting a payout.",
+            });
+            return;
+        }
+        
+        setIsRequestingPayout(true);
+        try {
+            await handleRequestPayout({ providerId: user.uid, amount: totalRevenue });
+            toast({
+                title: "Payout Requested",
+                description: "Your payout request has been submitted and will be processed within 3-5 business days.",
+            });
+        } catch (error) {
+            console.error(error);
+            toast({
+                variant: "destructive",
+                title: "Request Failed",
+                description: "There was an error submitting your payout request. Please try again.",
+            });
+        } finally {
+            setIsRequestingPayout(false);
+        }
+    };
 
     if (userRole !== 'provider') {
         return (
@@ -166,6 +198,13 @@ export default function EarningsPage() {
         );
     }
 
+    const payoutButton = (
+        <Button disabled={totalRevenue <= 400 || !isSaturday || isRequestingPayout} onClick={handlePayoutRequest}>
+            {isRequestingPayout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Request Payout
+        </Button>
+    );
+
     return (
         <div className="space-y-6">
              <div className="flex items-center justify-between">
@@ -175,9 +214,20 @@ export default function EarningsPage() {
                         Track your revenue and request payouts.
                     </p>
                 </div>
-                 <Button disabled={totalRevenue <= 400} onClick={handlePayoutRequest}>
-                    Request Payout
-                </Button>
+                {isSaturday ? (
+                    payoutButton
+                ) : (
+                    <TooltipProvider>
+                        <TooltipUI>
+                            <TooltipTrigger asChild>
+                                <span>{payoutButton}</span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Payout requests are only available on Saturdays.</p>
+                            </TooltipContent>
+                        </TooltipUI>
+                    </TooltipProvider>
+                )}
             </div>
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
