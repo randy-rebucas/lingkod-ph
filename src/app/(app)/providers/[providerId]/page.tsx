@@ -4,17 +4,18 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp, deleteDoc } from "firebase/firestore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, BriefcaseBusiness, MessageSquare, CalendarPlus, CheckCircle, Clock } from "lucide-react";
+import { Star, BriefcaseBusiness, MessageSquare, CalendarPlus, CheckCircle, Clock, Heart } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { BookingDialog } from "@/components/booking-dialog";
+import { cn } from "@/lib/utils";
 
 type Availability = {
     day: string;
@@ -78,6 +79,8 @@ export default function ProviderProfilePage() {
     const [services, setServices] = useState<Service[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isFavorited, setIsFavorited] = useState(false);
+    const [isFavoriteLoading, setIsFavoriteLoading] = useState(true);
 
     const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
     const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -116,6 +119,51 @@ export default function ProviderProfilePage() {
 
         fetchProviderData();
     }, [providerId]);
+    
+    useEffect(() => {
+        if (!user || !providerId) {
+            setIsFavoriteLoading(false);
+            return;
+        }
+        const favoriteRef = doc(db, `users/${user.uid}/favorites`, providerId);
+        const checkFavorite = async () => {
+            const docSnap = await getDoc(favoriteRef);
+            setIsFavorited(docSnap.exists());
+            setIsFavoriteLoading(false);
+        }
+        checkFavorite();
+    }, [user, providerId]);
+
+    const handleToggleFavorite = async () => {
+        if (!user || !provider) {
+            toast({ variant: "destructive", title: "Error", description: "You must be logged in to favorite a provider." });
+            return;
+        }
+        setIsFavoriteLoading(true);
+        const favoriteRef = doc(db, `users/${user.uid}/favorites`, provider.uid);
+        
+        try {
+            if (isFavorited) {
+                await deleteDoc(favoriteRef);
+                toast({ title: "Removed from Favorites" });
+                setIsFavorited(false);
+            } else {
+                await addDoc(collection(db, `users/${user.uid}/favorites`), {
+                    providerId: provider.uid,
+                    providerName: provider.displayName,
+                    providerPhotoURL: provider.photoURL || null,
+                    favoritedAt: serverTimestamp()
+                });
+                toast({ title: "Added to Favorites" });
+                setIsFavorited(true);
+            }
+        } catch (error) {
+            console.error("Error updating favorite status:", error);
+            toast({ variant: "destructive", title: "Error", description: "Could not update favorites." });
+        } finally {
+            setIsFavoriteLoading(false);
+        }
+    };
     
     const handleSendMessage = async () => {
         if (!user || !provider) {
@@ -231,6 +279,10 @@ export default function ProviderProfilePage() {
                         <div className="flex flex-col gap-2 w-full md:w-auto">
                             <Button size="lg" onClick={handleBookNow}><CalendarPlus className="mr-2" /> Book Now</Button>
                             <Button size="lg" variant="outline" onClick={handleSendMessage}><MessageSquare className="mr-2" /> Send Message</Button>
+                            <Button size="lg" variant="outline" onClick={handleToggleFavorite} disabled={isFavoriteLoading}>
+                                <Heart className={cn("mr-2", isFavorited && "fill-destructive text-destructive")} />
+                                {isFavorited ? 'Favorited' : 'Favorite'}
+                            </Button>
                         </div>
                     </div>
                 </CardContent>
