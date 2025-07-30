@@ -8,7 +8,7 @@ import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, getDocs, where, query, serverTimestamp, addDoc, updateDoc, arrayUnion } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Star, MessageSquare, Award, User, Briefcase, Mail, ArrowLeft, Users } from "lucide-react";
@@ -278,4 +278,3 @@ export default function ApplicantsPage() {
         </div>
     );
 }
-
