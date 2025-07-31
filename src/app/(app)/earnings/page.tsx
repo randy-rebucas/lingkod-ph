@@ -25,6 +25,12 @@ type CompletedBooking = {
     date: Timestamp;
 };
 
+type Payout = {
+    id: string;
+    amount: number;
+    status: 'Pending' | 'Paid';
+};
+
 const processChartData = (bookings: CompletedBooking[]) => {
     const monthlyEarnings: { [key: string]: number } = {};
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -65,6 +71,7 @@ export default function EarningsPage() {
     const { user, userRole, subscription } = useAuth();
     const { toast } = useToast();
     const [bookings, setBookings] = useState<CompletedBooking[]>([]);
+    const [payouts, setPayouts] = useState<Payout[]>([]);
     const [loading, setLoading] = useState(true);
     const [isRequestingPayout, setIsRequestingPayout] = useState(false);
     const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
@@ -83,7 +90,7 @@ export default function EarningsPage() {
             where("status", "==", "Completed")
         );
 
-        const unsubscribe = onSnapshot(bookingsQuery, (snapshot) => {
+        const unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
             const bookingsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CompletedBooking))
                 .sort((a, b) => b.date.toMillis() - a.date.toMillis());
             setBookings(bookingsData);
@@ -92,11 +99,23 @@ export default function EarningsPage() {
             console.error("Firestore Error:", error);
             setLoading(false);
         });
+        
+        const payoutsQuery = query(collection(db, "payouts"), where("providerId", "==", user.uid));
+        const unsubscribePayouts = onSnapshot(payoutsQuery, (snapshot) => {
+            const payoutsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
+            setPayouts(payoutsData);
+        });
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribeBookings();
+            unsubscribePayouts();
+        };
     }, [user, userRole, isPaidSubscriber]);
 
     const totalRevenue = bookings.reduce((sum, b) => sum + b.price, 0);
+    const totalPaidOut = payouts.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);
+    const totalPending = payouts.filter(p => p.status === 'Pending').reduce((sum, p) => sum + p.amount, 0);
+    const availableForPayout = totalRevenue - totalPaidOut - totalPending;
     
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
@@ -127,7 +146,7 @@ export default function EarningsPage() {
         
         setIsRequestingPayout(true);
         try {
-            await handleRequestPayout({ providerId: user.uid, amount: totalRevenue });
+            await handleRequestPayout({ providerId: user.uid, amount: availableForPayout });
             toast({
                 title: "Payout Requested",
                 description: "Your payout request has been submitted and will be processed within 3-5 business days.",
@@ -199,7 +218,7 @@ export default function EarningsPage() {
     }
 
     const payoutButton = (
-        <Button disabled={totalRevenue <= 400 || !isSaturday || isRequestingPayout} onClick={handlePayoutRequest}>
+        <Button disabled={availableForPayout <= 400 || !isSaturday || isRequestingPayout} onClick={handlePayoutRequest}>
             {isRequestingPayout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Request Payout
         </Button>
@@ -267,7 +286,7 @@ export default function EarningsPage() {
                         <WalletCards className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{totalRevenue.toFixed(2)}</div>
+                        <div className="text-2xl font-bold">₱{availableForPayout.toFixed(2)}</div>
                         <p className="text-xs text-muted-foreground">Minimum payout is ₱400.00</p>
                     </CardContent>
                 </Card>
@@ -338,5 +357,3 @@ export default function EarningsPage() {
         </div>
     );
 }
-
-    
