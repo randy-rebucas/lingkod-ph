@@ -1,13 +1,13 @@
 
 "use client";
 
-import { useState, useEffect, useMemo, useActionState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, getDocs, Timestamp, doc, updateDoc, serverTimestamp, addDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DollarSign, BookCheck, Calculator, FilePieChart, CheckCircle, Clock } from "lucide-react";
+import { DollarSign, BookCheck, Calculator, FilePieChart, CheckCircle } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -26,6 +26,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { handleMarkAsPaid } from './actions';
 
 type Booking = {
     id: string;
@@ -90,32 +91,6 @@ const getStatusVariant = (status: PayoutRequest['status']) => {
             return 'default';
     }
 };
-
-async function handleMarkAsPaid(payoutId: string, providerId: string, providerName: string, amount: number) {
-    'use server';
-    try {
-        const payoutRef = doc(db, 'payouts', payoutId);
-        await updateDoc(payoutRef, {
-            status: 'Paid',
-            processedAt: serverTimestamp(),
-        });
-
-        // Notify the provider
-        const notifRef = collection(db, `users/${providerId}/notifications`);
-        await addDoc(notifRef, {
-            type: 'info',
-            message: `Your payout request of ₱${amount.toFixed(2)} has been processed.`,
-            link: '/earnings',
-            read: false,
-            createdAt: serverTimestamp(),
-        });
-
-        return { error: null, message: `Payout for ${providerName} marked as paid.` };
-    } catch (e: any) {
-        return { error: e.message, message: 'Failed to update payout status.' };
-    }
-}
-
 
 export default function ReportsPage() {
     const { user, userRole, subscription } = useAuth();
