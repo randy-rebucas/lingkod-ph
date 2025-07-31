@@ -130,3 +130,5 @@ const footer = {
   lineHeight: '16px',
   textAlign: 'center' as const,
 };
+
+    
