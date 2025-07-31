@@ -11,33 +11,19 @@ const postJobSchema = z.object({
   categoryId: z.string().min(1, "Please select a category."),
   budget: z.coerce.number().positive("Budget must be a positive number."),
   location: z.string().min(5, "Please provide a specific location."),
-  deadline: z.string().optional(),
+  deadline: z.date().optional(),
   additionalDetails: z.string().optional(), // JSON string of questions and answers
   userId: z.string().min(1, "User ID is required."),
   jobId: z.string().optional(), // For editing existing jobs
 });
 
-export interface PostJobFormState {
-  error: string | null;
-  message: string;
-}
+export type PostJobInput = z.infer<typeof postJobSchema>;
 
-export async function handlePostJob(
-  prevState: PostJobFormState,
-  formData: FormData
-): Promise<PostJobFormState> {
+export async function postJobAction(
+  data: PostJobInput
+): Promise<{ error: string | null; message: string }> {
 
-  const validatedFields = postJobSchema.safeParse({
-    title: formData.get("title"),
-    description: formData.get("description"),
-    categoryId: formData.get("categoryId"),
-    budget: formData.get("budget"),
-    location: formData.get("location"),
-    deadline: formData.get("deadline") || undefined,
-    additionalDetails: formData.get("additionalDetails"),
-    userId: formData.get("userId"),
-    jobId: formData.get("jobId") || undefined,
-  });
+  const validatedFields = postJobSchema.safeParse(data);
   
   if (!validatedFields.success) {
     const errorMessage = validatedFields.error.errors.map((e) => e.message).join(", ");

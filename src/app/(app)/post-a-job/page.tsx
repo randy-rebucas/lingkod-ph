@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useActionState, useEffect, useState, useTransition, useRef } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -11,10 +11,10 @@ import { collection, getDocs, query, orderBy, getDoc, doc } from "firebase/fires
 import { useToast } from "@/hooks/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { handlePostJob, type PostJobFormState } from "./actions";
+import { postJobAction, type PostJobInput } from "./actions";
 import { generateJobDetails, type JobDetailQuestion } from "@/ai/flows/generate-job-details";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -45,24 +45,20 @@ type Category = {
     name: string;
 };
 
-const initialState: PostJobFormState = {
-  error: null,
-  message: "",
-};
-
 export default function PostAJobPage() {
   const { user, userRole } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const editJobId = searchParams.get("edit");
-  const [state, formAction, isSubmitting] = useActionState(handlePostJob, initialState);
+
+  const [isSubmitting, startSubmitTransition] = useTransition();
   const [isAiPending, startAiTransition] = useTransition();
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [questions, setQuestions] = useState<JobDetailQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isLoadingJob, setIsLoadingJob] = useState(!!editJobId);
-  const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm<PostJobFormValues>({
     resolver: zodResolver(postJobSchema),
@@ -129,22 +125,6 @@ export default function PostAJobPage() {
         fetchJobData();
     }, [editJobId, user, form, router, toast]);
 
-  useEffect(() => {
-    if (state.message && !isSubmitting) {
-      toast({
-        title: state.error ? "Error" : "Success!",
-        description: state.message,
-        variant: state.error ? "destructive" : "default",
-      });
-      if (!state.error) {
-        form.reset();
-        setQuestions([]);
-        setAnswers({});
-        router.push(editJobId ? '/my-job-posts' : '/dashboard');
-      }
-    }
-  }, [state, toast, form, router, isSubmitting, editJobId]);
-
   const handleGenerateDetails = () => {
     const jobDescription = form.getValues('description');
     if (jobDescription.length < 20) {
@@ -160,6 +140,7 @@ export default function PostAJobPage() {
             }
             if (result.questions) {
                 setQuestions(result.questions);
+                 setAnswers({}); // Reset answers when new questions are generated
             }
             toast({
               title: "AI Details Generated",
@@ -176,21 +157,44 @@ export default function PostAJobPage() {
     setAnswers(prev => ({...prev, [question]: answer}));
   }
 
-  const handleFormAction = (formData: FormData) => {
+  const onSubmit = (values: PostJobFormValues) => {
     if (!user) {
         toast({ variant: "destructive", title: "Error", description: "You must be logged in to post a job." });
         return;
     }
-    const additionalDetails = JSON.stringify(questions.map(q => ({
-        question: q.question,
-        answer: answers[q.question] || ''
-    })));
-    formData.append('additionalDetails', additionalDetails);
-    formData.append('userId', user.uid);
-    if(editJobId) {
-        formData.append('jobId', editJobId);
-    }
-    formAction(formData);
+
+    startSubmitTransition(async () => {
+        const additionalDetailsJSON = JSON.stringify(questions.map(q => ({
+            question: q.question,
+            answer: answers[q.question] || ''
+        })));
+        
+        const payload: PostJobInput = {
+            ...values,
+            userId: user.uid,
+            additionalDetails: additionalDetailsJSON,
+            ...(editJobId && { jobId: editJobId }),
+        };
+
+        const result = await postJobAction(payload);
+        
+        if (result.error) {
+            toast({
+                title: "Error",
+                description: result.message,
+                variant: "destructive",
+            });
+        } else {
+            toast({
+                title: "Success!",
+                description: result.message,
+            });
+            form.reset();
+            setQuestions([]);
+            setAnswers({});
+            router.push(editJobId ? '/my-job-posts' : '/dashboard');
+        }
+    });
   }
 
   const pageTitle = editJobId ? "Edit Job Post" : "Post a New Job";
@@ -208,7 +212,7 @@ export default function PostAJobPage() {
       </div>
 
       <Form {...form}>
-        <form ref={formRef} action={handleFormAction} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             
           <Card>
             <CardHeader>
@@ -338,7 +342,6 @@ export default function PostAJobPage() {
                                     <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date()}/>
                                 </PopoverContent>
                             </Popover>
-                             <input type="hidden" name={field.name} value={field.value?.toISOString() || ''} />
                             <FormMessage />
                         </FormItem>
                     )} />
