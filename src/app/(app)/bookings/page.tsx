@@ -13,9 +13,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or, runTransaction, serverTimestamp, orderBy, addDoc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or, runTransaction, serverTimestamp, orderBy, addDoc, getDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
+import { LeaveReviewDialog } from "@/components/leave-review-dialog";
+
 
 type BookingStatus = "Pending" | "Upcoming" | "Completed" | "Cancelled";
 
@@ -31,6 +33,7 @@ export type Booking = {
     status: BookingStatus;
     price: number;
     notes?: string;
+    reviewId?: string;
 };
 
 const getStatusVariant = (status: string) => {
@@ -71,6 +74,8 @@ const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings
     const { toast } = useToast();
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const [isReviewOpen, setIsReviewOpen] = useState(false);
+
 
     const handleStatusUpdate = async (booking: Booking, newStatus: BookingStatus, successMessage?: string) => {
         const bookingRef = doc(db, "bookings", booking.id);
@@ -127,6 +132,11 @@ const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings
     const handleViewDetails = (booking: Booking) => {
         setSelectedBooking(booking);
         setIsDetailsOpen(true);
+    };
+
+    const handleOpenReview = (booking: Booking) => {
+        setSelectedBooking(booking);
+        setIsReviewOpen(true);
     };
 
     if (isLoading) {
@@ -227,6 +237,9 @@ const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings
                                                                 <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">Cancel Booking</DropdownMenuItem>
                                                             </AlertDialogTrigger>
                                                         )}
+                                                        {userRole === 'client' && booking.status === 'Completed' && !booking.reviewId && (
+                                                            <DropdownMenuItem onClick={() => handleOpenReview(booking)}>Leave a Review</DropdownMenuItem>
+                                                        )}
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
 
@@ -263,6 +276,7 @@ const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings
                 </CardContent>
             </Card>
             {selectedBooking && <BookingDetailsDialog isOpen={isDetailsOpen} setIsOpen={setIsDetailsOpen} booking={selectedBooking} />}
+            {selectedBooking && userRole === 'client' && <LeaveReviewDialog isOpen={isReviewOpen} setIsOpen={setIsReviewOpen} booking={selectedBooking} />}
         </>
     );
 };
