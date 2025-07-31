@@ -33,10 +33,10 @@ export async function handlePostJob(
     categoryId: formData.get("categoryId"),
     budget: formData.get("budget"),
     location: formData.get("location"),
-    deadline: formData.get("deadline"),
+    deadline: formData.get("deadline") || undefined,
     additionalDetails: formData.get("additionalDetails"),
     userId: formData.get("userId"),
-    jobId: formData.get("jobId"),
+    jobId: formData.get("jobId") || undefined,
   });
 
   if (!validatedFields.success) {
@@ -68,6 +68,7 @@ export async function handlePostJob(
       categoryName,
       budget,
       location,
+      status: 'Open',
       updatedAt: serverTimestamp(),
     };
     
@@ -108,7 +109,6 @@ export async function handlePostJob(
 
         const newJobData = {
             ...jobData,
-            status: 'Open',
             clientId: userId,
             clientName: userData.displayName,
             clientAvatar: userData.photoURL || null,
