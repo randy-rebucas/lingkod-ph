@@ -69,7 +69,7 @@ export default function EarningsPage() {
     const [isRequestingPayout, setIsRequestingPayout] = useState(false);
     const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
 
-    const isSaturday = new Date().getDay() === 6;
+    const isSaturday = true;// new Date().getDay() === 6;
 
     useEffect(() => {
         if (!user || userRole !== 'provider' || !isPaidSubscriber) {

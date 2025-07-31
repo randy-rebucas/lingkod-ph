@@ -1,13 +1,13 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useActionState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, getDocs, Timestamp, doc, updateDoc, serverTimestamp, addDoc } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DollarSign, BookCheck, Calculator, FilePieChart } from "lucide-react";
+import { DollarSign, BookCheck, Calculator, FilePieChart, CheckCircle, Clock } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -23,6 +23,9 @@ import {
   Bar,
   BarChart,
 } from 'recharts';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 
 type Booking = {
     id: string;
@@ -38,6 +41,15 @@ type ProviderStats = {
     providerName: string;
     completedBookings: number;
     totalRevenue: number;
+};
+
+type PayoutRequest = {
+    id: string;
+    providerId: string;
+    providerName: string;
+    amount: number;
+    status: "Pending" | "Paid";
+    requestedAt: Timestamp;
 };
 
 const processRevenueChartData = (bookings: Booking[]) => {
@@ -68,11 +80,49 @@ const processRevenueChartData = (bookings: Booking[]) => {
     });
 };
 
+const getStatusVariant = (status: PayoutRequest['status']) => {
+    switch (status) {
+        case 'Paid':
+            return 'secondary';
+        case 'Pending':
+            return 'outline';
+        default:
+            return 'default';
+    }
+};
+
+async function handleMarkAsPaid(payoutId: string, providerId: string, providerName: string, amount: number) {
+    'use server';
+    try {
+        const payoutRef = doc(db, 'payouts', payoutId);
+        await updateDoc(payoutRef, {
+            status: 'Paid',
+            processedAt: serverTimestamp(),
+        });
+
+        // Notify the provider
+        const notifRef = collection(db, `users/${providerId}/notifications`);
+        await addDoc(notifRef, {
+            type: 'info',
+            message: `Your payout request of ₱${amount.toFixed(2)} has been processed.`,
+            link: '/earnings',
+            read: false,
+            createdAt: serverTimestamp(),
+        });
+
+        return { error: null, message: `Payout for ${providerName} marked as paid.` };
+    } catch (e: any) {
+        return { error: e.message, message: 'Failed to update payout status.' };
+    }
+}
+
 
 export default function ReportsPage() {
     const { user, userRole, subscription } = useAuth();
     const [bookings, setBookings] = useState<Booking[]>([]);
+    const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
     const [loading, setLoading] = useState(true);
+    const { toast } = useToast();
 
     const isAgencyPaidSubscriber = userRole === 'agency' && subscription?.status === 'active' && subscription.planId !== 'free';
     const isProOrCustom = isAgencyPaidSubscriber && (subscription?.planId === 'pro' || subscription?.planId === 'custom');
@@ -92,18 +142,28 @@ export default function ReportsPage() {
 
                 if (providerIds.length === 0) {
                     setBookings([]);
+                    setPayouts([]);
                     setLoading(false);
                     return;
                 }
 
                 const bookingsQuery = query(collection(db, "bookings"), where("providerId", "in", providerIds));
-                const unsubscribe = onSnapshot(bookingsQuery, (snapshot) => {
+                const unsubBookings = onSnapshot(bookingsQuery, (snapshot) => {
                     const fetchedBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
                     setBookings(fetchedBookings);
-                    setLoading(false);
+                });
+
+                const payoutsQuery = query(collection(db, "payouts"), where("agencyId", "==", user.uid));
+                const unsubPayouts = onSnapshot(payoutsQuery, (snapshot) => {
+                    const fetchedPayouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PayoutRequest));
+                    setPayouts(fetchedPayouts.sort((a,b) => b.requestedAt.toMillis() - a.requestedAt.toMillis()));
                 });
                 
-                return () => unsubscribe();
+                setLoading(false);
+                return () => {
+                    unsubBookings();
+                    unsubPayouts();
+                }
             } catch (error) {
                 console.error("Error fetching agency reports data:", error);
                 setLoading(false);
@@ -148,6 +208,16 @@ export default function ReportsPage() {
             providerChartData: providerPerformance.map(p => ({name: p.providerName, Bookings: p.completedBookings}))
         };
     }, [bookings]);
+    
+    const onMarkAsPaid = async (payout: PayoutRequest) => {
+        const result = await handleMarkAsPaid(payout.id, payout.providerId, payout.providerName, payout.amount);
+        toast({
+            title: result.error ? 'Error' : 'Success',
+            description: result.message,
+            variant: result.error ? 'destructive' : 'default',
+        });
+    };
+
 
      if (!isAgencyPaidSubscriber) {
         return (
@@ -232,6 +302,54 @@ export default function ReportsPage() {
                 </Card>
             </div>
             
+             <Card>
+                <CardHeader>
+                    <CardTitle>Payout Requests</CardTitle>
+                    <CardDescription>Manage and track payout requests from your providers.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Provider</TableHead>
+                                <TableHead>Date Requested</TableHead>
+                                <TableHead>Amount</TableHead>
+                                <TableHead className="text-center">Status</TableHead>
+                                <TableHead className="text-right">Action</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {payouts.length > 0 ? payouts.map((payout) => (
+                                <TableRow key={payout.id}>
+                                    <TableCell className="font-medium">{payout.providerName}</TableCell>
+                                    <TableCell>{format(payout.requestedAt.toDate(), 'PPP')}</TableCell>
+                                    <TableCell>₱{payout.amount.toFixed(2)}</TableCell>
+                                    <TableCell className="text-center">
+                                        <Badge variant={getStatusVariant(payout.status)}>{payout.status}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {payout.status === 'Pending' ? (
+                                            <Button size="sm" onClick={() => onMarkAsPaid(payout)}>
+                                                <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
+                                            </Button>
+                                        ) : (
+                                            <span className="text-sm text-muted-foreground">Processed</span>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="h-24 text-center">
+                                        No payout requests.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+
+
             {isProOrCustom && (
                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                     <Card className="lg:col-span-3">

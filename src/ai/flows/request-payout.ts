@@ -4,7 +4,8 @@
 /**
  * @fileOverview This file defines the Genkit flow for handling provider payout requests.
  *
- * - handleRequestPayout: Processes a payout request, notifying either the agency or the admin.
+ * - handleRequestPayout: Processes a payout request, creating a record in the 'payouts' collection
+ *   and notifying the relevant party (agency or admin).
  * - RequestPayoutInput: The input type for the flow.
  */
 
@@ -45,6 +46,21 @@ const requestPayoutFlow = ai.defineFlow(
     if (!payoutDetails || !payoutDetails.method) {
         throw new Error('Provider has not configured their payout details.');
     }
+    
+    const payoutData = {
+        providerId,
+        providerName: providerData.displayName,
+        agencyId: providerData.agencyId || null,
+        amount,
+        payoutDetails,
+        status: 'Pending',
+        requestedAt: serverTimestamp(),
+        processedAt: null,
+    };
+    
+    // Create a record in the main payouts collection
+    await addDoc(collection(db, 'payouts'), payoutData);
+
 
     if (providerData.agencyId) {
       // Notify the agency
@@ -52,15 +68,9 @@ const requestPayoutFlow = ai.defineFlow(
       await addDoc(agencyNotifRef, {
         type: 'info',
         message: `${providerData.displayName} has requested a payout of ₱${amount.toFixed(2)}.`,
-        link: '/reports', // Or a dedicated payout page for agencies
+        link: '/reports',
         read: false,
         createdAt: serverTimestamp(),
-        payoutRequest: {
-            providerId,
-            providerName: providerData.displayName,
-            amount,
-            payoutDetails
-        }
       });
     } else {
       // Email the admin
