@@ -38,7 +38,7 @@ export async function handlePostJob(
     userId: formData.get("userId"),
     jobId: formData.get("jobId") || undefined,
   });
-
+  
   if (!validatedFields.success) {
     const errorMessage = validatedFields.error.errors.map((e) => e.message).join(", ");
     return {
