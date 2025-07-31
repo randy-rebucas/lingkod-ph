@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List } from "lucide-react";
+import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -50,6 +50,7 @@ type Provider = {
     keyServices?: string[];
     address?: string;
     totalRevenue?: number;
+    isVerified?: boolean;
 };
 
 const getStatusVariant = (status: string) => {
@@ -176,8 +177,9 @@ const ProviderCard = ({ provider, isFavorite, onToggleFavorite }: { provider: Pr
                 </Avatar>
                 <div className="flex items-center justify-center gap-2">
                     <h3 className="text-xl font-bold">{provider.displayName}</h3>
-                     {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus)}
+                    {provider.isVerified && <ShieldCheck className="h-5 w-5 text-blue-500" title="Verified Provider" />}
                 </div>
+                 {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus)}
                  {provider.reviewCount > 0 && (
                      <div className="flex items-center justify-center gap-1 mt-1 text-muted-foreground">
                         {renderStars(provider.rating)}
@@ -224,7 +226,10 @@ const ProviderRow = ({ provider, isFavorite, onToggleFavorite }: { provider: Pro
                 <AvatarFallback>{getAvatarFallback(provider.displayName)}</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-                <Link href={`/providers/${provider.uid}`} className="font-bold hover:underline">{provider.displayName}</Link>
+                <div className="flex items-center gap-2">
+                    <Link href={`/providers/${provider.uid}`} className="font-bold hover:underline">{provider.displayName}</Link>
+                    {provider.isVerified && <ShieldCheck className="h-4 w-4 text-blue-500" title="Verified Provider" />}
+                </div>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                     {renderStars(provider.rating)}
                     <span>({provider.reviewCount} reviews)</span>
@@ -340,7 +345,8 @@ export default function DashboardPage() {
                         reviewCount: ratingInfo ? ratingInfo.count : 0,
                         availabilityStatus: data.availabilityStatus,
                         keyServices: data.keyServices,
-                        address: data.address
+                        address: data.address,
+                        isVerified: data.verification?.status === 'Verified',
                     } as Provider;
                 });
                 setProviders(providersData);
