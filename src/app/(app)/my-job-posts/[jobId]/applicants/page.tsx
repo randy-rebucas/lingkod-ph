@@ -125,6 +125,7 @@ export default function ApplicantsPage() {
                 clientId: user.uid,
                 clientName: user.displayName,
                 serviceName: job.title, // Use job title as service name
+                serviceId: '', // A job doesn't have a service ID
                 price: job.budget, // Use job budget as price
                 date: serverTimestamp(), // Placeholder, client/provider should confirm actual date
                 status: "Upcoming",

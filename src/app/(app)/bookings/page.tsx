@@ -103,7 +103,7 @@ const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings
                     // Update booking status
                     transaction.update(bookingRef, { status: newStatus });
                     
-                    // Update original job post status to "Closed" if it exists
+                    // Update original job post status to "Completed" if it exists
                     if (booking.jobId) {
                         const jobRef = doc(db, "jobs", booking.jobId);
                         transaction.update(jobRef, { status: "Completed" });
