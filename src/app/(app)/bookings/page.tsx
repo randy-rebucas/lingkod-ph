@@ -23,6 +23,7 @@ type BookingStatus = "Pending" | "Upcoming" | "Completed" | "Cancelled";
 
 export type Booking = {
     id: string;
+    jobId?: string;
     serviceName: string;
     serviceId: string;
     clientName: string;
@@ -82,23 +83,31 @@ const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings
         try {
             if (newStatus === 'Completed' && userRole === 'provider') {
                 await runTransaction(db, async (transaction) => {
+                    // Update client's loyalty points
                     const clientRef = doc(db, "users", booking.clientId);
                     const clientDoc = await transaction.get(clientRef);
                     if (!clientDoc.exists()) throw "Client document does not exist!";
-
                     const pointsToAward = Math.floor(booking.price / 10);
                     const currentPoints = clientDoc.data().loyaltyPoints || 0;
                     const newTotalPoints = currentPoints + pointsToAward;
-
-                    transaction.update(bookingRef, { status: newStatus });
                     transaction.update(clientRef, { loyaltyPoints: newTotalPoints });
 
+                    // Create loyalty transaction record
                     const loyaltyTxRef = doc(collection(db, `users/${booking.clientId}/loyaltyTransactions`));
                     transaction.set(loyaltyTxRef, {
                         points: pointsToAward, type: 'earn',
                         description: `Points for completing service: ${booking.serviceName}`,
                         bookingId: booking.id, createdAt: serverTimestamp()
                     });
+
+                    // Update booking status
+                    transaction.update(bookingRef, { status: newStatus });
+                    
+                    // Update original job post status to "Closed" if it exists
+                    if (booking.jobId) {
+                        const jobRef = doc(db, "jobs", booking.jobId);
+                        transaction.update(jobRef, { status: "Completed" });
+                    }
                 });
                 await createNotification(booking.clientId, `Your booking for "${booking.serviceName}" has been marked as completed.`, '/bookings');
             } else {

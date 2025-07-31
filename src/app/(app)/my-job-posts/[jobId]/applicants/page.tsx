@@ -68,7 +68,7 @@ export default function ApplicantsPage() {
                     router.push("/my-job-posts");
                     return;
                 }
-                const jobData = jobSnap.data() as Job;
+                const jobData = { id: jobSnap.id, ...jobSnap.data() } as Job;
                 setJob(jobData);
 
                 // Fetch applicants if any
@@ -119,6 +119,7 @@ export default function ApplicantsPage() {
         try {
             // Create a booking document
             await addDoc(collection(db, "bookings"), {
+                jobId: job.id,
                 providerId: provider.uid,
                 providerName: provider.displayName,
                 clientId: user.uid,
