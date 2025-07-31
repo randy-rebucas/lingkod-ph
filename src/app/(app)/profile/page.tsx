@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit, Wallet } from "lucide-react";
+import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit, Wallet, Building } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -207,6 +207,9 @@ export default function ProfilePage() {
                     setLicenseIssuingState(data.licenseIssuingState || '');
                     setLicenseIssuingCountry(data.licenseIssuingCountry || '');
                     setAvailabilitySchedule(data.availabilitySchedule || initialAvailability);
+                }
+
+                if (userRole === 'provider') {
                     // Load payout details
                     setPayoutMethod(data.payoutDetails?.method || '');
                     setGCashNumber(data.payoutDetails?.gCashNumber || '');
@@ -430,7 +433,7 @@ export default function ProfilePage() {
             };
             
             await updateDoc(userDocRef, updates);
-            toast({ title: "Success", description: "Provider details updated successfully!" });
+            toast({ title: "Success", description: "Details updated successfully!" });
         } catch (error: any) {
             toast({ variant: "destructive", title: "Update Failed", description: error.message });
         } finally {
@@ -559,8 +562,8 @@ export default function ProfilePage() {
     };
 
 
-    const isProviderOrAgency = userRole === 'provider' || userRole === 'agency';
     const isProvider = userRole === 'provider';
+    const isAgency = userRole === 'agency';
 
 
     const handleCurrentLocation = () => {
@@ -605,6 +608,10 @@ export default function ProfilePage() {
         }
     };
 
+    const tabGridClass = cn("grid w-full", {
+        "grid-cols-4": !isProvider && !isAgency,
+        "grid-cols-5": isProvider || isAgency,
+    });
 
     return (
         <div className="space-y-6">
@@ -692,14 +699,11 @@ export default function ProfilePage() {
             )}
 
             <Tabs defaultValue="public-profile" className="w-full">
-                <TabsList className={cn("grid w-full", isProviderOrAgency ? (isProvider ? "grid-cols-6" : "grid-cols-5") : "grid-cols-4")}>
+                 <TabsList className={tabGridClass}>
                     <TabsTrigger value="public-profile"><User className="mr-2"/> Public Profile</TabsTrigger>
-                    {isProviderOrAgency && (
-                        <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> Provider</TabsTrigger>
-                    )}
-                    {isProvider && (
-                        <TabsTrigger value="payout-settings"><Wallet className="mr-2" /> Payout</TabsTrigger>
-                    )}
+                    {isProvider && <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> Provider</TabsTrigger>}
+                    {isAgency && <TabsTrigger value="business-settings"><Building className="mr-2"/> Business</TabsTrigger>}
+                    {isProvider && <TabsTrigger value="payout-settings"><Wallet className="mr-2" /> Payout</TabsTrigger>}
                     <TabsTrigger value="account-settings"><Settings className="mr-2"/> Account</TabsTrigger>
                     <TabsTrigger value="loyalty"><Award className="mr-2"/> Loyalty</TabsTrigger>
                     <TabsTrigger value="referrals"><Users className="mr-2"/> Referrals</TabsTrigger>
@@ -713,7 +717,7 @@ export default function ProfilePage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">{userRole === 'agency' ? 'Business Name' : 'Full Name'}</Label>
+                                <Label htmlFor="name">{isAgency ? 'Business Name' : 'Full Name'}</Label>
                                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
                             </div>
                             <div className="space-y-2">
@@ -1048,176 +1052,281 @@ export default function ProfilePage() {
                     </div>
                 </TabsContent>
 
-                {isProviderOrAgency && (
-                     <TabsContent value="provider-settings" className="mt-6">
-                        <div className="space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Professional Details</CardTitle>
-                                    <CardDescription>Your professional experience and qualifications.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="yearsOfExperience">Years of Experience</Label>
-                                            <Input id="yearsOfExperience" type="number" value={yearsOfExperience} onChange={(e) => setYearsOfExperience(e.target.value)} placeholder="e.g., 5" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="availabilityStatus">Availability Status</Label>
-                                            <Select value={availabilityStatus} onValueChange={setAvailabilityStatus}>
-                                                <SelectTrigger id="availabilityStatus"><SelectValue placeholder="Select status" /></SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="available">Available for Bookings</SelectItem>
-                                                    <SelectItem value="limited">Limited Availability</SelectItem>
-                                                    <SelectItem value="unavailable">Not Available</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-
+                 <TabsContent value="provider-settings" className="mt-6">
+                    <div className="space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Professional Details</CardTitle>
+                                <CardDescription>Your professional experience and qualifications.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label>Key Services</Label>
-                                        <div className="flex gap-2">
-                                            <Select onValueChange={setCurrentKeyService} value={currentKeyService}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Select a key service" />
-                                                </SelectTrigger>
+                                        <Label htmlFor="yearsOfExperience">Years of Experience</Label>
+                                        <Input id="yearsOfExperience" type="number" value={yearsOfExperience} onChange={(e) => setYearsOfExperience(e.target.value)} placeholder="e.g., 5" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="availabilityStatus">Availability Status</Label>
+                                        <Select value={availabilityStatus} onValueChange={setAvailabilityStatus}>
+                                            <SelectTrigger id="availabilityStatus"><SelectValue placeholder="Select status" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="available">Available for Bookings</SelectItem>
+                                                <SelectItem value="limited">Limited Availability</SelectItem>
+                                                <SelectItem value="unavailable">Not Available</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>Key Services</Label>
+                                    <div className="flex gap-2">
+                                        <Select onValueChange={setCurrentKeyService} value={currentKeyService}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a key service" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {categories
+                                                    .filter(cat => !keyServices.includes(cat.name))
+                                                    .map(cat => (
+                                                    <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <Button type="button" onClick={handleAddKeyService}>Add</Button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 pt-2">
+                                        {keyServices.map(service => (
+                                            <Badge key={service} variant="secondary">
+                                                {service}
+                                                <button onClick={() => handleRemoveKeyService(service)} className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                                    <X className="h-3 w-3" />
+                                                </button>
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">List up to 5 key services to highlight on your profile card.</p>
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <Switch id="ownsToolsSupplies" checked={ownsToolsSupplies} onCheckedChange={setOwnsToolsSupplies} />
+                                    <Label htmlFor="ownsToolsSupplies">I own my own tools and supplies</Label>
+                                </div>
+                            </CardContent>
+                            <CardFooter>
+                                <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
+                                    {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSavingProvider ? 'Saving...' : 'Update Professional Details'}
+                                </Button>
+                            </CardFooter>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Weekly Availability</CardTitle>
+                                <CardDescription>Set your standard working hours for each day.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {availabilitySchedule.map((item, index) => (
+                                    <div key={item.day} className="grid grid-cols-4 items-center gap-4">
+                                        <div className="col-span-1 flex items-center gap-2">
+                                             <Switch 
+                                                id={`enabled-${item.day}`} 
+                                                checked={item.enabled}
+                                                onCheckedChange={(checked) => handleAvailabilityChange(item.day, 'enabled', checked)}
+                                            />
+                                            <Label htmlFor={`enabled-${item.day}`}>{item.day}</Label>
+                                        </div>
+                                        <div className="col-span-3 grid grid-cols-2 gap-2">
+                                             <Select 
+                                                value={item.startTime}
+                                                onValueChange={(value) => handleAvailabilityChange(item.day, 'startTime', value)}
+                                                disabled={!item.enabled}
+                                            >
+                                                <SelectTrigger><SelectValue /></SelectTrigger>
                                                 <SelectContent>
-                                                    {categories
-                                                        .filter(cat => !keyServices.includes(cat.name))
-                                                        .map(cat => (
-                                                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
-                                                    ))}
+                                                    {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
                                                 </SelectContent>
                                             </Select>
-                                            <Button type="button" onClick={handleAddKeyService}>Add</Button>
+                                             <Select 
+                                                value={item.endTime}
+                                                onValueChange={(value) => handleAvailabilityChange(item.day, 'endTime', value)}
+                                                disabled={!item.enabled}
+                                            >
+                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                                <SelectContent>
+                                                    {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
                                         </div>
-                                        <div className="flex flex-wrap gap-2 pt-2">
-                                            {keyServices.map(service => (
-                                                <Badge key={service} variant="secondary">
-                                                    {service}
-                                                    <button onClick={() => handleRemoveKeyService(service)} className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5">
-                                                        <X className="h-3 w-3" />
-                                                    </button>
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                        <p className="text-xs text-muted-foreground">List up to 5 key services to highlight on your profile card.</p>
                                     </div>
+                                ))}
+                            </CardContent>
+                             <CardFooter>
+                                <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
+                                    {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSavingProvider ? 'Saving...' : 'Update Availability'}
+                                </Button>
+                            </CardFooter>
+                        </Card>
 
-                                    <div className="flex items-center space-x-2">
-                                        <Switch id="ownsToolsSupplies" checked={ownsToolsSupplies} onCheckedChange={setOwnsToolsSupplies} />
-                                        <Label htmlFor="ownsToolsSupplies">I own my own tools and supplies</Label>
-                                    </div>
-                                </CardContent>
-                                <CardFooter>
-                                    <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
-                                        {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        {isSavingProvider ? 'Saving...' : 'Update Professional Details'}
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Weekly Availability</CardTitle>
-                                    <CardDescription>Set your standard working hours for each day.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    {availabilitySchedule.map((item, index) => (
-                                        <div key={item.day} className="grid grid-cols-4 items-center gap-4">
-                                            <div className="col-span-1 flex items-center gap-2">
-                                                 <Switch 
-                                                    id={`enabled-${item.day}`} 
-                                                    checked={item.enabled}
-                                                    onCheckedChange={(checked) => handleAvailabilityChange(item.day, 'enabled', checked)}
-                                                />
-                                                <Label htmlFor={`enabled-${item.day}`}>{item.day}</Label>
+                         <Card>
+                            <CardHeader>
+                                <CardTitle>Licensing & Credentials</CardTitle>
+                                <CardDescription>Add any relevant licenses or certifications.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="flex items-center space-x-2">
+                                    <Switch id="isLicensed" checked={isLicensed} onCheckedChange={setIsLicensed}/>
+                                    <Label htmlFor="isLicensed">I have a professional license or certification</Label>
+                                </div>
+                                {isLicensed && (
+                                    <div className="space-y-4 pt-4 border-t">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                             <div className="space-y-2">
+                                                <Label htmlFor="licenseType">License/Certification Type</Label>
+                                                <Input id="licenseType" value={licenseType} onChange={e => setLicenseType(e.target.value)} placeholder="e.g., TESDA NC II" />
                                             </div>
-                                            <div className="col-span-3 grid grid-cols-2 gap-2">
-                                                 <Select 
-                                                    value={item.startTime}
-                                                    onValueChange={(value) => handleAvailabilityChange(item.day, 'startTime', value)}
-                                                    disabled={!item.enabled}
-                                                >
-                                                    <SelectTrigger><SelectValue /></SelectTrigger>
-                                                    <SelectContent>
-                                                        {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
-                                                    </SelectContent>
-                                                </Select>
-                                                 <Select 
-                                                    value={item.endTime}
-                                                    onValueChange={(value) => handleAvailabilityChange(item.day, 'endTime', value)}
-                                                    disabled={!item.enabled}
-                                                >
-                                                    <SelectTrigger><SelectValue /></SelectTrigger>
-                                                    <SelectContent>
-                                                        {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
-                                                    </SelectContent>
-                                                </Select>
+                                             <div className="space-y-2">
+                                                <Label htmlFor="licenseNumber">License Number</Label>
+                                                <Input id="licenseNumber" value={licenseNumber} onChange={e => setLicenseNumber(e.target.value)} />
                                             </div>
                                         </div>
-                                    ))}
-                                </CardContent>
-                                 <CardFooter>
-                                    <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
-                                        {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        {isSavingProvider ? 'Saving...' : 'Update Availability'}
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-
-                             <Card>
-                                <CardHeader>
-                                    <CardTitle>Licensing & Credentials</CardTitle>
-                                    <CardDescription>Add any relevant licenses or certifications.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="flex items-center space-x-2">
-                                        <Switch id="isLicensed" checked={isLicensed} onCheckedChange={setIsLicensed}/>
-                                        <Label htmlFor="isLicensed">I have a professional license or certification</Label>
-                                    </div>
-                                    {isLicensed && (
-                                        <div className="space-y-4 pt-4 border-t">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                 <div className="space-y-2">
-                                                    <Label htmlFor="licenseType">License/Certification Type</Label>
-                                                    <Input id="licenseType" value={licenseType} onChange={e => setLicenseType(e.target.value)} placeholder="e.g., TESDA NC II" />
-                                                </div>
-                                                 <div className="space-y-2">
-                                                    <Label htmlFor="licenseNumber">License Number</Label>
-                                                    <Input id="licenseNumber" value={licenseNumber} onChange={e => setLicenseNumber(e.target.value)} />
-                                                </div>
+                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                             <div className="space-y-2">
+                                                <Label htmlFor="licenseExpirationDate">Expiration Date</Label>
+                                                <Input id="licenseExpirationDate" type="date" value={licenseExpirationDate} onChange={e => setLicenseExpirationDate(e.target.value)} />
                                             </div>
-                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                 <div className="space-y-2">
-                                                    <Label htmlFor="licenseExpirationDate">Expiration Date</Label>
-                                                    <Input id="licenseExpirationDate" type="date" value={licenseExpirationDate} onChange={e => setLicenseExpirationDate(e.target.value)} />
-                                                </div>
-                                                 <div className="space-y-2">
-                                                    <Label htmlFor="licenseIssuingState">Issuing State/Region</Label>
-                                                    <Input id="licenseIssuingState" value={licenseIssuingState} onChange={e => setLicenseIssuingState(e.target.value)} placeholder="e.g., NCR" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label htmlFor="licenseIssuingCountry">Issuing Country</Label>
-                                                    <Input id="licenseIssuingCountry" value={licenseIssuingCountry} onChange={e => setLicenseIssuingCountry(e.target.value)} placeholder="e.g., Philippines" />
-                                                </div>
+                                             <div className="space-y-2">
+                                                <Label htmlFor="licenseIssuingState">Issuing State/Region</Label>
+                                                <Input id="licenseIssuingState" value={licenseIssuingState} onChange={e => setLicenseIssuingState(e.target.value)} placeholder="e.g., NCR" />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="licenseIssuingCountry">Issuing Country</Label>
+                                                <Input id="licenseIssuingCountry" value={licenseIssuingCountry} onChange={e => setLicenseIssuingCountry(e.target.value)} placeholder="e.g., Philippines" />
                                             </div>
                                         </div>
-                                    )}
-                                </CardContent>
-                                 <CardFooter>
-                                    <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
-                                        {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        {isSavingProvider ? 'Saving...' : 'Update Credentials'}
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        </div>
-                    </TabsContent>
-                )}
+                                    </div>
+                                )}
+                            </CardContent>
+                             <CardFooter>
+                                <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
+                                    {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSavingProvider ? 'Saving...' : 'Update Credentials'}
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    </div>
+                </TabsContent>
+                
+                <TabsContent value="business-settings" className="mt-6">
+                    <div className="space-y-6">
+                         <Card>
+                            <CardHeader>
+                                <CardTitle>Business Details</CardTitle>
+                                <CardDescription>Settings related to your agency's business profile.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="availabilityStatus">Availability Status</Label>
+                                        <Select value={availabilityStatus} onValueChange={setAvailabilityStatus}>
+                                            <SelectTrigger id="availabilityStatus"><SelectValue placeholder="Select status" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="available">Available for Bookings</SelectItem>
+                                                <SelectItem value="limited">Limited Availability</SelectItem>
+                                                <SelectItem value="unavailable">Not Available</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Key Services</Label>
+                                    <div className="flex gap-2">
+                                        <Select onValueChange={setCurrentKeyService} value={currentKeyService}>
+                                            <SelectTrigger><SelectValue placeholder="Select a key service" /></SelectTrigger>
+                                            <SelectContent>
+                                                {categories
+                                                    .filter(cat => !keyServices.includes(cat.name))
+                                                    .map(cat => (
+                                                    <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <Button type="button" onClick={handleAddKeyService}>Add</Button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 pt-2">
+                                        {keyServices.map(service => (
+                                            <Badge key={service} variant="secondary">
+                                                {service}
+                                                <button onClick={() => handleRemoveKeyService(service)} className="ml-2 rounded-full hover:bg-muted-foreground/20 p-0.5">
+                                                    <X className="h-3 w-3" />
+                                                </button>
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">List up to 5 key services for your agency.</p>
+                                </div>
+                            </CardContent>
+                             <CardFooter>
+                                <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
+                                    {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSavingProvider ? 'Saving...' : 'Update Business Details'}
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                         <Card>
+                            <CardHeader>
+                                <CardTitle>Weekly Availability</CardTitle>
+                                <CardDescription>Set your standard business hours for each day.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {availabilitySchedule.map((item, index) => (
+                                    <div key={item.day} className="grid grid-cols-4 items-center gap-4">
+                                        <div className="col-span-1 flex items-center gap-2">
+                                             <Switch 
+                                                id={`enabled-${item.day}-agency`} 
+                                                checked={item.enabled}
+                                                onCheckedChange={(checked) => handleAvailabilityChange(item.day, 'enabled', checked)}
+                                            />
+                                            <Label htmlFor={`enabled-${item.day}-agency`}>{item.day}</Label>
+                                        </div>
+                                        <div className="col-span-3 grid grid-cols-2 gap-2">
+                                             <Select 
+                                                value={item.startTime}
+                                                onValueChange={(value) => handleAvailabilityChange(item.day, 'startTime', value)}
+                                                disabled={!item.enabled}
+                                            >
+                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                                <SelectContent>
+                                                    {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                             <Select 
+                                                value={item.endTime}
+                                                onValueChange={(value) => handleAvailabilityChange(item.day, 'endTime', value)}
+                                                disabled={!item.enabled}
+                                            >
+                                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                                <SelectContent>
+                                                    {timeSlots.map(time => <SelectItem key={time} value={time}>{time}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </div>
+                                ))}
+                            </CardContent>
+                             <CardFooter>
+                                <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
+                                    {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSavingProvider ? 'Saving...' : 'Update Availability'}
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    </div>
+                </TabsContent>
 
-                 {isProvider && (
+                {isProvider && (
                     <TabsContent value="payout-settings" className="mt-6">
                         <Card>
                             <CardHeader>
@@ -1273,4 +1382,3 @@ export default function ProfilePage() {
     );
 }
 
-    
