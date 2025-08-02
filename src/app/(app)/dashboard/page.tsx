@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List, ShieldCheck } from "lucide-react";
+import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List, ShieldCheck, Clock, Wallet } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,11 +12,13 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/firebase";
-import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs, getDoc, doc, setDoc, deleteDoc, serverTimestamp, addDoc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs, getDoc, doc, setDoc, deleteDoc, serverTimestamp, addDoc, startOfDay, endOfDay } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+
 
 type Booking = {
     id: string;
@@ -51,6 +53,12 @@ type Provider = {
     address?: string;
     totalRevenue?: number;
     isVerified?: boolean;
+};
+
+type Payout = {
+    id: string;
+    amount: number;
+    status: 'Pending' | 'Paid';
 };
 
 const getStatusVariant = (status: string) => {
@@ -254,6 +262,9 @@ export default function DashboardPage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
+    const [payouts, setPayouts] = useState<Payout[]>([]);
+    const [todaysJobs, setTodaysJobs] = useState<Booking[]>([]);
+
     
     // For client dashboard
     const [providers, setProviders] = useState<Provider[]>([]);
@@ -266,6 +277,7 @@ export default function DashboardPage() {
     // For agency dashboard
     const [agencyProviders, setAgencyProviders] = useState<Provider[]>([]);
     const [agencyBookings, setAgencyBookings] = useState<Booking[]>([]);
+    const [agencyPayouts, setAgencyPayouts] = useState<Payout[]>([]);
     const [loadingAgencyData, setLoadingAgencyData] = useState(true);
 
 
@@ -275,11 +287,23 @@ export default function DashboardPage() {
             setLoading(false);
             return;
         }
+        setLoading(true);
+
+        const todayStart = startOfDay(new Date());
+        const todayEnd = endOfDay(new Date());
 
         const bookingsQuery = query(
             collection(db, "bookings"),
             where("providerId", "==", user.uid),
             orderBy("date", "desc")
+        );
+        
+        const todaysJobsQuery = query(
+            collection(db, "bookings"),
+            where("providerId", "==", user.uid),
+            where("date", ">=", todayStart),
+            where("date", "<=", todayEnd),
+            orderBy("date", "asc")
         );
 
         const reviewsQuery = query(
@@ -288,24 +312,35 @@ export default function DashboardPage() {
             orderBy("createdAt", "desc"),
             limit(5)
         );
+        
+         const payoutsQuery = query(collection(db, "payouts"), where("providerId", "==", user.uid));
 
         const unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
             const bookingsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
             setBookings(bookingsData);
             setLoading(false);
-        }, (error) => {
-            console.error("Firestore Error:", error);
-            setLoading(false);
-        });
+        }, (error) => { console.error("Firestore Error:", error); setLoading(false); });
+        
+        const unsubscribeTodaysJobs = onSnapshot(todaysJobsQuery, (snapshot) => {
+            const jobsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
+            setTodaysJobs(jobsData);
+        }, (error) => { console.error("Firestore Error:", error); });
 
         const unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
             const reviewsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
             setReviews(reviewsData);
         });
+        
+         const unsubscribePayouts = onSnapshot(payoutsQuery, (snapshot) => {
+            const payoutsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
+            setPayouts(payoutsData);
+        });
 
         return () => {
             unsubscribeBookings();
             unsubscribeReviews();
+            unsubscribePayouts();
+            unsubscribeTodaysJobs();
         };
 
     }, [user, userRole]);
@@ -393,6 +428,7 @@ export default function DashboardPage() {
                 if (providerIds.length === 0) {
                     setAgencyProviders([]);
                     setAgencyBookings([]);
+                    setAgencyPayouts([]);
                     setLoadingAgencyData(false);
                     return;
                 }
@@ -418,6 +454,12 @@ export default function DashboardPage() {
                 });
 
                 setAgencyProviders(providerStats);
+                
+                // 4. Get all payout requests for the agency
+                const payoutsQuery = query(collection(db, 'payouts'), where('agencyId', '==', user.uid));
+                const payoutsSnapshot = await getDocs(payoutsQuery);
+                const fetchedPayouts = payoutsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
+                setAgencyPayouts(fetchedPayouts);
 
 
             } catch (error) {
@@ -435,6 +477,10 @@ export default function DashboardPage() {
     const totalRevenue = bookings
         .filter(b => b.status === 'Completed')
         .reduce((sum, b) => sum + b.price, 0);
+
+    const pendingPayouts = payouts
+        .filter(p => p.status === 'Pending')
+        .reduce((sum, p) => sum + p.amount, 0);
 
     const upcomingBookingsCount = bookings.filter(b => b.status === 'Upcoming').length;
 
@@ -458,6 +504,7 @@ export default function DashboardPage() {
     const agencyTotalRevenue = agencyBookings.filter(b => b.status === 'Completed').reduce((sum, b) => sum + b.price, 0);
     const agencyTotalBookings = agencyBookings.filter(b => b.status === 'Completed').length;
     const agencyProviderCount = agencyProviders.length;
+    const agencyPendingPayouts = agencyPayouts.filter(p => p.status === 'Pending').reduce((sum, p) => sum + p.amount, 0);
     const agencyOverallRating = agencyProviders.length > 0
         ? (agencyProviders.reduce((sum, p) => sum + p.rating, 0) / agencyProviders.length).toFixed(1)
         : "N/A";
@@ -577,11 +624,12 @@ export default function DashboardPage() {
                     <p className="text-muted-foreground">An overview of your agency&apos;s performance.</p>
                 </div>
 
-                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                     <DashboardCard isLoading={loadingAgencyData} title="Total Revenue" icon={DollarSign} value={`₱${agencyTotalRevenue.toFixed(2)}`} />
                     <DashboardCard isLoading={loadingAgencyData} title="Completed Bookings" icon={Calendar} value={`${agencyTotalBookings}`} />
                     <DashboardCard isLoading={loadingAgencyData} title="Managed Providers" icon={Users2} value={`${agencyProviderCount}`} />
                     <DashboardCard isLoading={loadingAgencyData} title="Agency Rating" icon={Star} value={`${agencyOverallRating}`} change={`Based on ${agencyProviders.reduce((sum, p) => sum + p.reviewCount, 0)} reviews`} />
+                    <DashboardCard isLoading={loadingAgencyData} title="Pending Payouts" icon={Wallet} value={`₱${agencyPendingPayouts.toFixed(2)}`} />
                 </div>
                 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
@@ -675,15 +723,16 @@ export default function DashboardPage() {
                 <p className="text-muted-foreground">Here&apos;s a summary of your activity and performance.</p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                 <DashboardCard isLoading={loading} title="Total Revenue" icon={DollarSign} value={`₱${totalRevenue.toFixed(2)}`} />
+                <DashboardCard isLoading={loading} title="Pending Payouts" icon={Wallet} value={`₱${pendingPayouts.toFixed(2)}`} />
                 <DashboardCard isLoading={loading} title="Upcoming Bookings" icon={Calendar} value={`${upcomingBookingsCount}`} />
                 <DashboardCard isLoading={loading} title="Total Clients" icon={Users} value={`${totalClientsCount}`} />
                 <DashboardCard isLoading={loading} title="Overall Rating" icon={Star} value={`${overallRating}`} change={`Based on ${reviews.length} reviews`} />
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="lg:col-span-4">
+                 <Card className="lg:col-span-4">
                     <CardHeader>
                         <CardTitle>Earnings Overview</CardTitle>
                         <CardDescription>Your earnings for the last 6 months.</CardDescription>
@@ -715,8 +764,8 @@ export default function DashboardPage() {
                 </Card>
                 <Card className="lg:col-span-3">
                     <CardHeader>
-                        <CardTitle>Recent Bookings</CardTitle>
-                        <CardDescription>A list of your most recent bookings.</CardDescription>
+                        <CardTitle>Today&apos;s Schedule</CardTitle>
+                        <CardDescription>Your upcoming jobs for today.</CardDescription>
                     </CardHeader>
                     <CardContent>
                          {loading ? (
@@ -729,23 +778,21 @@ export default function DashboardPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead>Time</TableHead>
                                     <TableHead>Client</TableHead>
                                     <TableHead>Service</TableHead>
-                                    <TableHead>Status</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {recentBookings.length > 0 ? recentBookings.map((booking) => (
+                                {todaysJobs.length > 0 ? todaysJobs.map((booking) => (
                                     <TableRow key={booking.id}>
+                                        <TableCell>{format(booking.date.toDate(), 'p')}</TableCell>
                                         <TableCell className="font-medium">{booking.clientName}</TableCell>
                                         <TableCell>{booking.serviceName}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
-                                        </TableCell>
                                     </TableRow>
                                 )) : (
                                     <TableRow>
-                                        <TableCell colSpan={3} className="h-24 text-center">No recent bookings.</TableCell>
+                                        <TableCell colSpan={3} className="h-24 text-center">No jobs scheduled for today.</TableCell>
                                     </TableRow>
                                 )}
                             </TableBody>
