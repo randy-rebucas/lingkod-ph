@@ -4,11 +4,10 @@
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MoreHorizontal, Loader2 } from "lucide-react";
+import { MoreHorizontal, Loader2, Calendar, Check, X, Hourglass, Briefcase, UserCircle } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
@@ -17,6 +16,7 @@ import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or, ru
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
 import { LeaveReviewDialog } from "@/components/leave-review-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 type BookingStatus = "Pending" | "Upcoming" | "Completed" | "Cancelled";
@@ -30,6 +30,8 @@ export type Booking = {
     providerName: string;
     clientId: string;
     providerId: string;
+    clientAvatar?: string;
+    providerAvatar?: string;
     date: Timestamp;
     status: BookingStatus;
     price: number;
@@ -71,14 +73,23 @@ const createNotification = async (userId: string, message: string, link: string)
     }
 };
 
-const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings: Booking[], isLoading: boolean, userRole: string | null }) => {
+const getAvatarFallback = (name: string | null | undefined) => {
+    if (!name) return "U";
+    const parts = name.split(" ");
+    if (parts.length > 1 && parts[0] && parts[1]) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+};
+
+
+const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string | null }) => {
     const { toast } = useToast();
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
 
-
-    const handleStatusUpdate = async (booking: Booking, newStatus: BookingStatus, successMessage?: string) => {
+     const handleStatusUpdate = async (booking: Booking, newStatus: BookingStatus, successMessage?: string) => {
         const bookingRef = doc(db, "bookings", booking.id);
         try {
             if (newStatus === 'Completed' && userRole === 'provider') {
@@ -147,147 +158,151 @@ const BookingTable = ({ bookings: bookingList, isLoading, userRole }: { bookings
         setSelectedBooking(booking);
         setIsReviewOpen(true);
     };
+    
+    const displayName = userRole === 'client' ? booking.providerName : booking.clientName;
+    const displayAvatar = userRole === 'client' ? booking.providerAvatar : booking.clientAvatar;
+    const displayDate = booking.date.toDate();
 
+    return (
+      <>
+        <Card>
+            <CardHeader className="flex flex-row items-start justify-between">
+                <div>
+                    <CardTitle>{booking.serviceName}</CardTitle>
+                    <CardDescription>with {displayName}</CardDescription>
+                </div>
+                <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <Avatar className="h-10 w-10">
+                        <AvatarImage src={displayAvatar} alt={displayName} />
+                        <AvatarFallback>{getAvatarFallback(displayName)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                        <span className="font-medium text-foreground">{displayName}</span>
+                        <span>{userRole === 'client' ? 'Service Provider' : 'Client'}</span>
+                    </div>
+                </div>
+                 <div className="flex justify-between items-center text-sm p-3 bg-secondary rounded-md">
+                     <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>{displayDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} at {displayDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                     </div>
+                     <span className="font-bold text-lg text-primary">₱{booking.price.toFixed(2)}</span>
+                </div>
+            </CardContent>
+            <CardFooter className="flex justify-end gap-2">
+                 <Button variant="outline" onClick={() => handleViewDetails(booking)}>View Details</Button>
+                <AlertDialog>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="outline">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Toggle menu</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            
+                            {/* Provider Actions */}
+                            {userRole === 'provider' && booking.status === 'Pending' && (
+                                <>
+                                    <DropdownMenuItem onClick={() => handleStatusUpdate(booking, 'Upcoming', 'Booking has been accepted.')}><Check className="mr-2 h-4 w-4 text-green-500" />Accept</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleStatusUpdate(booking, 'Cancelled', 'Booking has been declined.')} className="text-destructive focus:text-destructive focus:bg-destructive/10"><X className="mr-2 h-4 w-4" />Decline</DropdownMenuItem>
+                                </>
+                            )}
+                            {userRole === 'provider' && booking.status === 'Upcoming' && (
+                                <DropdownMenuItem onClick={() => handleStatusUpdate(booking, 'Completed')}><Check className="mr-2 h-4 w-4 text-green-500"/>Mark as Completed</DropdownMenuItem>
+                            )}
+
+                            {/* Client Actions */}
+                            {userRole === 'client' && (booking.status === 'Pending' || booking.status === 'Upcoming') && (
+                                <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10"><X className="mr-2 h-4 w-4" />Cancel Booking</DropdownMenuItem>
+                                </AlertDialogTrigger>
+                            )}
+                            {userRole === 'client' && booking.status === 'Completed' && !booking.reviewId && (
+                                <DropdownMenuItem onClick={() => handleOpenReview(booking)}>Leave a Review</DropdownMenuItem>
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    {/* Cancellation Dialog for Client */}
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will cancel your booking for "{booking.serviceName}".
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>Close</AlertDialogCancel>
+                            <AlertDialogAction
+                                className="bg-destructive hover:bg-destructive/90"
+                                onClick={() => handleStatusUpdate(booking, "Cancelled")}>
+                                Confirm Cancellation
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </CardFooter>
+        </Card>
+        {selectedBooking && <BookingDetailsDialog isOpen={isDetailsOpen} setIsOpen={setIsDetailsOpen} booking={selectedBooking} />}
+        {selectedBooking && userRole === 'client' && <LeaveReviewDialog isOpen={isReviewOpen} setIsOpen={setIsReviewOpen} booking={selectedBooking} />}
+        </>
+    );
+};
+
+const EmptyState = ({ status, userRole }: { status: BookingStatus, userRole: string | null }) => {
+    const messages = {
+        Pending: { icon: <Hourglass />, text: "You have no pending bookings at the moment." },
+        Upcoming: { icon: <Calendar />, text: "You have no upcoming bookings." },
+        Completed: { icon: <Check />, text: "You have no completed bookings yet." },
+        Cancelled: { icon: <X />, text: "You have no cancelled bookings." }
+    };
+    const clientAction = "Why not book a new service today?";
+    const providerAction = "You'll see new booking requests here.";
+
+    return (
+        <Card>
+            <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
+                <div className="mb-4 text-primary">{messages[status].icon}</div>
+                <h3 className="text-xl font-semibold">{messages[status].text}</h3>
+                <p className="mt-2">{userRole === 'client' ? clientAction : providerAction}</p>
+                 {userRole === 'client' && (
+                    <Button asChild className="mt-4">
+                        <Link href="/dashboard">Find a Service</Link>
+                    </Button>
+                )}
+            </CardContent>
+        </Card>
+    )
+}
+
+const BookingsList = ({ bookings, isLoading, userRole }: { bookings: Booking[], isLoading: boolean, userRole: string | null }) => {
     if (isLoading) {
         return (
-            <Card>
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Service</TableHead>
-                                <TableHead className="hidden md:table-cell">Client/Provider</TableHead>
-                                <TableHead className="hidden md:table-cell">Date</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Amount</TableHead>
-                                <TableHead><span className="sr-only">Actions</span></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {[...Array(3)].map((_, i) => (
-                                <TableRow key={i}>
-                                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                                    <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
-                                    <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
-                                    <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
-                                    <TableCell className="text-right"><Skeleton className="h-5 w-16" /></TableCell>
-                                    <TableCell className="text-right"><Skeleton className="h-8 w-8" /></TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64" />)}
+            </div>
         )
     }
 
+    if (bookings.length === 0) {
+        // This is a bit of a trick to get the current status from the bookings list even when it's empty
+        // In a real app, you'd probably pass the status down as a prop.
+        const currentTabStatus = (window.location.hash.substring(1) || 'pending') as BookingStatus;
+        return <EmptyState status={currentTabStatus} userRole={userRole} />;
+    }
+
     return (
-        <>
-            <Card>
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Service</TableHead>
-                                <TableHead className="hidden md:table-cell">{userRole === 'client' ? 'Provider' : 'Client'}</TableHead>
-                                <TableHead className="hidden md:table-cell">Date</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Amount</TableHead>
-                                <TableHead>
-                                    <span className="sr-only">Actions</span>
-                                </TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {bookingList.length > 0 ? bookingList.map((booking) => {
-                                const displayName = userRole === 'client' ? booking.providerName : booking.clientName;
-                                const displayDate = booking.date.toDate();
-                                return (
-                                    <TableRow key={booking.id}>
-                                        <TableCell>
-                                            <div className="font-medium">{booking.serviceName}</div>
-                                            <div className="text-sm text-muted-foreground md:hidden">{displayName} - {displayDate.toLocaleDateString()}</div>
-                                        </TableCell>
-                                        <TableCell className="hidden md:table-cell">{displayName}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{displayDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">₱{booking.price.toFixed(2)}</TableCell>
-                                        <TableCell className="text-right">
-                                            <AlertDialog>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                            <MoreHorizontal className="h-4 w-4" />
-                                                            <span className="sr-only">Toggle menu</span>
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                        <DropdownMenuItem onClick={() => handleViewDetails(booking)}>View Details</DropdownMenuItem>
-                                                        
-                                                        <DropdownMenuSeparator />
-
-                                                        {/* Provider Actions */}
-                                                        {userRole === 'provider' && booking.status === 'Pending' && (
-                                                            <>
-                                                                <DropdownMenuItem onClick={() => handleStatusUpdate(booking, 'Upcoming', 'Booking has been accepted.')}>Accept</DropdownMenuItem>
-                                                                <DropdownMenuItem onClick={() => handleStatusUpdate(booking, 'Cancelled', 'Booking has been declined.')} className="text-destructive focus:text-destructive focus:bg-destructive/10">Decline</DropdownMenuItem>
-                                                            </>
-                                                        )}
-                                                        {userRole === 'provider' && booking.status === 'Upcoming' && (
-                                                            <DropdownMenuItem onClick={() => handleStatusUpdate(booking, 'Completed')}>Mark as Completed</DropdownMenuItem>
-                                                        )}
-
-                                                        {/* Client Actions */}
-                                                        {userRole === 'client' && (booking.status === 'Pending' || booking.status === 'Upcoming') && (
-                                                            <AlertDialogTrigger asChild>
-                                                                <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">Cancel Booking</DropdownMenuItem>
-                                                            </AlertDialogTrigger>
-                                                        )}
-                                                        {userRole === 'client' && booking.status === 'Completed' && !booking.reviewId && (
-                                                            <DropdownMenuItem onClick={() => handleOpenReview(booking)}>Leave a Review</DropdownMenuItem>
-                                                        )}
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-
-                                                {/* Cancellation Dialog for Client */}
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This action cannot be undone. This will cancel your booking.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Close</AlertDialogCancel>
-                                                        <AlertDialogAction
-                                                            className="bg-destructive hover:bg-destructive/90"
-                                                            onClick={() => handleStatusUpdate(booking, "Cancelled")}>
-                                                            Confirm Cancellation
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
-                                    </TableRow>
-                                )
-                            }) : (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="h-24 text-center">
-                                        No bookings found.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-            {selectedBooking && <BookingDetailsDialog isOpen={isDetailsOpen} setIsOpen={setIsDetailsOpen} booking={selectedBooking} />}
-            {selectedBooking && userRole === 'client' && <LeaveReviewDialog isOpen={isReviewOpen} setIsOpen={setIsReviewOpen} booking={selectedBooking} />}
-        </>
-    );
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {bookings.map(booking => (
+                <BookingCard key={booking.id} booking={booking} userRole={userRole} />
+            ))}
+        </div>
+    )
 };
 
 
@@ -304,19 +319,28 @@ export default function BookingsPage() {
         };
 
         setLoading(true);
-        // Firestore doesn't support OR queries on different fields like this easily,
-        // so we create a query that checks if the user's ID is in either the clientId or providerId field.
         const bookingsRef = collection(db, "bookings");
         const q = query(bookingsRef, 
             or(where("clientId", "==", user.uid), where("providerId", "==", user.uid)),
             orderBy("date", "desc")
         );
 
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const bookingsData = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as Booking));
+        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
+             const bookingsData = await Promise.all(querySnapshot.docs.map(async (doc) => {
+                const data = doc.data();
+                
+                // Fetch related user avatars
+                const clientDoc = await getDoc(doc(db, "users", data.clientId));
+                const providerDoc = await getDoc(doc(db, "users", data.providerId));
+                
+                return {
+                    id: doc.id,
+                    ...data,
+                    clientAvatar: clientDoc.data()?.photoURL || '',
+                    providerAvatar: providerDoc.data()?.photoURL || ''
+                } as Booking;
+            }));
+
             setBookings(bookingsData);
             setLoading(false);
         }, (error) => {
@@ -332,6 +356,20 @@ export default function BookingsPage() {
     const upcomingBookings = bookings.filter(b => b.status === 'Upcoming');
     const completedBookings = bookings.filter(b => b.status === 'Completed');
     const cancelledBookings = bookings.filter(b => b.status === 'Cancelled');
+    
+    const [activeTab, setActiveTab] = useState("pending");
+
+    useEffect(() => {
+        const hash = window.location.hash.substring(1);
+        if (hash) {
+            setActiveTab(hash);
+        }
+    }, []);
+
+    const handleTabChange = (value: string) => {
+        setActiveTab(value);
+        window.location.hash = value;
+    }
 
     return (
         <div className="space-y-6">
@@ -342,24 +380,24 @@ export default function BookingsPage() {
                 </p>
             </div>
             
-            <Tabs defaultValue="pending" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+            <Tabs defaultValue="pending" value={activeTab} onValueChange={handleTabChange} className="w-full">
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
                     <TabsTrigger value="pending">Pending</TabsTrigger>
                     <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
                     <TabsTrigger value="completed">Completed</TabsTrigger>
                     <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
                 </TabsList>
-                <TabsContent value="pending" className="mt-4">
-                     <BookingTable bookings={pendingBookings} isLoading={loading} userRole={userRole} />
+                <TabsContent value="pending" className="mt-6">
+                     <BookingsList bookings={pendingBookings} isLoading={loading} userRole={userRole} />
                 </TabsContent>
-                <TabsContent value="upcoming" className="mt-4">
-                     <BookingTable bookings={upcomingBookings} isLoading={loading} userRole={userRole} />
+                <TabsContent value="upcoming" className="mt-6">
+                     <BookingsList bookings={upcomingBookings} isLoading={loading} userRole={userRole} />
                 </TabsContent>
-                <TabsContent value="completed" className="mt-4">
-                    <BookingTable bookings={completedBookings} isLoading={loading} userRole={userRole} />
+                <TabsContent value="completed" className="mt-6">
+                    <BookingsList bookings={completedBookings} isLoading={loading} userRole={userRole} />
                 </TabsContent>
-                <TabsContent value="cancelled" className="mt-4">
-                   <BookingTable bookings={cancelledBookings} isLoading={loading} userRole={userRole} />
+                <TabsContent value="cancelled" className="mt-6">
+                   <BookingsList bookings={cancelledBookings} isLoading={loading} userRole={userRole} />
                 </TabsContent>
             </Tabs>
         </div>
