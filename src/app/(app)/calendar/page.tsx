@@ -1,36 +1,18 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Calendar, dateFnsLocalizer, Views, View, ToolbarProps } from 'react-big-calendar';
-import format from 'date-fns/format';
-import parse from 'date-fns/parse';
-import startOfWeek from 'date-fns/startOfWeek';
-import getDay from 'date-fns/getDay';
-import enUS from 'date-fns/locale/en-US';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, or, Timestamp } from 'firebase/firestore';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Link, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const locales = {
-  'en-US': enUS,
-};
-
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-});
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameMonth, isToday, isSameDay } from 'date-fns';
 
 type BookingEvent = {
     title: string;
@@ -39,67 +21,27 @@ type BookingEvent = {
     allDay?: boolean;
     resource?: any;
     status: "Upcoming" | "Completed" | "Cancelled" | "Pending";
+    providerName: string;
+    clientName: string;
 };
 
-const getStatusVariant = (status: BookingEvent['status']) => {
+const getStatusClass = (status: BookingEvent['status']) => {
     switch (status) {
-        case "Upcoming": return "default";
-        case "Completed": return "secondary";
-        case "Cancelled": return "destructive";
-        case "Pending": return "outline";
-        default: return "outline";
+        case "Upcoming": return "bg-blue-500 hover:bg-blue-600";
+        case "Completed": return "bg-green-500 hover:bg-green-600";
+        case "Cancelled": return "bg-red-500 hover:bg-red-600";
+        default: return "bg-gray-400 hover:bg-gray-500";
     }
 };
-
-const CustomToolbar = (toolbar: ToolbarProps<BookingEvent, object>) => {
-    const { label, onNavigate, onView, view, views } = toolbar;
-
-    const navigate = (action: 'PREV' | 'NEXT' | 'TODAY') => {
-        onNavigate(action);
-    };
-
-    const handleViewChange = (newView: View) => {
-        onView(newView);
-    }
-    
-    return (
-        <div className="rbc-toolbar p-4 border-b">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                     <Button size="icon" variant="outline" onClick={() => navigate('PREV')}>
-                        <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                     <Button variant="outline" onClick={() => navigate('TODAY')}>Today</Button>
-                    <Button size="icon" variant="outline" onClick={() => navigate('NEXT')}>
-                        <ChevronRight className="h-4 w-4" />
-                    </Button>
-                </div>
-                 <span className="rbc-toolbar-label text-xl font-bold">{label}</span>
-                <div className="flex items-center gap-2">
-                     {(views as View[]).map((v) => (
-                        <Button
-                            key={v}
-                            variant={view === v ? 'default' : 'outline'}
-                            onClick={() => handleViewChange(v)}
-                            className="capitalize"
-                        >
-                            {v}
-                        </Button>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-};
-
 
 export default function CalendarPage() {
     const { user, userRole } = useAuth();
     const [events, setEvents] = useState<BookingEvent[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedEvent, setSelectedEvent] = useState<BookingEvent | null>(null);
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [selectedDayEvents, setSelectedDayEvents] = useState<BookingEvent[]>([]);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    
+
     useEffect(() => {
         if (!user) {
             setLoading(false);
@@ -114,18 +56,15 @@ export default function CalendarPage() {
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const bookingEvents = snapshot.docs.map(doc => {
                 const data = doc.data();
-                const bookingDate = (data.date as Timestamp).toDate();
-                const eventTitle = userRole === 'client' 
-                    ? `${data.serviceName} w/ ${data.providerName}`
-                    : `${data.serviceName} for ${data.clientName}`;
-
                 return {
-                    title: eventTitle,
-                    start: bookingDate,
-                    end: new Date(bookingDate.getTime() + 60 * 60 * 1000), // Assuming 1-hour booking
+                    title: data.serviceName,
+                    start: (data.date as Timestamp).toDate(),
+                    end: new Date((data.date as Timestamp).toDate().getTime() + 60 * 60 * 1000), // Assuming 1-hour booking
                     status: data.status,
+                    providerName: data.providerName,
+                    clientName: data.clientName,
                 };
-            }).filter(event => event.status !== 'Pending'); // Exclude pending bookings from calendar view
+            }).filter(event => event.status !== 'Pending');
             setEvents(bookingEvents as BookingEvent[]);
             setLoading(false);
         });
@@ -133,39 +72,43 @@ export default function CalendarPage() {
         return () => unsubscribe();
     }, [user, userRole]);
 
-    const eventStyleGetter = useCallback((event: BookingEvent) => {
-        let backgroundColor = 'hsl(var(--primary))';
-        let color = 'hsl(var(--primary-foreground))';
+    const firstDayOfMonth = startOfMonth(currentDate);
+    const lastDayOfMonth = endOfMonth(currentDate);
 
-        if(event.status === 'Completed') {
-            backgroundColor = 'hsl(var(--secondary))';
-            color = 'hsl(var(--secondary-foreground))';
-        } else if (event.status === 'Cancelled') {
-            backgroundColor = 'hsl(var(--destructive))';
-            color = 'hsl(var(--destructive-foreground))';
+    const daysInMonth = eachDayOfInterval({
+        start: firstDayOfMonth,
+        end: lastDayOfMonth,
+    });
+    
+    const startingDayIndex = getDay(firstDayOfMonth);
+
+    const prevMonthDays = Array.from({ length: startingDayIndex }, (_, i) => {
+        const date = new Date(firstDayOfMonth);
+        date.setDate(date.getDate() - (startingDayIndex - i));
+        return date;
+    });
+
+    const calendarGrid = [...prevMonthDays, ...daysInMonth];
+
+    const nextMonth = () => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)));
+    const prevMonth = () => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)));
+    
+    const handleDayClick = (day: Date) => {
+        const dayEvents = events.filter(event => isSameDay(event.start, day));
+        if (dayEvents.length > 0) {
+            setSelectedDayEvents(dayEvents);
+            setIsDialogOpen(true);
         }
-        
-        const style = {
-            backgroundColor,
-            color,
-            borderRadius: '5px',
-            opacity: 0.8,
-            border: '0px',
-            display: 'block',
-        };
-        return {
-            style: style,
-        };
-    }, []);
+    }
+    
+    const getEventsForDay = (day: Date) => {
+        return events.filter(event => isSameDay(event.start, day));
+    }
 
-    const handleSelectEvent = (event: BookingEvent) => {
-        setSelectedEvent(event);
-        setIsDialogOpen(true);
-    };
 
     if (loading) {
         return (
-             <div className="space-y-6">
+            <div className="space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">Calendar</h1>
                     <p className="text-muted-foreground">Loading your schedule...</p>
@@ -181,56 +124,71 @@ export default function CalendarPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Calendar</h1>
-                    <p className="text-muted-foreground">View your upcoming and past bookings.</p>
-                </div>
-                <Button variant="outline" disabled>
-                    <Link className="mr-2 h-4 w-4" />
-                    Sync with Google Calendar
-                </Button>
+            <div>
+                <h1 className="text-3xl font-bold font-headline">Calendar</h1>
+                <p className="text-muted-foreground">View your upcoming and past bookings.</p>
             </div>
-             <Card className="overflow-hidden">
-                <div className="h-[75vh] flex flex-col">
-                   <Calendar
-                        localizer={localizer}
-                        events={events}
-                        startAccessor="start"
-                        endAccessor="end"
-                        eventPropGetter={eventStyleGetter}
-                        onSelectEvent={handleSelectEvent}
-                        views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
-                        className="flex-1 p-4 bg-card text-foreground"
-                        components={{
-                            toolbar: CustomToolbar
-                        }}
-                    />
-                </div>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="text-2xl font-bold">{format(currentDate, 'MMMM yyyy')}</CardTitle>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="icon" onClick={prevMonth}><ChevronLeft /></Button>
+                        <Button variant="outline" onClick={() => setCurrentDate(new Date())}>Today</Button>
+                        <Button variant="outline" size="icon" onClick={nextMonth}><ChevronRight /></Button>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-7 text-center font-semibold text-muted-foreground">
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => <div key={day}>{day}</div>)}
+                    </div>
+                    <div className="grid grid-cols-7 grid-rows-5 gap-px border-t border-l mt-2">
+                        {calendarGrid.map((day, index) => {
+                             const dayEvents = getEventsForDay(day);
+                             return (
+                                <div 
+                                    key={index}
+                                    className={cn("relative border-r border-b p-2 h-28 flex flex-col group", 
+                                        !isSameMonth(day, currentDate) && "bg-secondary/30 text-muted-foreground",
+                                        dayEvents.length > 0 && "cursor-pointer hover:bg-secondary"
+                                    )}
+                                    onClick={() => handleDayClick(day)}
+                                >
+                                    <span className={cn("font-medium", isToday(day) && "bg-primary text-primary-foreground rounded-full h-8 w-8 flex items-center justify-center")}>
+                                        {format(day, 'd')}
+                                    </span>
+                                    <div className="mt-1 space-y-1 overflow-y-auto">
+                                        {dayEvents.map((event, eventIndex) => (
+                                            <div key={eventIndex} className={cn("text-xs text-white rounded px-1 truncate", getStatusClass(event.status))}>
+                                                {event.title}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                             )
+                        })}
+                    </div>
+                </CardContent>
             </Card>
 
              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{selectedEvent?.title}</DialogTitle>
-                         <DialogDescription>
-                            Booking Details
-                        </DialogDescription>
+                        <DialogTitle>Bookings for {selectedDayEvents.length > 0 && format(selectedDayEvents[0].start, 'PPP')}</DialogTitle>
                     </DialogHeader>
-                    {selectedEvent && (
-                        <div className="space-y-4">
-                            <div>
-                                <h4 className="font-semibold">Status</h4>
-                                <Badge variant={getStatusVariant(selectedEvent.status)}>{selectedEvent.status}</Badge>
-                            </div>
-                            <div>
-                                <h4 className="font-semibold">Time</h4>
-                                <p className="text-muted-foreground">
-                                    {format(selectedEvent.start, 'PPP p')}
+                     <div className="space-y-4">
+                        {selectedDayEvents.map((event, index) => (
+                            <div key={index} className="p-4 border rounded-lg">
+                                <p className="font-bold">{event.title}</p>
+                                 <p className="text-sm text-muted-foreground">
+                                    With: {userRole === 'client' ? event.providerName : event.clientName}
                                 </p>
+                                <p className="text-sm text-muted-foreground">
+                                    Time: {format(event.start, 'p')}
+                                </p>
+                                 <Badge className={cn("mt-2 text-white", getStatusClass(event.status))}>{event.status}</Badge>
                             </div>
-                        </div>
-                    )}
+                        ))}
+                    </div>
                 </DialogContent>
             </Dialog>
         </div>
