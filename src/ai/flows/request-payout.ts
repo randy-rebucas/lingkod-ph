@@ -47,7 +47,10 @@ const requestPayoutFlow = ai.defineFlow(
         throw new Error('Provider has not configured their payout details.');
     }
     
+    const transactionId = `PAYOUT-${Date.now()}-${providerId.slice(-6)}`;
+
     const payoutData = {
+        transactionId,
         providerId,
         providerName: providerData.displayName,
         agencyId: providerData.agencyId || null,

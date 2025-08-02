@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, Timestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { handleRequestPayout } from '@/ai/flows/request-payout';
 import { TooltipProvider, Tooltip as TooltipUI, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { format } from 'date-fns';
 
 type CompletedBooking = {
     id: string;
@@ -29,6 +30,9 @@ type Payout = {
     id: string;
     amount: number;
     status: 'Pending' | 'Paid';
+    transactionId?: string;
+    requestedAt: Timestamp;
+    processedAt?: Timestamp;
 };
 
 const processChartData = (bookings: CompletedBooking[]) => {
@@ -67,6 +71,17 @@ const processChartData = (bookings: CompletedBooking[]) => {
     return chartData;
 };
 
+const getStatusVariant = (status: string) => {
+    switch (status) {
+        case 'Paid':
+            return 'secondary';
+        case 'Pending':
+            return 'outline';
+        default:
+            return 'default';
+    }
+};
+
 export default function EarningsPage() {
     const { user, userRole, subscription } = useAuth();
     const { toast } = useToast();
@@ -100,7 +115,7 @@ export default function EarningsPage() {
             setLoading(false);
         });
         
-        const payoutsQuery = query(collection(db, "payouts"), where("providerId", "==", user.uid));
+        const payoutsQuery = query(collection(db, "payouts"), where("providerId", "==", user.uid), orderBy("requestedAt", "desc"));
         const unsubscribePayouts = onSnapshot(payoutsQuery, (snapshot) => {
             const payoutsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
             setPayouts(payoutsData);
@@ -291,30 +306,69 @@ export default function EarningsPage() {
                     </CardContent>
                 </Card>
             </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Earnings History</CardTitle>
+                        <CardDescription>Your monthly earnings over the last year.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ResponsiveContainer width="100%" height={350}>
+                            <LineChart data={chartData}>
+                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₱${value}`} />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: "hsl(var(--background))",
+                                        border: "1px solid hsl(var(--border))",
+                                        borderRadius: "var(--radius)"
+                                    }}
+                                />
+                                <Line type="monotone" dataKey="earnings" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: "hsl(var(--primary))" }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Earnings History</CardTitle>
-                    <CardDescription>Your monthly earnings over the last year.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <ResponsiveContainer width="100%" height={350}>
-                        <LineChart data={chartData}>
-                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₱${value}`} />
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: "hsl(var(--background))",
-                                    border: "1px solid hsl(var(--border))",
-                                    borderRadius: "var(--radius)"
-                                }}
-                            />
-                            <Line type="monotone" dataKey="earnings" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: "hsl(var(--primary))" }} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </CardContent>
-            </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Payout History</CardTitle>
+                        <CardDescription>A list of all your requested payouts.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                         <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Transaction ID</TableHead>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Amount</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {payouts.length > 0 ? payouts.map((payout) => (
+                                    <TableRow key={payout.id}>
+                                        <TableCell className="font-mono text-xs">{payout.transactionId || 'N/A'}</TableCell>
+                                        <TableCell>{format(payout.requestedAt.toDate(), 'PPP')}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getStatusVariant(payout.status)}>{payout.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right font-medium">₱{payout.amount.toFixed(2)}</TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-24 text-center">
+                                            No payout history.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </div>
 
             <Card>
                 <CardHeader>

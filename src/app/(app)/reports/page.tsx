@@ -46,6 +46,7 @@ type ProviderStats = {
 
 type PayoutRequest = {
     id: string;
+    transactionId?: string;
     providerId: string;
     providerName: string;
     amount: number;
@@ -286,6 +287,7 @@ export default function ReportsPage() {
                      <Table>
                         <TableHeader>
                             <TableRow>
+                                <TableHead>Transaction ID</TableHead>
                                 <TableHead>Provider</TableHead>
                                 <TableHead>Date Requested</TableHead>
                                 <TableHead>Amount</TableHead>
@@ -296,6 +298,7 @@ export default function ReportsPage() {
                         <TableBody>
                             {payouts.length > 0 ? payouts.map((payout) => (
                                 <TableRow key={payout.id}>
+                                    <TableCell className="font-mono text-xs">{payout.transactionId || 'N/A'}</TableCell>
                                     <TableCell className="font-medium">{payout.providerName}</TableCell>
                                     <TableCell>{format(payout.requestedAt.toDate(), 'PPP')}</TableCell>
                                     <TableCell>₱{payout.amount.toFixed(2)}</TableCell>
@@ -314,7 +317,7 @@ export default function ReportsPage() {
                                 </TableRow>
                             )) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center">
+                                    <TableCell colSpan={6} className="h-24 text-center">
                                         No payout requests.
                                     </TableCell>
                                 </TableRow>
