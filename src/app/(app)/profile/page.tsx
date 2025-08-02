@@ -11,11 +11,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit, Wallet, Building } from "lucide-react";
+import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit, Wallet, Building, File, Trash2 } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
-import { doc, updateDoc, getDoc, Timestamp, collection, onSnapshot, query, orderBy, runTransaction, serverTimestamp, where, addDoc, getDocs } from "firebase/firestore";
+import { doc, updateDoc, getDoc, Timestamp, collection, onSnapshot, query, orderBy, runTransaction, serverTimestamp, where, addDoc, getDocs, arrayUnion, arrayRemove } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -72,6 +72,12 @@ type Category = {
     id: string;
     name: string;
 };
+
+type Document = {
+    name: string;
+    url: string;
+    uploadedAt: Timestamp;
+}
 
 const initialAvailability: Availability[] = [
     { day: "Monday", enabled: true, startTime: "9:00 AM", endTime: "5:00 PM" },
@@ -147,6 +153,13 @@ export default function ProfilePage() {
     const [bankAccountName, setBankAccountName] = useState('');
     const [isSavingPayout, setIsSavingPayout] = useState(false);
 
+    // Document fields
+    const [documents, setDocuments] = useState<Document[]>([]);
+    const [newDocName, setNewDocName] = useState("");
+    const [newDocFile, setNewDocFile] = useState<File | null>(null);
+    const [isUploadingDoc, setIsUploadingDoc] = useState(false);
+    const newDocFileInputRef = useRef<HTMLInputElement>(null);
+
     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
     const { isLoaded } = useLoadScript({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
@@ -216,6 +229,7 @@ export default function ProfilePage() {
                     setBankName(data.payoutDetails?.bankName || '');
                     setBankAccountNumber(data.payoutDetails?.bankAccountNumber || '');
                     setBankAccountName(data.payoutDetails?.bankAccountName || '');
+                    setDocuments(data.documents || []);
                 }
             }
         });
@@ -501,6 +515,61 @@ export default function ProfilePage() {
                 }
             }
         );
+    };
+
+    const handleUploadDocument = async () => {
+        if (!user || !newDocFile || !newDocName) {
+            toast({ variant: 'destructive', title: 'Missing Info', description: 'Please provide a document name and select a file.' });
+            return;
+        }
+        setIsUploadingDoc(true);
+        try {
+            const storagePath = `provider-documents/${user.uid}/${Date.now()}_${newDocFile.name}`;
+            const storageRef = ref(storage, storagePath);
+            const uploadResult = await uploadBytes(storageRef, newDocFile);
+            const url = await getDownloadURL(uploadResult.ref);
+
+            const newDocument = {
+                name: newDocName,
+                url: url,
+                uploadedAt: serverTimestamp()
+            };
+
+            await updateDoc(doc(db, "users", user.uid), {
+                documents: arrayUnion(newDocument)
+            });
+
+            toast({ title: 'Success', description: 'Document uploaded successfully.' });
+            setNewDocName("");
+            setNewDocFile(null);
+            if (newDocFileInputRef.current) newDocFileInputRef.current.value = "";
+
+        } catch (error) {
+            console.error("Document upload failed: ", error);
+            toast({ variant: 'destructive', title: 'Upload Failed', description: 'Could not upload the document.' });
+        } finally {
+            setIsUploadingDoc(false);
+        }
+    };
+
+    const handleDeleteDocument = async (docToDelete: Document) => {
+        if (!user) return;
+        try {
+            // Delete from Storage
+            const fileRef = ref(storage, docToDelete.url);
+            await deleteObject(fileRef);
+
+            // Delete from Firestore
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, {
+                documents: arrayRemove(docToDelete)
+            });
+
+            toast({ title: 'Success', description: 'Document deleted successfully.' });
+        } catch (error) {
+            console.error("Error deleting document: ", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not delete the document.' });
+        }
     };
 
     if (loading) {
@@ -1216,6 +1285,58 @@ export default function ProfilePage() {
                                 </Button>
                             </CardFooter>
                         </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Documents</CardTitle>
+                                <CardDescription>Upload your resume, portfolio, or other relevant documents.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="docName">Document Name</Label>
+                                    <Input id="docName" value={newDocName} onChange={e => setNewDocName(e.target.value)} placeholder="e.g., My Resume.pdf" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="docFile">File</Label>
+                                    <Input id="docFile" type="file" ref={newDocFileInputRef} onChange={e => setNewDocFile(e.target.files ? e.target.files[0] : null)} />
+                                </div>
+                                <Button onClick={handleUploadDocument} disabled={isUploadingDoc}>
+                                    {isUploadingDoc ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                                    Upload Document
+                                </Button>
+                                <Separator />
+                                <h4 className="font-medium">Uploaded Documents</h4>
+                                <div className="space-y-2">
+                                    {documents.length > 0 ? documents.map((doc, i) => (
+                                        <div key={i} className="flex items-center justify-between p-2 border rounded-md">
+                                            <a href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline">
+                                                <File className="h-4 w-4" />
+                                                <span>{doc.name}</span>
+                                            </a>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This will permanently delete the document "{doc.name}". This action cannot be undone.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteDocument(doc)} className="bg-destructive hover:bg-destructive/80">Delete</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
+                                    )) : <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>}
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
                 </TabsContent>
                 
@@ -1381,4 +1502,3 @@ export default function ProfilePage() {
         </div>
     );
 }
-
