@@ -326,15 +326,15 @@ export default function BookingsPage() {
         );
 
         const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-             const bookingsData = await Promise.all(querySnapshot.docs.map(async (doc) => {
-                const data = doc.data();
+             const bookingsData = await Promise.all(querySnapshot.docs.map(async (bookingDoc) => {
+                const data = bookingDoc.data();
                 
                 // Fetch related user avatars
                 const clientDoc = await getDoc(doc(db, "users", data.clientId));
                 const providerDoc = await getDoc(doc(db, "users", data.providerId));
                 
                 return {
-                    id: doc.id,
+                    id: bookingDoc.id,
                     ...data,
                     clientAvatar: clientDoc.data()?.photoURL || '',
                     providerAvatar: providerDoc.data()?.photoURL || ''
