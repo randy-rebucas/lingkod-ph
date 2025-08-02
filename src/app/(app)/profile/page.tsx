@@ -29,6 +29,7 @@ import { format } from "date-fns";
 import { X } from "lucide-react";
 import { handleInviteAction } from "./actions";
 import { useLoadScript, Autocomplete } from "@react-google-maps/api";
+import { Separator } from "@/components/ui/separator";
 
 
 type Reward = {
