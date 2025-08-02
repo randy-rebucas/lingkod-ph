@@ -1,16 +1,13 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
-import { doc, updateDoc, Timestamp, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle, Loader2, Star, Check, Mail } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { CheckCircle, Mail, Star, Check } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PaymentDialog, type SubscriptionTier, type AgencySubscriptionTier } from "@/components/payment-dialog";
 
