@@ -71,7 +71,7 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
             // Create notification for the provider
             const providerNotifRef = doc(collection(db, `users/${booking.providerId}/notifications`));
             batch.set(providerNotifRef, {
-                type: 'info',
+                type: 'new_review',
                 message: `${user.displayName} left you a ${data.rating}-star review for "${booking.serviceName}".`,
                 link: `/providers/${booking.providerId}`,
                 read: false,

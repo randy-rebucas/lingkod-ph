@@ -42,5 +42,3 @@ export async function handleMarkAsPaid(
     return { error: e.message, message: 'Failed to update payout status.' };
   }
 }
-
-    

@@ -41,8 +41,7 @@ const createRenewalNotification = async (userId: string, planName: string, daysL
         // Check if a similar notification already exists to avoid duplicates
         const q = query(notificationsRef, 
             where("type", "==", "renewal_reminder"),
-            where("message", "like", `%Your ${planName} plan will renew%`),
-            limit(1)
+            where("message", "==", `Your ${planName} plan will renew in ${daysLeft} day${daysLeft > 1 ? 's' : ''}.`)
         );
 
         const existingNotifs = await getDocs(q);
