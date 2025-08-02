@@ -533,7 +533,7 @@ export default function ProfilePage() {
             const newDocument = {
                 name: newDocName,
                 url: url,
-                uploadedAt: serverTimestamp()
+                uploadedAt: Timestamp.now()
             };
 
             await updateDoc(doc(db, "users", user.uid), {
