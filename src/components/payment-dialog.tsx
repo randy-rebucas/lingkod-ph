@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, UploadCloud } from "lucide-react";
 import { PaymentMethodIcon } from "./payment-method-icon";
-import { QRCode } from "./qrcode-svg";
+import { QRCodeSVG } from 'qrcode.react';
 import { Input } from "./ui/input";
 import { Progress } from "./ui/progress";
 import Image from "next/image";
@@ -164,6 +164,15 @@ export function PaymentDialog({ isOpen, setIsOpen, plan }: PaymentDialogProps) {
     
     const renderConfirmationScreen = () => {
         const needsQrCode = paymentCategory === 'ewallet' || paymentCategory === 'bank';
+
+        const qrCodeData = JSON.stringify({
+            userId: user?.uid,
+            transactionId: referenceNumber,
+            planId: plan.id,
+            planName: plan.name,
+            amount: plan.price
+        });
+
         return (
             <div className="text-center space-y-4">
                  <DialogHeader>
@@ -178,7 +187,7 @@ export function PaymentDialog({ isOpen, setIsOpen, plan }: PaymentDialogProps) {
 
                 {needsQrCode ? (
                     <div className="p-4 bg-white rounded-lg inline-block">
-                        <QRCode />
+                        <QRCodeSVG value={qrCodeData} size={200} />
                     </div>
                 ) : (
                     <div className="p-4 bg-secondary rounded-lg">
