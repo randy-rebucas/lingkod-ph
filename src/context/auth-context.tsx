@@ -3,8 +3,9 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, getDoc, onSnapshot, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot, Timestamp, collection, addDoc, serverTimestamp, getDocs, query, where, limit } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
+import { differenceInDays } from 'date-fns';
 
 type UserRole = 'client' | 'provider' | 'agency' | null;
 
@@ -34,6 +35,34 @@ const AuthContext = createContext<AuthContextType>({
   setUser: () => {},
 });
 
+const createRenewalNotification = async (userId: string, planName: string, daysLeft: number) => {
+    try {
+        const notificationsRef = collection(db, `users/${userId}/notifications`);
+        // Check if a similar notification already exists to avoid duplicates
+        const q = query(notificationsRef, 
+            where("type", "==", "renewal_reminder"),
+            where("message", "like", `%Your ${planName} plan will renew%`),
+            limit(1)
+        );
+
+        const existingNotifs = await getDocs(q);
+        if (!existingNotifs.empty) {
+            return; // Notification already exists
+        }
+
+        await addDoc(notificationsRef, {
+            userId,
+            message: `Your ${planName} plan will renew in ${daysLeft} day${daysLeft > 1 ? 's' : ''}.`,
+            link: '/subscription',
+            type: 'renewal_reminder',
+            read: false,
+            createdAt: serverTimestamp(),
+        });
+    } catch (error) {
+        console.error("Error creating renewal notification: ", error);
+    }
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,12 +78,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(user);
         const userDocRef = doc(db, 'users', user.uid);
         
-        const unsubscribeDoc = onSnapshot(userDocRef, (doc) => {
-          if (doc.exists()) {
-            const data = doc.data();
+        const unsubscribeDoc = onSnapshot(userDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            const sub = data.subscription || { planId: 'free', status: 'active', renewsOn: null };
+
             setUserRole(data.role || null);
-            setSubscription(data.subscription || { planId: 'free', status: 'active', renewsOn: null });
+            setSubscription(sub);
             setVerificationStatus(data.verification?.status || 'Unverified');
+            
+            // Check for subscription renewal
+            if (sub?.status === 'active' && sub.renewsOn) {
+                const daysUntilRenewal = differenceInDays(sub.renewsOn.toDate(), new Date());
+                if (daysUntilRenewal > 0 && daysUntilRenewal <= 7) {
+                    createRenewalNotification(user.uid, sub.planId, daysUntilRenewal);
+                }
+            }
           }
            setLoading(false);
         });

@@ -8,7 +8,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, limit, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { formatDistanceToNow } from 'date-fns';
 
-import { Bell, Briefcase, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X } from 'lucide-react';
+import { Bell, Briefcase, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X, Star } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Badge } from './ui/badge';
@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 
-type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info';
+type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info' | 'renewal_reminder' | 'new_review';
 
 type Notification = {
     id: string;
@@ -36,6 +36,8 @@ const getIconForType = (type: NotificationType) => {
         case 'booking_update': return <Briefcase className="h-4 w-4" />;
         case 'new_message': return <MessageSquare className="h-4 w-4" />;
         case 'agency_invite': return <UserPlus className="h-4 w-4" />;
+        case 'renewal_reminder': return <Star className="h-4 w-4 text-yellow-500" />;
+        case 'new_review': return <Star className="h-4 w-4 text-yellow-500" />;
         default: return <Bell className="h-4 w-4" />;
     }
 };

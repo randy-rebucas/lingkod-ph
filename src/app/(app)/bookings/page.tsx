@@ -256,7 +256,7 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
 };
 
 const EmptyState = ({ status, userRole }: { status: BookingStatus, userRole: string | null }) => {
-    const messages = {
+    const messages: { [key in BookingStatus]: { icon: JSX.Element, text: string } } = {
         Pending: { icon: <Hourglass className="h-16 w-16" />, text: "You have no pending bookings at the moment." },
         Upcoming: { icon: <Calendar className="h-16 w-16" />, text: "You have no upcoming bookings." },
         Completed: { icon: <Check className="h-16 w-16" />, text: "You have no completed bookings yet." },
@@ -365,8 +365,11 @@ export default function BookingsPage() {
 
     useEffect(() => {
         const hash = window.location.hash.substring(1);
-        if (hash) {
+        const validTabs = ["pending", "upcoming", "completed", "cancelled"];
+        if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
+        } else {
+            setActiveTab("pending");
         }
     }, []);
 
