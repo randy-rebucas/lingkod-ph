@@ -6,7 +6,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, Loader2 } from 'lucide-react';
-import { finalizeSubscription } from '../actions';
+import { finalizeSubscription } from '@/app/(app)/subscription/actions';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
