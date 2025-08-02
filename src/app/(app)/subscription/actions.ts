@@ -1,5 +1,5 @@
 
-'use server';
+"use server";
 
 import { z } from 'zod';
 import { db } from '@/lib/firebase';
@@ -7,11 +7,11 @@ import { doc, updateDoc, collection, addDoc, serverTimestamp, Timestamp } from '
 import { revalidatePath } from 'next/cache';
 
 const plans = {
-    starter: { price: 299 },
-    pro: { price: 499 },
-    elite: { price: 899 },
-    lite: { price: 2500 },
-    custom: { price: 10000 },
+    starter: { price: 299, name: "Starter" },
+    pro: { price: 499, name: "Pro" },
+    elite: { price: 899, name: "Elite" },
+    lite: { price: 2500, name: "Lite" },
+    custom: { price: 10000, name: "Custom" },
 };
 
 export async function createPaypalOrder(planId: keyof typeof plans, userId: string) {
@@ -19,13 +19,11 @@ export async function createPaypalOrder(planId: keyof typeof plans, userId: stri
         return { error: 'You must be logged in to subscribe.' };
     }
 
-    // In a real application, you would make an API call to PayPal here
-    // to create an order and get an approval URL.
-    // For this simulation, we'll just generate a success URL for our app.
-    
-    const successUrl = `${process.env.NEXT_PUBLIC_APP_URL}/subscription/success?planId=${planId}&userId=${userId}`;
+    // In a real application, you would make an API call to PayPal here.
+    // For this simulation, we'll redirect to a mock PayPal checkout page.
+    const checkoutUrl = `${process.env.NEXT_PUBLIC_APP_URL}/paypal/checkout?planId=${planId}&userId=${userId}`;
 
-    return { approvalUrl: successUrl, error: null };
+    return { approvalUrl: checkoutUrl, error: null };
 }
 
 
