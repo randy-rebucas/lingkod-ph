@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit, Wallet, Building, File, Trash2 } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject, uploadBytes } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
 import { doc, updateDoc, getDoc, Timestamp, collection, onSnapshot, query, orderBy, runTransaction, serverTimestamp, where, addDoc, getDocs, arrayUnion, arrayRemove } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
@@ -1503,3 +1503,5 @@ export default function ProfilePage() {
         </div>
     );
 }
+
+    
