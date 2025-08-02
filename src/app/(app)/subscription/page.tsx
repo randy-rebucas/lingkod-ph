@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
+import { doc, getDoc, Timestamp } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CheckCircle, Loader2, Star, Check, FileDown, BriefcaseBusiness, Mail, Sparkles, Phone, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import Image from "next/image";
+import { createPaypalOrder } from "./actions";
 
 type SubscriptionTier = {
     id: 'starter' | 'pro' | 'elite';
@@ -116,32 +116,6 @@ const commissionRates = [
 ];
 
 
-// Mock function to simulate a backend payment process
-const processSubscriptionChange = async (userId: string, planId: SubscriptionTier['id'] | AgencySubscriptionTier['id']): Promise<UserSubscription> => {
-    console.log(`Processing subscription change for user ${userId} to plan ${planId}`);
-    // In a real app, this would call a payment gateway (e.g., Stripe) 
-    // and a backend function to update the subscription.
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
-
-    const newRenewsOn = Timestamp.fromDate(new Date(new Date().setMonth(new Date().getMonth() + 1)));
-    
-    const userDocRef = doc(db, "users", userId);
-    await updateDoc(userDocRef, {
-        subscription: {
-            planId: planId,
-            status: 'active',
-            renewsOn: newRenewsOn,
-        }
-    });
-
-    return {
-        planId: planId as UserSubscription['planId'],
-        status: 'active',
-        renewsOn: newRenewsOn
-    };
-};
-
-
 export default function SubscriptionPage() {
     const { user, userRole } = useAuth();
     const { toast } = useToast();
@@ -165,7 +139,7 @@ export default function SubscriptionPage() {
         };
         fetchSubscription();
     }, [user]);
-
+    
     const handlePlanChange = async (planId: SubscriptionTier['id'] | AgencySubscriptionTier['id']) => {
         if (!user) {
             toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' });
@@ -173,14 +147,20 @@ export default function SubscriptionPage() {
         }
         setIsProcessing(planId);
         try {
-            const newSubscription = await processSubscriptionChange(user.uid, planId);
-            setSubscription(newSubscription);
-            const allTiers = [...providerSubscriptionTiers, ...agencySubscriptionTiers];
-            toast({ title: 'Success!', description: `You have successfully subscribed to the ${allTiers.find(t => t.id === planId)?.name} plan.` });
+            const result = await createPaypalOrder(planId);
+            if(result.error) {
+                toast({ variant: 'destructive', title: 'Error', description: result.error });
+                setIsProcessing(null);
+                return;
+            }
+
+            if(result.approvalUrl) {
+                window.location.href = result.approvalUrl;
+            }
+            
         } catch (error) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to update your subscription.' });
-        } finally {
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to initiate payment.' });
             setIsProcessing(null);
         }
     }
@@ -328,11 +308,6 @@ export default function SubscriptionPage() {
                                 : `Upgrade to a paid plan to access more features.`}
                             </CardDescription>
                         </CardHeader>
-                        {currentPlan && (
-                            <CardFooter>
-                                <Button variant="outline">Manage Subscription</Button>
-                            </CardFooter>
-                        )}
                     </Card>
                 )}
             </section>
