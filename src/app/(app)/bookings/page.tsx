@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
 import { LeaveReviewDialog } from "@/components/leave-review-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 
 
 type BookingStatus = "Pending" | "Upcoming" | "Completed" | "Cancelled";
@@ -256,19 +257,25 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
 
 const EmptyState = ({ status, userRole }: { status: BookingStatus, userRole: string | null }) => {
     const messages = {
-        Pending: { icon: <Hourglass />, text: "You have no pending bookings at the moment." },
-        Upcoming: { icon: <Calendar />, text: "You have no upcoming bookings." },
-        Completed: { icon: <Check />, text: "You have no completed bookings yet." },
-        Cancelled: { icon: <X />, text: "You have no cancelled bookings." }
+        Pending: { icon: <Hourglass className="h-16 w-16" />, text: "You have no pending bookings at the moment." },
+        Upcoming: { icon: <Calendar className="h-16 w-16" />, text: "You have no upcoming bookings." },
+        Completed: { icon: <Check className="h-16 w-16" />, text: "You have no completed bookings yet." },
+        Cancelled: { icon: <X className="h-16 w-16" />, text: "You have no cancelled bookings." }
     };
     const clientAction = "Why not book a new service today?";
     const providerAction = "You'll see new booking requests here.";
+    
+    const messageInfo = messages[status];
+
+    if (!messageInfo) {
+        return null; // or a default fallback
+    }
 
     return (
         <Card>
             <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                <div className="mb-4 text-primary">{messages[status].icon}</div>
-                <h3 className="text-xl font-semibold">{messages[status].text}</h3>
+                <div className="mb-4 text-primary">{messageInfo.icon}</div>
+                <h3 className="text-xl font-semibold">{messageInfo.text}</h3>
                 <p className="mt-2">{userRole === 'client' ? clientAction : providerAction}</p>
                  {userRole === 'client' && (
                     <Button asChild className="mt-4">
@@ -280,7 +287,7 @@ const EmptyState = ({ status, userRole }: { status: BookingStatus, userRole: str
     )
 }
 
-const BookingsList = ({ bookings, isLoading, userRole }: { bookings: Booking[], isLoading: boolean, userRole: string | null }) => {
+const BookingsList = ({ bookings, isLoading, userRole, status }: { bookings: Booking[], isLoading: boolean, userRole: string | null, status: BookingStatus }) => {
     if (isLoading) {
         return (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -290,10 +297,7 @@ const BookingsList = ({ bookings, isLoading, userRole }: { bookings: Booking[], 
     }
 
     if (bookings.length === 0) {
-        // This is a bit of a trick to get the current status from the bookings list even when it's empty
-        // In a real app, you'd probably pass the status down as a prop.
-        const currentTabStatus = (window.location.hash.substring(1) || 'pending') as BookingStatus;
-        return <EmptyState status={currentTabStatus} userRole={userRole} />;
+        return <EmptyState status={status} userRole={userRole} />;
     }
 
     return (
@@ -388,16 +392,16 @@ export default function BookingsPage() {
                     <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
                 </TabsList>
                 <TabsContent value="pending" className="mt-6">
-                     <BookingsList bookings={pendingBookings} isLoading={loading} userRole={userRole} />
+                     <BookingsList bookings={pendingBookings} isLoading={loading} userRole={userRole} status="Pending"/>
                 </TabsContent>
                 <TabsContent value="upcoming" className="mt-6">
-                     <BookingsList bookings={upcomingBookings} isLoading={loading} userRole={userRole} />
+                     <BookingsList bookings={upcomingBookings} isLoading={loading} userRole={userRole} status="Upcoming" />
                 </TabsContent>
                 <TabsContent value="completed" className="mt-6">
-                    <BookingsList bookings={completedBookings} isLoading={loading} userRole={userRole} />
+                    <BookingsList bookings={completedBookings} isLoading={loading} userRole={userRole} status="Completed" />
                 </TabsContent>
                 <TabsContent value="cancelled" className="mt-6">
-                   <BookingsList bookings={cancelledBookings} isLoading={loading} userRole={userRole} />
+                   <BookingsList bookings={cancelledBookings} isLoading={loading} userRole={userRole} status="Cancelled" />
                 </TabsContent>
             </Tabs>
         </div>
