@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, Timestamp, collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import { doc, updateDoc, Timestamp, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +12,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { CheckCircle, Loader2, Star, Check, Mail, Sparkles, Phone, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { createPaypalOrder } from "./actions";
 
 type SubscriptionTier = {
     id: 'starter' | 'pro' | 'elite';
@@ -126,41 +125,47 @@ const commissionRates = [
 
 
 export default function SubscriptionPage() {
-    const { user, userRole, subscription } = useAuth();
+    const { user, userRole, subscription, loading } = useAuth();
     const { toast } = useToast();
-    const [loading, setLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState<SubscriptionTier['id'] | AgencySubscriptionTier['id'] | null>(null);
 
-    useEffect(() => {
-        if (!user) {
-            setLoading(false);
-            return;
-        }
-        // Auth context now provides subscription, so just handle loading state
-        setLoading(false);
-    }, [user, subscription]);
-    
-    const handlePlanChange = async (planId: SubscriptionTier['id'] | AgencySubscriptionTier['id']) => {
+    const handlePlanChange = async (plan: SubscriptionTier | AgencySubscriptionTier) => {
         if (!user) {
             toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' });
             return;
         }
-        setIsProcessing(planId);
+        setIsProcessing(plan.id);
         try {
-            const result = await createPaypalOrder(planId, user.uid);
-            if(result.error) {
-                toast({ variant: 'destructive', title: 'Error', description: result.error });
-                setIsProcessing(null);
-                return;
-            }
+            const userDocRef = doc(db, 'users', user.uid);
+            const newRenewsOn = Timestamp.fromDate(new Date(new Date().setMonth(new Date().getMonth() + 1)));
 
-            if(result.approvalUrl) {
-                window.location.href = result.approvalUrl;
+            // Update user's subscription
+            await updateDoc(userDocRef, {
+                subscription: {
+                    planId: plan.id,
+                    status: 'active',
+                    renewsOn: newRenewsOn,
+                }
+            });
+
+            // Create a transaction record (simulation)
+             if (typeof plan.price === 'number') {
+                await addDoc(collection(db, 'transactions'), {
+                    userId: user.uid,
+                    planId: plan.id,
+                    amount: plan.price,
+                    paymentMethod: 'simulated_payment',
+                    status: 'completed',
+                    createdAt: serverTimestamp()
+                });
             }
+            
+            toast({ title: 'Success!', description: `You have successfully subscribed to the ${plan.name} plan.` });
             
         } catch (error) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to initiate payment.' });
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to update subscription.' });
+        } finally {
             setIsProcessing(null);
         }
     }
@@ -208,10 +213,10 @@ export default function SubscriptionPage() {
                                         <Button 
                                             className="w-full"
                                             variant='default'
-                                            onClick={() => handlePlanChange(tier.id)}
+                                            onClick={() => handlePlanChange(tier)}
                                             disabled={isProcessing !== null}
                                         >
-                                            {isProcessing === tier.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                                            {isProcessing === tier.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Star className="mr-2 h-4 w-4" />}
                                             {isProcessing === tier.id ? 'Processing...' : 'Choose Plan'}
                                         </Button>
                                     )}
@@ -267,10 +272,10 @@ export default function SubscriptionPage() {
                                     <Button 
                                         className="w-full"
                                         variant='default'
-                                        onClick={() => handlePlanChange(tier.id)}
+                                        onClick={() => handlePlanChange(tier)}
                                         disabled={isProcessing !== null}
                                     >
-                                        {isProcessing === tier.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+                                        {isProcessing === tier.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Star className="mr-2 h-4 w-4" />}
                                         {isProcessing === tier.id ? 'Processing...' : 'Choose Plan'}
                                     </Button>
                                 )}
