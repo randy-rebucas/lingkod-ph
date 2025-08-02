@@ -7,10 +7,29 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle, Mail, Star, Check, Clock } from "lucide-react";
+import { CheckCircle, Mail, Star, Check, Clock, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PaymentDialog, type SubscriptionTier, type AgencySubscriptionTier } from "@/components/payment-dialog";
+import { createPaypalOrder } from "./actions";
 
+export type SubscriptionTier = {
+    id: "starter" | "pro" | "elite";
+    name: string;
+    price: number;
+    idealFor: string;
+    features: string[];
+    badge: string | null;
+    isFeatured?: boolean;
+};
+
+export type AgencySubscriptionTier = {
+    id: "lite" | "pro" | "custom";
+    name: string;
+    price: number | string;
+    idealFor: string;
+    features: string[];
+    badge: string | null;
+    isFeatured?: boolean;
+};
 
 const providerSubscriptionTiers: SubscriptionTier[] = [
     {
@@ -89,17 +108,24 @@ const commissionRates = [
 
 export default function SubscriptionPage() {
     const { userRole, subscription, loading } = useAuth();
-    const [selectedPlan, setSelectedPlan] = useState<SubscriptionTier | AgencySubscriptionTier | null>(null);
+    const [isProcessing, setIsProcessing] = useState<string | null>(null);
 
     const allTiers = [...providerSubscriptionTiers, ...agencySubscriptionTiers];
     const currentPlanDetails = allTiers.find(tier => tier.id === subscription?.planId);
 
+    const handleChoosePlan = async (plan: SubscriptionTier | AgencySubscriptionTier) => {
+        setIsProcessing(plan.id);
+        await createPaypalOrder(plan);
+        setIsProcessing(null);
+    }
+    
     const renderProviderPlans = () => (
          <section>
             <h2 className="text-2xl font-bold font-headline mb-4">Provider Subscription Plans</h2>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {providerSubscriptionTiers.map(tier => {
                     const isCurrentPlan = tier.id === subscription?.planId;
+                    const processingThisPlan = isProcessing === tier.id;
 
                     return (
                         <Card key={tier.id} className={`flex flex-col ${tier.isFeatured ? 'border-primary shadow-lg' : ''}`}>
@@ -134,10 +160,11 @@ export default function SubscriptionPage() {
                                     <Button 
                                         className="w-full"
                                         variant='default'
-                                        onClick={() => setSelectedPlan(tier)}
+                                        disabled={processingThisPlan}
+                                        onClick={() => handleChoosePlan(tier)}
                                     >
-                                        <Star className="mr-2 h-4 w-4" />
-                                        Choose Plan
+                                        {processingThisPlan ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Star className="mr-2 h-4 w-4" />}
+                                        {processingThisPlan ? 'Processing...' : 'Choose Plan'}
                                     </Button>
                                 )}
                             </CardFooter>
@@ -154,6 +181,8 @@ export default function SubscriptionPage() {
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {agencySubscriptionTiers.map(tier => {
                     const isCurrentPlan = tier.id === subscription?.planId;
+                    const processingThisPlan = isProcessing === tier.id;
+
                     return (
                         <Card key={tier.id} className={`flex flex-col ${tier.isFeatured ? 'border-primary shadow-lg' : ''}`}>
                             <CardHeader className="relative">
@@ -192,10 +221,11 @@ export default function SubscriptionPage() {
                                     <Button 
                                         className="w-full"
                                         variant='default'
-                                        onClick={() => setSelectedPlan(tier)}
+                                        disabled={processingThisPlan}
+                                        onClick={() => handleChoosePlan(tier)}
                                     >
-                                        <Star className="mr-2 h-4 w-4" />
-                                        Choose Plan
+                                        {processingThisPlan ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Star className="mr-2 h-4 w-4" />}
+                                        {processingThisPlan ? 'Processing...' : 'Choose Plan'}
                                     </Button>
                                 )}
                             </CardFooter>
@@ -274,15 +304,6 @@ export default function SubscriptionPage() {
                     </CardContent>
                  </Card>
             </section>
-            {selectedPlan && (
-                <PaymentDialog 
-                    isOpen={!!selectedPlan}
-                    setIsOpen={(open) => {
-                        if (!open) setSelectedPlan(null);
-                    }}
-                    plan={selectedPlan}
-                />
-            )}
         </div>
     );
 }
