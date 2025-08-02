@@ -4,12 +4,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, Timestamp } from "firebase/firestore";
+import { doc, getDoc, Timestamp, collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle, Loader2, Star, Check, FileDown, BriefcaseBusiness, Mail, Sparkles, Phone, CreditCard } from "lucide-react";
+import { CheckCircle, Loader2, Star, Check, Mail, Sparkles, Phone, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { createPaypalOrder } from "./actions";
@@ -40,6 +40,15 @@ type UserSubscription = {
     status: 'active' | 'cancelled' | 'none';
     renewsOn: Timestamp | null;
 } | null;
+
+type Transaction = {
+    id: string;
+    planId: string;
+    amount: number;
+    paymentMethod: string;
+    status: string;
+    createdAt: Timestamp;
+}
 
 const providerSubscriptionTiers: SubscriptionTier[] = [
     {
@@ -117,28 +126,19 @@ const commissionRates = [
 
 
 export default function SubscriptionPage() {
-    const { user, userRole } = useAuth();
+    const { user, userRole, subscription } = useAuth();
     const { toast } = useToast();
-    const [subscription, setSubscription] = useState<UserSubscription | null>(null);
     const [loading, setLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState<SubscriptionTier['id'] | AgencySubscriptionTier['id'] | null>(null);
 
     useEffect(() => {
-        const fetchSubscription = async () => {
-            if (!user) return;
-            setLoading(true);
-            const userDocRef = doc(db, 'users', user.uid);
-            const userDoc = await getDoc(userDocRef);
-            if (userDoc.exists() && userDoc.data().subscription) {
-                setSubscription(userDoc.data().subscription);
-            } else {
-                // Default to free plan if no subscription data is found
-                setSubscription({ planId: 'free', status: 'active', renewsOn: null });
-            }
+        if (!user) {
             setLoading(false);
-        };
-        fetchSubscription();
-    }, [user]);
+            return;
+        }
+        // Auth context now provides subscription, so just handle loading state
+        setLoading(false);
+    }, [user, subscription]);
     
     const handlePlanChange = async (planId: SubscriptionTier['id'] | AgencySubscriptionTier['id']) => {
         if (!user) {
@@ -147,7 +147,7 @@ export default function SubscriptionPage() {
         }
         setIsProcessing(planId);
         try {
-            const result = await createPaypalOrder(planId);
+            const result = await createPaypalOrder(planId, user.uid);
             if(result.error) {
                 toast({ variant: 'destructive', title: 'Error', description: result.error });
                 setIsProcessing(null);

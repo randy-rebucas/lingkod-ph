@@ -18,16 +18,17 @@ function SuccessContent() {
     const [error, setError] = useState<string | null>(null);
 
     const planId = searchParams.get('planId') as 'starter' | 'pro' | 'elite' | 'lite' | 'custom' | null;
+    const userId = searchParams.get('userId');
 
     useEffect(() => {
-        if (!planId) {
-            setError("Invalid subscription plan specified.");
+        if (!planId || !userId) {
+            setError("Invalid subscription details specified.");
             setLoading(false);
             return;
         }
 
         const processSubscription = async () => {
-            const result = await finalizeSubscription(planId);
+            const result = await finalizeSubscription(planId, userId);
             if (result.error) {
                 setError(result.error);
                 toast({ variant: 'destructive', title: 'Error', description: result.error });
@@ -39,7 +40,7 @@ function SuccessContent() {
 
         processSubscription();
 
-    }, [planId, router, toast]);
+    }, [planId, userId, router, toast]);
 
     if (loading) {
         return (
