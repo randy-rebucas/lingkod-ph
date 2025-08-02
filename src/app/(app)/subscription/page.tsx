@@ -224,6 +224,13 @@ export default function SubscriptionPage() {
         </svg>
     )
 
+    const QRCodeSVG = () => (
+        <svg width="300" height="300" viewBox="0 0 250 250" className="mx-auto border-4 border-blue-500 rounded-lg" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#fff" d="M0 0h250v250H0z"/>
+            <path d="M50 50h50v50H50zM60 60v30h30V60zm-5 45h5v5h-5zM150 50h50v50h-50zM160 60v30h30V60zM50 150h50v50H50zM60 160v30h30v-30zM55 195h5v5h-5zM105 55h5v5h-5zM55 105h5v5h-5zM105 105h5v5h-5zM105 155h5v5h-5zM155 105h5v5h-5zM105 195h5v5h-5zM155 155h5v5h-5zM195 55h5v5h-5zM195 105h5v5h-5zM155 195h5v5h-5zM195 155h5v5h-5zM195 195h5v5h-5zM110 110h30v30h-30zM120 120v10h10v-10zM110 80h10v10h-10zM80 110h10v10H80zM120 90h10v10h-10zM90 120h10v10H90z"/>
+        </svg>
+    );
+
     const renderProviderPlans = () => (
          <section>
                  <h2 className="text-2xl font-bold font-headline mb-4">Provider Subscription Plans</h2>
@@ -449,14 +456,7 @@ export default function SubscriptionPage() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4 text-center space-y-4">
-                        <Image 
-                            src="https://placehold.co/300x300.png" 
-                            alt="GCash QR Code" 
-                            width={300} 
-                            height={300}
-                            data-ai-hint="QR code"
-                            className="mx-auto border-4 border-blue-500 rounded-lg"
-                        />
+                        <QRCodeSVG />
                         <div className="text-left text-sm text-muted-foreground space-y-2">
                              <p><strong>Amount:</strong> ₱{selectedPlan && typeof selectedPlan.price === 'number' ? selectedPlan.price.toLocaleString() : 'N/A'}</p>
                              <p><strong>Instructions:</strong></p>
