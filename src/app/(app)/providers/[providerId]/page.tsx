@@ -32,6 +32,7 @@ type Provider = {
     photoURL?: string;
     role: string;
     availabilitySchedule?: Availability[];
+    availabilityStatus?: 'available' | 'limited' | 'unavailable';
 };
 
 export type Service = {
@@ -65,6 +66,19 @@ const getAvatarFallback = (name: string | null | undefined) => {
         return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
+};
+
+const getAvailabilityBadge = (status: Provider['availabilityStatus']) => {
+    switch (status) {
+        case 'available':
+            return <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">Available</Badge>;
+        case 'limited':
+            return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">Limited</Badge>;
+        case 'unavailable':
+            return <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">Unavailable</Badge>;
+        default:
+            return null;
+    }
 };
 
 export default function ProviderProfilePage() {
@@ -276,7 +290,10 @@ export default function ProviderProfilePage() {
                             <AvatarFallback className="text-5xl">{getAvatarFallback(provider.displayName)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1 space-y-2">
-                            <CardTitle className="text-4xl font-bold font-headline">{provider.displayName}</CardTitle>
+                            <div className="flex items-center justify-center md:justify-start gap-2">
+                                <CardTitle className="text-4xl font-bold font-headline">{provider.displayName}</CardTitle>
+                                {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus)}
+                            </div>
                             <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
                                 {renderStars(overallRating)}
                                 <span>({reviews.length} reviews)</span>

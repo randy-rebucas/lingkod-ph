@@ -196,16 +196,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/bookings")}>
-                <Link href="/bookings">
-                  <Calendar />
-                  <span>Bookings</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
             
-            {(userRole === 'provider' || userRole === 'agency') && (
+            {(userRole === 'provider' || userRole === 'agency' || userRole === 'client') && (
                <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/calendar")}>
                     <Link href="/calendar">
@@ -216,6 +208,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </SidebarMenuItem>
             )}
 
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={isActive("/bookings")}>
+                <Link href="/bookings">
+                  <Calendar />
+                  <span>Bookings</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={isActive("/messages")}>
                 <Link href="/messages">

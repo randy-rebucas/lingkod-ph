@@ -64,7 +64,7 @@ export default function CalendarPage() {
                     providerName: data.providerName,
                     clientName: data.clientName,
                 };
-            }).filter(event => event.status !== 'Pending');
+            }).filter(event => event.status !== 'Pending' && event.status !== 'Cancelled');
             setEvents(bookingEvents as BookingEvent[]);
             setLoading(false);
         });
