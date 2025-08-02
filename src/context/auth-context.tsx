@@ -9,8 +9,8 @@ import { auth, db } from '@/lib/firebase';
 type UserRole = 'client' | 'provider' | 'agency' | null;
 
 type UserSubscription = {
-    planId: 'starter' | 'pro' | 'elite' | 'free';
-    status: 'active' | 'cancelled' | 'none';
+    planId: 'starter' | 'pro' | 'elite' | 'free' | 'lite' | 'custom';
+    status: 'active' | 'cancelled' | 'none' | 'pending';
     renewsOn: Timestamp | null;
 } | null;
 

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle, Mail, Star, Check } from "lucide-react";
+import { CheckCircle, Mail, Star, Check, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PaymentDialog, type SubscriptionTier, type AgencySubscriptionTier } from "@/components/payment-dialog";
 
@@ -206,6 +206,20 @@ export default function SubscriptionPage() {
         </section>
     );
 
+    const getPlanStatusDescription = () => {
+        if (!subscription) return 'Upgrade to a paid plan to access more features.';
+
+        if (subscription.status === 'pending') {
+            return `Your payment for the ${currentPlanDetails?.name} plan is pending verification.`;
+        }
+
+        if (subscription.status === 'active' && subscription.renewsOn) {
+            return `Your plan renews on ${subscription.renewsOn.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+        }
+
+        return 'Upgrade to a paid plan to access more features.';
+    }
+
     return (
         <div className="space-y-8">
             <div>
@@ -223,14 +237,11 @@ export default function SubscriptionPage() {
                     <Card className="bg-secondary">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                                <Star className="text-primary"/>
+                                {subscription?.status === 'pending' ? <Clock className="text-yellow-500"/> : <Star className="text-primary"/>}
                                 {currentPlanDetails ? `You are on the ${currentPlanDetails.name} Plan` : 'You are on a Free Plan'}
+                                {subscription?.status && <Badge variant={subscription.status === 'pending' ? 'outline' : 'default'} className="capitalize">{subscription.status}</Badge>}
                             </CardTitle>
-                            <CardDescription>
-                                {currentPlanDetails && subscription?.renewsOn ? 
-                                `Your plan renews on ${subscription.renewsOn.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}.`
-                                : `Upgrade to a paid plan to access more features.`}
-                            </CardDescription>
+                            <CardDescription>{getPlanStatusDescription()}</CardDescription>
                         </CardHeader>
                     </Card>
                 )}

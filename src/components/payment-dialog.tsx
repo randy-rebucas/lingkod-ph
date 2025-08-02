@@ -3,19 +3,23 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
 import { doc, updateDoc, Timestamp, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Loader2 } from "lucide-react";
+import { Loader2, UploadCloud } from "lucide-react";
 import { PaymentMethodIcon } from "./payment-method-icon";
 import { QRCode } from "./qrcode-svg";
+import { Input } from "./ui/input";
+import { Progress } from "./ui/progress";
+import Image from "next/image";
 
 export type SubscriptionTier = {
     id: 'starter' | 'pro' | 'elite';
@@ -43,7 +47,7 @@ type PaymentDialogProps = {
     plan: SubscriptionTier | AgencySubscriptionTier;
 };
 
-type PaymentStep = 'selection' | 'confirmation';
+type PaymentStep = 'selection' | 'confirmation' | 'upload_proof';
 type PaymentCategory = 'ewallet' | 'bank' | 'otc';
 
 const eWallets = ["GCash", "Maya", "Coins.ph"];
@@ -59,58 +63,89 @@ export function PaymentDialog({ isOpen, setIsOpen, plan }: PaymentDialogProps) {
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("GCash");
     const [step, setStep] = useState<PaymentStep>('selection');
     const [referenceNumber, setReferenceNumber] = useState('');
+    const [proofFile, setProofFile] = useState<File | null>(null);
+    const [proofPreview, setProofPreview] = useState<string | null>(null);
+    const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
     useEffect(() => {
         if(isOpen) {
             setStep('selection');
             setIsProcessing(false);
+            setProofFile(null);
+            setProofPreview(null);
+            setUploadProgress(null);
             setReferenceNumber(`LP${Date.now()}`);
         }
     }, [isOpen]);
+    
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setProofFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setProofPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
-    const handleConfirmPayment = async () => {
+
+    const handleSubmitForVerification = async () => {
+        if (!user || !proofFile || typeof plan.price !== 'number') {
+            toast({ variant: 'destructive', title: 'Error', description: 'User or proof of payment is missing.' });
+            return;
+        }
         setIsProcessing(true);
-        // In a real app, you'd wait for a webhook from the payment provider.
-        // Here, we simulate it with a timeout.
-        setTimeout(async () => {
-             if (!user || typeof plan.price !== 'number') {
-                toast({ variant: 'destructive', title: 'Error', description: 'Cannot process payment.' });
-                setIsProcessing(false);
-                return;
-            }
-            try {
-                const userDocRef = doc(db, 'users', user.uid);
-                const newRenewsOn = isAutoRenew 
-                    ? Timestamp.fromDate(new Date(new Date().setMonth(new Date().getMonth() + 1)))
-                    : null;
 
-                await updateDoc(userDocRef, {
-                    subscription: {
-                        planId: plan.id,
-                        status: 'active',
-                        renewsOn: newRenewsOn,
+        try {
+            // 1. Upload Proof of Payment
+            const storageRef = ref(storage, `payment-proofs/${user.uid}/${Date.now()}_${proofFile.name}`);
+            const uploadTask = uploadBytesResumable(storageRef, proofFile);
+
+            const proofOfPaymentUrl = await new Promise<string>((resolve, reject) => {
+                 uploadTask.on('state_changed',
+                    (snapshot) => setUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
+                    (error) => reject(error),
+                    async () => {
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                        resolve(downloadURL);
                     }
-                });
-
-                await addDoc(collection(db, 'transactions'), {
-                    userId: user.uid,
+                );
+            });
+            
+            // 2. Update User's Subscription Status to Pending
+            const userDocRef = doc(db, 'users', user.uid);
+            await updateDoc(userDocRef, {
+                subscription: {
                     planId: plan.id,
-                    amount: plan.price,
-                    paymentMethod: selectedPaymentMethod,
-                    isAutoRenew,
-                    status: 'completed',
-                    createdAt: serverTimestamp()
-                });
-                
-                toast({ title: 'Success!', description: `You have successfully subscribed to the ${plan.name} plan.` });
-                setIsOpen(false);
-            } catch (error) {
-                console.error(error);
-                toast({ variant: 'destructive', title: 'Error', description: 'Failed to update subscription.' });
-            } finally {
-                setIsProcessing(false);
-            }
-        }, 2000); // 2-second delay to simulate processing
+                    status: 'pending',
+                    renewsOn: null, // Will be set upon approval
+                }
+            });
+
+            // 3. Create Transaction Record
+            await addDoc(collection(db, 'transactions'), {
+                userId: user.uid,
+                planId: plan.id,
+                amount: plan.price,
+                paymentMethod: selectedPaymentMethod,
+                isAutoRenew,
+                status: 'pending_verification',
+                referenceNumber,
+                proofOfPaymentUrl,
+                createdAt: serverTimestamp()
+            });
+            
+            toast({ title: 'Submitted for Verification', description: `Your payment for the ${plan.name} plan is being reviewed.` });
+            setIsOpen(false);
+
+        } catch (error) {
+             console.error(error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to submit payment for verification.' });
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     const renderPaymentOptions = (methods: string[], category: PaymentCategory) => (
@@ -157,20 +192,50 @@ export function PaymentDialog({ isOpen, setIsOpen, plan }: PaymentDialogProps) {
                 </div>
 
                 <DialogFooter className="pt-4">
-                    <Button onClick={handleConfirmPayment} disabled={isProcessing} className="w-full">
-                        {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isProcessing ? 'Verifying Payment...' : 'I have made the payment'}
+                    <Button onClick={() => setStep('upload_proof')} className="w-full">
+                        Next: Upload Proof of Payment
                     </Button>
                 </DialogFooter>
             </div>
         )
-    }
+    };
 
-    return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="max-w-2xl">
-                {step === 'selection' ? (
-                <>
+    const renderUploadScreen = () => (
+         <div className="space-y-4">
+            <DialogHeader>
+                <DialogTitle>Upload Proof of Payment</DialogTitle>
+                <DialogDescription>
+                    Please upload a screenshot or photo of your transaction receipt.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+                <div className="aspect-video w-full rounded-md border-2 border-dashed flex items-center justify-center bg-muted/50 overflow-hidden">
+                    {proofPreview ? (
+                         <Image src={proofPreview} alt="Proof of payment preview" width={300} height={200} className="object-contain h-full w-full" />
+                    ) : (
+                        <div className="text-center text-muted-foreground p-4 flex flex-col items-center gap-2">
+                             <UploadCloud className="h-10 w-10" />
+                            <p>Click to select an image</p>
+                        </div>
+                    )}
+                </div>
+                 <Input id="proof-upload" type="file" accept="image/*" onChange={handleFileChange} />
+                 {uploadProgress !== null && <Progress value={uploadProgress} />}
+            </div>
+            <DialogFooter className="pt-4">
+                 <Button variant="outline" onClick={() => setStep('confirmation')}>Back</Button>
+                 <Button onClick={handleSubmitForVerification} disabled={isProcessing || !proofFile}>
+                    {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isProcessing ? 'Submitting...' : 'Submit for Verification'}
+                </Button>
+            </DialogFooter>
+        </div>
+    );
+
+    const renderContent = () => {
+        switch(step) {
+            case 'selection': return (
+                 <>
                     <DialogHeader>
                         <DialogTitle>Complete Your Subscription</DialogTitle>
                         <DialogDescription>
@@ -205,9 +270,18 @@ export function PaymentDialog({ isOpen, setIsOpen, plan }: PaymentDialogProps) {
                         <Button onClick={() => setStep('confirmation')}>Proceed to Payment</Button>
                     </DialogFooter>
                 </>
-                ) : (
-                   renderConfirmationScreen()
-                )}
+            );
+            case 'confirmation': return renderConfirmationScreen();
+            case 'upload_proof': return renderUploadScreen();
+            default: return null;
+        }
+    }
+
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="max-w-2xl">
+              {renderContent()}
             </DialogContent>
         </Dialog>
     );
