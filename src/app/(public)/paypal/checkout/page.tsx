@@ -11,7 +11,7 @@ import { PaymentMethodIcon } from "@/components/payment-method-icon";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { doc, updateDoc, serverTimestamp, collection, addDoc } from "firebase/firestore";
+import { doc, updateDoc, serverTimestamp, collection, addDoc, Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
@@ -46,13 +46,15 @@ function CheckoutPageContent() {
             // This is where you would typically interact with a real payment gateway.
             // For this simulation, we'll directly update the user's subscription status
             // and create a transaction record.
+            const renewalDate = new Date();
+            renewalDate.setMonth(renewalDate.getMonth() + 1);
 
             const userDocRef = doc(db, 'users', user.uid);
             await updateDoc(userDocRef, {
                 subscription: {
                     planId: planId,
-                    status: 'pending', // Set to pending until proof is uploaded/verified
-                    renewsOn: null,
+                    status: 'active', // Set to active immediately for this simulation
+                    renewsOn: Timestamp.fromDate(renewalDate),
                 }
             });
 
@@ -61,7 +63,7 @@ function CheckoutPageContent() {
                 planId: planId,
                 amount: Number(price),
                 paymentMethod: selectedMethod,
-                status: 'pending_verification', // This status indicates we need proof
+                status: 'completed', // Mark as completed for this simulation
                 createdAt: serverTimestamp(),
             });
 
