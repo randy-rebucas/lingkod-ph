@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CheckCircle, Mail, Star, Check, Clock, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { createPaypalOrder } from "./actions";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { PayPalCheckoutButton } from "@/components/paypal-checkout-button";
 
 export type SubscriptionTier = {
     id: "starter" | "pro" | "elite";
@@ -108,16 +109,9 @@ const commissionRates = [
 
 export default function SubscriptionPage() {
     const { userRole, subscription, loading } = useAuth();
-    const [isProcessing, setIsProcessing] = useState<string | null>(null);
 
     const allTiers = [...providerSubscriptionTiers, ...agencySubscriptionTiers];
     const currentPlanDetails = allTiers.find(tier => tier.id === subscription?.planId);
-
-    const handleChoosePlan = async (plan: SubscriptionTier | AgencySubscriptionTier) => {
-        setIsProcessing(plan.id);
-        await createPaypalOrder(plan);
-        setIsProcessing(null);
-    }
     
     const renderProviderPlans = () => (
          <section>
@@ -125,8 +119,6 @@ export default function SubscriptionPage() {
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {providerSubscriptionTiers.map(tier => {
                     const isCurrentPlan = tier.id === subscription?.planId;
-                    const processingThisPlan = isProcessing === tier.id;
-
                     return (
                         <Card key={tier.id} className={`flex flex-col ${tier.isFeatured ? 'border-primary shadow-lg' : ''}`}>
                             <CardHeader className="relative">
@@ -157,15 +149,21 @@ export default function SubscriptionPage() {
                                         Current Plan
                                     </Button>
                                 ) : (
-                                    <Button 
-                                        className="w-full"
-                                        variant='default'
-                                        disabled={processingThisPlan}
-                                        onClick={() => handleChoosePlan(tier)}
-                                    >
-                                        {processingThisPlan ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Star className="mr-2 h-4 w-4" />}
-                                        {processingThisPlan ? 'Processing...' : 'Choose Plan'}
-                                    </Button>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                             <Button className="w-full" variant='default'>
+                                                <Star className="mr-2 h-4 w-4" />
+                                                Choose Plan
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Subscribe to {tier.name}</DialogTitle>
+                                                <DialogDescription>Complete your payment securely with PayPal.</DialogDescription>
+                                            </DialogHeader>
+                                            <PayPalCheckoutButton plan={tier} />
+                                        </DialogContent>
+                                    </Dialog>
                                 )}
                             </CardFooter>
                         </Card>
@@ -181,8 +179,6 @@ export default function SubscriptionPage() {
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {agencySubscriptionTiers.map(tier => {
                     const isCurrentPlan = tier.id === subscription?.planId;
-                    const processingThisPlan = isProcessing === tier.id;
-
                     return (
                         <Card key={tier.id} className={`flex flex-col ${tier.isFeatured ? 'border-primary shadow-lg' : ''}`}>
                             <CardHeader className="relative">
@@ -218,15 +214,21 @@ export default function SubscriptionPage() {
                                 ) : tier.id === 'custom' ? (
                                     <Button className="w-full" variant="outline"><Mail className="mr-2 h-4 w-4" /> Contact Us</Button>
                                 ) : (
-                                    <Button 
-                                        className="w-full"
-                                        variant='default'
-                                        disabled={processingThisPlan}
-                                        onClick={() => handleChoosePlan(tier)}
-                                    >
-                                        {processingThisPlan ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Star className="mr-2 h-4 w-4" />}
-                                        {processingThisPlan ? 'Processing...' : 'Choose Plan'}
-                                    </Button>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <Button className="w-full" variant='default'>
+                                                <Star className="mr-2 h-4 w-4" />
+                                                Choose Plan
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Subscribe to {tier.name}</DialogTitle>
+                                                <DialogDescription>Complete your payment securely with PayPal.</DialogDescription>
+                                            </DialogHeader>
+                                            <PayPalCheckoutButton plan={tier} />
+                                        </DialogContent>
+                                    </Dialog>
                                 )}
                             </CardFooter>
                         </Card>
