@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameMonth, isToday, isSameDay } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameMonth, isToday, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 
 type BookingEvent = {
     title: string;
@@ -80,15 +80,23 @@ export default function CalendarPage() {
         end: lastDayOfMonth,
     });
     
-    const startingDayIndex = getDay(firstDayOfMonth);
+    const startingDayIndex = getDay(startOfWeek(firstDayOfMonth));
 
-    const prevMonthDays = Array.from({ length: startingDayIndex }, (_, i) => {
-        const date = new Date(firstDayOfMonth);
-        date.setDate(date.getDate() - (startingDayIndex - i));
-        return date;
-    });
+    const calendarGrid = useMemo(() => {
+        const firstDayOfMonth = startOfMonth(currentDate);
+        const lastDayOfMonth = endOfMonth(currentDate);
 
-    const calendarGrid = [...prevMonthDays, ...daysInMonth];
+        // Get the first day of the week for the first day of the month
+        const calendarStart = startOfWeek(firstDayOfMonth);
+        // Get the last day of the week for the last day of the month
+        const calendarEnd = endOfWeek(lastDayOfMonth);
+
+        return eachDayOfInterval({
+            start: calendarStart,
+            end: calendarEnd
+        });
+
+    }, [currentDate]);
 
     const nextMonth = () => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)));
     const prevMonth = () => setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)));
@@ -194,5 +202,3 @@ export default function CalendarPage() {
         </div>
     );
 }
-
-    
