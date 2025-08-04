@@ -21,6 +21,15 @@ const Logo = () => (
   </h1>
 );
 
+// Function to generate a unique referral code
+const generateReferralCode = (userId: string): string => {
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const uidPart = userId.substring(0, 4).toUpperCase();
+    const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
+    return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
+};
+
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -59,11 +68,13 @@ export default function LoginPage() {
     try {
         const result = await signInWithPopup(auth, provider);
         const user = result.user;
-        const additionalInfo = getAdditionalUserInfo(result);
+        
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
         
         // If it's a new user, create a document for them
-        if (additionalInfo?.isNewUser) {
-            const userDocRef = doc(db, 'users', user.uid);
+        if (!userDoc.exists()) {
+            const newReferralCode = generateReferralCode(user.uid);
             await setDoc(userDocRef, {
                 uid: user.uid,
                 email: user.email,
@@ -71,6 +82,8 @@ export default function LoginPage() {
                 photoURL: user.photoURL,
                 role: 'client', // Default role for Google sign-in
                 createdAt: serverTimestamp(),
+                loyaltyPoints: 0,
+                referralCode: newReferralCode,
             });
              toast({ title: "Welcome!", description: "Your account has been created." });
         } else {
