@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -353,7 +352,7 @@ export default function MessagesPage() {
                         <div className="p-4 border-t bg-background">
                             {previewUrl && (
                                 <div className="relative mb-2 w-24 h-24">
-                                    <Image src={previewUrl} alt="Image preview" layout="fill" className="object-cover rounded-md" />
+                                    <Image src={previewUrl} alt="Image preview" fill className="object-cover rounded-md" />
                                     <Button size="icon" variant="destructive" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => { setPreviewUrl(null); setSelectedImage(null); if(fileInputRef.current) fileInputRef.current.value = "";}}>
                                         <X className="h-4 w-4" />
                                     </Button>
