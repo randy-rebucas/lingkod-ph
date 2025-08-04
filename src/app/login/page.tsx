@@ -4,8 +4,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
@@ -45,7 +46,7 @@ export default function LoginPage() {
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: error.message,
+        description: "Invalid credentials or user not found. Please check your email and password.",
       });
     } finally {
       setLoading(false);
@@ -56,8 +57,26 @@ export default function LoginPage() {
     setLoading(true);
     const provider = new GoogleAuthProvider();
     try {
-        await signInWithPopup(auth, provider);
-        toast({ title: "Success", description: "Logged in successfully with Google!" });
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        const additionalInfo = getAdditionalUserInfo(result);
+        
+        // If it's a new user, create a document for them
+        if (additionalInfo?.isNewUser) {
+            const userDocRef = doc(db, 'users', user.uid);
+            await setDoc(userDocRef, {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                photoURL: user.photoURL,
+                role: 'client', // Default role for Google sign-in
+                createdAt: serverTimestamp(),
+            });
+             toast({ title: "Welcome!", description: "Your account has been created." });
+        } else {
+            toast({ title: "Welcome Back!", description: "Logged in successfully with Google!" });
+        }
+        
         router.push('/dashboard');
     } catch (error: any) {
         toast({
