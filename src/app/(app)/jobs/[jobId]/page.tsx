@@ -6,15 +6,19 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, updateDoc, arrayUnion, Timestamp } from "firebase/firestore";
+import { doc, getDoc, updateDoc, arrayUnion, Timestamp, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Star, ArrowLeft, MapPin, UserCircle, Briefcase, DollarSign, Clock, ShieldCheck, Users } from "lucide-react";
+import { Star, ArrowLeft, MapPin, UserCircle, Briefcase, DollarSign, Clock, ShieldCheck, Users, Flag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatDistanceToNow } from "date-fns";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+
 
 type Job = {
     id: string;
@@ -35,12 +39,14 @@ type Job = {
 export default function JobDetailsPage() {
     const params = useParams();
     const router = useRouter();
-    const { user, subscription } = useAuth();
+    const { user, userRole, subscription } = useAuth();
     const { toast } = useToast();
     const jobId = params.jobId as string;
 
     const [job, setJob] = useState<Job | null>(null);
     const [loading, setLoading] = useState(true);
+    const [reportReason, setReportReason] = useState("");
+    const [isReporting, setIsReporting] = useState(false);
 
     const isSubscribed = subscription?.status === 'active';
     const hasApplied = job?.applications?.includes(user?.uid || '');
@@ -86,6 +92,31 @@ export default function JobDetailsPage() {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to apply for the job.' });
         }
     };
+    
+    const handleReportJob = async () => {
+        if (!user || !job || !reportReason) {
+            toast({ variant: "destructive", title: "Error", description: "Please provide a reason for your report." });
+            return;
+        }
+        setIsReporting(true);
+        try {
+            await addDoc(collection(db, "reports"), {
+                reportedBy: user.uid,
+                reportedItemType: 'job',
+                reportedItemId: job.id,
+                reason: reportReason,
+                status: 'New',
+                createdAt: serverTimestamp(),
+            });
+            toast({ title: 'Report Submitted', description: 'Thank you for your feedback. An admin will review your report shortly.' });
+            setReportReason("");
+        } catch(error) {
+            console.error("Error submitting report:", error);
+            toast({ variant: "destructive", title: "Error", description: "Failed to submit your report." });
+        } finally {
+            setIsReporting(false);
+        }
+    }
 
 
     if (loading) {
@@ -111,16 +142,48 @@ export default function JobDetailsPage() {
 
     return (
         <div className="space-y-6 max-w-4xl mx-auto">
-            <div className="flex items-center gap-4">
-                 <Button variant="outline" size="icon" onClick={() => router.back()}>
-                    <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">{job.title}</h1>
-                    <p className="text-muted-foreground">
-                       Posted by {job.clientName}
-                    </p>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <Button variant="outline" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <div>
+                        <h1 className="text-3xl font-bold font-headline">{job.title}</h1>
+                        <p className="text-muted-foreground">
+                           Posted by {job.clientName}
+                        </p>
+                    </div>
                 </div>
+                 <Dialog>
+                    <DialogTrigger asChild>
+                         <Button variant="outline" size="sm" className="text-muted-foreground">
+                            <Flag className="mr-2 h-4 w-4" /> Report Job
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Report Job Post</DialogTitle>
+                            <DialogDescription>
+                                Please provide a reason for reporting this job. Your feedback is important for maintaining a safe community.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-2">
+                            <Label htmlFor="report-reason">Reason</Label>
+                            <Textarea 
+                                id="report-reason"
+                                value={reportReason}
+                                onChange={(e) => setReportReason(e.target.value)}
+                                placeholder="e.g., This job seems like a scam, the description is inappropriate..."
+                            />
+                        </div>
+                        <DialogFooter>
+                            <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
+                            <Button onClick={handleReportJob} disabled={isReporting}>
+                                {isReporting ? 'Submitting...' : 'Submit Report'}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
             
             <Card>

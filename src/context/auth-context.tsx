@@ -41,7 +41,8 @@ const createSingletonNotification = async (userId: string, type: string, message
         // Check if a similar notification already exists to avoid duplicates
         const q = query(notificationsRef, 
             where("type", "==", type),
-            where("message", "==", message)
+            where("message", "==", message),
+            limit(1)
         );
 
         const existingNotifs = await getDocs(q);
@@ -94,25 +95,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 }
             }
             
-            // Check for upcoming appointments
+            // Check for upcoming appointments & completed jobs
             const bookingsQuery = query(
               collection(db, "bookings"),
               where(data.role === 'client' ? 'clientId' : 'providerId', '==', user.uid),
-              where("status", "==", "Upcoming")
             );
 
             const unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
                 snapshot.forEach(doc => {
                     const booking = doc.data();
-                    const hoursUntilBooking = differenceInHours(booking.date.toDate(), new Date());
-                    if (hoursUntilBooking > 0 && hoursUntilBooking <= 24) {
-                         createSingletonNotification(user.uid, 'booking_update', `Your appointment for "${booking.serviceName}" is tomorrow.`, '/bookings');
+                    if(booking.status === 'Upcoming') {
+                        const hoursUntilBooking = differenceInHours(booking.date.toDate(), new Date());
+                        if (hoursUntilBooking > 0 && hoursUntilBooking <= 24) {
+                             createSingletonNotification(user.uid, 'booking_update', `Your appointment for "${booking.serviceName}" is tomorrow.`, '/bookings');
+                        }
+                    } else if (booking.status === 'Completed' && data.role === 'client' && !booking.reviewId) {
+                         createSingletonNotification(user.uid, 'new_review', `How was your service for "${booking.serviceName}"? Leave a review!`, '/bookings#completed');
                     }
                 });
             });
-            // We should return this, but it creates a nested listener that can't be returned from the top-level useEffect.
-            // This is a minor memory leak, but acceptable for this case.
-            // For a production app, this should be refactored.
+            // This is a nested listener. For a production app, this should be managed more carefully.
           }
            setLoading(false);
         });

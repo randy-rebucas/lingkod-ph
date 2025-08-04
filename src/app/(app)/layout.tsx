@@ -31,6 +31,7 @@ import {
   CheckSquare,
   Phone,
   Megaphone,
+  Flag,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -344,6 +345,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             )}
 
              {userRole === 'admin' && (
+              <>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/admin/broadcast")}>
                     <Link href="/admin/broadcast">
@@ -352,6 +354,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin/reports")}>
+                    <Link href="/admin/reports">
+                      <Flag />
+                      <span>Reports</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </>
               )}
           </SidebarMenu>
         </SidebarContent>

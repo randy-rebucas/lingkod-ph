@@ -9,13 +9,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, BriefcaseBusiness, MessageSquare, CalendarPlus, CheckCircle, Clock, Heart } from "lucide-react";
+import { Star, BriefcaseBusiness, MessageSquare, CalendarPlus, CheckCircle, Clock, Heart, Flag } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { BookingDialog } from "@/components/booking-dialog";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 type Availability = {
     day: string;
@@ -98,6 +101,9 @@ export default function ProviderProfilePage() {
 
     const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
     const [selectedService, setSelectedService] = useState<Service | null>(null);
+
+    const [reportReason, setReportReason] = useState("");
+    const [isReporting, setIsReporting] = useState(false);
 
     useEffect(() => {
         if (!providerId) return;
@@ -238,6 +244,31 @@ export default function ProviderProfilePage() {
             toast({ variant: "destructive", title: "Error", description: "Could not start a conversation." });
         }
     };
+
+    const handleReportProvider = async () => {
+        if (!user || !provider || !reportReason) {
+            toast({ variant: "destructive", title: "Error", description: "Please provide a reason for your report." });
+            return;
+        }
+        setIsReporting(true);
+        try {
+            await addDoc(collection(db, "reports"), {
+                reportedBy: user.uid,
+                reportedItemType: 'user',
+                reportedItemId: provider.uid,
+                reason: reportReason,
+                status: 'New',
+                createdAt: serverTimestamp(),
+            });
+            toast({ title: 'Report Submitted', description: 'Thank you for your feedback. An admin will review your report shortly.' });
+            setReportReason("");
+        } catch(error) {
+            console.error("Error submitting report:", error);
+            toast({ variant: "destructive", title: "Error", description: "Failed to submit your report." });
+        } finally {
+            setIsReporting(false);
+        }
+    };
     
     const handleBookNow = () => {
         servicesRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -280,132 +311,165 @@ export default function ProviderProfilePage() {
     const todaySchedule = provider.availabilitySchedule?.find(s => s.day === today);
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            {/* Header Card */}
-            <Card className="shadow-lg">
-                <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-                        <Avatar className="h-32 w-32 border-4 border-primary">
-                            <AvatarImage src={provider.photoURL} alt={provider.displayName} />
-                            <AvatarFallback className="text-5xl">{getAvatarFallback(provider.displayName)}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 space-y-2">
-                            <div className="flex items-center justify-center md:justify-start gap-2">
-                                <CardTitle className="text-4xl font-bold font-headline">{provider.displayName}</CardTitle>
-                                {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus)}
-                            </div>
-                            <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
-                                {renderStars(overallRating)}
-                                <span>({reviews.length} reviews)</span>
-                                <Badge variant="secondary" className="capitalize">{provider.role}</Badge>
-                            </div>
-                            <p className="text-muted-foreground pt-2">{provider.bio || "This provider hasn't added a bio yet."}</p>
-                        </div>
-                        <div className="flex flex-col gap-2 w-full md:w-auto">
-                            <Button size="lg" onClick={handleBookNow}><CalendarPlus className="mr-2" /> Book Now</Button>
-                            <Button size="lg" variant="outline" onClick={handleSendMessage}><MessageSquare className="mr-2" /> Send Message</Button>
-                            <Button size="lg" variant="outline" onClick={handleToggleFavorite} disabled={isFavoriteLoading}>
-                                <Heart className={cn("mr-2", isFavorited && "fill-red-500 text-red-500")} />
-                                {isFavorited ? 'Favorited' : 'Favorite'}
-                            </Button>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="md:col-span-2">
-                    {/* Services Section */}
-                    <div ref={servicesRef}>
-                        <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><BriefcaseBusiness /> Services Offered</h2>
-                        <div className="grid gap-6 md:grid-cols-2">
-                            {services.length > 0 ? services.map(service => (
-                                <Card key={service.id}>
-                                    <CardHeader>
-                                        <CardTitle>{service.name}</CardTitle>
-                                        <CardDescription>{service.category}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <p className="text-sm text-muted-foreground h-20 line-clamp-4">{service.description}</p>
-                                    </CardContent>
-                                    <CardFooter className="flex justify-between items-center">
-                                        <p className="text-xl font-bold text-primary">₱{service.price.toFixed(2)}</p>
-                                        <Button onClick={() => handleBookServiceClick(service)}>Book</Button>
-                                    </CardFooter>
-                                </Card>
-                            )) : (
-                                <p className="text-muted-foreground col-span-full text-center py-8">This provider has not listed any services yet.</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-                <div className="md:col-span-1 space-y-8">
-                    {/* Availability Section */}
-                     <div>
-                        <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Clock /> Weekly Hours</h2>
-                         <Card>
-                             <CardContent className="p-6 space-y-3">
-                                {provider.availabilitySchedule && provider.availabilitySchedule.length > 0 ? (
-                                    provider.availabilitySchedule.map(schedule => (
-                                        <div key={schedule.day} className={`flex justify-between text-sm ${schedule.day === today ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
-                                            <span>{schedule.day}</span>
-                                            <span>
-                                                {schedule.enabled ? `${schedule.startTime} - ${schedule.endTime}` : 'Closed'}
-                                            </span>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-muted-foreground text-center py-4">Availability not set.</p>
-                                )}
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
-            </div>
-
-            
-            <Separator />
-
-            {/* Reviews Section */}
-            <div>
-                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Star /> Client Reviews</h2>
-                <Card>
-                    <CardContent className="p-6 space-y-6">
-                        {reviews.length > 0 ? reviews.map(review => (
-                            <div key={review.id} className="flex gap-4">
-                                <Avatar>
-                                    <AvatarImage src={review.clientAvatar} alt={review.clientName} />
-                                    <AvatarFallback>{getAvatarFallback(review.clientName)}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                    <div className="flex justify-between items-center">
-                                        <p className="font-semibold">{review.clientName}</p>
-                                        <div className="flex items-center gap-1">
-                                            {renderStars(review.rating)}
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">{review.createdAt.toDate().toLocaleDateString()}</p>
-                                    <p className="mt-2 text-sm">{review.comment}</p>
+        <Dialog>
+            <div className="max-w-6xl mx-auto space-y-8">
+                {/* Header Card */}
+                <Card className="shadow-lg">
+                    <CardContent className="p-6">
+                        <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+                            <Avatar className="h-32 w-32 border-4 border-primary">
+                                <AvatarImage src={provider.photoURL} alt={provider.displayName} />
+                                <AvatarFallback className="text-5xl">{getAvatarFallback(provider.displayName)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 space-y-2">
+                                <div className="flex items-center justify-center md:justify-start gap-2">
+                                    <CardTitle className="text-4xl font-bold font-headline">{provider.displayName}</CardTitle>
+                                    {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus)}
                                 </div>
+                                <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
+                                    {renderStars(overallRating)}
+                                    <span>({reviews.length} reviews)</span>
+                                    <Badge variant="secondary" className="capitalize">{provider.role}</Badge>
+                                </div>
+                                <p className="text-muted-foreground pt-2">{provider.bio || "This provider hasn't added a bio yet."}</p>
                             </div>
-                        )) : (
-                             <p className="text-muted-foreground text-center py-8">This provider has not received any reviews yet.</p>
-                        )}
+                            <div className="flex flex-col gap-2 w-full md:w-auto">
+                                <Button size="lg" onClick={handleBookNow}><CalendarPlus className="mr-2" /> Book Now</Button>
+                                <Button size="lg" variant="outline" onClick={handleSendMessage}><MessageSquare className="mr-2" /> Send Message</Button>
+                                <Button size="lg" variant="outline" onClick={handleToggleFavorite} disabled={isFavoriteLoading}>
+                                    <Heart className={cn("mr-2", isFavorited && "fill-red-500 text-red-500")} />
+                                    {isFavorited ? 'Favorited' : 'Favorite'}
+                                </Button>
+                            </div>
+                        </div>
                     </CardContent>
+                    <CardFooter className="bg-secondary/50 p-2 flex justify-end">
+                        <DialogTrigger asChild>
+                            <Button variant="link" size="sm" className="text-xs text-muted-foreground">
+                                <Flag className="mr-2 h-3 w-3" /> Report this Provider
+                            </Button>
+                        </DialogTrigger>
+                    </CardFooter>
                 </Card>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="md:col-span-2">
+                        {/* Services Section */}
+                        <div ref={servicesRef}>
+                            <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><BriefcaseBusiness /> Services Offered</h2>
+                            <div className="grid gap-6 md:grid-cols-2">
+                                {services.length > 0 ? services.map(service => (
+                                    <Card key={service.id}>
+                                        <CardHeader>
+                                            <CardTitle>{service.name}</CardTitle>
+                                            <CardDescription>{service.category}</CardDescription>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <p className="text-sm text-muted-foreground h-20 line-clamp-4">{service.description}</p>
+                                        </CardContent>
+                                        <CardFooter className="flex justify-between items-center">
+                                            <p className="text-xl font-bold text-primary">₱{service.price.toFixed(2)}</p>
+                                            <Button onClick={() => handleBookServiceClick(service)}>Book</Button>
+                                        </CardFooter>
+                                    </Card>
+                                )) : (
+                                    <p className="text-muted-foreground col-span-full text-center py-8">This provider has not listed any services yet.</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="md:col-span-1 space-y-8">
+                        {/* Availability Section */}
+                         <div>
+                            <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Clock /> Weekly Hours</h2>
+                             <Card>
+                                 <CardContent className="p-6 space-y-3">
+                                    {provider.availabilitySchedule && provider.availabilitySchedule.length > 0 ? (
+                                        provider.availabilitySchedule.map(schedule => (
+                                            <div key={schedule.day} className={`flex justify-between text-sm ${schedule.day === today ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
+                                                <span>{schedule.day}</span>
+                                                <span>
+                                                    {schedule.enabled ? `${schedule.startTime} - ${schedule.endTime}` : 'Closed'}
+                                                </span>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-muted-foreground text-center py-4">Availability not set.</p>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <Separator />
+
+                {/* Reviews Section */}
+                <div>
+                    <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Star /> Client Reviews</h2>
+                    <Card>
+                        <CardContent className="p-6 space-y-6">
+                            {reviews.length > 0 ? reviews.map(review => (
+                                <div key={review.id} className="flex gap-4">
+                                    <Avatar>
+                                        <AvatarImage src={review.clientAvatar} alt={review.clientName} />
+                                        <AvatarFallback>{getAvatarFallback(review.clientName)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                        <div className="flex justify-between items-center">
+                                            <p className="font-semibold">{review.clientName}</p>
+                                            <div className="flex items-center gap-1">
+                                                {renderStars(review.rating)}
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">{review.createdAt.toDate().toLocaleDateString()}</p>
+                                        <p className="mt-2 text-sm">{review.comment}</p>
+                                    </div>
+                                </div>
+                            )) : (
+                                 <p className="text-muted-foreground text-center py-8">This provider has not received any reviews yet.</p>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+                {provider && selectedService && (
+                    <BookingDialog 
+                        isOpen={isBookingDialogOpen}
+                        setIsOpen={setIsBookingDialogOpen}
+                        service={selectedService}
+                        provider={provider}
+                        onBookingConfirmed={() => {
+                            toast({ title: 'Booking Successful!', description: 'Your booking has been confirmed and is now visible in your bookings list.'});
+                            setIsBookingDialogOpen(false);
+                        }}
+                    />
+                )}
             </div>
-            {provider && selectedService && (
-                <BookingDialog 
-                    isOpen={isBookingDialogOpen}
-                    setIsOpen={setIsBookingDialogOpen}
-                    service={selectedService}
-                    provider={provider}
-                    onBookingConfirmed={() => {
-                        toast({ title: 'Booking Successful!', description: 'Your booking has been confirmed and is now visible in your bookings list.'});
-                        setIsBookingDialogOpen(false);
-                    }}
-                />
-            )}
-        </div>
+
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Report Provider: {provider.displayName}</DialogTitle>
+                    <DialogDescription>
+                        Please provide a reason for reporting this provider. Your feedback is important for maintaining a safe community.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-2">
+                    <Label htmlFor="report-reason">Reason</Label>
+                    <Textarea 
+                        id="report-reason"
+                        value={reportReason}
+                        onChange={(e) => setReportReason(e.target.value)}
+                        placeholder="e.g., This provider was unprofessional, the work was incomplete..."
+                    />
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
+                    <Button onClick={handleReportProvider} disabled={isReporting}>
+                        {isReporting ? 'Submitting...' : 'Submit Report'}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }
