@@ -11,6 +11,7 @@ import { CheckCircle, Mail, Star, Check, Clock, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PayPalCheckoutButton } from "@/components/paypal-checkout-button";
+import PaymentHistory from "./payment-history";
 
 export type SubscriptionTier = {
     id: "starter" | "pro" | "elite";
@@ -280,6 +281,10 @@ export default function SubscriptionPage() {
             </section>
             
             {userRole === 'agency' ? renderAgencyPlans() : renderProviderPlans()}
+
+            <section>
+                <PaymentHistory />
+            </section>
             
             <section>
                 <h2 className="text-2xl font-bold font-headline mb-4">Commission per Completed Service</h2>
