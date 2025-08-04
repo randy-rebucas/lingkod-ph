@@ -30,6 +30,7 @@ import {
   Search,
   CheckSquare,
   Phone,
+  Megaphone,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -64,6 +65,7 @@ import { auth } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationBell } from "@/components/notification-bell";
 import { useTheme } from "next-themes";
+import BroadcastBanner from "@/components/broadcast-banner";
 
 const Logo = () => (
   <h1 className="text-2xl font-bold font-headline text-primary pl-2 group-data-[collapsible=icon]:hidden">
@@ -340,6 +342,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 )}
               </>
             )}
+
+             {userRole === 'admin' && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin/broadcast")}>
+                    <Link href="/admin/broadcast">
+                      <Megaphone />
+                      <span>Broadcast</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
@@ -354,7 +367,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-16 items-center justify-between border-b px-6">
+         <header className="flex h-16 items-center justify-between border-b px-6 sticky top-0 bg-background/95 z-40">
           <div className="md:hidden">
             <SidebarTrigger />
           </div>
@@ -460,6 +473,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </DropdownMenu>
           </div>
         </header>
+        <BroadcastBanner />
         <main className="flex-1 p-6 bg-secondary relative">
             {children}
             <EmergencyHotlineButton />

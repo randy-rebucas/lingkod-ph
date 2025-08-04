@@ -7,7 +7,7 @@ import { doc, getDoc, onSnapshot, Timestamp, collection, addDoc, serverTimestamp
 import { auth, db } from '@/lib/firebase';
 import { differenceInDays } from 'date-fns';
 
-type UserRole = 'client' | 'provider' | 'agency' | null;
+type UserRole = 'client' | 'provider' | 'agency' | 'admin' | null;
 
 type UserSubscription = {
     planId: 'starter' | 'pro' | 'elite' | 'free' | 'lite' | 'custom';
