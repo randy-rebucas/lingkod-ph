@@ -5,7 +5,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, onSnapshot, Timestamp, collection, addDoc, serverTimestamp, getDocs, query, where, limit } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
-import { differenceInDays } from 'date-fns';
+import { differenceInDays, differenceInHours } from 'date-fns';
 
 type UserRole = 'client' | 'provider' | 'agency' | 'admin' | null;
 
@@ -35,13 +35,13 @@ const AuthContext = createContext<AuthContextType>({
   setUser: () => {},
 });
 
-const createRenewalNotification = async (userId: string, planName: string, daysLeft: number) => {
+const createSingletonNotification = async (userId: string, type: string, message: string, link: string) => {
     try {
         const notificationsRef = collection(db, `users/${userId}/notifications`);
         // Check if a similar notification already exists to avoid duplicates
         const q = query(notificationsRef, 
-            where("type", "==", "renewal_reminder"),
-            where("message", "==", `Your ${planName} plan will renew in ${daysLeft} day${daysLeft > 1 ? 's' : ''}.`)
+            where("type", "==", type),
+            where("message", "==", message)
         );
 
         const existingNotifs = await getDocs(q);
@@ -51,14 +51,14 @@ const createRenewalNotification = async (userId: string, planName: string, daysL
 
         await addDoc(notificationsRef, {
             userId,
-            message: `Your ${planName} plan will renew in ${daysLeft} day${daysLeft > 1 ? 's' : ''}.`,
-            link: '/subscription',
-            type: 'renewal_reminder',
+            message,
+            link,
+            type,
             read: false,
             createdAt: serverTimestamp(),
         });
     } catch (error) {
-        console.error("Error creating renewal notification: ", error);
+        console.error(`Error creating ${type} notification: `, error);
     }
 };
 
@@ -90,14 +90,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (sub?.status === 'active' && sub.renewsOn) {
                 const daysUntilRenewal = differenceInDays(sub.renewsOn.toDate(), new Date());
                 if (daysUntilRenewal > 0 && daysUntilRenewal <= 7) {
-                    createRenewalNotification(user.uid, sub.planId, daysUntilRenewal);
+                    createSingletonNotification(user.uid, 'renewal_reminder', `Your ${sub.planId} plan will renew in ${daysUntilRenewal} day${daysUntilRenewal > 1 ? 's' : ''}.`, '/subscription');
                 }
             }
           }
            setLoading(false);
         });
 
-        return () => unsubscribeDoc();
+        // Check for upcoming appointments
+        const bookingsQuery = query(collection(db, "bookings"), where(docSnap.data()?.role === 'client' ? 'clientId' : 'providerId', '==', user.uid), where("status", "==", "Upcoming"));
+        const unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
+            snapshot.forEach(doc => {
+                const booking = doc.data();
+                const hoursUntilBooking = differenceInHours(booking.date.toDate(), new Date());
+                if (hoursUntilBooking > 0 && hoursUntilBooking <= 24) {
+                     createSingletonNotification(user.uid, 'booking_update', `Your appointment for "${booking.serviceName}" is tomorrow.`, '/bookings');
+                }
+            });
+        });
+
+        return () => {
+            unsubscribeDoc();
+            unsubscribeBookings();
+        };
+
       } else {
         setUser(null);
         setUserRole(null);

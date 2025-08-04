@@ -23,11 +23,11 @@ export async function handleMarkAsPaid(
       processedAt: serverTimestamp(),
     });
 
-    // Notify the provider
+    // Notify the provider that their payment has been received
     const notifRef = collection(db, `users/${providerId}/notifications`);
     await addDoc(notifRef, {
       type: 'info',
-      message: `Your payout request of ₱${amount.toFixed(2)} has been processed.`,
+      message: `Your payout of ₱${amount.toFixed(2)} has been processed and sent.`,
       link: '/earnings',
       read: false,
       createdAt: serverTimestamp(),
