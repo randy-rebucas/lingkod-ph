@@ -85,7 +85,7 @@ export default function PaymentHistory() {
                     <TableBody>
                         {transactions.length > 0 ? transactions.map((tx) => (
                             <TableRow key={tx.id}>
-                                <TableCell>{format(tx.createdAt.toDate(), 'PPP')}</TableCell>
+                                <TableCell>{tx.createdAt ? format(tx.createdAt.toDate(), 'PPP') : 'Processing...'}</TableCell>
                                 <TableCell className="capitalize">{tx.planId}</TableCell>
                                 <TableCell>₱{tx.amount.toFixed(2)}</TableCell>
                                 <TableCell>
