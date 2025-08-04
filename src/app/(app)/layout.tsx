@@ -29,6 +29,7 @@ import {
   Heart,
   Search,
   CheckSquare,
+  Phone,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -114,6 +115,19 @@ const SuccessTips = () => (
       </div>
     </PopoverContent>
   </Popover>
+);
+
+const EmergencyHotlineButton = () => (
+  <Button
+    asChild
+    size="icon"
+    className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+  >
+    <a href="tel:911">
+      <Phone className="h-6 w-6" />
+      <span className="sr-only">Call Emergency Hotline</span>
+    </a>
+  </Button>
 );
 
 
@@ -448,6 +462,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
         <main className="flex-1 p-6 bg-secondary relative">
             {children}
+            <EmergencyHotlineButton />
             {(userRole === 'provider' || userRole === 'agency') && <SuccessTips />}
         </main>
       </SidebarInset>
