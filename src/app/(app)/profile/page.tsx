@@ -1153,8 +1153,7 @@ export default function ProfilePage() {
                                     <div className="flex gap-2">
                                         <Select onValueChange={setCurrentKeyService} value={currentKeyService}>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a key service" />
-                                            </SelectTrigger>
+                                                <SelectValue placeholder="Select a key service" /></SelectTrigger>
                                             <SelectContent>
                                                 {categories
                                                     .filter(cat => !keyServices.includes(cat.name))
@@ -1503,3 +1502,5 @@ export default function ProfilePage() {
         </div>
     );
 }
+
+    
