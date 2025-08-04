@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { format, startOfDay, endOfDay } from "date-fns";
+import { findMatchingProviders } from "@/ai/flows/find-matching-providers";
 
 
 type Booking = {
@@ -53,6 +54,8 @@ type Provider = {
     address?: string;
     totalRevenue?: number;
     isVerified?: boolean;
+    searchRank?: number;
+    searchReasoning?: string;
 };
 
 type Payout = {
@@ -270,6 +273,7 @@ export default function DashboardPage() {
     const [providers, setProviders] = useState<Provider[]>([]);
     const [loadingProviders, setLoadingProviders] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isSmartSearching, setIsSmartSearching] = useState(false);
     const [favoriteProviderIds, setFavoriteProviderIds] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
@@ -494,6 +498,46 @@ export default function DashboardPage() {
     const recentBookings = bookings.slice(0, 5);
     const earningsData = processEarningsData(bookings);
 
+    const handleSmartSearch = async () => {
+        if (!searchTerm) {
+            toast({
+                title: "Search query empty",
+                description: "Please enter what you're looking for.",
+                variant: "destructive",
+            });
+            return;
+        }
+        setIsSmartSearching(true);
+        try {
+            const result = await findMatchingProviders({ query: searchTerm });
+            const rankedProviderIds = result.providers.reduce((acc, p) => {
+                acc[p.providerId] = { rank: p.rank, reasoning: p.reasoning };
+                return acc;
+            }, {} as Record<string, { rank: number, reasoning: string }>);
+            
+            const matchedProviders = providers.filter(p => rankedProviderIds[p.uid]).map(p => ({
+                ...p,
+                searchRank: rankedProviderIds[p.uid].rank,
+                searchReasoning: rankedProviderIds[p.uid].reasoning
+            })).sort((a,b) => (a.searchRank || 99) - (b.searchRank || 99));
+
+            setProviders(matchedProviders);
+            toast({
+                title: "Smart Search Complete",
+                description: `Found and ranked ${matchedProviders.length} providers for you.`,
+            });
+        } catch (error) {
+            console.error("Smart search failed:", error);
+            toast({
+                title: "Smart Search Failed",
+                description: "There was an error finding providers. Please try a different search.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSmartSearching(false);
+        }
+    };
+
     // Filter providers for client view
     const filteredProviders = useMemo(() => 
         providers.filter(provider => 
@@ -547,21 +591,29 @@ export default function DashboardPage() {
              <div className="space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">Find a Service Provider</h1>
-                    <p className="text-muted-foreground">Browse our network of trusted professionals.</p>
+                    <p className="text-muted-foreground">Describe what you need, and we'll find the right pro for the job.</p>
                 </div>
                  <Card>
                     <CardContent className="p-6 space-y-6">
-                        <div className="flex justify-between items-center">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="relative flex-1">
                                 <Input 
-                                    placeholder="Search by provider name..." 
-                                    className="w-full max-w-lg pl-10" 
+                                    placeholder="e.g., 'I need a plumber for a clogged kitchen sink'" 
+                                    className="w-full h-12 text-base pl-4 pr-32" 
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSmartSearch()}
                                 />
+                                <Button 
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 h-9"
+                                    onClick={handleSmartSearch}
+                                    disabled={isSmartSearching}
+                                >
+                                    {isSmartSearching ? <Loader2 className="mr-2 animate-spin" /> : <Search className="mr-2" />}
+                                    {isSmartSearching ? 'Searching...' : 'Search'}
+                                </Button>
                             </div>
-                            <div className="flex items-center gap-1 border p-1 rounded-lg">
+                            <div className="flex items-center gap-1 border p-1 rounded-lg bg-background h-12">
                                 <Button size="icon" variant={viewMode === 'grid' ? 'secondary' : 'ghost'} onClick={() => setViewMode('grid')}>
                                     <LayoutGrid className="h-5 w-5" />
                                 </Button>
@@ -570,15 +622,15 @@ export default function DashboardPage() {
                                 </Button>
                             </div>
                         </div>
-                        {loadingProviders ? (
+                        {loadingProviders || isSmartSearching ? (
                             <div className={cn("gap-6", viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-2')}>
                                 {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
                             </div>
                         ) : (
-                             filteredProviders.length > 0 ? (
+                             providers.length > 0 ? (
                                 viewMode === 'grid' ? (
                                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                        {filteredProviders.map(provider => (
+                                        {providers.map(provider => (
                                             <ProviderCard 
                                                 key={provider.uid} 
                                                 provider={provider} 
@@ -590,7 +642,7 @@ export default function DashboardPage() {
                                 ) : (
                                     <Card>
                                         <CardContent className="p-0">
-                                            {filteredProviders.map(provider => (
+                                            {providers.map(provider => (
                                                  <ProviderRow 
                                                     key={provider.uid} 
                                                     provider={provider} 
