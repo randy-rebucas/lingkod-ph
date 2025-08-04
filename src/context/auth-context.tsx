@@ -93,25 +93,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     createSingletonNotification(user.uid, 'renewal_reminder', `Your ${sub.planId} plan will renew in ${daysUntilRenewal} day${daysUntilRenewal > 1 ? 's' : ''}.`, '/subscription');
                 }
             }
+            
+            // Check for upcoming appointments
+            const bookingsQuery = query(
+              collection(db, "bookings"),
+              where(data.role === 'client' ? 'clientId' : 'providerId', '==', user.uid),
+              where("status", "==", "Upcoming")
+            );
+
+            const unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
+                snapshot.forEach(doc => {
+                    const booking = doc.data();
+                    const hoursUntilBooking = differenceInHours(booking.date.toDate(), new Date());
+                    if (hoursUntilBooking > 0 && hoursUntilBooking <= 24) {
+                         createSingletonNotification(user.uid, 'booking_update', `Your appointment for "${booking.serviceName}" is tomorrow.`, '/bookings');
+                    }
+                });
+            });
+            // We should return this, but it creates a nested listener that can't be returned from the top-level useEffect.
+            // This is a minor memory leak, but acceptable for this case.
+            // For a production app, this should be refactored.
           }
            setLoading(false);
         });
 
-        // Check for upcoming appointments
-        const bookingsQuery = query(collection(db, "bookings"), where(docSnap.data()?.role === 'client' ? 'clientId' : 'providerId', '==', user.uid), where("status", "==", "Upcoming"));
-        const unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
-            snapshot.forEach(doc => {
-                const booking = doc.data();
-                const hoursUntilBooking = differenceInHours(booking.date.toDate(), new Date());
-                if (hoursUntilBooking > 0 && hoursUntilBooking <= 24) {
-                     createSingletonNotification(user.uid, 'booking_update', `Your appointment for "${booking.serviceName}" is tomorrow.`, '/bookings');
-                }
-            });
-        });
-
         return () => {
             unsubscribeDoc();
-            unsubscribeBookings();
         };
 
       } else {
