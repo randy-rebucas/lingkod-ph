@@ -16,6 +16,7 @@ import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or, ru
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
 import { LeaveReviewDialog } from "@/components/leave-review-dialog";
+import { CompleteBookingDialog } from "@/components/complete-booking-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 
@@ -38,6 +39,7 @@ export type Booking = {
     price: number;
     notes?: string;
     reviewId?: string;
+    completionPhotoURL?: string;
 };
 
 const getStatusVariant = (status: string) => {
@@ -89,42 +91,12 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
+    const [isCompleteOpen, setIsCompleteOpen] = useState(false);
 
      const handleStatusUpdate = async (booking: Booking, newStatus: BookingStatus, successMessage?: string) => {
         const bookingRef = doc(db, "bookings", booking.id);
         try {
-            if (newStatus === 'Completed' && userRole === 'provider') {
-                await runTransaction(db, async (transaction) => {
-                    // Update client's loyalty points
-                    const clientRef = doc(db, "users", booking.clientId);
-                    const clientDoc = await transaction.get(clientRef);
-                    if (!clientDoc.exists()) throw "Client document does not exist!";
-                    const pointsToAward = Math.floor(booking.price / 10);
-                    const currentPoints = clientDoc.data().loyaltyPoints || 0;
-                    const newTotalPoints = currentPoints + pointsToAward;
-                    transaction.update(clientRef, { loyaltyPoints: newTotalPoints });
-
-                    // Create loyalty transaction record
-                    const loyaltyTxRef = doc(collection(db, `users/${booking.clientId}/loyaltyTransactions`));
-                    transaction.set(loyaltyTxRef, {
-                        points: pointsToAward, type: 'earn',
-                        description: `Points for completing service: ${booking.serviceName}`,
-                        bookingId: booking.id, createdAt: serverTimestamp()
-                    });
-
-                    // Update booking status
-                    transaction.update(bookingRef, { status: newStatus });
-                    
-                    // Update original job post status to "Completed" if it exists
-                    if (booking.jobId) {
-                        const jobRef = doc(db, "jobs", booking.jobId);
-                        transaction.update(jobRef, { status: "Completed" });
-                    }
-                });
-                await createNotification(booking.clientId, `Your booking for "${booking.serviceName}" has been marked as completed.`, '/bookings');
-            } else {
-                 await updateDoc(bookingRef, { status: newStatus });
-            }
+            await updateDoc(bookingRef, { status: newStatus });
            
             toast({
                 title: "Booking Updated",
@@ -158,6 +130,11 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
     const handleOpenReview = (booking: Booking) => {
         setSelectedBooking(booking);
         setIsReviewOpen(true);
+    };
+
+    const handleOpenComplete = (booking: Booking) => {
+        setSelectedBooking(booking);
+        setIsCompleteOpen(true);
     };
     
     const displayName = userRole === 'client' ? booking.providerName : booking.clientName;
@@ -214,7 +191,7 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
                                 </>
                             )}
                             {userRole === 'provider' && booking.status === 'Upcoming' && (
-                                <DropdownMenuItem onClick={() => handleStatusUpdate(booking, 'Completed')}><Check className="mr-2 h-4 w-4 text-green-500"/>Mark as Completed</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleOpenComplete(booking)}><Check className="mr-2 h-4 w-4 text-green-500"/>Mark as Completed</DropdownMenuItem>
                             )}
 
                             {/* Client Actions */}
@@ -251,6 +228,7 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
         </Card>
         {selectedBooking && <BookingDetailsDialog isOpen={isDetailsOpen} setIsOpen={setIsDetailsOpen} booking={selectedBooking} />}
         {selectedBooking && userRole === 'client' && <LeaveReviewDialog isOpen={isReviewOpen} setIsOpen={setIsReviewOpen} booking={selectedBooking} />}
+        {selectedBooking && userRole === 'provider' && <CompleteBookingDialog isOpen={isCompleteOpen} setIsOpen={setIsCompleteOpen} booking={selectedBooking} />}
         </>
     );
 };

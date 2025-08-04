@@ -8,6 +8,7 @@ import { Booking } from "@/app/(app)/bookings/page";
 import { format } from "date-fns";
 import { Separator } from "./ui/separator";
 import { useAuth } from "@/context/auth-context";
+import Image from "next/image";
 
 type BookingDetailsDialogProps = {
     isOpen: boolean;
@@ -73,6 +74,18 @@ export function BookingDetailsDialog({ isOpen, setIsOpen, booking }: BookingDeta
                          <div className="space-y-2">
                             <span className="text-muted-foreground">Notes</span>
                             <p className="p-3 bg-secondary rounded-md">{booking.notes}</p>
+                        </div>
+                        </>
+                    )}
+
+                    {booking.completionPhotoURL && (
+                         <>
+                        <Separator />
+                         <div className="space-y-2">
+                            <span className="text-muted-foreground">Proof of Completion</span>
+                            <div className="relative aspect-video w-full">
+                                 <Image src={booking.completionPhotoURL} alt="Proof of completion" layout="fill" className="rounded-md object-cover" />
+                            </div>
                         </div>
                         </>
                     )}
