@@ -3,7 +3,7 @@
 
 import { z } from "zod";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, serverTimestamp, doc, getDoc, Timestamp, updateDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, getDoc, Timestamp, updateDoc, query, where, getDocs, writeBatch } from "firebase/firestore";
 
 const postJobSchema = z.object({
   title: z.string().min(10, "Job title must be at least 10 characters."),
@@ -93,6 +93,7 @@ export async function postJobAction(
         const userData = userDoc.data();
         const clientIsVerified = userData.verification?.status === 'Verified';
 
+        const newJobRef = doc(collection(db, "jobs"));
         const newJobData = {
             ...jobData,
             clientId: userId,
@@ -102,7 +103,35 @@ export async function postJobAction(
             createdAt: serverTimestamp(),
             applications: [],
         };
-        await addDoc(collection(db, "jobs"), newJobData);
+        
+        const batch = writeBatch(db);
+        batch.set(newJobRef, newJobData);
+
+        // Notify matching providers
+        const providersQuery = query(
+            collection(db, "users"), 
+            where("role", "==", "provider"),
+            where("keyServices", "array-contains", categoryName)
+        );
+        const providersSnapshot = await getDocs(providersQuery);
+        
+        providersSnapshot.forEach(providerDoc => {
+            const providerData = providerDoc.data();
+            const notifSettings = providerData.notificationSettings;
+            if (notifSettings?.newJobAlerts !== false) {
+                 const notificationRef = doc(collection(db, `users/${providerDoc.id}/notifications`));
+                 batch.set(notificationRef, {
+                    type: 'new_job',
+                    message: `A new job in '${categoryName}' has been posted.`,
+                    link: `/jobs/${newJobRef.id}`,
+                    read: false,
+                    createdAt: serverTimestamp(),
+                 });
+            }
+        });
+        
+        await batch.commit();
+        
         return { error: null, message: "Your job has been posted successfully!" };
     }
 

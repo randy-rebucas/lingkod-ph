@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 
-type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info' | 'renewal_reminder' | 'new_review';
+type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info' | 'renewal_reminder' | 'new_review' | 'new_job';
 
 type Notification = {
     id: string;
@@ -38,6 +38,7 @@ const getIconForType = (type: NotificationType) => {
         case 'agency_invite': return <UserPlus className="h-4 w-4" />;
         case 'renewal_reminder': return <Star className="h-4 w-4 text-yellow-500" />;
         case 'new_review': return <Star className="h-4 w-4 text-yellow-500" />;
+        case 'new_job': return <Briefcase className="h-4 w-4 text-blue-500" />;
         default: return <Bell className="h-4 w-4" />;
     }
 };

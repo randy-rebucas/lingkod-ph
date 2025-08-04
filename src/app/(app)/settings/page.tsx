@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Bell, AtSign, MessageSquare, Loader2, UserPlus } from "lucide-react"
+import { Bell, AtSign, MessageSquare, Loader2, UserPlus, Briefcase } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
@@ -18,6 +18,7 @@ type NotificationSettings = {
     newMessages: boolean;
     promotionalEmails: boolean;
     agencyInvites: boolean;
+    newJobAlerts: boolean;
 }
 
 export default function SettingsPage() {
@@ -29,6 +30,7 @@ export default function SettingsPage() {
         newMessages: true,
         promotionalEmails: false,
         agencyInvites: true,
+        newJobAlerts: true,
     });
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -39,7 +41,7 @@ export default function SettingsPage() {
                 const userDocRef = doc(db, 'users', user.uid);
                 const userDoc = await getDoc(userDocRef);
                 if (userDoc.exists() && userDoc.data().notificationSettings) {
-                    setSettings(userDoc.data().notificationSettings);
+                    setSettings(prev => ({ ...prev, ...userDoc.data().notificationSettings}));
                 }
             }
             setIsLoading(false);
@@ -108,6 +110,7 @@ export default function SettingsPage() {
                                     <Switch id="new-messages" checked={settings.newMessages} onCheckedChange={(v) => handleNotificationChange('newMessages', v)} />
                                 </div>
                                 {userRole === 'provider' && (
+                                    <>
                                     <div className="flex items-center justify-between">
                                         <Label htmlFor="agency-invites" className="flex items-center gap-3">
                                             <UserPlus className="h-5 w-5 text-accent" />
@@ -115,6 +118,14 @@ export default function SettingsPage() {
                                         </Label>
                                         <Switch id="agency-invites" checked={settings.agencyInvites} onCheckedChange={(v) => handleNotificationChange('agencyInvites', v)} />
                                     </div>
+                                     <div className="flex items-center justify-between">
+                                        <Label htmlFor="new-job-alerts" className="flex items-center gap-3">
+                                            <Briefcase className="h-5 w-5 text-accent" />
+                                            <span className="font-semibold">New Job Alerts</span>
+                                        </Label>
+                                        <Switch id="new-job-alerts" checked={settings.newJobAlerts} onCheckedChange={(v) => handleNotificationChange('newJobAlerts', v)} />
+                                    </div>
+                                    </>
                                 )}
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="promotional-emails" className="flex items-center gap-3">
