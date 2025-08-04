@@ -145,7 +145,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     try {
       await signOut(auth);
       toast({ title: "Success", description: "Logged out successfully." });
-      router.push('/login');
+      window.location.href = '/login'; // Force a full page reload to avoid fetch errors
     } catch (error: any) {
       toast({
         variant: "destructive",
