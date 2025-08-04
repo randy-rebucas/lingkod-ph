@@ -26,7 +26,6 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -52,6 +51,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { AddEditInvoiceDialog } from "@/components/add-edit-invoice-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { InvoicePreview } from "@/components/invoice-preview";
+
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
 
@@ -99,6 +101,8 @@ export default function InvoicesPage() {
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
+    
+    const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
     const isProOrElite = subscription?.status === 'active' && (subscription.planId === 'pro' || subscription.planId === 'elite');
 
@@ -243,50 +247,63 @@ export default function InvoicesPage() {
         cell: ({ row }) => {
           const invoice = row.original;
           return (
-             <AlertDialog>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => handleEditInvoice(invoice)}>
-                    View/Edit Details
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleStatusUpdate(invoice.id, 'Paid')} disabled={invoice.status === 'Paid'}>
-                    Mark as Paid
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleStatusUpdate(invoice.id, 'Sent')} disabled={invoice.status === 'Sent'}>
-                    Mark as Sent
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                   <AlertDialogTrigger asChild>
-                    <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">Delete</DropdownMenuItem>
-                  </AlertDialogTrigger>
-                </DropdownMenuContent>
-              </DropdownMenu>
-               <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete this invoice.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-destructive hover:bg-destructive/90"
-                    onClick={() => handleDeleteInvoice(invoice.id)}
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+             <Dialog onOpenChange={(open) => !open && setSelectedInvoice(null)}>
+              <AlertDialog>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                     <DialogTrigger asChild>
+                        <DropdownMenuItem onClick={() => setSelectedInvoice(invoice)}>View/Download</DropdownMenuItem>
+                    </DialogTrigger>
+                    <DropdownMenuItem onClick={() => handleEditInvoice(invoice)}>
+                      Edit Details
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => handleStatusUpdate(invoice.id, 'Paid')} disabled={invoice.status === 'Paid'}>
+                      Mark as Paid
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleStatusUpdate(invoice.id, 'Sent')} disabled={invoice.status === 'Sent'}>
+                      Mark as Sent
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                     <AlertDialogTrigger asChild>
+                      <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">Delete</DropdownMenuItem>
+                    </AlertDialogTrigger>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                 <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete this invoice.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive hover:bg-destructive/90"
+                      onClick={() => handleDeleteInvoice(invoice.id)}
+                    >
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+               {selectedInvoice?.id === invoice.id && (
+                    <DialogContent className="max-w-4xl">
+                        <DialogHeader>
+                            <DialogTitle>Invoice Preview: {selectedInvoice.invoiceNumber}</DialogTitle>
+                        </DialogHeader>
+                        <InvoicePreview invoice={selectedInvoice} />
+                    </DialogContent>
+                )}
+            </Dialog>
           );
         },
       },
