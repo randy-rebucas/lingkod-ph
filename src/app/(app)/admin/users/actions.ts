@@ -114,3 +114,33 @@ export async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
         return { error: errorMessage, message: 'Failed to create user.' };
     }
 }
+
+const updateUserSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters."),
+  role: z.enum(['client', 'provider', 'agency']),
+  phone: z.string().optional(),
+});
+
+
+export async function handleUpdateUser(userId: string, data: z.infer<typeof updateUserSchema>) {
+    const validatedFields = updateUserSchema.safeParse(data);
+    if (!validatedFields.success) {
+        return {
+            error: validatedFields.error.errors.map(e => e.message).join(', '),
+            message: 'Validation failed.'
+        };
+    }
+
+    try {
+        const userRef = doc(db, 'users', userId);
+        await updateDoc(userRef, {
+            displayName: validatedFields.data.name,
+            role: validatedFields.data.role,
+            phone: validatedFields.data.phone || '',
+        });
+        return { error: null, message: 'User updated successfully.' };
+    } catch (e: any) {
+        console.error('Error updating user: ', e);
+        return { error: e.message, message: 'Failed to update user.' };
+    }
+}

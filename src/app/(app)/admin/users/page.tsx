@@ -15,9 +15,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, CheckCircle, Slash, ShieldAlert, Trash2, Eye, UserPlus, Loader2 } from "lucide-react";
+import { MoreHorizontal, CheckCircle, Slash, ShieldAlert, Trash2, Eye, UserPlus, Loader2, Edit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { handleUserStatusUpdate, handleDeleteUser, handleCreateUser } from "./actions";
+import { handleUserStatusUpdate, handleDeleteUser, handleCreateUser, handleUpdateUser } from "./actions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import Link from "next/link";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -26,10 +26,11 @@ import { Label } from "@/components/ui/label";
 
 type UserStatus = 'active' | 'pending_approval' | 'suspended';
 
-type User = {
+export type User = {
     uid: string;
     displayName: string;
     email: string;
+    phone?: string;
     role: 'client' | 'provider' | 'agency' | 'admin';
     createdAt: Timestamp;
     accountStatus: UserStatus;
@@ -73,14 +74,15 @@ export default function AdminUsersPage() {
     const [roleFilter, setRoleFilter] = useState("all");
     const [statusFilter, setStatusFilter] = useState("all");
     
-    // Create User Dialog State
+    // Dialog States
     const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
-    const [isCreatingUser, setIsCreatingUser] = useState(false);
-    const [newUserName, setNewUserName] = useState("");
-    const [newUserEmail, setNewUserEmail] = useState("");
-    const [newUserPassword, setNewUserPassword] = useState("");
-    const [newUserRole, setNewUserRole] = useState<'client' | 'provider' | 'agency'>('client');
-    const [newUserPhone, setNewUserPhone] = useState("");
+    const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+    // Form states
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [createForm, setCreateForm] = useState({ name: "", email: "", password: "", role: 'client' as const, phone: "" });
+    const [editForm, setEditForm] = useState({ name: "", role: 'client' as const, phone: "" });
 
 
      useEffect(() => {
@@ -121,14 +123,38 @@ export default function AdminUsersPage() {
         });
     }
 
+    const handleOpenEditDialog = (user: User) => {
+        setSelectedUser(user);
+        setEditForm({ name: user.displayName, role: user.role, phone: user.phone || "" });
+        setIsEditUserOpen(true);
+    };
+
+    const onUpdateUser = async () => {
+        if (!selectedUser) return;
+        setIsSubmitting(true);
+        const result = await handleUpdateUser(selectedUser.uid, editForm);
+
+        toast({
+            title: result.error ? 'Error' : 'Success',
+            description: result.message,
+            variant: result.error ? 'destructive' : 'default',
+        });
+
+        if (!result.error) {
+            setIsEditUserOpen(false);
+            setSelectedUser(null);
+        }
+        setIsSubmitting(false);
+    }
+
     const onCreateUser = async () => {
-        setIsCreatingUser(true);
+        setIsSubmitting(true);
         const result = await handleCreateUser({
-            name: newUserName,
-            email: newUserEmail,
-            password: newUserPassword,
-            role: newUserRole,
-            phone: newUserPhone
+            name: createForm.name,
+            email: createForm.email,
+            password: createForm.password,
+            role: createForm.role,
+            phone: createForm.phone
         });
 
         toast({
@@ -139,13 +165,9 @@ export default function AdminUsersPage() {
 
         if (!result.error) {
             setIsCreateUserOpen(false);
-            setNewUserName("");
-            setNewUserEmail("");
-            setNewUserPassword("");
-            setNewUserRole("client");
-            setNewUserPhone("");
+            setCreateForm({ name: "", email: "", password: "", role: "client", phone: "" });
         }
-        setIsCreatingUser(false);
+        setIsSubmitting(false);
     }
     
     const filteredUsers = users.filter(user => {
@@ -183,7 +205,7 @@ export default function AdminUsersPage() {
     }
 
     return (
-        <Dialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen}>
+        <>
             <div className="space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">User Management</h1>
@@ -223,9 +245,7 @@ export default function AdminUsersPage() {
                                     <SelectItem value="suspended">Suspended</SelectItem>
                                 </SelectContent>
                             </Select>
-                             <DialogTrigger asChild>
-                                <Button><UserPlus className="mr-2 h-4 w-4" /> Create User</Button>
-                            </DialogTrigger>
+                             <Button onClick={() => setIsCreateUserOpen(true)}><UserPlus className="mr-2 h-4 w-4" /> Create User</Button>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -270,6 +290,9 @@ export default function AdminUsersPage() {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                        <DropdownMenuItem onSelect={() => handleOpenEditDialog(user)}>
+                                                            <Edit className="mr-2 h-4 w-4" />Edit User
+                                                        </DropdownMenuItem>
                                                         {user.role !== 'client' && (
                                                             <DropdownMenuItem asChild>
                                                                 <Link href={`/providers/${user.uid}`} target="_blank"><Eye className="mr-2 h-4 w-4" />View Profile</Link>
@@ -329,51 +352,53 @@ export default function AdminUsersPage() {
                         </Table>
                     </CardContent>
                 </Card>
+            </div>
+            
+            {/* Create User Dialog */}
+            <Dialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Create New User</DialogTitle>
                         <CardDescription>Enter the details for the new user account.</CardDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="new-name">Full Name</Label>
-                            <Input id="new-name" value={newUserName} onChange={e => setNewUserName(e.target.value)} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="new-email">Email</Label>
-                            <Input id="new-email" type="email" value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="new-phone">Phone Number</Label>
-                            <Input id="new-phone" type="tel" value={newUserPhone} onChange={e => setNewUserPhone(e.target.value)} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="new-password">Password</Label>
-                            <Input id="new-password" type="password" value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} />
-                        </div>
-                         <div className="space-y-2">
-                            <Label htmlFor="new-role">Role</Label>
-                            <Select value={newUserRole} onValueChange={(v) => setNewUserRole(v as any)}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a role" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="client">Client</SelectItem>
-                                    <SelectItem value="provider">Provider</SelectItem>
-                                    <SelectItem value="agency">Agency</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                        <div className="space-y-2"><Label htmlFor="new-name">Full Name</Label><Input id="new-name" value={createForm.name} onChange={e => setCreateForm(f => ({...f, name: e.target.value}))} /></div>
+                        <div className="space-y-2"><Label htmlFor="new-email">Email</Label><Input id="new-email" type="email" value={createForm.email} onChange={e => setCreateForm(f => ({...f, email: e.target.value}))} /></div>
+                        <div className="space-y-2"><Label htmlFor="new-phone">Phone Number</Label><Input id="new-phone" type="tel" value={createForm.phone} onChange={e => setCreateForm(f => ({...f, phone: e.target.value}))} /></div>
+                        <div className="space-y-2"><Label htmlFor="new-password">Password</Label><Input id="new-password" type="password" value={createForm.password} onChange={e => setCreateForm(f => ({...f, password: e.target.value}))} /></div>
+                        <div className="space-y-2"><Label htmlFor="new-role">Role</Label><Select value={createForm.role} onValueChange={(v) => setCreateForm(f => ({...f, role: v as any}))}>
+                            <SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger>
+                            <SelectContent><SelectItem value="client">Client</SelectItem><SelectItem value="provider">Provider</SelectItem><SelectItem value="agency">Agency</SelectItem></SelectContent>
+                        </Select></div>
                     </div>
                     <DialogFooter>
                         <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                        <Button onClick={onCreateUser} disabled={isCreatingUser}>
-                            {isCreatingUser ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
-                            Create User
-                        </Button>
+                        <Button onClick={onCreateUser} disabled={isSubmitting}>{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}Create User</Button>
                     </DialogFooter>
                 </DialogContent>
-            </div>
-        </Dialog>
+            </Dialog>
+            
+            {/* Edit User Dialog */}
+            <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit User: {selectedUser?.displayName}</DialogTitle>
+                        <CardDescription>Update the user's details below.</CardDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="space-y-2"><Label htmlFor="edit-name">Full Name</Label><Input id="edit-name" value={editForm.name} onChange={e => setEditForm(f => ({...f, name: e.target.value}))} /></div>
+                        <div className="space-y-2"><Label htmlFor="edit-phone">Phone Number</Label><Input id="edit-phone" type="tel" value={editForm.phone} onChange={e => setEditForm(f => ({...f, phone: e.target.value}))} /></div>
+                        <div className="space-y-2"><Label htmlFor="edit-role">Role</Label><Select value={editForm.role} onValueChange={(v) => setEditForm(f => ({...f, role: v as any}))}>
+                            <SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger>
+                            <SelectContent><SelectItem value="client">Client</SelectItem><SelectItem value="provider">Provider</SelectItem><SelectItem value="agency">Agency</SelectItem></SelectContent>
+                        </Select></div>
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                        <Button onClick={onUpdateUser} disabled={isSubmitting}>{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}Save Changes</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     )
 }
