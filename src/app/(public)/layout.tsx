@@ -1,6 +1,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { usePathname } from 'next/navigation';
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
@@ -8,7 +9,9 @@ const Logo = () => (
   </h1>
 );
 
-const Header = () => (
+const Header = () => {
+    
+  return (
   <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
     <div className="container flex h-16 items-center justify-between">
       <Link href="/" aria-label="Go to homepage">
@@ -29,7 +32,8 @@ const Header = () => (
       </div>
     </div>
   </header>
-);
+  )
+};
 
 const Footer = () => (
   <footer className="border-t bg-secondary">
@@ -64,7 +68,6 @@ const Footer = () => (
   </footer>
 );
 
-
 export default function PublicLayout({
   children,
 }: {
@@ -72,6 +75,7 @@ export default function PublicLayout({
 }) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      {/* Conditionally render header/footer based on route in a client component if needed */}
       <Header />
       <main className="flex-1">
         {children}

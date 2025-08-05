@@ -13,7 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp, getDocs, collection, query, limit } from "firebase/firestore";
+import { Loader2 } from "lucide-react";
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
@@ -37,6 +38,22 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
+  const [isSetupRequired, setIsSetupRequired] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkUserCount = async () => {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, limit(1));
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) {
+            setIsSetupRequired(true);
+            router.push('/setup');
+        } else {
+            setIsSetupRequired(false);
+        }
+    };
+    checkUserCount();
+  }, [router]);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -102,10 +119,10 @@ export default function LoginPage() {
     }
   };
 
-  if (authLoading || user) {
+  if (authLoading || user || isSetupRequired === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-secondary">
-        <p>Loading...</p>
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
   }
