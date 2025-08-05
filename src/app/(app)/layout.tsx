@@ -33,6 +33,9 @@ import {
   Megaphone,
   Flag,
   Wallet,
+  Shapes,
+  Gift,
+  Receipt,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -177,7 +180,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return null; // or a redirect component
   }
 
-  const isActive = (path: string) => pathname === path;
+  const isActive = (path: string) => pathname.startsWith(path);
   const getAvatarFallback = (name: string | null | undefined) => {
     if (!name) return "U";
     const parts = name.split(" ");
@@ -191,7 +194,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isProOrElite = isPaidSubscriber && (subscription?.planId === 'pro' || subscription?.planId === 'elite');
   const isElite = isPaidSubscriber && subscription?.planId === 'elite';
   const isAgencyPaidSubscriber = userRole === 'agency' && isPaidSubscriber;
-
+  
+  const dashboardPath = userRole === 'admin' ? '/admin/dashboard' : '/dashboard';
 
   return (
     <SidebarProvider>
@@ -207,8 +211,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/dashboard")}>
-                <Link href="/dashboard">
+              <SidebarMenuButton asChild isActive={isActive(dashboardPath)}>
+                <Link href={dashboardPath}>
                   <LayoutDashboard />
                   <span>Dashboard</span>
                 </Link>
@@ -348,6 +352,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
              {userRole === 'admin' && (
               <>
                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin/users")}>
+                    <Link href="/admin/users">
+                      <Users2 />
+                      <span>Users</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/admin/broadcast")}>
                     <Link href="/admin/broadcast">
                       <Megaphone />
@@ -379,11 +391,35 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                <SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin/transactions")}>
+                    <Link href="/admin/transactions">
+                      <Receipt />
+                      <span>Transactions</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/admin/reports")}>
                     <Link href="/admin/reports">
                       <Flag />
                       <span>User Reports</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin/categories")}>
+                    <Link href="/admin/categories">
+                      <Shapes />
+                      <span>Categories</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin/rewards")}>
+                    <Link href="/admin/rewards">
+                      <Gift />
+                      <span>Rewards</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
