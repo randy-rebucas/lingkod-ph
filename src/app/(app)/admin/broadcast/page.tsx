@@ -26,9 +26,9 @@ export default function BroadcastPage() {
         setIsSending(true);
         try {
             const batch = writeBatch(db);
+            const broadcastsRef = collection(db, "broadcasts");
 
             // 1. Deactivate all existing active broadcasts
-            const broadcastsRef = collection(db, "broadcasts");
             const q = query(broadcastsRef, where("status", "==", "active"));
             const activeBroadcasts = await getDocs(q);
             activeBroadcasts.forEach(doc => {
@@ -36,7 +36,8 @@ export default function BroadcastPage() {
             });
 
             // 2. Add the new broadcast as active
-            const newBroadcastRef = addDoc(collection(db, "broadcasts"), {
+            const newBroadcastRef = doc(collection(db, "broadcasts"));
+            batch.set(newBroadcastRef, {
                 message,
                 status: 'active',
                 createdAt: serverTimestamp()
