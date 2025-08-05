@@ -3,9 +3,6 @@
 
 import { useState, useRef } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { db, storage } from '@/lib/firebase';
-import { doc, runTransaction, collection, serverTimestamp, writeBatch, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -14,25 +11,12 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Camera, Upload } from 'lucide-react';
 import { Booking } from '@/app/(app)/bookings/page';
 import Image from 'next/image';
+import { completeBookingAction } from '@/app/(app)/bookings/actions';
 
 type CompleteBookingDialogProps = {
     isOpen: boolean;
     setIsOpen: (open: boolean) => void;
     booking: Booking;
-};
-
-const createNotification = async (userId: string, message: string, link: string) => {
-    try {
-        const notificationsRef = collection(db, `users/${userId}/notifications`);
-        await writeBatch(db).set(doc(notificationsRef), {
-            userId, message, link,
-            type: 'booking_update',
-            read: false,
-            createdAt: serverTimestamp(),
-        }).commit();
-    } catch (error) {
-        console.error("Error creating notification: ", error);
-    }
 };
 
 export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBookingDialogProps) {
@@ -47,57 +31,35 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
         if (event.target.files && event.target.files[0]) {
             const file = event.target.files[0];
             setImageFile(file);
-            setPreviewUrl(URL.createObjectURL(file));
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
     };
 
     const handleConfirmCompletion = async () => {
-        if (!user || !imageFile) {
+        if (!user || !imageFile || !previewUrl) {
             toast({ variant: 'destructive', title: 'Error', description: 'Please upload a photo as proof of completion.' });
             return;
         }
         setIsSaving(true);
 
         try {
-            // 1. Upload image to storage
-            const storageRef = ref(storage, `completion-photos/${booking.id}/${Date.now()}_${imageFile.name}`);
-            const uploadResult = await uploadBytes(storageRef, imageFile);
-            const completionPhotoURL = await getDownloadURL(uploadResult.ref);
-            
-            // 2. Run transaction to update booking, job, and loyalty points
-            await runTransaction(db, async (transaction) => {
-                const bookingRef = doc(db, "bookings", booking.id);
-                const clientRef = doc(db, "users", booking.clientId);
-
-                const clientDoc = await transaction.get(clientRef);
-                if (!clientDoc.exists()) throw "Client document does not exist!";
-                
-                // Update booking status and add photo URL
-                transaction.update(bookingRef, { status: "Completed", completionPhotoURL });
-
-                // Update client's loyalty points
-                const pointsToAward = Math.floor(booking.price / 10);
-                const currentPoints = clientDoc.data().loyaltyPoints || 0;
-                const newTotalPoints = currentPoints + pointsToAward;
-                transaction.update(clientRef, { loyaltyPoints: newTotalPoints });
-
-                // Create loyalty transaction record
-                const loyaltyTxRef = doc(collection(db, `users/${booking.clientId}/loyaltyTransactions`));
-                transaction.set(loyaltyTxRef, {
-                    points: pointsToAward, type: 'earn',
-                    description: `Points for completing service: ${booking.serviceName}`,
-                    bookingId: booking.id, createdAt: serverTimestamp()
-                });
-                
-                // Update original job post status to "Completed" if it exists
-                if (booking.jobId) {
-                    const jobRef = doc(db, "jobs", booking.jobId);
-                    transaction.update(jobRef, { status: "Completed" });
-                }
+            const result = await completeBookingAction({
+                bookingId: booking.id,
+                clientId: booking.clientId,
+                jobId: booking.jobId,
+                serviceName: booking.serviceName,
+                price: booking.price,
+                photoDataUrl: previewUrl,
+                fileName: imageFile.name,
             });
 
-            // 3. Send notification to client
-            await createNotification(booking.clientId, `Your booking for "${booking.serviceName}" has been marked as completed.`, '/bookings');
+            if (result.error) {
+                throw new Error(result.error);
+            }
             
             toast({
                 title: "Booking Completed!",
@@ -105,9 +67,9 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
             });
             setIsOpen(false);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error completing booking:", error);
-            toast({ variant: "destructive", title: "Update Failed", description: "Could not complete the booking." });
+            toast({ variant: "destructive", title: "Update Failed", description: error.message || "Could not complete the booking." });
         } finally {
             setIsSaving(false);
             setPreviewUrl(null);
@@ -116,7 +78,13 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={(open) => {
+            if (!open) {
+                setPreviewUrl(null);
+                setImageFile(null);
+            }
+            setIsOpen(open);
+        }}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Complete Booking</DialogTitle>
