@@ -32,6 +32,7 @@ import {
   Phone,
   Megaphone,
   Flag,
+  Wallet,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -355,10 +356,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin/payouts")}>
+                    <Link href="/admin/payouts">
+                      <Wallet />
+                      <span>Payouts</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/admin/reports")}>
                     <Link href="/admin/reports">
                       <Flag />
-                      <span>Reports</span>
+                      <span>User Reports</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
