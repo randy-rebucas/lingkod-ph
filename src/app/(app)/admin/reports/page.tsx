@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -116,7 +115,7 @@ export default function AdminReportsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Admin Reports</h1>
+                <h1 className="text-3xl font-bold font-headline">User Reports</h1>
                 <p className="text-muted-foreground">
                     Review and manage user-submitted reports.
                 </p>
