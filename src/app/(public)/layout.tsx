@@ -1,7 +1,6 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { usePathname } from 'next/navigation';
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
