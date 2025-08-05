@@ -161,6 +161,8 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
         const referralError = await handleReferral(referralCode, user);
         if (referralError) {
             toast({ variant: 'destructive', title: 'Invalid Referral Code', description: referralError });
+        } else {
+             toast({ title: "Referral Applied!", description: "You and your friend have received bonus points." });
         }
       }
 
@@ -268,6 +270,8 @@ const SignupFormContainer = () => {
           const referralError = await handleReferral(refCode, user);
           if (referralError) {
               toast({ variant: 'destructive', title: 'Invalid Referral Code', description: referralError });
+          } else {
+             toast({ title: "Referral Applied!", description: "You and your friend have received bonus points." });
           }
         }
       } 

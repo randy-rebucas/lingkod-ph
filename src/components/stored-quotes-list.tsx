@@ -129,7 +129,7 @@ export function StoredQuotesList() {
         }
     };
     
-    const calculateTotal = (quote: Quote) => {
+    const calculateTotal = (quote: QuoteFormValues) => {
         const subtotal = quote.lineItems.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
         const taxAmount = subtotal * ((Number(quote.taxRate) || 0) / 100);
         return subtotal + taxAmount;

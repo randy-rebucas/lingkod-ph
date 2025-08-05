@@ -11,7 +11,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { Bell, Briefcase, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X, Star } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
-import { Badge } from './ui/badge';
 import { handleInviteAction } from '@/app/(app)/profile/actions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -109,7 +108,7 @@ export function NotificationBell() {
                 <Button variant="ghost" size="icon" className="relative">
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
-                        <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">{unreadCount}</Badge>
+                        <div className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-destructive" />
                     )}
                 </Button>
             </DropdownMenuTrigger>

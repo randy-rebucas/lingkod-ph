@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, getDocs, where, query, serverTimestamp, addDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, where, query, serverTimestamp, addDoc, updateDoc, arrayUnion, writeBatch } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -117,25 +117,32 @@ export default function ApplicantsPage() {
         if (!job || !user) return;
         
         try {
-            // Create a booking document
-            await addDoc(collection(db, "bookings"), {
+            const batch = writeBatch(db);
+            
+            // 1. Create a booking document
+            const bookingRef = doc(collection(db, 'bookings'));
+            batch.set(bookingRef, {
                 jobId: job.id,
                 providerId: provider.uid,
                 providerName: provider.displayName,
+                providerAvatar: provider.photoURL || '',
                 clientId: user.uid,
                 clientName: user.displayName,
+                clientAvatar: user.photoURL || '',
                 serviceName: job.title, // Use job title as service name
                 serviceId: '', // A job doesn't have a service ID
                 price: job.budget, // Use job budget as price
-                date: serverTimestamp(), // Placeholder, client/provider should confirm actual date
+                date: job.deadline || serverTimestamp(), // Use deadline or now as placeholder
                 status: "Upcoming",
                 notes: `This booking was created from job post: ${job.title}`,
                 createdAt: serverTimestamp(),
             });
 
-            // Update job status to 'In Progress'
+            // 2. Update job status to 'In Progress'
             const jobRef = doc(db, "jobs", jobId);
-            await updateDoc(jobRef, { status: "In Progress" });
+            batch.update(jobRef, { status: "In Progress" });
+
+            await batch.commit();
 
             toast({ title: "Success!", description: `${provider.displayName} has been awarded the job. A new booking has been created.`});
             router.push("/bookings");
