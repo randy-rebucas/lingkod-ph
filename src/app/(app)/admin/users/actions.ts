@@ -60,6 +60,7 @@ const createUserSchema = z.object({
   email: z.string().email("Please enter a valid email."),
   password: z.string().min(6, "Password must be at least 6 characters."),
   role: z.enum(['client', 'provider', 'agency']),
+  phone: z.string().optional(),
 });
 
 export async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
@@ -71,7 +72,7 @@ export async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
         };
     }
     
-    const { name, email, password, role } = validatedFields.data;
+    const { name, email, password, role, phone } = validatedFields.data;
 
     try {
         // This action uses the client-side Admin Auth context which is initialized when an admin is logged in.
@@ -88,6 +89,7 @@ export async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
             uid: user.uid,
             email: user.email,
             displayName: name,
+            phone: phone || '',
             role: role,
             createdAt: serverTimestamp(),
             loyaltyPoints: 0,

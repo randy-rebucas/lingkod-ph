@@ -80,6 +80,7 @@ export default function AdminUsersPage() {
     const [newUserEmail, setNewUserEmail] = useState("");
     const [newUserPassword, setNewUserPassword] = useState("");
     const [newUserRole, setNewUserRole] = useState<'client' | 'provider' | 'agency'>('client');
+    const [newUserPhone, setNewUserPhone] = useState("");
 
 
      useEffect(() => {
@@ -126,7 +127,8 @@ export default function AdminUsersPage() {
             name: newUserName,
             email: newUserEmail,
             password: newUserPassword,
-            role: newUserRole
+            role: newUserRole,
+            phone: newUserPhone
         });
 
         toast({
@@ -141,6 +143,7 @@ export default function AdminUsersPage() {
             setNewUserEmail("");
             setNewUserPassword("");
             setNewUserRole("client");
+            setNewUserPhone("");
         }
         setIsCreatingUser(false);
     }
@@ -339,6 +342,10 @@ export default function AdminUsersPage() {
                         <div className="space-y-2">
                             <Label htmlFor="new-email">Email</Label>
                             <Input id="new-email" type="email" value={newUserEmail} onChange={e => setNewUserEmail(e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="new-phone">Phone Number</Label>
+                            <Input id="new-phone" type="tel" value={newUserPhone} onChange={e => setNewUserPhone(e.target.value)} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="new-password">Password</Label>
