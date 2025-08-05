@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -225,7 +226,7 @@ export default function MessagesPage() {
         if (otherId && convo.participantInfo[otherId]) {
             return {
                 name: convo.participantInfo[otherId].displayName,
-                avatar: convo.participantInfo[otherId].photoURL
+                avatar: convo.participantInfo[otherId].photoURL || ''
             };
         }
         return { name: 'Unknown User', avatar: '' };
@@ -316,7 +317,7 @@ export default function MessagesPage() {
                                 <div className="space-y-4">
                                     {messages.map((msg) => {
                                         const isCurrentUser = msg.senderId === user?.uid;
-                                        const senderInfo = isCurrentUser ? {avatar: user?.photoURL, name: user?.displayName} : getOtherParticipantInfo(activeConversation)
+                                        const senderInfo = isCurrentUser ? {avatar: user?.photoURL || '', name: user?.displayName} : getOtherParticipantInfo(activeConversation)
                                         return (
                                             <div key={msg.id} className={cn("flex items-end gap-2", isCurrentUser ? "justify-end" : "justify-start")}>
                                                 {!isCurrentUser && (

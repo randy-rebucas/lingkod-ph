@@ -172,8 +172,8 @@ export default function ApplicantsPage() {
                 const newConvoRef = await addDoc(conversationsRef, {
                     participants: [user.uid, provider.uid],
                     participantInfo: {
-                        [user.uid]: { displayName: user.displayName, photoURL: user.photoURL },
-                        [provider.uid]: { displayName: provider.displayName, photoURL: provider.photoURL }
+                        [user.uid]: { displayName: user.displayName, photoURL: user.photoURL || '' },
+                        [provider.uid]: { displayName: provider.displayName, photoURL: provider.photoURL || '' }
                     },
                     lastMessage: `Regarding your application for: ${job?.title}`,
                     timestamp: serverTimestamp(),

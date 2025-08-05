@@ -227,11 +227,11 @@ export default function ProviderProfilePage() {
                     participantInfo: {
                         [user.uid]: {
                             displayName: user.displayName,
-                            photoURL: user.photoURL,
+                            photoURL: user.photoURL || '',
                         },
                         [provider.uid]: {
                             displayName: provider.displayName,
-                            photoURL: provider.photoURL,
+                            photoURL: provider.photoURL || '',
                         }
                     },
                     lastMessage: "Conversation started.",
