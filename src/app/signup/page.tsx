@@ -75,7 +75,7 @@ const handleReferral = async (referralCode: string, newUser: { uid: string; emai
                 referredUserId: newUser.uid,
                 createdAt: serverTimestamp(),
             });
-
+            
             // Add referral record
             const referralRecordRef = doc(collection(db, 'referrals'));
             transaction.set(referralRecordRef, {
@@ -144,8 +144,8 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
 
       const newReferralCode = generateReferralCode(user.uid);
       
-      // Check if the signing-up user is the admin
-      const role = email === 'admin@localpro.asia' ? 'admin' : userType.toLowerCase();
+      const role = userType.toLowerCase();
+      const accountStatus = (role === 'provider' || role === 'agency') ? 'pending_approval' : 'active';
 
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
@@ -153,6 +153,7 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
         displayName: displayName,
         phone: phone,
         role: role,
+        accountStatus: accountStatus,
         createdAt: serverTimestamp(),
         loyaltyPoints: 0, // Initial points
         referralCode: newReferralCode,
@@ -250,13 +251,17 @@ const SignupFormContainer = () => {
 
       if (!userDoc.exists()) {
         const newReferralCode = generateReferralCode(user.uid);
+        const role = activeTab.toLowerCase();
+        const accountStatus = (role === 'provider' || role === 'agency') ? 'pending_approval' : 'active';
+
         const userData: any = {
             uid: user.uid,
             email: user.email,
             displayName: user.displayName,
             photoURL: user.photoURL,
             phone: user.phoneNumber || '',
-            role: activeTab.toLowerCase(),
+            role: role,
+            accountStatus: accountStatus,
             createdAt: serverTimestamp(),
             loyaltyPoints: 0,
             referralCode: newReferralCode,

@@ -13,6 +13,13 @@ import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal, CheckCircle, Slash, ShieldAlert } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { handleUserStatusUpdate } from "./actions";
+
+type UserStatus = 'active' | 'pending_approval' | 'suspended';
 
 type User = {
     uid: string;
@@ -20,6 +27,7 @@ type User = {
     email: string;
     role: 'client' | 'provider' | 'agency' | 'admin';
     createdAt: Timestamp;
+    accountStatus: UserStatus;
     photoURL?: string;
 };
 
@@ -29,6 +37,15 @@ const getRoleVariant = (role: string) => {
         case "agency": return "default";
         case "provider": return "secondary";
         case "client": return "outline";
+        default: return "outline";
+    }
+};
+
+const getStatusVariant = (status: UserStatus) => {
+    switch (status) {
+        case "active": return "secondary";
+        case "pending_approval": return "outline";
+        case "suspended": return "destructive";
         default: return "outline";
     }
 };
@@ -44,10 +61,12 @@ const getAvatarFallback = (name: string | null | undefined) => {
 
 export default function AdminUsersPage() {
     const { userRole } = useAuth();
+    const { toast } = useToast();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [roleFilter, setRoleFilter] = useState("all");
+    const [statusFilter, setStatusFilter] = useState("all");
 
      useEffect(() => {
         if (userRole !== 'admin') {
@@ -69,10 +88,20 @@ export default function AdminUsersPage() {
         return () => unsubscribe();
     }, [userRole]);
     
+    const onUpdateStatus = async (userId: string, status: UserStatus) => {
+        const result = await handleUserStatusUpdate(userId, status);
+        toast({
+            title: result.error ? 'Error' : 'Success',
+            description: result.message,
+            variant: result.error ? 'destructive' : 'default',
+        });
+    };
+    
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-        return matchesSearch && matchesRole;
+        const matchesStatus = statusFilter === 'all' || user.accountStatus === statusFilter;
+        return matchesSearch && matchesRole && matchesStatus;
     });
 
     if (userRole !== 'admin') {
@@ -131,6 +160,17 @@ export default function AdminUsersPage() {
                                 <SelectItem value="client">Client</SelectItem>
                             </SelectContent>
                         </Select>
+                         <Select value={statusFilter} onValueChange={setStatusFilter}>
+                            <SelectTrigger className="w-full sm:w-[180px]">
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Statuses</SelectItem>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="pending_approval">Pending</SelectItem>
+                                <SelectItem value="suspended">Suspended</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -140,7 +180,9 @@ export default function AdminUsersPage() {
                                 <TableHead>User</TableHead>
                                 <TableHead>Email</TableHead>
                                 <TableHead>Role</TableHead>
+                                <TableHead>Status</TableHead>
                                 <TableHead>Date Joined</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -159,13 +201,41 @@ export default function AdminUsersPage() {
                                     <TableCell>
                                         <Badge variant={getRoleVariant(user.role)} className="capitalize">{user.role}</Badge>
                                     </TableCell>
+                                    <TableCell>
+                                        <Badge variant={getStatusVariant(user.accountStatus)} className="capitalize">{user.accountStatus?.replace('_', ' ') || 'Active'}</Badge>
+                                    </TableCell>
                                      <TableCell className="text-xs text-muted-foreground">
                                         {user.createdAt ? format(user.createdAt.toDate(), 'PP') : 'N/A'}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                         <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                {user.accountStatus === 'pending_approval' && (
+                                                    <DropdownMenuItem onClick={() => onUpdateStatus(user.uid, 'active')}>
+                                                        <CheckCircle className="mr-2 h-4 w-4" />Approve
+                                                    </DropdownMenuItem>
+                                                )}
+                                                {user.accountStatus === 'active' && user.role !== 'admin' && (
+                                                    <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => onUpdateStatus(user.uid, 'suspended')}>
+                                                        <Slash className="mr-2 h-4 w-4" />Suspend
+                                                    </DropdownMenuItem>
+                                                )}
+                                                 {user.accountStatus === 'suspended' && (
+                                                    <DropdownMenuItem onClick={() => onUpdateStatus(user.uid, 'active')}>
+                                                        <ShieldAlert className="mr-2 h-4 w-4" />Reactivate
+                                                    </DropdownMenuItem>
+                                                )}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </TableCell>
                                 </TableRow>
                             )) : (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center h-24">
+                                    <TableCell colSpan={6} className="text-center h-24">
                                         No users found.
                                     </TableCell>
                                 </TableRow>

@@ -2,10 +2,11 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { doc, getDoc, onSnapshot, Timestamp, collection, addDoc, serverTimestamp, getDocs, query, where, limit } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { differenceInDays, differenceInHours } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 type UserRole = 'client' | 'provider' | 'agency' | 'admin' | null;
 
@@ -69,7 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [subscription, setSubscription] = useState<UserSubscription>(null);
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus | null>(null);
-
+  const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -81,6 +82,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const unsubscribeDoc = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
+
+            if (data.accountStatus === 'suspended') {
+                signOut(auth);
+                toast({ variant: 'destructive', title: 'Account Suspended', description: 'Your account has been suspended. Please contact support.' });
+                return;
+            }
+
             const sub = data.subscription || { planId: 'free', status: 'active', renewsOn: null };
 
             setUserRole(data.role || null);
@@ -133,7 +141,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribeAuth();
-  }, []);
+  }, [toast]);
 
   return (
     <AuthContext.Provider value={{ user, loading, userRole, subscription, verificationStatus, setUser }}>
