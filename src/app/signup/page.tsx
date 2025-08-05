@@ -143,13 +143,16 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
       await updateProfile(user, { displayName });
 
       const newReferralCode = generateReferralCode(user.uid);
+      
+      // Check if the signing-up user is the admin
+      const role = email === 'admin@localpro.asia' ? 'admin' : userType.toLowerCase();
 
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
         displayName: displayName,
         phone: phone,
-        role: userType.toLowerCase(),
+        role: role,
         createdAt: serverTimestamp(),
         loyaltyPoints: 0, // Initial points
         referralCode: newReferralCode,
