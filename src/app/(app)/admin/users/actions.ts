@@ -85,7 +85,7 @@ export async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
         const newReferralCode = generateReferralCode(user.uid);
         const accountStatus = (role === 'provider' || role === 'agency') ? 'pending_approval' : 'active';
         
-        await setDoc(doc(db, "users", user.uid), {
+        const userData: any = {
             uid: user.uid,
             email: user.email,
             displayName: name,
@@ -95,8 +95,13 @@ export async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
             loyaltyPoints: 0,
             referralCode: newReferralCode,
             accountStatus: accountStatus,
-            agencyId: role === 'provider' ? null : undefined,
-        });
+        };
+
+        if (role === 'provider') {
+            userData.agencyId = null;
+        }
+
+        await setDoc(doc(db, "users", user.uid), userData);
 
         return { error: null, message: `User ${name} created successfully as a ${role}.` };
 
