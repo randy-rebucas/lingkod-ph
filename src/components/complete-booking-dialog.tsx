@@ -10,9 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Camera } from 'lucide-react';
+import { Loader2, Camera, Upload } from 'lucide-react';
 import { Booking } from '@/app/(app)/bookings/page';
 import Image from 'next/image';
 
@@ -128,17 +127,30 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
                 <div className="py-4 space-y-4">
                      <div className="space-y-2">
                         <Label>Proof of Completion</Label>
-                        <div className="aspect-video w-full rounded-md border-2 border-dashed flex items-center justify-center bg-muted/50 overflow-hidden">
-                           {previewUrl ? (
-                                <Image src={previewUrl} alt="Completion preview" layout="fill" className="object-cover"/>
+                        <div className="w-full">
+                             {previewUrl ? (
+                                <div className="relative aspect-video w-full rounded-md overflow-hidden border">
+                                    <Image src={previewUrl} alt="Completion preview" layout="fill" className="object-cover"/>
+                                </div>
                            ) : (
-                            <div className="text-center text-muted-foreground p-4">
-                                <Camera className="h-8 w-8 mx-auto mb-2"/>
-                                <p>Upload a photo of the completed work.</p>
+                             <div className="aspect-video w-full rounded-md border-2 border-dashed flex items-center justify-center bg-muted/50">
+                                <div className="text-center text-muted-foreground p-4">
+                                    <Camera className="h-8 w-8 mx-auto mb-2"/>
+                                    <p>Upload a photo of the completed work.</p>
+                                </div>
                             </div>
                            )}
                         </div>
-                        <Input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} />
+                        <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            <Upload className="mr-2 h-4 w-4" />
+                            {previewUrl ? 'Change Photo' : 'Select Photo'}
+                        </Button>
+                        <Input className="hidden" type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} />
                      </div>
                 </div>
                  <DialogFooter>
