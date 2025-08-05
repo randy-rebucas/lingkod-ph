@@ -1,0 +1,197 @@
+
+"use client";
+
+import { useState, useEffect } from "react";
+import { useAuth } from "@/context/auth-context";
+import { db } from "@/lib/firebase";
+import { collection, query, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal, Trash2, Eye, CircleSlash } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import { handleUpdateJobStatus, handleDeleteJob } from "./actions";
+import Link from "next/link";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+
+type JobStatus = "Open" | "In Progress" | "Completed" | "Closed";
+
+type Job = {
+    id: string;
+    title: string;
+    clientName: string;
+    budget: number;
+    status: JobStatus;
+    createdAt: Timestamp;
+};
+
+const getStatusVariant = (status: JobStatus) => {
+    switch (status) {
+        case "Open": return "default";
+        case "In Progress": return "secondary";
+        case "Completed": return "secondary";
+        case "Closed": return "outline";
+        default: return "default";
+    }
+};
+
+export default function AdminJobsPage() {
+    const { userRole } = useAuth();
+    const { toast } = useToast();
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [loading, setLoading] = useState(true);
+
+     useEffect(() => {
+        if (userRole !== 'admin') {
+            setLoading(false);
+            return;
+        }
+
+        const jobsQuery = query(collection(db, "jobs"), orderBy("createdAt", "desc"));
+        
+        const unsubscribe = onSnapshot(jobsQuery, (snapshot) => {
+            const jobsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
+            setJobs(jobsData);
+            setLoading(false);
+        }, (error) => {
+            console.error("Error fetching jobs:", error);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, [userRole]);
+
+    const onUpdateStatus = async (jobId: string, status: JobStatus) => {
+        const result = await handleUpdateJobStatus(jobId, status);
+        toast({
+            title: result.error ? 'Error' : 'Success',
+            description: result.message,
+            variant: result.error ? 'destructive' : 'default',
+        });
+    };
+
+    const onDeleteJob = async (jobId: string) => {
+        const result = await handleDeleteJob(jobId);
+        toast({
+            title: result.error ? 'Error' : 'Success',
+            description: result.message,
+            variant: result.error ? 'destructive' : 'default',
+        });
+    }
+
+    if (userRole !== 'admin') {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Access Denied</CardTitle>
+                    <CardDescription>This page is for administrators only.</CardDescription>
+                </CardHeader>
+            </Card>
+        );
+    }
+    
+    if (loading) {
+        return (
+             <div className="space-y-6">
+                 <div>
+                    <h1 className="text-3xl font-bold font-headline">Job Post Management</h1>
+                    <p className="text-muted-foreground">
+                        Monitor and manage all job posts on the platform.
+                    </p>
+                </div>
+                <Card>
+                    <CardContent className="p-6">
+                        <Skeleton className="h-64 w-full" />
+                    </CardContent>
+                </Card>
+             </div>
+        )
+    }
+
+    return (
+        <div className="space-y-6">
+            <div>
+                <h1 className="text-3xl font-bold font-headline">Job Post Management</h1>
+                <p className="text-muted-foreground">
+                     Monitor and manage all job posts on the platform.
+                </p>
+            </div>
+             <Card>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Date Posted</TableHead>
+                                <TableHead>Job Title</TableHead>
+                                <TableHead>Client</TableHead>
+                                <TableHead>Budget</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {jobs.length > 0 ? jobs.map(job => (
+                                <TableRow key={job.id}>
+                                    <TableCell className="text-xs text-muted-foreground">
+                                        {format(job.createdAt.toDate(), 'PP')}
+                                    </TableCell>
+                                    <TableCell className="font-medium">{job.title}</TableCell>
+                                    <TableCell>{job.clientName}</TableCell>
+                                    <TableCell>₱{job.budget.toFixed(2)}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={getStatusVariant(job.status)}>{job.status}</Badge>
+                                    </TableCell>
+                                     <TableCell className="text-right">
+                                        <AlertDialog>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/jobs/${job.id}`} target="_blank"><Eye className="mr-2 h-4 w-4" />View Job Post</Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem onClick={() => onUpdateStatus(job.id, "Closed")}><CircleSlash className="mr-2 h-4 w-4" />Mark as Closed</DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <AlertDialogTrigger asChild>
+                                                        <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                                                            <Trash2 className="mr-2 h-4 w-4" />Delete Job
+                                                        </DropdownMenuItem>
+                                                    </AlertDialogTrigger>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                    <AlertDialogDescription>This action cannot be undone. This will permanently delete the job post "{job.title}".</AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction className="bg-destructive hover:bg-destructive/80" onClick={() => onDeleteJob(job.id)}>
+                                                        Confirm Deletion
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </TableCell>
+                                </TableRow>
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center h-24">
+                                        No jobs found.
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
