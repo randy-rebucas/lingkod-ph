@@ -228,7 +228,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={isActive("/bookings")}>
                 <Link href="/bookings">
-                  <Calendar />
+                  <Briefcase />
                   <span>Bookings</span>
                 </Link>
               </SidebarMenuButton>
