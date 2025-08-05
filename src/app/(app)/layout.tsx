@@ -219,8 +219,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </SidebarMenuButton>
             </SidebarMenuItem>
             
-            {(userRole === 'provider' || userRole === 'agency' || userRole === 'client') && (
-               <SidebarMenuItem>
+            {(userRole !== 'admin') && (
+              <>
+                <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/calendar")}>
                     <Link href="/calendar">
                       <Calendar />
@@ -228,25 +229,26 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-            )}
 
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/bookings")}>
-                <Link href="/bookings">
-                  <Briefcase />
-                  <span>Bookings</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive("/messages")}>
-                <Link href="/messages">
-                  <MessageSquare />
-                  <span>Messages</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/bookings")}>
+                    <Link href="/bookings">
+                      <Briefcase />
+                      <span>Bookings</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/messages")}>
+                    <Link href="/messages">
+                      <MessageSquare />
+                      <span>Messages</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </>
+            )}
             
             {(userRole === 'provider' || userRole === 'agency') && (
               <>
