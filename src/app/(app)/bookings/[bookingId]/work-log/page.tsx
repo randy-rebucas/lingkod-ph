@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { db, storage } from "@/lib/firebase";
-import { doc, onSnapshot, updateDoc, arrayUnion, serverTimestamp, Timestamp, writeBatch } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc, arrayUnion, Timestamp, writeBatch } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -111,7 +111,7 @@ export default function WorkLogPage() {
             batch.update(bookingRef, {
                 status: "In Progress",
                 workLog: arrayUnion({
-                    startTime: serverTimestamp(),
+                    startTime: Timestamp.now(),
                     endTime: null,
                 })
             });
@@ -161,7 +161,7 @@ export default function WorkLogPage() {
             await updateDoc(bookingRef, {
                 notes: arrayUnion({
                     text: noteText,
-                    createdAt: serverTimestamp(),
+                    createdAt: Timestamp.now(),
                 })
             });
             setNoteText("");
@@ -187,7 +187,7 @@ export default function WorkLogPage() {
                 photos: arrayUnion({
                     url,
                     type: photoType,
-                    uploadedAt: serverTimestamp(),
+                    uploadedAt: Timestamp.now(),
                 })
             });
             
