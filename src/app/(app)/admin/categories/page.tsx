@@ -31,6 +31,7 @@ export default function AdminCategoriesPage() {
     const [isEditing, setIsEditing] = useState<Category | null>(null);
     const [isAdding, setIsAdding] = useState(false);
     const [categoryName, setCategoryName] = useState("");
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
      useEffect(() => {
         if (userRole !== 'admin') {
@@ -51,6 +52,13 @@ export default function AdminCategoriesPage() {
 
         return () => unsubscribe();
     }, [userRole]);
+    
+    const resetDialog = () => {
+        setIsEditing(null);
+        setIsAdding(false);
+        setCategoryName("");
+        setIsDialogOpen(false);
+    }
 
     const onUpdateCategory = async () => {
         if (!isEditing || !categoryName) return;
@@ -61,8 +69,7 @@ export default function AdminCategoriesPage() {
             variant: result.error ? 'destructive' : 'default',
         });
         if (!result.error) {
-            setIsEditing(null);
-            setCategoryName("");
+            resetDialog();
         }
     };
 
@@ -74,8 +81,7 @@ export default function AdminCategoriesPage() {
             variant: result.error ? 'destructive' : 'default',
         });
         if (!result.error) {
-            setIsAdding(false);
-            setCategoryName("");
+            resetDialog();
         }
     }
 
@@ -91,6 +97,13 @@ export default function AdminCategoriesPage() {
     const openEditDialog = (category: Category) => {
         setIsEditing(category);
         setCategoryName(category.name);
+        setIsDialogOpen(true);
+    }
+    
+    const openAddDialog = () => {
+        setIsAdding(true);
+        setCategoryName("");
+        setIsDialogOpen(true);
     }
 
     if (userRole !== 'admin') {
@@ -121,7 +134,7 @@ export default function AdminCategoriesPage() {
     }
 
     return (
-        <Dialog onOpenChange={(open) => { if (!open) { setIsEditing(null); setIsAdding(false); setCategoryName(""); }}}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetDialog() }}>
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
                     <div>
@@ -130,9 +143,7 @@ export default function AdminCategoriesPage() {
                             Add, edit, or delete service categories.
                         </p>
                     </div>
-                    <DialogTrigger asChild>
-                        <Button onClick={() => setIsAdding(true)}><PlusCircle className="mr-2"/> Add Category</Button>
-                    </DialogTrigger>
+                    <Button onClick={openAddDialog}><PlusCircle className="mr-2"/> Add Category</Button>
                 </div>
                  <Card>
                     <CardContent>
@@ -154,9 +165,7 @@ export default function AdminCategoriesPage() {
                                                         <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DialogTrigger asChild>
-                                                            <DropdownMenuItem onClick={() => openEditDialog(category)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-                                                        </DialogTrigger>
+                                                        <DropdownMenuItem onClick={() => openEditDialog(category)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
                                                         <AlertDialogTrigger asChild>
                                                             <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
                                                                 <Trash2 className="mr-2 h-4 w-4" />Delete
