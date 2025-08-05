@@ -1,14 +1,25 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 import {
   doc,
   updateDoc,
   deleteDoc,
+  setDoc,
+  serverTimestamp,
 } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { z } from 'zod';
 
 type UserStatus = 'active' | 'pending_approval' | 'suspended';
+
+const generateReferralCode = (userId: string): string => {
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const uidPart = userId.substring(0, 4).toUpperCase();
+    const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
+    return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
+};
 
 export async function handleUserStatusUpdate(
   userId: string,
@@ -41,5 +52,58 @@ export async function handleDeleteUser(userId: string) {
     } catch (e: any) {
         console.error('Error deleting user: ', e);
         return { error: e.message, message: 'Failed to delete user record.' };
+    }
+}
+
+const createUserSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters."),
+  email: z.string().email("Please enter a valid email."),
+  password: z.string().min(6, "Password must be at least 6 characters."),
+  role: z.enum(['client', 'provider', 'agency']),
+});
+
+export async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
+    const validatedFields = createUserSchema.safeParse(data);
+    if (!validatedFields.success) {
+        return {
+            error: validatedFields.error.errors.map(e => e.message).join(', '),
+            message: 'Validation failed.'
+        };
+    }
+    
+    const { name, email, password, role } = validatedFields.data;
+
+    try {
+        // This action uses the client-side Admin Auth context which is initialized when an admin is logged in.
+        // It's a temporary workaround. For production, a dedicated backend function with Admin SDK is recommended.
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        await updateProfile(user, { displayName: name });
+        
+        const newReferralCode = generateReferralCode(user.uid);
+        const accountStatus = (role === 'provider' || role === 'agency') ? 'pending_approval' : 'active';
+        
+        await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            email: user.email,
+            displayName: name,
+            role: role,
+            createdAt: serverTimestamp(),
+            loyaltyPoints: 0,
+            referralCode: newReferralCode,
+            accountStatus: accountStatus,
+            agencyId: role === 'provider' ? null : undefined,
+        });
+
+        return { error: null, message: `User ${name} created successfully as a ${role}.` };
+
+    } catch (e: any) {
+         console.error('Error creating user: ', e);
+         let errorMessage = e.message;
+         if (e.code === 'auth/email-already-in-use') {
+             errorMessage = "This email address is already in use by another account.";
+         }
+        return { error: errorMessage, message: 'Failed to create user.' };
     }
 }
