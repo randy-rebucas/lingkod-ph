@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MoreHorizontal, Loader2, Calendar, Check, X, Hourglass, Briefcase, UserCircle } from "lucide-react";
+import { MoreHorizontal, Loader2, Calendar, Check, X, Hourglass, Briefcase, UserCircle, Timer, Eye } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 
 
-type BookingStatus = "Pending" | "Upcoming" | "Completed" | "Cancelled";
+type BookingStatus = "Pending" | "Upcoming" | "In Progress" | "Completed" | "Cancelled";
 
 export type Booking = {
     id: string;
@@ -45,6 +45,7 @@ export type Booking = {
 const getStatusVariant = (status: string) => {
     switch (status) {
         case "Upcoming": return "default";
+        case "In Progress": return "secondary";
         case "Completed": return "secondary";
         case "Cancelled": return "destructive";
         case "Pending": return "outline";
@@ -171,6 +172,11 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
                 </div>
             </CardContent>
             <CardFooter className="flex justify-end gap-2">
+                 {booking.status === 'In Progress' && (
+                    <Button asChild>
+                        <Link href={`/bookings/${booking.id}/work-log`}><Eye className="mr-2 h-4 w-4"/> View Work Log</Link>
+                    </Button>
+                 )}
                  <Button variant="outline" onClick={() => handleViewDetails(booking)}>View Details</Button>
                 <AlertDialog>
                     <DropdownMenu>
@@ -190,7 +196,12 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
                                     <DropdownMenuItem onClick={() => handleStatusUpdate(booking, 'Cancelled', 'Booking has been declined.')} className="text-destructive focus:text-destructive focus:bg-destructive/10"><X className="mr-2 h-4 w-4" />Decline</DropdownMenuItem>
                                 </>
                             )}
-                            {userRole === 'provider' && booking.status === 'Upcoming' && (
+                             {userRole === 'provider' && booking.status === 'Upcoming' && (
+                                <DropdownMenuItem onClick={() => handleStatusUpdate(booking, 'In Progress', 'Booking has been started.')}>
+                                    <Timer className="mr-2 h-4 w-4 text-blue-500"/>Start Work
+                                </DropdownMenuItem>
+                            )}
+                            {userRole === 'provider' && booking.status === 'In Progress' && (
                                 <DropdownMenuItem onClick={() => handleOpenComplete(booking)}><Check className="mr-2 h-4 w-4 text-green-500"/>Mark as Completed</DropdownMenuItem>
                             )}
 
@@ -233,10 +244,11 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
     );
 };
 
-const EmptyState = ({ status, userRole }: { status: BookingStatus, userRole: string | null }) => {
-    const messages: { [key in BookingStatus]: { icon: JSX.Element, text: string } } = {
+const EmptyState = ({ status, userRole }: { status: string, userRole: string | null }) => {
+    const messages: { [key: string]: { icon: JSX.Element, text: string } } = {
         Pending: { icon: <Hourglass className="h-16 w-16" />, text: "You have no pending bookings at the moment." },
         Upcoming: { icon: <Calendar className="h-16 w-16" />, text: "You have no upcoming bookings." },
+        "In Progress": { icon: <Timer className="h-16 w-16" />, text: "You have no jobs currently in progress." },
         Completed: { icon: <Check className="h-16 w-16" />, text: "You have no completed bookings yet." },
         Cancelled: { icon: <X className="h-16 w-16" />, text: "You have no cancelled bookings." }
     };
@@ -265,7 +277,7 @@ const EmptyState = ({ status, userRole }: { status: BookingStatus, userRole: str
     )
 }
 
-const BookingsList = ({ bookings, isLoading, userRole, status }: { bookings: Booking[], isLoading: boolean, userRole: string | null, status: BookingStatus }) => {
+const BookingsList = ({ bookings, isLoading, userRole, status }: { bookings: Booking[], isLoading: boolean, userRole: string | null, status: string }) => {
     if (isLoading) {
         return (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -336,6 +348,7 @@ export default function BookingsPage() {
 
     const pendingBookings = bookings.filter(b => b.status === 'Pending');
     const upcomingBookings = bookings.filter(b => b.status === 'Upcoming');
+    const inProgressBookings = bookings.filter(b => b.status === 'In Progress');
     const completedBookings = bookings.filter(b => b.status === 'Completed');
     const cancelledBookings = bookings.filter(b => b.status === 'Cancelled');
     
@@ -343,7 +356,7 @@ export default function BookingsPage() {
 
     useEffect(() => {
         const hash = window.location.hash.substring(1);
-        const validTabs = ["pending", "upcoming", "completed", "cancelled"];
+        const validTabs = ["pending", "upcoming", "in-progress", "completed", "cancelled"];
         if (hash && validTabs.includes(hash)) {
             setActiveTab(hash);
         } else {
@@ -366,9 +379,10 @@ export default function BookingsPage() {
             </div>
             
             <Tabs defaultValue="pending" value={activeTab} onValueChange={handleTabChange} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+                <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
                     <TabsTrigger value="pending">Pending</TabsTrigger>
                     <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+                    <TabsTrigger value="in-progress">In Progress</TabsTrigger>
                     <TabsTrigger value="completed">Completed</TabsTrigger>
                     <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
                 </TabsList>
@@ -377,6 +391,9 @@ export default function BookingsPage() {
                 </TabsContent>
                 <TabsContent value="upcoming" className="mt-6">
                      <BookingsList bookings={upcomingBookings} isLoading={loading} userRole={userRole} status="Upcoming" />
+                </TabsContent>
+                <TabsContent value="in-progress" className="mt-6">
+                    <BookingsList bookings={inProgressBookings} isLoading={loading} userRole={userRole} status="In Progress" />
                 </TabsContent>
                 <TabsContent value="completed" className="mt-6">
                     <BookingsList bookings={completedBookings} isLoading={loading} userRole={userRole} status="Completed" />
