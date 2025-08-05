@@ -77,10 +77,15 @@ const requestPayoutFlow = ai.defineFlow(
       });
     } else {
       // Email the admin
+      const adminEmail = process.env.ADMIN_EMAIL;
+      if (!adminEmail) {
+        console.error("ADMIN_EMAIL environment variable not set. Cannot send payout request email.");
+        return; // Or throw an error
+      }
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
         from: 'Payouts <onboarding@resend.dev>',
-        to: 'admin@localpro.asia',
+        to: adminEmail,
         subject: `New Payout Request from ${providerData.displayName}`,
         react: PayoutRequestEmail({
             providerName: providerData.displayName,
