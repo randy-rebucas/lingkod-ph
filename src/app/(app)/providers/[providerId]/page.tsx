@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, BriefcaseBusiness, MessageSquare, CalendarPlus, CheckCircle, Clock, Heart, Flag } from "lucide-react";
+import { Star, BriefcaseBusiness, MessageSquare, CalendarPlus, Clock, Heart, Flag, Building, FileText } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/auth-context";
@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { format } from "date-fns";
 
 type Availability = {
     day: string;
@@ -33,9 +34,12 @@ type Provider = {
     email: string;
     bio?: string;
     photoURL?: string;
-    role: string;
+    role: 'provider' | 'agency';
     availabilitySchedule?: Availability[];
     availabilityStatus?: 'available' | 'limited' | 'unavailable';
+    keyServices?: string[];
+    isVerified?: boolean;
+    documents?: { name: string; url: string }[];
 };
 
 export type Service = {
@@ -115,7 +119,7 @@ export default function ProviderProfilePage() {
                 const providerDocRef = doc(db, "users", providerId);
                 const providerDoc = await getDoc(providerDocRef);
                 if (providerDoc.exists()) {
-                    setProvider(providerDoc.data() as Provider);
+                    setProvider({ uid: providerDoc.id, ...providerDoc.data() } as Provider);
                 }
 
                 // Fetch services
@@ -125,7 +129,7 @@ export default function ProviderProfilePage() {
                 setServices(servicesData);
 
                 // Fetch reviews
-                const reviewsQuery = query(collection(db, "reviews"), where("providerId", "==", providerId));
+                const reviewsQuery = query(collection(db, "reviews"), where("providerId", "==", providerId), orderBy("createdAt", "desc"));
                 const reviewsSnapshot = await getDocs(reviewsQuery);
                 const reviewsData = reviewsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
                 setReviews(reviewsData);
@@ -304,11 +308,20 @@ export default function ProviderProfilePage() {
     }
 
     if (!provider) {
-        return <div>Provider not found.</div>
+        return (
+            <div className="container mx-auto text-center py-20">
+                <h1 className="text-4xl font-bold">Provider Not Found</h1>
+                <p className="text-muted-foreground mt-4">The provider you are looking for does not exist or may have been removed.</p>
+                <Button asChild className="mt-8">
+                    <Link href="/dashboard">Return to Dashboard</Link>
+                </Button>
+            </div>
+        )
     }
 
     const today = new Date().toLocaleString('en-us', { weekday: 'long' });
     const todaySchedule = provider.availabilitySchedule?.find(s => s.day === today);
+    const ProfileIcon = provider.role === 'agency' ? Building : BriefcaseBusiness;
 
     return (
         <Dialog>
@@ -324,12 +337,12 @@ export default function ProviderProfilePage() {
                             <div className="flex-1 space-y-2">
                                 <div className="flex items-center justify-center md:justify-start gap-2">
                                     <CardTitle className="text-4xl font-bold font-headline">{provider.displayName}</CardTitle>
-                                    {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus)}
+                                    {getAvailabilityBadge(provider.availabilityStatus)}
                                 </div>
                                 <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
                                     {renderStars(overallRating)}
                                     <span>({reviews.length} reviews)</span>
-                                    <Badge variant="secondary" className="capitalize">{provider.role}</Badge>
+                                    <Badge variant="secondary" className="capitalize"><ProfileIcon className="mr-1 h-4 w-4"/> {provider.role}</Badge>
                                 </div>
                                 <p className="text-muted-foreground pt-2">{provider.bio || "This provider hasn't added a bio yet."}</p>
                             </div>
@@ -399,6 +412,21 @@ export default function ProviderProfilePage() {
                                 </CardContent>
                             </Card>
                         </div>
+                          {provider.documents && provider.documents.length > 0 && (
+                            <div>
+                                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><FileText /> Documents</h2>
+                                <Card>
+                                    <CardContent className="p-6 space-y-3">
+                                        {provider.documents.map((doc, i) => (
+                                            <a key={i} href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline text-primary">
+                                                <FileText className="h-4 w-4" />
+                                                <span>{doc.name}</span>
+                                            </a>
+                                        ))}
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -423,7 +451,7 @@ export default function ProviderProfilePage() {
                                                 {renderStars(review.rating)}
                                             </div>
                                         </div>
-                                        <p className="text-xs text-muted-foreground">{review.createdAt.toDate().toLocaleDateString()}</p>
+                                        <p className="text-xs text-muted-foreground">{format(review.createdAt.toDate(), "PPP")}</p>
                                         <p className="mt-2 text-sm">{review.comment}</p>
                                     </div>
                                 </div>
@@ -473,3 +501,4 @@ export default function ProviderProfilePage() {
         </Dialog>
     );
 }
+

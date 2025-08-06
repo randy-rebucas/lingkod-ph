@@ -2,7 +2,7 @@
 'use server';
 
 import { db, storage } from '@/lib/firebase';
-import { doc, runTransaction, collection, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { doc, runTransaction, collection, serverTimestamp, writeBatch, getDoc, addDoc } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { z } from 'zod';
 
@@ -21,12 +21,12 @@ type CompleteBookingInput = z.infer<typeof completeBookingSchema>;
 const createNotification = async (userId: string, message: string, link: string) => {
     try {
         const notificationsRef = collection(db, `users/${userId}/notifications`);
-        await writeBatch(db).set(doc(notificationsRef), {
+        await addDoc(notificationsRef, {
             userId, message, link,
             type: 'booking_update',
             read: false,
             createdAt: serverTimestamp(),
-        }).commit();
+        });
     } catch (error) {
         console.error("Error creating notification: ", error);
     }
@@ -54,7 +54,9 @@ export async function completeBookingAction(input: CompleteBookingInput): Promis
             const clientRef = doc(db, "users", clientId);
 
             const clientDoc = await transaction.get(clientRef);
-            if (!clientDoc.exists()) throw "Client document does not exist!";
+            if (!clientDoc.exists()) {
+                throw new Error("Client document does not exist!");
+            }
             
             transaction.update(bookingRef, { status: "Completed", completionPhotoURL });
 

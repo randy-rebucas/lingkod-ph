@@ -89,7 +89,7 @@ export async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
             uid: user.uid,
             email: user.email,
             displayName: name,
-            phone: phone || '',
+            phone: phone || null,
             role: role,
             createdAt: serverTimestamp(),
             loyaltyPoints: 0,
@@ -136,7 +136,7 @@ export async function handleUpdateUser(userId: string, data: z.infer<typeof upda
         await updateDoc(userRef, {
             displayName: validatedFields.data.name,
             role: validatedFields.data.role,
-            phone: validatedFields.data.phone || '',
+            phone: validatedFields.data.phone || null,
         });
         return { error: null, message: 'User updated successfully.' };
     } catch (e: any) {
