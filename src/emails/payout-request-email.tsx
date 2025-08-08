@@ -35,7 +35,7 @@ export const PayoutRequestEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Heading style={heading}>New Payout Request</Heading>
-        <Text style={paragraph}>A new payout has been requested by a provider on LingkodPH.</Text>
+        <Text style={paragraph}>A new payout has been requested by a provider on LocalPro.</Text>
         
         <Section style={infoSection}>
           <Text><strong>Provider:</strong> {providerName}</Text>
@@ -130,5 +130,3 @@ const footer = {
   lineHeight: '16px',
   textAlign: 'center' as const,
 };
-
-    

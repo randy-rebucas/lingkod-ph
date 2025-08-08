@@ -5,7 +5,7 @@ import { AuthProvider } from '@/context/auth-context';
 import { ThemeProvider } from '@/context/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'Lingkod PH',
+  title: 'LocalPro',
   description: 'Your trusted partner for home services.',
 };
 

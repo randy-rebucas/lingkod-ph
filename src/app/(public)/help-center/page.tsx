@@ -42,7 +42,7 @@ const clientFaqs = [
 
 const providerFaqs = [
   {
-    question: "How do I become a provider on LingkodPH?",
+    question: "How do I become a provider on LocalPro?",
     answer: "Simply sign up for a 'Provider' or 'Agency' account. You'll then be guided through setting up your profile, adding your services, and completing our verification process to build trust with clients.",
   },
   {
@@ -96,7 +96,7 @@ const AiChatbot = () => {
       <DialogHeader>
         <DialogTitle>AI Assistant</DialogTitle>
         <DialogDescription>
-          Ask me anything about LingkodPH. I'll do my best to help!
+          Ask me anything about LocalPro. I'll do my best to help!
         </DialogDescription>
       </DialogHeader>
       <ScrollArea className="flex-1 -mx-6 px-6">

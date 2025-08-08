@@ -44,7 +44,7 @@ export async function sendContactForm(
   try {
     await resend.emails.send({
       from: "Contact Form <onboarding@resend.dev>", // Must be a verified domain on Resend
-      to: "admin@localpro.asia",
+      to: process.env.ADMIN_EMAIL!,
       subject: `New Contact Form Submission: ${subject}`,
       reply_to: email,
       react: ContactFormEmail({ name, email, message }),

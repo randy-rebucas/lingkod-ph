@@ -6,15 +6,15 @@ export default function TermsOfServicePage() {
     {
       title: "1. Definitions",
       content: [
-        "“LingkodPH,” “we,” “our,” or “us” refers to LingkodPHand its affiliates.",
+        "“LocalPro,” “we,” “our,” or “us” refers to LocalPro and its affiliates.",
         "“User” or “you” means anyone who accesses or uses the Platform, including service providers (“Providers”), clients (“Clients”), and agencies.",
-        "“Services” refers to any service offered through the LingkodPH platform by Providers to Clients.",
+        "“Services” refers to any service offered through the LocalPro platform by Providers to Clients.",
       ],
     },
     {
       title: "2. Eligibility",
       content: [
-        "You must be at least 18 years old and capable of entering into legally binding contracts to use LingkodPH. By registering, you confirm that all information provided is accurate and complete.",
+        "You must be at least 18 years old and capable of entering into legally binding contracts to use LocalPro. By registering, you confirm that all information provided is accurate and complete.",
       ],
     },
     {
@@ -46,7 +46,7 @@ export default function TermsOfServicePage() {
       title: "6. Cancellations and Refunds",
       content: [
         "Cancellation and refund policies vary by service and are set by each Provider.",
-        "LingkodPH may intervene in disputes but is not liable for any service issues between Client and Provider.",
+        "LocalPro may intervene in disputes but is not liable for any service issues between Client and Provider.",
       ],
     },
     {
@@ -64,7 +64,7 @@ export default function TermsOfServicePage() {
     {
       title: "9. User Content",
       content: [
-        "You retain ownership of content you post, such as reviews or photos, but you grant LingkodPH a non-exclusive, royalty-free license to use, display, and distribute such content on the Platform.",
+        "You retain ownership of content you post, such as reviews or photos, but you grant LocalPro a non-exclusive, royalty-free license to use, display, and distribute such content on the Platform.",
       ],
     },
     {
@@ -76,20 +76,20 @@ export default function TermsOfServicePage() {
     {
       title: "11. Disclaimers",
       content: [
-        "LingkodPH acts only as a marketplace and is not responsible for the conduct, performance, or services of Providers.",
+        "LocalPro acts only as a marketplace and is not responsible for the conduct, performance, or services of Providers.",
         "The Platform is provided “as is” and “as available.” We do not guarantee uninterrupted or error-free service.",
       ],
     },
     {
       title: "12. Limitation of Liability",
       content: [
-        "To the maximum extent permitted by law, LingkodPH is not liable for any indirect, incidental, or consequential damages arising from your use of the Platform.",
+        "To the maximum extent permitted by law, LocalPro is not liable for any indirect, incidental, or consequential damages arising from your use of the Platform.",
       ],
     },
     {
       title: "13. Indemnity",
       content: [
-        "You agree to indemnify and hold harmless LingkodPH and its officers, employees, and partners from any claims or disputes arising out of your use of the Platform or your violation of these Terms.",
+        "You agree to indemnify and hold harmless LocalPro and its officers, employees, and partners from any claims or disputes arising out of your use of the Platform or your violation of these Terms.",
       ],
     },
     {
@@ -125,7 +125,7 @@ export default function TermsOfServicePage() {
 
       <div className="mx-auto max-w-3xl space-y-12 mt-12">
         <p className="text-muted-foreground leading-relaxed">
-          Welcome to LingkodPH. These Terms of Service (&quot;Terms&quot;) govern your use of our platform, which connects service providers with clients through our website and mobile applications (collectively, the &quot;Platform&quot;). By accessing or using LingkodPH, you agree to be bound by these Terms.
+          Welcome to LocalPro. These Terms of Service (&quot;Terms&quot;) govern your use of our platform, which connects service providers with clients through our website and mobile applications (collectively, the &quot;Platform&quot;). By accessing or using LocalPro, you agree to be bound by these Terms.
         </p>
 
         {sections.map(section => (

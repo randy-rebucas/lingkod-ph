@@ -84,7 +84,7 @@ const findProvidersPrompt = ai.definePrompt({
   output: { schema: FindMatchingProvidersOutputSchema },
   tools: [getAllProvidersTool],
   prompt: `
-    You are an expert matchmaking agent for a service provider marketplace.
+    You are an expert matchmaking agent for a service provider marketplace called LocalPro.
     Your task is to find the best service providers for a user's request.
 
     1. First, use the \`getAllProviders\` tool to get a list of all available providers.

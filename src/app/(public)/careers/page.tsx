@@ -27,7 +27,7 @@ export default function CareersPage() {
   return (
     <div className="container py-12 md:py-24 lg:py-32">
       <div className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Build the Future with LingkodPH</h1>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Build the Future with LocalPro</h1>
         <p className="mt-6 text-lg leading-8 text-muted-foreground">
           Join a passionate team dedicated to revolutionizing the service industry in the Philippines.
         </p>
@@ -81,7 +81,7 @@ export default function CareersPage() {
                 We are always looking for passionate, talented individuals to join our mission. While we don't have specific openings at this moment, we encourage you to send us your resume. We'll keep it on file and reach out if a suitable role becomes available.
             </p>
             <Button asChild size="lg">
-              <a href="mailto:careers@lingkodph.example.com">
+              <a href="mailto:careers@localpro.example.com">
                 Contact our HR team <ArrowRight className="ml-2" />
               </a>
             </Button>

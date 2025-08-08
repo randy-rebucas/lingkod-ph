@@ -1018,7 +1018,7 @@ export default function ProfilePage() {
                 <TabsContent value="referrals" className="mt-6 space-y-6">
                     <div>
                         <h2 className="text-2xl font-bold">Referral Program</h2>
-                        <p className="text-muted-foreground">Invite friends to LingkodPH and earn 250 points for each successful referral!</p>
+                        <p className="text-muted-foreground">Invite friends to LocalPro and earn 250 points for each successful referral!</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1066,7 +1066,7 @@ export default function ProfilePage() {
                                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">2</div>
                                         <div>
                                             <h4 className="font-semibold">Friend Signs Up</h4>
-                                            <p className="text-sm text-muted-foreground">Your friend signs up on LingkodPH using your referral code.</p>
+                                            <p className="text-sm text-muted-foreground">Your friend signs up on LocalPro using your referral code.</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start gap-4">
@@ -1091,10 +1091,10 @@ export default function ProfilePage() {
                                         <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`} target="_blank" rel="noopener noreferrer">Facebook</a>
                                     </Button>
                                     <Button variant="outline" asChild>
-                                        <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent('Join me on LingkodPH! Use my code: ' + referralCode)}`} target="_blank" rel="noopener noreferrer">Twitter / X</a>
+                                        <a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent('Join me on LocalPro! Use my code: ' + referralCode)}`} target="_blank" rel="noopener noreferrer">Twitter / X</a>
                                     </Button>
                                     <Button variant="outline" asChild>
-                                        <a href={`https://wa.me/?text=${encodeURIComponent('Join me on LingkodPH! Use my referral code ' + referralCode + ' when you sign up: ' + referralLink)}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                                        <a href={`https://wa.me/?text=${encodeURIComponent('Join me on LocalPro! Use my referral code ' + referralCode + ' when you sign up: ' + referralLink)}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>
                                     </Button>
                                 </CardContent>
                             </Card>
@@ -1502,5 +1502,3 @@ export default function ProfilePage() {
         </div>
     );
 }
-
-    

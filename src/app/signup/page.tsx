@@ -21,7 +21,7 @@ import { useAuth } from "@/context/auth-context";
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
-    Lingkod<span className="text-accent">PH</span>
+    Local<span className="text-accent">Pro</span>
   </h1>
 );
 
@@ -189,7 +189,7 @@ const SignUpForm = ({ userType }: { userType: UserType }) => {
         <>
           <div className="space-y-2">
             <Label htmlFor={`${userType}-business-name`}>Business Name</Label>
-            <Input id={`${userType}-business-name`} placeholder="Lingkod Inc." required value={businessName} onChange={e => setBusinessName(e.target.value)} />
+            <Input id={`${userType}-business-name`} placeholder="LocalPro Inc." required value={businessName} onChange={e => setBusinessName(e.target.value)} />
           </div>
           <div className="space-y-2">
             <Label htmlFor={`${userType}-contact-person`}>Contact Person</Label>
@@ -359,7 +359,7 @@ export default function SignupPage() {
            <Link href="/" className="inline-block">
               <Logo />
             </Link>
-          <CardTitle className="text-2xl">Join Lingkod PH</CardTitle>
+          <CardTitle className="text-2xl">Join LocalPro</CardTitle>
           <CardDescription>Choose your account type and let&apos;s get started.</CardDescription>
         </CardHeader>
         <CardContent>

@@ -13,4 +13,5 @@ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY="AIzaSyCJG1n0iHEeMhb-QGUnZRw3vKaSDWSA5UQ"
 
 NEXT_PUBLIC_BASE_URL="https://6000-firebase-studio-1751787617427.cluster-fkltigo73ncaixtmokrzxhwsfc.cloudworkstations.dev"
 NEXT_PUBLIC_PAYPAL_CLIENT_ID="AQUxT329jBIpdZxvjXWUr3IwRyyEnyE1ThSdo6WHpVq_9rUAUMnzEKKi3hp7LgnLdGnhhRcDZmraP_Ge"
-ADMIN_EMAIL="admin@lingkodph.com"
+ADMIN_EMAIL="admin@localpro.com"
+

@@ -28,7 +28,7 @@ export default function AboutPage() {
   return (
     <div className="container py-12 md:py-24 lg:py-32">
       <div className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">About LingkodPH</h1>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">About LocalPro</h1>
         <p className="mt-6 text-lg leading-8 text-muted-foreground">
           Connecting communities with trusted local service providers.
         </p>
@@ -47,14 +47,14 @@ export default function AboutPage() {
             <BookOpen className="mx-auto h-12 w-12 text-primary" />
             <h2 className="mt-4 text-3xl font-bold font-headline">Our Story</h2>
             <p className="mt-4 text-muted-foreground leading-relaxed">
-               LingkodPH was born from a simple idea: what if finding a reliable plumber, electrician, or cleaner was as easy as a few clicks? Frustrated by the challenges of finding trustworthy professionals, our founders set out to create a platform that bridges the gap between skilled local workers and the communities that need them, all built on a foundation of trust and technology.
+               LocalPro was born from a simple idea: what if finding a reliable plumber, electrician, or cleaner was as easy as a few clicks? Frustrated by the challenges of finding trustworthy professionals, our founders set out to create a platform that bridges the gap between skilled local workers and the communities that need them, all built on a foundation of trust and technology.
             </p>
         </section>
       </div>
       
       <section className="mt-20">
          <div className="mx-auto mb-12 max-w-2xl text-center">
-            <h2 className="text-3xl font-bold font-headline">Why Choose LingkodPH?</h2>
+            <h2 className="text-3xl font-bold font-headline">Why Choose LocalPro?</h2>
          </div>
          <div className="mx-auto grid max-w-lg gap-8 lg:max-w-none lg:grid-cols-3">
              {whyChooseUs.map((item) => (

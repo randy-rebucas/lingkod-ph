@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
-    Lingkod<span className="text-accent">PH</span>
+    Local<span className="text-accent">Pro</span>
   </h1>
 );
 
@@ -68,7 +68,7 @@ const Footer = () => (
         <div>
              <h4 className="font-semibold mb-2">Stay Connected</h4>
              <div className="flex space-x-4">
-                <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} Lingkod PH. All rights reserved.</p>
+                <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} LocalPro. All rights reserved.</p>
              </div>
         </div>
     </div>
@@ -82,8 +82,8 @@ const renderStars = (rating: number, keyPrefix: string) => {
 }
 
 const testimonials = [
-    { name: 'Maria C.', rating: 5, comment: "Booking an electrician through LingkodPH was a breeze! The provider was professional, on-time, and fixed the issue in no time. Highly recommended!", avatar: 'https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=300', hint: 'woman portrait' },
-    { name: 'John D.', rating: 5, comment: "As a small business owner, finding reliable contractors was always a challenge. LingkodPH connected us with a fantastic team for our office renovation.", avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300', hint: 'man portrait' },
+    { name: 'Maria C.', rating: 5, comment: "Booking an electrician through LocalPro was a breeze! The provider was professional, on-time, and fixed the issue in no time. Highly recommended!", avatar: 'https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=300', hint: 'woman portrait' },
+    { name: 'John D.', rating: 5, comment: "As a small business owner, finding reliable contractors was always a challenge. LocalPro connected us with a fantastic team for our office renovation.", avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=300', hint: 'man portrait' },
     { name: 'Anna S.', rating: 4, comment: "The platform is very user-friendly. I found a great weekly cleaning service that fits my budget. My only wish is for more providers in my specific area.", avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=300', hint: 'woman smiling' },
 ];
 
@@ -130,7 +130,7 @@ export default function Home() {
                         Find Trusted Pros. Grow Your Business.
                     </h1>
                     <p className="max-w-2xl text-lg text-muted-foreground">
-                        LingkodPH is the all-in-one platform for discovering reliable service providers and empowering businesses to thrive in the digital marketplace.
+                        LocalPro is the all-in-one platform for discovering reliable service providers and empowering businesses to thrive in the digital marketplace.
                     </p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
@@ -262,7 +262,7 @@ export default function Home() {
                      <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
                         <div>
                             <h2 className="font-headline text-4xl font-bold">Ready to Grow Your Service Business?</h2>
-                            <p className="mt-4 text-lg opacity-90">Whether you're an individual provider or a growing agency, LingkodPH provides the tools, visibility, and support you need to succeed.</p>
+                            <p className="mt-4 text-lg opacity-90">Whether you're an individual provider or a growing agency, LocalPro provides the tools, visibility, and support you need to succeed.</p>
                         </div>
                         <div className="bg-black/20 backdrop-blur-sm p-8 rounded-lg">
                            <ul className="space-y-4">

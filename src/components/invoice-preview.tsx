@@ -14,7 +14,7 @@ import html2canvas from 'html2canvas';
 
 const Logo = () => (
   <h1 className="text-2xl font-bold font-headline text-primary">
-    Lingkod<span className="text-accent">PH</span>
+    Local<span className="text-accent">Pro</span>
   </h1>
 );
 

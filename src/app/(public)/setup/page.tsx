@@ -19,7 +19,7 @@ import { getDocs, collection } from "firebase/firestore";
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
-    Lingkod<span className="text-accent">PH</span>
+    Local<span className="text-accent">Pro</span>
   </h1>
 );
 
@@ -78,7 +78,7 @@ export default function SetupPage() {
             <Card className="w-full max-w-md shadow-2xl">
                 <CardHeader className="text-center space-y-2">
                     <Logo />
-                    <CardTitle className="text-2xl">Welcome to LingkodPH!</CardTitle>
+                    <CardTitle className="text-2xl">Welcome to LocalPro!</CardTitle>
                     <CardDescription>Let's set up your administrator account.</CardDescription>
                 </CardHeader>
                 <CardContent>

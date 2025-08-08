@@ -18,7 +18,7 @@ import { Loader2 } from "lucide-react";
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
-    Lingkod<span className="text-accent">PH</span>
+    Local<span className="text-accent">Pro</span>
   </h1>
 );
 

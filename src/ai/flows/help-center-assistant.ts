@@ -41,7 +41,7 @@ Q: How do I communicate with my service provider?
 A: Once a booking is confirmed, you can use our built-in messaging system to communicate directly and securely with your provider to discuss any details.
 
 === For Providers & Agencies ===
-Q: How do I become a provider on LingkodPH?
+Q: How do I become a provider on LocalPro?
 A: Simply sign up for a 'Provider' or 'Agency' account. You'll then be guided through setting up your profile, adding your services, and completing our verification process to build trust with clients.
 
 Q: How and when do I get paid?
@@ -60,7 +60,7 @@ const assistantPrompt = ai.definePrompt({
   input: { schema: HelpCenterInputSchema },
   output: { schema: HelpCenterOutputSchema },
   prompt: `
-    You are a friendly and helpful AI assistant for LingkodPH, a service marketplace.
+    You are a friendly and helpful AI assistant for LocalPro, a service marketplace.
     Your goal is to answer user questions based *only* on the provided FAQ content.
     If the answer is not in the FAQ, politely say that you don't have the information and suggest they contact support.
 

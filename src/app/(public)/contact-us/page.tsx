@@ -70,7 +70,7 @@ export default function ContactUsPage() {
       <Card className="mt-12 max-w-xl mx-auto">
         <CardHeader>
           <CardTitle>Send us a Message</CardTitle>
-          <CardDescription>Your message will be sent to admin@localpro.asia</CardDescription>
+          <CardDescription>Your message will be sent to our support team.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>

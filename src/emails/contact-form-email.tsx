@@ -25,7 +25,7 @@ export const ContactFormEmail = ({
 }: ContactFormEmailProps) => (
   <Html>
     <Head />
-    <Preview>New message from your LingkodPH contact form</Preview>
+    <Preview>New message from your LocalPro contact form</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={heading}>New Contact Form Submission</Heading>
@@ -43,7 +43,7 @@ export const ContactFormEmail = ({
         <Text style={messageText}>{message}</Text>
         <Hr style={hr} />
         <Text style={footer}>
-          This email was sent from the contact form on LingkodPH.
+          This email was sent from the contact form on LocalPro.
         </Text>
       </Container>
     </Body>

@@ -44,7 +44,7 @@ export function PayPalCheckoutButton({ plan }: PayPalCheckoutButtonProps) {
     return actions.order.create({
       purchase_units: [
         {
-          description: `LingkodPH - ${plan.name} Plan`,
+          description: `LocalPro - ${plan.name} Plan`,
           amount: {
             value: String(plan.price),
             currency_code: "PHP",

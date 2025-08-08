@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 const Logo = () => (
   <h1 className="text-3xl font-bold font-headline text-primary">
-    Lingkod<span className="text-accent">PH</span>
+    Local<span className="text-accent">Pro</span>
   </h1>
 );
 
@@ -60,7 +60,7 @@ const Footer = () => (
         <div>
              <h4 className="font-semibold mb-2">Stay Connected</h4>
              <div className="flex space-x-4">
-                <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} Lingkod PH. All rights reserved.</p>
+                <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} LocalPro. All rights reserved.</p>
              </div>
         </div>
     </div>

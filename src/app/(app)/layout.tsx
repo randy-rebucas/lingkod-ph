@@ -74,7 +74,7 @@ import BroadcastBanner from "@/components/broadcast-banner";
 
 const Logo = () => (
   <h1 className="text-2xl font-bold font-headline text-primary pl-2 group-data-[collapsible=icon]:hidden">
-    Lingkod<span className="text-accent">PH</span>
+    Local<span className="text-accent">Pro</span>
   </h1>
 );
 
@@ -94,7 +94,7 @@ const SuccessTips = () => (
         <div className="space-y-2">
           <h4 className="font-medium leading-none">Tips for Success</h4>
           <p className="text-sm text-muted-foreground">
-            Maximize your opportunities on LingkodPH.
+            Maximize your opportunities on LocalPro.
           </p>
         </div>
         <ul className="space-y-3">
