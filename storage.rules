@@ -1,33 +1,36 @@
+
 rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow public read access to user profile pictures
-    match /profile-pictures/{userId}/{allPaths=**} {
+    // Allow public read access to all files
+    match /{allPaths=**} {
       allow read;
     }
-    
-    // Allow authenticated users to upload verification documents to their own folder
-    match /verification/{userId}/{allPaths=**} {
+
+    // Allow authenticated users to write to their own folders within specific paths
+    match /profile-pictures/{userId}/{fileName} {
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Allow authenticated users to upload completion photos to a booking-specific folder
-    // The client should only be able to upload to a folder they are a part of (either client or provider)
-    // For simplicity here, we'll allow any authenticated user to write.
-    // In a production app, you would add more granular checks.
-    match /completion-photos/{bookingId}/{allPaths=**} {
-      allow read, write: if request.auth != null;
+    match /completion-photos/{bookingId}/{fileName} {
+      allow write: if request.auth != null;
+    }
+    
+    match /work-log-photos/{bookingId}/{fileName} {
+      allow write: if request.auth != null;
+    }
+    
+    match /chat-images/{conversationId}/{fileName} {
+        allow write: if request.auth != null;
     }
 
-    // Allow authenticated users to upload chat images
-    match /chat-images/{conversationId}/{allPaths=**} {
-        allow read, write: if request.auth != null;
+    match /verification/{userId}/{fileName} {
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
-
-    // Allow providers to upload documents
-    match /provider-documents/{userId}/{allPaths=**} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+    
+    match /provider-documents/{userId}/{fileName} {
+        allow write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
