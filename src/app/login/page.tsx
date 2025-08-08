@@ -15,12 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import { doc, getDoc, setDoc, serverTimestamp, getDocs, collection, query, limit } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
-
-const Logo = () => (
-  <h1 className="text-3xl font-bold font-headline text-primary">
-    Local<span className="text-accent">Pro</span>
-  </h1>
-);
+import { Logo } from "@/components/logo";
 
 // Function to generate a unique referral code
 const generateReferralCode = (userId: string): string => {
@@ -132,7 +127,7 @@ export default function LoginPage() {
        <div className="w-full max-w-md">
         <Card className="shadow-2xl">
           <CardHeader className="text-center space-y-2">
-             <Link href="/" className="inline-block">
+             <Link href="/" className="inline-block mx-auto">
               <Logo />
             </Link>
             <CardTitle className="text-2xl">Welcome Back!</CardTitle>

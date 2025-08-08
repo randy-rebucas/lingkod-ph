@@ -11,12 +11,7 @@ import type { Timestamp } from "firebase/firestore";
 import { Button } from './ui/button';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-
-const Logo = () => (
-  <h1 className="text-2xl font-bold font-headline text-primary">
-    Local<span className="text-accent">Pro</span>
-  </h1>
-);
+import { Logo } from './logo';
 
 const toDate = (date: Date | Timestamp): Date => {
     if (date instanceof Date) {

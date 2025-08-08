@@ -7,12 +7,7 @@ import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { Separator } from "./ui/separator";
 import type { Timestamp } from "firebase/firestore";
-
-const Logo = () => (
-  <h1 className="text-2xl font-bold font-headline text-primary">
-    Lingkod<span className="text-accent">PH</span>
-  </h1>
-);
+import { Logo } from "./logo";
 
 const toDate = (date: Date | Timestamp): Date => {
     if (date instanceof Date) {

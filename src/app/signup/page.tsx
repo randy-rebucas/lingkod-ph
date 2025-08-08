@@ -18,12 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
-
-const Logo = () => (
-  <h1 className="text-3xl font-bold font-headline text-primary">
-    Local<span className="text-accent">Pro</span>
-  </h1>
-);
+import { Logo } from "@/components/logo";
 
 type UserType = 'client' | 'provider' | 'agency';
 
@@ -356,7 +351,7 @@ export default function SignupPage() {
     <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
       <Card className="w-full max-w-md shadow-2xl">
          <CardHeader className="text-center space-y-2">
-           <Link href="/" className="inline-block">
+           <Link href="/" className="inline-block mx-auto">
               <Logo />
             </Link>
           <CardTitle className="text-2xl">Join LocalPro</CardTitle>

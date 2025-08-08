@@ -16,12 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { getDocs, collection } from "firebase/firestore";
-
-const Logo = () => (
-  <h1 className="text-3xl font-bold font-headline text-primary">
-    Local<span className="text-accent">Pro</span>
-  </h1>
-);
+import { Logo } from "@/components/logo";
 
 const initialState: FormState = {
   error: null,
@@ -77,7 +72,9 @@ export default function SetupPage() {
         <div className="flex min-h-screen items-center justify-center bg-secondary p-4">
             <Card className="w-full max-w-md shadow-2xl">
                 <CardHeader className="text-center space-y-2">
-                    <Logo />
+                    <div className="flex justify-center">
+                        <Logo />
+                    </div>
                     <CardTitle className="text-2xl">Welcome to LocalPro!</CardTitle>
                     <CardDescription>Let's set up your administrator account.</CardDescription>
                 </CardHeader>

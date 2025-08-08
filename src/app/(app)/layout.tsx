@@ -71,12 +71,7 @@ import { useToast } from "@/hooks/use-toast";
 import { NotificationBell } from "@/components/notification-bell";
 import { useTheme } from "next-themes";
 import BroadcastBanner from "@/components/broadcast-banner";
-
-const Logo = () => (
-  <h1 className="text-2xl font-bold font-headline text-primary pl-2 group-data-[collapsible=icon]:hidden">
-    Local<span className="text-accent">Pro</span>
-  </h1>
-);
+import { Logo } from "@/components/logo";
 
 const SuccessTips = () => (
   <Popover>

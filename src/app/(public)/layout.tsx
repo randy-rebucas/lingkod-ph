@@ -1,12 +1,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-
-const Logo = () => (
-  <h1 className="text-3xl font-bold font-headline text-primary">
-    Local<span className="text-accent">Pro</span>
-  </h1>
-);
+import { Logo } from '@/components/logo';
 
 const Header = () => {
     
@@ -39,7 +34,6 @@ const Footer = () => (
     <div className="container grid grid-cols-1 md:grid-cols-4 gap-8 py-12">
         <div>
             <Logo />
-            <p className="mt-2 text-muted-foreground text-sm">Your trusted partner for home & professional services in the Philippines.</p>
         </div>
         <div>
             <h4 className="font-semibold mb-2">Company</h4>
