@@ -541,7 +541,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         <BroadcastBanner />
-        <main className="flex-1 p-6 bg-secondary relative">
+        <main className="flex-1 p-6 relative">
             {children}
             <EmergencyHotlineButton />
             {(userRole === 'provider' || userRole === 'agency') && <SuccessTips />}

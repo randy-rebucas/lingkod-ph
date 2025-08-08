@@ -113,7 +113,7 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative overflow-hidden bg-secondary">
+        <section className="relative overflow-hidden bg-background">
             <div className="container relative z-10 grid items-center gap-6 pb-20 pt-16 md:py-28">
                 <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 text-center">
                     <Badge variant="default" className="py-2 px-4 rounded-full bg-primary/10 text-primary border-primary/20">
@@ -135,7 +135,7 @@ export default function Home() {
         </section>
 
         {/* How It Works Section */}
-        <section id="features" className="bg-background py-20">
+        <section id="features" className="bg-muted py-20">
             <div className="container">
                 <div className="mx-auto mb-12 max-w-2xl text-center">
                     <h2 className="font-headline text-3xl font-bold">A Seamless Experience for Everyone</h2>
@@ -183,7 +183,7 @@ export default function Home() {
         </section>
 
          {/* Top Providers Section */}
-        <section id="providers" className="bg-secondary py-20">
+        <section id="providers" className="bg-background py-20">
             <div className="container">
                 <div className="mx-auto mb-12 max-w-2xl text-center">
                     <h2 className="font-headline text-3xl font-bold">Meet Our Top-Rated Providers</h2>
@@ -218,7 +218,7 @@ export default function Home() {
         </section>
 
         {/* Testimonials Section */}
-        <section className="bg-background py-20">
+        <section className="bg-muted py-20">
             <div className="container">
                  <div className="mx-auto mb-12 max-w-2xl text-center">
                     <h2 className="font-headline text-3xl font-bold">What Our Community Says</h2>
@@ -226,7 +226,7 @@ export default function Home() {
                 </div>
                 <div className="grid gap-8 lg:grid-cols-3">
                     {testimonials.map((testimonial, index) => (
-                        <Card key={index} className="bg-secondary">
+                        <Card key={index} className="bg-background">
                             <CardContent className="p-6">
                                 <div className="flex items-center mb-4">
                                     <Avatar className="h-12 w-12 mr-4">
@@ -248,7 +248,7 @@ export default function Home() {
 
 
         {/* Join Platform Section (B2B2C CTA) */}
-        <section id="join" className="bg-secondary py-20">
+        <section id="join" className="bg-background py-20">
             <div className="container">
                 <div className="relative rounded-xl overflow-hidden p-12 text-white">
                     <Image src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1469" layout="fill" alt="Business team collaborating" className="object-cover" data-ai-hint="business team" />
