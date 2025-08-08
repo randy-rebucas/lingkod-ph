@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from "react";
 import {
   PayPalScriptProvider,
   PayPalButtons,
@@ -8,6 +9,7 @@ import {
   type OnApproveActions,
   type CreateOrderData,
   type CreateOrderActions,
+  type OnErrorActions,
 } from "@paypal/react-paypal-js";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
@@ -22,6 +24,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { type SubscriptionTier, type AgencySubscriptionTier } from "@/app/(app)/subscription/page";
+import { Loader2 } from "lucide-react";
 
 type PayPalCheckoutButtonProps = {
   plan: SubscriptionTier | AgencySubscriptionTier;
@@ -31,6 +34,7 @@ export function PayPalCheckoutButton({ plan }: PayPalCheckoutButtonProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   if (!process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID) {
     return (
@@ -55,6 +59,7 @@ export function PayPalCheckoutButton({ plan }: PayPalCheckoutButtonProps) {
   };
 
   const onApprove = (data: OnApproveData, actions: OnApproveActions) => {
+    setIsProcessing(true);
     return actions.order!.capture().then(async (details) => {
       if (!user) {
         toast({
@@ -62,6 +67,7 @@ export function PayPalCheckoutButton({ plan }: PayPalCheckoutButtonProps) {
           title: "Error",
           description: "You must be logged in to subscribe.",
         });
+        setIsProcessing(false);
         return;
       }
       try {
@@ -103,23 +109,58 @@ export function PayPalCheckoutButton({ plan }: PayPalCheckoutButtonProps) {
           title: "Error",
           description: "Failed to update your subscription.",
         });
+      } finally {
+        setIsProcessing(false);
       }
     });
   };
 
+  const onError = (err: any) => {
+    console.error("PayPal Checkout Error", err);
+    toast({
+      variant: "destructive",
+      title: "Payment Error",
+      description: "An error occurred during the payment process. Please try again.",
+    });
+    setIsProcessing(false);
+  };
+
+  const onCancel = (data: Record<string, unknown>, actions: any) => {
+    toast({
+      title: "Payment Cancelled",
+      description: "You have cancelled the payment process.",
+    });
+    setIsProcessing(false);
+  };
+  
+
   return (
-    <PayPalScriptProvider
-      options={{
-        clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
-        currency: "PHP",
-        intent: "capture",
-      }}
-    >
-      <PayPalButtons
-        style={{ layout: "vertical" }}
-        createOrder={createOrder}
-        onApprove={onApprove}
-      />
-    </PayPalScriptProvider>
+    <>
+    {isProcessing && (
+        <div className="flex items-center justify-center p-4">
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            <span>Processing your payment...</span>
+        </div>
+    )}
+    <div className={isProcessing ? 'hidden' : ''}>
+        <PayPalScriptProvider
+          options={{
+            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
+            currency: "PHP",
+            intent: "capture",
+          }}
+        >
+          <PayPalButtons
+            style={{ layout: "vertical" }}
+            createOrder={createOrder}
+            onApprove={onApprove}
+            onError={onError}
+            onCancel={onCancel}
+            forceReRender={[plan.id]}
+          />
+        </PayPalScriptProvider>
+    </div>
+    </>
   );
 }
+
