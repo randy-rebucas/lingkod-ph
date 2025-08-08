@@ -3,7 +3,6 @@
 
 import { useState } from "react";
 import {
-  PayPalScriptProvider,
   PayPalButtons,
   type OnApproveData,
   type OnApproveActions,
@@ -35,14 +34,6 @@ export function PayPalCheckoutButton({ plan }: PayPalCheckoutButtonProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
-
-  if (!process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID) {
-    return (
-      <div className="text-destructive">
-        PayPal Client ID is not configured.
-      </div>
-    );
-  }
 
   const createOrder = (data: CreateOrderData, actions: CreateOrderActions) => {
     return actions.order.create({
@@ -125,7 +116,7 @@ export function PayPalCheckoutButton({ plan }: PayPalCheckoutButtonProps) {
     setIsProcessing(false);
   };
 
-  const onCancel = (data: Record<string, unknown>, actions: any) => {
+  const onCancel = () => {
     toast({
       title: "Payment Cancelled",
       description: "You have cancelled the payment process.",
@@ -143,14 +134,7 @@ export function PayPalCheckoutButton({ plan }: PayPalCheckoutButtonProps) {
         </div>
     )}
     <div className={isProcessing ? 'hidden' : ''}>
-        <PayPalScriptProvider
-          options={{
-            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
-            currency: "PHP",
-            intent: "capture",
-          }}
-        >
-          <PayPalButtons
+        <PayPalButtons
             style={{ layout: "vertical" }}
             createOrder={createOrder}
             onApprove={onApprove}
@@ -158,9 +142,7 @@ export function PayPalCheckoutButton({ plan }: PayPalCheckoutButtonProps) {
             onCancel={onCancel}
             forceReRender={[plan.id]}
           />
-        </PayPalScriptProvider>
     </div>
     </>
   );
 }
-

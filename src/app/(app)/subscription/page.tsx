@@ -7,11 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle, Mail, Star, Check, Clock, Loader2 } from "lucide-react";
+import { CheckCircle, Mail, Star, Check, Clock } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { PayPalCheckoutButton } from "@/components/paypal-checkout-button";
 import PaymentHistory from "./payment-history";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 
 export type SubscriptionTier = {
     id: "starter" | "pro" | "elite";
@@ -113,6 +114,16 @@ export default function SubscriptionPage() {
 
     const allTiers = [...providerSubscriptionTiers, ...agencySubscriptionTiers];
     const currentPlanDetails = allTiers.find(tier => tier.id === subscription?.planId);
+    
+    if (!process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID) {
+        return <div>PayPal Client ID not configured.</div>
+    }
+
+    const paypalOptions = {
+        clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
+        currency: "PHP",
+        intent: "capture",
+    };
     
     const renderProviderPlans = () => (
          <section>
@@ -254,63 +265,65 @@ export default function SubscriptionPage() {
     }
 
     return (
-        <div className="space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Subscription & Pricing</h1>
-                <p className="text-muted-foreground">
-                    Choose the perfect plan for your business and understand our commission structure.
-                </p>
-            </div>
+        <PayPalScriptProvider options={paypalOptions}>
+            <div className="space-y-8">
+                <div>
+                    <h1 className="text-3xl font-bold font-headline">Subscription & Pricing</h1>
+                    <p className="text-muted-foreground">
+                        Choose the perfect plan for your business and understand our commission structure.
+                    </p>
+                </div>
 
-            <section>
-                <h2 className="text-2xl font-bold font-headline mb-4">Current Plan</h2>
-                {loading ? (
-                    <Card><CardContent className="p-6"><Skeleton className="h-24 w-full" /></CardContent></Card>
-                ) : (
-                    <Card className="bg-secondary">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                {subscription?.status === 'pending' ? <Clock className="text-yellow-500"/> : <Star className="text-primary"/>}
-                                {currentPlanDetails ? `You are on the ${currentPlanDetails.name} Plan` : 'You are on a Free Plan'}
-                                {subscription?.status && <Badge variant={subscription.status === 'pending' ? 'outline' : 'default'} className="capitalize">{subscription.status}</Badge>}
-                            </CardTitle>
-                            <CardDescription>{getPlanStatusDescription()}</CardDescription>
-                        </CardHeader>
-                    </Card>
-                )}
-            </section>
-            
-            {userRole === 'agency' ? renderAgencyPlans() : renderProviderPlans()}
+                <section>
+                    <h2 className="text-2xl font-bold font-headline mb-4">Current Plan</h2>
+                    {loading ? (
+                        <Card><CardContent className="p-6"><Skeleton className="h-24 w-full" /></CardContent></Card>
+                    ) : (
+                        <Card className="bg-secondary">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    {subscription?.status === 'pending' ? <Clock className="text-yellow-500"/> : <Star className="text-primary"/>}
+                                    {currentPlanDetails ? `You are on the ${currentPlanDetails.name} Plan` : 'You are on a Free Plan'}
+                                    {subscription?.status && <Badge variant={subscription.status === 'pending' ? 'outline' : 'default'} className="capitalize">{subscription.status}</Badge>}
+                                </CardTitle>
+                                <CardDescription>{getPlanStatusDescription()}</CardDescription>
+                            </CardHeader>
+                        </Card>
+                    )}
+                </section>
+                
+                {userRole === 'agency' ? renderAgencyPlans() : renderProviderPlans()}
 
-            <section>
-                <PaymentHistory />
-            </section>
-            
-            <section>
-                <h2 className="text-2xl font-bold font-headline mb-4">Commission per Completed Service</h2>
-                 <Card>
-                    <CardContent className="p-0">
-                         <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Job Type</TableHead>
-                                    <TableHead>Commission Rate</TableHead>
-                                    <TableHead>Notes</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {commissionRates.map(rate => (
-                                    <TableRow key={rate.jobType}>
-                                        <TableCell className="font-medium">{rate.jobType}</TableCell>
-                                        <TableCell>{rate.commission}</TableCell>
-                                        <TableCell className="text-muted-foreground">{rate.notes}</TableCell>
+                <section>
+                    <PaymentHistory />
+                </section>
+                
+                <section>
+                    <h2 className="text-2xl font-bold font-headline mb-4">Commission per Completed Service</h2>
+                     <Card>
+                        <CardContent className="p-0">
+                             <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Job Type</TableHead>
+                                        <TableHead>Commission Rate</TableHead>
+                                        <TableHead>Notes</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                 </Card>
-            </section>
-        </div>
+                                </TableHeader>
+                                <TableBody>
+                                    {commissionRates.map(rate => (
+                                        <TableRow key={rate.jobType}>
+                                            <TableCell className="font-medium">{rate.jobType}</TableCell>
+                                            <TableCell>{rate.commission}</TableCell>
+                                            <TableCell className="text-muted-foreground">{rate.notes}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                     </Card>
+                </section>
+            </div>
+        </PayPalScriptProvider>
     );
 }
