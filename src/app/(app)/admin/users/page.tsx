@@ -379,7 +379,7 @@ export default function AdminUsersPage() {
             </Dialog>
             
             {/* Edit User Dialog */}
-            <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
+             <Dialog open={isEditUserOpen} onOpenChange={(open) => { setIsEditUserOpen(open); if (!open) setSelectedUser(null); }}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Edit User: {selectedUser?.displayName}</DialogTitle>

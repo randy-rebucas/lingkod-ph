@@ -36,19 +36,26 @@ export default function LoginPage() {
   const [isSetupRequired, setIsSetupRequired] = useState<boolean | null>(null);
 
   useEffect(() => {
+    // This check runs only once on component mount
     const checkUserCount = async () => {
-        const usersRef = collection(db, "users");
-        const q = query(usersRef, limit(1));
-        const snapshot = await getDocs(q);
-        if (snapshot.empty) {
-            setIsSetupRequired(true);
-            router.push('/setup');
-        } else {
-            setIsSetupRequired(false);
+        if (auth.currentUser) return; // Don't run if a user session is being restored
+        try {
+            const usersRef = collection(db, "users");
+            const q = query(usersRef, limit(1));
+            const snapshot = await getDocs(q);
+            if (snapshot.empty) {
+                setIsSetupRequired(true);
+                router.push('/setup');
+            } else {
+                setIsSetupRequired(false);
+            }
+        } catch (error) {
+            console.error("Error checking user count:", error);
+            setIsSetupRequired(false); // Default to not required on error
         }
     };
     checkUserCount();
-  }, [router]);
+}, [router]);
 
   useEffect(() => {
     if (!authLoading && user) {

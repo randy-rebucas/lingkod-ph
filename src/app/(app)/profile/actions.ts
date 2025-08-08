@@ -78,5 +78,3 @@ export async function handleInviteAction(
         return { error: errorMessage, message: "Action failed." };
     }
 }
-
-    

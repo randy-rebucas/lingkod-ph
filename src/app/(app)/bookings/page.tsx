@@ -319,22 +319,8 @@ export default function BookingsPage() {
             orderBy("date", "desc")
         );
 
-        const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-             const bookingsData = await Promise.all(querySnapshot.docs.map(async (bookingDoc) => {
-                const data = bookingDoc.data();
-                
-                // Fetch related user avatars
-                const clientDoc = await getDoc(doc(db, "users", data.clientId));
-                const providerDoc = await getDoc(doc(db, "users", data.providerId));
-                
-                return {
-                    id: bookingDoc.id,
-                    ...data,
-                    clientAvatar: clientDoc.data()?.photoURL || '',
-                    providerAvatar: providerDoc.data()?.photoURL || ''
-                } as Booking;
-            }));
-
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+             const bookingsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
             setBookings(bookingsData);
             setLoading(false);
         }, (error) => {

@@ -298,11 +298,11 @@ export default function SubscriptionPage() {
                     <PaymentHistory />
                 </section>
                 
-                <section>
+                 <section>
                     <h2 className="text-2xl font-bold font-headline mb-4">Commission per Completed Service</h2>
-                     <Card>
+                    <Card>
                         <CardContent className="p-0">
-                             <Table>
+                            <Table>
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Job Type</TableHead>
@@ -321,7 +321,7 @@ export default function SubscriptionPage() {
                                 </TableBody>
                             </Table>
                         </CardContent>
-                     </Card>
+                    </Card>
                 </section>
             </div>
         </PayPalScriptProvider>

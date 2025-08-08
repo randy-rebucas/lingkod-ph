@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List, ShieldCheck, Clock, Wallet } from "lucide-react";
+import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List, ShieldCheck, Clock, Wallet, Info } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { findMatchingProviders } from "@/ai/flows/find-matching-providers";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 
 type Booking = {
@@ -173,6 +174,12 @@ const getAvatarFallback = (name: string | null | undefined) => {
 const ProviderCard = ({ provider, isFavorite, onToggleFavorite }: { provider: Provider; isFavorite: boolean; onToggleFavorite: (provider: Provider) => void; }) => {
     return (
         <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col">
+            {provider.searchReasoning && (
+                 <Alert className="border-0 border-b rounded-none bg-primary/10 text-primary-foreground">
+                    <Info className="h-4 w-4 text-primary" />
+                    <AlertDescription className="text-primary text-xs">{provider.searchReasoning}</AlertDescription>
+                </Alert>
+            )}
             <CardHeader className="text-center relative">
                  <Button 
                     size="icon" 
@@ -241,6 +248,9 @@ const ProviderRow = ({ provider, isFavorite, onToggleFavorite }: { provider: Pro
                     <Link href={`/providers/${provider.uid}`} className="font-bold hover:underline">{provider.displayName}</Link>
                     {provider.isVerified && <ShieldCheck className="h-4 w-4 text-blue-500" title="Verified Provider" />}
                 </div>
+                {provider.searchReasoning && (
+                    <p className="text-xs text-primary/80 mt-1">{provider.searchReasoning}</p>
+                )}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                     {renderStars(provider.rating)}
                     <span>({provider.reviewCount} reviews)</span>
@@ -271,6 +281,7 @@ export default function DashboardPage() {
     
     // For client dashboard
     const [providers, setProviders] = useState<Provider[]>([]);
+    const [allProviders, setAllProviders] = useState<Provider[]>([]);
     const [loadingProviders, setLoadingProviders] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [isSmartSearching, setIsSmartSearching] = useState(false);
@@ -389,6 +400,7 @@ export default function DashboardPage() {
                     } as Provider;
                 });
                 setProviders(providersData);
+                setAllProviders(providersData); // Store a copy for resetting search
             } catch (error) {
                 console.error("Error fetching providers: ", error);
             } finally {
@@ -500,32 +512,36 @@ export default function DashboardPage() {
 
     const handleSmartSearch = async () => {
         if (!searchTerm) {
-            toast({
-                title: "Search query empty",
-                description: "Please enter what you're looking for.",
-                variant: "destructive",
-            });
+            setProviders(allProviders); // Reset if search is cleared
             return;
         }
         setIsSmartSearching(true);
         try {
             const result = await findMatchingProviders({ query: searchTerm });
-            const rankedProviderIds = result.providers.reduce((acc, p) => {
-                acc[p.providerId] = { rank: p.rank, reasoning: p.reasoning };
-                return acc;
-            }, {} as Record<string, { rank: number, reasoning: string }>);
-            
-            const matchedProviders = providers.filter(p => rankedProviderIds[p.uid]).map(p => ({
-                ...p,
-                searchRank: rankedProviderIds[p.uid].rank,
-                searchReasoning: rankedProviderIds[p.uid].reasoning
-            })).sort((a,b) => (a.searchRank || 99) - (b.searchRank || 99));
+            if (result.providers.length > 0) {
+                const rankedProviderIds = result.providers.reduce((acc, p) => {
+                    acc[p.providerId] = { rank: p.rank, reasoning: p.reasoning };
+                    return acc;
+                }, {} as Record<string, { rank: number, reasoning: string }>);
+                
+                const matchedProviders = allProviders.filter(p => rankedProviderIds[p.uid]).map(p => ({
+                    ...p,
+                    searchRank: rankedProviderIds[p.uid].rank,
+                    searchReasoning: rankedProviderIds[p.uid].reasoning
+                })).sort((a,b) => (a.searchRank || 99) - (b.searchRank || 99));
 
-            setProviders(matchedProviders);
-            toast({
-                title: "Smart Search Complete",
-                description: `Found and ranked ${matchedProviders.length} providers for you.`,
-            });
+                setProviders(matchedProviders);
+                toast({
+                    title: "Smart Search Complete",
+                    description: `Found and ranked ${matchedProviders.length} providers for you.`,
+                });
+            } else {
+                setProviders([]);
+                 toast({
+                    title: "No Results",
+                    description: `Could not find any providers for your search. Try a broader term.`,
+                });
+            }
         } catch (error) {
             console.error("Smart search failed:", error);
             toast({
@@ -538,13 +554,7 @@ export default function DashboardPage() {
         }
     };
 
-    // Filter providers for client view
-    const filteredProviders = useMemo(() => 
-        providers.filter(provider => 
-            provider.displayName.toLowerCase().includes(searchTerm.toLowerCase())
-        ), [providers, searchTerm]);
-
-     // Derived stats for agency
+    // Derived stats for agency
     const agencyTotalRevenue = agencyBookings.filter(b => b.status === 'Completed').reduce((sum, b) => sum + b.price, 0);
     const agencyTotalBookings = agencyBookings.filter(b => b.status === 'Completed').length;
     const agencyProviderCount = agencyProviders.length;
@@ -907,5 +917,3 @@ export default function DashboardPage() {
         </div>
     );
 }
-
-    
