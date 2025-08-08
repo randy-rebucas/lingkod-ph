@@ -484,7 +484,8 @@ export default function ProfilePage() {
         setIsUploading(true);
         setUploadProgress(0);
 
-        const storageRef = ref(storage, `profile-pictures/${user.uid}/${imageFile.name}`);
+        const storagePath = `profile-pictures/${user.uid}/${imageFile.name}`;
+        const storageRef = ref(storage, storagePath);
         const uploadTask = uploadBytesResumable(storageRef, imageFile);
 
         uploadTask.on(
