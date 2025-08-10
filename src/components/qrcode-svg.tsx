@@ -1,20 +1,23 @@
 
 "use client";
 
+import { QRCodeSVG } from 'qrcode.react';
+
+// Using a placeholder value for the QR code.
+// In a real implementation, you would generate a unique payment request
+// from your payment provider (e.g., PayMongo, Xendit) and encode that URL here.
+const placeholderPaymentUrl = "https://localpro.ph/pay?tx=12345&amount=100";
+
 export function QRCode() {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 100 100"
-      width="200"
-      height="200"
-      shapeRendering="crispEdges"
-    >
-      <path fill="#ffffff" d="M0 0h100v100H0z" />
-      <path
-        fill="#000000"
-        d="M10 10h20v20H10z m60 0h20v20H70z M10 70h20v20H10z M15 15h10v10H15z m60 0h10v10H75z M15 75h10v10H15z M40 10h10v10H40z M60 10h10v10H60z M30 20h10v10H30z m20 0h10v10H50z M70 20h10v10H70z M10 30h10v10H10z m20 0h10v10H30z m10 10h10v10H40z m20 0h10v10H60z M10 50h10v10H10z m20 0h10v10H30z m20 0h10v10H50z m20 0h10v10H70z m-40 10h10v10H30z M50 60h10v10H50z M70 60h10v10H70z M40 70h10v10H40z m20 0h10v10H60z M10 40h20v10H10z M70 30h20v10H70z M40 80h20v10H40z M40 40h10v20H40z M60 50h10v20H60z"
-      />
-    </svg>
+    <QRCodeSVG
+      value={placeholderPaymentUrl}
+      size={192} // 192px fits well in the 208px container (w-52) with p-2 padding
+      bgColor={"#ffffff"}
+      fgColor={"#000000"}
+      level={"L"}
+      includeMargin={false}
+      className="w-full h-full"
+    />
   );
 }

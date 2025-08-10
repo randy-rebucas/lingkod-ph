@@ -111,6 +111,7 @@ const commissionRates = [
 
 export default function SubscriptionPage() {
     const { userRole, subscription, loading } = useAuth();
+    const [isPaymentDialog, setPaymentDialog] = useState(false);
 
     const allTiers = [...providerSubscriptionTiers, ...agencySubscriptionTiers];
     const currentPlanDetails = allTiers.find(tier => tier.id === subscription?.planId);
@@ -171,9 +172,13 @@ export default function SubscriptionPage() {
                                         <DialogContent>
                                             <DialogHeader>
                                                 <DialogTitle>Subscribe to {tier.name}</DialogTitle>
-                                                <DialogDescription>Complete your payment securely with PayPal.</DialogDescription>
+                                                <DialogDescription>Choose your preferred payment method.</DialogDescription>
                                             </DialogHeader>
-                                            <PayPalCheckoutButton plan={tier} />
+                                            <PayPalCheckoutButton 
+                                                plan={tier} 
+                                                onPaymentStart={() => setPaymentDialog(true)}
+                                                onPaymentSuccess={() => setPaymentDialog(false)}
+                                            />
                                         </DialogContent>
                                     </Dialog>
                                 )}
@@ -236,9 +241,13 @@ export default function SubscriptionPage() {
                                         <DialogContent>
                                             <DialogHeader>
                                                 <DialogTitle>Subscribe to {tier.name}</DialogTitle>
-                                                <DialogDescription>Complete your payment securely with PayPal.</DialogDescription>
+                                                <DialogDescription>Choose your preferred payment method.</DialogDescription>
                                             </DialogHeader>
-                                            <PayPalCheckoutButton plan={tier} />
+                                            <PayPalCheckoutButton 
+                                                plan={tier} 
+                                                onPaymentStart={() => setPaymentDialog(true)}
+                                                onPaymentSuccess={() => setPaymentDialog(false)}
+                                            />
                                         </DialogContent>
                                     </Dialog>
                                 )}
