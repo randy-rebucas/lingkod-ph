@@ -26,7 +26,7 @@ import { type SubscriptionTier, type AgencySubscriptionTier } from "@/app/(app)/
 import { Loader2, Wallet, QrCode } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
-import { QRCode } from "./qrcode-svg";
+import Image from "next/image";
 
 
 type PayPalCheckoutButtonProps = {
@@ -41,19 +41,23 @@ const localPaymentInstructions = {
   gcash: {
     name: "GCash",
     icon: Wallet,
+    accountName: "Juan Dela Cruz",
+    accountNumber: "0917-000-1234",
     steps: [
-      "Open your GCash app and tap 'Scan QR'.",
-      "Scan the QR code shown on this screen.",
-      "Enter the amount: ₱{amount} and complete the payment.",
+      "Open your GCash app.",
+      "Tap 'Send' and choose 'Express Send'.",
+      "Enter the details above and the amount: ₱{amount}.",
       "Click the 'I Have Paid' button below.",
     ],
   },
   maya: {
     name: "Maya",
     icon: Wallet,
+    accountName: "Juan Dela Cruz",
+    accountNumber: "0918-000-5678",
     steps: [
-      "Open your Maya app and tap 'Scan to Pay'.",
-      "Scan the QR code shown on this screen.",
+      "Open your Maya app.",
+      "Tap 'Send Money' and enter the details above.",
       "Enter the amount: ₱{amount} and complete the payment.",
       "Click the 'I Have Paid' button below.",
     ],
@@ -171,7 +175,7 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
         });
         
         onPaymentSuccess?.();
-        router.push("/subscription/success");
+        router.push("/subscription/success?status=pending");
         
     } catch (error) {
         console.error(error);
@@ -208,9 +212,20 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
     return (
         <div className="text-center space-y-4">
             <h3 className="font-bold text-lg flex items-center justify-center gap-2">Pay with {details.name}</h3>
+            
             <div className="mx-auto w-48 h-48 bg-white p-2 rounded-lg">
-                <QRCode />
+                <Image 
+                    src="https://placehold.co/192x192.png"
+                    alt="Sample QR Code"
+                    width={192}
+                    height={192}
+                    data-ai-hint="qr code"
+                />
             </div>
+             <div className="text-sm bg-muted p-3 rounded-lg">
+                <p><strong>Account Name:</strong> {details.accountName}</p>
+                <p><strong>Account Number:</strong> {details.accountNumber}</p>
+             </div>
             <ol className="text-left space-y-2 text-sm text-muted-foreground list-decimal list-inside">
                 {details.steps.map(step => (
                     <li key={step}>{step.replace('{amount}', Number(plan.price).toFixed(2))}</li>

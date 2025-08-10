@@ -2,6 +2,7 @@
 "use client";
 
 import { QRCodeSVG } from 'qrcode.react';
+import Image from 'next/image';
 
 // Using a placeholder value for the QR code.
 // In a real implementation, you would generate a unique payment request
@@ -10,14 +11,12 @@ const placeholderPaymentUrl = "https://localpro.ph/pay?tx=12345&amount=100";
 
 export function QRCode() {
   return (
-    <QRCodeSVG
-      value={placeholderPaymentUrl}
-      size={192} // 192px fits well in the 208px container (w-52) with p-2 padding
-      bgColor={"#ffffff"}
-      fgColor={"#000000"}
-      level={"L"}
-      includeMargin={false}
-      className="w-full h-full"
+    <Image 
+        src="https://placehold.co/256x256.png" 
+        alt="Sample QR Code" 
+        width={192} 
+        height={192} 
+        data-ai-hint="qr code"
     />
   );
 }
