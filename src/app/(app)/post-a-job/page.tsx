@@ -27,13 +27,16 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 
 const postJobSchema = z.object({
   title: z.string().min(10, "Job title must be at least 10 characters."),
   description: z.string().min(20, "Description must be at least 20 characters."),
   categoryId: z.string().min(1, "Please select a category."),
-  budget: z.coerce.number().positive("Budget must be a positive number."),
+  budgetAmount: z.coerce.number().positive("Budget must be a positive number."),
+  budgetType: z.enum(['Fixed', 'Daily', 'Monthly']),
+  isNegotiable: z.boolean().default(false),
   location: z.string().min(5, "Please provide a specific location."),
   deadline: z.date().optional(),
 });
@@ -66,7 +69,9 @@ export default function PostAJobPage() {
       title: "",
       description: "",
       categoryId: "",
-      budget: '' as any,
+      budgetAmount: '' as any,
+      budgetType: 'Fixed',
+      isNegotiable: false,
       location: "",
       deadline: undefined,
     },
@@ -106,7 +111,9 @@ export default function PostAJobPage() {
                     title: jobData.title,
                     description: jobData.description,
                     categoryId: jobData.categoryId,
-                    budget: jobData.budget,
+                    budgetAmount: jobData.budget.amount,
+                    budgetType: jobData.budget.type,
+                    isNegotiable: jobData.budget.negotiable,
                     location: jobData.location,
                     deadline: jobData.deadline?.toDate(),
                 });
@@ -136,7 +143,7 @@ export default function PostAJobPage() {
         try {
             const result = await generateJobDetails({ jobDescription });
             if (result.suggestedBudget) {
-                form.setValue('budget', result.suggestedBudget, { shouldValidate: true });
+                form.setValue('budgetAmount', result.suggestedBudget, { shouldValidate: true });
             }
             if (result.questions) {
                 setQuestions(result.questions);
@@ -302,17 +309,32 @@ export default function PostAJobPage() {
                         </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="budget"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Budget (PHP)</FormLabel>
-                            <FormControl><Input type="number" placeholder="e.g., 1500" {...field} /></FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
+                     <div className="space-y-2">
+                        <FormLabel>Budget (PHP)</FormLabel>
+                        <div className="grid grid-cols-2 gap-2">
+                            <FormField control={form.control} name="budgetAmount" render={({ field }) => (
+                                <FormItem><FormControl><Input type="number" placeholder="e.g., 1500" {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField control={form.control} name="budgetType" render={({ field }) => (
+                                <FormItem>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="Fixed">Fixed</SelectItem>
+                                            <SelectItem value="Daily">Daily</SelectItem>
+                                            <SelectItem value="Monthly">Monthly</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormItem>
+                            )} />
+                        </div>
+                         <FormField control={form.control} name="isNegotiable" render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-start space-x-2 pt-2">
+                                <FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                                <FormLabel className="m-0">Budget is negotiable</FormLabel>
+                            </FormItem>
+                        )} />
+                    </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField

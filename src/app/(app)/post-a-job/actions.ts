@@ -9,7 +9,9 @@ const postJobSchema = z.object({
   title: z.string().min(10, "Job title must be at least 10 characters."),
   description: z.string().min(20, "Description must be at least 20 characters."),
   categoryId: z.string().min(1, "Please select a category."),
-  budget: z.coerce.number().positive("Budget must be a positive number."),
+  budgetAmount: z.coerce.number().positive("Budget must be a positive number."),
+  budgetType: z.enum(['Fixed', 'Daily', 'Monthly']),
+  isNegotiable: z.boolean().default(false),
   location: z.string().min(5, "Please provide a specific location."),
   deadline: z.date().optional(),
   additionalDetails: z.string().optional(), // JSON string of questions and answers
@@ -33,7 +35,7 @@ export async function postJobAction(
     };
   }
 
-  const { userId, title, description, categoryId, budget, location, deadline, additionalDetails, jobId } = validatedFields.data;
+  const { userId, title, description, categoryId, budgetAmount, budgetType, isNegotiable, location, deadline, additionalDetails, jobId } = validatedFields.data;
 
   if (!userId) {
     return { error: "You must be logged in to post a job.", message: "Authentication failed." };
@@ -52,7 +54,11 @@ export async function postJobAction(
       description,
       categoryId,
       categoryName,
-      budget,
+      budget: {
+        amount: budgetAmount,
+        type: budgetType,
+        negotiable: isNegotiable,
+      },
       location,
       status: 'Open',
       updatedAt: serverTimestamp(),

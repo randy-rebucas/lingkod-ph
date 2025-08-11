@@ -13,6 +13,7 @@ import { Briefcase, MapPin, Users, Star, ShieldCheck, Clock } from "lucide-react
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
+import { formatBudget } from '@/lib/utils';
 
 
 export type Job = {
@@ -20,7 +21,11 @@ export type Job = {
     title: string;
     description: string;
     categoryName: string;
-    budget: number;
+    budget: {
+      amount: number;
+      type: 'Fixed' | 'Daily' | 'Monthly';
+      negotiable: boolean;
+    };
     location: string;
     clientName: string;
     clientId: string;
@@ -137,7 +142,7 @@ export default function JobsPage() {
                                     </CardContent>
                                 </Link>
                                 <CardFooter className="flex justify-between items-center bg-secondary/50 p-4">
-                                    <div className="font-bold text-lg text-primary">₱{job.budget.toFixed(2)}</div>
+                                    <div className="font-bold text-lg text-primary">{formatBudget(job.budget)}</div>
                                     <Button
                                         asChild={!isSubscribed}
                                         onClick={(e) => {

@@ -18,6 +18,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { formatBudget } from "@/lib/utils";
 
 
 type Job = {
@@ -25,7 +26,11 @@ type Job = {
     title: string;
     description: string;
     categoryName: string;
-    budget: number;
+    budget: {
+      amount: number;
+      type: 'Fixed' | 'Daily' | 'Monthly';
+      negotiable: boolean;
+    };
     location: string;
     clientName: string;
     clientId: string;
@@ -225,7 +230,7 @@ export default function JobDetailsPage() {
                 <CardFooter className="flex-col items-start gap-4 bg-secondary/50 p-6">
                     <div>
                         <p className="text-sm text-muted-foreground">Budget</p>
-                        <p className="text-3xl font-bold text-primary">₱{job.budget.toFixed(2)}</p>
+                        <p className="text-3xl font-bold text-primary">{formatBudget(job.budget)}</p>
                     </div>
                     <Button
                         size="lg"

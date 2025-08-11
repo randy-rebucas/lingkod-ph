@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import Link from "next/link";
+import { formatBudget } from "@/lib/utils";
 
 type JobStatus = "Open" | "In Progress" | "Completed" | "Closed";
 
@@ -23,7 +24,11 @@ export type Job = {
     id: string;
     title: string;
     status: JobStatus;
-    budget: number;
+    budget: {
+        amount: number;
+        type: 'Fixed' | 'Daily' | 'Monthly';
+        negotiable: boolean;
+    };
     applications: string[]; // Array of provider IDs
 };
 
@@ -128,7 +133,7 @@ export default function MyJobPostsPage() {
                                     <TableCell className="font-medium">{job.title}</TableCell>
                                     <TableCell><Badge variant={getStatusVariant(job.status)}>{job.status}</Badge></TableCell>
                                     <TableCell>{job.applications?.length || 0}</TableCell>
-                                    <TableCell className="text-right">₱{job.budget.toFixed(2)}</TableCell>
+                                    <TableCell className="text-right">{formatBudget(job.budget)}</TableCell>
                                     <TableCell className="text-right">
                                         <AlertDialog>
                                             <DropdownMenu>
