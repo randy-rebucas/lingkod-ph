@@ -43,6 +43,8 @@ export default function AdminRewardsPage() {
     const [pointsRequired, setPointsRequired] = useState(0);
     const [isActive, setIsActive] = useState(true);
 
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
     useEffect(() => {
         if (userRole !== 'admin') {
             setLoading(false);
@@ -69,13 +71,29 @@ export default function AdminRewardsPage() {
         setPointsRequired(0);
         setIsActive(true);
     };
+    
+    const closeDialog = () => {
+        setIsDialogOpen(false);
+        setIsEditing(null);
+        setIsAdding(false);
+        resetForm();
+    };
 
     const openEditDialog = (reward: Reward) => {
         setIsEditing(reward);
+        setIsAdding(false);
         setTitle(reward.title);
         setDescription(reward.description);
         setPointsRequired(reward.pointsRequired);
         setIsActive(reward.isActive);
+        setIsDialogOpen(true);
+    };
+    
+    const openAddDialog = () => {
+        setIsAdding(true);
+        setIsEditing(null);
+        resetForm();
+        setIsDialogOpen(true);
     };
 
     const handleFormSubmit = async () => {
@@ -88,9 +106,7 @@ export default function AdminRewardsPage() {
             variant: result.error ? 'destructive' : 'default',
         });
         if (!result.error) {
-            setIsAdding(false);
-            setIsEditing(null);
-            resetForm();
+            closeDialog();
         }
     };
     
@@ -131,7 +147,7 @@ export default function AdminRewardsPage() {
     }
 
     return (
-        <Dialog onOpenChange={(open) => { if (!open) { setIsEditing(null); setIsAdding(false); resetForm(); }}}>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
                     <div>
@@ -140,9 +156,7 @@ export default function AdminRewardsPage() {
                             Manage rewards for the loyalty program.
                         </p>
                     </div>
-                    <DialogTrigger asChild>
-                        <Button onClick={() => setIsAdding(true)}><PlusCircle className="mr-2"/> Add Reward</Button>
-                    </DialogTrigger>
+                    <Button onClick={openAddDialog}><PlusCircle className="mr-2"/> Add Reward</Button>
                 </div>
                  <Card>
                     <CardContent>
@@ -172,11 +186,9 @@ export default function AdminRewardsPage() {
                                                         <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DialogTrigger asChild>
-                                                            <DropdownMenuItem onClick={() => openEditDialog(reward)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-                                                        </DialogTrigger>
+                                                        <DropdownMenuItem onSelect={() => openEditDialog(reward)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
                                                         <AlertDialogTrigger asChild>
-                                                            <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                                                            <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onSelect={(e) => e.preventDefault()}>
                                                                 <Trash2 className="mr-2 h-4 w-4" />Delete
                                                             </DropdownMenuItem>
                                                         </AlertDialogTrigger>

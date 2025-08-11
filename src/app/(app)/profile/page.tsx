@@ -925,17 +925,17 @@ export default function ProfilePage() {
                          <p className="text-muted-foreground">Earn points for completed bookings and redeem them for exclusive rewards.</p>
                     </div>
 
-                    <Card className="bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-lg">
-                        <CardHeader>
-                            <CardTitle>Your Loyalty Points</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-5xl font-bold">{loyaltyPoints.toLocaleString()}</p>
-                        </CardContent>
-                    </Card>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Card>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <Card className="lg:col-span-1 bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg flex flex-col justify-center text-center">
+                            <CardHeader>
+                                <CardTitle>Your Loyalty Points</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-6xl font-bold">{loyaltyPoints.toLocaleString()}</p>
+                            </CardContent>
+                        </Card>
+                        
+                        <Card className="lg:col-span-2">
                              <CardHeader>
                                 <CardTitle>Available Rewards</CardTitle>
                                 <CardDescription>Use your points to claim these rewards.</CardDescription>
@@ -974,39 +974,39 @@ export default function ProfilePage() {
                                 )) : <p className="text-muted-foreground text-center">No rewards available at the moment.</p>}
                             </CardContent>
                         </Card>
-                         <Card>
-                            <CardHeader>
-                                <CardTitle>Points History</CardTitle>
-                                <CardDescription>Your recent point transactions.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Date</TableHead>
-                                            <TableHead>Description</TableHead>
-                                            <TableHead className="text-right">Points</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {transactions.length > 0 ? transactions.slice(0, 5).map(tx => (
-                                             <TableRow key={tx.id}>
-                                                <TableCell className="text-xs text-muted-foreground">{tx.createdAt ? format(tx.createdAt.toDate(), 'MMM d, yyyy') : ''}</TableCell>
-                                                <TableCell>{tx.description}</TableCell>
-                                                <TableCell className={cn("text-right font-medium", tx.type === 'earn' || tx.type === 'referral' ? 'text-green-600' : 'text-destructive')}>
-                                                    {tx.type === 'earn' || tx.type === 'referral' ? '+' : '-'}{tx.points.toLocaleString()}
-                                                </TableCell>
-                                            </TableRow>
-                                        )) : (
-                                            <TableRow>
-                                                <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">No transactions yet.</TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
-                        </Card>
                     </div>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Points History</CardTitle>
+                            <CardDescription>Your recent point transactions.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Description</TableHead>
+                                        <TableHead className="text-right">Points</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {transactions.length > 0 ? transactions.slice(0, 10).map(tx => (
+                                         <TableRow key={tx.id}>
+                                            <TableCell className="text-xs text-muted-foreground">{tx.createdAt ? format(tx.createdAt.toDate(), 'MMM d, yyyy') : ''}</TableCell>
+                                            <TableCell>{tx.description}</TableCell>
+                                            <TableCell className={cn("text-right font-medium", tx.type === 'earn' || tx.type === 'referral' ? 'text-green-600' : 'text-destructive')}>
+                                                {tx.type === 'earn' || tx.type === 'referral' ? '+' : '-'}{tx.points.toLocaleString()}
+                                            </TableCell>
+                                        </TableRow>
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">No transactions yet.</TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
                 </TabsContent>
 
                 <TabsContent value="referrals" className="mt-6 space-y-6">
