@@ -265,7 +265,7 @@ export default function ProfilePage() {
 
         // Fetch loyalty rewards
         const rewardsRef = collection(db, "loyaltyRewards");
-        const qRewards = query(rewardsRef, where("isActive", "==", true));
+        const qRewards = query(rewardsRef, where("isActive", "==", true), orderBy("pointsRequired"));
         const unsubscribeRewards = onSnapshot(qRewards, (snapshot) => {
             const rewardsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reward));
             setRewards(rewardsData);

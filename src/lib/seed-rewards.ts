@@ -1,5 +1,5 @@
 
-import { collection, addDoc, getDocs, writeBatch, doc } from "firebase/firestore";
+import { collection, addDoc, getDocs, writeBatch, doc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 
 const rewards = [
@@ -49,7 +49,7 @@ export async function seedRewards() {
     rewards.forEach(reward => {
         if (!existingRewardTitles.has(reward.title)) {
             const newRewardRef = doc(rewardsRef);
-            batch.set(newRewardRef, { ...reward, createdAt: new Date() });
+            batch.set(newRewardRef, { ...reward, createdAt: serverTimestamp() });
             count++;
         }
     });
