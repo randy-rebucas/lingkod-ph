@@ -30,6 +30,7 @@ import { X } from "lucide-react";
 import { handleInviteAction } from "./actions";
 import { useLoadScript, Autocomplete } from "@react-google-maps/api";
 import { Separator } from "@/components/ui/separator";
+import { useActionState } from "react";
 
 
 type Reward = {
@@ -144,7 +145,8 @@ export default function ProfilePage() {
     const [referralCode, setReferralCode] = useState('');
     const [referrals, setReferrals] = useState<Referral[]>([]);
     const [invites, setInvites] = useState<Invite[]>([]);
-    const [isRespondingToInvite, setIsRespondingToInvite] = useState(false);
+
+    const [state, formAction, isPending] = useActionState(handleInviteAction, { error: null, message: '' });
 
     // Payout fields
     const [payoutMethod, setPayoutMethod] = useState('');
@@ -185,6 +187,16 @@ export default function ProfilePage() {
         const year = parseInt(birthYear, 10);
         return new Date(year, monthIndex + 1, 0).getDate();
     }, [birthMonth, birthYear]);
+
+    useEffect(() => {
+        if (state.message) {
+             toast({
+                title: state.error ? 'Error' : 'Success',
+                description: state.message,
+                variant: state.error ? 'destructive' : 'default',
+            });
+        }
+    }, [state, toast]);
 
     useEffect(() => {
         if (!user) return;
@@ -293,30 +305,6 @@ export default function ProfilePage() {
         };
     }, [user, userRole]);
 
-    const handleInviteResponse = async (inviteId: string, accepted: boolean) => {
-        setIsRespondingToInvite(true);
-        try {
-            const formData = new FormData();
-            formData.append('inviteId', inviteId);
-            formData.append('accepted', String(accepted));
-            
-            const result = await handleInviteAction({ error: null, message: '' }, formData);
-
-            if (result.error) {
-                 toast({ variant: 'destructive', title: 'Error', description: result.error });
-            } else {
-                toast({
-                    title: `Invitation ${accepted ? 'Accepted' : 'Declined'}`,
-                    description: `You have successfully ${accepted ? 'joined the agency' : 'declined the invitation'}.`,
-                });
-            }
-        } catch (error) {
-            console.error("Error responding to invite:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to respond to invitation.' });
-        } finally {
-            setIsRespondingToInvite(false);
-        }
-    };
 
     const handleCopy = (textToCopy: string, toastMessage: string) => {
         navigator.clipboard.writeText(textToCopy);
@@ -757,20 +745,18 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent className="space-y-2">
                         {invites.map(invite => (
-                             <div key={invite.id} className="flex items-center justify-between p-3 border rounded-lg">
+                             <form action={formAction} key={invite.id} className="flex items-center justify-between p-3 border rounded-lg">
                                 <p>Invitation from <span className="font-semibold">{invite.agencyName}</span></p>
-                                 <form action={(formData) => handleInviteAction({ error: null, message: '' }, formData)}>
-                                    <input type="hidden" name="inviteId" value={invite.id} />
-                                    <div className="flex gap-2">
-                                        <Button size="sm" variant="outline" type="submit" name="accepted" value="true" disabled={isRespondingToInvite}>
-                                            <ThumbsUp className="mr-2 h-4 w-4"/> Accept
-                                        </Button>
-                                        <Button size="sm" variant="destructive" type="submit" name="accepted" value="false" disabled={isRespondingToInvite}>
-                                            <ThumbsDown className="mr-2 h-4 w-4"/> Decline
-                                        </Button>
-                                    </div>
-                                </form>
-                            </div>
+                                <input type="hidden" name="inviteId" value={invite.id} />
+                                <div className="flex gap-2">
+                                    <Button size="sm" variant="outline" type="submit" name="accepted" value="true" disabled={isPending}>
+                                        <ThumbsUp className="mr-2 h-4 w-4"/> Accept
+                                    </Button>
+                                    <Button size="sm" variant="destructive" type="submit" name="accepted" value="false" disabled={isPending}>
+                                        <ThumbsDown className="mr-2 h-4 w-4"/> Decline
+                                    </Button>
+                                </div>
+                            </form>
                         ))}
                     </CardContent>
                 </Card>
@@ -1316,7 +1302,7 @@ export default function ProfilePage() {
                                 <h4 className="font-medium">Uploaded Documents</h4>
                                 <div className="space-y-2">
                                     {documents.length > 0 ? documents.map((doc, i) => (
-                                        <div key={doc.url} className="flex items-center justify-between p-2 border rounded-md">
+                                        <div key={i} className="flex items-center justify-between p-2 border rounded-md">
                                             <a href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline">
                                                 <File className="h-4 w-4" />
                                                 <span>{doc.name}</span>

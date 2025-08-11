@@ -146,10 +146,12 @@ export default function MyJobPostsPage() {
                                                     <DropdownMenuItem asChild>
                                                         <Link href={`/post-a-job?edit=${job.id}`}><Edit className="mr-2 h-4 w-4" /> Edit Post</Link>
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleUpdateStatus(job.id, "Closed")}>Close Post</DropdownMenuItem>
+                                                    <DropdownMenuItem onSelect={() => handleUpdateStatus(job.id, "Closed")}>Close Post</DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <AlertDialogTrigger asChild>
-                                                        <DropdownMenuItem className="text-destructive"><Trash2 className="mr-2 h-4 w-4" /> Delete</DropdownMenuItem>
+                                                        <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
+                                                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                        </DropdownMenuItem>
                                                     </AlertDialogTrigger>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>

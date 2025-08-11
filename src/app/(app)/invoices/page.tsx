@@ -165,6 +165,12 @@ export default function InvoicesPage() {
         setSelectedInvoice(invoice);
         setIsDialogOpen(true);
     };
+    
+    const handleOpenPreview = (invoice: Invoice) => {
+        setSelectedInvoice(invoice);
+        setIsPreviewOpen(true);
+    };
+
 
     const columns: ColumnDef<Invoice>[] = [
       {
@@ -248,7 +254,6 @@ export default function InvoicesPage() {
         cell: ({ row }) => {
           const invoice = row.original;
           return (
-             <Dialog onOpenChange={(open) => !open && setSelectedInvoice(null)}>
               <AlertDialog>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -259,17 +264,15 @@ export default function InvoicesPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                     <DialogTrigger asChild>
-                        <DropdownMenuItem onClick={() => setSelectedInvoice(invoice)}>View/Download</DropdownMenuItem>
-                    </DialogTrigger>
-                    <DropdownMenuItem onClick={() => handleEditInvoice(invoice)}>
+                    <DropdownMenuItem onSelect={() => handleOpenPreview(invoice)}>View/Download</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleEditInvoice(invoice)}>
                       Edit Details
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => handleStatusUpdate(invoice.id, 'Paid')} disabled={invoice.status === 'Paid'}>
+                    <DropdownMenuItem onSelect={() => handleStatusUpdate(invoice.id, 'Paid')} disabled={invoice.status === 'Paid'}>
                       Mark as Paid
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleStatusUpdate(invoice.id, 'Sent')} disabled={invoice.status === 'Sent'}>
+                    <DropdownMenuItem onSelect={() => handleStatusUpdate(invoice.id, 'Sent')} disabled={invoice.status === 'Sent'}>
                       Mark as Sent
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -295,16 +298,7 @@ export default function InvoicesPage() {
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
-              </AlertDialog>
-               {selectedInvoice?.id === invoice.id && (
-                    <DialogContent className="max-w-4xl">
-                        <DialogHeader>
-                            <DialogTitle>Invoice Preview: {selectedInvoice.invoiceNumber}</DialogTitle>
-                        </DialogHeader>
-                        <InvoicePreview invoice={selectedInvoice} />
-                    </DialogContent>
-                )}
-            </Dialog>
+            </AlertDialog>
           );
         },
       },
@@ -497,6 +491,14 @@ export default function InvoicesPage() {
                   fetchInvoices();
               }}
           />
+           <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
+               <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                        <DialogTitle>Invoice Preview: {selectedInvoice?.invoiceNumber}</DialogTitle>
+                    </DialogHeader>
+                   {selectedInvoice && <InvoicePreview invoice={selectedInvoice} />}
+                </DialogContent>
+            </Dialog>
       </div>
     );
 }

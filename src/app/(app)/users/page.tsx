@@ -245,7 +245,9 @@ export default function AdminUsersPage() {
                                     <SelectItem value="suspended">Suspended</SelectItem>
                                 </SelectContent>
                             </Select>
-                             <Button onClick={() => setIsCreateUserOpen(true)}><UserPlus className="mr-2 h-4 w-4" /> Create User</Button>
+                            <DialogTrigger asChild>
+                                <Button onClick={() => setIsCreateUserOpen(true)}><UserPlus className="mr-2 h-4 w-4" /> Create User</Button>
+                            </DialogTrigger>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -318,7 +320,7 @@ export default function AdminUsersPage() {
                                                             <>
                                                                 <DropdownMenuSeparator />
                                                                 <AlertDialogTrigger asChild>
-                                                                    <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onSelect={(e) => e.preventDefault()}>
+                                                                    <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
                                                                         <Trash2 className="mr-2 h-4 w-4" />Delete User
                                                                     </DropdownMenuItem>
                                                                 </AlertDialogTrigger>
@@ -356,9 +358,6 @@ export default function AdminUsersPage() {
             
             {/* Create User Dialog */}
             <Dialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen}>
-                 <DialogTrigger asChild>
-                    <button className="hidden" />
-                </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Create New User</DialogTitle>
@@ -383,9 +382,6 @@ export default function AdminUsersPage() {
             
             {/* Edit User Dialog */}
              <Dialog open={isEditUserOpen} onOpenChange={(open) => { setIsEditUserOpen(open); if (!open) setSelectedUser(null); }}>
-                 <DialogTrigger asChild>
-                    <button className="hidden" />
-                </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Edit User: {selectedUser?.displayName}</DialogTitle>

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import {
   PayPalButtons,
   type OnApproveData,
@@ -240,7 +240,7 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
   }
 
   return (
-    <>
+    <Suspense fallback={<div className="flex justify-center p-8"><Loader2 className="animate-spin"/></div>}>
       <Tabs value={selectedMethod} onValueChange={(v) => setSelectedMethod(v as PaymentMethod)} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="paypal">PayPal</TabsTrigger>
@@ -272,6 +272,6 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
              <LocalPaymentView method="maya" />
          </TabsContent>
       </Tabs>
-    </>
+    </Suspense>
   );
 }

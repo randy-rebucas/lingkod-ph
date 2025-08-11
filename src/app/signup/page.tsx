@@ -294,7 +294,7 @@ const SignupFormContainer = () => {
   };
 
   return (
-    <Suspense fallback={<div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin"/></div>}>
+    <>
       <Tabs defaultValue="client" className="w-full" onValueChange={(value) => setActiveTab(value as UserType)}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="client">Client</TabsTrigger>
@@ -324,7 +324,7 @@ const SignupFormContainer = () => {
         </Button>
         <Button variant="outline" className="w-full" disabled>Sign up with Facebook</Button>
       </div>
-    </Suspense>
+    </>
   );
 };
 
@@ -355,7 +355,7 @@ export default function SignupPage() {
               <Logo />
             </Link>
           <CardTitle className="text-2xl">Join LocalPro</CardTitle>
-          <CardDescription>Choose your account type and let&apos;s get started.</CardDescription>
+          <CardDescription>Choose your account type and let's get started.</CardDescription>
         </CardHeader>
         <CardContent>
           <Suspense fallback={<div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin"/></div>}>
