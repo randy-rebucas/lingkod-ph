@@ -22,8 +22,8 @@ import { Logo } from "@/components/logo";
 
 type UserType = 'client' | 'provider' | 'agency';
 
-  // Function to generate a unique referral code
-  const generateReferralCode = (userId: string): string => {
+// Function to generate a unique referral code
+const generateReferralCode = (userId: string): string => {
     // Create a more unique and readable referral code
     const timestamp = Date.now().toString(36).toUpperCase();
     const uidPart = userId.substring(0, 4).toUpperCase();
@@ -31,7 +31,7 @@ type UserType = 'client' | 'provider' | 'agency';
     
     // Format: LP-XXXX-YYY-ZZZ (where XXXX is uid part, YYY is timestamp part, ZZZ is random part)
     return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
-  };
+};
 
 const handleReferral = async (referralCode: string, newUser: { uid: string; email: string | null }) => {
     if (!referralCode) return;
@@ -48,6 +48,11 @@ const handleReferral = async (referralCode: string, newUser: { uid: string; emai
         }
 
         const referrerDoc = querySnapshot.docs[0];
+        
+        if (referrerDoc.id === newUser.uid) {
+            return "You cannot use your own referral code.";
+        }
+
         const referrerRef = referrerDoc.ref;
         const pointsToAward = 250; // Referral bonus
         

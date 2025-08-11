@@ -212,7 +212,7 @@ export default function ProfilePage() {
                 setLatitude(data.latitude || null);
                 setLongitude(data.longitude || null);
                 setGender(data.gender || '');
-                setReferralCode(data.referralCode || generateReferralCode(user.uid));
+                setReferralCode(data.referralCode || '');
                 if (data.birthdate && data.birthdate.toDate) {
                     const date = data.birthdate.toDate();
                     setBirthDay(String(date.getDate()));
@@ -586,13 +586,6 @@ export default function ProfilePage() {
     }
     
     const totalReferralPoints = referrals.reduce((sum, ref) => sum + ref.rewardPointsGranted, 0);
-  
-    const generateReferralCode = (userId: string): string => {
-        const timestamp = Date.now().toString(36).toUpperCase();
-        const uidPart = userId.substring(0, 4).toUpperCase();
-        const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
-        return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
-    };
     
     const referralLink = typeof window !== 'undefined' ? `${window.location.origin}/signup?ref=${referralCode}` : '';
 
