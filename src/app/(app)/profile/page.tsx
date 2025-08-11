@@ -759,10 +759,17 @@ export default function ProfilePage() {
                         {invites.map(invite => (
                              <div key={invite.id} className="flex items-center justify-between p-3 border rounded-lg">
                                 <p>Invitation from <span className="font-semibold">{invite.agencyName}</span></p>
-                                <div className="flex gap-2">
-                                     <Button size="sm" variant="outline" onClick={() => handleInviteResponse(invite.id, true)} disabled={isRespondingToInvite}><ThumbsUp className="mr-2 h-4 w-4"/> Accept</Button>
-                                     <Button size="sm" variant="destructive" onClick={() => handleInviteResponse(invite.id, false)} disabled={isRespondingToInvite}><ThumbsDown className="mr-2 h-4 w-4"/> Decline</Button>
-                                </div>
+                                 <form action={(formData) => handleInviteAction({ error: null, message: '' }, formData)}>
+                                    <input type="hidden" name="inviteId" value={invite.id} />
+                                    <div className="flex gap-2">
+                                        <Button size="sm" variant="outline" type="submit" name="accepted" value="true" disabled={isRespondingToInvite}>
+                                            <ThumbsUp className="mr-2 h-4 w-4"/> Accept
+                                        </Button>
+                                        <Button size="sm" variant="destructive" type="submit" name="accepted" value="false" disabled={isRespondingToInvite}>
+                                            <ThumbsDown className="mr-2 h-4 w-4"/> Decline
+                                        </Button>
+                                    </div>
+                                </form>
                             </div>
                         ))}
                     </CardContent>
@@ -1309,7 +1316,7 @@ export default function ProfilePage() {
                                 <h4 className="font-medium">Uploaded Documents</h4>
                                 <div className="space-y-2">
                                     {documents.length > 0 ? documents.map((doc, i) => (
-                                        <div key={i} className="flex items-center justify-between p-2 border rounded-md">
+                                        <div key={doc.url} className="flex items-center justify-between p-2 border rounded-md">
                                             <a href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline">
                                                 <File className="h-4 w-4" />
                                                 <span>{doc.name}</span>

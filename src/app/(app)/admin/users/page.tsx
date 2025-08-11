@@ -300,17 +300,17 @@ export default function AdminUsersPage() {
                                                         )}
                                                         <DropdownMenuSeparator />
                                                         {user.accountStatus === 'pending_approval' && (
-                                                            <DropdownMenuItem onClick={() => onUpdateStatus(user.uid, 'active')}>
+                                                            <DropdownMenuItem onSelect={() => onUpdateStatus(user.uid, 'active')}>
                                                                 <CheckCircle className="mr-2 h-4 w-4" />Approve
                                                             </DropdownMenuItem>
                                                         )}
                                                         {user.accountStatus === 'active' && user.role !== 'admin' && (
-                                                            <DropdownMenuItem className="focus:bg-destructive/10" onClick={() => onUpdateStatus(user.uid, 'suspended')}>
+                                                            <DropdownMenuItem className="focus:bg-destructive/10" onSelect={() => onUpdateStatus(user.uid, 'suspended')}>
                                                                 <Slash className="mr-2 h-4 w-4 text-destructive" />Suspend
                                                             </DropdownMenuItem>
                                                         )}
                                                         {user.accountStatus === 'suspended' && (
-                                                            <DropdownMenuItem onClick={() => onUpdateStatus(user.uid, 'active')}>
+                                                            <DropdownMenuItem onSelect={() => onUpdateStatus(user.uid, 'active')}>
                                                                 <ShieldAlert className="mr-2 h-4 w-4" />Reactivate
                                                             </DropdownMenuItem>
                                                         )}
@@ -356,6 +356,9 @@ export default function AdminUsersPage() {
             
             {/* Create User Dialog */}
             <Dialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen}>
+                 <DialogTrigger asChild>
+                    <Button className="hidden">Create User</Button>
+                </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Create New User</DialogTitle>
@@ -380,6 +383,9 @@ export default function AdminUsersPage() {
             
             {/* Edit User Dialog */}
              <Dialog open={isEditUserOpen} onOpenChange={(open) => { setIsEditUserOpen(open); if (!open) setSelectedUser(null); }}>
+                 <DialogTrigger asChild>
+                    <Button className="hidden">Edit User</Button>
+                </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Edit User: {selectedUser?.displayName}</DialogTitle>
