@@ -378,6 +378,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin/moderation")}>
+                    <Link href="/admin/moderation">
+                      <Flag />
+                      <span>Moderation</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/admin/payouts")}>
                     <Link href="/admin/payouts">
