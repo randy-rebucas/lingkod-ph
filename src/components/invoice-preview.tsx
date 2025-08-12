@@ -107,7 +107,7 @@ export function InvoicePreview({ invoice }: { invoice: Invoice }) {
                             <span className="font-medium">₱{taxAmount.toFixed(2)}</span>
                         </div>
                         <Separator />
-                        <div className="flex justify-between text-lg font-bold">
+                         <div className="flex justify-between text-lg font-bold">
                             <span>Total Due:</span>
                             <span>₱{total.toFixed(2)}</span>
                         </div>
@@ -125,3 +125,5 @@ export function InvoicePreview({ invoice }: { invoice: Invoice }) {
         </div>
     );
 }
+
+    

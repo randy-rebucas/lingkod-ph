@@ -25,6 +25,7 @@ type Payout = {
     amount: number;
     status: PayoutStatus;
     requestedAt: Timestamp;
+    processedAt?: Timestamp;
     payoutDetails: {
         method: 'gcash' | 'bank';
         gCashNumber?: string;
@@ -201,7 +202,7 @@ export default function AdminPayoutsPage() {
                              {paidPayouts.length > 0 ? paidPayouts.map(payout => (
                                 <TableRow key={payout.id}>
                                     <TableCell className="text-xs text-muted-foreground">
-                                        {payout.requestedAt.toDate().toLocaleDateString()}
+                                        {payout.processedAt ? format(payout.processedAt.toDate(), 'PP') : 'N/A'}
                                     </TableCell>
                                     <TableCell>{payout.providerName}</TableCell>
                                     <TableCell>₱{payout.amount.toFixed(2)}</TableCell>
@@ -221,3 +222,5 @@ export default function AdminPayoutsPage() {
         </div>
     )
 }
+
+    

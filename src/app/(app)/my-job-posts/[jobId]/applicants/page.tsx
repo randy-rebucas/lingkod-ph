@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, getDocs, where, query, serverTimestamp, addDoc, updateDoc, arrayUnion, writeBatch } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, where, query, serverTimestamp, addDoc, updateDoc, arrayUnion, writeBatch, Timestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star, MessageSquare, Award, User, Briefcase, Mail, ArrowLeft, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Job } from "../../page";
+import type { Job as JobType } from "@/app/(app)/my-job-posts/page";
 
 
 type Provider = {
@@ -26,6 +26,11 @@ type Provider = {
     keyServices?: string[];
     bio?: string;
 };
+
+// Use a more detailed job type for this page
+type JobDetails = JobType & {
+    deadline?: Timestamp | null;
+}
 
 const getAvatarFallback = (name: string | null | undefined) => {
     if (!name) return "U";
@@ -49,7 +54,7 @@ export default function ApplicantsPage() {
     const { toast } = useToast();
     const jobId = params.jobId as string;
 
-    const [job, setJob] = useState<Job | null>(null);
+    const [job, setJob] = useState<JobDetails | null>(null);
     const [applicants, setApplicants] = useState<Provider[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -68,7 +73,7 @@ export default function ApplicantsPage() {
                     router.push("/my-job-posts");
                     return;
                 }
-                const jobData = { id: jobSnap.id, ...jobSnap.data() } as Job;
+                const jobData = { id: jobSnap.id, ...jobSnap.data() } as JobDetails;
                 setJob(jobData);
 
                 // Fetch applicants if any
@@ -131,7 +136,7 @@ export default function ApplicantsPage() {
                 clientAvatar: user.photoURL || '',
                 serviceName: job.title, // Use job title as service name
                 serviceId: '', // A job doesn't have a service ID
-                price: job.budget, // Use job budget as price
+                price: job.budget.amount,
                 date: job.deadline || serverTimestamp(), // Use deadline or now as placeholder
                 status: "Upcoming",
                 notes: `This booking was created from job post: ${job.title}`,
@@ -287,3 +292,5 @@ export default function ApplicantsPage() {
         </div>
     );
 }
+
+    

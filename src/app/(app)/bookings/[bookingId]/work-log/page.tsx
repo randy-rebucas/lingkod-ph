@@ -17,6 +17,8 @@ import Image from "next/image";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 type WorkLogEntry = {
     startTime: Timestamp;
@@ -291,10 +293,15 @@ export default function WorkLogPage() {
                                      {photoPreview && <div className="relative w-32 h-32"><Image src={photoPreview} alt="preview" layout="fill" className="rounded-md object-cover" /></div>}
                                 </div>
                                 <div className="flex gap-2 items-center">
-                                    <select value={photoType} onChange={e => setPhotoType(e.target.value as 'before' | 'after')} className="p-2 border rounded-md bg-transparent">
-                                        <option value="before">Before</option>
-                                        <option value="after">After</option>
-                                    </select>
+                                    <Select value={photoType} onValueChange={(value) => setPhotoType(value as 'before' | 'after')}>
+                                        <SelectTrigger className="w-[120px]">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="before">Before</SelectItem>
+                                            <SelectItem value="after">After</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                     <Button onClick={handlePhotoUpload} disabled={!photoFile || isSaving}><PlusCircle className="mr-2"/> Upload</Button>
                                 </div>
                                 </>
@@ -329,3 +336,5 @@ export default function WorkLogPage() {
         </div>
     );
 }
+
+    

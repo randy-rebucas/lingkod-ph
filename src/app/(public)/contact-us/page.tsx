@@ -74,7 +74,7 @@ export default function ContactUsPage() {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form action={formAction} className="space-y-6">
+            <form onSubmit={form.handleSubmit(formAction as any)} className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -149,3 +149,5 @@ export default function ContactUsPage() {
     </div>
   );
 }
+
+    
