@@ -1,11 +1,11 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { collection, query, onSnapshot, orderBy, limit, startAfter, endBefore, getDocs, DocumentSnapshot, QueryDocumentSnapshot } from "firebase/firestore";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -14,7 +14,7 @@ import { MoreHorizontal, Trash2, Edit, PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { handleUpdateCategory, handleDeleteCategory, handleAddCategory } from "./actions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -22,6 +22,8 @@ type Category = {
     id: string;
     name: string;
 };
+
+const PAGE_SIZE = 10;
 
 export default function AdminCategoriesPage() {
     const { userRole } = useAuth();
@@ -33,26 +35,78 @@ export default function AdminCategoriesPage() {
     const [categoryName, setCategoryName] = useState("");
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-     useEffect(() => {
-        if (userRole !== 'admin') {
-            setLoading(false);
-            return;
-        }
+    // Pagination state
+    const [firstVisible, setFirstVisible] = useState<QueryDocumentSnapshot | null>(null);
+    const [lastVisible, setLastVisible] = useState<QueryDocumentSnapshot | null>(null);
+    const [isNextPageAvailable, setIsNextPageAvailable] = useState(false);
+    const [page, setPage] = useState(1);
 
-        const categoriesQuery = query(collection(db, "categories"), orderBy("name"));
-        
-        const unsubscribe = onSnapshot(categoriesQuery, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
-            setCategories(data);
-            setLoading(false);
-        }, (error) => {
+     const fetchCategories = useCallback(async (direction: 'next' | 'prev' | 'initial' = 'initial') => {
+        setLoading(true);
+        try {
+            let q;
+            const categoriesRef = collection(db, "categories");
+
+            if (direction === 'next' && lastVisible) {
+                q = query(categoriesRef, orderBy("name"), startAfter(lastVisible), limit(PAGE_SIZE));
+            } else if (direction === 'prev' && firstVisible) {
+                q = query(categoriesRef, orderBy("name", "desc"), startAfter(firstVisible), limit(PAGE_SIZE));
+            } else {
+                q = query(categoriesRef, orderBy("name"), limit(PAGE_SIZE));
+            }
+
+            const documentSnapshots = await getDocs(q);
+            
+            const fetchedCategories = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+            
+            if (direction === 'prev') {
+                fetchedCategories.reverse();
+            }
+
+            if (!documentSnapshots.empty) {
+                setFirstVisible(documentSnapshots.docs[0]);
+                setLastVisible(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
+                setCategories(fetchedCategories);
+
+                // Check if there is a next page
+                const nextQuery = query(categoriesRef, orderBy("name"), startAfter(documentSnapshots.docs[documentSnapshots.docs.length - 1]), limit(1));
+                const nextSnapshot = await getDocs(nextQuery);
+                setIsNextPageAvailable(!nextSnapshot.empty);
+
+            } else if (direction !== 'initial') {
+                // If we navigate to an empty page, don't change the current data
+                toast({ variant: 'destructive', title: "No More Data", description: "You have reached the end of the list." });
+            } else {
+                 setCategories([]);
+                 setIsNextPageAvailable(false);
+            }
+
+        } catch (error) {
             console.error("Error fetching categories:", error);
+            toast({ variant: "destructive", title: "Error", description: "Could not fetch categories." });
+        } finally {
             setLoading(false);
-        });
+        }
+    }, [lastVisible, firstVisible, toast]);
 
-        return () => unsubscribe();
-    }, [userRole]);
+    useEffect(() => {
+        if (userRole === 'admin') {
+            fetchCategories('initial');
+        } else {
+            setLoading(false);
+        }
+    }, [userRole, fetchCategories]);
     
+    const handleNextPage = () => {
+        setPage(prev => prev + 1);
+        fetchCategories('next');
+    };
+
+    const handlePrevPage = () => {
+        setPage(prev => Math.max(1, prev - 1));
+        fetchCategories('prev');
+    };
+
     const resetDialog = () => {
         setIsEditing(null);
         setIsAdding(false);
@@ -70,6 +124,7 @@ export default function AdminCategoriesPage() {
         });
         if (!result.error) {
             resetDialog();
+            fetchCategories(); // Refresh data
         }
     };
 
@@ -82,6 +137,7 @@ export default function AdminCategoriesPage() {
         });
         if (!result.error) {
             resetDialog();
+            fetchCategories(); // Refresh data
         }
     }
 
@@ -92,6 +148,9 @@ export default function AdminCategoriesPage() {
             description: result.message,
             variant: result.error ? 'destructive' : 'default',
         });
+        if (!result.error) {
+            fetchCategories(); // Refresh data
+        }
     }
 
     const openEditDialog = (category: Category) => {
@@ -117,22 +176,6 @@ export default function AdminCategoriesPage() {
         );
     }
     
-    if (loading) {
-        return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Category Management</h1>
-                    <p className="text-muted-foreground">Add, edit, or delete service categories.</p>
-                </div>
-                <Card>
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
-             </div>
-        )
-    }
-
     return (
         <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetDialog() }}>
             <div className="space-y-6">
@@ -146,7 +189,14 @@ export default function AdminCategoriesPage() {
                     <Button onClick={openAddDialog}><PlusCircle className="mr-2"/> Add Category</Button>
                 </div>
                  <Card>
-                    <CardContent>
+                    <CardContent className="p-0">
+                        {loading ? (
+                             <div className="p-6 space-y-2">
+                                <Skeleton className="h-10 w-full" />
+                                <Skeleton className="h-10 w-full" />
+                                <Skeleton className="h-10 w-full" />
+                             </div>
+                        ) : (
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -197,7 +247,12 @@ export default function AdminCategoriesPage() {
                                 )}
                             </TableBody>
                         </Table>
+                        )}
                     </CardContent>
+                    <CardFooter className="flex justify-end gap-2 pt-6">
+                        <Button variant="outline" onClick={handlePrevPage} disabled={page <= 1}>Previous</Button>
+                        <Button variant="outline" onClick={handleNextPage} disabled={!isNextPageAvailable}>Next</Button>
+                    </CardFooter>
                 </Card>
                 <DialogContent>
                     <DialogHeader>
