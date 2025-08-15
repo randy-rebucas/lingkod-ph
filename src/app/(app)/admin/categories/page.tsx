@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot, orderBy, limit, startAfter, endBefore, getDocs, DocumentSnapshot, QueryDocumentSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot, orderBy, limit, getDocs, startAfter, QueryDocumentSnapshot } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,76 +36,84 @@ export default function AdminCategoriesPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     // Pagination state
-    const [firstVisible, setFirstVisible] = useState<QueryDocumentSnapshot | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
     const [lastVisible, setLastVisible] = useState<QueryDocumentSnapshot | null>(null);
+    const [pageHistory, setPageHistory] = useState<(QueryDocumentSnapshot | null)[]>([null]); // History of lastVisible for each page
     const [isNextPageAvailable, setIsNextPageAvailable] = useState(false);
-    const [page, setPage] = useState(1);
 
-     const fetchCategories = useCallback(async (direction: 'next' | 'prev' | 'initial' = 'initial') => {
+    const fetchCategories = useCallback(async (page: number) => {
         setLoading(true);
         try {
-            let q;
             const categoriesRef = collection(db, "categories");
+            let q;
 
-            if (direction === 'next' && lastVisible) {
-                q = query(categoriesRef, orderBy("name"), startAfter(lastVisible), limit(PAGE_SIZE));
-            } else if (direction === 'prev' && firstVisible) {
-                q = query(categoriesRef, orderBy("name", "desc"), startAfter(firstVisible), limit(PAGE_SIZE));
-            } else {
+            if (page === 1) {
                 q = query(categoriesRef, orderBy("name"), limit(PAGE_SIZE));
+            } else {
+                const previousPageLastVisible = pageHistory[page - 1];
+                if (!previousPageLastVisible) {
+                    // This case should ideally not happen if navigation is controlled properly.
+                    // Fallback to fetching from start.
+                    q = query(categoriesRef, orderBy("name"), limit(PAGE_SIZE * (page -1)));
+                    const initialDocs = await getDocs(q);
+                    const lastDoc = initialDocs.docs[initialDocs.docs.length-1];
+                    q = query(categoriesRef, orderBy("name"), startAfter(lastDoc), limit(PAGE_SIZE));
+                } else {
+                    q = query(categoriesRef, orderBy("name"), startAfter(previousPageLastVisible), limit(PAGE_SIZE));
+                }
             }
 
             const documentSnapshots = await getDocs(q);
-            
             const fetchedCategories = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
             
-            if (direction === 'prev') {
-                fetchedCategories.reverse();
-            }
+            setCategories(fetchedCategories);
 
             if (!documentSnapshots.empty) {
-                setFirstVisible(documentSnapshots.docs[0]);
-                setLastVisible(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
-                setCategories(fetchedCategories);
-
-                // Check if there is a next page
-                const nextQuery = query(categoriesRef, orderBy("name"), startAfter(documentSnapshots.docs[documentSnapshots.docs.length - 1]), limit(1));
+                const newLastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+                setLastVisible(newLastVisible);
+                
+                // Update history if moving forward
+                if (page > currentPage) {
+                   setPageHistory(prev => [...prev, newLastVisible]);
+                }
+                
+                // Check for next page availability
+                const nextQuery = query(categoriesRef, orderBy("name"), startAfter(newLastVisible), limit(1));
                 const nextSnapshot = await getDocs(nextQuery);
                 setIsNextPageAvailable(!nextSnapshot.empty);
-
-            } else if (direction !== 'initial') {
-                // If we navigate to an empty page, don't change the current data
-                toast({ variant: 'destructive', title: "No More Data", description: "You have reached the end of the list." });
             } else {
-                 setCategories([]);
+                 if (page === 1) setCategories([]);
                  setIsNextPageAvailable(false);
             }
-
         } catch (error) {
             console.error("Error fetching categories:", error);
             toast({ variant: "destructive", title: "Error", description: "Could not fetch categories." });
         } finally {
             setLoading(false);
         }
-    }, [lastVisible, firstVisible, toast]);
+    }, [toast, currentPage]);
 
     useEffect(() => {
         if (userRole === 'admin') {
-            fetchCategories('initial');
+            fetchCategories(currentPage);
         } else {
             setLoading(false);
         }
-    }, [userRole, fetchCategories]);
-    
+    }, [userRole, currentPage, fetchCategories]);
+
     const handleNextPage = () => {
-        setPage(prev => prev + 1);
-        fetchCategories('next');
+        if (isNextPageAvailable) {
+            setCurrentPage(prev => prev + 1);
+        }
     };
 
     const handlePrevPage = () => {
-        setPage(prev => Math.max(1, prev - 1));
-        fetchCategories('prev');
+        if (currentPage > 1) {
+            setPageHistory(prev => prev.slice(0, -1));
+            setCurrentPage(prev => prev - 1);
+        }
     };
+
 
     const resetDialog = () => {
         setIsEditing(null);
@@ -124,7 +132,7 @@ export default function AdminCategoriesPage() {
         });
         if (!result.error) {
             resetDialog();
-            fetchCategories(); // Refresh data
+            fetchCategories(currentPage); // Refresh current page
         }
     };
 
@@ -137,7 +145,7 @@ export default function AdminCategoriesPage() {
         });
         if (!result.error) {
             resetDialog();
-            fetchCategories(); // Refresh data
+            fetchCategories(currentPage); // Refresh current page
         }
     }
 
@@ -149,7 +157,7 @@ export default function AdminCategoriesPage() {
             variant: result.error ? 'destructive' : 'default',
         });
         if (!result.error) {
-            fetchCategories(); // Refresh data
+            fetchCategories(currentPage); // Refresh current page
         }
     }
 
@@ -249,9 +257,12 @@ export default function AdminCategoriesPage() {
                         </Table>
                         )}
                     </CardContent>
-                    <CardFooter className="flex justify-end gap-2 pt-6">
-                        <Button variant="outline" onClick={handlePrevPage} disabled={page <= 1}>Previous</Button>
-                        <Button variant="outline" onClick={handleNextPage} disabled={!isNextPageAvailable}>Next</Button>
+                    <CardFooter className="flex justify-between items-center pt-6">
+                        <span className="text-sm text-muted-foreground">Page {currentPage}</span>
+                        <div className="flex gap-2">
+                            <Button variant="outline" onClick={handlePrevPage} disabled={currentPage <= 1}>Previous</Button>
+                            <Button variant="outline" onClick={handleNextPage} disabled={!isNextPageAvailable}>Next</Button>
+                        </div>
                     </CardFooter>
                 </Card>
                 <DialogContent>
