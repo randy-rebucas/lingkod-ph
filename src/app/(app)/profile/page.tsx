@@ -661,7 +661,8 @@ export default function ProfilePage() {
     };
 
     const tabGridClass = cn("grid w-full", {
-        "grid-cols-4": !isProvider && !isAgency,
+        "grid-cols-4": !isProvider && !isAgency && userRole !== 'admin',
+        "grid-cols-2": userRole === 'admin',
         "grid-cols-5": isProvider || isAgency,
     });
 
@@ -762,8 +763,12 @@ export default function ProfilePage() {
                     {isAgency && <TabsTrigger value="business-settings"><Building className="mr-2"/> Business</TabsTrigger>}
                     {isProvider && <TabsTrigger value="payout-settings"><Wallet className="mr-2" /> Payout</TabsTrigger>}
                     <TabsTrigger value="account-settings"><Settings className="mr-2"/> Account</TabsTrigger>
-                    <TabsTrigger value="loyalty"><Award className="mr-2"/> Loyalty</TabsTrigger>
-                    <TabsTrigger value="referrals"><Users className="mr-2"/> Referrals</TabsTrigger>
+                    {userRole !== 'admin' && (
+                        <>
+                            <TabsTrigger value="loyalty"><Award className="mr-2"/> Loyalty</TabsTrigger>
+                            <TabsTrigger value="referrals"><Users className="mr-2"/> Referrals</TabsTrigger>
+                        </>
+                    )}
                 </TabsList>
 
                 <TabsContent value="public-profile" className="mt-6">
@@ -909,7 +914,7 @@ export default function ProfilePage() {
                         </CardFooter>
                     </Card>
                     
-                    <IdentityVerification />
+                    {userRole !== 'admin' && <IdentityVerification />}
                 </TabsContent>
 
                 <TabsContent value="loyalty" className="mt-6 space-y-6">
