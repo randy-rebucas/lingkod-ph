@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db, storage } from "@/lib/firebase";
-import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
+import { collection, query, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import Image from 'next/image';
+import { differenceInDays, addDays } from 'date-fns';
 
 type AdCampaign = {
     id: string;
@@ -31,6 +32,7 @@ type AdCampaign = {
     durationDays: number;
     isActive: boolean;
     imageUrl?: string;
+    createdAt: Timestamp;
 };
 
 export default function AdminAdsPage() {
@@ -169,6 +171,14 @@ export default function AdminAdsPage() {
             variant: result.error ? 'destructive' : 'default',
         });
     }
+    
+     const isExpiringSoon = (campaign: AdCampaign): boolean => {
+        if (!campaign.isActive || !campaign.createdAt) return false;
+        const expirationDate = addDays(campaign.createdAt.toDate(), campaign.durationDays);
+        const daysLeft = differenceInDays(expirationDate, new Date());
+        return daysLeft >= 0 && daysLeft <= 3;
+    };
+
 
     if (userRole !== 'admin') {
         return (
@@ -238,9 +248,14 @@ export default function AdminAdsPage() {
                                         <TableCell>₱{campaign.price.toFixed(2)}</TableCell>
                                         <TableCell>{campaign.durationDays}</TableCell>
                                         <TableCell>
-                                            <Badge variant={campaign.isActive ? "default" : "secondary"}>
-                                                {campaign.isActive ? 'Active' : 'Inactive'}
-                                            </Badge>
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant={campaign.isActive ? "default" : "secondary"}>
+                                                    {campaign.isActive ? 'Active' : 'Inactive'}
+                                                </Badge>
+                                                {isExpiringSoon(campaign) && (
+                                                    <Badge variant="outline" className="border-yellow-400 text-yellow-600">Expiring Soon</Badge>
+                                                )}
+                                            </div>
                                         </TableCell>
                                          <TableCell className="text-right">
                                             <AlertDialog>
