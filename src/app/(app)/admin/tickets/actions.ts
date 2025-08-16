@@ -1,0 +1,70 @@
+
+'use server';
+
+import { db } from '@/lib/firebase';
+import { doc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
+import { logAdminAction } from '@/lib/audit-logger';
+
+type Actor = {
+    id: string;
+    name: string | null;
+}
+
+export async function handleUpdateTicketStatus(
+    ticketId: string,
+    status: 'New' | 'In Progress' | 'Closed',
+    actor: Actor
+) {
+    try {
+        const ticketRef = doc(db, 'tickets', ticketId);
+        await updateDoc(ticketRef, { 
+            status,
+            updatedAt: serverTimestamp() 
+        });
+
+        await logAdminAction({
+            actor: { ...actor, role: 'admin' },
+            action: 'TICKET_STATUS_UPDATED',
+            details: { ticketId, newStatus: status }
+        });
+
+        return { error: null, message: `Ticket status updated to "${status}".` };
+    } catch (e: any) {
+        console.error('Error updating ticket status: ', e);
+        return { error: e.message, message: 'Failed to update ticket status.' };
+    }
+}
+
+
+export async function handleAddTicketNote(
+    ticketId: string,
+    note: string,
+    actor: Actor
+) {
+     if (!note.trim()) {
+        return { error: 'Note cannot be empty.', message: 'Validation failed.' };
+    }
+    try {
+        const ticketRef = doc(db, 'tickets', ticketId);
+        await updateDoc(ticketRef, {
+            notes: arrayUnion({
+                text: note,
+                authorId: actor.id,
+                authorName: actor.name,
+                createdAt: serverTimestamp(),
+            }),
+            updatedAt: serverTimestamp()
+        });
+
+         await logAdminAction({
+            actor: { ...actor, role: 'admin' },
+            action: 'TICKET_NOTE_ADDED',
+            details: { ticketId }
+        });
+
+        return { error: null, message: 'Note added successfully.' };
+    } catch (e: any) {
+        console.error('Error adding note to ticket: ', e);
+        return { error: e.message, message: 'Failed to add note.' };
+    }
+}

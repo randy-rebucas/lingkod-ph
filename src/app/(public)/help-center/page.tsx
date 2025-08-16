@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, MessageCircle, ArrowRight, Bot, Loader2, User } from "lucide-react";
+import { Search, MessageCircle, ArrowRight, Bot, Loader2, User, FilePenLine } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -19,6 +19,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/auth-context";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 
 const clientFaqs = [
@@ -145,6 +150,82 @@ const AiChatbot = () => {
   )
 }
 
+const CreateTicketDialog = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+      toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to submit a ticket.' });
+      return;
+    }
+    if (!subject.trim() || !message.trim()) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Please fill out all fields.' });
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await addDoc(collection(db, 'tickets'), {
+        userId: user.uid,
+        userName: user.displayName,
+        userEmail: user.email,
+        subject,
+        message,
+        status: 'New',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      toast({ title: 'Ticket Submitted', description: 'Our team will get back to you shortly.' });
+      setSubject("");
+      setMessage("");
+      setIsOpen(false);
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to submit your ticket.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">
+          <FilePenLine className="mr-2 h-4 w-4" /> Create Support Ticket
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Create a Support Ticket</DialogTitle>
+          <DialogDescription>
+            Can't find what you're looking for? Submit a ticket and our team will assist you.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="subject">Subject</Label>
+            <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g., Issue with my booking" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="message">Message</Label>
+            <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Please describe your issue in detail..." rows={5} />
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="mr-2 animate-spin" /> : null}
+              Submit Ticket
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function HelpCenterPage() {
   return (
     <Dialog>
@@ -196,15 +277,16 @@ export default function HelpCenterPage() {
          <Card className="mt-20 max-w-3xl mx-auto bg-secondary">
             <CardHeader className="text-center">
               <Bot className="mx-auto h-12 w-12 text-primary mb-4" />
-              <CardTitle className="text-2xl">Need Immediate Help?</CardTitle>
-              <p className="text-muted-foreground">Try our new AI Assistant for instant answers.</p>
+              <CardTitle className="text-2xl">Still Need Help?</CardTitle>
+              <p className="text-muted-foreground">Try our new AI Assistant for instant answers or create a support ticket.</p>
             </CardHeader>
-            <CardContent className="flex justify-center">
+            <CardContent className="flex justify-center gap-4">
                <DialogTrigger asChild>
                   <Button>
                     Ask AI Assistant <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </DialogTrigger>
+                <CreateTicketDialog />
             </CardContent>
           </Card>
 

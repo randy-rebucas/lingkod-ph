@@ -41,6 +41,7 @@ import {
   DatabaseBackup,
   Shield,
   Users,
+  LifeBuoy,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -377,6 +378,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <Link href="/admin/conversations">
                       <MessageSquare />
                       <span>Conversations</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin/tickets")}>
+                    <Link href="/admin/tickets">
+                      <LifeBuoy />
+                      <span>Support Tickets</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
