@@ -8,7 +8,7 @@ import { collection, query, where, onSnapshot, Timestamp, doc, getDoc } from 'fi
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { DollarSign, BookCheck, CalendarDays, Loader2, WalletCards, CheckCircle } from "lucide-react";
+import { DollarSign, BookCheck, Wallet, Loader2, WalletCards, CheckCircle, Hourglass } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,6 +29,7 @@ type Payout = {
     id: string;
     amount: number;
     status: 'Pending' | 'Paid';
+    requestedAt: Timestamp;
 };
 
 const processChartData = (bookings: CompletedBooking[]) => {
@@ -100,7 +101,7 @@ export default function EarningsPage() {
             setLoading(false);
         });
         
-        const payoutsQuery = query(collection(db, "payouts"), where("providerId", "==", user.uid));
+        const payoutsQuery = query(collection(db, "payouts"), where("providerId", "==", user.uid), orderBy("requestedAt", "desc"));
         const unsubscribePayouts = onSnapshot(payoutsQuery, (snapshot) => {
             const payoutsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
             setPayouts(payoutsData);
@@ -116,15 +117,6 @@ export default function EarningsPage() {
     const totalPaidOut = payouts.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);
     const totalPending = payouts.filter(p => p.status === 'Pending').reduce((sum, p) => sum + p.amount, 0);
     const availableForPayout = totalRevenue - totalPaidOut - totalPending;
-    
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const thisMonthRevenue = bookings
-        .filter(b => {
-            const date = b.date.toDate();
-            return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-        })
-        .reduce((sum, b) => sum + b.price, 0);
     
     const totalPaidBookings = bookings.length;
     const chartData = processChartData(bookings);
@@ -252,7 +244,7 @@ export default function EarningsPage() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                        <CardTitle className="text-sm font-medium">Lifetime Gross Revenue</CardTitle>
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -262,22 +254,22 @@ export default function EarningsPage() {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">This Month</CardTitle>
-                        <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">Total Paid Out</CardTitle>
+                        <CheckCircle className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{thisMonthRevenue.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">Revenue earned this calendar month</p>
+                        <div className="text-2xl font-bold">₱{totalPaidOut.toFixed(2)}</div>
+                        <p className="text-xs text-muted-foreground">Total amount successfully paid out</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Paid Bookings</CardTitle>
-                        <BookCheck className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">Pending Payouts</CardTitle>
+                        <Hourglass className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">+{totalPaidBookings}</div>
-                        <p className="text-xs text-muted-foreground">Successfully completed services</p>
+                        <div className="text-2xl font-bold">₱{totalPending.toFixed(2)}</div>
+                        <p className="text-xs text-muted-foreground">Amount currently being processed</p>
                     </CardContent>
                 </Card>
                  <Card>
@@ -316,44 +308,76 @@ export default function EarningsPage() {
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Transaction History</CardTitle>
-                    <CardDescription>A detailed list of all completed transactions.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Client</TableHead>
-                                <TableHead>Service</TableHead>
-                                <TableHead className="text-center">Status</TableHead>
-                                <TableHead>Date Completed</TableHead>
-                                <TableHead className="text-right">Amount</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {bookings.length > 0 ? bookings.map((booking) => (
-                                <TableRow key={booking.id}>
-                                    <TableCell className="font-medium">{booking.clientName}</TableCell>
-                                    <TableCell>{booking.serviceName}</TableCell>
-                                    <TableCell className="text-center">
-                                        <Badge variant="secondary">Paid</Badge>
-                                    </TableCell>
-                                    <TableCell>{booking.date.toDate().toLocaleDateString()}</TableCell>
-                                    <TableCell className="text-right">₱{booking.price.toFixed(2)}</TableCell>
-                                </TableRow>
-                            )) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Recent Completed Jobs</CardTitle>
+                        <CardDescription>A detailed list of completed transactions contributing to your earnings.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center">
-                                        No transactions yet.
-                                    </TableCell>
+                                    <TableHead>Client</TableHead>
+                                    <TableHead>Service</TableHead>
+                                    <TableHead className="text-right">Amount</TableHead>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                            </TableHeader>
+                            <TableBody>
+                                {bookings.slice(0, 5).length > 0 ? bookings.slice(0, 5).map((booking) => (
+                                    <TableRow key={booking.id}>
+                                        <TableCell className="font-medium">{booking.clientName}</TableCell>
+                                        <TableCell>{booking.serviceName}</TableCell>
+                                        <TableCell className="text-right">₱{booking.price.toFixed(2)}</TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={3} className="h-24 text-center">
+                                            No transactions yet. Complete jobs to see them here.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Payout History</CardTitle>
+                        <CardDescription>A record of your requested payouts.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Date Requested</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Amount</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {payouts.slice(0, 5).length > 0 ? payouts.slice(0, 5).map((payout) => (
+                                    <TableRow key={payout.id}>
+                                        <TableCell>{payout.requestedAt.toDate().toLocaleDateString()}</TableCell>
+                                        <TableCell>
+                                             <Badge variant={payout.status === 'Paid' ? 'secondary' : 'outline'}>
+                                                {payout.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">₱{payout.amount.toFixed(2)}</TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={3} className="h-24 text-center">
+                                            No payouts requested yet.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }
