@@ -26,7 +26,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { handleMarkAsPaid as adminHandleMarkAsPaid } from '@/app/(app)/admin/payouts/actions';
+import { handleMarkAsPaid } from '@/app/(app)/admin/payouts/actions';
 
 
 type Booking = {
@@ -130,6 +130,7 @@ export default function ReportsPage() {
                 const unsubBookings = onSnapshot(bookingsQuery, (snapshot) => {
                     const fetchedBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
                     setBookings(fetchedBookings);
+                    setLoading(false);
                 });
 
                 const payoutsQuery = query(collection(db, "payouts"), where("agencyId", "==", user.uid));
@@ -138,7 +139,6 @@ export default function ReportsPage() {
                     setPayouts(fetchedPayouts.sort((a,b) => b.requestedAt.toMillis() - a.requestedAt.toMillis()));
                 });
                 
-                setLoading(false);
                 return () => {
                     unsubBookings();
                     unsubPayouts();
@@ -190,7 +190,7 @@ export default function ReportsPage() {
     
     const onMarkAsPaid = async (payout: PayoutRequest) => {
         if (!user) return;
-        const result = await adminHandleMarkAsPaid(payout.id, payout.providerId, payout.providerName, payout.amount, {id: user.uid, name: user.displayName});
+        const result = await handleMarkAsPaid(payout.id, payout.providerId, payout.providerName, payout.amount, {id: user.uid, name: user.displayName});
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,

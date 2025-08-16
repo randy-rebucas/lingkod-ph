@@ -381,7 +381,7 @@ export default function DashboardPage() {
                 });
 
                 // Fetch all providers
-                const q = query(collection(db, "users"), where("role", "==", "provider"));
+                const q = query(collection(db, "users"), where("role", "in", ["provider", "agency"]));
                 const querySnapshot = await getDocs(q);
                 const providersData = querySnapshot.docs.map(doc => {
                     const data = doc.data();
@@ -690,7 +690,7 @@ export default function DashboardPage() {
                     <DashboardCard isLoading={loadingAgencyData} title="Total Revenue" icon={DollarSign} value={`₱${agencyTotalRevenue.toFixed(2)}`} />
                     <DashboardCard isLoading={loadingAgencyData} title="Completed Bookings" icon={Calendar} value={`${agencyTotalBookings}`} />
                     <DashboardCard isLoading={loadingAgencyData} title="Managed Providers" icon={Users2} value={`${agencyProviderCount}`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Agency Rating" icon={Star} value={`${agencyOverallRating}`} change={`Based on ${agencyProviders.reduce((sum, p) => sum + p.reviewCount, 0)} reviews`} />
+                    <DashboardCard isLoading={loadingAgencyData} title="Agency Rating" icon={Star} value={`${agencyOverallRating}`} change={`Based on ${agencyProviders.reduce((sum, p) => sum + (p.reviewCount || 0), 0)} reviews`} />
                     <DashboardCard isLoading={loadingAgencyData} title="Pending Payouts" icon={Wallet} value={`₱${agencyPendingPayouts.toFixed(2)}`} />
                 </div>
                 
