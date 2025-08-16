@@ -231,7 +231,7 @@ export default function HelpCenterPage() {
     <Dialog>
       <div className="container py-12 md:py-24 lg:py-32">
         <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Help Center</h1>
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">Help Center</h1>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
             Find answers to your questions and get support.
           </p>

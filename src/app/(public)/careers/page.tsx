@@ -2,7 +2,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Zap, Users, Heart, Lightbulb } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: 'Careers',
+  description: 'Join the LocalPro team and help us build the future of the service industry in the Philippines. Explore our values and open positions.',
+};
 
 const ourValues = [
   {
@@ -27,7 +33,7 @@ export default function CareersPage() {
   return (
     <div className="container py-12 md:py-24 lg:py-32">
       <div className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Build the Future with LocalPro</h1>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">Build the Future with LocalPro</h1>
         <p className="mt-6 text-lg leading-8 text-muted-foreground">
           Join a passionate team dedicated to revolutionizing the service industry in the Philippines.
         </p>

@@ -7,6 +7,7 @@ import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { sendContactForm, FormState } from "./actions";
 import { useActionState, useEffect } from "react";
+import type { Metadata } from "next";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,7 +62,7 @@ export default function ContactUsPage() {
   return (
     <div className="container py-12 md:py-24 lg:py-32">
       <div className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Contact Us</h1>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">Contact Us</h1>
         <p className="mt-6 text-lg leading-8 text-muted-foreground">
           We'd love to hear from you. Get in touch with us.
         </p>
@@ -149,5 +150,3 @@ export default function ContactUsPage() {
     </div>
   );
 }
-
-    

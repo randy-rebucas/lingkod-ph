@@ -2,7 +2,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Zap, Users, Heart, Lightbulb, Target, BookOpen, ShieldCheck } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: 'About Us',
+  description: 'Learn about the mission, story, and values of LocalPro. Discover how we are empowering local communities and service professionals across the Philippines.',
+};
 
 
 const whyChooseUs = [

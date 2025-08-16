@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
@@ -21,8 +22,34 @@ const poppins = Poppins({
 
 
 export const metadata: Metadata = {
-  title: 'LocalPro',
-  description: 'Your trusted partner for home services.',
+  title: {
+    default: 'LocalPro | Find Trusted Local Service Providers in the Philippines',
+    template: '%s | LocalPro',
+  },
+  description: 'LocalPro is the leading platform for connecting clients with trusted, verified local service providers in the Philippines. From plumbing and electrical work to cleaning and beauty services, find the right pro for any job.',
+  keywords: ['local services Philippines', 'home services', 'find a plumber', 'electrician manila', 'cleaning services cebu', 'skilled workers Philippines', 'LocalPro', 'local pro'],
+  openGraph: {
+    title: 'LocalPro | Find Trusted Local Service Providers in the Philippines',
+    description: 'The easiest way to hire verified local professionals for all your home and business needs.',
+    url: 'https://localpro.ph', // Replace with your actual domain
+    siteName: 'LocalPro',
+    images: [
+      {
+        url: '/og-image.png', // You would need to create this image and place it in the /public folder
+        width: 1200,
+        height: 630,
+        alt: 'LocalPro - Connecting Communities with Trusted Providers',
+      },
+    ],
+    locale: 'en_PH',
+    type: 'website',
+  },
+   twitter: {
+    card: 'summary_large_image',
+    title: 'LocalPro | Find Trusted Local Service Providers',
+    description: 'Connecting you with the best local service professionals in the Philippines.',
+    images: ['/twitter-image.png'], // You would need to create this image and place it in the /public folder
+  },
 };
 
 export default function RootLayout({

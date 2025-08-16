@@ -2,7 +2,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Building2, Handshake, Users, Wrench } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: 'Partnerships',
+  description: 'Collaborate with LocalPro to empower local businesses and build stronger communities. Explore our partnership opportunities for corporations, LGUs, and suppliers.',
+};
 
 const partnershipTypes = [
   {
@@ -26,7 +32,7 @@ export default function PartnersPage() {
   return (
     <div className="container py-12 md:py-24 lg:py-32">
       <div className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Partner with LocalPro</h1>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">Partner with LocalPro</h1>
         <p className="mt-6 text-lg leading-8 text-muted-foreground">
           Collaborate with us to empower local businesses and build stronger communities together.
         </p>
