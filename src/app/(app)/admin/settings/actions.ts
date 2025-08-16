@@ -6,12 +6,16 @@ import { doc, setDoc } from 'firebase/firestore';
 import { z } from 'zod';
 
 const platformSettingsSchema = z.object({
+    appName: z.string().min(1, "App name is required."),
+    supportEmail: z.string().email("A valid support email is required."),
+    logoUrl: z.string().url().optional(),
     commissionRates: z.object({
         low: z.number().min(0).max(100),
         mid: z.number().min(0).max(100),
         high: z.number().min(0).max(100),
     }),
     referralBonus: z.number().min(0),
+    welcomeBonus: z.number().min(0),
 });
 
 export type PlatformSettings = z.infer<typeof platformSettingsSchema>;

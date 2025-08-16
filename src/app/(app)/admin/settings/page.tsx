@@ -1,18 +1,20 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { handleUpdatePlatformSettings, type PlatformSettings } from "./actions";
+import Image from "next/image";
 
 export default function AdminSettingsPage() {
     const { userRole } = useAuth();
@@ -20,6 +22,12 @@ export default function AdminSettingsPage() {
     const [settings, setSettings] = useState<PlatformSettings | null>(null);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    
+    // Logo upload states
+    const [logoFile, setLogoFile] = useState<File | null>(null);
+    const [logoPreview, setLogoPreview] = useState<string | null>(null);
+    const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+    const logoInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (userRole !== 'admin') {
@@ -31,11 +39,18 @@ export default function AdminSettingsPage() {
             const settingsRef = doc(db, 'platform', 'settings');
             const docSnap = await getDoc(settingsRef);
             if (docSnap.exists()) {
-                setSettings(docSnap.data() as PlatformSettings);
+                const data = docSnap.data() as PlatformSettings;
+                setSettings(data);
+                if (data.logoUrl) {
+                    setLogoPreview(data.logoUrl);
+                }
             } else {
                 setSettings({
+                    appName: 'Lingkod PH',
+                    supportEmail: 'support@lingkod.ph',
                     commissionRates: { low: 10, mid: 12, high: 15 },
-                    referralBonus: 250
+                    referralBonus: 250,
+                    welcomeBonus: 100,
                 });
             }
             setLoading(false);
@@ -44,11 +59,44 @@ export default function AdminSettingsPage() {
         fetchSettings();
 
     }, [userRole]);
+    
+     const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setLogoFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setLogoPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleSave = async () => {
         if (!settings) return;
         setIsSaving(true);
-        const result = await handleUpdatePlatformSettings(settings);
+        
+        let finalSettings = { ...settings };
+        
+        if (logoFile) {
+             setIsUploadingLogo(true);
+            try {
+                const storagePath = `platform/logo/${Date.now()}_${logoFile.name}`;
+                const storageRef = ref(storage, storagePath);
+                const uploadResult = await uploadBytes(storageRef, logoFile);
+                const newLogoUrl = await getDownloadURL(uploadResult.ref);
+                finalSettings.logoUrl = newLogoUrl;
+                 toast({ title: 'Logo Uploaded', description: 'New logo has been uploaded.' });
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Upload Error', description: 'Failed to upload new logo.' });
+                setIsSaving(false);
+                setIsUploadingLogo(false);
+                return;
+            }
+             setIsUploadingLogo(false);
+        }
+        
+        const result = await handleUpdatePlatformSettings(finalSettings);
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,
@@ -87,6 +135,52 @@ export default function AdminSettingsPage() {
                 <h1 className="text-3xl font-bold font-headline">Platform Settings</h1>
                 <p className="text-muted-foreground">Manage global settings for the application.</p>
             </div>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>Branding</CardTitle>
+                    <CardDescription>Customize the look and feel of your application.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid md:grid-cols-2 gap-8">
+                     <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="appName">App Name</Label>
+                            <Input 
+                                id="appName"
+                                value={settings?.appName || ''}
+                                onChange={(e) => setSettings(s => s ? { ...s, appName: e.target.value } : null)}
+                            />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="supportEmail">Support Email</Label>
+                            <Input 
+                                id="supportEmail"
+                                type="email"
+                                value={settings?.supportEmail || ''}
+                                onChange={(e) => setSettings(s => s ? { ...s, supportEmail: e.target.value } : null)}
+                            />
+                        </div>
+                     </div>
+                     <div className="space-y-2">
+                        <Label>Logo</Label>
+                        <div className="flex items-center gap-4">
+                           {logoPreview ? (
+                                <Image src={logoPreview} alt="Current logo" width={64} height={64} className="rounded-md bg-muted p-1" />
+                            ) : (
+                                <div className="h-16 w-16 bg-muted rounded-md flex items-center justify-center text-muted-foreground">
+                                    <span>No Logo</span>
+                                </div>
+                            )}
+                            <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()} disabled={isUploadingLogo}>
+                                <Upload className="mr-2 h-4 w-4" />
+                                {isUploadingLogo ? 'Uploading...' : 'Upload New Logo'}
+                            </Button>
+                            <Input type="file" className="hidden" ref={logoInputRef} onChange={handleLogoFileChange} accept="image/*" />
+                        </div>
+                     </div>
+                </CardContent>
+            </Card>
+
              <Card>
                 <CardHeader>
                     <CardTitle>Commission Rates</CardTitle>
@@ -122,19 +216,29 @@ export default function AdminSettingsPage() {
                     </div>
                 </CardContent>
             </Card>
+            
              <Card>
                 <CardHeader>
-                    <CardTitle>Referral Program</CardTitle>
-                    <CardDescription>Configure the rewards for user referrals.</CardDescription>
+                    <CardTitle>Platform Rules</CardTitle>
+                    <CardDescription>Configure rewards and incentives for users.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <div className="space-y-2 max-w-sm">
+                <CardContent className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
                         <Label htmlFor="referral-bonus">Referral Bonus (Points)</Label>
                         <Input 
                             id="referral-bonus" 
                             type="number" 
                             value={settings?.referralBonus || ''}
                             onChange={(e) => setSettings(s => s ? { ...s, referralBonus: Number(e.target.value) } : null)}
+                        />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="welcome-bonus">New User Welcome Bonus (Points)</Label>
+                        <Input 
+                            id="welcome-bonus" 
+                            type="number" 
+                            value={settings?.welcomeBonus || ''}
+                            onChange={(e) => setSettings(s => s ? { ...s, welcomeBonus: Number(e.target.value) } : null)}
                         />
                     </div>
                 </CardContent>
