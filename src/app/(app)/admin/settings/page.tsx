@@ -48,6 +48,7 @@ export default function AdminSettingsPage() {
                 setSettings({
                     appName: 'Lingkod PH',
                     supportEmail: 'support@lingkod.ph',
+                    logoUrl: '',
                     commissionRates: { low: 10, mid: 12, high: 15 },
                     referralBonus: 250,
                     welcomeBonus: 100,
@@ -76,7 +77,7 @@ export default function AdminSettingsPage() {
         if (!settings) return;
         setIsSaving(true);
         
-        let finalSettings = { ...settings };
+        let settingsToSave = { ...settings };
         
         if (logoFile) {
              setIsUploadingLogo(true);
@@ -85,8 +86,7 @@ export default function AdminSettingsPage() {
                 const storageRef = ref(storage, storagePath);
                 const uploadResult = await uploadBytes(storageRef, logoFile);
                 const newLogoUrl = await getDownloadURL(uploadResult.ref);
-                finalSettings.logoUrl = newLogoUrl;
-                setSettings(finalSettings); // Explicitly update state before saving
+                settingsToSave.logoUrl = newLogoUrl;
                  toast({ title: 'Logo Uploaded', description: 'New logo has been uploaded.' });
             } catch (error) {
                 toast({ variant: 'destructive', title: 'Upload Error', description: 'Failed to upload new logo.' });
@@ -97,7 +97,11 @@ export default function AdminSettingsPage() {
              setIsUploadingLogo(false);
         }
         
-        const result = await handleUpdatePlatformSettings(finalSettings);
+        const result = await handleUpdatePlatformSettings(settingsToSave);
+
+        // After saving, update the local state to reflect the saved state
+        setSettings(settingsToSave);
+
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,
