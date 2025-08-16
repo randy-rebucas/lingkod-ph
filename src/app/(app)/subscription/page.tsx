@@ -38,25 +38,6 @@ export type AgencySubscriptionTier = {
     type: 'agency';
 };
 
-const commissionRates = [
-    {
-        jobType: "Low-ticket (e.g. haircut, cleaning)",
-        commission: "10%",
-        notes: "To keep providers profitable",
-    },
-    {
-        jobType: "Mid-ticket (e.g. appliance repair, plumbing)",
-        commission: "12%",
-        notes: "Good balance",
-    },
-    {
-        jobType: "High-ticket (e.g. renovation, roofing)",
-        commission: "15%",
-        notes: "More value, so higher cut is fair",
-    }
-];
-
-
 export default function SubscriptionPage() {
     const { userRole, subscription, loading } = useAuth();
     const [isPaymentDialog, setPaymentDialog] = useState(false);
