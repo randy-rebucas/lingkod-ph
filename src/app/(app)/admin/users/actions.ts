@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { z } from 'zod';
+import { logAdminAction } from '@/lib/audit-logger';
 
 type UserStatus = 'active' | 'pending_approval' | 'suspended';
 
@@ -21,13 +22,30 @@ const generateReferralCode = (userId: string): string => {
     return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
 };
 
+async function getActor() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("User not authenticated for logging.");
+    return {
+        id: currentUser.uid,
+        name: currentUser.displayName,
+        role: 'admin'
+    };
+}
+
 export async function handleUserStatusUpdate(
   userId: string,
   status: UserStatus
 ) {
   try {
+    const actor = await getActor();
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, { accountStatus: status });
+
+    await logAdminAction({
+        actor,
+        action: 'USER_STATUS_UPDATED',
+        details: { targetUserId: userId, newStatus: status }
+    });
 
     return {
       error: null,
@@ -41,8 +59,16 @@ export async function handleUserStatusUpdate(
 
 export async function handleDeleteUser(userId: string) {
     try {
+        const actor = await getActor();
         const userRef = doc(db, 'users', userId);
         await deleteDoc(userRef);
+
+         await logAdminAction({
+            actor,
+            action: 'USER_DELETED',
+            details: { targetUserId: userId }
+        });
+
         // Note: This does not delete the user from Firebase Auth.
         // That requires admin SDK privileges on the backend.
         return {
@@ -75,6 +101,7 @@ export async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
     const { name, email, password, role, phone } = validatedFields.data;
 
     try {
+        const actor = await getActor();
         // This action uses the client-side Admin Auth context which is initialized when an admin is logged in.
         // It's a temporary workaround. For production, a dedicated backend function with Admin SDK is recommended.
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -102,6 +129,12 @@ export async function handleCreateUser(data: z.infer<typeof createUserSchema>) {
         }
 
         await setDoc(doc(db, "users", user.uid), userData);
+
+        await logAdminAction({
+            actor,
+            action: 'USER_CREATED',
+            details: { newUserId: user.uid, name, email, role }
+        });
 
         return { error: null, message: `User ${name} created successfully as a ${role}.` };
 
@@ -132,12 +165,21 @@ export async function handleUpdateUser(userId: string, data: z.infer<typeof upda
     }
 
     try {
+        const actor = await getActor();
         const userRef = doc(db, 'users', userId);
-        await updateDoc(userRef, {
+        const updateData = {
             displayName: validatedFields.data.name,
             role: validatedFields.data.role,
             phone: validatedFields.data.phone || null,
+        };
+        await updateDoc(userRef, updateData);
+
+        await logAdminAction({
+            actor,
+            action: 'USER_UPDATED',
+            details: { targetUserId: userId, changes: updateData }
         });
+
         return { error: null, message: 'User updated successfully.' };
     } catch (e: any) {
         console.error('Error updating user: ', e);

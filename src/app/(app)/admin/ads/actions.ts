@@ -10,14 +10,34 @@ import {
   collection,
   serverTimestamp,
 } from 'firebase/firestore';
+import { logAdminAction } from '@/lib/audit-logger';
+import { auth } from '@/lib/firebase';
+
+async function getActor() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("User not authenticated.");
+    return {
+        id: currentUser.uid,
+        name: currentUser.displayName,
+        role: 'admin' // Assuming this action is only performed by admins
+    };
+}
+
 
 export async function handleUpdateAdCampaign(
   campaignId: string,
   data: any
 ) {
   try {
+    const actor = await getActor();
     const campaignRef = doc(db, 'adCampaigns', campaignId);
     await updateDoc(campaignRef, data);
+
+    await logAdminAction({
+        actor,
+        action: 'AD_CAMPAIGN_UPDATED',
+        details: { campaignId, changes: data }
+    });
 
     return {
       error: null,
@@ -34,7 +54,15 @@ export async function handleAddAdCampaign(data: any) {
         return { error: 'Invalid data provided.', message: 'Validation failed.' };
     }
     try {
-        await addDoc(collection(db, 'adCampaigns'), { ...data, createdAt: serverTimestamp() });
+        const actor = await getActor();
+        const newDoc = await addDoc(collection(db, 'adCampaigns'), { ...data, createdAt: serverTimestamp() });
+        
+        await logAdminAction({
+            actor,
+            action: 'AD_CAMPAIGN_CREATED',
+            details: { campaignId: newDoc.id, name: data.name }
+        });
+
         return {
             error: null,
             message: `Ad campaign "${data.name}" added successfully.`,
@@ -47,10 +75,16 @@ export async function handleAddAdCampaign(data: any) {
 
 export async function handleDeleteAdCampaign(campaignId: string) {
   try {
-    // Note: This does not delete the image from storage.
-    // A cloud function would be needed for that to prevent orphaned files.
+    const actor = await getActor();
     const campaignRef = doc(db, 'adCampaigns', campaignId);
     await deleteDoc(campaignRef);
+
+    await logAdminAction({
+        actor,
+        action: 'AD_CAMPAIGN_DELETED',
+        details: { campaignId }
+    });
+    
     return {
       error: null,
       message: 'Ad campaign has been deleted successfully.',

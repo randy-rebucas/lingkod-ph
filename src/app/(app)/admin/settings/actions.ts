@@ -4,6 +4,18 @@
 import { db } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { z } from 'zod';
+import { logAdminAction } from '@/lib/audit-logger';
+import { auth } from '@/lib/firebase';
+
+async function getActor() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) throw new Error("User not authenticated.");
+    return {
+        id: currentUser.uid,
+        name: currentUser.displayName,
+        role: 'admin'
+    };
+}
 
 const platformSettingsSchema = z.object({
     appName: z.string().min(1, "App name is required."),
@@ -24,6 +36,7 @@ export async function handleUpdatePlatformSettings(
   settings: PlatformSettings
 ) {
   try {
+    const actor = await getActor();
     const validatedSettings = platformSettingsSchema.safeParse(settings);
     if (!validatedSettings.success) {
         return { error: 'Invalid settings format.', message: 'Validation failed.' };
@@ -31,6 +44,12 @@ export async function handleUpdatePlatformSettings(
 
     const settingsRef = doc(db, 'platform', 'settings');
     await setDoc(settingsRef, validatedSettings.data, { merge: true });
+
+    await logAdminAction({
+        actor,
+        action: 'PLATFORM_SETTINGS_UPDATED',
+        details: { settings: validatedSettings.data }
+    });
 
     return {
       error: null,

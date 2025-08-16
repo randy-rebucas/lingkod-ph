@@ -3,13 +3,12 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
-import { collection, doc, writeBatch, query, where, getDocs, serverTimestamp } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Send } from "lucide-react";
+import { sendBroadcastAction } from "./actions";
 
 export default function BroadcastPage() {
     const { userRole } = useAuth();
@@ -18,42 +17,20 @@ export default function BroadcastPage() {
     const [isSending, setIsSending] = useState(false);
 
     const handleSendBroadcast = async () => {
-        if (message.trim().length < 10) {
-            toast({ variant: "destructive", title: "Message too short", description: "Broadcast message must be at least 10 characters."});
-            return;
-        }
-
         setIsSending(true);
-        try {
-            const batch = writeBatch(db);
-            const broadcastsRef = collection(db, "broadcasts");
+        const result = await sendBroadcastAction(message);
 
-            // 1. Deactivate all existing active broadcasts
-            const q = query(broadcastsRef, where("status", "==", "active"));
-            const activeBroadcasts = await getDocs(q);
-            activeBroadcasts.forEach(doc => {
-                batch.update(doc.ref, { status: "inactive" });
-            });
+        toast({
+            title: result.error ? 'Error' : 'Broadcast Sent!',
+            description: result.message,
+            variant: result.error ? "destructive" : "default"
+        });
 
-            // 2. Add the new broadcast as active
-            const newBroadcastRef = doc(collection(db, "broadcasts"));
-            batch.set(newBroadcastRef, {
-                message,
-                status: 'active',
-                createdAt: serverTimestamp()
-            });
-
-            await batch.commit();
-
-            toast({ title: "Broadcast Sent!", description: "Your message is now active for all users." });
+        if (!result.error) {
             setMessage("");
-
-        } catch (error) {
-             console.error("Error sending broadcast:", error);
-            toast({ variant: "destructive", title: "Error", description: "Failed to send broadcast."});
-        } finally {
-            setIsSending(false);
         }
+
+        setIsSending(false);
     }
 
 
