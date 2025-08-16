@@ -560,7 +560,7 @@ export default function DashboardPage() {
     const agencyProviderCount = agencyProviders.length;
     const agencyPendingPayouts = agencyPayouts.filter(p => p.status === 'Pending').reduce((sum, p) => sum + p.amount, 0);
     const agencyOverallRating = agencyProviders.length > 0
-        ? (agencyProviders.reduce((sum, p) => sum + p.rating, 0) / agencyProviders.length).toFixed(1)
+        ? (agencyProviders.reduce((sum, p) => sum + (p.rating || 0), 0) / agencyProviders.length).toFixed(1)
         : "N/A";
     const agencyRecentBookings = agencyBookings.sort((a,b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5);
     const topPerformingProviders = [...agencyProviders].sort((a,b) => (b.totalRevenue || 0) - (a.totalRevenue || 0)).slice(0, 5);

@@ -19,7 +19,7 @@ type Booking = {
     serviceName: string;
     status: "Upcoming" | "Completed" | "Cancelled" | "Pending";
     price: number;
-    date: Timestamp;
+    createdAt: Timestamp;
 };
 
 type User = {
@@ -213,3 +213,4 @@ export default function AdminDashboardPage() {
     );
 
     
+}
