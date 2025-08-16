@@ -64,8 +64,7 @@ export default function SubscriptionPage() {
         };
     }, []);
 
-    const allTiers = plans;
-    const currentPlanDetails = allTiers.find(tier => tier.id === subscription?.planId);
+    const currentPlanDetails = plans.find(tier => tier.id === subscription?.planId);
     
     if (!process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID) {
         return <div>PayPal Client ID not configured.</div>
@@ -78,7 +77,7 @@ export default function SubscriptionPage() {
     };
     
     const renderProviderPlans = () => {
-        const providerPlans = plans.filter(p => p.type === 'provider') as SubscriptionTier[];
+        const providerPlans = plans.filter(p => p.type === 'provider').sort((a, b) => (a as SubscriptionTier).price - (b as SubscriptionTier).price) as SubscriptionTier[];
          return (
          <section>
             <h2 className="text-2xl font-bold font-headline mb-4">Provider Subscription Plans</h2>
@@ -145,7 +144,7 @@ export default function SubscriptionPage() {
     };
 
     const renderAgencyPlans = () => {
-        const agencyPlans = plans.filter(p => p.type === 'agency') as AgencySubscriptionTier[];
+        const agencyPlans = plans.filter(p => p.type === 'agency').sort((a,b) => (a as AgencySubscriptionTier).price as number - (b as AgencySubscriptionTier).price as number) as AgencySubscriptionTier[];
         return (
          <section>
             <h2 className="text-2xl font-bold font-headline mb-4">Agency Subscription Plans</h2>
