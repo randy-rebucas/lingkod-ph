@@ -47,6 +47,8 @@ export async function handleAddAdCampaign(data: any) {
 
 export async function handleDeleteAdCampaign(campaignId: string) {
   try {
+    // Note: This does not delete the image from storage.
+    // A cloud function would be needed for that to prevent orphaned files.
     const campaignRef = doc(db, 'adCampaigns', campaignId);
     await deleteDoc(campaignRef);
     return {

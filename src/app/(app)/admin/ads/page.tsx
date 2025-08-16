@@ -1,16 +1,17 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
 import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Trash2, Edit, PlusCircle, Megaphone } from "lucide-react";
+import { MoreHorizontal, Trash2, Edit, PlusCircle, Megaphone, Upload, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { handleUpdateAdCampaign, handleDeleteAdCampaign, handleAddAdCampaign } from "./actions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -20,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import Image from 'next/image';
 
 type AdCampaign = {
     id: string;
@@ -28,6 +30,7 @@ type AdCampaign = {
     price: number;
     durationDays: number;
     isActive: boolean;
+    imageUrl?: string;
 };
 
 export default function AdminAdsPage() {
@@ -44,8 +47,13 @@ export default function AdminAdsPage() {
     const [price, setPrice] = useState(0);
     const [durationDays, setDurationDays] = useState(7);
     const [isActive, setIsActive] = useState(true);
+    const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (userRole !== 'admin') {
@@ -73,6 +81,10 @@ export default function AdminAdsPage() {
         setPrice(0);
         setDurationDays(7);
         setIsActive(true);
+        setImageUrl(undefined);
+        setImageFile(null);
+        setImagePreview(null);
+        setIsUploading(false);
     };
     
     const closeDialog = () => {
@@ -90,6 +102,8 @@ export default function AdminAdsPage() {
         setPrice(campaign.price);
         setDurationDays(campaign.durationDays);
         setIsActive(campaign.isActive);
+        setImageUrl(campaign.imageUrl);
+        setImagePreview(campaign.imageUrl || null);
         setIsDialogOpen(true);
     };
     
@@ -100,8 +114,41 @@ export default function AdminAdsPage() {
         setIsDialogOpen(true);
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleFormSubmit = async () => {
-        const payload = { name, description, price, durationDays, isActive };
+        let finalImageUrl = imageUrl;
+
+        if (imageFile) {
+            setIsUploading(true);
+            try {
+                const storagePath = `ad-campaign-images/${Date.now()}_${imageFile.name}`;
+                const storageRef = ref(storage, storagePath);
+                const uploadTask = await uploadBytesResumable(storageRef, imageFile);
+                finalImageUrl = await getDownloadURL(uploadTask.ref);
+            } catch (error) {
+                 toast({
+                    title: 'Upload Error',
+                    description: "Failed to upload image. Please try again.",
+                    variant: 'destructive',
+                });
+                setIsUploading(false);
+                return;
+            }
+            setIsUploading(false);
+        }
+
+        const payload = { name, description, price, durationDays, isActive, imageUrl: finalImageUrl };
         const result = isAdding ? await handleAddAdCampaign(payload) : await handleUpdateAdCampaign(isEditing!.id, payload);
 
         toast({
@@ -167,6 +214,7 @@ export default function AdminAdsPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
+                                    <TableHead>Image</TableHead>
                                     <TableHead>Campaign Name</TableHead>
                                     <TableHead>Price</TableHead>
                                     <TableHead>Duration (Days)</TableHead>
@@ -177,6 +225,15 @@ export default function AdminAdsPage() {
                             <TableBody>
                                 {campaigns.length > 0 ? campaigns.map(campaign => (
                                     <TableRow key={campaign.id}>
+                                        <TableCell>
+                                            {campaign.imageUrl ? (
+                                                <Image src={campaign.imageUrl} alt={campaign.name} width={40} height={40} className="rounded-md object-cover"/>
+                                            ) : (
+                                                <div className="w-10 h-10 bg-secondary rounded-md flex items-center justify-center">
+                                                    <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                                                </div>
+                                            )}
+                                        </TableCell>
                                         <TableCell className="font-medium">{campaign.name}</TableCell>
                                         <TableCell>₱{campaign.price.toFixed(2)}</TableCell>
                                         <TableCell>{campaign.durationDays}</TableCell>
@@ -217,7 +274,7 @@ export default function AdminAdsPage() {
                                     </TableRow>
                                 )) : (
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center h-24">
+                                        <TableCell colSpan={6} className="text-center h-24">
                                             No ad campaigns found.
                                         </TableCell>
                                     </TableRow>
@@ -226,11 +283,37 @@ export default function AdminAdsPage() {
                         </Table>
                     </CardContent>
                 </Card>
-                <DialogContent>
+                <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
                         <DialogTitle>{isAdding ? "Add New Ad Campaign" : "Edit Ad Campaign"}</DialogTitle>
                     </DialogHeader>
-                     <div className="grid gap-4 py-4">
+                     <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto p-1">
+                        <div className="space-y-2">
+                            <Label>Feature Image</Label>
+                            {imagePreview ? (
+                                <div className="aspect-video w-full rounded-md overflow-hidden border relative">
+                                    <Image src={imagePreview} alt="Campaign preview" layout="fill" className="object-cover"/>
+                                </div>
+                            ) : (
+                                <div className="aspect-video w-full rounded-md border-2 border-dashed flex items-center justify-center bg-muted/50">
+                                    <div className="text-center text-muted-foreground p-4">
+                                        <ImageIcon className="h-8 w-8 mx-auto mb-2"/>
+                                        <p>Upload an image for the campaign.</p>
+                                    </div>
+                                </div>
+                            )}
+                             <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <Upload className="mr-2 h-4 w-4" />
+                                {imagePreview ? 'Change Image' : 'Select Image'}
+                            </Button>
+                            <Input className="hidden" type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} />
+                        </div>
+
                         <div className="space-y-2">
                             <Label htmlFor="name">Campaign Name</Label>
                             <Input id="name" value={name} onChange={e => setName(e.target.value)} placeholder="e.g., Homepage Feature" />
@@ -256,7 +339,10 @@ export default function AdminAdsPage() {
                     </div>
                     <DialogFooter>
                         <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                        <Button onClick={handleFormSubmit}>Save changes</Button>
+                        <Button onClick={handleFormSubmit} disabled={isUploading}>
+                             {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                             {isUploading ? 'Uploading...' : 'Save changes'}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </div>
