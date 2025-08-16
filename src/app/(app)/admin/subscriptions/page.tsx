@@ -128,13 +128,13 @@ export default function AdminSubscriptionsPage() {
         const unsubProvider = onSnapshot(providerQuery, (snapshot) => {
             const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SubscriptionTier));
             setProviderPlans(plans.sort((a, b) => a.price - b.price));
-            setLoading(false);
+            if(agencyPlans.length > 0) setLoading(false);
         });
 
         const unsubAgency = onSnapshot(agencyQuery, (snapshot) => {
             const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AgencySubscriptionTier));
             setAgencyPlans(plans.sort((a,b) => (a.price as number) - (b.price as number)));
-            setLoading(false);
+            if(providerPlans.length > 0) setLoading(false);
         });
         
         return () => {
@@ -142,7 +142,7 @@ export default function AdminSubscriptionsPage() {
             unsubAgency();
         };
 
-    }, [userRole]);
+    }, [userRole, providerPlans.length, agencyPlans.length]);
 
 
     if (userRole !== 'admin') {
@@ -199,5 +199,3 @@ export default function AdminSubscriptionsPage() {
         </div>
     )
 }
-
-    
