@@ -15,6 +15,7 @@ const providerTiers = [
         badge: null,
         isFeatured: false,
         type: 'provider',
+        sortOrder: 1,
     },
     {
         name: 'Pro',
@@ -30,6 +31,7 @@ const providerTiers = [
         badge: 'Most Popular',
         isFeatured: true,
         type: 'provider',
+        sortOrder: 2,
     },
     {
         name: 'Elite',
@@ -45,6 +47,7 @@ const providerTiers = [
         badge: null,
         isFeatured: false,
         type: 'provider',
+        sortOrder: 3,
     }
 ];
 
@@ -62,6 +65,7 @@ const agencyTiers = [
         badge: null,
         isFeatured: false,
         type: 'agency',
+        sortOrder: 1,
     },
     {
         name: 'Pro',
@@ -76,6 +80,7 @@ const agencyTiers = [
         badge: 'Most Popular',
         isFeatured: true,
         type: 'agency',
+        sortOrder: 2,
     },
     {
         name: 'Custom',
@@ -91,6 +96,7 @@ const agencyTiers = [
         badge: null,
         isFeatured: false,
         type: 'agency',
+        sortOrder: 3,
     },
 ];
 

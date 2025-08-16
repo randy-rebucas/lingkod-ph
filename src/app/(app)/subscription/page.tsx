@@ -25,6 +25,7 @@ export type SubscriptionTier = {
     badge: string | null;
     isFeatured?: boolean;
     type: 'provider';
+    sortOrder: number;
 };
 
 export type AgencySubscriptionTier = {
@@ -36,6 +37,7 @@ export type AgencySubscriptionTier = {
     badge: string | null;
     isFeatured?: boolean;
     type: 'agency';
+    sortOrder: number;
 };
 
 export default function SubscriptionPage() {
@@ -77,7 +79,7 @@ export default function SubscriptionPage() {
     };
     
     const renderProviderPlans = () => {
-        const providerPlans = plans.filter(p => p.type === 'provider').sort((a, b) => (a as SubscriptionTier).price - (b as SubscriptionTier).price) as SubscriptionTier[];
+        const providerPlans = plans.filter(p => p.type === 'provider').sort((a, b) => a.sortOrder - b.sortOrder) as SubscriptionTier[];
          return (
          <section>
             <h2 className="text-2xl font-bold font-headline mb-4">Provider Subscription Plans</h2>
@@ -144,7 +146,7 @@ export default function SubscriptionPage() {
     };
 
     const renderAgencyPlans = () => {
-        const agencyPlans = plans.filter(p => p.type === 'agency').sort((a,b) => (a as AgencySubscriptionTier).price as number - (b as AgencySubscriptionTier).price as number) as AgencySubscriptionTier[];
+        const agencyPlans = plans.filter(p => p.type === 'agency').sort((a,b) => a.sortOrder - b.sortOrder) as AgencySubscriptionTier[];
         return (
          <section>
             <h2 className="text-2xl font-bold font-headline mb-4">Agency Subscription Plans</h2>

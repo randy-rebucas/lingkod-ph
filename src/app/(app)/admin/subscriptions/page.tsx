@@ -170,6 +170,10 @@ const AddEditPlanDialog = ({
                     <Input value={editablePlan.idealFor} onChange={e => setEditablePlan(p => p ? ({...p, idealFor: e.target.value}) : null)}/>
                 </div>
                  <div className="space-y-2">
+                    <Label>Sort Order</Label>
+                    <Input type="number" value={editablePlan.sortOrder} onChange={e => setEditablePlan(p => p ? ({...p, sortOrder: Number(e.target.value)}) : null)} />
+                </div>
+                 <div className="space-y-2">
                     <Label>Features</Label>
                     <div className="space-y-2">
                         {editablePlan.features.map((feature, index) => (
@@ -228,13 +232,13 @@ export default function AdminSubscriptionsPage() {
 
         const unsubProvider = onSnapshot(providerQuery, (snapshot) => {
             const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SubscriptionTier));
-            setProviderPlans(plans.sort((a, b) => a.price - b.price));
+            setProviderPlans(plans.sort((a, b) => a.sortOrder - b.sortOrder));
             setLoading(false);
         });
 
         const unsubAgency = onSnapshot(agencyQuery, (snapshot) => {
             const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AgencySubscriptionTier));
-            setAgencyPlans(plans.sort((a,b) => (a.price as number) - (b.price as number)));
+            setAgencyPlans(plans.sort((a,b) => a.sortOrder - b.sortOrder));
             setLoading(false);
         });
         
@@ -252,6 +256,10 @@ export default function AdminSubscriptionsPage() {
     };
 
     const handleAddPlan = (type: 'provider' | 'agency') => {
+        const nextSortOrder = type === 'provider' 
+            ? Math.max(0, ...providerPlans.map(p => p.sortOrder)) + 1
+            : Math.max(0, ...agencyPlans.map(p => p.sortOrder)) + 1;
+            
         setEditingPlan({
             id: '',
             name: '',
@@ -260,7 +268,8 @@ export default function AdminSubscriptionsPage() {
             features: [''],
             badge: null,
             isFeatured: false,
-            type: type
+            type: type,
+            sortOrder: nextSortOrder,
         });
         setEditingPlanType(type);
         setIsDialogOpen(true);
