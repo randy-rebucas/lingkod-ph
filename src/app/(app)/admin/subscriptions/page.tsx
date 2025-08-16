@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -110,7 +110,8 @@ const SubscriptionPlanEditor = ({ plan }: { plan: (SubscriptionTier | AgencySubs
 
 export default function AdminSubscriptionsPage() {
     const { userRole } = useAuth();
-    const [subscriptions, setSubscriptions] = useState<(SubscriptionTier | AgencySubscriptionTier)[]>([]);
+    const [providerPlans, setProviderPlans] = useState<SubscriptionTier[]>([]);
+    const [agencyPlans, setAgencyPlans] = useState<AgencySubscriptionTier[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -119,21 +120,27 @@ export default function AdminSubscriptionsPage() {
             return;
         }
 
-        const unsubscribes: (() => void)[] = [];
+        const subRef = collection(db, 'subscriptions');
 
-        const subscribeToSubscriptions = () => {
-            const subRef = collection(db, 'subscriptions');
-            const unsubscribe = onSnapshot(subRef, (snapshot) => {
-                const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as (SubscriptionTier | AgencySubscriptionTier)));
-                setSubscriptions(plans);
-                setLoading(false);
-            });
-            unsubscribes.push(unsubscribe);
+        const providerQuery = query(subRef, where("type", "==", "provider"));
+        const agencyQuery = query(subRef, where("type", "==", "agency"));
+
+        const unsubProvider = onSnapshot(providerQuery, (snapshot) => {
+            const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SubscriptionTier));
+            setProviderPlans(plans);
+            setLoading(false);
+        });
+
+        const unsubAgency = onSnapshot(agencyQuery, (snapshot) => {
+            const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AgencySubscriptionTier));
+            setAgencyPlans(plans);
+            setLoading(false);
+        });
+        
+        return () => {
+            unsubProvider();
+            unsubAgency();
         };
-        
-        subscribeToSubscriptions();
-        
-        return () => unsubscribes.forEach(unsub => unsub());
 
     }, [userRole]);
 
@@ -161,9 +168,6 @@ export default function AdminSubscriptionsPage() {
             </div>
         );
     }
-
-    const providerPlans = subscriptions.filter(s => s.type === 'provider');
-    const agencyPlans = subscriptions.filter(s => s.type === 'agency');
 
     return (
         <div className="space-y-6">
