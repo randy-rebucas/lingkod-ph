@@ -14,13 +14,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from '@/hooks/use-toast';
-import { CalendarIcon, Loader2, PlusCircle, Trash2 } from 'lucide-react';
+import { CalendarIcon, Loader2, PlusCircle, Trash2, Wand2 } from 'lucide-react';
 import { Invoice } from '@/app/(app)/invoices/page';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Calendar } from './ui/calendar';
 import { Separator } from './ui/separator';
+import { generateQuoteDescription } from '@/ai/flows/generate-quote-description';
 
 const lineItemSchema = z.object({
     description: z.string().min(1, "Description is required."),
@@ -53,6 +54,7 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
     const { user } = useAuth();
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
+    const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
 
     const form = useForm<InvoiceFormValues>({
         resolver: zodResolver(invoiceSchema),
@@ -101,6 +103,41 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
     const subtotal = watchedLineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
     const taxAmount = subtotal * ((watchedTaxRate || 0) / 100);
     const total = subtotal + taxAmount;
+
+    const handleGenerateDescription = async (index: number) => {
+        setGeneratingIndex(index);
+        const itemName = form.getValues(`lineItems.${index}.description`);
+        if (!itemName || itemName.trim().length < 3) {
+            toast({
+                variant: 'destructive',
+                title: 'Item Name Required',
+                description: 'Please enter a brief item name first (at least 3 characters).',
+            });
+            setGeneratingIndex(null);
+            return;
+        }
+
+        try {
+            const result = await generateQuoteDescription({ itemName });
+            if (result.description) {
+                form.setValue(`lineItems.${index}.description`, result.description, { shouldValidate: true });
+                toast({
+                    title: 'Success',
+                    description: 'AI-powered description has been generated!',
+                });
+            }
+        } catch (error) {
+            console.error("Error generating description:", error);
+            toast({
+                variant: 'destructive',
+                title: 'AI Error',
+                description: 'Could not generate a description at this time.',
+            });
+        } finally {
+            setGeneratingIndex(null);
+        }
+    };
+
 
     const onSubmit = async (data: InvoiceFormValues) => {
         if (!user) {
@@ -203,7 +240,17 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
                                         <div key={field.id} className="grid grid-cols-12 gap-2 items-start relative border-b pb-4">
                                             <div className="col-span-6">
                                                 <FormField control={form.control} name={`lineItems.${index}.description`} render={({ field }) => (
-                                                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="e.g., Deep House Cleaning" {...field} rows={1} /></FormControl><FormMessage /></FormItem>
+                                                    <FormItem>
+                                                        <div className="flex justify-between items-center">
+                                                            <FormLabel>Description</FormLabel>
+                                                            <Button type="button" variant="ghost" size="sm" onClick={() => handleGenerateDescription(index)} disabled={generatingIndex === index}>
+                                                                {generatingIndex === index ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4 text-accent" />}
+                                                                <span className="ml-2 text-xs">{generatingIndex === index ? 'Generating...' : 'AI'}</span>
+                                                            </Button>
+                                                        </div>
+                                                        <FormControl><Textarea placeholder="e.g., Deep House Cleaning" {...field} rows={1} /></FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
                                                 )} />
                                             </div>
                                             <div className="col-span-2">

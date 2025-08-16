@@ -125,5 +125,3 @@ export function InvoicePreview({ invoice }: { invoice: Invoice }) {
         </div>
     );
 }
-
-    
