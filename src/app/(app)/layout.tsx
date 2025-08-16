@@ -40,6 +40,7 @@ import {
   TrendingUp,
   DatabaseBackup,
   Shield,
+  Users,
 } from "lucide-react";
 import {
   SidebarProvider,
