@@ -4,6 +4,7 @@ import { db } from "./firebase";
 
 const providerTiers = [
     {
+        id: 'free',
         name: 'Free',
         price: 0,
         idealFor: 'New providers starting out',
@@ -18,6 +19,7 @@ const providerTiers = [
         sortOrder: 1,
     },
     {
+        id: 'pro',
         name: 'Pro',
         price: 499,
         idealFor: 'Professionals ready to grow',
@@ -34,6 +36,7 @@ const providerTiers = [
         sortOrder: 2,
     },
     {
+        id: 'elite',
         name: 'Elite',
         price: 999,
         idealFor: 'Top-tier providers and businesses',
@@ -53,6 +56,7 @@ const providerTiers = [
 
 const agencyTiers = [
      {
+        id: 'lite',
         name: 'Lite',
         price: 1999,
         idealFor: 'Small agencies starting out',
@@ -68,6 +72,7 @@ const agencyTiers = [
         sortOrder: 1,
     },
     {
+        id: 'pro',
         name: 'Pro',
         price: 4999,
         idealFor: 'Growing agencies scaling their team',
@@ -83,6 +88,7 @@ const agencyTiers = [
         sortOrder: 2,
     },
     {
+        id: 'custom',
         name: 'Custom',
         price: 'Contact Us',
         idealFor: 'Large agencies with custom needs',
@@ -113,13 +119,13 @@ export async function seedSubscriptions() {
     const batch = writeBatch(db);
     
     providerTiers.forEach(tier => {
-        const newSubRef = doc(subscriptionsRef, tier.name.toLowerCase());
+        const newSubRef = doc(subscriptionsRef, tier.id);
         batch.set(newSubRef, tier);
         count++;
     });
 
     agencyTiers.forEach(tier => {
-        const newSubRef = doc(subscriptionsRef, tier.name.toLowerCase());
+        const newSubRef = doc(subscriptionsRef, tier.id);
         batch.set(newSubRef, tier);
         count++;
     });
