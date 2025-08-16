@@ -101,8 +101,10 @@ export default function ReportsPage() {
     const { toast } = useToast();
 
     const isAgencyPaidSubscriber = userRole === 'agency' && subscription?.status === 'active' && subscription.planId !== 'free';
-    const isProOrCustom = isAgencyPaidSubscriber && (subscription?.planId === 'pro' || subscription?.planId === 'custom');
-
+    const isProOrCustom = useMemo(() => {
+        return isAgencyPaidSubscriber && (subscription?.planId === 'pro' || subscription?.planId === 'custom');
+    }, [isAgencyPaidSubscriber, subscription]);
+    
     useEffect(() => {
         if (!user || !isAgencyPaidSubscriber) {
             setLoading(false);
@@ -403,5 +405,3 @@ export default function ReportsPage() {
             </Card>
         </div>
     );
-
-    

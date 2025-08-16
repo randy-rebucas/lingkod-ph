@@ -1,9 +1,9 @@
 
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
-import { doc, getDoc, onSnapshot, Timestamp, collection, addDoc, serverTimestamp, getDocs, query, where, limit } from 'firebase/firestore';
+import { doc, onSnapshot, Timestamp, collection, addDoc, serverTimestamp, getDocs, query, where, limit } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { differenceInDays, differenceInHours } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -24,7 +24,6 @@ interface AuthContextType {
   userRole: UserRole;
   subscription: UserSubscription;
   verificationStatus: VerificationStatus | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -33,7 +32,6 @@ const AuthContext = createContext<AuthContextType>({
   userRole: null,
   subscription: null,
   verificationStatus: null,
-  setUser: () => {},
 });
 
 const createSingletonNotification = async (userId: string, type: string, message: string, link: string) => {
@@ -72,20 +70,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus | null>(null);
   const { toast } = useToast();
 
+  const handleSignOut = useCallback(() => {
+    signOut(auth);
+    setUser(null);
+    setUserRole(null);
+    setSubscription(null);
+    setVerificationStatus(null);
+  }, []);
+
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      setLoading(true);
-      if (user) {
-        setUser(user);
-        const userDocRef = doc(db, 'users', user.uid);
+    const unsubscribeAuth = onAuthStateChanged(auth, (authUser) => {
+      if (authUser) {
+        setUser(authUser);
+        const userDocRef = doc(db, 'users', authUser.uid);
         
         const unsubscribeDoc = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
             const data = docSnap.data();
 
             if (data.accountStatus === 'suspended') {
-                signOut(auth);
                 toast({ variant: 'destructive', title: 'Account Suspended', description: 'Your account has been suspended. Please contact support.' });
+                handleSignOut();
                 return;
             }
 
@@ -99,52 +104,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (sub?.status === 'active' && sub.renewsOn) {
                 const daysUntilRenewal = differenceInDays(sub.renewsOn.toDate(), new Date());
                 if (daysUntilRenewal > 0 && daysUntilRenewal <= 7) {
-                    createSingletonNotification(user.uid, 'renewal_reminder', `Your ${sub.planId} plan will renew in ${daysUntilRenewal} day${daysUntilRenewal > 1 ? 's' : ''}.`, '/subscription');
+                    createSingletonNotification(authUser.uid, 'renewal_reminder', `Your ${sub.planId} plan will renew in ${daysUntilRenewal} day${daysUntilRenewal > 1 ? 's' : ''}.`, '/subscription');
                 }
             }
-            
-            // Check for upcoming appointments & completed jobs
-            const bookingsQuery = query(
-              collection(db, "bookings"),
-              where(data.role === 'client' ? 'clientId' : 'providerId', '==', user.uid),
-            );
-
-            const unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
-                snapshot.forEach(doc => {
-                    const booking = doc.data();
-                    if(booking.status === 'Upcoming') {
-                        const hoursUntilBooking = differenceInHours(booking.date.toDate(), new Date());
-                        if (hoursUntilBooking > 0 && hoursUntilBooking <= 24) {
-                             createSingletonNotification(user.uid, 'booking_update', `Your appointment for "${booking.serviceName}" is tomorrow.`, '/bookings');
-                        }
-                    } else if (booking.status === 'Completed' && data.role === 'client' && !booking.reviewId) {
-                         createSingletonNotification(user.uid, 'new_review', `How was your service for "${booking.serviceName}"? Leave a review!`, '/bookings#completed');
-                    }
-                });
-            });
-            // This is a nested listener. For a production app, this should be managed more carefully.
           }
            setLoading(false);
         });
 
-        return () => {
-            unsubscribeDoc();
-        };
+        return () => unsubscribeDoc();
 
       } else {
-        setUser(null);
-        setUserRole(null);
-        setSubscription(null);
-        setVerificationStatus(null);
+        handleSignOut();
         setLoading(false);
       }
     });
 
     return () => unsubscribeAuth();
-  }, [toast]);
+  }, [toast, handleSignOut]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, userRole, subscription, verificationStatus, setUser }}>
+    <AuthContext.Provider value={{ user, loading, userRole, subscription, verificationStatus }}>
       {children}
     </AuthContext.Provider>
   );
