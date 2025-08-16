@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,82 +13,30 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { PayPalCheckoutButton } from "@/components/paypal-checkout-button";
 import PaymentHistory from "./payment-history";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot, getDoc, doc } from "firebase/firestore";
 
 export type SubscriptionTier = {
-    id: "starter" | "pro" | "elite";
+    id: string;
     name: string;
     price: number;
     idealFor: string;
     features: string[];
     badge: string | null;
     isFeatured?: boolean;
+    type: 'provider';
 };
 
 export type AgencySubscriptionTier = {
-    id: "lite" | "pro" | "custom";
+    id: string;
     name: string;
     price: number | string;
     idealFor: string;
     features: string[];
     badge: string | null;
     isFeatured?: boolean;
+    type: 'agency';
 };
-
-const providerSubscriptionTiers: SubscriptionTier[] = [
-    {
-        id: "starter",
-        name: "Starter",
-        price: 299,
-        idealFor: "Freelancers & part-timers",
-        features: ["Basic profile", "Job matching", "Calendar"],
-        badge: null,
-    },
-    {
-        id: "pro",
-        name: "Pro",
-        price: 499,
-        idealFor: "Full-time service providers",
-        features: ["Verified badge", "Priority listing", "Calendar", "Invoice generator"],
-        badge: "Most Popular",
-        isFeatured: true,
-    },
-    {
-        id: "elite",
-        name: "Elite",
-        price: 899,
-        idealFor: "Agencies or seasoned pros",
-        features: ["Premium badge", "Leads priority", "Quote builder", "Analytics", "Invoice generator"],
-        badge: null,
-    }
-];
-
-const agencySubscriptionTiers: AgencySubscriptionTier[] = [
-     {
-        id: "lite",
-        name: "Lite",
-        price: 2500,
-        idealFor: "Small teams starting out",
-        features: ["Up to 5 bookings/month", "Manage up to 3 providers", "Basic Reporting"],
-        badge: null,
-    },
-    {
-        id: "pro",
-        name: "Pro",
-        price: 4500,
-        idealFor: "Growing agencies",
-        features: ["Up to 20 bookings/month", "Manage up to 10 providers", "Advanced Usage Reports"],
-        badge: "Most Popular",
-        isFeatured: true,
-    },
-    {
-        id: "custom",
-        name: "Custom",
-        price: "Starts at ₱10,000",
-        idealFor: "Large-scale operations",
-        features: ["Unlimited bookings & providers", "Onboarding support", "Custom SLA", "Full dashboard access"],
-        badge: "Enterprise",
-    }
-]
 
 const commissionRates = [
     {
@@ -112,8 +60,30 @@ const commissionRates = [
 export default function SubscriptionPage() {
     const { userRole, subscription, loading } = useAuth();
     const [isPaymentDialog, setPaymentDialog] = useState(false);
+    const [plans, setPlans] = useState<(SubscriptionTier | AgencySubscriptionTier)[]>([]);
+    const [platformSettings, setPlatformSettings] = useState<any>(null);
+    const [loadingPlans, setLoadingPlans] = useState(true);
 
-    const allTiers = [...providerSubscriptionTiers, ...agencySubscriptionTiers];
+    useEffect(() => {
+        const unsubPlans = onSnapshot(collection(db, "subscriptions"), (snapshot) => {
+            const fetchedPlans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as (SubscriptionTier | AgencySubscriptionTier)));
+            setPlans(fetchedPlans);
+            setLoadingPlans(false);
+        });
+        
+        const unsubSettings = onSnapshot(doc(db, "platform", "settings"), (doc) => {
+            if (doc.exists()) {
+                setPlatformSettings(doc.data());
+            }
+        });
+
+        return () => {
+            unsubPlans();
+            unsubSettings();
+        };
+    }, []);
+
+    const allTiers = plans;
     const currentPlanDetails = allTiers.find(tier => tier.id === subscription?.planId);
     
     if (!process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID) {
@@ -126,11 +96,13 @@ export default function SubscriptionPage() {
         intent: "capture",
     };
     
-    const renderProviderPlans = () => (
+    const renderProviderPlans = () => {
+        const providerPlans = plans.filter(p => p.type === 'provider') as SubscriptionTier[];
+         return (
          <section>
             <h2 className="text-2xl font-bold font-headline mb-4">Provider Subscription Plans</h2>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {providerSubscriptionTiers.map(tier => {
+                {providerPlans.map(tier => {
                     const isCurrentPlan = tier.id === subscription?.planId;
                     return (
                         <Card key={tier.id} className={`flex flex-col ${tier.isFeatured ? 'border-primary shadow-lg' : ''}`}>
@@ -188,13 +160,16 @@ export default function SubscriptionPage() {
                 })}
             </div>
         </section>
-    );
+        )
+    };
 
-    const renderAgencyPlans = () => (
+    const renderAgencyPlans = () => {
+        const agencyPlans = plans.filter(p => p.type === 'agency') as AgencySubscriptionTier[];
+        return (
          <section>
             <h2 className="text-2xl font-bold font-headline mb-4">Agency Subscription Plans</h2>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                {agencySubscriptionTiers.map(tier => {
+                {agencyPlans.map(tier => {
                     const isCurrentPlan = tier.id === subscription?.planId;
                     return (
                         <Card key={tier.id} className={`flex flex-col ${tier.isFeatured ? 'border-primary shadow-lg' : ''}`}>
@@ -257,7 +232,7 @@ export default function SubscriptionPage() {
                 })}
             </div>
         </section>
-    );
+    )};
 
     const getPlanStatusDescription = () => {
         if (!subscription) return 'Upgrade to a paid plan to access more features.';
@@ -301,7 +276,7 @@ export default function SubscriptionPage() {
                     )}
                 </section>
                 
-                {userRole === 'agency' ? renderAgencyPlans() : renderProviderPlans()}
+                {loadingPlans ? <Skeleton className="h-96 w-full"/> : (userRole === 'agency' ? renderAgencyPlans() : renderProviderPlans())}
 
                 <section>
                     <PaymentHistory />
@@ -311,24 +286,34 @@ export default function SubscriptionPage() {
                     <h2 className="text-2xl font-bold font-headline mb-4">Commission per Completed Service</h2>
                     <Card>
                         <CardContent className="p-0">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Job Type</TableHead>
-                                        <TableHead>Commission Rate</TableHead>
-                                        <TableHead>Notes</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {commissionRates.map(rate => (
-                                        <TableRow key={rate.jobType}>
-                                            <TableCell className="font-medium">{rate.jobType}</TableCell>
-                                            <TableCell>{rate.commission}</TableCell>
-                                            <TableCell className="text-muted-foreground">{rate.notes}</TableCell>
+                             {platformSettings ? (
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Job Value Tier</TableHead>
+                                            <TableHead>Commission Rate</TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                    </TableHeader>
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell className="font-medium">Low-Ticket</TableCell>
+                                            <TableCell>{platformSettings.commissionRates.low}%</TableCell>
+                                        </TableRow>
+                                         <TableRow>
+                                            <TableCell className="font-medium">Mid-Ticket</TableCell>
+                                            <TableCell>{platformSettings.commissionRates.mid}%</TableCell>
+                                        </TableRow>
+                                         <TableRow>
+                                            <TableCell className="font-medium">High-Ticket</TableCell>
+                                            <TableCell>{platformSettings.commissionRates.high}%</TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            ) : (
+                                <div className="p-6">
+                                    <Skeleton className="h-32 w-full" />
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </section>
