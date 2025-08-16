@@ -2,7 +2,7 @@
 "use client";
 
 import { useAuth } from "@/context/auth-context";
-import { BarChart2, TrendingUp, Users, DollarSign, CheckCircle, PieChart, Loader2 } from "lucide-react";
+import { BarChart2, TrendingUp, Users, DollarSign, CheckCircle, PieChart, Loader2, Slash, Star, Percent } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   LineChart,
@@ -32,6 +32,11 @@ type Booking = {
     price: number;
     date: Timestamp;
 };
+
+type Review = {
+    id: string;
+    rating: number;
+}
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
@@ -84,6 +89,7 @@ const processServicePerformance = (bookings: Booking[]) => {
 export default function AnalyticsPage() {
     const { user, subscription } = useAuth();
     const [bookings, setBookings] = useState<Booking[]>([]);
+    const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
     const isElite = subscription?.status === 'active' && subscription.planId === 'elite';
 
@@ -96,17 +102,26 @@ export default function AnalyticsPage() {
 
         setLoading(true);
         const bookingsQuery = query(collection(db, "bookings"), where("providerId", "==", user.uid));
+        const reviewsQuery = query(collection(db, "reviews"), where("providerId", "==", user.uid));
         
-        const unsubscribe = onSnapshot(bookingsQuery, (snapshot) => {
+        const unsubBookings = onSnapshot(bookingsQuery, (snapshot) => {
             const bookingsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
             setBookings(bookingsData);
             setLoading(false);
         }, (error) => {
-            console.error("Firestore Error:", error);
+            console.error("Firestore Error (Bookings):", error);
             setLoading(false);
         });
 
-        return () => unsubscribe();
+        const unsubReviews = onSnapshot(reviewsQuery, (snapshot) => {
+             const reviewsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
+            setReviews(reviewsData);
+        });
+
+        return () => {
+            unsubBookings();
+            unsubReviews();
+        };
     }, [user, isElite]);
 
     const analyticsData = useMemo(() => {
@@ -114,23 +129,32 @@ export default function AnalyticsPage() {
         const totalRevenue = completedBookings.reduce((sum, b) => sum + b.price, 0);
         const averageBookingValue = completedBookings.length > 0 ? totalRevenue / completedBookings.length : 0;
         
-        const clientIds = bookings.map(b => b.clientId);
-        const uniqueClients = new Set(clientIds);
-        const repeatClients = clientIds.length - uniqueClients.size;
-        const clientRetentionRate = uniqueClients.size > 0 ? (repeatClients / uniqueClients.size) * 100 : 0;
-
+        const totalClients = new Set(bookings.map(b => b.clientId)).size;
+        
         const bookingTrends = processBookingTrends(bookings);
         const servicePerformance = processServicePerformance(completedBookings);
+
+        const totalBookings = bookings.length;
+        const cancelledBookings = bookings.filter(b => b.status === 'Cancelled').length;
+        const cancellationRate = totalBookings > 0 ? (cancelledBookings / totalBookings) * 100 : 0;
+
+        const totalPotentialJobs = bookings.filter(b => b.status === 'Upcoming' || b.status === 'Completed').length;
+        const utilizationRate = totalPotentialJobs > 0 ? (completedBookings.length / totalPotentialJobs) * 100 : 0;
+        
+        const averageRating = reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
         
         return {
             averageBookingValue,
             totalBookings: bookings.length,
-            clientRetentionRate,
+            totalClients,
             bookingTrends,
             servicePerformance,
-            topServices: servicePerformance.slice(0, 5)
+            topServices: servicePerformance.slice(0, 5),
+            cancellationRate,
+            utilizationRate,
+            averageRating,
         };
-    }, [bookings]);
+    }, [bookings, reviews]);
 
     if (!isElite) {
         return (
@@ -174,9 +198,9 @@ export default function AnalyticsPage() {
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                     <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Avg. Booking Value</CardTitle><DollarSign className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">₱{analyticsData.averageBookingValue.toFixed(2)}</div></CardContent></Card>
-                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total Bookings</CardTitle><CheckCircle className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.totalBookings}</div></CardContent></Card>
-                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Client Retention</CardTitle><Users className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.clientRetentionRate.toFixed(1)}%</div></CardContent></Card>
-                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Booking Trend</CardTitle><TrendingUp className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">+12% this month</div><p className="text-xs text-muted-foreground">mock data</p></CardContent></Card>
+                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Cancellation Rate</CardTitle><Slash className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.cancellationRate.toFixed(1)}%</div></CardContent></Card>
+                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Utilization Rate</CardTitle><Percent className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.utilizationRate.toFixed(1)}%</div></CardContent></Card>
+                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Avg. Rating</CardTitle><Star className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.averageRating.toFixed(2)}</div></CardContent></Card>
                 </div>
             )}
             
