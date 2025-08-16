@@ -41,6 +41,7 @@ import {
   DatabaseBackup,
   Shield,
   LifeBuoy,
+  Users,
 } from "lucide-react";
 import {
   SidebarProvider,
