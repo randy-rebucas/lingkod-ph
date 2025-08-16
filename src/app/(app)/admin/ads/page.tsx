@@ -332,9 +332,11 @@ export default function AdminAdsPage() {
                                 <Input id="duration" type="number" value={durationDays} onChange={e => setDurationDays(Number(e.target.value))} />
                             </div>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 pt-2">
                              <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
-                             <Label htmlFor="isActive">Campaign is Active</Label>
+                             <Label htmlFor="isActive" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                Campaign is Active
+                             </Label>
                         </div>
                     </div>
                     <DialogFooter>
