@@ -86,6 +86,7 @@ export default function AdminSettingsPage() {
                 const uploadResult = await uploadBytes(storageRef, logoFile);
                 const newLogoUrl = await getDownloadURL(uploadResult.ref);
                 finalSettings.logoUrl = newLogoUrl;
+                setSettings(finalSettings); // Explicitly update state before saving
                  toast({ title: 'Logo Uploaded', description: 'New logo has been uploaded.' });
             } catch (error) {
                 toast({ variant: 'destructive', title: 'Upload Error', description: 'Failed to upload new logo.' });
