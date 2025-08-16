@@ -98,6 +98,7 @@ const AddEditPlanDialog = ({
     onSave: () => void
 }) => {
     const { toast } = useToast();
+    const { user } = useAuth();
     const [isSaving, setIsSaving] = useState(false);
     const [editablePlan, setEditablePlan] = useState(initialPlan);
 
@@ -125,16 +126,17 @@ const AddEditPlanDialog = ({
     };
 
     const handleSave = async () => {
-        if (!editablePlan) return;
+        if (!editablePlan || !user) return;
         setIsSaving(true);
         
         const { id, ...planData } = editablePlan;
         let result;
+        const actor = { id: user.uid, name: user.displayName };
 
         if (id) {
-            result = await handleUpdateSubscriptionPlan(id, planData);
+            result = await handleUpdateSubscriptionPlan(id, planData, actor);
         } else {
-            result = await handleAddSubscriptionPlan({...planData, type: planType});
+            result = await handleAddSubscriptionPlan({...planData, type: planType}, actor);
         }
         
          toast({
@@ -208,13 +210,12 @@ const AddEditPlanDialog = ({
 }
 
 export default function AdminSubscriptionsPage() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const [providerPlans, setProviderPlans] = useState<(SubscriptionTier)[]>([]);
     const [agencyPlans, setAgencyPlans] = useState<(AgencySubscriptionTier)[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Dialog state
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingPlan, setEditingPlan] = useState<(SubscriptionTier | AgencySubscriptionTier) | null>(null);
     const [editingPlanType, setEditingPlanType] = useState<'provider' | 'agency'>('provider');
@@ -276,7 +277,8 @@ export default function AdminSubscriptionsPage() {
     };
     
     const handleDeletePlan = async (planId: string) => {
-        const result = await handleDeleteSubscriptionPlan(planId);
+        if (!user) return;
+        const result = await handleDeleteSubscriptionPlan(planId, { id: user.uid, name: user.displayName });
          toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,

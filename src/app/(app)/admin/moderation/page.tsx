@@ -41,7 +41,7 @@ const getStatusVariant = (status: ReportStatus) => {
 };
 
 export default function AdminModerationPage() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const [reports, setReports] = useState<Report[]>([]);
     const [loading, setLoading] = useState(true);
@@ -66,8 +66,9 @@ export default function AdminModerationPage() {
         return () => unsubscribe();
     }, [userRole]);
 
-    const onUpdateStatus = async (reportId: string, status: ReportStatus) => {
-        const result = await handleUpdateReportStatus(reportId, status);
+    const onUpdateStatus = async (reportId: string, status: 'Action Taken' | 'Dismissed') => {
+        if (!user) return;
+        const result = await handleUpdateReportStatus(reportId, status, { id: user.uid, name: user.displayName });
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,

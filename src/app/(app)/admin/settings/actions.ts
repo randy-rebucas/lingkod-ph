@@ -5,16 +5,10 @@ import { db } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { z } from 'zod';
 import { logAdminAction } from '@/lib/audit-logger';
-import { auth } from '@/lib/firebase';
 
-async function getActor() {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("User not authenticated.");
-    return {
-        id: currentUser.uid,
-        name: currentUser.displayName,
-        role: 'admin'
-    };
+type Actor = {
+    id: string;
+    name: string | null;
 }
 
 const platformSettingsSchema = z.object({
@@ -33,10 +27,10 @@ const platformSettingsSchema = z.object({
 export type PlatformSettings = z.infer<typeof platformSettingsSchema>;
 
 export async function handleUpdatePlatformSettings(
-  settings: PlatformSettings
+  settings: PlatformSettings,
+  actor: Actor
 ) {
   try {
-    const actor = await getActor();
     const validatedSettings = platformSettingsSchema.safeParse(settings);
     if (!validatedSettings.success) {
         return { error: 'Invalid settings format.', message: 'Validation failed.' };
@@ -46,7 +40,7 @@ export async function handleUpdatePlatformSettings(
     await setDoc(settingsRef, validatedSettings.data, { merge: true });
 
     await logAdminAction({
-        actor,
+        actor: { ...actor, role: 'admin' },
         action: 'PLATFORM_SETTINGS_UPDATED',
         details: { settings: validatedSettings.data }
     });

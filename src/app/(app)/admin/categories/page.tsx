@@ -26,7 +26,7 @@ type Category = {
 const PAGE_SIZE = 10;
 
 export default function AdminCategoriesPage() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
@@ -52,8 +52,6 @@ export default function AdminCategoriesPage() {
             } else {
                 const previousPageLastVisible = pageHistory[page - 1];
                 if (!previousPageLastVisible) {
-                    // This case should ideally not happen if navigation is controlled properly.
-                    // Fallback to fetching from start.
                     q = query(categoriesRef, orderBy("name"), limit(PAGE_SIZE * (page -1)));
                     const initialDocs = await getDocs(q);
                     const lastDoc = initialDocs.docs[initialDocs.docs.length-1];
@@ -72,12 +70,10 @@ export default function AdminCategoriesPage() {
                 const newLastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
                 setLastVisible(newLastVisible);
                 
-                // Update history if moving forward
                 if (page > currentPage) {
                    setPageHistory(prev => [...prev, newLastVisible]);
                 }
                 
-                // Check for next page availability
                 const nextQuery = query(categoriesRef, orderBy("name"), startAfter(newLastVisible), limit(1));
                 const nextSnapshot = await getDocs(nextQuery);
                 setIsNextPageAvailable(!nextSnapshot.empty);
@@ -123,8 +119,8 @@ export default function AdminCategoriesPage() {
     }
 
     const onUpdateCategory = async () => {
-        if (!isEditing || !categoryName) return;
-        const result = await handleUpdateCategory(isEditing.id, categoryName);
+        if (!user || !isEditing || !categoryName) return;
+        const result = await handleUpdateCategory(isEditing.id, categoryName, { id: user.uid, name: user.displayName });
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,
@@ -132,12 +128,13 @@ export default function AdminCategoriesPage() {
         });
         if (!result.error) {
             resetDialog();
-            fetchCategories(currentPage); // Refresh current page
+            fetchCategories(currentPage);
         }
     };
 
     const onAddCategory = async () => {
-        const result = await handleAddCategory(categoryName);
+        if (!user) return;
+        const result = await handleAddCategory(categoryName, { id: user.uid, name: user.displayName });
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,
@@ -145,19 +142,20 @@ export default function AdminCategoriesPage() {
         });
         if (!result.error) {
             resetDialog();
-            fetchCategories(currentPage); // Refresh current page
+            fetchCategories(currentPage);
         }
     }
 
     const onDeleteCategory = async (categoryId: string) => {
-        const result = await handleDeleteCategory(categoryId);
+        if (!user) return;
+        const result = await handleDeleteCategory(categoryId, { id: user.uid, name: user.displayName });
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,
             variant: result.error ? 'destructive' : 'default',
         });
         if (!result.error) {
-            fetchCategories(currentPage); // Refresh current page
+            fetchCategories(currentPage);
         }
     }
 

@@ -38,6 +38,5 @@ export async function logAdminAction(entry: Omit<LogEntry, 'timestamp'>) {
         });
     } catch (error) {
         console.error("Failed to write to audit log:", error);
-        // Depending on the severity, you might want to handle this error more robustly.
     }
 }

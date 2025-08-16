@@ -10,27 +10,20 @@ import {
   addDoc,
 } from 'firebase/firestore';
 import { logAdminAction } from '@/lib/audit-logger';
-import { auth } from '@/lib/firebase';
 
-async function getActor() {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("User not authenticated.");
-    return {
-        id: currentUser.uid,
-        name: currentUser.displayName,
-        role: 'admin'
-    };
+type Actor = {
+    id: string;
+    name: string | null;
 }
-
 
 export async function handleMarkAsPaid(
   payoutId: string,
   providerId: string,
   providerName: string,
-  amount: number
+  amount: number,
+  actor: Actor
 ) {
   try {
-    const actor = await getActor();
     const payoutRef = doc(db, 'payouts', payoutId);
     await updateDoc(payoutRef, {
       status: 'Paid',
@@ -48,7 +41,7 @@ export async function handleMarkAsPaid(
     });
     
     await logAdminAction({
-        actor,
+        actor: { ...actor, role: 'admin' },
         action: 'PAYOUT_PROCESSED',
         details: { payoutId, providerId, providerName, amount }
     });

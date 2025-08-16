@@ -64,7 +64,7 @@ const PayoutDetails = ({ payout }: { payout: Payout }) => {
 }
 
 export default function AdminPayoutsPage() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const [payouts, setPayouts] = useState<Payout[]>([]);
     const [loading, setLoading] = useState(true);
@@ -90,7 +90,8 @@ export default function AdminPayoutsPage() {
     }, [userRole]);
 
     const onMarkAsPaid = async (payout: Payout) => {
-        const result = await handleMarkAsPaid(payout.id, payout.providerId, payout.providerName, payout.amount);
+        if (!user) return;
+        const result = await handleMarkAsPaid(payout.id, payout.providerId, payout.providerName, payout.amount, { id: user.uid, name: user.displayName });
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,
@@ -222,5 +223,3 @@ export default function AdminPayoutsPage() {
         </div>
     )
 }
-
-    

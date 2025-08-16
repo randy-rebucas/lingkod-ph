@@ -8,29 +8,23 @@ import {
   deleteDoc,
 } from 'firebase/firestore';
 import { logAdminAction } from '@/lib/audit-logger';
-import { auth } from '@/lib/firebase';
 
-async function getActor() {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("User not authenticated.");
-    return {
-        id: currentUser.uid,
-        name: currentUser.displayName,
-        role: 'admin'
-    };
+type Actor = {
+    id: string;
+    name: string | null;
 }
 
 export async function handleUpdateJobStatus(
   jobId: string,
-  status: string
+  status: string,
+  actor: Actor,
 ) {
   try {
-    const actor = await getActor();
     const jobRef = doc(db, 'jobs', jobId);
     await updateDoc(jobRef, { status });
 
     await logAdminAction({
-        actor,
+        actor: { ...actor, role: 'admin' },
         action: 'JOB_STATUS_UPDATED',
         details: { jobId, newStatus: status }
     });
@@ -45,14 +39,13 @@ export async function handleUpdateJobStatus(
   }
 }
 
-export async function handleDeleteJob(jobId: string) {
+export async function handleDeleteJob(jobId: string, actor: Actor) {
   try {
-    const actor = await getActor();
     const jobRef = doc(db, 'jobs', jobId);
     await deleteDoc(jobRef);
 
     await logAdminAction({
-        actor,
+        actor: { ...actor, role: 'admin' },
         action: 'JOB_DELETED',
         details: { jobId }
     });

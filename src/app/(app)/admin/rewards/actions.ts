@@ -11,29 +11,23 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { logAdminAction } from '@/lib/audit-logger';
-import { auth } from '@/lib/firebase';
 
-async function getActor() {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("User not authenticated.");
-    return {
-        id: currentUser.uid,
-        name: currentUser.displayName,
-        role: 'admin'
-    };
+type Actor = {
+    id: string;
+    name: string | null;
 }
 
 export async function handleUpdateReward(
   rewardId: string,
-  data: { title: string, description: string, pointsRequired: number, isActive: boolean }
+  data: { title: string, description: string, pointsRequired: number, isActive: boolean },
+  actor: Actor
 ) {
   try {
-    const actor = await getActor();
     const rewardRef = doc(db, 'loyaltyRewards', rewardId);
     await updateDoc(rewardRef, data);
 
     await logAdminAction({
-        actor,
+        actor: { ...actor, role: 'admin' },
         action: 'REWARD_UPDATED',
         details: { rewardId, changes: data }
     });
@@ -48,16 +42,15 @@ export async function handleUpdateReward(
   }
 }
 
-export async function handleAddReward(data: { title: string, description: string, pointsRequired: number, isActive: boolean }) {
+export async function handleAddReward(data: { title: string, description: string, pointsRequired: number, isActive: boolean }, actor: Actor) {
     if (!data.title || !data.description || data.pointsRequired <= 0) {
         return { error: 'Invalid data provided.', message: 'Validation failed.' };
     }
     try {
-        const actor = await getActor();
         const newDoc = await addDoc(collection(db, 'loyaltyRewards'), { ...data, createdAt: serverTimestamp() });
         
         await logAdminAction({
-            actor,
+            actor: { ...actor, role: 'admin' },
             action: 'REWARD_CREATED',
             details: { rewardId: newDoc.id, title: data.title }
         });
@@ -72,14 +65,13 @@ export async function handleAddReward(data: { title: string, description: string
     }
 }
 
-export async function handleDeleteReward(rewardId: string) {
+export async function handleDeleteReward(rewardId: string, actor: Actor) {
   try {
-    const actor = await getActor();
     const rewardRef = doc(db, 'loyaltyRewards', rewardId);
     await deleteDoc(rewardRef);
 
      await logAdminAction({
-        actor,
+        actor: { ...actor, role: 'admin' },
         action: 'REWARD_DELETED',
         details: { rewardId }
     });

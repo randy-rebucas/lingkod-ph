@@ -8,29 +8,23 @@ import {
 } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 import { logAdminAction } from '@/lib/audit-logger';
-import { auth } from '@/lib/firebase';
 
-async function getActor() {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("User not authenticated.");
-    return {
-        id: currentUser.uid,
-        name: currentUser.displayName,
-        role: 'admin'
-    };
+type Actor = {
+    id: string;
+    name: string | null;
 }
 
 export async function handleUpdateReportStatus(
   reportId: string,
-  status: 'Dismissed' | 'Action Taken'
+  status: 'Dismissed' | 'Action Taken',
+  actor: Actor,
 ) {
   try {
-    const actor = await getActor();
     const reportRef = doc(db, 'reports', reportId);
     await updateDoc(reportRef, { status });
     
     await logAdminAction({
-        actor,
+        actor: { ...actor, role: 'admin' },
         action: 'REPORT_STATUS_UPDATED',
         details: { reportId, newStatus: status }
     });

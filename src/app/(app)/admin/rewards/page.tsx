@@ -30,7 +30,7 @@ type Reward = {
 };
 
 export default function AdminRewardsPage() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const [rewards, setRewards] = useState<Reward[]>([]);
     const [loading, setLoading] = useState(true);
@@ -97,8 +97,10 @@ export default function AdminRewardsPage() {
     };
 
     const handleFormSubmit = async () => {
+        if (!user) return;
         const payload = { title, description, pointsRequired, isActive };
-        const result = isAdding ? await handleAddReward(payload) : await handleUpdateReward(isEditing!.id, payload);
+        const actor = { id: user.uid, name: user.displayName };
+        const result = isAdding ? await handleAddReward(payload, actor) : await handleUpdateReward(isEditing!.id, payload, actor);
 
         toast({
             title: result.error ? 'Error' : 'Success',
@@ -111,7 +113,8 @@ export default function AdminRewardsPage() {
     };
     
     const onDeleteReward = async (rewardId: string) => {
-        const result = await handleDeleteReward(rewardId);
+        if (!user) return;
+        const result = await handleDeleteReward(rewardId, { id: user.uid, name: user.displayName });
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,

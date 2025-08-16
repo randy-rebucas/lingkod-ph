@@ -40,7 +40,7 @@ const getStatusVariant = (status: JobStatus) => {
 };
 
 export default function AdminJobsPage() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
@@ -66,7 +66,8 @@ export default function AdminJobsPage() {
     }, [userRole]);
 
     const onUpdateStatus = async (jobId: string, status: JobStatus) => {
-        const result = await handleUpdateJobStatus(jobId, status);
+        if (!user) return;
+        const result = await handleUpdateJobStatus(jobId, status, { id: user.uid, name: user.displayName });
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,
@@ -75,7 +76,8 @@ export default function AdminJobsPage() {
     };
 
     const onDeleteJob = async (jobId: string) => {
-        const result = await handleDeleteJob(jobId);
+        if (!user) return;
+        const result = await handleDeleteJob(jobId, { id: user.uid, name: user.displayName });
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,

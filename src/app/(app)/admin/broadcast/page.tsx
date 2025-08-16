@@ -11,14 +11,18 @@ import { Loader2, Send } from "lucide-react";
 import { sendBroadcastAction } from "./actions";
 
 export default function BroadcastPage() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const [message, setMessage] = useState("");
     const [isSending, setIsSending] = useState(false);
 
     const handleSendBroadcast = async () => {
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Authentication Error', description: 'You must be logged in.' });
+            return;
+        }
         setIsSending(true);
-        const result = await sendBroadcastAction(message);
+        const result = await sendBroadcastAction(message, { id: user.uid, name: user.displayName });
 
         toast({
             title: result.error ? 'Error' : 'Broadcast Sent!',

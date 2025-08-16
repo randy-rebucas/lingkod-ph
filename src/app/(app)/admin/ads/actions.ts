@@ -11,30 +11,23 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { logAdminAction } from '@/lib/audit-logger';
-import { auth } from '@/lib/firebase';
 
-async function getActor() {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("User not authenticated.");
-    return {
-        id: currentUser.uid,
-        name: currentUser.displayName,
-        role: 'admin' // Assuming this action is only performed by admins
-    };
+type Actor = {
+    id: string;
+    name: string | null;
 }
-
 
 export async function handleUpdateAdCampaign(
   campaignId: string,
-  data: any
+  data: any,
+  actor: Actor
 ) {
   try {
-    const actor = await getActor();
     const campaignRef = doc(db, 'adCampaigns', campaignId);
     await updateDoc(campaignRef, data);
 
     await logAdminAction({
-        actor,
+        actor: { ...actor, role: 'admin' },
         action: 'AD_CAMPAIGN_UPDATED',
         details: { campaignId, changes: data }
     });
@@ -49,16 +42,15 @@ export async function handleUpdateAdCampaign(
   }
 }
 
-export async function handleAddAdCampaign(data: any) {
+export async function handleAddAdCampaign(data: any, actor: Actor) {
     if (!data.name || !data.price || !data.durationDays) {
         return { error: 'Invalid data provided.', message: 'Validation failed.' };
     }
     try {
-        const actor = await getActor();
         const newDoc = await addDoc(collection(db, 'adCampaigns'), { ...data, createdAt: serverTimestamp() });
         
         await logAdminAction({
-            actor,
+            actor: { ...actor, role: 'admin' },
             action: 'AD_CAMPAIGN_CREATED',
             details: { campaignId: newDoc.id, name: data.name }
         });
@@ -73,14 +65,13 @@ export async function handleAddAdCampaign(data: any) {
     }
 }
 
-export async function handleDeleteAdCampaign(campaignId: string) {
+export async function handleDeleteAdCampaign(campaignId: string, actor: Actor) {
   try {
-    const actor = await getActor();
     const campaignRef = doc(db, 'adCampaigns', campaignId);
     await deleteDoc(campaignRef);
 
     await logAdminAction({
-        actor,
+        actor: { ...actor, role: 'admin' },
         action: 'AD_CAMPAIGN_DELETED',
         details: { campaignId }
     });

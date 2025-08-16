@@ -4,25 +4,18 @@
 import { db } from '@/lib/firebase';
 import { collection, doc, writeBatch, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { logAdminAction } from '@/lib/audit-logger';
-import { auth } from '@/lib/firebase';
 
-async function getActor() {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("User not authenticated.");
-    return {
-        id: currentUser.uid,
-        name: currentUser.displayName,
-        role: 'admin'
-    };
+type Actor = {
+    id: string;
+    name: string | null;
 }
 
-export async function sendBroadcastAction(message: string): Promise<{ error: string | null; message: string }> {
+export async function sendBroadcastAction(message: string, actor: Actor): Promise<{ error: string | null; message: string }> {
     if (message.trim().length < 10) {
         return { error: "Broadcast message must be at least 10 characters.", message: "Message too short" };
     }
 
     try {
-        const actor = await getActor();
         const batch = writeBatch(db);
         const broadcastsRef = collection(db, "broadcasts");
 
@@ -44,7 +37,7 @@ export async function sendBroadcastAction(message: string): Promise<{ error: str
         await batch.commit();
 
         await logAdminAction({
-            actor,
+            actor: { ...actor, role: 'admin' },
             action: 'BROADCAST_SENT',
             details: { message }
         });

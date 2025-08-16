@@ -36,7 +36,7 @@ type AdCampaign = {
 };
 
 export default function AdminAdsPage() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const [campaigns, setCampaigns] = useState<AdCampaign[]>([]);
     const [loading, setLoading] = useState(true);
@@ -68,16 +68,15 @@ export default function AdminAdsPage() {
         const unsubscribe = onSnapshot(campaignsQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AdCampaign));
 
-            // Check for and deactivate expired campaigns
             const now = new Date();
             data.forEach(campaign => {
                 if (campaign.isActive && campaign.createdAt) {
                     const expirationDate = addDays(campaign.createdAt.toDate(), campaign.durationDays);
                     if (now > expirationDate) {
-                        // This campaign has expired, update it to inactive without showing a toast
-                        // to avoid cluttering the UI on every page load.
                         console.log(`Campaign "${campaign.name}" has expired. Setting to inactive.`);
-                        handleUpdateAdCampaign(campaign.id, { isActive: false });
+                        if (user) {
+                           handleUpdateAdCampaign(campaign.id, { isActive: false }, {id: user.uid, name: user.displayName});
+                        }
                     }
                 }
             });
@@ -90,7 +89,7 @@ export default function AdminAdsPage() {
         });
 
         return () => unsubscribe();
-    }, [userRole]);
+    }, [user, userRole]);
 
     const resetForm = () => {
         setName("");
@@ -144,6 +143,11 @@ export default function AdminAdsPage() {
     };
 
     const handleFormSubmit = async () => {
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Authentication Error', description: 'You must be logged in.' });
+            return;
+        }
+
         let finalImageUrl = imageUrl;
 
         if (imageFile) {
@@ -166,7 +170,8 @@ export default function AdminAdsPage() {
         }
 
         const payload = { name, description, price, durationDays, isActive, imageUrl: finalImageUrl };
-        const result = isAdding ? await handleAddAdCampaign(payload) : await handleUpdateAdCampaign(isEditing!.id, payload);
+        const actor = { id: user.uid, name: user.displayName };
+        const result = isAdding ? await handleAddAdCampaign(payload, actor) : await handleUpdateAdCampaign(isEditing!.id, payload, actor);
 
         toast({
             title: result.error ? 'Error' : 'Success',
@@ -179,7 +184,11 @@ export default function AdminAdsPage() {
     };
     
     const onDeleteCampaign = async (campaignId: string) => {
-        const result = await handleDeleteAdCampaign(campaignId);
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Authentication Error', description: 'You must be logged in.' });
+            return;
+        }
+        const result = await handleDeleteAdCampaign(campaignId, { id: user.uid, name: user.displayName });
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,

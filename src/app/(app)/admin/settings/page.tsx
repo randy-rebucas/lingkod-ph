@@ -17,13 +17,12 @@ import { handleUpdatePlatformSettings, type PlatformSettings } from "./actions";
 import Image from "next/image";
 
 export default function AdminSettingsPage() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const [settings, setSettings] = useState<PlatformSettings | null>(null);
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     
-    // Logo upload states
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [logoPreview, setLogoPreview] = useState<string | null>(null);
     const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -74,10 +73,10 @@ export default function AdminSettingsPage() {
     };
 
     const handleSave = async () => {
-        if (!settings) return;
+        if (!settings || !user) return;
         setIsSaving(true);
         
-        let settingsToSave = { ...settings };
+        let finalSettings = { ...settings };
         
         if (logoFile) {
              setIsUploadingLogo(true);
@@ -86,7 +85,7 @@ export default function AdminSettingsPage() {
                 const storageRef = ref(storage, storagePath);
                 const uploadResult = await uploadBytes(storageRef, logoFile);
                 const newLogoUrl = await getDownloadURL(uploadResult.ref);
-                settingsToSave.logoUrl = newLogoUrl;
+                finalSettings.logoUrl = newLogoUrl;
                  toast({ title: 'Logo Uploaded', description: 'New logo has been uploaded.' });
             } catch (error) {
                 toast({ variant: 'destructive', title: 'Upload Error', description: 'Failed to upload new logo.' });
@@ -97,10 +96,9 @@ export default function AdminSettingsPage() {
              setIsUploadingLogo(false);
         }
         
-        const result = await handleUpdatePlatformSettings(settingsToSave);
+        const result = await handleUpdatePlatformSettings(finalSettings, { id: user.uid, name: user.displayName });
 
-        // After saving, update the local state to reflect the saved state
-        setSettings(settingsToSave);
+        setSettings(finalSettings);
 
         toast({
             title: result.error ? 'Error' : 'Success',
