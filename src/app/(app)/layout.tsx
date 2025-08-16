@@ -38,6 +38,7 @@ import {
   Receipt,
   Radio,
   TrendingUp,
+  DatabaseBackup,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -425,6 +426,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <Link href="/admin/reports">
                       <FilePieChart />
                       <span>Reports</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin/backup")}>
+                    <Link href="/admin/backup">
+                      <DatabaseBackup />
+                      <span>Data Backup</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

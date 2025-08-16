@@ -13,6 +13,7 @@ import '@/ai/flows/generate-job-details.ts';
 import '@/ai/flows/request-payout.ts';
 import '@/ai/flows/find-matching-providers.ts';
 import '@/ai/flows/help-center-assistant.ts';
+import '@/ai/flows/create-backup.ts';
 
 // Seed the database with initial data
 async function seedDatabase() {
