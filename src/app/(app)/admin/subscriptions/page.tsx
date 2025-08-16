@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, PlusCircle, Trash2, MoreHorizontal, Edit } from "lucide-react";
+import { Loader2, PlusCircle, Trash2, MoreHorizontal, Edit, CheckCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { handleUpdateSubscriptionPlan, handleAddSubscriptionPlan, handleDeleteSubscriptionPlan } from "./actions";
 import { type SubscriptionTier, type AgencySubscriptionTier } from "@/app/(app)/subscription/page";
@@ -18,9 +18,10 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 
-const SubscriptionPlanEditor = ({ plan, onSave, onEdit, onDelete }: { plan: (SubscriptionTier | AgencySubscriptionTier), onSave: (data: any) => void, onEdit: (plan: any) => void, onDelete: (planId: string) => void }) => {
+const SubscriptionPlanEditor = ({ plan, onEdit, onDelete }: { plan: (SubscriptionTier | AgencySubscriptionTier), onEdit: (plan: any) => void, onDelete: (planId: string) => void }) => {
     return (
         <Card className="flex flex-col">
             <CardHeader className="flex flex-row items-start justify-between">
@@ -299,7 +300,7 @@ export default function AdminSubscriptionsPage() {
     }
 
     return (
-        <Dialog open={isDialogOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <div className="space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">Subscription Management</h1>
@@ -312,7 +313,7 @@ export default function AdminSubscriptionsPage() {
                         <Button size="sm" onClick={() => handleAddPlan('provider')}><PlusCircle className="mr-2"/> Add Plan</Button>
                     </CardHeader>
                     <CardContent className="grid md:grid-cols-3 gap-4">
-                        {providerPlans.map(plan => <SubscriptionPlanEditor key={plan.id} plan={plan} onEdit={handleEditPlan} onDelete={handleDeletePlan} onSave={() => {}} />)}
+                        {providerPlans.map(plan => <SubscriptionPlanEditor key={plan.id} plan={plan} onEdit={handleEditPlan} onDelete={handleDeletePlan} />)}
                     </CardContent>
                 </Card>
                 <Card>
@@ -321,14 +322,14 @@ export default function AdminSubscriptionsPage() {
                         <Button size="sm" onClick={() => handleAddPlan('agency')}><PlusCircle className="mr-2"/> Add Plan</Button>
                     </CardHeader>
                      <CardContent className="grid md:grid-cols-3 gap-4">
-                        {agencyPlans.map(plan => <SubscriptionPlanEditor key={plan.id} plan={plan} onEdit={handleEditPlan} onDelete={handleDeletePlan} onSave={() => {}} />)}
+                        {agencyPlans.map(plan => <SubscriptionPlanEditor key={plan.id} plan={plan} onEdit={handleEditPlan} onDelete={handleDeletePlan} />)}
                     </CardContent>
                 </Card>
             </div>
             
             <AddEditPlanDialog 
                 isOpen={isDialogOpen}
-                setIsOpen={setIsOpen}
+                setIsOpen={setIsDialogOpen}
                 plan={editingPlan}
                 planType={editingPlanType}
                 onSave={() => setIsDialogOpen(false)}
