@@ -26,7 +26,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { handleMarkAsPaid } from './actions';
+import { handleMarkAsPaid } from '@/app/(app)/admin/payouts/actions';
+
 
 type Booking = {
     id: string;
@@ -405,3 +406,4 @@ export default function ReportsPage() {
             </Card>
         </div>
     );
+}
