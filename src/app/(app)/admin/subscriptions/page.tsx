@@ -127,13 +127,13 @@ export default function AdminSubscriptionsPage() {
 
         const unsubProvider = onSnapshot(providerQuery, (snapshot) => {
             const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SubscriptionTier));
-            setProviderPlans(plans);
+            setProviderPlans(plans.sort((a, b) => a.price - b.price));
             setLoading(false);
         });
 
         const unsubAgency = onSnapshot(agencyQuery, (snapshot) => {
             const plans = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AgencySubscriptionTier));
-            setAgencyPlans(plans);
+            setAgencyPlans(plans.sort((a,b) => (a.price as number) - (b.price as number)));
             setLoading(false);
         });
         
@@ -199,3 +199,5 @@ export default function AdminSubscriptionsPage() {
         </div>
     )
 }
+
+    

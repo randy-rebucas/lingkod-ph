@@ -184,7 +184,7 @@ export default function SubscriptionPage() {
                                  {isCurrentPlan ? (
                                     <Button className="w-full" disabled><Check className="mr-2 h-4 w-4" /> Current Plan</Button>
                                 ) : tier.id === 'custom' ? (
-                                    <Button className="w-full" variant="outline"><Mail className="mr-2 h-4 w-4" /> Contact Us</Button>
+                                    <Button asChild className="w-full" variant="outline"><a href="mailto:sales@localpro.com"><Mail className="mr-2 h-4 w-4" /> Contact Us</a></Button>
                                 ) : (
                                     <Dialog>
                                         <DialogTrigger asChild>
@@ -301,3 +301,5 @@ export default function SubscriptionPage() {
         </PayPalScriptProvider>
     );
 }
+
+    
