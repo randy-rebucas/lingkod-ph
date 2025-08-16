@@ -67,6 +67,21 @@ export default function AdminAdsPage() {
         
         const unsubscribe = onSnapshot(campaignsQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AdCampaign));
+
+            // Check for and deactivate expired campaigns
+            const now = new Date();
+            data.forEach(campaign => {
+                if (campaign.isActive && campaign.createdAt) {
+                    const expirationDate = addDays(campaign.createdAt.toDate(), campaign.durationDays);
+                    if (now > expirationDate) {
+                        // This campaign has expired, update it to inactive without showing a toast
+                        // to avoid cluttering the UI on every page load.
+                        console.log(`Campaign "${campaign.name}" has expired. Setting to inactive.`);
+                        handleUpdateAdCampaign(campaign.id, { isActive: false });
+                    }
+                }
+            });
+
             setCampaigns(data);
             setLoading(false);
         }, (error) => {
