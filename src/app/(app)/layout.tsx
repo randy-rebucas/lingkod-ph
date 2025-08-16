@@ -196,6 +196,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   
   const dashboardPath = userRole === 'admin' ? '/admin/dashboard' : '/dashboard';
 
+  const getPageTitle = (path: string) => {
+    const parts = path.split('/').filter(Boolean);
+    if (parts.length === 0) return "Dashboard";
+    const lastPart = parts[parts.length - 1];
+    // Handle UUIDs in paths like /bookings/[bookingId]/work-log
+    if (parts.includes('bookings') && lastPart === 'work-log') return "Work Log";
+    if (parts.includes('my-job-posts') && lastPart === 'applicants') return "Applicants";
+    if (parts.includes('providers')) return "Provider Profile";
+    if (parts.includes('jobs')) return "Job Details";
+
+    return lastPart.replace(/-/g, ' ');
+  }
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -393,7 +406,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                  <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/admin/jobs")}>
                     <Link href="/admin/jobs">
-                      <Briefcase />
+                      <BriefcaseBusiness />
                       <span>Job Posts</span>
                     </Link>
                   </SidebarMenuButton>
@@ -499,8 +512,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarTrigger />
           </div>
           <div className="flex-1 text-center font-semibold text-lg md:text-left capitalize">
-            {/* Page title can be dynamic here */}
-            {pathname.split('/').pop()?.replace('-', ' ') || 'Dashboard'}
+            {getPageTitle(pathname)}
           </div>
            <div className="flex items-center gap-4">
             {userRole === 'provider' && (

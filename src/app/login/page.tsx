@@ -38,16 +38,19 @@ export default function LoginPage() {
   useEffect(() => {
     // This check runs only once on component mount
     const checkUserCount = async () => {
-        if (auth.currentUser) return; // Don't run if a user session is being restored
+        // No need to check if a user session is being restored or already exists
+        if (auth.currentUser) {
+            setIsSetupRequired(false);
+            return;
+        }; 
         try {
             const usersRef = collection(db, "users");
             const q = query(usersRef, limit(1));
             const snapshot = await getDocs(q);
-            if (snapshot.empty) {
-                setIsSetupRequired(true);
+            const setupRequired = snapshot.empty;
+            setIsSetupRequired(setupRequired);
+            if (setupRequired) {
                 router.push('/setup');
-            } else {
-                setIsSetupRequired(false);
             }
         } catch (error) {
             console.error("Error checking user count:", error);
@@ -121,7 +124,7 @@ export default function LoginPage() {
     }
   };
 
-  if (authLoading || user || isSetupRequired === null) {
+  if (authLoading || user || isSetupRequired === null || isSetupRequired === true) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-secondary">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />

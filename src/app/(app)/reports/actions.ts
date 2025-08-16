@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -188,7 +189,8 @@ export default function ReportsPage() {
     }, [bookings]);
     
     const onMarkAsPaid = async (payout: PayoutRequest) => {
-        const result = await handleMarkAsPaid(payout.id, payout.providerId, payout.providerName, payout.amount);
+        if (!user) return;
+        const result = await adminHandleMarkAsPaid(payout.id, payout.providerId, payout.providerName, payout.amount, {id: user.uid, name: user.displayName});
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,
