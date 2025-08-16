@@ -36,6 +36,8 @@ import {
   Shapes,
   Gift,
   Receipt,
+  Radio,
+  TrendingUp,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -365,8 +367,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/admin/broadcast")}>
                     <Link href="/admin/broadcast">
-                      <Megaphone />
+                      <Radio />
                       <span>Broadcast</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/admin/ads")}>
+                    <Link href="/admin/ads">
+                      <Megaphone />
+                      <span>Ad Management</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
