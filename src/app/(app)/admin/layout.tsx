@@ -16,24 +16,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [user, loading, userRole, router]);
 
-  if (loading || userRole !== 'admin') {
+  if (loading || !user || userRole !== 'admin') {
     return (
         <div className="flex h-screen w-full items-center justify-center">
             <p>Loading admin resources...</p>
         </div>
     );
   }
-
-  if (userRole === 'admin') {
-     return <>{children}</>;
-  }
   
-  return (
-    <Card>
-        <CardHeader>
-            <CardTitle>Access Denied</CardTitle>
-            <CardDescription>You do not have permission to view this page.</CardDescription>
-        </CardHeader>
-    </Card>
-  )
+  return <>{children}</>;
+  
 }
