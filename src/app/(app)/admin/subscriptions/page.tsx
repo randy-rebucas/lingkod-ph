@@ -171,7 +171,7 @@ const AddEditPlanDialog = ({
                 </div>
                  <div className="space-y-2">
                     <Label>Sort Order</Label>
-                    <Input type="number" value={editablePlan.sortOrder} onChange={e => setEditablePlan(p => p ? ({...p, sortOrder: Number(e.target.value)}) : null)} />
+                    <Input type="number" value={editablePlan.sortOrder || ''} onChange={e => setEditablePlan(p => p ? ({...p, sortOrder: Number(e.target.value)}) : null)} />
                 </div>
                  <div className="space-y-2">
                     <Label>Features</Label>
@@ -191,8 +191,8 @@ const AddEditPlanDialog = ({
                         <Input value={editablePlan.badge || ''} onChange={e => setEditablePlan(p => p ? ({...p, badge: e.target.value || null}) : null)} placeholder="e.g., Most Popular"/>
                     </div>
                     <div className="flex items-center gap-2 pt-6">
-                        <Switch id={`featured-${editablePlan.id}`} checked={editablePlan.isFeatured} onCheckedChange={checked => setEditablePlan(p => p ? ({...p, isFeatured: checked}) : null)}/>
-                        <Label htmlFor={`featured-${editablePlan.id}`}>Is Featured?</Label>
+                        <Switch id={`featured-${editablePlan.id || 'new'}`} checked={editablePlan.isFeatured} onCheckedChange={checked => setEditablePlan(p => p ? ({...p, isFeatured: checked}) : null)}/>
+                        <Label htmlFor={`featured-${editablePlan.id || 'new'}`}>Is Featured?</Label>
                     </div>
                 </div>
             </div>
