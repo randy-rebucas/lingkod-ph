@@ -66,7 +66,7 @@ const getAvatarFallback = (name: string | null | undefined) => {
 };
 
 export default function AdminUsersPage() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
@@ -106,7 +106,8 @@ export default function AdminUsersPage() {
     }, [userRole]);
     
     const onUpdateStatus = async (userId: string, status: UserStatus) => {
-        const result = await handleUserStatusUpdate(userId, status);
+        if (!user) return;
+        const result = await handleUserStatusUpdate(userId, status, {id: user.uid, name: user.displayName});
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,
@@ -115,7 +116,8 @@ export default function AdminUsersPage() {
     };
 
     const onDeleteUser = async (userId: string) => {
-        const result = await handleDeleteUser(userId);
+        if (!user) return;
+        const result = await handleDeleteUser(userId, {id: user.uid, name: user.displayName});
         toast({
             title: result.error ? 'Error' : 'Success',
             description: result.message,
@@ -130,9 +132,9 @@ export default function AdminUsersPage() {
     };
 
     const onUpdateUser = async () => {
-        if (!selectedUser) return;
+        if (!selectedUser || !user) return;
         setIsSubmitting(true);
-        const result = await handleUpdateUser(selectedUser.uid, editForm);
+        const result = await handleUpdateUser(selectedUser.uid, editForm, {id: user.uid, name: user.displayName});
 
         toast({
             title: result.error ? 'Error' : 'Success',
@@ -148,6 +150,7 @@ export default function AdminUsersPage() {
     }
 
     const onCreateUser = async () => {
+        if (!user) return;
         setIsSubmitting(true);
         const result = await handleCreateUser({
             name: createForm.name,
@@ -155,7 +158,7 @@ export default function AdminUsersPage() {
             password: createForm.password,
             role: createForm.role,
             phone: createForm.phone
-        });
+        }, {id: user.uid, name: user.displayName});
 
         toast({
             title: result.error ? 'Error' : 'Success',
