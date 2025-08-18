@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { handleRequestPayout } from '@/ai/flows/request-payout';
 import { TooltipProvider, Tooltip as TooltipUI, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import AgencyEarningsPage from '@/app/(app)/agency-earnings/page';
 
 type CompletedBooking = {
     id: string;
@@ -154,13 +155,17 @@ export default function EarningsPage() {
             setIsRequestingPayout(false);
         }
     };
+    
+    if (userRole === 'agency') {
+        return <AgencyEarningsPage />;
+    }
 
     if (userRole !== 'provider') {
         return (
             <div className="space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">Earnings</h1>
-                    <p className="text-muted-foreground">This page is for providers only.</p>
+                    <p className="text-muted-foreground">This page is for providers and agencies only.</p>
                 </div>
             </div>
         );
