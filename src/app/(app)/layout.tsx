@@ -589,6 +589,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
+                 <DropdownMenuItem asChild>
+                  <Link href="/billing">
+                    <Receipt className="mr-2 h-4 w-4" />
+                    <span>Billing</span>
+                  </Link>
+                </DropdownMenuItem>
 
                 {userRole === 'provider' && (
                    <DropdownMenuItem asChild>

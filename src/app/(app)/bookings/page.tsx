@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MoreHorizontal, Loader2, Calendar, Check, X, Hourglass, Briefcase, UserCircle, Timer, Eye } from "lucide-react";
+import { MoreHorizontal, Loader2, Calendar, Check, X, Hourglass, Briefcase, UserCircle, Timer, Eye, Repeat } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
@@ -19,6 +19,7 @@ import { LeaveReviewDialog } from "@/components/leave-review-dialog";
 import { CompleteBookingDialog } from "@/components/complete-booking-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
+import { BookingDialog } from "@/components/booking-dialog";
 
 
 type BookingStatus = "Pending" | "Upcoming" | "In Progress" | "Completed" | "Cancelled";
@@ -93,6 +94,7 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
     const [isCompleteOpen, setIsCompleteOpen] = useState(false);
+    const [isRebookOpen, setIsRebookOpen] = useState(false);
 
      const handleStatusUpdate = async (booking: Booking, newStatus: BookingStatus, successMessage?: string) => {
         const bookingRef = doc(db, "bookings", booking.id);
@@ -137,6 +139,11 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
         setSelectedBooking(booking);
         setIsCompleteOpen(true);
     };
+
+     const handleOpenRebook = (booking: Booking) => {
+        setSelectedBooking(booking);
+        setIsRebookOpen(true);
+    };
     
     const displayName = userRole === 'client' ? booking.providerName : booking.clientName;
     const displayAvatar = userRole === 'client' ? booking.providerAvatar : booking.clientAvatar;
@@ -172,6 +179,11 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
                 </div>
             </CardContent>
             <CardFooter className="flex justify-end gap-2">
+                 {booking.status === 'Completed' && userRole === 'client' && (
+                     <Button variant="secondary" onClick={() => handleOpenRebook(booking)}>
+                        <Repeat className="mr-2 h-4 w-4"/> Re-book
+                     </Button>
+                 )}
                  {booking.status === 'In Progress' && (
                     <Button asChild>
                         <Link href={`/bookings/${booking.id}/work-log`}><Eye className="mr-2 h-4 w-4"/> View Work Log</Link>
@@ -240,6 +252,18 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
         {selectedBooking && <BookingDetailsDialog isOpen={isDetailsOpen} setIsOpen={setIsDetailsOpen} booking={selectedBooking} />}
         {selectedBooking && userRole === 'client' && <LeaveReviewDialog isOpen={isReviewOpen} setIsOpen={setIsReviewOpen} booking={selectedBooking} />}
         {selectedBooking && userRole === 'provider' && <CompleteBookingDialog isOpen={isCompleteOpen} setIsOpen={setIsCompleteOpen} booking={selectedBooking} />}
+        {selectedBooking && userRole === 'client' && (
+            <BookingDialog
+                isOpen={isRebookOpen}
+                setIsOpen={setIsRebookOpen}
+                service={{ id: booking.serviceId, name: booking.serviceName, price: booking.price, category: '', description: '', status: 'Active' }}
+                provider={{ uid: booking.providerId, displayName: booking.providerName, email: '', role: 'provider' }}
+                onBookingConfirmed={() => {
+                    toast({ title: 'Booking Successful!', description: 'Your new booking has been confirmed and is now visible in your bookings list.'});
+                    setIsRebookOpen(false);
+                }}
+            />
+        )}
         </>
     );
 };

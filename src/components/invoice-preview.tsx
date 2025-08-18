@@ -3,7 +3,6 @@
 
 import { useRef } from 'react';
 import { useAuth } from "@/context/auth-context";
-import { Invoice } from "@/app/(app)/invoices/page";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { Separator } from "./ui/separator";
@@ -12,6 +11,7 @@ import { Button } from './ui/button';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Logo } from './logo';
+import { Invoice } from '@/app/(app)/invoices/page';
 
 const toDate = (date: Date | Timestamp): Date => {
     if (date instanceof Date) {
