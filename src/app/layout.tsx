@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'LocalPro | Find Trusted Local Service Providers in the Philippines',
     description: 'The easiest way to hire verified local professionals for all your home and business needs.',
-    url: 'https://localpro.ph', // Replace with your actual domain
+    url: 'https://localpro.asia', // Replace with your actual domain
     siteName: 'LocalPro',
     images: [
       {
