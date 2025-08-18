@@ -76,15 +76,15 @@ const renderStars = (rating: number, keyPrefix: string) => {
 }
 
 const testimonials = [
-    { name: 'Maria C.', rating: 5, comment: "Booking an electrician through LocalPro was a breeze! The provider was professional, on-time, and fixed the issue in no time. Highly recommended!", avatar: 'https://placehold.co/300x300.png', hint: 'woman portrait' },
-    { name: 'John D.', rating: 5, comment: "As a small business owner, finding reliable contractors was always a challenge. LocalPro connected us with a fantastic team for our office renovation.", avatar: 'https://placehold.co/300x300.png', hint: 'man portrait' },
-    { name: 'Anna S.', rating: 4, comment: "The platform is very user-friendly. I found a great weekly cleaning service that fits my budget. My only wish is for more providers in my specific area.", avatar: 'https://placehold.co/300x300.png', hint: 'woman smiling' },
+    { name: 'Maria C.', rating: 5, comment: "Booking an electrician through LocalPro was a breeze! The provider was professional, on-time, and fixed the issue in no time. Highly recommended!", avatar: 'https://loremflickr.com/300/300/woman,portrait', hint: 'woman portrait' },
+    { name: 'John D.', rating: 5, comment: "As a small business owner, finding reliable contractors was always a challenge. LocalPro connected us with a fantastic team for our office renovation.", avatar: 'https://loremflickr.com/300/300/man,portrait', hint: 'man portrait' },
+    { name: 'Anna S.', rating: 4, comment: "The platform is very user-friendly. I found a great weekly cleaning service that fits my budget. My only wish is for more providers in my specific area.", avatar: 'https://loremflickr.com/300/300/woman,smiling', hint: 'woman smiling' },
 ];
 
 const topProviders = [
-    { name: 'Ricardo "Cardo" Gomez', specialty: 'Master Electrician', rating: 4.9, reviews: 128, avatar: 'https://placehold.co/300x300.png', hint: 'man smiling', background: 'https://placehold.co/600x400.png', bgHint: 'electrical wiring' },
-    { name: 'Elena Reyes', specialty: 'Deep Cleaning Specialist', rating: 4.8, reviews: 214, avatar: 'https://placehold.co/300x300.png', hint: 'woman happy', background: 'https://placehold.co/600x400.png', bgHint: 'cleaning supplies' },
-    { name: 'Benny Tan', specialty: 'HVAC & Refrigeration Expert', rating: 4.9, reviews: 98, avatar: 'https://placehold.co/300x300.png', hint: 'man portrait', background: 'https://placehold.co/600x400.png', bgHint: 'air conditioner' },
+    { name: 'Ricardo "Cardo" Gomez', specialty: 'Master Electrician', rating: 4.9, reviews: 128, avatar: 'https://loremflickr.com/300/300/man,smiling', hint: 'man smiling', background: 'https://loremflickr.com/600/400/electrical,wiring', bgHint: 'electrical wiring' },
+    { name: 'Elena Reyes', specialty: 'Deep Cleaning Specialist', rating: 4.8, reviews: 214, avatar: 'https://loremflickr.com/300/300/woman,happy', hint: 'woman happy', background: 'https://loremflickr.com/600/400/cleaning,supplies', bgHint: 'cleaning supplies' },
+    { name: 'Benny Tan', specialty: 'HVAC & Refrigeration Expert', rating: 4.9, reviews: 98, avatar: 'https://loremflickr.com/300/300/man,portrait', hint: 'man portrait', background: 'https://loremflickr.com/600/400/air,conditioner', bgHint: 'air conditioner' },
 ];
 
 export default function Home() {
