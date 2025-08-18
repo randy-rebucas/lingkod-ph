@@ -660,12 +660,6 @@ export default function ProfilePage() {
         }
     };
 
-    const tabGridClass = cn("grid w-full", {
-        "grid-cols-4": !isProvider && !isAgency && userRole !== 'admin',
-        "grid-cols-2": userRole === 'admin',
-        "grid-cols-5": isProvider || isAgency,
-    });
-
     return (
         <div className="space-y-6">
             <div>
@@ -757,7 +751,7 @@ export default function ProfilePage() {
             )}
 
             <Tabs defaultValue="public-profile" className="w-full">
-                 <TabsList className={tabGridClass}>
+                 <TabsList className="w-full h-auto justify-start overflow-x-auto">
                     <TabsTrigger value="public-profile"><User className="mr-2"/> Public Profile</TabsTrigger>
                     {isProvider && <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> Provider</TabsTrigger>}
                     {isAgency && <TabsTrigger value="business-settings"><Building className="mr-2"/> Business</TabsTrigger>}
