@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit, Wallet, Building, File, Trash2 } from "lucide-react";
+import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit, Wallet, Building, FileText, Trash2 } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject, uploadBytes } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -235,7 +235,7 @@ export default function ProfilePage() {
                     setAvailabilitySchedule(data.availabilitySchedule || initialAvailability);
                 }
 
-                if (userRole === 'provider') {
+                if (userRole === 'provider' || userRole === 'agency') {
                     // Load payout details
                     setPayoutMethod(data.payoutDetails?.method || '');
                     setGCashNumber(data.payoutDetails?.gCashNumber || '');
@@ -761,7 +761,7 @@ export default function ProfilePage() {
                     <TabsTrigger value="public-profile"><User className="mr-2"/> Public Profile</TabsTrigger>
                     {isProvider && <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> Provider</TabsTrigger>}
                     {isAgency && <TabsTrigger value="business-settings"><Building className="mr-2"/> Business</TabsTrigger>}
-                    {isProvider && <TabsTrigger value="payout-settings"><Wallet className="mr-2" /> Payout</TabsTrigger>}
+                    {(isProvider || isAgency) && <TabsTrigger value="payout-settings"><Wallet className="mr-2" /> Payout</TabsTrigger>}
                     <TabsTrigger value="account-settings"><Settings className="mr-2"/> Account</TabsTrigger>
                     {userRole !== 'admin' && (
                         <>
@@ -1277,58 +1277,6 @@ export default function ProfilePage() {
                                 </Button>
                             </CardFooter>
                         </Card>
-
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Documents</CardTitle>
-                                <CardDescription>Upload your resume, portfolio, or other relevant documents.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="docName">Document Name</Label>
-                                    <Input id="docName" value={newDocName} onChange={e => setNewDocName(e.target.value)} placeholder="e.g., My Resume.pdf" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="docFile">File</Label>
-                                    <Input id="docFile" type="file" ref={newDocFileInputRef} onChange={e => setNewDocFile(e.target.files ? e.target.files[0] : null)} />
-                                </div>
-                                <Button onClick={handleUploadDocument} disabled={isUploadingDoc}>
-                                    {isUploadingDoc ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-                                    Upload Document
-                                </Button>
-                                <Separator />
-                                <h4 className="font-medium">Uploaded Documents</h4>
-                                <div className="space-y-2">
-                                    {documents.length > 0 ? documents.map((doc, i) => (
-                                        <div key={i} className="flex items-center justify-between p-2 border rounded-md">
-                                            <a href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline">
-                                                <File className="h-4 w-4" />
-                                                <span>{doc.name}</span>
-                                            </a>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            This will permanently delete the document "{doc.name}". This action cannot be undone.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction onClick={() => handleDeleteDocument(doc)} className="bg-destructive hover:bg-destructive/80">Delete</AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </div>
-                                    )) : <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>}
-                                </div>
-                            </CardContent>
-                        </Card>
                     </div>
                 </TabsContent>
                 
@@ -1379,6 +1327,48 @@ export default function ProfilePage() {
                                         ))}
                                     </div>
                                     <p className="text-xs text-muted-foreground">List up to 5 key services for your agency.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    <h4 className="font-medium">Documents</h4>
+                                    <p className="text-xs text-muted-foreground">Upload business permits, contracts, or other relevant documents.</p>
+                                    <div className="flex gap-2">
+                                        <Input value={newDocName} onChange={e => setNewDocName(e.target.value)} placeholder="Document Name (e.g., Business Permit)" />
+                                        <Input type="file" ref={newDocFileInputRef} onChange={e => setNewDocFile(e.target.files ? e.target.files[0] : null)} className="max-w-xs" />
+                                        <Button onClick={handleUploadDocument} disabled={isUploadingDoc}>
+                                            {isUploadingDoc ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                                            Upload
+                                        </Button>
+                                    </div>
+                                </div>
+                                 <Separator />
+                                <div className="space-y-2">
+                                    {documents.length > 0 ? documents.map((doc, i) => (
+                                        <div key={i} className="flex items-center justify-between p-2 border rounded-md">
+                                            <a href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline">
+                                                <FileText className="h-4 w-4" />
+                                                <span>{doc.name}</span>
+                                            </a>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            This will permanently delete the document "{doc.name}". This action cannot be undone.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteDocument(doc)} className="bg-destructive hover:bg-destructive/80">Delete</AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
+                                    )) : <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>}
                                 </div>
                             </CardContent>
                              <CardFooter>
@@ -1439,56 +1429,54 @@ export default function ProfilePage() {
                     </div>
                 </TabsContent>
 
-                {isProvider && (
-                    <TabsContent value="payout-settings" className="mt-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Payout Details</CardTitle>
-                                <CardDescription>Set your preferred method for receiving payments.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                 <div className="space-y-2">
-                                    <Label>Payout Method</Label>
-                                    <Select value={payoutMethod} onValueChange={setPayoutMethod}>
-                                        <SelectTrigger><SelectValue placeholder="Select a method" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="gcash">GCash</SelectItem>
-                                            <SelectItem value="bank">Bank Transfer</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                <TabsContent value="payout-settings" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Payout Details</CardTitle>
+                            <CardDescription>Set your preferred method for receiving payments.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                                <div className="space-y-2">
+                                <Label>Payout Method</Label>
+                                <Select value={payoutMethod} onValueChange={setPayoutMethod}>
+                                    <SelectTrigger><SelectValue placeholder="Select a method" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="gcash">GCash</SelectItem>
+                                        <SelectItem value="bank">Bank Transfer</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            {payoutMethod === 'gcash' && (
+                                <div className="space-y-2 border-l-2 border-primary pl-4">
+                                    <Label htmlFor="gCashNumber">GCash Number</Label>
+                                    <Input id="gCashNumber" value={gCashNumber} onChange={e => setGCashNumber(e.target.value)} placeholder="09123456789"/>
                                 </div>
-                                {payoutMethod === 'gcash' && (
-                                    <div className="space-y-2 border-l-2 border-primary pl-4">
-                                        <Label htmlFor="gCashNumber">GCash Number</Label>
-                                        <Input id="gCashNumber" value={gCashNumber} onChange={e => setGCashNumber(e.target.value)} placeholder="09123456789"/>
-                                    </div>
-                                )}
-                                {payoutMethod === 'bank' && (
-                                     <div className="space-y-4 border-l-2 border-primary pl-4">
-                                         <div className="space-y-2">
-                                            <Label htmlFor="bankName">Bank Name</Label>
-                                            <Input id="bankName" value={bankName} onChange={e => setBankName(e.target.value)} placeholder="e.g., BDO Unibank"/>
-                                        </div>
-                                         <div className="space-y-2">
-                                            <Label htmlFor="bankAccountNumber">Account Number</Label>
-                                            <Input id="bankAccountNumber" value={bankAccountNumber} onChange={e => setBankAccountNumber(e.target.value)} />
-                                        </div>
+                            )}
+                            {payoutMethod === 'bank' && (
+                                    <div className="space-y-4 border-l-2 border-primary pl-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="bankAccountName">Account Name</Label>
-                                            <Input id="bankAccountName" value={bankAccountName} onChange={e => setBankAccountName(e.target.value)} />
-                                        </div>
+                                        <Label htmlFor="bankName">Bank Name</Label>
+                                        <Input id="bankName" value={bankName} onChange={e => setBankName(e.target.value)} placeholder="e.g., BDO Unibank"/>
                                     </div>
-                                )}
-                            </CardContent>
-                            <CardFooter>
-                                <Button onClick={handlePayoutDetailsUpdate} disabled={isSavingPayout}>
-                                    {isSavingPayout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    {isSavingPayout ? 'Saving...' : 'Save Payout Details'}
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    </TabsContent>
-                )}
+                                        <div className="space-y-2">
+                                        <Label htmlFor="bankAccountNumber">Account Number</Label>
+                                        <Input id="bankAccountNumber" value={bankAccountNumber} onChange={e => setBankAccountNumber(e.target.value)} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="bankAccountName">Account Name</Label>
+                                        <Input id="bankAccountName" value={bankAccountName} onChange={e => setBankAccountName(e.target.value)} />
+                                    </div>
+                                </div>
+                            )}
+                        </CardContent>
+                        <CardFooter>
+                            <Button onClick={handlePayoutDetailsUpdate} disabled={isSavingPayout}>
+                                {isSavingPayout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isSavingPayout ? 'Saving...' : 'Save Payout Details'}
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </TabsContent>
                 
             </Tabs>
         </div>
