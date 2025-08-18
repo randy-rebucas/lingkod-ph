@@ -5,19 +5,20 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { db, storage } from "@/lib/firebase";
-import { doc, onSnapshot, updateDoc, arrayUnion, Timestamp, writeBatch } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc, arrayUnion, Timestamp, writeBatch, arrayRemove } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Timer, Play, Square, Camera, Send, PlusCircle, Trash2 } from "lucide-react";
+import { ArrowLeft, Timer, Play, Square, Camera, Send, PlusCircle, Trash2, CheckSquare } from "lucide-react";
 import { format, formatDistanceStrict } from "date-fns";
 import Image from "next/image";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 
 type WorkLogEntry = {
@@ -36,6 +37,13 @@ type NoteEntry = {
     createdAt: Timestamp;
 };
 
+type ChecklistItem = {
+    id: string;
+    text: string;
+    completed: boolean;
+};
+
+
 type BookingWorkLog = {
     id: string;
     title: string;
@@ -43,6 +51,7 @@ type BookingWorkLog = {
     workLog: WorkLogEntry[];
     photos: PhotoEntry[];
     notes: NoteEntry[];
+    checklist?: ChecklistItem[];
 };
 
 export default function WorkLogPage() {
@@ -60,6 +69,7 @@ export default function WorkLogPage() {
     const [photoFile, setPhotoFile] = useState<File | null>(null);
     const [photoType, setPhotoType] = useState<'before' | 'after'>('before');
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+    const [newChecklistItem, setNewChecklistItem] = useState("");
     
     const [isSaving, setIsSaving] = useState(false);
     const photoInputRef = useRef<HTMLInputElement>(null);
@@ -78,6 +88,7 @@ export default function WorkLogPage() {
                     workLog: data.workLog || [],
                     photos: data.photos || [],
                     notes: data.notes || [],
+                    checklist: data.checklist || [],
                 });
             } else {
                 toast({ variant: "destructive", title: "Error", description: "Booking not found." });
@@ -205,6 +216,52 @@ export default function WorkLogPage() {
         }
     };
 
+     const handleAddChecklistItem = async () => {
+        if (!newChecklistItem.trim() || !booking) return;
+        const newItem: ChecklistItem = {
+            id: `task-${Date.now()}`,
+            text: newChecklistItem.trim(),
+            completed: false,
+        };
+        try {
+            const bookingRef = doc(db, "bookings", booking.id);
+            await updateDoc(bookingRef, {
+                checklist: arrayUnion(newItem)
+            });
+            setNewChecklistItem("");
+        } catch (error) {
+            console.error("Error adding checklist item:", error);
+            toast({ variant: "destructive", title: "Error", description: "Could not add task." });
+        }
+    };
+
+    const handleToggleChecklistItem = async (itemToToggle: ChecklistItem) => {
+        if (!booking?.checklist) return;
+        const updatedChecklist = booking.checklist.map(item =>
+            item.id === itemToToggle.id ? { ...item, completed: !item.completed } : item
+        );
+        try {
+            const bookingRef = doc(db, "bookings", booking.id);
+            await updateDoc(bookingRef, { checklist: updatedChecklist });
+        } catch (error) {
+            console.error("Error updating checklist:", error);
+            toast({ variant: "destructive", title: "Error", description: "Could not update task." });
+        }
+    };
+
+    const handleDeleteChecklistItem = async (itemToDelete: ChecklistItem) => {
+        if (!booking?.checklist) return;
+        try {
+            const bookingRef = doc(db, "bookings", booking.id);
+            await updateDoc(bookingRef, {
+                checklist: arrayRemove(itemToDelete)
+            });
+        } catch (error) {
+            console.error("Error deleting checklist item:", error);
+            toast({ variant: "destructive", title: "Error", description: "Could not delete task." });
+        }
+    };
+
     if (loading) {
         return (
              <div className="space-y-6 max-w-4xl mx-auto">
@@ -217,6 +274,11 @@ export default function WorkLogPage() {
     if (!booking) return null;
     
     const isActiveLog = booking.workLog.some(log => log.endTime === null);
+
+    const completedTasks = booking.checklist?.filter(item => item.completed).length || 0;
+    const totalTasks = booking.checklist?.length || 0;
+    const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
 
     return (
         <div className="space-y-6 max-w-4xl mx-auto">
@@ -253,6 +315,54 @@ export default function WorkLogPage() {
                                     </Button>
                                 )
                             )}
+                        </CardContent>
+                    </Card>
+                    
+                     <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><CheckSquare /> Task Checklist</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                           {userRole === 'provider' && (
+                                <div className="flex gap-2">
+                                    <Input 
+                                        value={newChecklistItem} 
+                                        onChange={e => setNewChecklistItem(e.target.value)}
+                                        placeholder="Add a new task..."
+                                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddChecklistItem(); }}}
+                                    />
+                                    <Button onClick={handleAddChecklistItem}><PlusCircle className="mr-2"/> Add Task</Button>
+                                </div>
+                            )}
+                             <div className="space-y-2">
+                                {booking.checklist && booking.checklist.length > 0 ? (
+                                    booking.checklist.map(item => (
+                                        <div key={item.id} className="flex items-center gap-2 group">
+                                            <Checkbox 
+                                                id={item.id}
+                                                checked={item.completed}
+                                                onCheckedChange={() => handleToggleChecklistItem(item)}
+                                                disabled={userRole !== 'provider'}
+                                            />
+                                            <label htmlFor={item.id} className="flex-1 text-sm peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                                {item.text}
+                                            </label>
+                                            {userRole === 'provider' && (
+                                                <Button 
+                                                    variant="ghost" 
+                                                    size="icon" 
+                                                    className="h-6 w-6 text-muted-foreground opacity-0 group-hover:opacity-100"
+                                                    onClick={() => handleDeleteChecklistItem(item)}
+                                                >
+                                                    <Trash2 className="h-4 w-4"/>
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-muted-foreground text-center py-4">No tasks added yet.</p>
+                                )}
+                             </div>
                         </CardContent>
                     </Card>
 
