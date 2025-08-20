@@ -167,7 +167,7 @@ export default function AdminJobsPage() {
                                                     <DropdownMenuItem onClick={() => onUpdateStatus(job.id, "Closed")}><CircleSlash className="mr-2 h-4 w-4" />Mark as Closed</DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <AlertDialogTrigger asChild>
-                                                        <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                                                        <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onSelect={(e) => e.preventDefault()}>
                                                             <Trash2 className="mr-2 h-4 w-4" />Delete Job
                                                         </DropdownMenuItem>
                                                     </AlertDialogTrigger>
