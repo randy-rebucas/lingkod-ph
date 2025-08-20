@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { findMatchingProviders } from "@/ai/flows/find-matching-providers";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AdCarousel } from "@/components/ad-carousel";
 
 
 type Booking = {
@@ -603,6 +604,7 @@ export default function DashboardPage() {
                     <h1 className="text-3xl font-bold font-headline">Find a Service Provider</h1>
                     <p className="text-muted-foreground">Describe what you need, and we'll find the right pro for the job.</p>
                 </div>
+                 <AdCarousel />
                  <Card>
                     <CardContent className="p-6 space-y-6">
                         <div className="flex flex-col sm:flex-row gap-4">
@@ -784,7 +786,7 @@ export default function DashboardPage() {
                 <h1 className="text-3xl font-bold font-headline">Welcome back, {user?.displayName || 'User'}!</h1>
                 <p className="text-muted-foreground">Here&apos;s a summary of your activity and performance.</p>
             </div>
-
+            <AdCarousel />
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                 <DashboardCard isLoading={loading} title="Total Revenue" icon={DollarSign} value={`₱${totalRevenue.toFixed(2)}`} />
                 <DashboardCard isLoading={loading} title="Pending Payouts" icon={Wallet} value={`₱${pendingPayouts.toFixed(2)}`} />
