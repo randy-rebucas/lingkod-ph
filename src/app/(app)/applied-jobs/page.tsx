@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -92,7 +91,7 @@ export default function AppliedJobsPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex justify-between items-center">
-                                        <p className="font-bold text-lg text-primary">₱{job.budget.toFixed(2)}</p>
+                                        <p className="font-bold text-lg text-primary">₱{job.budget.amount.toFixed(2)}</p>
                                         <Badge variant={getStatusVariant(job.status)}>{job.status}</Badge>
                                     </div>
                                 </CardContent>
