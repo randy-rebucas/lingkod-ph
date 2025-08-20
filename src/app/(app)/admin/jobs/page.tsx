@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
+import { collection, query, onSnapshot, orderBy, Timestamp, getDoc, doc } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,14 +13,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Trash2, Eye, CircleSlash } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { handleUpdateJobStatus, handleDeleteJob } from "./actions";
 import Link from "next/link";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Dialog, DialogClose, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatBudget } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 type JobStatus = "Open" | "In Progress" | "Completed" | "Closed";
 
+// Extended Job type for details dialog
 type Job = {
     id: string;
     title: string;
@@ -32,6 +35,10 @@ type Job = {
     };
     status: JobStatus;
     createdAt: Timestamp;
+    description?: string;
+    location?: string;
+    categoryName?: string;
+    additionalDetails?: { question: string, answer: string }[];
 };
 
 const getStatusVariant = (status: JobStatus) => {
@@ -49,6 +56,8 @@ export default function AdminJobsPage() {
     const { toast } = useToast();
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
      useEffect(() => {
         if (userRole !== 'admin') {
@@ -90,6 +99,18 @@ export default function AdminJobsPage() {
         });
     }
 
+    const handleViewDetails = async (jobId: string) => {
+        const jobRef = doc(db, 'jobs', jobId);
+        const jobSnap = await getDoc(jobRef);
+        if (jobSnap.exists()) {
+            setSelectedJob({ id: jobSnap.id, ...jobSnap.data()} as Job);
+            setIsDetailsOpen(true);
+        } else {
+            toast({ variant: 'destructive', title: 'Error', description: 'Job details could not be found.' });
+        }
+    }
+
+
     if (userRole !== 'admin') {
         return (
             <Card>
@@ -120,6 +141,7 @@ export default function AdminJobsPage() {
     }
 
     return (
+        <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <div className="space-y-6">
             <div>
                 <h1 className="text-3xl font-bold font-headline">Job Post Management</h1>
@@ -160,9 +182,7 @@ export default function AdminJobsPage() {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem asChild>
-                                                        <Link href={`/jobs/${job.id}`} target="_blank"><Eye className="mr-2 h-4 w-4" />View Job Post</Link>
-                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onSelect={() => handleViewDetails(job.id)}><Eye className="mr-2 h-4 w-4" />View Job Details</DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem onClick={() => onUpdateStatus(job.id, "Closed")}><CircleSlash className="mr-2 h-4 w-4" />Mark as Closed</DropdownMenuItem>
                                                     <DropdownMenuSeparator />
@@ -199,6 +219,60 @@ export default function AdminJobsPage() {
                     </Table>
                 </CardContent>
             </Card>
+             {selectedJob && (
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>{selectedJob.title}</DialogTitle>
+                        <DialogDescription>
+                            Posted by {selectedJob.clientName}
+                             <span className="text-muted-foreground mx-2">•</span> 
+                             {formatDistanceToNow(selectedJob.createdAt.toDate(), { addSuffix: true })}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
+                        <div>
+                            <h3 className="font-semibold mb-2 text-sm">Description</h3>
+                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedJob.description}</p>
+                        </div>
+                        <Separator />
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <h4 className="font-semibold">Category</h4>
+                                <p className="text-muted-foreground">{selectedJob.categoryName || 'N/A'}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold">Location</h4>
+                                <p className="text-muted-foreground">{selectedJob.location || 'N/A'}</p>
+                            </div>
+                             <div>
+                                <h4 className="font-semibold">Budget</h4>
+                                <p className="text-muted-foreground">{formatBudget(selectedJob.budget)}</p>
+                            </div>
+                             <div>
+                                <h4 className="font-semibold">Status</h4>
+                                <p className="text-muted-foreground">{selectedJob.status}</p>
+                            </div>
+                        </div>
+                         {selectedJob.additionalDetails && selectedJob.additionalDetails.length > 0 && (
+                            <>
+                                <Separator />
+                                <div>
+                                    <h3 className="font-semibold mb-2 text-sm">Additional Details</h3>
+                                    <div className="space-y-3">
+                                    {selectedJob.additionalDetails.map((detail, index) => (
+                                        <div key={index}>
+                                            <p className="font-medium text-xs">{detail.question}</p>
+                                            <p className="text-muted-foreground text-xs pl-4 border-l-2 ml-2 mt-1">{detail.answer || "No answer provided."}</p>
+                                        </div>
+                                    ))}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                </DialogContent>
+            )}
         </div>
+        </Dialog>
     )
 }
