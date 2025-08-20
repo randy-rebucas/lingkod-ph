@@ -67,12 +67,16 @@ export function AdCarousel() {
     return (
         <Carousel
             setApi={setApi}
+            opts={{
+                align: "start",
+                loop: true,
+            }}
             plugins={Autoplay.current ? [Autoplay.current({ delay: 5000, stopOnInteraction: true })] : []}
             className="w-full"
         >
             <CarouselContent>
                 {campaigns.map((campaign) => (
-                    <CarouselItem key={campaign.id}>
+                    <CarouselItem key={campaign.id} className="md:basis-1/2 lg:basis-1/3">
                         <div className="p-1">
                             <Card className="overflow-hidden">
                                 <CardContent className="relative flex aspect-video items-center justify-center p-0">
@@ -86,8 +90,8 @@ export function AdCarousel() {
                                     )}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                                     <div className="absolute bottom-0 left-0 p-6 text-white">
-                                        <h3 className="text-2xl font-bold font-headline">{campaign.name}</h3>
-                                        <p className="text-sm opacity-90">{campaign.description}</p>
+                                        <h3 className="text-xl font-bold font-headline">{campaign.name}</h3>
+                                        <p className="text-sm opacity-90 line-clamp-2">{campaign.description}</p>
                                     </div>
                                 </CardContent>
                             </Card>
