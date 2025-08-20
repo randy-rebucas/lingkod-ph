@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -8,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Logo } from '@/components/logo';
 import HomeClient from './home-client';
+import { AdCarousel } from '@/components/ad-carousel';
 
 const Header = () => (
   <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -110,9 +112,13 @@ export default function HomePage() {
                         </div>
                     </div>
                 </section>
+                
+                <section className="container -mt-16 relative z-20">
+                    <AdCarousel />
+                </section>
 
                 {/* How It Works Section */}
-                <section id="features" className="bg-muted py-20">
+                <section id="features" className="bg-muted py-20 pt-32">
                     <div className="container">
                         <div className="mx-auto mb-12 max-w-2xl text-center">
                             <h2 className="font-headline text-3xl font-bold">A Seamless Experience for Everyone</h2>
