@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MoreHorizontal, Loader2, Briefcase, Trash2, Edit, Eye } from "lucide-react";
+import { MoreHorizontal, Loader2, Briefcase, Trash2, Edit, Eye, CircleSlash } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
@@ -151,7 +150,9 @@ export default function MyJobPostsPage() {
                                                     <DropdownMenuItem asChild>
                                                         <Link href={`/post-a-job?edit=${job.id}`}><Edit className="mr-2 h-4 w-4" /> Edit Post</Link>
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onSelect={() => handleUpdateStatus(job.id, "Closed")}>Close Post</DropdownMenuItem>
+                                                    <DropdownMenuItem onSelect={() => handleUpdateStatus(job.id, "Closed")}>
+                                                        <CircleSlash className="mr-2 h-4 w-4" /> Close Post
+                                                    </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <AlertDialogTrigger asChild>
                                                         <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
