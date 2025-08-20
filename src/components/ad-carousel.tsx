@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import Image from "next/image";
@@ -12,8 +12,10 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel";
-import Autoplay from "embla-carousel-autoplay";
+import type { EmblaCarouselType } from "embla-carousel-react";
+
 import { Skeleton } from "./ui/skeleton";
 
 type AdCampaign = {
@@ -26,6 +28,19 @@ type AdCampaign = {
 export function AdCarousel() {
     const [campaigns, setCampaigns] = useState<AdCampaign[]>([]);
     const [loading, setLoading] = useState(true);
+    const [api, setApi] = useState<CarouselApi>()
+    const Autoplay = useRef<any>(null);
+
+    useEffect(() => {
+        import("embla-carousel-autoplay").then((plugin) => {
+            Autoplay.current = plugin.default;
+            // When the plugin is loaded, we can initialize the carousel
+            if(api) {
+                 api.reInit();
+            }
+        });
+    }, [api]);
+
 
     useEffect(() => {
         const campaignsQuery = query(collection(db, "adCampaigns"), where("isActive", "==", true));
@@ -51,7 +66,8 @@ export function AdCarousel() {
 
     return (
         <Carousel
-            plugins={[Autoplay({ delay: 5000, stopOnInteraction: true })]}
+            setApi={setApi}
+            plugins={Autoplay.current ? [Autoplay.current({ delay: 5000, stopOnInteraction: true })] : []}
             className="w-full"
         >
             <CarouselContent>
