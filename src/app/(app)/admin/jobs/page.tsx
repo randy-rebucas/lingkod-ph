@@ -17,7 +17,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { handleUpdateJobStatus, handleDeleteJob } from "./actions";
 import Link from "next/link";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Dialog, DialogClose, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatBudget } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 
