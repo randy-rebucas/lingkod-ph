@@ -17,6 +17,7 @@ import { format } from "date-fns";
 import { handleUpdateJobStatus, handleDeleteJob } from "./actions";
 import Link from "next/link";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { formatBudget } from "@/lib/utils";
 
 type JobStatus = "Open" | "In Progress" | "Completed" | "Closed";
 
@@ -24,7 +25,11 @@ type Job = {
     id: string;
     title: string;
     clientName: string;
-    budget: number;
+    budget: {
+      amount: number;
+      type: 'Fixed' | 'Daily' | 'Monthly';
+      negotiable: boolean;
+    };
     status: JobStatus;
     createdAt: Timestamp;
 };
@@ -143,7 +148,7 @@ export default function AdminJobsPage() {
                                     </TableCell>
                                     <TableCell className="font-medium">{job.title}</TableCell>
                                     <TableCell>{job.clientName}</TableCell>
-                                    <TableCell>₱{job.budget.toFixed(2)}</TableCell>
+                                    <TableCell>{formatBudget(job.budget)}</TableCell>
                                     <TableCell>
                                         <Badge variant={getStatusVariant(job.status)}>{job.status}</Badge>
                                     </TableCell>
