@@ -14,7 +14,7 @@ type Actor = {
 const platformSettingsSchema = z.object({
     appName: z.string().min(1, "App name is required."),
     supportEmail: z.string().email("A valid support email is required."),
-    logoUrl: z.string().url().optional(),
+    logoUrl: z.string().url().or(z.literal("")).optional(),
     commissionRates: z.object({
         low: z.number().min(0).max(100),
         mid: z.number().min(0).max(100),
