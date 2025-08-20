@@ -26,6 +26,7 @@ type AdCampaign = {
     name: string;
     description: string;
     imageUrl?: string;
+    socialLink?: string;
 };
 
 export function AdCarousel() {
@@ -66,6 +67,43 @@ export function AdCarousel() {
         return null; 
     }
 
+    const AdCard = ({ campaign }: { campaign: AdCampaign }) => {
+        const cardContent = (
+            <Card className="overflow-hidden h-full flex group">
+                <CardContent className="flex items-center gap-4 p-4 w-full">
+                    <div className="relative h-24 w-24 flex-shrink-0">
+                        {campaign.imageUrl ? (
+                                <Image
+                                src={campaign.imageUrl}
+                                alt={campaign.name}
+                                layout="fill"
+                                className="object-cover rounded-md transition-transform duration-300 group-hover:scale-105"
+                            />
+                        ) : (
+                            <div className="h-full w-full bg-secondary rounded-md flex items-center justify-center">
+                                <Megaphone className="h-8 w-8 text-muted-foreground"/>
+                            </div>
+                        )}
+                    </div>
+                    <div className="space-y-1 overflow-hidden">
+                        <h3 className="text-base font-bold font-headline truncate">{campaign.name}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-3">{campaign.description}</p>
+                    </div>
+                </CardContent>
+            </Card>
+        );
+
+        if (campaign.socialLink) {
+            return (
+                <Link href={campaign.socialLink} target="_blank" rel="noopener noreferrer" className="h-full block">
+                    {cardContent}
+                </Link>
+            )
+        }
+        return cardContent;
+    };
+
+
     return (
         <Carousel
             setApi={setApi}
@@ -80,28 +118,7 @@ export function AdCarousel() {
                 {campaigns.map((campaign) => (
                     <CarouselItem key={campaign.id} className="md:basis-1/2 lg:basis-1/3">
                         <div className="p-1 h-full">
-                           <Card className="overflow-hidden h-full flex">
-                                <CardContent className="flex items-center gap-4 p-4 w-full">
-                                    <div className="relative h-24 w-24 flex-shrink-0">
-                                        {campaign.imageUrl ? (
-                                             <Image
-                                                src={campaign.imageUrl}
-                                                alt={campaign.name}
-                                                layout="fill"
-                                                className="object-cover rounded-md"
-                                            />
-                                        ) : (
-                                            <div className="h-full w-full bg-secondary rounded-md flex items-center justify-center">
-                                                <Megaphone className="h-8 w-8 text-muted-foreground"/>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="space-y-1 overflow-hidden">
-                                        <h3 className="text-base font-bold font-headline truncate">{campaign.name}</h3>
-                                        <p className="text-sm text-muted-foreground line-clamp-3">{campaign.description}</p>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                           <AdCard campaign={campaign} />
                         </div>
                     </CarouselItem>
                 ))}

@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Trash2, Edit, PlusCircle, Megaphone, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
+import { MoreHorizontal, Trash2, Edit, PlusCircle, Megaphone, Upload, Image as ImageIcon, Loader2, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { handleUpdateAdCampaign, handleDeleteAdCampaign, handleAddAdCampaign } from "./actions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -32,6 +32,7 @@ type AdCampaign = {
     durationDays: number;
     isActive: boolean;
     imageUrl?: string;
+    socialLink?: string;
     createdAt: Timestamp;
 };
 
@@ -50,6 +51,7 @@ export default function AdminAdsPage() {
     const [durationDays, setDurationDays] = useState(7);
     const [isActive, setIsActive] = useState(true);
     const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+    const [socialLink, setSocialLink] = useState("");
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -98,6 +100,7 @@ export default function AdminAdsPage() {
         setDurationDays(7);
         setIsActive(true);
         setImageUrl(undefined);
+        setSocialLink("");
         setImageFile(null);
         setImagePreview(null);
         setIsUploading(false);
@@ -119,6 +122,7 @@ export default function AdminAdsPage() {
         setDurationDays(campaign.durationDays);
         setIsActive(campaign.isActive);
         setImageUrl(campaign.imageUrl);
+        setSocialLink(campaign.socialLink || "");
         setImagePreview(campaign.imageUrl || null);
         setIsDialogOpen(true);
     };
@@ -169,7 +173,7 @@ export default function AdminAdsPage() {
             setIsUploading(false);
         }
 
-        const payload = { name, description, price, durationDays, isActive, imageUrl: finalImageUrl };
+        const payload = { name, description, price, durationDays, isActive, imageUrl: finalImageUrl, socialLink };
         const actor = { id: user.uid, name: user.displayName };
         const result = isAdding ? await handleAddAdCampaign(payload, actor) : await handleUpdateAdCampaign(isEditing!.id, payload, actor);
 
@@ -360,6 +364,13 @@ export default function AdminAdsPage() {
                          <div className="space-y-2">
                             <Label htmlFor="description">Description</Label>
                             <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe what this campaign offers."/>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="socialLink">Social Link (Optional)</Label>
+                             <div className="relative">
+                                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input id="socialLink" value={socialLink} onChange={e => setSocialLink(e.target.value)} placeholder="e.g., https://facebook.com/yourpage" className="pl-9" />
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
