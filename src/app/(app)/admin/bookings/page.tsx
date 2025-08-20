@@ -11,9 +11,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, MoreHorizontal, User, CircleSlash, Trash2 } from "lucide-react";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
 import type { Booking as BookingType } from "@/app/(app)/bookings/page";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { handleUpdateBookingStatus } from "./actions";
+import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 const getStatusVariant = (status: string) => {
     switch (status) {
@@ -28,7 +33,8 @@ const getStatusVariant = (status: string) => {
 
 
 export default function AdminBookingsPage() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
+    const { toast } = useToast();
     const [bookings, setBookings] = useState<BookingType[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedBooking, setSelectedBooking] = useState<BookingType | null>(null);
@@ -57,6 +63,16 @@ export default function AdminBookingsPage() {
     const handleViewDetails = (booking: BookingType) => {
         setSelectedBooking(booking);
         setIsDetailsOpen(true);
+    };
+
+    const onUpdateStatus = async (bookingId: string, status: string) => {
+        if (!user) return;
+        const result = await handleUpdateBookingStatus(bookingId, status, { id: user.uid, name: user.displayName });
+        toast({
+            title: result.error ? 'Error' : 'Success',
+            description: result.message,
+            variant: result.error ? 'destructive' : 'default',
+        });
     };
 
     if (userRole !== 'admin') {
@@ -123,10 +139,25 @@ export default function AdminBookingsPage() {
                                     <TableCell>
                                         <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
                                     </TableCell>
-                                     <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon" onClick={() => handleViewDetails(booking)}>
-                                            <Eye className="h-4 w-4" />
-                                        </Button>
+                                    <TableCell className="text-right">
+                                        <AlertDialog>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuItem onSelect={() => handleViewDetails(booking)}><Eye className="mr-2 h-4 w-4" />View Details</DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                                                    <DropdownMenuItem onClick={() => onUpdateStatus(booking.id, "Completed")} disabled={booking.status === 'Completed'}>Mark as Completed</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => onUpdateStatus(booking.id, "Cancelled")} disabled={booking.status === 'Cancelled'}>Mark as Cancelled</DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem asChild><Link href={`/admin/users?search=${booking.clientId}`}><User className="mr-2 h-4 w-4" />View Client</Link></DropdownMenuItem>
+                                                    <DropdownMenuItem asChild><Link href={`/admin/users?search=${booking.providerId}`}><User className="mr-2 h-4 w-4" />View Provider</Link></DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </AlertDialog>
                                     </TableCell>
                                 </TableRow>
                             )) : (
