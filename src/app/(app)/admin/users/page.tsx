@@ -31,7 +31,7 @@ export type User = {
     displayName: string;
     email: string;
     phone?: string;
-    role: 'client' | 'provider' | 'agency' | 'admin';
+    role: 'client' | 'provider' | 'agency' | 'admin' | 'partner';
     createdAt: Timestamp;
     accountStatus: UserStatus;
     photoURL?: string;
@@ -43,6 +43,7 @@ const getRoleVariant = (role: string) => {
         case "agency": return "default";
         case "provider": return "secondary";
         case "client": return "outline";
+        case "partner": return "default";
         default: return "outline";
     }
 };
@@ -82,7 +83,7 @@ export default function AdminUsersPage() {
     // Form states
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [createForm, setCreateForm] = useState({ name: "", email: "", password: "", role: 'client' as const, phone: "" });
-    const [editForm, setEditForm] = useState({ name: "", role: 'client' as const, phone: "" });
+    const [editForm, setEditForm] = useState({ name: "", role: 'client' as any, phone: "" });
 
 
      useEffect(() => {
@@ -235,6 +236,7 @@ export default function AdminUsersPage() {
                                     <SelectItem value="agency">Agency</SelectItem>
                                     <SelectItem value="provider">Provider</SelectItem>
                                     <SelectItem value="client">Client</SelectItem>
+                                    <SelectItem value="partner">Partner</SelectItem>
                                 </SelectContent>
                             </Select>
                             <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -374,7 +376,12 @@ export default function AdminUsersPage() {
                         <div className="space-y-2"><Label htmlFor="new-password">Password</Label><Input id="new-password" type="password" value={createForm.password} onChange={e => setCreateForm(f => ({...f, password: e.target.value}))} /></div>
                         <div className="space-y-2"><Label htmlFor="new-role">Role</Label><Select value={createForm.role} onValueChange={(v) => setCreateForm(f => ({...f, role: v as any}))}>
                             <SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger>
-                            <SelectContent><SelectItem value="client">Client</SelectItem><SelectItem value="provider">Provider</SelectItem><SelectItem value="agency">Agency</SelectItem></SelectContent>
+                            <SelectContent>
+                                <SelectItem value="client">Client</SelectItem>
+                                <SelectItem value="provider">Provider</SelectItem>
+                                <SelectItem value="agency">Agency</SelectItem>
+                                <SelectItem value="partner">Partner</SelectItem>
+                            </SelectContent>
                         </Select></div>
                     </div>
                     <DialogFooter>
@@ -399,7 +406,12 @@ export default function AdminUsersPage() {
                         <div className="space-y-2"><Label htmlFor="edit-phone">Phone Number</Label><Input id="edit-phone" type="tel" value={editForm.phone} onChange={e => setEditForm(f => ({...f, phone: e.target.value}))} /></div>
                         <div className="space-y-2"><Label htmlFor="edit-role">Role</Label><Select value={editForm.role} onValueChange={(v) => setEditForm(f => ({...f, role: v as any}))}>
                             <SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger>
-                            <SelectContent><SelectItem value="client">Client</SelectItem><SelectItem value="provider">Provider</SelectItem><SelectItem value="agency">Agency</SelectItem></SelectContent>
+                            <SelectContent>
+                                <SelectItem value="client">Client</SelectItem>
+                                <SelectItem value="provider">Provider</SelectItem>
+                                <SelectItem value="agency">Agency</SelectItem>
+                                <SelectItem value="partner">Partner</SelectItem>
+                            </SelectContent>
                         </Select></div>
                     </div>
                     <DialogFooter>

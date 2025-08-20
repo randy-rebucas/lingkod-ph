@@ -42,6 +42,7 @@ import {
   Shield,
   LifeBuoy,
   Users,
+  Handshake,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -196,13 +197,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isElite = isPaidSubscriber && subscription?.planId === 'elite';
   const isAgencyPaidSubscriber = userRole === 'agency' && isPaidSubscriber;
   
-  const dashboardPath = userRole === 'admin' ? '/admin/dashboard' : '/dashboard';
+  const dashboardPath = userRole === 'admin' ? '/admin/dashboard' : (userRole === 'partner' ? '/partners/dashboard' : '/dashboard');
 
   const getPageTitle = (path: string) => {
     const parts = path.split('/').filter(Boolean);
     if (parts.length === 0) return "Dashboard";
     const lastPart = parts[parts.length - 1];
-    // Handle UUIDs in paths like /bookings/[bookingId]/work-log
+    if (parts.includes('partners') && lastPart === 'dashboard') return "Partners Dashboard";
     if (parts.includes('bookings') && lastPart === 'work-log') return "Work Log";
     if (parts.includes('my-job-posts') && lastPart === 'applicants') return "Applicants";
     if (parts.includes('providers')) return "Provider Profile";
@@ -225,7 +226,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive(dashboardPath)}>
+              <SidebarMenuButton asChild isActive={isActive(dashboardPath) && (pathname === dashboardPath)}>
                 <Link href={dashboardPath}>
                   <LayoutDashboard />
                   <span>Dashboard</span>
@@ -233,7 +234,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </SidebarMenuButton>
             </SidebarMenuItem>
             
-            {(userRole !== 'admin') && (
+            {(userRole !== 'admin' && userRole !== 'partner') && (
               <>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/calendar")}>
@@ -620,6 +621,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       </Link>
                     </DropdownMenuItem>
                   </>
+                )}
+                {userRole === 'partner' && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/partners/dashboard">
+                        <Handshake className="mr-2 h-4 w-4" />
+                        <span>Partners Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
                   <Link href="/settings">
