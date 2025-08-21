@@ -208,6 +208,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     if (parts.includes('my-job-posts') && lastPart === 'applicants') return "Applicants";
     if (parts.includes('providers')) return "Provider Profile";
     if (parts.includes('jobs')) return "Job Details";
+    if (parts.includes('broadcast')) return "Broadcast Center";
 
     return lastPart.replace(/-/g, ' ');
   }

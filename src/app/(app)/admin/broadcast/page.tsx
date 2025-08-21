@@ -7,22 +7,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Send } from "lucide-react";
-import { sendBroadcastAction } from "./actions";
+import { Loader2, Send, Radio } from "lucide-react";
+import { sendBroadcastAction, sendCampaignEmailAction } from "./actions";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function BroadcastPage() {
     const { user, userRole } = useAuth();
     const { toast } = useToast();
-    const [message, setMessage] = useState("");
-    const [isSending, setIsSending] = useState(false);
+    
+    // State for banner broadcast
+    const [bannerMessage, setBannerMessage] = useState("");
+    const [isSendingBanner, setIsSendingBanner] = useState(false);
+    
+    // State for email campaign
+    const [emailSubject, setEmailSubject] = useState("");
+    const [emailMessage, setEmailMessage] = useState("");
+    const [isSendingEmail, setIsSendingEmail] = useState(false);
 
-    const handleSendBroadcast = async () => {
+    const handleSendBanner = async () => {
         if (!user) {
             toast({ variant: 'destructive', title: 'Authentication Error', description: 'You must be logged in.' });
             return;
         }
-        setIsSending(true);
-        const result = await sendBroadcastAction(message, { id: user.uid, name: user.displayName });
+        setIsSendingBanner(true);
+        const result = await sendBroadcastAction(bannerMessage, { id: user.uid, name: user.displayName });
 
         toast({
             title: result.error ? 'Error' : 'Broadcast Sent!',
@@ -31,11 +41,32 @@ export default function BroadcastPage() {
         });
 
         if (!result.error) {
-            setMessage("");
+            setBannerMessage("");
         }
 
-        setIsSending(false);
-    }
+        setIsSendingBanner(false);
+    };
+
+    const handleSendEmail = async () => {
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Authentication Error', description: 'You must be logged in.' });
+            return;
+        }
+        setIsSendingEmail(true);
+        const result = await sendCampaignEmailAction({ subject: emailSubject, message: emailMessage }, { id: user.uid, name: user.displayName });
+
+        toast({
+            title: result.error ? 'Error' : 'Email Campaign Sent!',
+            description: result.message,
+            variant: result.error ? "destructive" : "default"
+        });
+
+        if (!result.error) {
+            setEmailSubject("");
+            setEmailMessage("");
+        }
+        setIsSendingEmail(false);
+    };
 
 
     if (userRole !== 'admin') {
@@ -52,29 +83,70 @@ export default function BroadcastPage() {
     return (
         <div className="space-y-6">
              <div>
-                <h1 className="text-3xl font-bold font-headline">Admin Broadcast</h1>
+                <h1 className="text-3xl font-bold font-headline">Broadcast Center</h1>
                 <p className="text-muted-foreground">
-                    Send a site-wide announcement to all users.
+                    Send site-wide announcements and email campaigns.
                 </p>
             </div>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Create Broadcast Message</CardTitle>
-                    <CardDescription>This message will appear as a banner at the top of the page for all users. Sending a new message will replace the previous one.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <Textarea 
-                        placeholder="Enter your announcement here..."
-                        rows={5}
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                    />
-                    <Button onClick={handleSendBroadcast} disabled={isSending}>
-                        {isSending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                        {isSending ? "Sending..." : "Send Broadcast"}
-                    </Button>
-                </CardContent>
-            </Card>
+            <Tabs defaultValue="banner">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="banner">Site Banner</TabsTrigger>
+                    <TabsTrigger value="email">Email Campaign</TabsTrigger>
+                </TabsList>
+                <TabsContent value="banner" className="mt-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Create Broadcast Banner</CardTitle>
+                            <CardDescription>This message will appear as a banner for all users. Sending a new message replaces the previous one.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <Textarea 
+                                placeholder="Enter your announcement here..."
+                                rows={5}
+                                value={bannerMessage}
+                                onChange={(e) => setBannerMessage(e.target.value)}
+                            />
+                            <Button onClick={handleSendBanner} disabled={isSendingBanner}>
+                                {isSendingBanner ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Radio className="mr-2 h-4 w-4" />}
+                                {isSendingBanner ? "Sending..." : "Send Banner"}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                 <TabsContent value="email" className="mt-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Create Email Campaign</CardTitle>
+                            <CardDescription>This email will be sent to all registered providers on the platform.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                             <div className="space-y-2">
+                                <Label htmlFor="subject">Subject</Label>
+                                <Input 
+                                    id="subject"
+                                    placeholder="e.g., New Feature Announcement!"
+                                    value={emailSubject}
+                                    onChange={(e) => setEmailSubject(e.target.value)}
+                                />
+                            </div>
+                             <div className="space-y-2">
+                                <Label htmlFor="email-message">Message</Label>
+                                <Textarea 
+                                    id="email-message"
+                                    placeholder="Write your email content here..."
+                                    rows={8}
+                                    value={emailMessage}
+                                    onChange={(e) => setEmailMessage(e.target.value)}
+                                />
+                            </div>
+                            <Button onClick={handleSendEmail} disabled={isSendingEmail}>
+                                {isSendingEmail ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                                {isSendingEmail ? "Sending..." : "Send Email to Providers"}
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }
