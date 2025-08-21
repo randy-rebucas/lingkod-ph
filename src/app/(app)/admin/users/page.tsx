@@ -15,13 +15,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, CheckCircle, Slash, ShieldAlert, Trash2, Eye, UserPlus, Loader2, Edit } from "lucide-react";
+import { MoreHorizontal, CheckCircle, Slash, ShieldAlert, Trash2, Eye, UserPlus, Loader2, Edit, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { handleUserStatusUpdate, handleDeleteUser, handleCreateUser, handleUpdateUser } from "./actions";
+import { handleUserStatusUpdate, handleDeleteUser, handleCreateUser, handleUpdateUser, handleSendDirectEmail } from "./actions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import Link from "next/link";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 
 type UserStatus = 'active' | 'pending_approval' | 'suspended';
@@ -78,12 +79,14 @@ export default function AdminUsersPage() {
     // Dialog States
     const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
     const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+    const [isEmailUserOpen, setIsEmailUserOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
     // Form states
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [createForm, setCreateForm] = useState({ name: "", email: "", password: "", role: 'client' as const, phone: "" });
     const [editForm, setEditForm] = useState({ name: "", role: 'client' as any, phone: "" });
+    const [emailForm, setEmailForm] = useState({ subject: "", message: "" });
 
 
      useEffect(() => {
@@ -132,6 +135,12 @@ export default function AdminUsersPage() {
         setIsEditUserOpen(true);
     };
 
+     const handleOpenEmailDialog = (user: User) => {
+        setSelectedUser(user);
+        setEmailForm({ subject: "", message: "" });
+        setIsEmailUserOpen(true);
+    };
+
     const onUpdateUser = async () => {
         if (!selectedUser || !user) return;
         setIsSubmitting(true);
@@ -173,6 +182,23 @@ export default function AdminUsersPage() {
         }
         setIsSubmitting(false);
     }
+
+    const onSendEmail = async () => {
+        if (!selectedUser || !user) return;
+        setIsSubmitting(true);
+        const result = await handleSendDirectEmail(selectedUser.uid, emailForm.subject, emailForm.message, {id: user.uid, name: user.displayName});
+        toast({
+            title: result.error ? 'Error' : 'Success',
+            description: result.message,
+            variant: result.error ? 'destructive' : 'default',
+        });
+
+        if (!result.error) {
+            setIsEmailUserOpen(false);
+            setSelectedUser(null);
+        }
+        setIsSubmitting(false);
+    };
     
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) || user.email.toLowerCase().includes(searchTerm.toLowerCase());
@@ -298,6 +324,9 @@ export default function AdminUsersPage() {
                                                         <DropdownMenuItem onSelect={() => handleOpenEditDialog(user)}>
                                                             <Edit className="mr-2 h-4 w-4" />Edit User
                                                         </DropdownMenuItem>
+                                                        <DropdownMenuItem onSelect={() => handleOpenEmailDialog(user)}>
+                                                            <Mail className="mr-2 h-4 w-4" />Send Email
+                                                        </DropdownMenuItem>
                                                         {user.role !== 'client' && (
                                                             <DropdownMenuItem asChild>
                                                                 <Link href={`/providers/${user.uid}`} target="_blank"><Eye className="mr-2 h-4 w-4" />View Profile</Link>
@@ -420,6 +449,36 @@ export default function AdminUsersPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {/* Send Email Dialog */}
+             <Dialog open={isEmailUserOpen} onOpenChange={(open) => { setIsEmailUserOpen(open); if (!open) setSelectedUser(null); }}>
+                <DialogTrigger asChild><button className="hidden" /></DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Send Email to {selectedUser?.displayName}</DialogTitle>
+                        <CardDescription>Compose and send a direct email to {selectedUser?.email}.</CardDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="email-subject">Subject</Label>
+                            <Input id="email-subject" value={emailForm.subject} onChange={e => setEmailForm(f => ({...f, subject: e.target.value}))}/>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="email-message">Message</Label>
+                            <Textarea id="email-message" rows={8} value={emailForm.message} onChange={e => setEmailForm(f => ({...f, message: e.target.value}))}/>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
+                        <Button onClick={onSendEmail} disabled={isSubmitting}>
+                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Mail className="mr-2 h-4 w-4" />}
+                            Send Email
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     )
 }
+
+    

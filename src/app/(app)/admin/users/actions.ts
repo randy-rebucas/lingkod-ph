@@ -8,10 +8,13 @@ import {
   deleteDoc,
   setDoc,
   serverTimestamp,
+  getDoc,
 } from 'firebase/firestore';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { z } from 'zod';
 import { logAdminAction } from '@/lib/audit-logger';
+import { Resend } from 'resend';
+import DirectMessageEmail from '@/emails/direct-message-email';
 
 type UserStatus = 'active' | 'pending_approval' | 'suspended';
 type Actor = {
@@ -147,3 +150,51 @@ export async function handleUpdateUser(userId: string, data: z.infer<typeof upda
         return { error: e.message, message: 'Failed to update user.' };
     }
 }
+
+const sendDirectEmailSchema = z.object({
+    targetUserId: z.string().min(1),
+    subject: z.string().min(3, "Subject must be at least 3 characters."),
+    message: z.string().min(10, "Message must be at least 10 characters."),
+});
+
+export async function handleSendDirectEmail(targetUserId: string, subject: string, message: string, actor: Actor) {
+    const validatedFields = sendDirectEmailSchema.safeParse({ targetUserId, subject, message });
+    if (!validatedFields.success) {
+        return {
+            error: validatedFields.error.errors.map(e => e.message).join(', '),
+            message: 'Validation failed.'
+        };
+    }
+
+    try {
+        const userRef = doc(db, 'users', targetUserId);
+        const userSnap = await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+            return { error: "User not found.", message: "The target user does not exist." };
+        }
+
+        const targetUserEmail = userSnap.data().email;
+        const targetUserName = userSnap.data().displayName;
+        
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+            from: `LocalPro Admin <onboarding@resend.dev>`,
+            to: targetUserEmail,
+            subject: subject,
+            react: DirectMessageEmail({
+                userName: targetUserName,
+                subject: subject,
+                message: message,
+            }),
+        });
+
+        return { error: null, message: `Email successfully sent to ${targetUserName}.` };
+
+    } catch (e: any) {
+        console.error('Error sending direct email: ', e);
+        return { error: e.message, message: 'Failed to send email.' };
+    }
+}
+
+    
