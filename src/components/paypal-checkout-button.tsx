@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, Suspense } from "react";
@@ -78,7 +77,7 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
     return actions.order.create({
       purchase_units: [
         {
-          description: `Lingkod PH - ${plan.name} Plan`,
+          description: `LocalPro - ${plan.name} Plan`,
           amount: {
             value: String(plan.price),
             currency_code: "PHP",
@@ -104,16 +103,22 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
       try {
         const renewalDate = new Date();
         renewalDate.setMonth(renewalDate.getMonth() + 1);
-
+        
         const userDocRef = doc(db, "users", user.uid);
-        await updateDoc(userDocRef, {
+        const updates: any = {
           subscription: {
             planId: plan.id,
             status: "active",
             renewsOn: Timestamp.fromDate(renewalDate),
             paypalOrderId: details.id,
           },
-        });
+        };
+        // Upgrade role if it's a new subscription type
+        if (plan.type === 'provider' || plan.type === 'agency') {
+          updates.role = plan.type;
+        }
+
+        await updateDoc(userDocRef, updates);
 
         await addDoc(collection(db, "transactions"), {
           userId: user.uid,
@@ -165,15 +170,21 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
           createdAt: serverTimestamp(),
         });
         
+        const updates: any = {
+            subscription: {
+                planId: plan.id,
+                status: "pending",
+                renewsOn: null
+            },
+        };
+
+        if (plan.type === 'provider' || plan.type === 'agency') {
+          updates.role = plan.type;
+        }
+        
         // Set user's subscription to pending
         const userDocRef = doc(db, "users", user.uid);
-        await updateDoc(userDocRef, {
-          subscription: {
-            planId: plan.id,
-            status: "pending",
-            renewsOn: null
-          },
-        });
+        await updateDoc(userDocRef, updates);
         
         onPaymentSuccess?.();
         router.push("/subscription/success?status=pending");

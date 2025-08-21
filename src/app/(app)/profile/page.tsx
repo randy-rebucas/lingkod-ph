@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -11,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit, Wallet, Building, FileText, Trash2 } from "lucide-react";
+import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit, Wallet, Building, FileText, Trash2, ArrowRight } from "lucide-react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject, uploadBytes } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
@@ -31,6 +30,7 @@ import { handleInviteAction } from "./actions";
 import { useLoadScript, Autocomplete } from "@react-google-maps/api";
 import { Separator } from "@/components/ui/separator";
 import { useActionState } from "react";
+import Link from 'next/link';
 
 
 type Reward = {
@@ -616,6 +616,7 @@ export default function ProfilePage() {
 
     const isProvider = userRole === 'provider';
     const isAgency = userRole === 'agency';
+    const isClient = userRole === 'client';
 
 
     const handleCurrentLocation = () => {
@@ -747,6 +748,37 @@ export default function ProfilePage() {
                             </form>
                         ))}
                     </CardContent>
+                </Card>
+            )}
+
+            {userRole === 'client' && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Become a Provider</CardTitle>
+                        <CardDescription>Ready to offer your skills and services to the community? Upgrade your account to start accepting jobs.</CardDescription>
+                    </CardHeader>
+                    <CardFooter>
+                        <Button asChild>
+                            <Link href="/subscription">
+                                View Provider Plans <ArrowRight className="ml-2 h-4 w-4"/>
+                            </Link>
+                        </Button>
+                    </CardFooter>
+                </Card>
+            )}
+             {userRole === 'provider' && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Upgrade to an Agency Account</CardTitle>
+                        <CardDescription>Manage a team of providers, access advanced analytics, and grow your business.</CardDescription>
+                    </CardHeader>
+                    <CardFooter>
+                        <Button asChild>
+                            <Link href="/subscription">
+                                View Agency Plans <ArrowRight className="ml-2 h-4 w-4"/>
+                            </Link>
+                        </Button>
+                    </CardFooter>
                 </Card>
             )}
 

@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -307,6 +306,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                           <span>My Services</span>
                         </Link>
                       </SidebarMenuButton>
+                    </SidebarMenuItem>
+                     <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/jobs")}>
+                            <Link href="/jobs">
+                                <Search />
+                                <span>Find Work</span>
+                            </Link>
+                        </SidebarMenuButton>
                     </SidebarMenuItem>
                   </>
                 )}

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,7 +13,7 @@ import { PayPalCheckoutButton } from "@/components/paypal-checkout-button";
 import PaymentHistory from "./payment-history";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, getDoc, doc } from "firebase/firestore";
+import { collection, onSnapshot, getDoc, doc, updateDoc } from "firebase/firestore";
 
 export type SubscriptionTier = {
     id: string;
@@ -41,7 +40,7 @@ export type AgencySubscriptionTier = {
 };
 
 export default function SubscriptionPage() {
-    const { userRole, subscription, loading } = useAuth();
+    const { user, userRole, subscription, loading } = useAuth();
     const [isPaymentDialog, setPaymentDialog] = useState(false);
     const [plans, setPlans] = useState<(SubscriptionTier | AgencySubscriptionTier)[]>([]);
     const [platformSettings, setPlatformSettings] = useState<any>(null);
@@ -76,6 +75,12 @@ export default function SubscriptionPage() {
         clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID,
         currency: "PHP",
         intent: "capture",
+    };
+
+    const handleRoleUpgrade = async (newRole: 'provider' | 'agency') => {
+        if (!user) return;
+        const userDocRef = doc(db, 'users', user.uid);
+        await updateDoc(userDocRef, { role: newRole });
     };
     
     const renderProviderPlans = () => {
@@ -131,7 +136,10 @@ export default function SubscriptionPage() {
                                             <PayPalCheckoutButton 
                                                 plan={tier} 
                                                 onPaymentStart={() => setPaymentDialog(true)}
-                                                onPaymentSuccess={() => setPaymentDialog(false)}
+                                                onPaymentSuccess={() => {
+                                                    setPaymentDialog(false)
+                                                    handleRoleUpgrade('provider');
+                                                }}
                                             />
                                         </DialogContent>
                                     </Dialog>
@@ -203,7 +211,10 @@ export default function SubscriptionPage() {
                                             <PayPalCheckoutButton 
                                                 plan={tier} 
                                                 onPaymentStart={() => setPaymentDialog(true)}
-                                                onPaymentSuccess={() => setPaymentDialog(false)}
+                                                onPaymentSuccess={() => {
+                                                    setPaymentDialog(false);
+                                                    handleRoleUpgrade('agency');
+                                                }}
                                             />
                                         </DialogContent>
                                     </Dialog>
@@ -258,7 +269,7 @@ export default function SubscriptionPage() {
                     )}
                 </section>
                 
-                {loadingPlans ? <Skeleton className="h-96 w-full"/> : (userRole === 'agency' ? renderAgencyPlans() : renderProviderPlans())}
+                {loadingPlans ? <Skeleton className="h-96 w-full"/> : (userRole === 'provider' ? renderAgencyPlans() : renderProviderPlans())}
 
                 <section>
                     <PaymentHistory />
