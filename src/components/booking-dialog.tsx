@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 import { Calendar } from './ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import type { Service } from '@/app/(app)/providers/[providerId]/page';
+import { useRouter } from 'next/navigation';
 
 const bookingSchema = z.object({
   date: z.date({ required_error: "Please select a date." }),
@@ -59,6 +60,7 @@ const generateTimeSlots = () => {
 export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingConfirmed }: BookingDialogProps) {
     const { user } = useAuth();
     const { toast } = useToast();
+    const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
     const timeSlots = generateTimeSlots();
 
@@ -101,19 +103,23 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
             const bookingData = {
                 providerId: provider.uid,
                 providerName: provider.displayName,
+                providerAvatar: provider.photoURL || '',
                 clientId: user.uid,
                 clientName: user.displayName,
+                clientAvatar: user.photoURL || '',
                 serviceId: service.id,
                 serviceName: service.name,
                 price: service.price,
                 date: Timestamp.fromDate(bookingDateTime),
-                status: "Pending",
+                status: "Pending Payment",
                 notes: data.notes,
                 createdAt: serverTimestamp(),
             };
 
-            await addDoc(collection(db, 'bookings'), bookingData);
+            const newBookingRef = await addDoc(collection(db, 'bookings'), bookingData);
             onBookingConfirmed();
+            router.push(`/bookings/${newBookingRef.id}/payment`);
+
         } catch (error) {
             console.error("Error creating booking:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to create booking.' });
@@ -191,7 +197,7 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
                             </DialogClose>
                             <Button type="submit" disabled={isSaving}>
                                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isSaving ? 'Confirming...' : 'Confirm Booking'}
+                                {isSaving ? 'Proceeding...' : 'Proceed to Payment'}
                             </Button>
                         </DialogFooter>
                     </form>
