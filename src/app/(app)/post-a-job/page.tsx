@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Loader2, Briefcase, Sparkles, Wand2 } from "lucide-react";
+import { Loader2, Briefcase, Sparkles, Wand2, PenLine, FileQuestion, CheckCircle } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ import { format } from "date-fns";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 
 
 const postJobSchema = z.object({
@@ -222,9 +223,14 @@ export default function PostAJobPage() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             
           <Card>
-            <CardHeader>
-              <CardTitle>1. Describe the Job</CardTitle>
-              <CardDescription>Start with the basic details of the job you need done.</CardDescription>
+            <CardHeader className="flex flex-row items-start gap-4">
+              <div className="bg-primary/10 text-primary p-3 rounded-full">
+                <PenLine className="h-6 w-6" />
+              </div>
+              <div>
+                <CardTitle>Step 1: Describe the Job</CardTitle>
+                <CardDescription>Start with the basic details of the job you need done.</CardDescription>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
                 <FormField
@@ -253,16 +259,21 @@ export default function PostAJobPage() {
           </Card>
           
           <Card>
-            <CardHeader>
-                <CardTitle>2. Add Specific Details</CardTitle>
-                <CardDescription>Generate questions to add more context, and set your budget.</CardDescription>
+            <CardHeader className="flex flex-row items-start gap-4">
+              <div className="bg-primary/10 text-primary p-3 rounded-full">
+                <FileQuestion className="h-6 w-6" />
+              </div>
+              <div>
+                <CardTitle>Step 2: Add Specific Details</CardTitle>
+                <CardDescription>Generate questions for clarity and get a budget suggestion.</CardDescription>
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
                  <Alert>
                     <Sparkles className="h-4 w-4" />
                     <AlertTitle>Get AI Assistance!</AlertTitle>
                     <AlertDescription>
-                        Click the button below to generate specific questions for your job and get a budget suggestion based on your description.
+                        Click the button below to generate specific questions and a budget suggestion based on your job description.
                     </AlertDescription>
                     <Button type="button" size="sm" onClick={handleGenerateDetails} disabled={isAiPending} className="mt-2">
                         {isAiPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
@@ -271,10 +282,10 @@ export default function PostAJobPage() {
                 </Alert>
                 
                 {questions.length > 0 && (
-                    <div className="space-y-4 pt-4">
-                        <h3 className="font-semibold">Job-Specific Questions</h3>
+                    <div className="space-y-4 pt-4 border-t">
+                        <h3 className="font-semibold text-foreground">Job-Specific Questions</h3>
                         {questions.map((q, index) => (
-                             <div key={index} className="space-y-2">
+                             <div key={index} className="space-y-2 p-4 rounded-md bg-secondary/50">
                                 <Label htmlFor={`q-${index}`}>{q.question}</Label>
                                 {q.type === 'text' ? (
                                     <Input id={`q-${index}`} placeholder={q.example} value={answers[q.question] || ''} onChange={e => handleAnswerChange(q.question, e.target.value)} />
@@ -289,9 +300,14 @@ export default function PostAJobPage() {
           </Card>
 
           <Card>
-             <CardHeader>
-                <CardTitle>3. Finalize Job Details</CardTitle>
-                <CardDescription>Set your budget, location, and timeline.</CardDescription>
+             <CardHeader className="flex flex-row items-start gap-4">
+              <div className="bg-primary/10 text-primary p-3 rounded-full">
+                <CheckCircle className="h-6 w-6" />
+              </div>
+              <div>
+                <CardTitle>Step 3: Finalize and Post</CardTitle>
+                <CardDescription>Set your budget, location, and timeline to complete your job post.</CardDescription>
+              </div>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -311,10 +327,13 @@ export default function PostAJobPage() {
                     />
                      <div className="space-y-2">
                         <FormLabel>Budget (PHP)</FormLabel>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="flex gap-2">
+                          <div className="flex-1">
                             <FormField control={form.control} name="budgetAmount" render={({ field }) => (
                                 <FormItem><FormControl><Input type="number" placeholder="e.g., 1500" {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
+                          </div>
+                          <div className="w-[120px]">
                             <FormField control={form.control} name="budgetType" render={({ field }) => (
                                 <FormItem>
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -327,6 +346,7 @@ export default function PostAJobPage() {
                                     </Select>
                                 </FormItem>
                             )} />
+                           </div>
                         </div>
                          <FormField control={form.control} name="isNegotiable" render={({ field }) => (
                             <FormItem className="flex flex-row items-center justify-start space-x-2 pt-2">
@@ -370,11 +390,11 @@ export default function PostAJobPage() {
                 </div>
             </CardContent>
             <CardFooter>
-                 <Button type="submit" className="w-full" disabled={isSubmitting}>
+                 <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
                     {isSubmitting ? (
                     <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {editJobId ? 'Updating Job...' : 'Posting Job...'}</>
                     ) : (
-                    <><Briefcase className="mr-2 h-4 w-4" /> {editJobId ? 'Update Job' : 'Post Job'}</>
+                    <><Briefcase className="mr-2 h-4 w-4" /> {editJobId ? 'Update Job Post' : 'Post Job'}</>
                     )}
                 </Button>
             </CardFooter>
