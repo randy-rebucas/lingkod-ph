@@ -29,11 +29,19 @@ import { db } from "@/lib/firebase";
 const clientFaqs = [
   {
     question: "How do I book a service?",
-    answer: "You can book a service by browsing our provider listings, selecting a provider, choosing a service, and then clicking the 'Book' button. You'll be prompted to select a date and time that works for you.",
+    answer: "You can book a service by browsing our provider listings, selecting a provider, choosing a service from their profile, and then clicking the 'Book' button. You'll be prompted to select a date and time that works for you.",
+  },
+  {
+    question: "What's the difference between booking a service and posting a job?",
+    answer: "Booking a service is for when you've already found a provider and a specific service they offer. Posting a job is for when you have a specific task and want to receive applications from interested providers.",
   },
   {
     question: "What payment methods are accepted?",
-    answer: "We support a variety of payment methods, including GCash, Maya, Debit/Credit Card, and Bank Transfer, all processed securely through our platform.",
+    answer: "We support a variety of payment methods, including GCash, Maya, Debit/Credit Card, and Bank Transfer, all processed securely through our platform. Some providers may also offer cash on delivery.",
+  },
+  {
+    question: "Is my payment secure?",
+    answer: "Yes, all online payments are processed through a secure payment gateway. For manual payments, we hold the funds until you confirm the job is complete, providing an extra layer of security.",
   },
   {
     question: "Can I cancel or reschedule a booking?",
@@ -48,15 +56,23 @@ const clientFaqs = [
 const providerFaqs = [
   {
     question: "How do I become a provider on LocalPro?",
-    answer: "Simply sign up for a 'Provider' or 'Agency' account. You'll then be guided through setting up your profile, adding your services, and completing our verification process to build trust with clients.",
+    answer: "Sign up for a 'Client' account first. From your profile page, you will find an option to 'Become a Provider'. This will take you to our subscription page where you can choose a plan that fits your needs.",
+  },
+  {
+    question: "How do I create an effective profile?",
+    answer: "A great profile includes a clear photo of yourself or your business logo, a detailed bio describing your experience, and a comprehensive list of the services you offer with clear pricing. Complete our identity verification process to earn a 'Verified' badge, which greatly increases client trust.",
   },
   {
     question: "How and when do I get paid?",
-    answer: "Payments for completed jobs are processed through our platform. Once a client pays for your service, the funds are held securely and transferred to your account after deducting our platform commission. You can request a payout from your Earnings dashboard.",
+    answer: "Payments for completed jobs are processed through our platform. Once a client pays for your service, the funds are held securely and become available for payout after our platform commission is deducted. You can request a payout from your Earnings dashboard.",
+  },
+    {
+    question: "When can I request a payout?",
+    answer: "Payout requests are processed every Saturday. You must have a minimum available balance of ₱400 to be eligible for a payout. Please ensure your payout details are correctly set up in your profile.",
   },
   {
     question: "What are the fees for using the platform?",
-    answer: "We charge a competitive commission fee on each completed booking. We also offer optional subscription plans for providers and agencies that provide access to advanced features like invoicing, analytics, and lower commission rates. You can find more details on our Subscription page.",
+    answer: "We charge a competitive commission fee on each completed booking. We also offer optional subscription plans for providers and agencies that provide access to advanced features and lower commission rates. You can find more details on our Subscription page.",
   },
   {
     question: "How can I improve my ranking and get more bookings?",
