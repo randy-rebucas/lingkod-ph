@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -211,6 +212,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
     return lastPart.replace(/-/g, ' ');
   }
+  
+  const profileLink = userRole === 'provider' || userRole === 'agency' ? `/providers/${user.uid}` : '/profile';
 
   return (
     <SidebarProvider>
@@ -593,7 +596,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuLabel>{user.displayName || 'User'}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/profile">
+                  <Link href={profileLink}>
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </Link>

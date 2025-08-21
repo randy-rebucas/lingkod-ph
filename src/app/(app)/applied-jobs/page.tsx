@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { Briefcase, CheckSquare } from "lucide-react";
 import { Job } from "../jobs/page"; // Reusing the Job type
+import { formatBudget } from "@/lib/utils";
 
 const getStatusVariant = (status: string) => {
     switch (status) {
@@ -91,7 +92,7 @@ export default function AppliedJobsPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex justify-between items-center">
-                                        <p className="font-bold text-lg text-primary">₱{job.budget.amount.toFixed(2)}</p>
+                                        <p className="font-bold text-lg text-primary">{formatBudget(job.budget)}</p>
                                         <Badge variant={getStatusVariant(job.status)}>{job.status}</Badge>
                                     </div>
                                 </CardContent>

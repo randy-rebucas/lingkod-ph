@@ -130,7 +130,6 @@ export default function ReportsPage() {
                 const unsubBookings = onSnapshot(bookingsQuery, (snapshot) => {
                     const fetchedBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
                     setBookings(fetchedBookings);
-                    setLoading(false);
                 });
 
                 const payoutsQuery = query(collection(db, "payouts"), where("agencyId", "==", user.uid));
@@ -139,6 +138,7 @@ export default function ReportsPage() {
                     setPayouts(fetchedPayouts.sort((a,b) => b.requestedAt.toMillis() - a.requestedAt.toMillis()));
                 });
                 
+                setLoading(false);
                 return () => {
                     unsubBookings();
                     unsubPayouts();
