@@ -79,6 +79,7 @@ import { NotificationBell } from "@/components/notification-bell";
 import { useTheme } from "next-themes";
 import BroadcastBanner from "@/components/broadcast-banner";
 import { Logo } from "@/components/logo";
+import { SupportChat } from "@/components/support-chat";
 
 const SuccessTips = () => (
   <Popover>
@@ -665,6 +666,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <BroadcastBanner />
         <main className="flex-1 p-6 relative">
             {children}
+            {userRole !== 'admin' && <SupportChat />}
             <EmergencyHotlineButton />
             {(userRole === 'provider' || userRole === 'agency') && <SuccessTips />}
         </main>
