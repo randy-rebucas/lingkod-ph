@@ -562,6 +562,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </Button>
             )}
             <NotificationBell />
+            <Button asChild variant="ghost" size="icon">
+              <Link href="/help-center">
+                <LifeBuoy className="h-5 w-5" />
+                <span className="sr-only">Help Center</span>
+              </Link>
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">

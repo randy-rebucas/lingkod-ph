@@ -15,6 +15,7 @@ const Header = () => {
          <Link href="/about" className="transition-colors hover:text-primary">About</Link>
         <Link href="/careers" className="transition-colors hover:text-primary">Careers</Link>
         <Link href="/contact-us" className="transition-colors hover:text-primary">Contact Us</Link>
+        <Link href="/help-center" className="transition-colors hover:text-primary">Help Center</Link>
       </nav>
       <div className="flex items-center space-x-2">
         <Button variant="ghost" asChild>
