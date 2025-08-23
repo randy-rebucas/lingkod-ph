@@ -12,9 +12,8 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
 } from "@/components/ui/carousel";
-import type { UseEmblaCarouselType } from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay"
 import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
 import Link from "next/link";
@@ -33,19 +32,7 @@ type AdCampaign = {
 export function AdCarousel() {
     const [campaigns, setCampaigns] = useState<AdCampaign[]>([]);
     const [loading, setLoading] = useState(true);
-    const [api, setApi] = useState<CarouselApi>()
-    const Autoplay = useRef<any>(null);
     const t = useTranslations('AdCarousel');
-
-    useEffect(() => {
-        import("embla-carousel-autoplay").then((plugin) => {
-            Autoplay.current = plugin.default;
-            if(api) {
-                 api.reInit();
-            }
-        });
-    }, [api]);
-
 
     useEffect(() => {
         const campaignsQuery = query(collection(db, "adCampaigns"), where("isActive", "==", true));
@@ -108,12 +95,16 @@ export function AdCarousel() {
 
     return (
         <Carousel
-            setApi={setApi}
             opts={{
                 align: "start",
                 loop: true,
             }}
-            plugins={Autoplay.current ? [Autoplay.current({ delay: 5000, stopOnInteraction: true })] : []}
+            plugins={[
+                Autoplay({
+                    delay: 5000,
+                    stopOnInteraction: true,
+                })
+            ]}
             className="w-full"
         >
             <CarouselContent>

@@ -94,7 +94,7 @@ export default async function CareersPage() {
                 {t('noOpenings')} {t('checkBack')}
             </p>
             <Button asChild size="lg">
-              <a href="mailto:careers@localpro.example.com">
+              <a href="mailto:careers@lingkod.ph">
                 {t('contactSales')} <ArrowRight className="ml-2" />
               </a>
             </Button>

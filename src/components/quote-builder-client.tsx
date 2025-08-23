@@ -20,7 +20,7 @@ import { generateQuoteDescription } from "@/ai/flows/generate-quote-description"
 import { Separator } from "./ui/separator";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp, Timestamp } from "firebase/firestore";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { QuotePreview } from "./quote-preview";
 import { useTranslations } from 'next-intl';
@@ -102,12 +102,33 @@ export default function QuoteBuilderClient() {
 
     const handleGenerateDescription = async (index: number) => {
         setGeneratingDescriptionIndex(index);
+        const itemName = form.getValues(`lineItems.${index}.description`);
+        if (!itemName || itemName.trim().length < 3) {
+            toast({
+                variant: 'destructive',
+                title: t('error'),
+                description: t('enterItemNameFirst'),
+            });
+            setGeneratingDescriptionIndex(null);
+            return;
+        }
+
         try {
-            const result = await generateQuoteDescription({ itemName: "Service Item" });
-            form.setValue(`lineItems.${index}.description`, result.description);
-            toast({ title: t('success'), description: t('descriptionGenerated') });
+            const result = await generateQuoteDescription({ itemName });
+            if (result.description) {
+                form.setValue(`lineItems.${index}.description`, `${itemName} - ${result.description}`, { shouldValidate: true });
+                toast({
+                    title: t('success'),
+                    description: t('aiDescriptionGenerated'),
+                });
+            }
         } catch (error) {
-            toast({ variant: "destructive", title: t('error'), description: t('descriptionGenerationFailed') });
+            console.error("Error generating description:", error);
+            toast({
+                variant: 'destructive',
+                title: t('aiError'),
+                description: t('couldNotGenerateDescription'),
+            });
         } finally {
             setGeneratingDescriptionIndex(null);
         }
@@ -119,22 +140,27 @@ export default function QuoteBuilderClient() {
     };
 
     const onSubmit = async (data: QuoteFormValues) => {
-        if (!user) return;
+        if (!user) {
+            toast({ variant: 'destructive', title: t('error'), description: t('mustBeLoggedInToSaveQuote') });
+            return;
+        }
         
         setIsSaving(true);
         try {
             await addDoc(collection(db, "quotes"), {
                 ...data,
-                userId: user.uid,
+                providerId: user.uid,
                 createdAt: serverTimestamp(),
-                issueDate: data.issueDate.toISOString(),
-                validUntil: data.validUntil.toISOString(),
+                status: 'Draft',
+                issueDate: Timestamp.fromDate(data.issueDate),
+                validUntil: Timestamp.fromDate(data.validUntil),
             });
             
-            toast({ title: t('success'), description: t('quoteSaved') });
+            toast({ title: t('quoteSaved'), description: t('quoteSavedSuccessfully') });
             form.reset();
         } catch (error) {
-            toast({ variant: "destructive", title: t('error'), description: t('quoteSaveFailed') });
+            console.error("Error saving quote:", error);
+            toast({ variant: "destructive", title: t('error'), description: t('failedToSaveQuote') });
         } finally {
             setIsSaving(false);
         }
@@ -145,27 +171,28 @@ export default function QuoteBuilderClient() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid gap-6 lg:grid-cols-3">
-                        <div className="lg:col-span-1 space-y-6">
-                            <Card>
+                        <div className="lg:col-span-2 space-y-6">
+                             <Card>
                                 <CardHeader>
                                     <CardTitle>{t('clientInformation')}</CardTitle>
-                                    <CardDescription>{t('clientInformationDescription')}</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
-                                    <FormField control={form.control} name="clientName" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>{t('clientName')}</FormLabel>
-                                            <FormControl><Input placeholder={t('clientNamePlaceholder')} {...field} className="bg-background" /></FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
-                                    <FormField control={form.control} name="clientEmail" render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>{t('clientEmail')}</FormLabel>
-                                            <FormControl><Input type="email" placeholder={t('clientEmailPlaceholder')} {...field} className="bg-background" /></FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )} />
+                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <FormField control={form.control} name="clientName" render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>{t('clientName')}</FormLabel>
+                                                <FormControl><Input placeholder={t('clientNamePlaceholder')} {...field} className="bg-background" /></FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )} />
+                                        <FormField control={form.control} name="clientEmail" render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>{t('clientEmail')}</FormLabel>
+                                                <FormControl><Input type="email" placeholder={t('clientEmailPlaceholder')} {...field} className="bg-background" /></FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )} />
+                                    </div>
                                     <FormField control={form.control} name="clientAddress" render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>{t('clientAddress')}</FormLabel>
@@ -179,13 +206,12 @@ export default function QuoteBuilderClient() {
                             <Card>
                                 <CardHeader>
                                     <CardTitle>{t('quoteDetails')}</CardTitle>
-                                    <CardDescription>{t('quoteDetailsDescription')}</CardDescription>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <FormField control={form.control} name="quoteNumber" render={({ field }) => (
+                                <CardContent className="grid md:grid-cols-3 gap-4">
+                                     <FormField control={form.control} name="quoteNumber" render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>{t('quoteNumber')}</FormLabel>
-                                            <FormControl><Input placeholder={t('quoteNumberPlaceholder')} {...field} className="bg-background" /></FormControl>
+                                            <FormControl><Input {...field} className="bg-background" /></FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )} />
@@ -196,13 +222,13 @@ export default function QuoteBuilderClient() {
                                                 <PopoverTrigger asChild>
                                                     <FormControl>
                                                         <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal bg-background", !field.value && "text-muted-foreground")}>
-                                                            {field.value ? (format(field.value, "PPP")) : (<span>{t('pickADate')}</span>)}
+                                                            {field.value ? (format(field.value, "PPP")) : (<span>{t('pickDate')}</span>)}
                                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                         </Button>
                                                     </FormControl>
                                                 </PopoverTrigger>
                                                 <PopoverContent className="w-auto p-0" align="start">
-                                                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date > new Date() || date < new Date("1900-01-01")} initialFocus />
+                                                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
                                                 </PopoverContent>
                                             </Popover>
                                             <FormMessage />
@@ -215,13 +241,13 @@ export default function QuoteBuilderClient() {
                                                 <PopoverTrigger asChild>
                                                     <FormControl>
                                                         <Button variant={"outline"} className={cn("w-full pl-3 text-left font-normal bg-background", !field.value && "text-muted-foreground")}>
-                                                            {field.value ? (format(field.value, "PPP")) : (<span>{t('pickADate')}</span>)}
+                                                            {field.value ? (format(field.value, "PPP")) : (<span>{t('pickDate')}</span>)}
                                                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                         </Button>
                                                     </FormControl>
                                                 </PopoverTrigger>
                                                 <PopoverContent className="w-auto p-0" align="start">
-                                                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date() || date < new Date("1900-01-01")} initialFocus />
+                                                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date()} initialFocus />
                                                 </PopoverContent>
                                             </Popover>
                                             <FormMessage />
@@ -265,7 +291,7 @@ export default function QuoteBuilderClient() {
                                                     </div>
                                                 </FormItem>
                                             </div>
-                                            <Button type="button" size="icon" variant="destructive" className="absolute top-2 right-2 h-7 w-7" onClick={() => remove(index)}>
+                                            <Button type="button" size="icon" variant="ghost" className="absolute top-2 right-2 h-7 w-7 text-destructive" onClick={() => remove(index)}>
                                                 <Trash2 className="h-4 w-4" />
                                                 <span className="sr-only">{t('removeItem')}</span>
                                             </Button>
@@ -278,7 +304,7 @@ export default function QuoteBuilderClient() {
                             </Card>
                         </div>
 
-                        <div className="lg:col-span-2">
+                        <div className="lg:col-span-1">
                              <Card className="sticky top-20">
                                 <CardHeader><CardTitle>{t('quoteSummary')}</CardTitle></CardHeader>
                                 <CardContent className="space-y-4">
@@ -328,5 +354,3 @@ export default function QuoteBuilderClient() {
         </Dialog>
     );
 }
-
-

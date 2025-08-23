@@ -175,7 +175,7 @@ const getAvatarFallback = (name: string | null | undefined) => {
 
 const ProviderCard = ({ provider, isFavorite, onToggleFavorite, t }: { provider: Provider; isFavorite: boolean; onToggleFavorite: (provider: Provider) => void; t: any; }) => {
     return (
-        <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col">
+        <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col group">
             {provider.searchReasoning && (
                  <Alert className="border-0 border-b rounded-none bg-primary/10 text-primary-foreground">
                     <Info className="h-4 w-4 text-primary" />
@@ -218,7 +218,7 @@ const ProviderCard = ({ provider, isFavorite, onToggleFavorite, t }: { provider:
 
                 {provider.keyServices && provider.keyServices.length > 0 && (
                     <div>
-                         <h4 className="font-semibold flex items-center gap-2 mb-2"><Briefcase className="h-4 w-4" /> Key Services</h4>
+                         <h4 className="font-semibold flex items-center gap-2 mb-2 text-sm"><Briefcase className="h-4 w-4" /> Key Services</h4>
                         <div className="flex flex-wrap gap-2">
                             {provider.keyServices.map(service => (
                                 <Badge key={service} variant="secondary">{service}</Badge>
@@ -226,8 +226,6 @@ const ProviderCard = ({ provider, isFavorite, onToggleFavorite, t }: { provider:
                         </div>
                     </div>
                 )}
-
-                <p className="text-sm text-muted-foreground mt-2 h-10 line-clamp-2">{provider.bio || 'No bio available.'}</p>
             </CardContent>
             <CardFooter>
                  <Button className="w-full" asChild>
@@ -691,11 +689,11 @@ export default function DashboardPage() {
                 </div>
 
                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-                    <DashboardCard isLoading={loadingAgencyData} title="Total Revenue" icon={DollarSign} value={`₱${agencyTotalRevenue.toFixed(2)}`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Completed Bookings" icon={Calendar} value={`${agencyTotalBookings}`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Managed Providers" icon={Users2} value={`${agencyProviderCount}`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Agency Rating" icon={Star} value={`${agencyOverallRating}`} change={`Based on ${agencyProviders.reduce((sum, p) => sum + (p.reviewCount || 0), 0)} reviews`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Pending Payouts" icon={Wallet} value={`₱${agencyPendingPayouts.toFixed(2)}`} />
+                    <DashboardCard isLoading={loadingAgencyData} title={t('totalRevenue')} icon={DollarSign} value={`₱${agencyTotalRevenue.toFixed(2)}`} />
+                    <DashboardCard isLoading={loadingAgencyData} title={t('completedBookings')} icon={Calendar} value={`${agencyTotalBookings}`} />
+                    <DashboardCard isLoading={loadingAgencyData} title={t('managedProviders')} icon={Users2} value={`${agencyProviderCount}`} />
+                    <DashboardCard isLoading={loadingAgencyData} title={t('agencyRating')} icon={Star} value={`${agencyOverallRating}`} change={t('basedOnReviews', { count: agencyProviders.reduce((sum, p) => sum + (p.reviewCount || 0), 0) })} />
+                    <DashboardCard isLoading={loadingAgencyData} title={t('pendingPayouts')} icon={Wallet} value={`₱${agencyPendingPayouts.toFixed(2)}`} />
                 </div>
                 
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
