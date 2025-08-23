@@ -1,0 +1,69 @@
+
+"use server";
+
+import { z } from "zod";
+import { Resend } from "resend";
+import ContactFormEmail from "@/emails/contact-form-email";
+import { getTranslations } from 'next-intl/server';
+
+const createContactSchema = (t: any) => z.object({
+  name: z.string().min(2, { message: t('nameRequired') }),
+  email: z.string().email({ message: t('emailRequired') }),
+  subject: z.string().min(5, { message: t('subjectRequired') }),
+  message: z.string().min(10, { message: t('messageRequired') }),
+});
+
+export interface FormState {
+  error: string | null;
+  message: string;
+}
+
+export async function sendContactForm(
+  prevState: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const t = await getTranslations('ContactUs');
+  const contactSchema = createContactSchema(t);
+  
+  const validatedFields = contactSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    subject: formData.get("subject"),
+    message: formData.get("message"),
+  });
+
+  if (!validatedFields.success) {
+    const errorMessage = validatedFields.error.errors
+      .map((e) => e.message)
+      .join(", ");
+    return {
+      error: errorMessage,
+      message: t('validationFailed'),
+    };
+  }
+
+  const { name, email, subject, message } = validatedFields.data;
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
+  try {
+    await resend.emails.send({
+      from: "Contact Form <onboarding@resend.dev>", // Must be a verified domain on Resend
+      to: process.env.ADMIN_EMAIL!,
+      subject: `New Contact Form Submission: ${subject}`,
+      reply_to: email,
+      react: ContactFormEmail({ name, email, message }),
+    });
+
+    return {
+      error: null,
+      message: t('messageSent'),
+    };
+  } catch (e) {
+    const error = e instanceof Error ? e.message : t('unknownError');
+    console.error("Email sending failed:", error);
+    return {
+      error: t('sendError', { error }),
+      message: t('errorOccurred'),
+    };
+  }
+}
