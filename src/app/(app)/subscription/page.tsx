@@ -271,7 +271,7 @@ export default function SubscriptionPage() {
                     )}
                 </section>
                 
-                {loadingPlans ? <Skeleton className="h-96 w-full"/> : (userRole === 'provider' ? renderAgencyPlans() : renderProviderPlans())}
+                {loadingPlans ? <Skeleton className="h-96 w-full"/> : (userRole === 'provider' ? renderProviderPlans() : renderAgencyPlans())}
 
                 <section>
                     <PaymentHistory />

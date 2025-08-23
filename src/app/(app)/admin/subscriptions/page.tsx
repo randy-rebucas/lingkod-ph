@@ -136,7 +136,13 @@ const AddEditPlanDialog = ({
         if (id) {
             result = await handleUpdateSubscriptionPlan(id, planData, actor);
         } else {
-            result = await handleAddSubscriptionPlan({...planData, type: planType}, actor);
+            const planWithType = {...planData, type: planType};
+            result = await handleAddSubscriptionPlan(
+                planType === 'provider' 
+                    ? planWithType as Omit<SubscriptionTier, 'id'>
+                    : planWithType as Omit<AgencySubscriptionTier, 'id'>, 
+                actor
+            );
         }
         
          toast({
@@ -164,7 +170,10 @@ const AddEditPlanDialog = ({
                     </div>
                      <div className="space-y-2">
                         <Label>Price (PHP or text)</Label>
-                        <Input value={editablePlan.price || ''} onChange={e => setEditablePlan(p => p ? ({...p, price: e.target.value.match(/^[0-9]+$/) ? Number(e.target.value) : e.target.value}) : null)}/>
+                        <Input value={editablePlan.price || ''} onChange={e => {
+                            const newPrice = e.target.value.match(/^[0-9]+$/) ? Number(e.target.value) : e.target.value;
+                            setEditablePlan(p => p ? ({...p, price: newPrice} as SubscriptionTier | AgencySubscriptionTier) : null);
+                        }}/>
                     </div>
                  </div>
                  <div className="space-y-2">

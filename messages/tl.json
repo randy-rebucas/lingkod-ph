@@ -300,7 +300,10 @@
       "agreeTerms": "Sumasang-ayon ako sa Terms of Service",
       "createAccount": "Gumawa ng Account",
       "haveAccount": "May account ka na?",
-      "signIn": "Mag-sign In"
+      "signIn": "Mag-sign In",
+      "logInLink": "Mag-log in",
+      "joinLocalPro": "Sumali sa LocalPro ngayon para makahanap ng trusted na pros o palaguin ang iyong negosyo.",
+      "alreadyHaveAccount": "May account ka na?"
     },
     "welcomeBack": "Maligayang Pagbabalik!",
     "enterCredentials": "I-enter ang iyong credentials para ma-access ang iyong account",
@@ -786,7 +789,8 @@
     "noOpenings": "Walang bukas na posisyon sa ngayon.",
     "checkBack": "Paki-check ulit sa ibang pagkakataon para sa mga bagong oportunidad.",
     "applyNow": "Mag-apply Ngayon",
-    "viewDetails": "Tingnan ang mga Detalye"
+    "viewDetails": "Tingnan ang mga Detalye",
+    "contactSales": "Kontakin ang Sales"
   },
   "Partners": {
     "title": "Mga Partner",
@@ -896,7 +900,8 @@
     "success": "Tagumpay",
     "mustBeLoggedIn": "Dapat kang naka-log in para ma-save ang mga setting.",
     "preferencesSaved": "Na-save na ang iyong mga kagustuhan.",
-    "saveFailed": "Hindi Na-save"
+    "saveFailed": "Hindi Na-save",
+    "description": "Pamahalaan ang mga setting at kagustuhan ng iyong account."
   },
   "Services": {
     "title": "Aking Mga Serbisyo",
@@ -989,7 +994,8 @@
     "loginRequired": "Kailangan ng Login",
     "pleaseLoginToBook": "Mangyaring mag-login para makapag-book ng serbisyo.",
     "bookingSuccessful": "Matagumpay ang Booking!",
-    "bookingSuccessfulDescription": "Na-kumpirma na ang iyong booking at makikita na sa iyong listahan ng mga booking."
+    "bookingSuccessfulDescription": "Na-kumpirma na ang iyong booking at makikita na sa iyong listahan ng mga booking.",
+    "cancel": "Kanselahin"
   },
   "Profile": {
     "title": "Aking Profile",

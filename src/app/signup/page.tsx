@@ -268,7 +268,7 @@ const SignupFormContainer = () => {
 export default function SignupPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const t = useTranslations('Signup');
+  const t = useTranslations('Auth.signup');
   
   useEffect(() => {
     if (!authLoading && user) {

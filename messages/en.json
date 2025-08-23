@@ -71,6 +71,7 @@
   },
   "Settings": {
     "title": "Settings",
+    "description": "Manage your account settings and preferences.",
     "account": "Account Settings",
     "privacy": "Privacy Settings",
     "notifications": "Notification Settings",
@@ -306,7 +307,10 @@
       "agreeTerms": "I agree to the Terms of Service",
       "createAccount": "Create Account",
       "haveAccount": "Already have an account?",
-      "signIn": "Sign In"
+      "signIn": "Sign In",
+      "logInLink": "Log in",
+      "joinLocalPro": "Join LocalPro today to find trusted pros or grow your business.",
+      "alreadyHaveAccount": "Already have an account?"
     },
     "welcomeBack": "Welcome Back!",
     "enterCredentials": "Enter your credentials to access your account",
@@ -784,7 +788,8 @@
     "noOpenings": "No open positions at the moment.",
     "checkBack": "Please check back later for new opportunities.",
     "applyNow": "Apply Now",
-    "viewDetails": "View Details"
+    "viewDetails": "View Details",
+    "contactSales": "Contact Sales"
   },
   "Partners": {
     "title": "Partners",
@@ -875,6 +880,7 @@
   "Settings": {
     "title": "Settings",
     "subtitle": "Manage your account settings and preferences.",
+    "description": "Manage your account settings and preferences.",
     "notificationsTitle": "Notifications",
     "notificationsDescription": "Choose how you want to be notified.",
     "bookingUpdates": "Booking Updates",
@@ -888,7 +894,8 @@
     "success": "Success",
     "mustBeLoggedIn": "You must be logged in to save settings.",
     "preferencesSaved": "Your preferences have been saved.",
-    "saveFailed": "Save Failed"
+    "saveFailed": "Save Failed",
+    "notifications": "Notifications"
   },
   "Services": {
     "title": "My Services",
@@ -981,7 +988,8 @@
     "loginRequired": "Login Required",
     "pleaseLoginToBook": "Please log in to book a service.",
     "bookingSuccessful": "Booking Successful!",
-    "bookingSuccessfulDescription": "Your booking has been confirmed and is now visible in your bookings list."
+    "bookingSuccessfulDescription": "Your booking has been confirmed and is now visible in your bookings list.",
+    "cancel": "Cancel"
   },
   "Profile": {
     "title": "My Profile",
