@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { Logo } from "@/components/logo";
+import { useTranslations } from 'next-intl';
 
 
 // Function to generate a unique referral code
@@ -118,6 +119,7 @@ const SignupFormContainer = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const t = useTranslations('Auth');
 
   useEffect(() => {
     const refCode = searchParams.get('ref');
@@ -153,18 +155,18 @@ const SignupFormContainer = () => {
       if (referralCode) {
         const referralError = await handleReferral(referralCode, user);
         if (referralError) {
-            toast({ variant: 'destructive', title: 'Invalid Referral Code', description: referralError });
+            toast({ variant: 'destructive', title: t('invalidReferralCode'), description: referralError });
         } else {
-             toast({ title: "Referral Applied!", description: "You and your friend have received bonus points." });
+             toast({ title: t('referralApplied'), description: t('referralBonus') });
         }
       }
 
-      toast({ title: "Success", description: "Account created successfully!" });
+      toast({ title: t('success'), description: t('accountCreatedSuccess') });
       router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Signup Failed",
+        title: t('signupFailed'),
         description: error.message,
       });
     } finally {
@@ -202,20 +204,20 @@ const SignupFormContainer = () => {
         if (refCode) {
           const referralError = await handleReferral(refCode, user);
           if (referralError) {
-              toast({ variant: 'destructive', title: 'Invalid Referral Code', description: referralError });
+              toast({ variant: 'destructive', title: t('invalidReferralCode'), description: referralError });
           } else {
-             toast({ title: "Referral Applied!", description: "You and your friend have received bonus points." });
+             toast({ title: t('referralApplied'), description: t('referralBonus') });
           }
         }
       } 
       
-      toast({ title: "Success", description: "Signed up successfully with Google!" });
+      toast({ title: t('success'), description: t('signedUpGoogle') });
       router.push('/dashboard');
 
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Google Sign-up Failed",
+        title: t('googleSignupFailed'),
         description: error.message,
       });
     } finally {
@@ -227,7 +229,7 @@ const SignupFormContainer = () => {
     <>
     <form className="space-y-4" onSubmit={handleSignup}>
         <div className="space-y-2">
-          <Label htmlFor="name">Full Name</Label>
+          <Label htmlFor="name">{t('fullName')}</Label>
           <Input id="name" placeholder="Juan Dela Cruz" required value={name} onChange={e => setName(e.target.value)} />
         </div>
         <div className="space-y-2">
@@ -235,7 +237,7 @@ const SignupFormContainer = () => {
             <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={e => setEmail(e.target.value)} />
         </div>
         <div className="space-y-2">
-            <Label htmlFor="phone">Mobile Number</Label>
+            <Label htmlFor="phone">{t('mobileNumber')}</Label>
             <Input id="phone" type="tel" placeholder="09123456789" required value={phone} onChange={e => setPhone(e.target.value)} />
         </div>
         <div className="space-y-2">
@@ -243,19 +245,19 @@ const SignupFormContainer = () => {
             <Input id="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
         </div>
         <div className="space-y-2">
-            <Label htmlFor="referral">Referral Code (Optional)</Label>
+            <Label htmlFor="referral">{t('referralCode')}</Label>
             <Input id="referral" placeholder="LP-XXXX-YYY-ZZZ" value={referralCode} onChange={e => setReferralCode(e.target.value)} />
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {loading ? 'Creating Account...' : 'Create Account'}
+            {loading ? t('creatingAccount') : t('createAccountBtn')}
         </Button>
     </form>
     <Separator className="my-6" />
     <div className="space-y-4">
         <Button variant="outline" className="w-full" onClick={handleGoogleSignup} disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Sign up with Google
+            {t('signUpWithGoogle')}
         </Button>
     </div>
     </>
@@ -266,6 +268,7 @@ const SignupFormContainer = () => {
 export default function SignupPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const t = useTranslations('Signup');
   
   useEffect(() => {
     if (!authLoading && user) {
@@ -288,8 +291,8 @@ export default function SignupPage() {
            <Link href="/" className="inline-block mx-auto">
               <Logo />
             </Link>
-          <CardTitle className="text-2xl">Create Your Account</CardTitle>
-          <CardDescription>Join LocalPro today to find trusted pros or grow your business.</CardDescription>
+          <CardTitle className="text-2xl">{t('createAccount')}</CardTitle>
+          <CardDescription>{t('joinLocalPro')}</CardDescription>
         </CardHeader>
         <CardContent>
           <Suspense fallback={<div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin"/></div>}>
@@ -297,9 +300,9 @@ export default function SignupPage() {
           </Suspense>
 
           <div className="mt-6 text-center text-sm">
-            Already have an account?{" "}
+            {t('alreadyHaveAccount')}{" "}
             <Link href="/login" className="underline">
-              Log in
+              {t('logInLink')}
             </Link>
           </div>
         </CardContent>

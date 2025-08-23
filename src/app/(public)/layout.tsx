@@ -1,10 +1,15 @@
 
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
+import { useTranslations } from 'next-intl';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 const Header = () => {
-    
+  const t = useTranslations('Navigation');
+
   return (
   <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
     <div className="container flex h-16 items-center justify-between">
@@ -12,17 +17,21 @@ const Header = () => {
         <Logo />
       </Link>
       <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
-         <Link href="/about" className="transition-colors hover:text-primary">About</Link>
-        <Link href="/careers" className="transition-colors hover:text-primary">Careers</Link>
-        <Link href="/contact-us" className="transition-colors hover:text-primary">Contact Us</Link>
-        <Link href="/help-center" className="transition-colors hover:text-primary">Help Center</Link>
+         <Link href="/about" className="transition-colors hover:text-primary">{t('about')}</Link>
+        <Link href="/careers" className="transition-colors hover:text-primary">{t('careers')}</Link>
+        <Link href="/contact-us" className="transition-colors hover:text-primary">{t('contact')}</Link>
+        <Link href="/help-center" className="transition-colors hover:text-primary">{t('helpCenter')}</Link>
       </nav>
       <div className="flex items-center space-x-2">
+        <p>
+          {t('language')}
+        </p>
+        <LanguageSwitcher />
         <Button variant="ghost" asChild>
-          <Link href="/login">Log In</Link>
+          <Link href="/login">{t('login')}</Link>
         </Button>
         <Button asChild>
-          <Link href="/signup">Sign Up</Link>
+          <Link href="/signup">{t('signup')}</Link>
         </Button>
       </div>
     </div>
@@ -30,37 +39,41 @@ const Header = () => {
   )
 };
 
-const Footer = () => (
+const Footer = () => {
+  const t = useTranslations('Footer');
+  
+  return (
   <footer className="border-t bg-secondary">
     <div className="container grid grid-cols-1 md:grid-cols-4 gap-8 py-12">
         <div>
             <Logo />
         </div>
         <div>
-            <h4 className="font-semibold mb-2">Company</h4>
+            <h4 className="font-semibold mb-2">{t('company')}</h4>
             <ul className="space-y-2 text-sm">
-                <li><Link href="/about" className="text-muted-foreground hover:text-primary">About Us</Link></li>
-                <li><Link href="/careers" className="text-muted-foreground hover:text-primary">Careers</Link></li>
-                <li><Link href="/partners" className="text-muted-foreground hover:text-primary">Partners</Link></li>
+                <li><Link href="/about" className="text-muted-foreground hover:text-primary">{t('about')}</Link></li>
+                <li><Link href="/careers" className="text-muted-foreground hover:text-primary">{t('careers')}</Link></li>
+                <li><Link href="/partners" className="text-muted-foreground hover:text-primary">{t('partners')}</Link></li>
             </ul>
         </div>
         <div>
-            <h4 className="font-semibold mb-2">Support</h4>
+            <h4 className="font-semibold mb-2">{t('support')}</h4>
             <ul className="space-y-2 text-sm">
-                <li><Link href="/help-center" className="text-muted-foreground hover:text-primary">Help Center</Link></li>
-                <li><Link href="/contact-us" className="text-muted-foreground hover:text-primary">Contact Us</Link></li>
-                <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-primary">Terms of Service</Link></li>
+                <li><Link href="/help-center" className="text-muted-foreground hover:text-primary">{t('helpCenter')}</Link></li>
+                <li><Link href="/contact-us" className="text-muted-foreground hover:text-primary">{t('contact')}</Link></li>
+                <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-primary">{t('terms')}</Link></li>
             </ul>
         </div>
         <div>
-             <h4 className="font-semibold mb-2">Stay Connected</h4>
+             <h4 className="font-semibold mb-2">{t('stayConnected')}</h4>
              <div className="flex space-x-4">
-                <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} LocalPro. All rights reserved.</p>
+                <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} LocalPro. {t('allRightsReserved')}</p>
              </div>
         </div>
     </div>
   </footer>
-);
+  );
+};
 
 export default function PublicLayout({
   children,

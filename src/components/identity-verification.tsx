@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Upload, Loader2, CheckCircle, AlertCircle, Clock, ShieldCheck, User, CreditCard } from 'lucide-react';
 import { Badge } from './ui/badge';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 type VerificationStatus = 'Unverified' | 'Pending' | 'Verified' | 'Rejected';
 
@@ -22,31 +23,32 @@ const StatusInfo = {
         icon: <AlertCircle className="h-12 w-12 text-destructive" />,
         title: "Unverified",
         description: "Please submit your documents to get verified.",
-        badgeVariant: "destructive",
+        badgeVariant: "destructive" as const,
     },
     Pending: {
         icon: <Clock className="h-12 w-12 text-yellow-500" />,
         title: "Pending Review",
         description: "Your documents have been submitted and are under review. This may take 1-2 business days.",
-        badgeVariant: "secondary",
+        badgeVariant: "secondary" as const,
     },
     Verified: {
         icon: <CheckCircle className="h-12 w-12 text-green-500" />,
         title: "Verified",
         description: "Congratulations! Your identity has been successfully verified.",
-        badgeVariant: "default",
+        badgeVariant: "default" as const,
     },
     Rejected: {
         icon: <AlertCircle className="h-12 w-12 text-destructive" />,
         title: "Verification Rejected",
         description: "There was an issue with your documents. Please review the feedback and resubmit.",
-        badgeVariant: "destructive",
+        badgeVariant: "destructive" as const,
     },
 };
 
 export default function IdentityVerification() {
     const { user, verificationStatus } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('IdentityVerification');
     const [selfie, setSelfie] = useState<File | null>(null);
     const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
     const [govId, setGovId] = useState<File | null>(null);
@@ -95,7 +97,7 @@ export default function IdentityVerification() {
 
     const handleSubmit = async () => {
         if (!user || !selfie || !govId) {
-            toast({ variant: 'destructive', title: 'Missing Files', description: 'Please upload both a selfie and a government ID.' });
+            toast({ variant: 'destructive', title: t('missingFiles'), description: t('uploadBothFiles') });
             return;
         }
 
@@ -114,7 +116,7 @@ export default function IdentityVerification() {
                 }
             });
             
-            toast({ title: 'Success', description: 'Your documents have been submitted for verification.' });
+            toast({ title: t('success'), description: t('documentsSubmitted') });
             // The AuthContext will automatically update the status via its listener
             setSelfie(null);
             setSelfiePreview(null);
@@ -122,7 +124,7 @@ export default function IdentityVerification() {
             setGovIdPreview(null);
 
         } catch (error: any) {
-            toast({ variant: 'destructive', title: 'Submission Failed', description: error.message });
+            toast({ variant: 'destructive', title: t('submissionFailed'), description: error.message });
         } finally {
             setIsSubmitting(false);
             setSelfieProgress(null);

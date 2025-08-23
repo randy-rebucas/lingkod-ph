@@ -2,9 +2,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, Timestamp, doc, getDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -72,6 +73,7 @@ const processChartData = (bookings: CompletedBooking[]) => {
 export default function EarningsPage() {
     const { user, userRole, subscription } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('Earnings');
     const [bookings, setBookings] = useState<CompletedBooking[]>([]);
     const [payouts, setPayouts] = useState<Payout[]>([]);
     const [loading, setLoading] = useState(true);
@@ -131,8 +133,8 @@ export default function EarningsPage() {
         if (!userDoc.exists() || !userDoc.data()?.payoutDetails?.method) {
             toast({
                 variant: "destructive",
-                title: "Payout Details Missing",
-                description: "Please set up your payout method in your profile before requesting a payout.",
+                title: t('payoutDetailsMissing'),
+                description: t('payoutDetailsMissingDescription'),
             });
             return;
         }
@@ -141,15 +143,15 @@ export default function EarningsPage() {
         try {
             await handleRequestPayout({ providerId: user.uid, amount: availableForPayout });
             toast({
-                title: "Payout Requested",
-                description: "Your payout request has been submitted and will be processed within 3-5 business days.",
+                title: t('payoutRequested'),
+                description: t('payoutRequestedDescription'),
             });
         } catch (error) {
             console.error(error);
             toast({
                 variant: "destructive",
-                title: "Request Failed",
-                description: "There was an error submitting your payout request. Please try again.",
+                title: t('requestFailed'),
+                description: t('requestFailedDescription'),
             });
         } finally {
             setIsRequestingPayout(false);
@@ -164,8 +166,8 @@ export default function EarningsPage() {
         return (
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Earnings</h1>
-                    <p className="text-muted-foreground">This page is for providers and agencies only.</p>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('providersAndAgenciesOnly')}</p>
                 </div>
             </div>
         );
@@ -175,21 +177,21 @@ export default function EarningsPage() {
          return (
             <div className="space-y-6">
                  <div>
-                    <h1 className="text-3xl font-bold font-headline">Earnings</h1>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                     <p className="text-muted-foreground">
-                        Track your revenue and request payouts.
+                        {t('subtitle')}
                     </p>
                 </div>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Upgrade to Access Earnings</CardTitle>
-                        <CardDescription>This feature is available on our paid plans. Upgrade your plan to track your earnings and manage payouts.</CardDescription>
+                        <CardTitle>{t('upgradeToAccessEarnings')}</CardTitle>
+                        <CardDescription>{t('upgradeDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                         <DollarSign className="h-16 w-16 mb-4" />
-                        <p className="mb-4">Take control of your finances and monitor your business growth.</p>
+                        <p className="mb-4">{t('takeControlOfFinances')}</p>
                          <Button asChild>
-                            <Link href="/subscription">View Subscription Plans</Link>
+                            <Link href="/subscription">{t('viewSubscriptionPlans')}</Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -217,7 +219,7 @@ export default function EarningsPage() {
     const payoutButton = (
         <Button disabled={availableForPayout <= 400 || !isSaturday || isRequestingPayout} onClick={handlePayoutRequest}>
             {isRequestingPayout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Request Payout
+            {t('requestPayout')}
         </Button>
     );
 
@@ -225,9 +227,9 @@ export default function EarningsPage() {
         <div className="space-y-6">
              <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Earnings</h1>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                     <p className="text-muted-foreground">
-                        Track your revenue and request payouts.
+                        {t('subtitle')}
                     </p>
                 </div>
                 {isSaturday ? (
@@ -239,7 +241,7 @@ export default function EarningsPage() {
                                 <span>{payoutButton}</span>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Payout requests are only available on Saturdays.</p>
+                                <p>{t('payoutRequestsOnlyOnSaturdays')}</p>
                             </TooltipContent>
                         </TooltipUI>
                     </TooltipProvider>
@@ -249,50 +251,50 @@ export default function EarningsPage() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Lifetime Gross Revenue</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('lifetimeGrossRevenue')}</CardTitle>
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">₱{totalRevenue.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">All-time earnings from completed jobs</p>
+                        <p className="text-xs text-muted-foreground">{t('allTimeEarnings')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Paid Out</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('totalPaidOut')}</CardTitle>
                         <CheckCircle className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">₱{totalPaidOut.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">Total amount successfully paid out</p>
+                        <p className="text-xs text-muted-foreground">{t('totalAmountPaidOut')}</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Pending Payouts</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('pendingPayouts')}</CardTitle>
                         <Hourglass className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">₱{totalPending.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">Amount currently being processed</p>
+                        <p className="text-xs text-muted-foreground">{t('amountBeingProcessed')}</p>
                     </CardContent>
                 </Card>
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Available for Payout</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('availableForPayout')}</CardTitle>
                         <WalletCards className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">₱{availableForPayout.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">Minimum payout is ₱400.00</p>
+                        <p className="text-xs text-muted-foreground">{t('minimumPayout')}</p>
                     </CardContent>
                 </Card>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Earnings History</CardTitle>
-                    <CardDescription>Your monthly earnings over the last year.</CardDescription>
+                    <CardTitle>{t('earningsHistory')}</CardTitle>
+                    <CardDescription>{t('monthlyEarningsDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <ResponsiveContainer width="100%" height={350}>
@@ -316,16 +318,16 @@ export default function EarningsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Recent Completed Jobs</CardTitle>
-                        <CardDescription>A detailed list of completed transactions contributing to your earnings.</CardDescription>
+                        <CardTitle>{t('recentCompletedJobs')}</CardTitle>
+                        <CardDescription>{t('completedJobsDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Client</TableHead>
-                                    <TableHead>Service</TableHead>
-                                    <TableHead className="text-right">Amount</TableHead>
+                                    <TableHead>{t('client')}</TableHead>
+                                    <TableHead>{t('service')}</TableHead>
+                                    <TableHead className="text-right">{t('amount')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -338,7 +340,7 @@ export default function EarningsPage() {
                                 )) : (
                                     <TableRow>
                                         <TableCell colSpan={3} className="h-24 text-center">
-                                            No transactions yet. Complete jobs to see them here.
+                                            {t('noTransactionsYet')}
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -348,16 +350,16 @@ export default function EarningsPage() {
                 </Card>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Payout History</CardTitle>
-                        <CardDescription>A record of your requested payouts.</CardDescription>
+                        <CardTitle>{t('payoutHistory')}</CardTitle>
+                        <CardDescription>{t('payoutHistoryDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Date Requested</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Amount</TableHead>
+                                    <TableHead>{t('dateRequested')}</TableHead>
+                                    <TableHead>{t('status')}</TableHead>
+                                    <TableHead className="text-right">{t('amount')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -374,7 +376,7 @@ export default function EarningsPage() {
                                 )) : (
                                     <TableRow>
                                         <TableCell colSpan={3} className="h-24 text-center">
-                                            No payouts requested yet.
+                                            {t('noPayoutsRequested')}
                                         </TableCell>
                                     </TableRow>
                                 )}

@@ -17,6 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Sparkles } from 'lucide-react';
 import { generateServiceDescription } from '@/ai/flows/generate-service-description';
+import { useTranslations } from 'next-intl';
 
 export type Service = {
     id?: string;
@@ -52,12 +53,19 @@ type AddEditServiceDialogProps = {
 export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSaved }: AddEditServiceDialogProps) {
     const { user } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('Components');
     const [isSaving, setIsSaving] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [categories, setCategories] = useState<Category[]>([]);
 
     const form = useForm<Service>({
-        resolver: zodResolver(serviceSchema),
+        resolver: zodResolver(z.object({
+            name: z.string().min(3, { message: t('serviceNameRequired') }),
+            category: z.string().min(1, { message: t('categoryRequired') }),
+            price: z.coerce.number().positive({ message: t('priceMustBePositive') }),
+            description: z.string().min(10, { message: t('descriptionMinLength') }),
+            status: z.enum(['Active', 'Inactive']),
+        })),
         defaultValues: {
             name: '',
             category: '',
@@ -77,7 +85,7 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                 setCategories(fetchedCategories);
             } catch (error) {
                 console.error("Error fetching categories: ", error);
-                toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch categories.' });
+                toast({ variant: 'destructive', title: t('error'), description: t('couldNotFetchCategories') });
             }
         };
 
@@ -106,8 +114,8 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
         if (!serviceName || serviceName.trim().length < 3) {
             toast({
                 variant: 'destructive',
-                title: 'Service Name Required',
-                description: 'Please enter a service name (at least 3 characters) first.',
+                title: t('serviceNameRequired'),
+                description: t('enterServiceNameFirst'),
             });
             return;
         }
@@ -118,16 +126,16 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
             if (result.description) {
                 form.setValue('description', result.description, { shouldValidate: true });
                 toast({
-                    title: 'Description Generated!',
-                    description: 'The AI-powered description has been added.',
+                    title: t('descriptionGenerated'),
+                    description: t('aiDescriptionAdded'),
                 });
             }
         } catch (error) {
             console.error('Error generating description:', error);
             toast({
                 variant: 'destructive',
-                title: 'AI Error',
-                description: 'Could not generate a description at this time.',
+                title: t('aiError'),
+                description: t('couldNotGenerate'),
             });
         } finally {
             setIsGenerating(false);
@@ -136,7 +144,7 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
 
     const onSubmit = async (data: Service) => {
         if (!user) {
-            toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('mustBeLoggedIn') });
             return;
         }
         setIsSaving(true);
@@ -145,7 +153,7 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                 // Update existing service
                 const serviceRef = doc(db, 'services', service.id);
                 await updateDoc(serviceRef, data);
-                toast({ title: 'Success', description: 'Service updated successfully.' });
+                toast({ title: t('success'), description: t('serviceUpdated') });
             } else {
                 // Add new service
                 await addDoc(collection(db, 'services'), {
@@ -153,12 +161,12 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                     userId: user.uid,
                     createdAt: serverTimestamp(),
                 });
-                toast({ title: 'Success', description: 'Service added successfully.' });
+                toast({ title: t('success'), description: t('serviceAdded') });
             }
             onServiceSaved();
         } catch (error) {
             console.error("Error saving service:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to save service.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToSave') });
         } finally {
             setIsSaving(false);
         }
@@ -168,9 +176,9 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>{service ? 'Edit Service' : 'Add New Service'}</DialogTitle>
+                    <DialogTitle>{service ? t('editService') : t('addNewService')}</DialogTitle>
                     <DialogDescription>
-                        {service ? 'Update the details of your service.' : 'Fill in the details to add a new service to your profile.'}
+                        {service ? t('updateServiceDetails') : t('addServiceDetails')}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -180,9 +188,9 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Service Name</FormLabel>
+                                    <FormLabel>{t('serviceName')}</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g., Deep House Cleaning" {...field} />
+                                        <Input placeholder={t('serviceNamePlaceholder')} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -193,11 +201,11 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                             name="category"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Category</FormLabel>
+                                    <FormLabel>{t('category')}</FormLabel>
                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a category" />
+                                                <SelectValue placeholder={t('selectCategory')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -215,9 +223,9 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                             name="price"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Price (PHP)</FormLabel>
+                                    <FormLabel>{t('price')} (PHP)</FormLabel>
                                     <FormControl>
-                                        <Input type="number" placeholder="e.g., 2500" {...field} />
+                                        <Input type="number" placeholder={t('pricePlaceholder')} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -229,14 +237,14 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex justify-between items-center">
-                                        <FormLabel>Description</FormLabel>
+                                        <FormLabel>{t('description')}</FormLabel>
                                         <Button type="button" variant="ghost" size="sm" onClick={handleGenerateDescription} disabled={isGenerating}>
                                             {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4 text-accent" />}
-                                            <span className="ml-2">{isGenerating ? 'Generating...' : 'Generate with AI'}</span>
+                                            <span className="ml-2">{isGenerating ? t('generating') : t('generateWithAI')}</span>
                                         </Button>
                                     </div>
                                     <FormControl>
-                                        <Textarea placeholder="Describe your service in detail..." {...field} rows={4} />
+                                        <Textarea placeholder={t('describeService')} {...field} rows={4} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -247,16 +255,16 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                             name="status"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Status</FormLabel>
+                                    <FormLabel>{t('status')}</FormLabel>
                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a status" />
+                                                <SelectValue placeholder={t('selectStatus')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="Active">Active</SelectItem>
-                                            <SelectItem value="Inactive">Inactive</SelectItem>
+                                            <SelectItem value="Active">{t('active')}</SelectItem>
+                                            <SelectItem value="Inactive">{t('inactive')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -265,11 +273,11 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                         />
                          <DialogFooter>
                             <Button type="button" variant="outline" onClick={() => setIsOpen(false)} disabled={isSaving}>
-                                Cancel
+                                {t('cancel')}
                             </Button>
                             <Button type="submit" disabled={isSaving}>
                                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isSaving ? 'Saving...' : 'Save Service'}
+                                {isSaving ? t('saving') : t('saveService')}
                             </Button>
                         </DialogFooter>
                     </form>

@@ -3,11 +3,6 @@
 import { useState, Suspense } from "react";
 import {
   PayPalButtons,
-  type OnApproveData,
-  type OnApproveActions,
-  type CreateOrderData,
-  type CreateOrderActions,
-  type OnErrorActions,
 } from "@paypal/react-paypal-js";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
@@ -27,7 +22,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
 import Image from "next/image";
 import { QRCode } from "./qrcode-svg";
+import { useTranslations } from 'next-intl';
 
+// Define PayPal types locally since they're not exported from the package
+type OnApproveData = any;
+type OnApproveActions = any;
+type CreateOrderData = any;
+type CreateOrderActions = any;
+type OnErrorActions = any;
 
 type PayPalCheckoutButtonProps = {
   plan: SubscriptionTier | AgencySubscriptionTier;
@@ -37,40 +39,40 @@ type PayPalCheckoutButtonProps = {
 
 type PaymentMethod = 'paypal' | 'gcash' | 'maya';
 
-const localPaymentInstructions = {
-  gcash: {
-    name: "GCash",
-    icon: Wallet,
-    accountName: "Juan Dela Cruz",
-    accountNumber: "0917-000-1234",
-    steps: [
-      "Open your GCash app.",
-      "Tap 'Send' and choose 'Express Send' or scan the QR code.",
-      "Enter the details above and the amount: ₱{amount}.",
-      "After payment, click the 'I Have Paid' button below.",
-    ],
-  },
-  maya: {
-    name: "Maya",
-    icon: Wallet,
-    accountName: "Juan Dela Cruz",
-    accountNumber: "0918-000-5678",
-    steps: [
-      "Open your Maya app.",
-      "Tap 'Send Money' or scan the QR code.",
-      "Enter the amount: ₱{amount} and complete the payment.",
-      "After payment, click the 'I Have Paid' button below.",
-    ],
-  },
-};
-
-
 export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }: PayPalCheckoutButtonProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
+  const t = useTranslations('PayPalCheckout');
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('paypal');
+
+  const localPaymentInstructions = {
+    gcash: {
+      name: "GCash",
+      icon: Wallet,
+      accountName: "Juan Dela Cruz",
+      accountNumber: "0917-000-1234",
+      steps: [
+        t('gcashStep1'),
+        t('gcashStep2'),
+        t('gcashStep3'),
+        t('gcashStep4'),
+      ],
+    },
+    maya: {
+      name: "Maya",
+      icon: Wallet,
+      accountName: "Juan Dela Cruz",
+      accountNumber: "0918-000-5678",
+      steps: [
+        t('mayaStep1'),
+        t('mayaStep2'),
+        t('mayaStep3'),
+        t('mayaStep4'),
+      ],
+    },
+  };
 
   const createOrder = (data: CreateOrderData, actions: CreateOrderActions) => {
     onPaymentStart?.();
@@ -90,16 +92,16 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
   const onApprove = (data: OnApproveData, actions: OnApproveActions) => {
     setIsProcessing(true);
     onPaymentStart?.();
-    return actions.order!.capture().then(async (details) => {
-      if (!user) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "You must be logged in to subscribe.",
-        });
-        setIsProcessing(false);
-        return;
-      }
+    return actions.order!.capture().then(async (details: any) => {
+              if (!user) {
+          toast({
+            variant: "destructive",
+            title: t('error'),
+            description: t('mustBeLoggedInToSubscribe'),
+          });
+          setIsProcessing(false);
+          return;
+        }
       try {
         const renewalDate = new Date();
         renewalDate.setMonth(renewalDate.getMonth() + 1);
@@ -138,8 +140,8 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
         console.error(error);
         toast({
           variant: "destructive",
-          title: "Error",
-          description: "Failed to update your subscription.",
+          title: t('error'),
+          description: t('failedToUpdateSubscription'),
         });
       } finally {
         setIsProcessing(false);
@@ -151,8 +153,8 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
     if (!user) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "You must be logged in to subscribe.",
+        title: t('error'),
+        description: t('mustBeLoggedInToSubscribe'),
       });
       return;
     }
@@ -193,8 +195,8 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
         console.error(error);
         toast({
             variant: "destructive",
-            title: "Error",
-            description: "Failed to create your pending subscription. Please try again.",
+            title: t('error'),
+            description: t('failedToCreatePendingSubscription'),
         });
     } finally {
       setIsProcessing(false);
@@ -205,16 +207,16 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
     console.error("PayPal Checkout Error", err);
     toast({
       variant: "destructive",
-      title: "Payment Error",
-      description: "An error occurred during the payment process. Please try again.",
+      title: t('paymentError'),
+      description: t('paymentProcessError'),
     });
     setIsProcessing(false);
   };
 
   const onCancel = () => {
     toast({
-      title: "Payment Cancelled",
-      description: "You have cancelled the payment process.",
+      title: t('paymentCancelled'),
+      description: t('paymentCancelledDescription'),
     });
     setIsProcessing(false);
   };
@@ -223,23 +225,23 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
     const details = localPaymentInstructions[method];
     return (
         <div className="text-center space-y-4">
-            <h3 className="font-bold text-lg flex items-center justify-center gap-2">Pay with {details.name}</h3>
+            <h3 className="font-bold text-lg flex items-center justify-center gap-2">{t('payWith')} {details.name}</h3>
             
             <div className="mx-auto w-48 h-48 bg-white p-2 rounded-lg">
                 <QRCode />
             </div>
              <div className="text-sm bg-muted p-3 rounded-lg">
-                <p><strong>Account Name:</strong> {details.accountName}</p>
-                <p><strong>Account Number:</strong> {details.accountNumber}</p>
+                <p><strong>{t('accountName')}:</strong> {details.accountName}</p>
+                <p><strong>{t('accountNumber')}:</strong> {details.accountNumber}</p>
              </div>
             <ol className="text-left space-y-2 text-sm text-muted-foreground list-decimal list-inside">
-                {details.steps.map(step => (
+                {details.steps.map((step: string) => (
                     <li key={step}>{step.replace('{amount}', Number(plan.price).toFixed(2))}</li>
                 ))}
             </ol>
             <Button className="w-full" onClick={handleLocalPayment} disabled={isProcessing}>
                 {isProcessing ? <Loader2 className="mr-2 animate-spin" /> : null}
-                I Have Paid
+                {t('iHavePaid')}
             </Button>
         </div>
     )
@@ -257,7 +259,7 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
             {isProcessing && (
                 <div className="flex items-center justify-center p-4">
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    <span>Processing your payment...</span>
+                    <span>{t('processingPayment')}</span>
                 </div>
             )}
             <div className={isProcessing ? 'hidden' : ''}>

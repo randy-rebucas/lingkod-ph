@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, onSnapshot, query, where } from "firebase/firestore";
@@ -39,20 +40,21 @@ const renderStars = (rating: number) => {
     ));
 };
 
-const getAvailabilityBadge = (status: Provider['availabilityStatus']) => {
+const getAvailabilityBadge = (status: Provider['availabilityStatus'], t: any) => {
     switch (status) {
         case 'available':
-            return <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">Available</Badge>;
+            return <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">{t('available')}</Badge>;
         case 'limited':
-            return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">Limited</Badge>;
+            return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">{t('limited')}</Badge>;
         case 'unavailable':
-            return <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">Unavailable</Badge>;
+            return <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">{t('unavailable')}</Badge>;
         default:
             return null;
     }
 };
 
 const ProviderCard = ({ provider }: { provider: Provider }) => {
+    const t = useTranslations('MyFavorites');
     return (
         <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col">
             <CardHeader className="text-center">
@@ -62,7 +64,7 @@ const ProviderCard = ({ provider }: { provider: Provider }) => {
                 </Avatar>
                 <div className="flex items-center justify-center gap-2">
                     <h3 className="text-xl font-bold">{provider.displayName}</h3>
-                     {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus)}
+                     {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus, t)}
                 </div>
                  {provider.reviewCount > 0 && (
                      <div className="flex items-center justify-center gap-1 mt-1 text-muted-foreground">
@@ -72,11 +74,11 @@ const ProviderCard = ({ provider }: { provider: Provider }) => {
                 )}
             </CardHeader>
             <CardContent className="flex-1 space-y-4">
-                <p className="text-sm text-muted-foreground mt-2 h-10 line-clamp-2">{provider.bio || 'No bio available.'}</p>
+                <p className="text-sm text-muted-foreground mt-2 h-10 line-clamp-2">{provider.bio || t('noBioAvailable')}</p>
             </CardContent>
             <CardFooter>
                  <Button className="w-full" asChild>
-                    <Link href={`/providers/${provider.uid}`}>View Profile</Link>
+                    <Link href={`/providers/${provider.uid}`}>{t('viewProfile')}</Link>
                 </Button>
             </CardFooter>
         </Card>
@@ -86,6 +88,7 @@ const ProviderCard = ({ provider }: { provider: Provider }) => {
 
 export default function MyFavoritesPage() {
     const { user } = useAuth();
+    const t = useTranslations('MyFavorites');
     const [providers, setProviders] = useState<Provider[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -144,8 +147,8 @@ export default function MyFavoritesPage() {
         return (
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">My Favorite Providers</h1>
-                    <p className="text-muted-foreground">Your hand-picked list of top professionals.</p>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
@@ -157,8 +160,8 @@ export default function MyFavoritesPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">My Favorite Providers</h1>
-                <p className="text-muted-foreground">Your hand-picked list of top professionals.</p>
+                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
             
             {providers.length > 0 ? (
@@ -171,10 +174,10 @@ export default function MyFavoritesPage() {
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                         <Heart className="h-16 w-16 mb-4" />
-                        <h3 className="text-xl font-semibold">No Favorites Yet</h3>
-                        <p>You haven't added any providers to your favorites. Start exploring to find professionals you like!</p>
+                        <h3 className="text-xl font-semibold">{t('noFavoritesYet')}</h3>
+                        <p>{t('noFavoritesDescription')}</p>
                         <Button asChild className="mt-4">
-                            <Link href="/dashboard">Find Providers</Link>
+                            <Link href="/dashboard">{t('findProviders')}</Link>
                         </Button>
                     </CardContent>
                 </Card>

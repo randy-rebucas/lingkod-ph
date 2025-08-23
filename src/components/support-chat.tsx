@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { cn } from '@/lib/utils';
 import { helpCenterAssistant } from '@/ai/flows/help-center-assistant';
 import { useAuth } from '@/context/auth-context';
+import { useTranslations } from 'next-intl';
 
 type ChatMessage = {
   role: 'user' | 'assistant';
@@ -19,6 +20,7 @@ type ChatMessage = {
 
 export function SupportChat() {
   const { user } = useAuth();
+  const t = useTranslations('SupportChat');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +40,7 @@ export function SupportChat() {
       const assistantMessage: ChatMessage = { role: 'assistant', content: response.answer };
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      const errorMessage: ChatMessage = { role: 'assistant', content: "Sorry, I encountered an error. Please try again." };
+      const errorMessage: ChatMessage = { role: 'assistant', content: t('sorryError') };
       setMessages(prev => [...prev, errorMessage]);
       console.error("AI assistant error:", error);
     } finally {
@@ -69,13 +71,13 @@ export function SupportChat() {
       </PopoverTrigger>
       <PopoverContent className="w-80 sm:w-96 p-0 flex flex-col h-[60vh] mb-2" side="top" align="end">
         <div className="p-4 border-b bg-secondary">
-          <h4 className="font-medium text-center">AI Support Assistant</h4>
+          <h4 className="font-medium text-center">{t('aiAssistant')}</h4>
         </div>
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
             {messages.length === 0 && (
               <div className="text-center text-muted-foreground text-sm p-4">
-                Ask me anything about using LocalPro!
+                {t('aiAssistantSubtitle')}
               </div>
             )}
             {messages.map((message, index) => (
@@ -103,6 +105,7 @@ export function SupportChat() {
                 </Avatar>
                 <div className="rounded-lg p-3 bg-primary/10">
                   <Loader2 className="h-5 w-5 animate-spin" />
+                  <span className="ml-2 text-sm">{t('thinking')}</span>
                 </div>
               </div>
             )}
@@ -113,7 +116,7 @@ export function SupportChat() {
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask a question..."
+              placeholder={t('askQuestion')}
               disabled={isLoading}
               className="bg-background"
             />

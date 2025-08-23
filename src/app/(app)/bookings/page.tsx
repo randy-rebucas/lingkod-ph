@@ -20,6 +20,7 @@ import { CompleteBookingDialog } from "@/components/complete-booking-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { BookingDialog } from "@/components/booking-dialog";
+import { useTranslations } from 'next-intl';
 
 
 type BookingStatus = "Pending Payment" | "Pending Verification" | "Upcoming" | "In Progress" | "Completed" | "Cancelled";
@@ -269,16 +270,18 @@ const BookingCard = ({ booking, userRole }: { booking: Booking, userRole: string
 };
 
 const EmptyState = ({ status, userRole }: { status: string, userRole: string | null }) => {
+    const t = useTranslations('Bookings');
+    
     const messages: { [key: string]: { icon: JSX.Element, text: string } } = {
-        'Pending Payment': { icon: <Wallet className="h-16 w-16" />, text: "You have no bookings awaiting payment." },
-        'Pending Verification': { icon: <Hourglass className="h-16 w-16" />, text: "You have no payments pending verification." },
-        Upcoming: { icon: <Calendar className="h-16 w-16" />, text: "You have no upcoming bookings." },
-        "In Progress": { icon: <Timer className="h-16 w-16" />, text: "You have no jobs currently in progress." },
-        Completed: { icon: <Check className="h-16 w-16" />, text: "You have no completed bookings yet." },
-        Cancelled: { icon: <X className="h-16 w-16" />, text: "You have no cancelled bookings." }
+        'Pending Payment': { icon: <Wallet className="h-16 w-16" />, text: t('noBookingsAwaitingPayment') },
+        'Pending Verification': { icon: <Hourglass className="h-16 w-16" />, text: t('noPaymentsPendingVerification') },
+        Upcoming: { icon: <Calendar className="h-16 w-16" />, text: t('noUpcomingBookings') },
+        "In Progress": { icon: <Timer className="h-16 w-16" />, text: t('noJobsInProgress') },
+        Completed: { icon: <Check className="h-16 w-16" />, text: t('noCompletedBookings') },
+        Cancelled: { icon: <X className="h-16 w-16" />, text: t('noCancelledBookings') }
     };
-    const clientAction = "Why not book a new service today?";
-    const providerAction = "You'll see new booking requests here.";
+    const clientAction = t('whyNotBookNewService');
+    const providerAction = t('seeNewBookingRequests');
     
     const messageInfo = messages[status];
 
@@ -294,7 +297,7 @@ const EmptyState = ({ status, userRole }: { status: string, userRole: string | n
                 <p className="mt-2">{userRole === 'client' ? clientAction : providerAction}</p>
                  {userRole === 'client' && (
                     <Button asChild className="mt-4">
-                        <Link href="/dashboard">Find a Service</Link>
+                        <Link href="/dashboard">{t('findAService')}</Link>
                     </Button>
                 )}
             </CardContent>
@@ -330,6 +333,7 @@ export default function BookingsPage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
+    const t = useTranslations('Bookings');
 
     useEffect(() => {
         if (!user) {
@@ -384,20 +388,20 @@ export default function BookingsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">My Bookings</h1>
+                <h1 className="text-3xl font-bold font-headline">{t('myBookingsTitle')}</h1>
                 <p className="text-muted-foreground">
-                    View and manage all your scheduled services here.
+                    {t('myBookingsDescription')}
                 </p>
             </div>
             
             <Tabs defaultValue="pending-payment" value={activeTab} onValueChange={handleTabChange} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 md:grid-cols-6">
-                    <TabsTrigger value="pending-payment">Awaiting Payment</TabsTrigger>
-                    <TabsTrigger value="pending-verification">For Verification</TabsTrigger>
-                    <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                    <TabsTrigger value="in-progress">In Progress</TabsTrigger>
-                    <TabsTrigger value="completed">Completed</TabsTrigger>
-                    <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+                    <TabsTrigger value="pending-payment">{t('awaitingPayment')}</TabsTrigger>
+                    <TabsTrigger value="pending-verification">{t('forVerification')}</TabsTrigger>
+                    <TabsTrigger value="upcoming">{t('upcoming')}</TabsTrigger>
+                    <TabsTrigger value="in-progress">{t('inProgress')}</TabsTrigger>
+                    <TabsTrigger value="completed">{t('completed')}</TabsTrigger>
+                    <TabsTrigger value="cancelled">{t('cancelled')}</TabsTrigger>
                 </TabsList>
                  <TabsContent value="pending-payment" className="mt-6">
                      <BookingsList bookings={pendingPaymentBookings} isLoading={loading} userRole={userRole} status="Pending Payment"/>

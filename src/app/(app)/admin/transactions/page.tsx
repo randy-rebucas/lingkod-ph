@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot, orderBy, Timestamp, updateDoc, doc, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, onSnapshot, orderBy, Timestamp, updateDoc, doc, addDoc, serverTimestamp, where } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";

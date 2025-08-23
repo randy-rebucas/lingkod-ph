@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, Bot, DollarSign, Lightbulb } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from 'next-intl';
 
 const initialState: FormState = {
   data: null,
@@ -19,6 +20,7 @@ const initialState: FormState = {
 export default function SmartRateClient() {
   const [state, formAction, isPending] = useActionState(handleSuggestSmartRate, initialState);
   const [displayResult, setDisplayResult] = useState<FormState['data']>(null);
+  const t = useTranslations('SmartRate');
 
   useEffect(() => {
     if (state.data) {
@@ -34,40 +36,40 @@ export default function SmartRateClient() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="text-accent" />
-              <span>Describe Your Service</span>
+              <span>{t('title')}</span>
             </CardTitle>
             <CardDescription>
-              Provide details about the services you offer and your location to get a tailored rate suggestion.
+              {t('description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="servicesOffered">Services Offered</Label>
+              <Label htmlFor="servicesOffered">{t('servicesOffered')}</Label>
               <Textarea
                 id="servicesOffered"
                 name="servicesOffered"
-                placeholder="e.g., Deep cleaning, plumbing repairs, haircut and color"
+                placeholder={t('servicesPlaceholder')}
                 rows={4}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">{t('location')}</Label>
               <Input
                 id="location"
                 name="location"
-                placeholder="e.g., Quezon City, Metro Manila"
+                placeholder={t('locationPlaceholder')}
                 required
               />
               <p className="text-xs text-muted-foreground">
-                Specify city or region for accurate local pricing.
+                {t('locationHint')}
               </p>
             </div>
             {state.error && <p className="text-sm text-destructive">{state.error}</p>}
           </CardContent>
           <CardFooter>
             <Button type="submit" disabled={isPending} className="w-full">
-              {isPending ? "Analyzing..." : "Get Suggestion"}
+              {isPending ? t('analyzing') : t('getSuggestion')}
             </Button>
           </CardFooter>
         </form>
@@ -77,10 +79,10 @@ export default function SmartRateClient() {
         <CardHeader>
             <CardTitle className="flex items-center gap-2">
                 <Bot className="text-primary" />
-                <span>AI-Powered Suggestion</span>
+                <span>{t('aiPoweredSuggestion')}</span>
             </CardTitle>
             <CardDescription>
-                Our analysis will appear here.
+                {t('analysisWillAppear')}
             </CardDescription>
         </CardHeader>
         <CardContent>
@@ -100,7 +102,7 @@ export default function SmartRateClient() {
                     <div>
                         <h3 className="flex items-center gap-2 text-lg font-semibold text-muted-foreground">
                             <DollarSign className="h-5 w-5"/>
-                            Suggested Rate
+                            {t('suggestedRate')}
                         </h3>
                         <p className="text-4xl font-bold text-primary">
                             ₱{displayResult.suggestedRate.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -109,7 +111,7 @@ export default function SmartRateClient() {
                      <div>
                         <h3 className="flex items-center gap-2 text-lg font-semibold text-muted-foreground">
                             <Lightbulb className="h-5 w-5"/>
-                            Reasoning
+                            {t('reasoning')}
                         </h3>
                         <p className="text-foreground/90 whitespace-pre-wrap">
                             {displayResult.reasoning}
@@ -119,7 +121,7 @@ export default function SmartRateClient() {
             ) : (
                 <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 rounded-lg border-2 border-dashed">
                     <Sparkles className="h-12 w-12 mb-4" />
-                    <p>Your smart rate suggestion will be shown here once you submit your service details.</p>
+                    <p>{t('suggestionWillShow')}</p>
                 </div>
             )}
         </CardContent>

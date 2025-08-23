@@ -2,9 +2,10 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, getDocs, Timestamp, orderBy } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DollarSign, BookCheck, Wallet, CheckCircle } from "lucide-react";
@@ -44,6 +45,7 @@ const getStatusVariant = (status: PayoutRequest['status']) => {
 export default function AgencyEarningsPage() {
     const { user } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('AgencyEarnings');
     const [loading, setLoading] = useState(true);
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
@@ -99,7 +101,7 @@ export default function AgencyEarningsPage() {
         if (!user) return;
         const result = await handleMarkAsPaid(payout.id, payout.providerId, payout.providerName, payout.amount, { id: user.uid, name: user.displayName });
         toast({
-            title: result.error ? 'Error' : 'Success',
+            title: result.error ? t('error') : t('success'),
             description: result.message,
             variant: result.error ? 'destructive' : 'default',
         });
@@ -131,57 +133,57 @@ export default function AgencyEarningsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Agency Earnings</h1>
-                <p className="text-muted-foreground">Monitor your agency's total revenue and manage provider payouts.</p>
+                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-3">
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Agency Revenue</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('totalAgencyRevenue')}</CardTitle>
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">₱{stats.totalRevenue.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">From {bookings.length} completed jobs by {providerCount} providers</p>
+                        <p className="text-xs text-muted-foreground">{t('fromCompletedJobs', { bookings: bookings.length, providers: providerCount })}</p>
                     </CardContent>
                 </Card>
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Paid Out</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('totalPaidOut')}</CardTitle>
                         <CheckCircle className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">₱{stats.totalPaidOut.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">Across all providers</p>
+                        <p className="text-xs text-muted-foreground">{t('acrossAllProviders')}</p>
                     </CardContent>
                 </Card>
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Pending Payouts</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('pendingPayouts')}</CardTitle>
                         <Wallet className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">₱{stats.totalPending.toFixed(2)}</div>
-                         <p className="text-xs text-muted-foreground">Awaiting processing</p>
+                         <p className="text-xs text-muted-foreground">{t('awaitingProcessing')}</p>
                     </CardContent>
                 </Card>
             </div>
 
              <Card>
                 <CardHeader>
-                    <CardTitle>Payout Requests</CardTitle>
-                    <CardDescription>Manage and track payout requests from your providers.</CardDescription>
+                    <CardTitle>{t('payoutRequests')}</CardTitle>
+                    <CardDescription>{t('managePayoutRequests')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                      <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Provider</TableHead>
-                                <TableHead>Date Requested</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead className="text-center">Status</TableHead>
-                                <TableHead className="text-right">Action</TableHead>
+                                <TableHead>{t('provider')}</TableHead>
+                                <TableHead>{t('dateRequested')}</TableHead>
+                                <TableHead>{t('amount')}</TableHead>
+                                <TableHead className="text-center">{t('status')}</TableHead>
+                                <TableHead className="text-right">{t('action')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -196,17 +198,17 @@ export default function AgencyEarningsPage() {
                                     <TableCell className="text-right">
                                         {payout.status === 'Pending' ? (
                                             <Button size="sm" onClick={() => onMarkAsPaid(payout)}>
-                                                <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
+                                                <CheckCircle className="mr-2 h-4 w-4" /> {t('markAsPaid')}
                                             </Button>
                                         ) : (
-                                            <span className="text-sm text-muted-foreground">Processed</span>
+                                            <span className="text-sm text-muted-foreground">{t('processed')}</span>
                                         )}
                                     </TableCell>
                                 </TableRow>
                             )) : (
                                 <TableRow>
                                     <TableCell colSpan={5} className="h-24 text-center">
-                                        No payout requests from your providers.
+                                        {t('noPayoutRequests')}
                                     </TableCell>
                                 </TableRow>
                             )}

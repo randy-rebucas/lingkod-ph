@@ -2,6 +2,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from 'next-intl';
 import {
   MoreHorizontal,
   UserPlus,
@@ -74,6 +75,7 @@ const getProviderLimit = (planId: string | undefined): number => {
 export default function ManageProvidersPage() {
     const { user, subscription, userRole } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('ManageProviders');
     const [providers, setProviders] = React.useState<Provider[]>([]);
     const [loading, setLoading] = React.useState(true);
     const [isInviteDialogOpen, setInviteDialogOpen] = React.useState(false);
@@ -136,7 +138,7 @@ export default function ManageProvidersPage() {
             const userSnapshot = await getDocs(userQuery);
 
             if (userSnapshot.empty) {
-                toast({ variant: 'destructive', title: 'Provider Not Found', description: 'This user is not registered on LingkodPH. Please ask them to sign up as a provider first.' });
+                toast({ variant: 'destructive', title: t('providerNotFound'), description: t('providerNotFoundDescription') });
                 setIsInviting(false);
                 return;
             }
@@ -145,13 +147,13 @@ export default function ManageProvidersPage() {
             const providerData = providerDoc.data();
 
             if (providerData.role !== 'provider') {
-                toast({ variant: 'destructive', title: 'Invalid User Role', description: 'This user is not a registered provider.' });
+                toast({ variant: 'destructive', title: t('invalidUserRole'), description: t('invalidUserRoleDescription') });
                 setIsInviting(false);
                 return;
             }
 
             if (providerData.agencyId) {
-                toast({ variant: 'destructive', title: 'Already in an Agency', description: 'This provider is already part of another agency.' });
+                toast({ variant: 'destructive', title: t('alreadyInAgency'), description: t('alreadyInAgencyDescription') });
                 setIsInviting(false);
                 return;
             }
@@ -160,7 +162,7 @@ export default function ManageProvidersPage() {
             const inviteSnapshot = await getDocs(existingInviteQuery);
 
              if (!inviteSnapshot.empty) {
-                 toast({ variant: 'destructive', title: 'Invite Pending', description: 'This provider already has a pending invitation.' });
+                 toast({ variant: 'destructive', title: t('invitePending'), description: t('invitePendingDescription') });
                  setIsInviting(false);
                 return;
             }
@@ -193,12 +195,12 @@ export default function ManageProvidersPage() {
 
             await batch.commit();
 
-            toast({ title: "Invitation Sent!", description: `An invitation has been sent to ${inviteEmail}.` });
+            toast({ title: t('invitationSent'), description: t('invitationSentDescription', { email: inviteEmail }) });
             setInviteEmail("");
             setInviteDialogOpen(false);
         } catch (error) {
             console.error("Error inviting provider:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to send invitation.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToSendInvitation') });
         } finally {
             setIsInviting(false);
         }
@@ -216,27 +218,27 @@ export default function ManageProvidersPage() {
                 batch.delete(inviteRef);
             }
             await batch.commit();
-            toast({ title: 'Success', description: 'Provider has been removed from your agency.' });
+            toast({ title: t('success'), description: t('providerRemoved') });
         } catch(error) {
              console.error("Error removing provider:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to remove provider.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToRemoveProvider') });
         }
     }
 
     const columns: ColumnDef<Provider>[] = [
       {
         accessorKey: "displayName",
-        header: "Name",
+        header: t('name'),
         cell: ({ row }) => <div className="font-medium">{row.getValue("displayName")}</div>,
       },
       {
         accessorKey: "email",
-        header: "Email",
+        header: t('email'),
         cell: ({ row }) => <div>{row.getValue("email")}</div>,
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: t('status'),
         cell: ({ row }) => (
           <Badge variant={getStatusVariant(row.getValue("status"))} className="capitalize">{row.getValue("status")}</Badge>
         ),
@@ -256,28 +258,28 @@ export default function ManageProvidersPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t('actions')}</DropdownMenuLabel>
                     <AlertDialogTrigger asChild>
                       <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
-                        <Trash2 className="mr-2 h-4 w-4" /> Remove
+                        <Trash2 className="mr-2 h-4 w-4" /> {t('remove')}
                       </DropdownMenuItem>
                     </AlertDialogTrigger>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('areYouSureRemove')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This will remove the provider from your agency. They will no longer be associated with your bookings or analytics.
+                        {t('removeProviderDescription')}
                     </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
                     <AlertDialogAction 
                         onClick={() => handleRemoveProvider(provider.id, provider.status)}
                         className="bg-destructive hover:bg-destructive/80"
                     >
-                        Confirm Removal
+                        {t('confirmRemoval')}
                     </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -297,8 +299,8 @@ export default function ManageProvidersPage() {
         return (
              <div className="space-y-6">
                  <div>
-                    <h1 className="text-3xl font-bold font-headline">Manage Providers</h1>
-                    <p className="text-muted-foreground">This page is for agency accounts only.</p>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('agencyOnly')}</p>
                 </div>
             </div>
         )
@@ -308,28 +310,28 @@ export default function ManageProvidersPage() {
       <div className="space-y-6">
           <div className="flex items-center justify-between">
               <div>
-                  <h1 className="text-3xl font-bold font-headline">Manage Providers</h1>
+                  <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                   <p className="text-muted-foreground">
-                      Invite, view, and manage your team of service providers.
+                      {t('subtitle')}
                   </p>
               </div>
                <Dialog open={isInviteDialogOpen} onOpenChange={setInviteDialogOpen}>
                     <DialogTrigger asChild>
                          <Button disabled={!canAddMoreProviders}>
                             <UserPlus className="mr-2 h-4 w-4" />
-                            Invite Provider
+                            {t('inviteProvider')}
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Invite a New Provider</DialogTitle>
+                            <DialogTitle>{t('inviteNewProvider')}</DialogTitle>
                             <DialogDescription>
-                                Enter the email address of the provider you wish to invite. They must already be a registered provider on LingkodPH.
+                                {t('inviteDescription')}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="email" className="text-right">Email</Label>
+                                <Label htmlFor="email" className="text-right">{t('email')}</Label>
                                 <Input 
                                     id="email"
                                     type="email"
@@ -340,10 +342,10 @@ export default function ManageProvidersPage() {
                             </div>
                         </div>
                         <DialogFooter>
-                            <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+                            <DialogClose asChild><Button variant="outline">{t('cancel')}</Button></DialogClose>
                             <Button onClick={handleInviteProvider} disabled={isInviting}>
                                 {isInviting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
-                                Send Invite
+                                {t('sendInvite')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -352,18 +354,18 @@ export default function ManageProvidersPage() {
           
           <Card>
             <CardHeader>
-                <CardTitle>Your Provider Network</CardTitle>
+                <CardTitle>{t('yourProviderNetwork')}</CardTitle>
                 <CardDescription>
-                    You have {providers.length} of {isFinite(providerLimit) ? providerLimit : 'unlimited'} providers.
+                    {t('providerCount', { count: providers.length, limit: isFinite(providerLimit) ? providerLimit : t('unlimited') })}
                 </CardDescription>
             </CardHeader>
              <CardContent>
                  {!canAddMoreProviders && (
                     <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
                         <AlertCircle className="h-4 w-4 !text-blue-700" />
-                        <AlertTitle className="text-blue-800">Provider Limit Reached</AlertTitle>
+                        <AlertTitle className="text-blue-800">{t('providerLimitReached')}</AlertTitle>
                         <AlertDescription className="text-blue-700">
-                           You have reached the provider limit for your current plan. Please <Button variant="link" asChild className="p-0 h-auto"><Link href="/subscription">upgrade your subscription</Link></Button> to add more providers.
+                           {t('limitReachedDescription')} <Button variant="link" asChild className="p-0 h-auto"><Link href="/subscription">{t('upgradeSubscription')}</Link></Button>.
                         </AlertDescription>
                     </Alert>
                 )}
@@ -410,8 +412,8 @@ export default function ManageProvidersPage() {
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <Users className="mx-auto h-12 w-12 text-muted-foreground mb-2"/>
-                                    No providers yet.
-                                    <p className="text-muted-foreground">Click "Invite Provider" to build your team.</p>
+                                    {t('noProvidersYet')}
+                                    <p className="text-muted-foreground">{t('noProvidersDescription')}</p>
                                 </TableCell>
                             </TableRow>
                         )}

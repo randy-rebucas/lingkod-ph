@@ -14,11 +14,12 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import type { EmblaCarouselType } from "embla-carousel-react";
+import type { UseEmblaCarouselType } from "embla-carousel-react";
 import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
 import Link from "next/link";
 import { Megaphone, ArrowRight } from "lucide-react";
+import { useTranslations } from 'next-intl';
 
 
 type AdCampaign = {
@@ -34,6 +35,7 @@ export function AdCarousel() {
     const [loading, setLoading] = useState(true);
     const [api, setApi] = useState<CarouselApi>()
     const Autoplay = useRef<any>(null);
+    const t = useTranslations('AdCarousel');
 
     useEffect(() => {
         import("embla-carousel-autoplay").then((plugin) => {
@@ -76,7 +78,7 @@ export function AdCarousel() {
                                 <Image
                                 src={campaign.imageUrl}
                                 alt={campaign.name}
-                                layout="fill"
+                                fill
                                 className="object-cover rounded-md transition-transform duration-300 group-hover:scale-105"
                             />
                         ) : (
@@ -127,10 +129,10 @@ export function AdCarousel() {
                          <Card className="overflow-hidden h-full flex flex-col items-center justify-center text-center bg-secondary">
                             <CardContent className="p-6">
                                 <Megaphone className="h-10 w-10 mx-auto text-primary mb-2" />
-                                <h3 className="text-lg font-bold font-headline">Advertise Your Business Here</h3>
-                                <p className="text-sm text-muted-foreground mb-4">Reach thousands of potential customers daily.</p>
+                                <h3 className="text-lg font-bold font-headline">{t('advertiseYourBusiness')}</h3>
+                                <p className="text-sm text-muted-foreground mb-4">{t('reachThousandsOfCustomers')}</p>
                                 <Button asChild>
-                                    <Link href="/contact-us">Contact Sales <ArrowRight className="ml-2 h-4 w-4"/></Link>
+                                    <Link href="/contact-us">{t('contactSales')} <ArrowRight className="ml-2 h-4 w-4"/></Link>
                                 </Button>
                             </CardContent>
                         </Card>

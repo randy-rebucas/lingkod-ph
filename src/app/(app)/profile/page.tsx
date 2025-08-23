@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
+import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -103,6 +104,7 @@ const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
 export default function ProfilePage() {
     const { user, userRole, loading, subscription, verificationStatus } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('Profile');
     
     // States for form fields
     const [name, setName] = useState('');
@@ -191,12 +193,12 @@ export default function ProfilePage() {
     useEffect(() => {
         if (state.message) {
              toast({
-                title: state.error ? 'Error' : 'Success',
+                title: state.error ? t('error') : t('success'),
                 description: state.message,
                 variant: state.error ? 'destructive' : 'default',
             });
         }
-    }, [state, toast]);
+    }, [state, toast, t]);
 
     useEffect(() => {
         if (!user) return;
@@ -308,12 +310,12 @@ export default function ProfilePage() {
 
     const handleCopy = (textToCopy: string, toastMessage: string) => {
         navigator.clipboard.writeText(textToCopy);
-        toast({ title: 'Copied!', description: toastMessage });
+        toast({ title: t('copied'), description: toastMessage });
     };
 
     const handleRedeemReward = async (reward: Reward) => {
         if (!user || loyaltyPoints < reward.pointsRequired) {
-            toast({ variant: "destructive", title: "Error", description: "Not enough points to redeem this reward." });
+            toast({ variant: "destructive", title: t('error'), description: t('notEnoughPoints') });
             return;
         }
 
@@ -338,11 +340,11 @@ export default function ProfilePage() {
                     rewardId: reward.id, createdAt: serverTimestamp()
                 });
             });
-            toast({ title: "Reward Redeemed!", description: `You have successfully redeemed "${reward.title}".` });
+            toast({ title: t('rewardRedeemed'), description: t('rewardRedeemedDescription', { rewardTitle: reward.title }) });
         } catch (error) {
             console.error("Error redeeming reward:", error);
-            const errorMessage = error instanceof Error ? error.message : "Could not redeem the reward.";
-            toast({ variant: "destructive", title: "Redemption Failed", description: errorMessage });
+            const errorMessage = error instanceof Error ? error.message : t('couldNotRedeemReward');
+            toast({ variant: "destructive", title: t('redemptionFailed'), description: errorMessage });
         } finally {
             setIsRedeeming(null);
         }
@@ -379,9 +381,9 @@ export default function ProfilePage() {
             }
             
             await updateDoc(userDocRef, updates);
-            toast({ title: "Success", description: "Public profile updated successfully!" });
+            toast({ title: t('success'), description: t('publicProfileUpdated') });
         } catch (error: any) {
-            toast({ variant: "destructive", title: "Update Failed", description: error.message });
+            toast({ variant: "destructive", title: t('updateFailed'), description: error.message });
         } finally {
             setIsSavingPublic(false);
         }
@@ -408,9 +410,9 @@ export default function ProfilePage() {
             }
 
             await updateDoc(userDocRef, updates);
-            toast({ title: "Success", description: "Personal details updated successfully!" });
+            toast({ title: t('success'), description: t('personalDetailsUpdated') });
         } catch (error: any) {
-            toast({ variant: "destructive", title: "Update Failed", description: error.message });
+            toast({ variant: "destructive", title: t('updateFailed'), description: error.message });
         } finally {
             setIsSavingPersonal(false);
         }
@@ -436,9 +438,9 @@ export default function ProfilePage() {
             };
             
             await updateDoc(userDocRef, updates);
-            toast({ title: "Success", description: "Details updated successfully!" });
+            toast({ title: t('success'), description: t('detailsUpdated') });
         } catch (error: any) {
-            toast({ variant: "destructive", title: "Update Failed", description: error.message });
+            toast({ variant: "destructive", title: t('updateFailed'), description: error.message });
         } finally {
             setIsSavingProvider(false);
         }
@@ -458,9 +460,9 @@ export default function ProfilePage() {
                 payoutDetails.bankAccountName = bankAccountName;
             }
             await updateDoc(userDocRef, { payoutDetails });
-            toast({ title: "Success", description: "Payout details updated successfully!" });
+            toast({ title: t('success'), description: t('payoutDetailsUpdated') });
         } catch (error: any) {
-            toast({ variant: "destructive", title: "Update Failed", description: error.message });
+            toast({ variant: "destructive", title: t('updateFailed'), description: error.message });
         } finally {
             setIsSavingPayout(false);
         }
@@ -484,7 +486,7 @@ export default function ProfilePage() {
             },
             (error) => {
                 console.error("Upload failed", error);
-                toast({ variant: "destructive", title: "Upload Failed", description: error.message });
+                toast({ variant: "destructive", title: t('uploadFailed'), description: error.message });
                 setIsUploading(false);
                 setUploadProgress(null);
                 setImageFile(null);
@@ -495,9 +497,9 @@ export default function ProfilePage() {
                     await updateProfile(user, { photoURL: downloadURL });
                     const userDocRef = doc(db, "users", user.uid);
                     await updateDoc(userDocRef, { photoURL: downloadURL });
-                    toast({ title: "Success", description: "Profile picture updated!" });
+                    toast({ title: t('success'), description: t('profilePictureUpdated') });
                 } catch (error: any) {
-                     toast({ variant: "destructive", title: "Update Failed", description: "Failed to update profile picture URL." });
+                     toast({ variant: "destructive", title: t('updateFailed'), description: t('failedToUpdateProfilePicture') });
                 } finally {
                     setIsUploading(false);
                     setUploadProgress(null);
@@ -509,7 +511,7 @@ export default function ProfilePage() {
 
     const handleUploadDocument = async () => {
         if (!user || !newDocFile || !newDocName) {
-            toast({ variant: 'destructive', title: 'Missing Info', description: 'Please provide a document name and select a file.' });
+            toast({ variant: 'destructive', title: t('missingInfo'), description: t('pleaseProvideDocumentInfo') });
             return;
         }
         setIsUploadingDoc(true);
@@ -529,14 +531,14 @@ export default function ProfilePage() {
                 documents: arrayUnion(newDocument)
             });
 
-            toast({ title: 'Success', description: 'Document uploaded successfully.' });
+            toast({ title: t('success'), description: t('documentUploaded') });
             setNewDocName("");
             setNewDocFile(null);
             if (newDocFileInputRef.current) newDocFileInputRef.current.value = "";
 
         } catch (error) {
             console.error("Document upload failed: ", error);
-            toast({ variant: 'destructive', title: 'Upload Failed', description: 'Could not upload the document.' });
+            toast({ variant: 'destructive', title: t('uploadFailed'), description: t('couldNotDeleteDocument') });
         } finally {
             setIsUploadingDoc(false);
         }
@@ -555,10 +557,10 @@ export default function ProfilePage() {
                 documents: arrayRemove(docToDelete)
             });
 
-            toast({ title: 'Success', description: 'Document deleted successfully.' });
+            toast({ title: t('success'), description: t('documentDeleted') });
         } catch (error) {
             console.error("Error deleting document: ", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not delete the document.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('couldNotDeleteDocument') });
         }
     };
 
@@ -582,7 +584,7 @@ export default function ProfilePage() {
     }
     
     if (!user) {
-        return <p>Please log in to view your profile.</p>;
+        return <p>{t('pleaseLoginToViewProfile')}</p>;
     }
     
     const totalReferralPoints = referrals.reduce((sum, ref) => sum + ref.rewardPointsGranted, 0);
@@ -594,8 +596,8 @@ export default function ProfilePage() {
             if (keyServices.length >= 5) {
                 toast({
                     variant: "destructive",
-                    title: "Limit Reached",
-                    description: "You can only add up to 5 key services."
+                    title: t('limitReached'),
+                    description: t('maxKeyServices')
                 });
                 return;
             }
@@ -633,14 +635,14 @@ export default function ProfilePage() {
                     if (status === 'OK' && results && results[0]) {
                         setAddress(results[0].formatted_address);
                     } else {
-                        toast({ variant: 'destructive', title: 'Error', description: 'Could not retrieve address from coordinates.' });
+                        toast({ variant: 'destructive', title: t('error'), description: t('couldNotRetrieveAddress') });
                     }
                 });
             }, (error) => {
-                 toast({ variant: 'destructive', title: 'Geolocation Error', description: error.message });
+                 toast({ variant: 'destructive', title: t('geolocationError'), description: error.message });
             });
         } else {
-            toast({ variant: 'destructive', title: 'Unsupported', description: 'Geolocation is not supported by this browser.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('geolocationNotSupported') });
         }
     };
 
@@ -664,9 +666,9 @@ export default function ProfilePage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">My Profile</h1>
+                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                 <p className="text-muted-foreground">
-                    View and manage your account details and settings.
+                    {t('subtitle')}
                 </p>
             </div>
 
@@ -679,7 +681,7 @@ export default function ProfilePage() {
                         </Avatar>
                         <Button size="icon" className="absolute bottom-0 right-0 rounded-full h-8 w-8" onClick={() => fileInputRef.current?.click()}>
                             <Camera className="h-4 w-4"/>
-                            <span className="sr-only">Change Photo</span>
+                            <span className="sr-only">{t('changePhoto')}</span>
                         </Button>
                         <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
                     </div>
@@ -689,19 +691,19 @@ export default function ProfilePage() {
                              {verificationStatus === 'Verified' && (
                                 <Badge variant="default" className="flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-200">
                                     <ShieldCheck className="h-4 w-4" />
-                                    Verified
+                                    {t('verified')}
                                 </Badge>
                             )}
                              {subscription?.planId === 'pro' && (
                                 <Badge variant="default" className="flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-200">
                                     <ShieldCheck className="h-4 w-4" />
-                                    Pro
+                                    {t('pro')}
                                 </Badge>
                             )}
                              {subscription?.planId === 'elite' && (
                                 <Badge variant="default" className="flex items-center gap-1 bg-purple-100 text-purple-800 border-purple-200">
                                     <Star className="h-4 w-4" />
-                                    Elite
+                                    {t('elite')}
                                 </Badge>
                             )}
                         </CardTitle>
@@ -711,13 +713,13 @@ export default function ProfilePage() {
                         </CardDescription>
                          {imageFile && (
                             <div className="mt-2 space-y-2 text-left">
-                                <p className="text-sm text-muted-foreground truncate">Selected: {imageFile.name}</p>
+                                <p className="text-sm text-muted-foreground truncate">{t('selected', { fileName: imageFile.name })}</p>
                                 {isUploading && uploadProgress !== null ? (
                                     <Progress value={uploadProgress} className="w-full" />
                                 ) : (
                                     <Button onClick={handleUpload} disabled={isUploading} size="sm">
                                         <Upload className="mr-2 h-4 w-4" />
-                                        {isUploading ? 'Uploading...' : 'Upload Picture'}
+                                        {isUploading ? t('uploading') : t('uploadPicture')}
                                     </Button>
                                 )}
                             </div>
@@ -729,20 +731,20 @@ export default function ProfilePage() {
             {userRole === 'provider' && invites.length > 0 && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Agency Invitations</CardTitle>
-                        <CardDescription>You have pending invitations to join an agency.</CardDescription>
+                        <CardTitle>{t('agencyInvitations')}</CardTitle>
+                        <CardDescription>{t('agencyInvitationsDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-2">
                         {invites.map(invite => (
                              <form action={formAction} key={invite.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                <p>Invitation from <span className="font-semibold">{invite.agencyName}</span></p>
+                                <p>{t('invitationFrom', { agencyName: invite.agencyName })}</p>
                                 <input type="hidden" name="inviteId" value={invite.id} />
                                 <div className="flex gap-2">
                                     <Button size="sm" variant="outline" type="submit" name="accepted" value="true" disabled={isPending}>
-                                        <ThumbsUp className="mr-2 h-4 w-4"/> Accept
+                                        <ThumbsUp className="mr-2 h-4 w-4"/> {t('accept')}
                                     </Button>
                                     <Button size="sm" variant="destructive" type="submit" name="accepted" value="false" disabled={isPending}>
-                                        <ThumbsDown className="mr-2 h-4 w-4"/> Decline
+                                        <ThumbsDown className="mr-2 h-4 w-4"/> {t('decline')}
                                     </Button>
                                 </div>
                             </form>
@@ -754,13 +756,13 @@ export default function ProfilePage() {
             {userRole === 'client' && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Become a Provider</CardTitle>
-                        <CardDescription>Ready to offer your skills and services to the community? Upgrade your account to start accepting jobs.</CardDescription>
+                        <CardTitle>{t('becomeProvider')}</CardTitle>
+                        <CardDescription>{t('becomeProviderDescription')}</CardDescription>
                     </CardHeader>
                     <CardFooter>
                         <Button asChild>
                             <Link href="/subscription">
-                                View Provider Plans <ArrowRight className="ml-2 h-4 w-4"/>
+                                {t('viewProviderPlans')} <ArrowRight className="ml-2 h-4 w-4"/>
                             </Link>
                         </Button>
                     </CardFooter>
@@ -769,13 +771,13 @@ export default function ProfilePage() {
              {userRole === 'provider' && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Upgrade to an Agency Account</CardTitle>
-                        <CardDescription>Manage a team of providers, access advanced analytics, and grow your business.</CardDescription>
+                        <CardTitle>{t('upgradeToAgency')}</CardTitle>
+                        <CardDescription>{t('upgradeToAgencyDescription')}</CardDescription>
                     </CardHeader>
                     <CardFooter>
                         <Button asChild>
                             <Link href="/subscription">
-                                View Agency Plans <ArrowRight className="ml-2 h-4 w-4"/>
+                                {t('viewAgencyPlans')} <ArrowRight className="ml-2 h-4 w-4"/>
                             </Link>
                         </Button>
                     </CardFooter>
@@ -784,15 +786,15 @@ export default function ProfilePage() {
 
             <Tabs defaultValue="public-profile" className="w-full">
                  <TabsList className="w-full h-auto justify-start overflow-x-auto">
-                    <TabsTrigger value="public-profile"><User className="mr-2"/> Public Profile</TabsTrigger>
-                    {isProvider && <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> Provider</TabsTrigger>}
-                    {isAgency && <TabsTrigger value="business-settings"><Building className="mr-2"/> Business</TabsTrigger>}
-                    {(isProvider || isAgency) && <TabsTrigger value="payout-settings"><Wallet className="mr-2" /> Payout</TabsTrigger>}
-                    <TabsTrigger value="account-settings"><Settings className="mr-2"/> Account</TabsTrigger>
+                    <TabsTrigger value="public-profile"><User className="mr-2"/> {t('publicProfile')}</TabsTrigger>
+                    {isProvider && <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> {t('provider')}</TabsTrigger>}
+                    {isAgency && <TabsTrigger value="business-settings"><Building className="mr-2"/> {t('business')}</TabsTrigger>}
+                    {(isProvider || isAgency) && <TabsTrigger value="payout-settings"><Wallet className="mr-2" /> {t('payout')}</TabsTrigger>}
+                    <TabsTrigger value="account-settings"><Settings className="mr-2"/> {t('account')}</TabsTrigger>
                     {userRole !== 'admin' && (
                         <>
-                            <TabsTrigger value="loyalty"><Award className="mr-2"/> Loyalty</TabsTrigger>
-                            <TabsTrigger value="referrals"><Users className="mr-2"/> Referrals</TabsTrigger>
+                            <TabsTrigger value="loyalty"><Award className="mr-2"/> {t('loyalty')}</TabsTrigger>
+                            <TabsTrigger value="referrals"><Users className="mr-2"/> {t('referrals')}</TabsTrigger>
                         </>
                     )}
                 </TabsList>

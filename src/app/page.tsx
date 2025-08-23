@@ -1,4 +1,6 @@
 
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -10,61 +12,72 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Logo } from '@/components/logo';
 import HomeClient from './home-client';
 import { AdCarousel } from '@/components/ad-carousel';
+import { useTranslations } from 'next-intl';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
-const Header = () => (
-  <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-    <div className="container flex h-16 items-center justify-between">
-      <Link href="/" aria-label="Go to homepage">
-        <Logo />
-      </Link>
-      <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
-        <Link href="#features" className="transition-colors hover:text-primary">Features</Link>
-        <Link href="#providers" className="transition-colors hover:text-primary">Providers</Link>
-        <Link href="#join" className="transition-colors hover:text-primary">For Businesses</Link>
-      </nav>
-      <div className="flex items-center space-x-2">
-        <Button variant="ghost" asChild>
-          <Link href="/login">Log In</Link>
-        </Button>
-        <Button asChild>
-          <Link href="/signup">Sign Up</Link>
-        </Button>
+const Header = () => {
+  const t = useTranslations('Navigation');
+  
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between">
+        <Link href="/" aria-label="Go to homepage">
+          <Logo />
+        </Link>
+        <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
+          <Link href="#features" className="transition-colors hover:text-primary">{t('home')}</Link>
+          <Link href="#providers" className="transition-colors hover:text-primary">{t('providers')}</Link>
+          <Link href="#join" className="transition-colors hover:text-primary">{t('forBusinesses')}</Link>
+        </nav>
+        <div className="flex items-center space-x-2">
+          <LanguageSwitcher />
+          <Button variant="ghost" asChild>
+            <Link href="/login">{t('login')}</Link>
+          </Button>
+          <Button asChild>
+            <Link href="/signup">{t('signup')}</Link>
+          </Button>
+        </div>
       </div>
-    </div>
-  </header>
-);
+    </header>
+  );
+};
 
-const Footer = () => (
-  <footer className="border-t bg-secondary">
-    <div className="container grid grid-cols-1 md:grid-cols-4 gap-8 py-12">
-        <div>
-            <Logo />
-        </div>
-        <div>
-            <h4 className="font-semibold mb-2">Company</h4>
-            <ul className="space-y-2 text-sm">
-                <li><Link href="/about" className="text-muted-foreground hover:text-primary">About Us</Link></li>
-                <li><Link href="/careers" className="text-muted-foreground hover:text-primary">Careers</Link></li>
-                <li><Link href="/partners" className="text-muted-foreground hover:text-primary">Partners</Link></li>
-            </ul>
-        </div>
-        <div>
-            <h4 className="font-semibold mb-2">Support</h4>
-            <ul className="space-y-2 text-sm">
-                <li><Link href="/help-center" className="text-muted-foreground hover:text-primary">Help Center</Link></li>
-                <li><Link href="/contact-us" className="text-muted-foreground hover:text-primary">Contact Us</Link></li>
-                <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-primary">Terms of Service</Link></li>
-            </ul>
-        </div>
-        <div>
-             <h4 className="font-semibold mb-2">Stay Connected</h4>
-             <div className="flex space-x-4">
-                <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} LocalPro. All rights reserved.</p>
-             </div>
-        </div>
-    </div>
-  </footer>
-);
+const Footer = () => {
+  const t = useTranslations('Footer');
+  
+  return (
+    <footer className="border-t bg-secondary">
+      <div className="container grid grid-cols-1 md:grid-cols-4 gap-8 py-12">
+          <div>
+              <Logo />
+          </div>
+          <div>
+              <h4 className="font-semibold mb-2">Company</h4>
+              <ul className="space-y-2 text-sm">
+                  <li><Link href="/about" className="text-muted-foreground hover:text-primary">{t('about')}</Link></li>
+                  <li><Link href="/careers" className="text-muted-foreground hover:text-primary">{t('careers')}</Link></li>
+                  <li><Link href="/partners" className="text-muted-foreground hover:text-primary">{t('partners')}</Link></li>
+              </ul>
+          </div>
+          <div>
+              <h4 className="font-semibold mb-2">{t('support')}</h4>
+              <ul className="space-y-2 text-sm">
+                  <li><Link href="/help-center" className="text-muted-foreground hover:text-primary">{t('helpCenter')}</Link></li>
+                  <li><Link href="/contact-us" className="text-muted-foreground hover:text-primary">{t('contact')}</Link></li>
+                  <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-primary">{t('terms')}</Link></li>
+              </ul>
+          </div>
+          <div>
+               <h4 className="font-semibold mb-2">{t('stayConnected')}</h4>
+               <div className="flex space-x-4">
+                  <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} LocalPro. {t('allRightsReserved')}</p>
+               </div>
+          </div>
+      </div>
+    </footer>
+  );
+};
 
 const renderStars = (rating: number, keyPrefix: string) => {
     return Array(5).fill(0).map((_, i) => (
@@ -86,6 +99,8 @@ const topProviders = [
 
 
 export default function HomePage() {
+    const t = useTranslations('HomePage');
+    
     return (
         <HomeClient>
             <div className="flex min-h-screen flex-col bg-background">
@@ -97,18 +112,18 @@ export default function HomePage() {
                         <div className="mx-auto flex max-w-4xl flex-col items-center gap-4 text-center">
                             <Badge variant="default" className="py-2 px-4 rounded-full bg-primary/10 text-primary border-primary/20">
                                 <Sparkles className="mr-2 h-4 w-4" />
-                                Connecting Clients, Empowering Businesses
+                                {t('badge')}
                             </Badge>
                             <h1 className="font-headline text-4xl font-bold tracking-tighter md:text-6xl">
-                                Find Trusted Pros. Grow Your Business.
+                                {t('hero.title')}
                             </h1>
                             <p className="max-w-2xl text-lg text-muted-foreground">
-                                LocalPro is the all-in-one platform for discovering reliable service providers and empowering businesses to thrive in the digital marketplace.
+                                {t('hero.subtitle')}
                             </p>
                         </div>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4">
-                            <Button size="lg" asChild><Link href="/signup">Find a Service Pro <ArrowRight className="ml-2" /></Link></Button>
-                            <Button size="lg" variant="outline" asChild><Link href="#join">For Businesses & Providers</Link></Button>
+                            <Button size="lg" asChild><Link href="/signup">{t('hero.cta')} <ArrowRight className="ml-2" /></Link></Button>
+                            <Button size="lg" variant="outline" asChild><Link href="#join">{t('forBusinesses')} & {t('providers')}</Link></Button>
                         </div>
                     </div>
                 </section>
@@ -121,43 +136,43 @@ export default function HomePage() {
                 <section id="features" className="bg-muted py-20 pt-32">
                     <div className="container">
                         <div className="mx-auto mb-12 max-w-2xl text-center">
-                            <h2 className="font-headline text-3xl font-bold">A Seamless Experience for Everyone</h2>
-                            <p className="mt-2 text-muted-foreground">Whether you're hiring or providing a service, our process is simple and transparent.</p>
+                            <h2 className="font-headline text-3xl font-bold">{t('seamlessExperience')}</h2>
+                            <p className="mt-2 text-muted-foreground">{t('seamlessDescription')}</p>
                         </div>
                         <Tabs defaultValue="client" className="w-full max-w-4xl mx-auto">
                             <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="client">For Clients</TabsTrigger>
-                                <TabsTrigger value="provider">For Providers & Agencies</TabsTrigger>
+                                <TabsTrigger value="client">{t('forClients')}</TabsTrigger>
+                                <TabsTrigger value="provider">{t('forProviders')}</TabsTrigger>
                             </TabsList>
                             <TabsContent value="client" className="mt-8">
                                 <div className="grid gap-8 md:grid-cols-3">
                                     <Card className="bg-background/50 border-none shadow-none text-center">
-                                        <CardHeader><CardTitle>1. Search & Discover</CardTitle></CardHeader>
-                                        <CardContent><p className="text-muted-foreground">Browse profiles, read reviews, and find the perfect professional for your job.</p></CardContent>
+                                        <CardHeader><CardTitle>{t('searchDiscover')}</CardTitle></CardHeader>
+                                        <CardContent><p className="text-muted-foreground">{t('searchDiscoverDesc')}</p></CardContent>
                                     </Card>
                                     <Card className="bg-background/50 border-none shadow-none text-center">
-                                        <CardHeader><CardTitle>2. Book with Confidence</CardTitle></CardHeader>
-                                        <CardContent><p className="text-muted-foreground">Schedule services directly through our secure platform at a time that works for you.</p></CardContent>
+                                        <CardHeader><CardTitle>{t('bookConfidence')}</CardTitle></CardHeader>
+                                        <CardContent><p className="text-muted-foreground">{t('bookConfidenceDesc')}</p></CardContent>
                                     </Card>
                                     <Card className="bg-background/50 border-none shadow-none text-center">
-                                        <CardHeader><CardTitle>3. Job Done, Rate & Relax</CardTitle></CardHeader>
-                                        <CardContent><p className="text-muted-foreground">Enjoy top-quality service, then leave a review to help our community grow.</p></CardContent>
+                                        <CardHeader><CardTitle>{t('jobDone')}</CardTitle></CardHeader>
+                                        <CardContent><p className="text-muted-foreground">{t('jobDoneDesc')}</p></CardContent>
                                     </Card>
                                 </div>
                             </TabsContent>
                             <TabsContent value="provider" className="mt-8">
                                 <div className="grid gap-8 md:grid-cols-3">
                                     <Card className="bg-background/50 border-none shadow-none text-center">
-                                        <CardHeader><CardTitle>1. Create Your Profile</CardTitle></CardHeader>
-                                        <CardContent><p className="text-muted-foreground">Showcase your skills, services, and pricing to attract clients.</p></CardContent>
+                                        <CardHeader><CardTitle>{t('createProfile')}</CardTitle></CardHeader>
+                                        <CardContent><p className="text-muted-foreground">{t('createProfileDesc')}</p></CardContent>
                                     </Card>
                                     <Card className="bg-background/50 border-none shadow-none text-center">
-                                        <CardHeader><CardTitle>2. Manage Bookings</CardTitle></CardHeader>
-                                        <CardContent><p className="text-muted-foreground">Use our dashboard to manage your schedule, communicate with clients, and send quotes.</p></CardContent>
+                                        <CardHeader><CardTitle>{t('manageBookings')}</CardTitle></CardHeader>
+                                        <CardContent><p className="text-muted-foreground">{t('manageBookingsDesc')}</p></CardContent>
                                     </Card>
                                     <Card className="bg-background/50 border-none shadow-none text-center">
-                                        <CardHeader><CardTitle>3. Grow Your Business</CardTitle></CardHeader>
-                                        <CardContent><p className="text-muted-foreground">Get paid securely, build your reputation with reviews, and access business analytics.</p></CardContent>
+                                        <CardHeader><CardTitle>{t('growBusiness')}</CardTitle></CardHeader>
+                                        <CardContent><p className="text-muted-foreground">{t('growBusinessDesc')}</p></CardContent>
                                     </Card>
                                 </div>
                             </TabsContent>
@@ -169,8 +184,8 @@ export default function HomePage() {
                 <section id="providers" className="bg-background py-20">
                     <div className="container">
                         <div className="mx-auto mb-12 max-w-2xl text-center">
-                            <h2 className="font-headline text-3xl font-bold">Meet Our Top-Rated Providers</h2>
-                            <p className="mt-2 text-muted-foreground">A glimpse of the trusted and skilled professionals in our network.</p>
+                            <h2 className="font-headline text-3xl font-bold">{t('topProviders')}</h2>
+                            <p className="mt-2 text-muted-foreground">{t('topProvidersDesc')}</p>
                         </div>
                         <div className="grid gap-8 md:grid-cols-3">
                             {topProviders.map(provider => (
@@ -190,9 +205,9 @@ export default function HomePage() {
                                             {renderStars(provider.rating, provider.name)}
                                         </div>
                                         <p className="text-sm text-muted-foreground mt-1">{provider.rating} stars ({provider.reviews} reviews)</p>
-                                        <Button asChild variant="secondary" className="mt-4">
-                                            <Link href="/signup">View Profile</Link>
-                                        </Button>
+                                                                                 <Button asChild variant="secondary" className="mt-4">
+                                             <Link href="/signup">{t('viewProfile')}</Link>
+                                         </Button>
                                     </CardContent>
                                 </Card>
                             ))}
@@ -204,8 +219,8 @@ export default function HomePage() {
                 <section className="bg-muted py-20">
                     <div className="container">
                         <div className="mx-auto mb-12 max-w-2xl text-center">
-                            <h2 className="font-headline text-3xl font-bold">What Our Community Says</h2>
-                            <p className="mt-2 text-muted-foreground">Real stories from satisfied clients and successful providers.</p>
+                            <h2 className="font-headline text-3xl font-bold">{t('communitySays')}</h2>
+                            <p className="mt-2 text-muted-foreground">{t('communitySaysDesc')}</p>
                         </div>
                         <div className="grid gap-8 lg:grid-cols-3">
                             {testimonials.map((testimonial, index) => (
@@ -237,25 +252,25 @@ export default function HomePage() {
                             <Image src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1469" layout="fill" alt="Business team collaborating" className="object-cover" data-ai-hint="business team" />
                             <div className="absolute inset-0 bg-primary/80 mix-blend-multiply"></div>
                             <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
-                                <div>
-                                    <h2 className="font-headline text-4xl font-bold">Ready to Grow Your Service Business?</h2>
-                                    <p className="mt-4 text-lg opacity-90">Whether you're an individual provider or a growing agency, LocalPro provides the tools, visibility, and support you need to succeed.</p>
-                                </div>
-                                <div className="bg-black/20 backdrop-blur-sm p-8 rounded-lg">
-                                <ul className="space-y-4">
-                                    <li className="flex items-start gap-3">
-                                        <div className="mt-1"><UserCheck className="h-5 w-5 text-white" /></div>
-                                        <p><span className="font-semibold">For Individual Providers:</span> Build your reputation, manage bookings effortlessly, and connect with a steady stream of clients.</p>
-                                    </li>
-                                    <li className="flex items-start gap-3">
-                                        <div className="mt-1"><Building className="h-5 w-5 text-white" /></div>
-                                        <p><span className="font-semibold">For Agencies:</span> Onboard your team, manage multiple providers, and access powerful analytics to scale your operations.</p>
-                                    </li>
-                                </ul>
-                                <Button asChild variant="secondary" size="lg" className="mt-6 w-full text-white bg-white/20 hover:bg-white/30">
-                                    <Link href="/signup">Join as a Provider or Agency</Link>
-                                </Button>
-                                </div>
+                                                                 <div>
+                                     <h2 className="font-headline text-4xl font-bold">{t('growBusinessTitle')}</h2>
+                                     <p className="mt-4 text-lg opacity-90">{t('growBusinessSubtitle')}</p>
+                                 </div>
+                                 <div className="bg-black/20 backdrop-blur-sm p-8 rounded-lg">
+                                 <ul className="space-y-4">
+                                     <li className="flex items-start gap-3">
+                                         <div className="mt-1"><UserCheck className="h-5 w-5 text-white" /></div>
+                                         <p><span className="font-semibold">{t('individualProviders')}</span> {t('individualProvidersDesc')}</p>
+                                     </li>
+                                     <li className="flex items-start gap-3">
+                                         <div className="mt-1"><Building className="h-5 w-5 text-white" /></div>
+                                         <p><span className="font-semibold">{t('agencies')}</span> {t('agenciesDesc')}</p>
+                                     </li>
+                                 </ul>
+                                 <Button asChild variant="secondary" size="lg" className="mt-6 w-full text-white bg-white/20 hover:bg-white/30">
+                                     <Link href="/signup">{t('joinProvider')}</Link>
+                                 </Button>
+                                 </div>
                             </div>
                         </div>
                     </div>

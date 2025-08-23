@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, deleteDoc, Timestamp } from 'firebase/firestore';
@@ -30,6 +31,7 @@ const getStatusVariant = (status: string) => {
 export default function ServicesPage() {
     const { user } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('Services');
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -53,7 +55,7 @@ export default function ServicesPage() {
             setServices(servicesData);
         } catch (error) {
             console.error("Error fetching services:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch services.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToFetchServices') });
         } finally {
             setLoading(false);
         }
@@ -76,11 +78,11 @@ export default function ServicesPage() {
     const handleDeleteService = async (serviceId: string) => {
         try {
             await deleteDoc(doc(db, 'services', serviceId));
-            toast({ title: 'Success', description: 'Service deleted successfully.' });
+            toast({ title: t('success'), description: t('serviceDeletedSuccessfully') });
             fetchServices(); // Refresh list
         } catch (error) {
             console.error("Error deleting service:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete service.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToDeleteService') });
         }
     };
 
@@ -93,15 +95,15 @@ export default function ServicesPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">My Services</h1>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                     <p className="text-muted-foreground">
-                        Manage the services you offer to clients.
+                        {t('subtitle')}
                     </p>
                 </div>
                  <div className="flex items-center gap-2">
                     <Button onClick={handleAddService}>
                         <PlusCircle className="mr-2" />
-                        Add New Service
+                        {t('addNewService')}
                     </Button>
                 </div>
             </div>
@@ -138,26 +140,26 @@ export default function ServicesPage() {
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
-                                                <DropdownMenuItem onClick={() => handleEditService(service)}>Edit</DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleEditService(service)}>{t('edit')}</DropdownMenuItem>
                                                 <AlertDialogTrigger asChild>
-                                                    <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                                                    <DropdownMenuItem className="text-destructive">{t('delete')}</DropdownMenuItem>
                                                 </AlertDialogTrigger>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                         <AlertDialogContent>
                                             <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                <AlertDialogTitle>{t('deleteConfirmationTitle')}</AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    This action cannot be undone. This will permanently delete this service from your profile.
+                                                    {t('deleteConfirmationDescription')}
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
                                                 <AlertDialogAction
                                                     className="bg-destructive hover:bg-destructive/90"
                                                     onClick={() => service.id && handleDeleteService(service.id)}
                                                 >
-                                                    Delete
+                                                    {t('delete')}
                                                 </AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
@@ -181,8 +183,8 @@ export default function ServicesPage() {
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                          <BriefcaseBusiness className="h-16 w-16 mb-4" />
-                        <h3 className="text-xl font-semibold">No services found</h3>
-                        <p>Click "Add New Service" to get started.</p>
+                        <h3 className="text-xl font-semibold">{t('noServicesFound')}</h3>
+                        <p>{t('noServicesDescription')}</p>
                     </CardContent>
                 </Card>
             )}

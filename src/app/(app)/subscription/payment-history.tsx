@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { ScrollText } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 type Transaction = {
     id: string;
@@ -24,6 +25,7 @@ type Transaction = {
 
 export default function PaymentHistory() {
     const { user } = useAuth();
+    const t = useTranslations('PaymentHistory');
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -55,8 +57,8 @@ export default function PaymentHistory() {
         return (
              <Card>
                 <CardHeader>
-                    <CardTitle>Payment History</CardTitle>
-                    <CardDescription>A record of all your subscription payments.</CardDescription>
+                    <CardTitle>{t('title')}</CardTitle>
+                    <CardDescription>{t('description')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Skeleton className="h-48 w-full" />
@@ -68,24 +70,24 @@ export default function PaymentHistory() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Payment History</CardTitle>
-                <CardDescription>A record of all your subscription payments.</CardDescription>
+                <CardTitle>{t('title')}</CardTitle>
+                <CardDescription>{t('description')}</CardDescription>
             </CardHeader>
             <CardContent>
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Plan</TableHead>
-                            <TableHead>Amount</TableHead>
-                            <TableHead>Payment Method</TableHead>
-                            <TableHead>Transaction ID</TableHead>
+                            <TableHead>{t('date')}</TableHead>
+                            <TableHead>{t('plan')}</TableHead>
+                            <TableHead>{t('amount')}</TableHead>
+                            <TableHead>{t('paymentMethod')}</TableHead>
+                            <TableHead>{t('transactionId')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {transactions.length > 0 ? transactions.map((tx) => (
                             <TableRow key={tx.id}>
-                                <TableCell>{tx.createdAt ? format(tx.createdAt.toDate(), 'PPP') : 'Processing...'}</TableCell>
+                                <TableCell>{tx.createdAt ? format(tx.createdAt.toDate(), 'PPP') : t('processing')}</TableCell>
                                 <TableCell className="capitalize">{tx.planId}</TableCell>
                                 <TableCell>₱{tx.amount.toFixed(2)}</TableCell>
                                 <TableCell>
@@ -97,7 +99,7 @@ export default function PaymentHistory() {
                             <TableRow>
                                 <TableCell colSpan={5} className="h-24 text-center">
                                     <ScrollText className="mx-auto h-12 w-12 text-muted-foreground mb-2"/>
-                                    No payment history found.
+                                    {t('noPaymentHistory')}
                                 </TableCell>
                             </TableRow>
                         )}

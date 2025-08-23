@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { Label } from "@/components/ui/label";
 export default function BroadcastPage() {
     const { user, userRole } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('Broadcast');
     
     // State for banner broadcast
     const [bannerMessage, setBannerMessage] = useState("");
@@ -83,32 +85,32 @@ export default function BroadcastPage() {
     return (
         <div className="space-y-6">
              <div>
-                <h1 className="text-3xl font-bold font-headline">Broadcast Center</h1>
+                <h1 className="text-3xl font-bold font-headline">{t('BroadcastCenterTitle')}</h1>
                 <p className="text-muted-foreground">
-                    Send site-wide announcements and email campaigns.
+                    {t('BroadcastCenterDescription')}
                 </p>
             </div>
             <Tabs defaultValue="banner">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="banner">Site Banner</TabsTrigger>
-                    <TabsTrigger value="email">Email Campaign</TabsTrigger>
+                    <TabsTrigger value="banner">{t('SiteBannerTab')}</TabsTrigger>
+                    <TabsTrigger value="email">{t('EmailCampaignTab')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="banner" className="mt-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Create Broadcast Banner</CardTitle>
-                            <CardDescription>This message will appear as a banner for all users. Sending a new message replaces the previous one.</CardDescription>
+                            <CardTitle>{t('CreateBroadcastBannerTitle')}</CardTitle>
+                            <CardDescription>{t('CreateBroadcastBannerDescription')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <Textarea 
-                                placeholder="Enter your announcement here..."
+                                placeholder={t('BannerMessagePlaceholder')}
                                 rows={5}
                                 value={bannerMessage}
                                 onChange={(e) => setBannerMessage(e.target.value)}
                             />
                             <Button onClick={handleSendBanner} disabled={isSendingBanner}>
                                 {isSendingBanner ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Radio className="mr-2 h-4 w-4" />}
-                                {isSendingBanner ? "Sending..." : "Send Banner"}
+                                {isSendingBanner ? t('SendingBanner') : t('SendBanner')}
                             </Button>
                         </CardContent>
                     </Card>
@@ -116,24 +118,24 @@ export default function BroadcastPage() {
                  <TabsContent value="email" className="mt-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Create Email Campaign</CardTitle>
-                            <CardDescription>This email will be sent to all registered providers on the platform.</CardDescription>
+                            <CardTitle>{t('CreateEmailCampaignTitle')}</CardTitle>
+                            <CardDescription>{t('CreateEmailCampaignDescription')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                              <div className="space-y-2">
-                                <Label htmlFor="subject">Subject</Label>
+                                <Label htmlFor="subject">{t('EmailSubjectLabel')}</Label>
                                 <Input 
                                     id="subject"
-                                    placeholder="e.g., New Feature Announcement!"
+                                    placeholder={t('EmailSubjectPlaceholder')}
                                     value={emailSubject}
                                     onChange={(e) => setEmailSubject(e.target.value)}
                                 />
                             </div>
                              <div className="space-y-2">
-                                <Label htmlFor="email-message">Message</Label>
+                                <Label htmlFor="email-message">{t('EmailMessageLabel')}</Label>
                                 <Textarea 
                                     id="email-message"
-                                    placeholder="Write your email content here..."
+                                    placeholder={t('EmailMessagePlaceholder')}
                                     rows={8}
                                     value={emailMessage}
                                     onChange={(e) => setEmailMessage(e.target.value)}
@@ -141,7 +143,7 @@ export default function BroadcastPage() {
                             </div>
                             <Button onClick={handleSendEmail} disabled={isSendingEmail}>
                                 {isSendingEmail ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                                {isSendingEmail ? "Sending..." : "Send Email to Providers"}
+                                {isSendingEmail ? t('SendingEmail') : t('SendEmailToProviders')}
                             </Button>
                         </CardContent>
                     </Card>

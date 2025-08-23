@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import { useActionState } from "react";
 import { createAdminAction, type FormState } from "./actions";
+import { useTranslations } from 'next-intl';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +29,7 @@ export default function SetupPage() {
     const { toast } = useToast();
     const { user, loading: authLoading } = useAuth();
     const [state, formAction, isPending] = useActionState(createAdminAction, initialState);
+    const t = useTranslations('Setup');
 
     useEffect(() => {
         const checkUsers = async () => {
@@ -49,7 +51,7 @@ export default function SetupPage() {
     useEffect(() => {
         if (state.message) {
             toast({
-                title: state.error ? "Error" : "Success!",
+                title: state.error ? t('error') : t('success'),
                 description: state.message,
                 variant: state.error ? "destructive" : "default",
             });
@@ -58,7 +60,7 @@ export default function SetupPage() {
                 router.push('/dashboard');
             }
         }
-    }, [state, toast, router]);
+    }, [state, toast, router, t]);
 
     if (authLoading || user) {
         return (
@@ -75,27 +77,27 @@ export default function SetupPage() {
                     <div className="flex justify-center">
                         <Logo />
                     </div>
-                    <CardTitle className="text-2xl">Welcome to LocalPro!</CardTitle>
-                    <CardDescription>Let's set up your administrator account.</CardDescription>
+                    <CardTitle className="text-2xl">{t('title')}</CardTitle>
+                    <CardDescription>{t('subtitle')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form action={formAction} className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="name">Full Name</Label>
+                            <Label htmlFor="name">{t('fullName')}</Label>
                             <Input id="name" name="name" placeholder="Juan Dela Cruz" required />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="email">Email Address</Label>
+                            <Label htmlFor="email">{t('email')}</Label>
                             <Input id="email" name="email" type="email" placeholder="admin@example.com" required />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
+                            <Label htmlFor="password">{t('password')}</Label>
                             <Input id="password" name="password" type="password" required />
                         </div>
                         {state.error && <p className="text-sm text-destructive">{state.error}</p>}
                         <Button type="submit" className="w-full" disabled={isPending}>
                             {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                            {isPending ? "Creating Account..." : "Create Admin Account"}
+                            {isPending ? t('saving') : t('complete')}
                         </Button>
                     </form>
                 </CardContent>

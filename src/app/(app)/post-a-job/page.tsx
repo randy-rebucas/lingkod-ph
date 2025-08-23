@@ -10,6 +10,7 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, query, orderBy, getDoc, doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from 'next-intl';
 
 import { postJobAction, type PostJobInput } from "./actions";
 import { generateJobDetails, type JobDetailQuestion } from "@/ai/flows/generate-job-details";
@@ -51,6 +52,7 @@ type Category = {
 
 export default function PostAJobPage() {
   const { user, userRole } = useAuth();
+  const t = useTranslations('PostAJob');
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -228,8 +230,8 @@ export default function PostAJobPage() {
                 <PenLine className="h-6 w-6" />
               </div>
               <div>
-                <CardTitle>Step 1: Describe the Job</CardTitle>
-                <CardDescription>Start with the basic details of the job you need done.</CardDescription>
+                <CardTitle>{t('step1Title')}</CardTitle>
+                <CardDescription>{t('step1Description')}</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -238,8 +240,8 @@ export default function PostAJobPage() {
                     name="title"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Job Title</FormLabel>
-                        <FormControl><Input placeholder="e.g., Need a Plumber to Fix a Leaky Faucet" {...field} /></FormControl>
+                        <FormLabel>{t('jobTitle')}</FormLabel>
+                        <FormControl><Input placeholder={t('jobTitlePlaceholder')} {...field} /></FormControl>
                         <FormMessage />
                     </FormItem>
                     )}
@@ -249,8 +251,8 @@ export default function PostAJobPage() {
                     name="description"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Job Description</FormLabel>
-                        <FormControl><Textarea placeholder="Describe the job in detail. Include what needs to be done, any specific requirements, and the desired outcome." rows={5} {...field} /></FormControl>
+                        <FormLabel>{t('jobDescription')}</FormLabel>
+                        <FormControl><Textarea placeholder={t('jobDescriptionPlaceholder')} rows={5} {...field} /></FormControl>
                         <FormMessage />
                     </FormItem>
                     )}

@@ -8,7 +8,7 @@ import { auth, db } from '@/lib/firebase';
 import { differenceInDays, differenceInHours } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
-type UserRole = 'client' | 'provider' | 'agency' | 'admin' | null;
+type UserRole = 'client' | 'provider' | 'agency' | 'admin' | 'partner' | null;
 
 type UserSubscription = {
     planId: 'starter' | 'pro' | 'elite' | 'free' | 'lite' | 'custom';

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Building2, Handshake, Users, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { useTranslations } from 'next-intl';
 
 export const metadata: Metadata = {
   title: 'Partnerships',
@@ -29,12 +30,14 @@ const partnershipTypes = [
 ];
 
 export default function PartnersPage() {
+  const t = useTranslations('Partners');
+  
   return (
     <div className="container py-12 md:py-24 lg:py-32">
       <div className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">Partner with LocalPro</h1>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">{t('title')}</h1>
         <p className="mt-6 text-lg leading-8 text-muted-foreground">
-          Collaborate with us to empower local businesses and build stronger communities together.
+          {t('subtitle')}
         </p>
       </div>
 
@@ -66,7 +69,7 @@ export default function PartnersPage() {
           <div className="mt-4 md:mt-0 flex-shrink-0">
             <Button asChild size="lg">
               <Link href="/contact-us">
-                Become a Partner <ArrowRight className="ml-2" />
+                {t('becomePartner')} <ArrowRight className="ml-2" />
               </Link>
             </Button>
           </div>

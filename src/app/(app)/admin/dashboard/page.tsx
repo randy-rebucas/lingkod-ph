@@ -2,6 +2,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/auth-context";
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { DollarSign, Calendar, Star, Users, Loader2, Users2, Briefcase, UserPlus } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -79,12 +81,19 @@ const AdminDashboardCard = ({ title, icon: Icon, value, change, isLoading }: { t
 }
 
 export default function AdminDashboardPage() {
+    const { userRole } = useAuth();
+    const t = useTranslations('AdminDashboard');
     const [stats, setStats] = useState({ totalUsers: 0, totalProviders: 0, totalClients: 0, totalAgencies: 0, totalRevenue: 0, totalBookings: 0 });
     const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
     const [recentUsers, setRecentUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if (userRole !== 'admin') {
+            setLoading(false);
+            return;
+        }
+        
         const usersQuery = query(collection(db, "users"));
         const bookingsQuery = query(collection(db, "bookings"));
 
@@ -130,24 +139,35 @@ export default function AdminDashboardPage() {
         };
     }, []);
 
+    if (userRole !== 'admin') {
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>{t('accessDenied')}</CardTitle>
+                    <CardDescription>{t('adminOnly')}</CardDescription>
+                </CardHeader>
+            </Card>
+        );
+    }
+
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Admin Dashboard</h1>
-                <p className="text-muted-foreground">Platform-wide overview and statistics.</p>
+                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <AdminDashboardCard isLoading={loading} title="Total Revenue" icon={DollarSign} value={`₱${stats.totalRevenue.toFixed(2)}`} />
-                <AdminDashboardCard isLoading={loading} title="Total Bookings" icon={Briefcase} value={`${stats.totalBookings}`} />
-                <AdminDashboardCard isLoading={loading} title="Total Users" icon={Users} value={`${stats.totalUsers}`} />
-                <AdminDashboardCard isLoading={loading} title="Providers & Agencies" icon={Users2} value={`${stats.totalProviders + stats.totalAgencies}`} />
+                <AdminDashboardCard isLoading={loading} title={t('totalRevenue')} icon={DollarSign} value={`₱${stats.totalRevenue.toFixed(2)}`} />
+                <AdminDashboardCard isLoading={loading} title={t('totalBookings')} icon={Briefcase} value={`${stats.totalBookings}`} />
+                <AdminDashboardCard isLoading={loading} title={t('totalUsers')} icon={Users} value={`${stats.totalUsers}`} />
+                <AdminDashboardCard isLoading={loading} title={`${t('totalProviders')} & ${t('totalAgencies')}`} icon={Users2} value={`${stats.totalProviders + stats.totalAgencies}`} />
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
                  <Card>
                     <CardHeader>
-                        <CardTitle>Recent Bookings</CardTitle>
+                        <CardTitle>{t('recentBookings')}</CardTitle>
                         <CardDescription>The latest bookings made on the platform.</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -155,10 +175,10 @@ export default function AdminDashboardPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Service</TableHead>
-                                    <TableHead>Client</TableHead>
-                                    <TableHead>Provider</TableHead>
-                                    <TableHead>Status</TableHead>
+                                    <TableHead>{t('serviceName')}</TableHead>
+                                    <TableHead>{t('clientName')}</TableHead>
+                                    <TableHead>{t('providerName')}</TableHead>
+                                    <TableHead>{t('status')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -183,7 +203,7 @@ export default function AdminDashboardPage() {
                 </Card>
                 <Card>
                     <CardHeader>
-                        <CardTitle>New Users</CardTitle>
+                        <CardTitle>{t('recentUsers')}</CardTitle>
                         <CardDescription>The latest users to join the platform.</CardDescription>
                     </CardHeader>
                     <CardContent>

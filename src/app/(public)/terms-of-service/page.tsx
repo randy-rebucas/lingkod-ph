@@ -1,7 +1,10 @@
 
 "use client";
 
+import { useTranslations } from 'next-intl';
+
 export default function TermsOfServicePage() {
+  const t = useTranslations('TermsOfService');
   const sections = [
     {
       title: "1. Definitions",
@@ -117,9 +120,9 @@ export default function TermsOfServicePage() {
   return (
     <div className="container py-12 md:py-24 lg:py-32">
       <div className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Terms of Service</h1>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{t('title')}</h1>
         <p className="mt-6 text-lg leading-8 text-muted-foreground">
-          Effective Date: 07/20/2025 &bull; Last Updated: 07/20/2025
+          {t('lastUpdated')}: 07/20/2025
         </p>
       </div>
 

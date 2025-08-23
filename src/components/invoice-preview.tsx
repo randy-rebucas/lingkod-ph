@@ -12,6 +12,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Logo } from './logo';
 import { Invoice } from '@/app/(app)/invoices/page';
+import { useTranslations } from 'next-intl';
 
 const toDate = (date: Date | Timestamp): Date => {
     if (date instanceof Date) {
@@ -22,6 +23,7 @@ const toDate = (date: Date | Timestamp): Date => {
 
 export function InvoicePreview({ invoice }: { invoice: Invoice }) {
     const { user } = useAuth();
+    const t = useTranslations('InvoicePreview');
     const invoiceRef = useRef<HTMLDivElement>(null);
 
     const subtotal = invoice.lineItems.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
@@ -62,14 +64,14 @@ export function InvoicePreview({ invoice }: { invoice: Invoice }) {
                         <p>{user?.email}</p>
                     </div>
                     <div className="text-right">
-                        <h2 className="text-3xl font-bold text-muted-foreground mb-2">INVOICE</h2>
-                        <p><span className="font-semibold">Invoice #:</span> {invoice.invoiceNumber}</p>
-                        <p><span className="font-semibold">Date:</span> {format(issueDate, "PPP")}</p>
+                        <h2 className="text-3xl font-bold text-muted-foreground mb-2">{t('invoice').toUpperCase()}</h2>
+                        <p><span className="font-semibold">{t('invoice')} #:</span> {invoice.invoiceNumber}</p>
+                        <p><span className="font-semibold">{t('date')}:</span> {format(issueDate, "PPP")}</p>
                     </div>
                 </div>
 
                 <div className="mb-8">
-                    <h3 className="font-bold mb-2">Bill To:</h3>
+                    <h3 className="font-bold mb-2">{t('billTo')}:</h3>
                     <p>{invoice.clientName}</p>
                     <p>{invoice.clientAddress}</p>
                     <p>{invoice.clientEmail}</p>
@@ -78,10 +80,10 @@ export function InvoicePreview({ invoice }: { invoice: Invoice }) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="w-[60%]">Description</TableHead>
-                            <TableHead className="text-center">Quantity</TableHead>
-                            <TableHead className="text-right">Unit Price</TableHead>
-                            <TableHead className="text-right">Total</TableHead>
+                            <TableHead className="w-[60%]">{t('description')}</TableHead>
+                            <TableHead className="text-center">{t('quantity')}</TableHead>
+                            <TableHead className="text-right">{t('unitPrice')}</TableHead>
+                            <TableHead className="text-right">{t('total')}</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -99,28 +101,28 @@ export function InvoicePreview({ invoice }: { invoice: Invoice }) {
                 <div className="flex justify-end mt-4">
                     <div className="w-full max-w-sm space-y-2">
                         <div className="flex justify-between">
-                            <span className="text-muted-foreground">Subtotal:</span>
+                            <span className="text-muted-foreground">{t('subtotal')}:</span>
                             <span className="font-medium">₱{subtotal.toFixed(2)}</span>
                         </div>
                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Tax ({invoice.taxRate}%):</span>
+                            <span className="text-muted-foreground">{t('tax')} ({invoice.taxRate}%):</span>
                             <span className="font-medium">₱{taxAmount.toFixed(2)}</span>
                         </div>
                         <Separator />
                          <div className="flex justify-between text-lg font-bold">
-                            <span>Total Due:</span>
+                            <span>{t('totalDue')}:</span>
                             <span>₱{total.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="mt-12 text-center text-xs text-muted-foreground">
-                    <p>Payment due by: {format(dueDate, "PPP")}</p>
-                    <p className="mt-2">Thank you for your business!</p>
+                    <p>{t('paymentDueBy')}: {format(dueDate, "PPP")}</p>
+                    <p className="mt-2">{t('thankYouForBusiness')}</p>
                 </div>
             </div>
             <div className="p-4 bg-secondary flex justify-end">
-                <Button onClick={handleDownload}>Download as PDF</Button>
+                <Button onClick={handleDownload}>{t('downloadAsPDF')}</Button>
             </div>
         </div>
     );

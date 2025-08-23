@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Star } from 'lucide-react';
 import { Booking } from '@/app/(app)/bookings/page';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 const reviewSchema = z.object({
   rating: z.number().min(1, "Rating is required.").max(5),
@@ -35,9 +36,13 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
     const { toast } = useToast();
     const [isSaving, setIsSaving] = useState(false);
     const [hoverRating, setHoverRating] = useState(0);
+    const t = useTranslations('ReviewDialog');
 
     const form = useForm<ReviewFormValues>({
-        resolver: zodResolver(reviewSchema),
+        resolver: zodResolver(z.object({
+            rating: z.number().min(1, t('ratingRequired')).max(5),
+            comment: z.string().min(10, t('commentMinLength')).max(500, t('commentMaxLength')),
+        })),
         defaultValues: {
             rating: 0,
             comment: "",
@@ -46,7 +51,7 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
 
     const onSubmit = async (data: ReviewFormValues) => {
         if (!user) {
-            toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('mustBeLoggedIn') });
             return;
         }
         setIsSaving(true);
@@ -80,11 +85,11 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
 
             await batch.commit();
             
-            toast({ title: 'Success', description: 'Your review has been submitted. Thank you!' });
+            toast({ title: t('success'), description: t('reviewSubmitted') });
             setIsOpen(false);
         } catch (error) {
             console.error("Error submitting review:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to submit your review.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToSubmitReview') });
         } finally {
             setIsSaving(false);
         }
@@ -94,9 +99,9 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Leave a Review for {booking.providerName}</DialogTitle>
+                    <DialogTitle>{t('leaveReview')} {booking.providerName}</DialogTitle>
                     <DialogDescription>
-                        Your feedback helps other clients and provides valuable insight to the provider.
+                        {t('feedbackDescription')}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -106,7 +111,7 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
                             name="rating"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Overall Rating</FormLabel>
+                                    <FormLabel>{t('overallRating')}</FormLabel>
                                     <FormControl>
                                         <div 
                                             className="flex items-center gap-1"
@@ -136,9 +141,9 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
                             name="comment"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Your Comment</FormLabel>
+                                    <FormLabel>{t('yourComment')}</FormLabel>
                                     <FormControl>
-                                        <Textarea placeholder="Share your experience..." {...field} rows={5} />
+                                        <Textarea placeholder={t('commentPlaceholder')} {...field} rows={5} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -146,11 +151,11 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
                         />
                          <DialogFooter>
                              <DialogClose asChild>
-                                <Button type="button" variant="outline" disabled={isSaving}>Cancel</Button>
+                                <Button type="button" variant="outline" disabled={isSaving}>{t('cancel')}</Button>
                             </DialogClose>
                             <Button type="submit" disabled={isSaving}>
                                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isSaving ? 'Submitting...' : 'Submit Review'}
+                                {isSaving ? t('submitting') : t('submitReview')}
                             </Button>
                         </DialogFooter>
                     </form>

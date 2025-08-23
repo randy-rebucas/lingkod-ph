@@ -6,6 +6,7 @@ import { AuthProvider } from '@/context/auth-context';
 import { ThemeProvider } from '@/context/theme-provider';
 import { Inter, Poppins } from 'next/font/google';
 import Script from 'next/script';
+import {NextIntlClientProvider} from 'next-intl';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -78,17 +79,19 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AuthProvider>
-              {children}
-              <Toaster />
-          </AuthProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AuthProvider>
+                {children}
+                <Toaster />
+            </AuthProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

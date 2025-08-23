@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
@@ -51,6 +52,7 @@ const getStatusVariant = (status: InvoiceStatus) => {
 
 export default function BillingPage() {
     const { user } = useAuth();
+    const t = useTranslations('Billing');
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -83,8 +85,8 @@ export default function BillingPage() {
         return (
              <div className="space-y-6">
                  <div>
-                    <h1 className="text-3xl font-bold font-headline">Billing & Invoices</h1>
-                    <p className="text-muted-foreground">View and manage your invoices from service providers.</p>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
                 <Card>
                     <CardContent className="p-6">
@@ -99,20 +101,20 @@ export default function BillingPage() {
         <Dialog onOpenChange={(open) => !open && setSelectedInvoice(null)}>
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Billing & Invoices</h1>
-                <p className="text-muted-foreground">View and manage your invoices from service providers.</p>
+                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
              <Card>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Invoice #</TableHead>
-                                <TableHead>Date Issued</TableHead>
-                                <TableHead>Due Date</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead>{t('invoiceNumber')}</TableHead>
+                                <TableHead>{t('dateIssued')}</TableHead>
+                                <TableHead>{t('dueDate')}</TableHead>
+                                <TableHead>{t('amount')}</TableHead>
+                                <TableHead>{t('status')}</TableHead>
+                                <TableHead className="text-right">{t('actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -123,7 +125,7 @@ export default function BillingPage() {
                                     <TableCell>{format(invoice.dueDate.toDate(), 'PP')}</TableCell>
                                     <TableCell>₱{invoice.amount.toFixed(2)}</TableCell>
                                     <TableCell>
-                                        <Badge variant={getStatusVariant(invoice.status)}>{invoice.status}</Badge>
+                                        <Badge variant={getStatusVariant(invoice.status)}>{t(invoice.status.toLowerCase())}</Badge>
                                     </TableCell>
                                      <TableCell className="text-right">
                                         <DialogTrigger asChild>
@@ -137,7 +139,7 @@ export default function BillingPage() {
                                 <TableRow>
                                     <TableCell colSpan={6} className="text-center h-24">
                                         <Receipt className="mx-auto h-12 w-12 text-muted-foreground mb-2"/>
-                                        No invoices found.
+                                        {t('noInvoicesFound')}
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -148,7 +150,7 @@ export default function BillingPage() {
             {selectedInvoice && (
                  <DialogContent className="max-w-4xl">
                     <DialogHeader>
-                        <DialogTitle>Invoice Details: {selectedInvoice.invoiceNumber}</DialogTitle>
+                        <DialogTitle>{t('invoiceDetails', { invoiceNumber: selectedInvoice.invoiceNumber })}</DialogTitle>
                     </DialogHeader>
                     <InvoicePreview invoice={selectedInvoice as any} />
                  </DialogContent>

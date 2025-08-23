@@ -12,6 +12,7 @@ import { Loader2, Camera, Upload } from 'lucide-react';
 import { Booking } from '@/app/(app)/bookings/page';
 import Image from 'next/image';
 import { completeBookingAction } from '@/app/(app)/bookings/actions';
+import { useTranslations } from 'next-intl';
 
 type CompleteBookingDialogProps = {
     isOpen: boolean;
@@ -22,6 +23,7 @@ type CompleteBookingDialogProps = {
 export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBookingDialogProps) {
     const { user } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('CompleteBookingDialog');
     const [isSaving, setIsSaving] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
 
     const handleConfirmCompletion = async () => {
         if (!user || !imageFile || !previewUrl) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Please upload a photo as proof of completion.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('uploadProof') });
             return;
         }
         setIsSaving(true);
@@ -62,14 +64,14 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
             }
             
             toast({
-                title: "Booking Completed!",
-                description: "The booking has been successfully marked as completed.",
+                title: t('bookingCompleted'),
+                description: t('bookingCompleted'),
             });
             setIsOpen(false);
 
         } catch (error: any) {
             console.error("Error completing booking:", error);
-            toast({ variant: "destructive", title: "Update Failed", description: error.message || "Could not complete the booking." });
+            toast({ variant: "destructive", title: t('error'), description: t('failedToComplete') });
         } finally {
             setIsSaving(false);
             setPreviewUrl(null);
@@ -87,14 +89,14 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
         }}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Complete Booking</DialogTitle>
+                    <DialogTitle>{t('completeBooking')}</DialogTitle>
                     <DialogDescription>
-                        Upload a photo as proof of completion for the service: "{booking.serviceName}".
+                        {t('uploadProof')} "{booking.serviceName}".
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-4 space-y-4">
                      <div className="space-y-2">
-                        <Label>Proof of Completion</Label>
+                        <Label>{t('uploadProof')}</Label>
                         <div className="w-full">
                              {previewUrl ? (
                                 <div className="relative aspect-video w-full rounded-md overflow-hidden border">
@@ -104,7 +106,7 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
                              <div className="aspect-video w-full rounded-md border-2 border-dashed flex items-center justify-center bg-muted/50">
                                 <div className="text-center text-muted-foreground p-4">
                                     <Camera className="h-8 w-8 mx-auto mb-2"/>
-                                    <p>Upload a photo of the completed work.</p>
+                                    <p>{t('uploadImage')}</p>
                                 </div>
                             </div>
                            )}
@@ -116,18 +118,18 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
                             onClick={() => fileInputRef.current?.click()}
                         >
                             <Upload className="mr-2 h-4 w-4" />
-                            {previewUrl ? 'Change Photo' : 'Select Photo'}
+                            {previewUrl ? t('changePhoto') : t('selectPhoto')}
                         </Button>
                         <Input className="hidden" type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} />
                      </div>
                 </div>
                  <DialogFooter>
                      <DialogClose asChild>
-                        <Button type="button" variant="outline" disabled={isSaving}>Cancel</Button>
+                        <Button type="button" variant="outline" disabled={isSaving}>{t('cancel')}</Button>
                     </DialogClose>
                     <Button type="button" onClick={handleConfirmCompletion} disabled={isSaving || !imageFile}>
                         {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isSaving ? 'Confirming...' : 'Confirm Completion'}
+                        {isSaving ? t('completing') : t('complete')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

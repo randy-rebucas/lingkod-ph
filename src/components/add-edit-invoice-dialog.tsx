@@ -22,6 +22,7 @@ import { format } from 'date-fns';
 import { Calendar } from './ui/calendar';
 import { Separator } from './ui/separator';
 import { generateQuoteDescription } from '@/ai/flows/generate-quote-description';
+import { useTranslations } from 'next-intl';
 
 const lineItemSchema = z.object({
     description: z.string().min(1, "Description is required."),
@@ -53,11 +54,26 @@ type AddEditInvoiceDialogProps = {
 export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSaved }: AddEditInvoiceDialogProps) {
     const { user } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('Components');
     const [isSaving, setIsSaving] = useState(false);
     const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
 
     const form = useForm<InvoiceFormValues>({
-        resolver: zodResolver(invoiceSchema),
+        resolver: zodResolver(z.object({
+            clientName: z.string().min(1, t('clientNameRequired')),
+            clientEmail: z.string().email(t('invalidEmail')),
+            clientAddress: z.string().min(1, t('clientAddressRequired')),
+            invoiceNumber: z.string().min(1, t('invoiceNumberRequired')),
+            issueDate: z.date({ required_error: t('issueDateRequired') }),
+            dueDate: z.date({ required_error: t('dueDateRequired') }),
+            lineItems: z.array(z.object({
+                description: z.string().min(1, t('descriptionRequired')),
+                quantity: z.coerce.number().min(0.1, t('quantityMin')),
+                price: z.coerce.number().min(0, t('priceCannotBeNegative')),
+            })).min(1, t('atLeastOneLineItem')),
+            taxRate: z.coerce.number().min(0, t('taxRateCannotBeNegative')).optional().default(0),
+            status: z.enum(["Draft", "Sent", "Paid", "Overdue"]).default("Draft"),
+        })),
         defaultValues: {
             clientName: "",
             clientEmail: "",
@@ -110,8 +126,8 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
         if (!itemName || itemName.trim().length < 3) {
             toast({
                 variant: 'destructive',
-                title: 'Item Name Required',
-                description: 'Please enter a brief item name first (at least 3 characters).',
+                title: t('itemNameRequired'),
+                description: t('enterItemName'),
             });
             setGeneratingIndex(null);
             return;
@@ -122,16 +138,16 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
             if (result.description) {
                 form.setValue(`lineItems.${index}.description`, result.description, { shouldValidate: true });
                 toast({
-                    title: 'Success',
-                    description: 'AI-powered description has been generated!',
+                    title: t('success'),
+                    description: t('aiDescriptionGenerated'),
                 });
             }
         } catch (error) {
             console.error("Error generating description:", error);
             toast({
                 variant: 'destructive',
-                title: 'AI Error',
-                description: 'Could not generate a description at this time.',
+                title: t('aiError'),
+                description: t('couldNotGenerate'),
             });
         } finally {
             setGeneratingIndex(null);
@@ -141,7 +157,7 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
 
     const onSubmit = async (data: InvoiceFormValues) => {
         if (!user) {
-            toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('mustBeLoggedIn') });
             return;
         }
         setIsSaving(true);
@@ -157,18 +173,18 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
             if (invoice?.id) {
                 const invoiceRef = doc(db, 'invoices', invoice.id);
                 await updateDoc(invoiceRef, finalData);
-                toast({ title: 'Success', description: 'Invoice updated successfully.' });
+                toast({ title: t('success'), description: t('invoiceUpdated') });
             } else {
                 await addDoc(collection(db, 'invoices'), {
                     ...finalData,
                     createdAt: serverTimestamp(),
                 });
-                toast({ title: 'Success', description: 'Invoice created successfully.' });
+                toast({ title: t('success'), description: t('invoiceCreated') });
             }
             onInvoiceSaved();
         } catch (error) {
             console.error("Error saving invoice:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to save invoice.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToSaveInvoice') });
         } finally {
             setIsSaving(false);
         }
@@ -178,9 +194,9 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="max-w-4xl">
                 <DialogHeader>
-                    <DialogTitle>{invoice ? 'Edit Invoice' : 'Create New Invoice'}</DialogTitle>
+                    <DialogTitle>{invoice ? t('editInvoice') : t('createNewInvoice')}</DialogTitle>
                     <DialogDescription>
-                        {invoice ? 'Update the details of your invoice.' : 'Fill in the details to create a new invoice.'}
+                        {invoice ? t('updateInvoiceDetails') : t('createInvoiceDetails')}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>

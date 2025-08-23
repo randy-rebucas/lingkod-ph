@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, doc, updateDoc, arrayUnion, Timestamp, orderBy } from "firebase/firestore";
@@ -37,6 +38,7 @@ export type Job = {
 export default function JobsPage() {
     const { user, subscription, userRole } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('Jobs');
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -55,12 +57,12 @@ export default function JobsPage() {
             setLoading(false);
         }, (error) => {
             console.error("Error fetching jobs:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch job listings.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('couldNotFetchJobs') });
             setLoading(false);
         });
 
         return () => unsubscribe();
-    }, [userRole, toast]);
+    }, [userRole, toast, t]);
 
     const handleApply = async (jobId: string, providerId: string) => {
         try {
@@ -68,10 +70,10 @@ export default function JobsPage() {
             await updateDoc(jobRef, {
                 applications: arrayUnion(providerId)
             });
-            toast({ title: 'Success!', description: 'You have successfully applied for the job.' });
+            toast({ title: t('success'), description: t('successfullyApplied') });
         } catch (error) {
             console.error("Error applying for job:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to apply for the job.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToApply') });
         }
     };
 
@@ -79,8 +81,8 @@ export default function JobsPage() {
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is only available to service providers.</CardDescription>
+                    <CardTitle>{t('accessDenied')}</CardTitle>
+                    <CardDescription>{t('providersOnly')}</CardDescription>
                 </CardHeader>
             </Card>
         );
@@ -90,8 +92,8 @@ export default function JobsPage() {
         return (
             <div className="space-y-6">
                  <div>
-                    <h1 className="text-3xl font-bold font-headline">Find Work</h1>
-                    <p className="text-muted-foreground">Browse and apply for available jobs.</p>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-72" />)}
@@ -103,8 +105,8 @@ export default function JobsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Find Work</h1>
-                <p className="text-muted-foreground">Browse and apply for available jobs.</p>
+                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
             {jobs.length > 0 ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -123,7 +125,7 @@ export default function JobsPage() {
                                         <p className="text-muted-foreground text-sm h-12 line-clamp-3">{job.description}</p>
                                         <div className="text-sm space-y-2 text-muted-foreground">
                                             <div className="flex items-center gap-2">
-                                                <Clock className="h-4 w-4" /> <span>Posted {job.createdAt ? formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true }) : '...'}</span>
+                                                <Clock className="h-4 w-4" /> <span>{t('posted')} {job.createdAt ? formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true }) : '...'}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <MapPin className="h-4 w-4" /> <span>{job.location}</span>
@@ -131,12 +133,12 @@ export default function JobsPage() {
                                             <div className="flex items-center gap-2">
                                                 {job.clientIsVerified && (
                                                     <div className="flex items-center gap-1 text-green-600">
-                                                        <ShieldCheck className="h-4 w-4" /> <span>Verified Client</span>
+                                                        <ShieldCheck className="h-4 w-4" /> <span>{t('verifiedClient')}</span>
                                                     </div>
                                                 )}
                                             </div>
                                              <div className="flex items-center gap-2">
-                                                <Users className="h-4 w-4" /> <span>{job.applications?.length || 0} Applicants</span>
+                                                <Users className="h-4 w-4" /> <span>{job.applications?.length || 0} {t('applicants')}</span>
                                             </div>
                                         </div>
                                     </CardContent>
@@ -152,15 +154,15 @@ export default function JobsPage() {
                                             }
                                         }}
                                         disabled={!isSubscribed || hasApplied}
-                                        title={!isSubscribed ? "You need an active subscription to apply" : (hasApplied ? "You have already applied" : "Apply for this job")}
+                                        title={!isSubscribed ? t('needSubscriptionToApply') : (hasApplied ? t('alreadyApplied') : t('applyForThisJob'))}
                                     >
                                         {isSubscribed ? (
                                              <div className="flex items-center gap-2">
-                                                {hasApplied ? 'Applied' : 'Apply Now'}
+                                                {hasApplied ? t('applied') : t('applyNow')}
                                              </div>
                                         ) : (
                                             <Link href="/subscription" className="flex items-center gap-2">
-                                                <Star className="h-4 w-4" /> Upgrade to Apply
+                                                <Star className="h-4 w-4" /> {t('upgradeToApply')}
                                             </Link>
                                         )}
                                     </Button>
@@ -173,8 +175,8 @@ export default function JobsPage() {
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                         <Briefcase className="h-16 w-16 mb-4" />
-                        <h3 className="text-xl font-semibold">No Open Jobs</h3>
-                        <p>There are currently no open jobs available. Please check back later!</p>
+                        <h3 className="text-xl font-semibold">{t('noOpenJobs')}</h3>
+                        <p>{t('noOpenJobsDescription')}</p>
                     </CardContent>
                 </Card>
             )}

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, or, Timestamp } from 'firebase/firestore';
@@ -36,6 +37,7 @@ const getStatusClass = (status: BookingEvent['status']) => {
 
 export default function CalendarPage() {
     const { user, userRole } = useAuth();
+    const t = useTranslations('Calendar');
     const [events, setEvents] = useState<BookingEvent[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -118,8 +120,8 @@ export default function CalendarPage() {
         return (
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Calendar</h1>
-                    <p className="text-muted-foreground">Loading your schedule...</p>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('loadingSchedule')}</p>
                 </div>
                 <Card>
                     <CardContent className="p-6">
@@ -133,21 +135,21 @@ export default function CalendarPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Calendar</h1>
-                <p className="text-muted-foreground">View your upcoming and past bookings.</p>
+                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="text-2xl font-bold">{format(currentDate, 'MMMM yyyy')}</CardTitle>
                     <div className="flex gap-2">
                         <Button variant="outline" size="icon" onClick={prevMonth}><ChevronLeft /></Button>
-                        <Button variant="outline" onClick={() => setCurrentDate(new Date())}>Today</Button>
+                        <Button variant="outline" onClick={() => setCurrentDate(new Date())}>{t('today')}</Button>
                         <Button variant="outline" size="icon" onClick={nextMonth}><ChevronRight /></Button>
                     </div>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-7 text-center font-semibold text-muted-foreground">
-                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => <div key={day}>{day}</div>)}
+                        {[t('sun'), t('mon'), t('tue'), t('wed'), t('thu'), t('fri'), t('sat')].map(day => <div key={day}>{day}</div>)}
                     </div>
                     <div className="grid grid-cols-7 grid-rows-5 gap-px border-t border-l mt-2">
                         {calendarGrid.map((day, index) => {
@@ -181,19 +183,19 @@ export default function CalendarPage() {
              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Bookings for {selectedDayEvents.length > 0 && format(selectedDayEvents[0].start, 'PPP')}</DialogTitle>
+                        <DialogTitle>{t('bookingsFor', { date: selectedDayEvents.length > 0 ? format(selectedDayEvents[0].start, 'PPP') : '' })}</DialogTitle>
                     </DialogHeader>
                      <div className="space-y-4">
                         {selectedDayEvents.map((event, index) => (
                             <div key={index} className="p-4 border rounded-lg">
                                 <p className="font-bold">{event.title}</p>
                                  <p className="text-sm text-muted-foreground">
-                                    With: {userRole === 'client' ? event.providerName : event.clientName}
+                                    {t('with', { name: userRole === 'client' ? event.providerName : event.clientName })}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                    Time: {format(event.start, 'p')}
+                                    {t('time', { time: format(event.start, 'p') })}
                                 </p>
-                                 <Badge className={cn("mt-2 text-white", getStatusClass(event.status))}>{event.status}</Badge>
+                                 <Badge className={cn("mt-2 text-white", getStatusClass(event.status))}>{t(event.status.toLowerCase())}</Badge>
                             </div>
                         ))}
                     </div>

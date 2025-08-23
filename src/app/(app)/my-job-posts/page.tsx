@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
@@ -45,6 +46,7 @@ export default function MyJobPostsPage() {
     const { user, userRole } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
+    const t = useTranslations('MyJobPosts');
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -63,29 +65,29 @@ export default function MyJobPostsPage() {
             setLoading(false);
         }, (error) => {
             console.error("Error fetching jobs:", error);
-            toast({ variant: "destructive", title: "Error", description: "Could not fetch your job posts." });
+            toast({ variant: "destructive", title: t('error'), description: t('couldNotFetchJobs') });
             setLoading(false);
         });
 
         return () => unsubscribe();
-    }, [user, userRole, router, toast]);
+    }, [user, userRole, router, toast, t]);
     
     const handleUpdateStatus = async (jobId: string, status: JobStatus) => {
         try {
             const jobRef = doc(db, "jobs", jobId);
             await updateDoc(jobRef, { status });
-            toast({ title: "Success", description: `Job has been marked as ${status}.` });
+            toast({ title: t('success'), description: t('jobMarkedAs', { status }) });
         } catch(e) {
-            toast({ variant: "destructive", title: "Error", description: "Failed to update job status." });
+            toast({ variant: "destructive", title: t('error'), description: t('failedToUpdateStatus') });
         }
     }
 
     const handleDeleteJob = async (jobId: string) => {
          try {
             await deleteDoc(doc(db, "jobs", jobId));
-            toast({ title: "Success", description: "Job post has been deleted." });
+            toast({ title: t('success'), description: t('jobDeleted') });
         } catch(e) {
-            toast({ variant: "destructive", title: "Error", description: "Failed to delete job post." });
+            toast({ variant: "destructive", title: t('error'), description: t('failedToDeleteJob') });
         }
     }
 
@@ -93,8 +95,8 @@ export default function MyJobPostsPage() {
         return (
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">My Job Posts</h1>
-                    <p className="text-muted-foreground">View and manage all your posted jobs here.</p>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
                 <Card>
                     <CardContent className="p-6">
@@ -108,9 +110,9 @@ export default function MyJobPostsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">My Job Posts</h1>
+                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                 <p className="text-muted-foreground">
-                    View and manage all your posted jobs here.
+                    {t('subtitle')}
                 </p>
             </div>
 
@@ -119,11 +121,11 @@ export default function MyJobPostsPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Title</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Applicants</TableHead>
-                                <TableHead className="text-right">Budget</TableHead>
-                                <TableHead><span className="sr-only">Actions</span></TableHead>
+                                <TableHead>{t('title')}</TableHead>
+                                <TableHead>{t('status')}</TableHead>
+                                <TableHead>{t('applicants')}</TableHead>
+                                <TableHead className="text-right">{t('budget')}</TableHead>
+                                <TableHead><span className="sr-only">{t('actions')}</span></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -139,36 +141,36 @@ export default function MyJobPostsPage() {
                                                 <DropdownMenuTrigger asChild>
                                                     <Button aria-haspopup="true" size="icon" variant="ghost">
                                                         <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
+                                                        <span className="sr-only">{t('toggleMenu')}</span>
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuLabel>{t('actions')}</DropdownMenuLabel>
                                                      <DropdownMenuItem asChild>
-                                                        <Link href={`/my-job-posts/${job.id}/applicants`}><Eye className="mr-2 h-4 w-4" /> View Applicants</Link>
+                                                        <Link href={`/my-job-posts/${job.id}/applicants`}><Eye className="mr-2 h-4 w-4" /> {t('viewApplicants')}</Link>
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem asChild>
-                                                        <Link href={`/post-a-job?edit=${job.id}`}><Edit className="mr-2 h-4 w-4" /> Edit Post</Link>
+                                                        <Link href={`/post-a-job?edit=${job.id}`}><Edit className="mr-2 h-4 w-4" /> {t('editPost')}</Link>
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem onSelect={() => handleUpdateStatus(job.id, "Closed")}>
-                                                        <CircleSlash className="mr-2 h-4 w-4" /> Close Post
+                                                        <CircleSlash className="mr-2 h-4 w-4" /> {t('closePost')}
                                                     </DropdownMenuItem>
                                                     <DropdownMenuSeparator />
                                                     <AlertDialogTrigger asChild>
                                                         <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
-                                                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                                            <Trash2 className="mr-2 h-4 w-4" /> {t('delete')}
                                                         </DropdownMenuItem>
                                                     </AlertDialogTrigger>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                             <AlertDialogContent>
                                                 <AlertDialogHeader>
-                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                    <AlertDialogDescription>This will permanently delete this job post. This action cannot be undone.</AlertDialogDescription>
+                                                    <AlertDialogTitle>{t('areYouSure')}</AlertDialogTitle>
+                                                    <AlertDialogDescription>{t('deleteJobDescription')}</AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => handleDeleteJob(job.id)} className="bg-destructive hover:bg-destructive/80">Delete</AlertDialogAction>
+                                                    <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDeleteJob(job.id)} className="bg-destructive hover:bg-destructive/80">{t('delete')}</AlertDialogAction>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>
                                         </AlertDialog>
@@ -178,8 +180,8 @@ export default function MyJobPostsPage() {
                                 <TableRow>
                                     <TableCell colSpan={5} className="h-24 text-center">
                                         <Briefcase className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
-                                        You haven't posted any jobs yet.
-                                        <Button variant="link" asChild><Link href="/post-a-job">Post a Job</Link></Button>
+                                        {t('noJobsYet')}
+                                        <Button variant="link" asChild><Link href="/post-a-job">{t('postAJob')}</Link></Button>
                                     </TableCell>
                                 </TableRow>
                             )}

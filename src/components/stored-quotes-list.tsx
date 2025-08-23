@@ -52,6 +52,7 @@ import { QuoteFormValues } from "./quote-builder-client";
 import { Card, CardContent } from "./ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { QuotePreview } from "./quote-preview";
+import { useTranslations } from 'next-intl';
 
 
 type QuoteStatus = "Draft" | "Sent" | "Accepted" | "Declined";
@@ -77,6 +78,7 @@ const getStatusVariant = (status: QuoteStatus) => {
 export function StoredQuotesList() {
     const { user } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('StoredQuotesList');
     const [quotes, setQuotes] = React.useState<Quote[]>([]);
     const [loading, setLoading] = React.useState(true);
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -103,7 +105,7 @@ export function StoredQuotesList() {
             setLoading(false);
         }, (error) => {
             console.error("Error fetching quotes:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch quotes.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToFetchQuotes') });
             setLoading(false);
         });
 
@@ -114,23 +116,23 @@ export function StoredQuotesList() {
         const quoteRef = doc(db, "quotes", quoteId);
         try {
             await updateDoc(quoteRef, { status });
-            toast({ title: "Success", description: `Quote marked as ${status.toLowerCase()}.` });
+            toast({ title: t('success'), description: t('quoteMarkedAs', { status: status.toLowerCase() }) });
         } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to update quote status.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToUpdateQuoteStatus') });
         }
     };
     
     const handleDeleteQuote = async (quoteId: string) => {
         try {
             await deleteDoc(doc(db, "quotes", quoteId));
-            toast({ title: "Success", description: "Quote deleted successfully." });
+            toast({ title: t('success'), description: t('quoteDeletedSuccessfully') });
         } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete quote.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToDeleteQuote') });
         }
     };
     
     const calculateTotal = (quote: QuoteFormValues) => {
-        const subtotal = quote.lineItems.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
+        const subtotal = quote.lineItems.reduce((acc: number, item: any) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
         const taxAmount = subtotal * ((Number(quote.taxRate) || 0) / 100);
         return subtotal + taxAmount;
     }
@@ -160,7 +162,7 @@ export function StoredQuotesList() {
       },
       {
         accessorKey: "quoteNumber",
-        header: "Quote #",
+        header: t('quoteNumber'),
         cell: ({ row }) => <div className="font-medium">{row.getValue("quoteNumber")}</div>,
       },
       {
@@ -170,7 +172,7 @@ export function StoredQuotesList() {
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Client
+            {t('client')}
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         ),
@@ -178,25 +180,25 @@ export function StoredQuotesList() {
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: t('status'),
         cell: ({ row }) => (
           <Badge variant={getStatusVariant(row.getValue("status"))} className="capitalize">{row.getValue("status")}</Badge>
         ),
       },
       {
         accessorKey: "createdAt",
-        header: "Created",
+        header: t('created'),
         cell: ({ row }) => {
             const date: Timestamp | { toDate: () => Date } = row.getValue("createdAt");
             if (date && typeof date.toDate === 'function') {
                 return <div>{date.toDate().toLocaleDateString()}</div>
             }
-            return <div>Invalid Date</div>
+            return <div>{t('invalidDate')}</div>
         }
       },
       {
         accessorKey: "amount",
-        header: () => <div className="text-right">Amount</div>,
+        header: () => <div className="text-right">{t('amount')}</div>,
         cell: ({ row }) => {
           const amount = calculateTotal(row.original)
           const formatted = new Intl.NumberFormat("en-PH", {
@@ -222,40 +224,40 @@ export function StoredQuotesList() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t('actions')}</DropdownMenuLabel>
                     <DialogTrigger asChild>
-                        <DropdownMenuItem onClick={() => setSelectedQuote(quote)}>View Details</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setSelectedQuote(quote)}>{t('viewDetails')}</DropdownMenuItem>
                     </DialogTrigger>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => handleStatusUpdate(quote.id, 'Sent')} disabled={quote.status === 'Sent'}>
-                      Mark as Sent
+                      {t('markAsSent')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleStatusUpdate(quote.id, 'Accepted')} disabled={quote.status === 'Accepted'}>
-                      Mark as Accepted
+                      {t('markAsAccepted')}
                     </DropdownMenuItem>
                      <DropdownMenuItem onClick={() => handleStatusUpdate(quote.id, 'Declined')} disabled={quote.status === 'Declined'}>
-                      Mark as Declined
+                      {t('markAsDeclined')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                      <AlertDialogTrigger asChild>
-                      <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive">{t('delete')}</DropdownMenuItem>
                     </AlertDialogTrigger>
                   </DropdownMenuContent>
                 </DropdownMenu>
                  <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('areYouAbsolutelySure')}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete this quote.
+                      {t('deleteQuoteWarning')}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
                     <AlertDialogAction
                       className="bg-destructive hover:bg-destructive/90"
                       onClick={() => handleDeleteQuote(quote.id)}
                     >
-                      Delete
+                      {t('delete')}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -264,7 +266,7 @@ export function StoredQuotesList() {
               {selectedQuote?.id === quote.id && (
                 <DialogContent className="max-w-4xl">
                     <DialogHeader>
-                        <DialogTitle>Quote Preview: {selectedQuote.quoteNumber}</DialogTitle>
+                        <DialogTitle>{t('quotePreview')}: {selectedQuote.quoteNumber}</DialogTitle>
                     </DialogHeader>
                     <QuotePreview data={selectedQuote} />
                 </DialogContent>
@@ -310,8 +312,8 @@ export function StoredQuotesList() {
              <Card>
                 <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                     <FileText className="h-16 w-16 mb-4" />
-                    <h3 className="text-xl font-semibold">No Stored Quotes</h3>
-                    <p>Create your first quote in the "Create Quote" tab.</p>
+                    <h3 className="text-xl font-semibold">{t('noStoredQuotes')}</h3>
+                    <p>{t('createFirstQuoteMessage')}</p>
                 </CardContent>
             </Card>
         )
@@ -321,7 +323,7 @@ export function StoredQuotesList() {
       <div className="w-full">
         <div className="flex items-center py-4">
           <Input
-            placeholder="Filter by client name..."
+            placeholder={t('filterByClientName')}
             value={(table.getColumn("clientName")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
               table.getColumn("clientName")?.setFilterValue(event.target.value)
@@ -331,7 +333,7 @@ export function StoredQuotesList() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
-                Columns <ChevronDown className="ml-2 h-4 w-4" />
+                {t('columns')} <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -398,7 +400,7 @@ export function StoredQuotesList() {
                         colSpan={columns.length}
                         className="h-24 text-center"
                     >
-                        No results.
+                        {t('noResults')}.
                     </TableCell>
                     </TableRow>
                 )}
@@ -407,8 +409,8 @@ export function StoredQuotesList() {
         </div>
         <div className="flex items-center justify-end space-x-2 py-4">
           <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
+            {table.getFilteredSelectedRowModel().rows.length} {t('of')} {" "}
+            {table.getFilteredRowModel().rows.length} {t('rowsSelected')}.
           </div>
           <div className="space-x-2">
             <Button
@@ -417,7 +419,7 @@ export function StoredQuotesList() {
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              Previous
+              {t('previous')}
             </Button>
             <Button
               variant="outline"
@@ -425,7 +427,7 @@ export function StoredQuotesList() {
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
-              Next
+              {t('next')}
             </Button>
           </div>
         </div>

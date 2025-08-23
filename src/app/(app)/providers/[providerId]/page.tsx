@@ -2,7 +2,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp, deleteDoc, setDoc, onSnapshot, orderBy } from "firebase/firestore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -93,6 +95,7 @@ export default function ProviderProfilePage() {
     const router = useRouter();
     const { user } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('ProviderProfile');
     const providerId = params.providerId as string;
     const servicesRef = useRef<HTMLDivElement>(null);
 
@@ -167,7 +170,7 @@ export default function ProviderProfilePage() {
 
     const handleToggleFavorite = async () => {
         if (!user || !provider) {
-            toast({ variant: "destructive", title: "Error", description: "You must be logged in to favorite a provider." });
+            toast({ variant: "destructive", title: t('error'), description: t('mustBeLoggedInToFavorite') });
             return;
         }
         setIsFavoriteLoading(true);
@@ -180,18 +183,18 @@ export default function ProviderProfilePage() {
                 if (!snapshot.empty) {
                     await deleteDoc(snapshot.docs[0].ref);
                 }
-                toast({ title: "Removed from Favorites" });
+                toast({ title: t('removedFromFavorites') });
             } else {
                  await addDoc(favoritesRef, {
                     userId: user.uid,
                     providerId: provider.uid,
                     favoritedAt: serverTimestamp()
                 });
-                toast({ title: "Added to Favorites" });
+                toast({ title: t('addedToFavorites') });
             }
         } catch (error) {
             console.error("Error updating favorite status:", error);
-            toast({ variant: "destructive", title: "Error", description: "Could not update favorites." });
+            toast({ variant: "destructive", title: t('error'), description: t('couldNotUpdateFavorites') });
         } finally {
             setIsFavoriteLoading(false);
         }
@@ -199,12 +202,12 @@ export default function ProviderProfilePage() {
     
     const handleSendMessage = async () => {
         if (!user || !provider) {
-            toast({ variant: "destructive", title: "Error", description: "You must be logged in to send a message." });
+            toast({ variant: "destructive", title: t('error'), description: t('mustBeLoggedInToMessage') });
             return;
         }
 
         if (user.uid === provider.uid) {
-             toast({ variant: "destructive", title: "Error", description: "You cannot send a message to yourself." });
+             toast({ variant: "destructive", title: t('error'), description: t('cannotMessageYourself') });
             return;
         }
 
@@ -245,13 +248,13 @@ export default function ProviderProfilePage() {
             }
         } catch (error) {
             console.error("Error starting conversation:", error);
-            toast({ variant: "destructive", title: "Error", description: "Could not start a conversation." });
+            toast({ variant: "destructive", title: t('error'), description: t('couldNotStartConversation') });
         }
     };
 
     const handleReportProvider = async () => {
         if (!user || !provider || !reportReason) {
-            toast({ variant: "destructive", title: "Error", description: "Please provide a reason for your report." });
+            toast({ variant: "destructive", title: t('error'), description: t('pleaseProvideReason') });
             return;
         }
         setIsReporting(true);
@@ -264,11 +267,11 @@ export default function ProviderProfilePage() {
                 status: 'New',
                 createdAt: serverTimestamp(),
             });
-            toast({ title: 'Report Submitted', description: 'Thank you for your feedback. An admin will review your report shortly.' });
+            toast({ title: t('reportSubmitted'), description: t('reportSubmittedDescription') });
             setReportReason("");
         } catch(error) {
             console.error("Error submitting report:", error);
-            toast({ variant: "destructive", title: "Error", description: "Failed to submit your report." });
+            toast({ variant: "destructive", title: t('error'), description: t('failedToSubmitReport') });
         } finally {
             setIsReporting(false);
         }
@@ -280,7 +283,7 @@ export default function ProviderProfilePage() {
 
     const handleBookServiceClick = (service: Service) => {
         if (!user) {
-            toast({ variant: 'destructive', title: 'Login Required', description: 'Please log in to book a service.' });
+            toast({ variant: 'destructive', title: t('loginRequired'), description: t('pleaseLoginToBook') });
             router.push('/login');
             return;
         }
@@ -310,10 +313,10 @@ export default function ProviderProfilePage() {
     if (!provider) {
         return (
             <div className="container mx-auto text-center py-20">
-                <h1 className="text-4xl font-bold">Provider Not Found</h1>
-                <p className="text-muted-foreground mt-4">The provider you are looking for does not exist or may have been removed.</p>
+                <h1 className="text-4xl font-bold">{t('providerNotFound')}</h1>
+                <p className="text-muted-foreground mt-4">{t('providerNotFoundDescription')}</p>
                 <Button asChild className="mt-8">
-                    <Link href="/dashboard">Return to Dashboard</Link>
+                    <Link href="/dashboard">{t('returnToDashboard')}</Link>
                 </Button>
             </div>
         )
@@ -341,17 +344,17 @@ export default function ProviderProfilePage() {
                                 </div>
                                 <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
                                     {renderStars(overallRating)}
-                                    <span>({reviews.length} reviews)</span>
+                                    <span>({reviews.length} {t('reviews')})</span>
                                     <Badge variant="secondary" className="capitalize"><ProfileIcon className="mr-1 h-4 w-4"/> {provider.role}</Badge>
                                 </div>
-                                <p className="text-muted-foreground pt-2">{provider.bio || "This provider hasn't added a bio yet."}</p>
+                                <p className="text-muted-foreground pt-2">{provider.bio || t('noBioYet')}</p>
                             </div>
                             <div className="flex flex-col gap-2 w-full md:w-auto">
-                                <Button size="lg" onClick={handleBookNow}><CalendarPlus className="mr-2" /> Book Now</Button>
-                                <Button size="lg" variant="outline" onClick={handleSendMessage}><MessageSquare className="mr-2" /> Send Message</Button>
+                                <Button size="lg" onClick={handleBookNow}><CalendarPlus className="mr-2" /> {t('bookNow')}</Button>
+                                <Button size="lg" variant="outline" onClick={handleSendMessage}><MessageSquare className="mr-2" /> {t('sendMessage')}</Button>
                                 <Button size="lg" variant="outline" onClick={handleToggleFavorite} disabled={isFavoriteLoading}>
                                     <Heart className={cn("mr-2", isFavorited && "fill-red-500 text-red-500")} />
-                                    {isFavorited ? 'Favorited' : 'Favorite'}
+                                    {isFavorited ? t('favorited') : t('favorite')}
                                 </Button>
                             </div>
                         </div>
@@ -359,7 +362,7 @@ export default function ProviderProfilePage() {
                     <CardFooter className="bg-secondary/50 p-2 flex justify-end">
                         <DialogTrigger asChild>
                             <Button variant="link" size="sm" className="text-xs text-muted-foreground">
-                                <Flag className="mr-2 h-3 w-3" /> Report this Provider
+                                <Flag className="mr-2 h-3 w-3" /> {t('reportThisProvider')}
                             </Button>
                         </DialogTrigger>
                     </CardFooter>
@@ -369,7 +372,7 @@ export default function ProviderProfilePage() {
                     <div className="md:col-span-2">
                         {/* Services Section */}
                         <div ref={servicesRef}>
-                            <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><BriefcaseBusiness /> Services Offered</h2>
+                            <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><BriefcaseBusiness /> {t('servicesOffered')}</h2>
                             <div className="grid gap-6 md:grid-cols-2">
                                 {services.length > 0 ? services.map(service => (
                                     <Card key={service.id}>
@@ -386,7 +389,7 @@ export default function ProviderProfilePage() {
                                         </CardFooter>
                                     </Card>
                                 )) : (
-                                    <p className="text-muted-foreground col-span-full text-center py-8">This provider has not listed any services yet.</p>
+                                    <p className="text-muted-foreground col-span-full text-center py-8">{t('noServicesListed')}</p>
                                 )}
                             </div>
                         </div>
@@ -394,7 +397,7 @@ export default function ProviderProfilePage() {
                     <div className="md:col-span-1 space-y-8">
                         {/* Availability Section */}
                          <div>
-                            <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Clock /> Weekly Hours</h2>
+                            <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Clock /> {t('weeklyHours')}</h2>
                              <Card>
                                  <CardContent className="p-6 space-y-3">
                                     {provider.availabilitySchedule && provider.availabilitySchedule.length > 0 ? (
@@ -402,19 +405,19 @@ export default function ProviderProfilePage() {
                                             <div key={schedule.day} className={`flex justify-between text-sm ${schedule.day === today ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
                                                 <span>{schedule.day}</span>
                                                 <span>
-                                                    {schedule.enabled ? `${schedule.startTime} - ${schedule.endTime}` : 'Closed'}
+                                                    {schedule.enabled ? `${schedule.startTime} - ${schedule.endTime}` : t('closed')}
                                                 </span>
                                             </div>
                                         ))
                                     ) : (
-                                        <p className="text-muted-foreground text-center py-4">Availability not set.</p>
+                                        <p className="text-muted-foreground text-center py-4">{t('availabilityNotSet')}</p>
                                     )}
                                 </CardContent>
                             </Card>
                         </div>
                           {provider.documents && provider.documents.length > 0 && (
                             <div>
-                                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><FileText /> Documents</h2>
+                                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><FileText /> {t('documents')}</h2>
                                 <Card>
                                     <CardContent className="p-6 space-y-3">
                                         {provider.documents.map((doc, i) => (
@@ -435,7 +438,7 @@ export default function ProviderProfilePage() {
 
                 {/* Reviews Section */}
                 <div>
-                    <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Star /> Client Reviews</h2>
+                    <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Star /> {t('clientReviews')}</h2>
                     <Card>
                         <CardContent className="p-6 space-y-6">
                             {reviews.length > 0 ? reviews.map(review => (
@@ -456,7 +459,7 @@ export default function ProviderProfilePage() {
                                     </div>
                                 </div>
                             )) : (
-                                 <p className="text-muted-foreground text-center py-8">This provider has not received any reviews yet.</p>
+                                 <p className="text-muted-foreground text-center py-8">{t('noReviewsYet')}</p>
                             )}
                         </CardContent>
                     </Card>
@@ -468,7 +471,7 @@ export default function ProviderProfilePage() {
                         service={selectedService}
                         provider={provider}
                         onBookingConfirmed={() => {
-                            toast({ title: 'Booking Successful!', description: 'Your booking has been confirmed and is now visible in your bookings list.'});
+                            toast({ title: t('bookingSuccessful'), description: t('bookingSuccessfulDescription')});
                             setIsBookingDialogOpen(false);
                         }}
                     />
@@ -477,24 +480,24 @@ export default function ProviderProfilePage() {
 
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Report Provider: {provider.displayName}</DialogTitle>
+                    <DialogTitle>{t('reportProviderTitle', { providerName: provider.displayName })}</DialogTitle>
                     <DialogDescription>
-                        Please provide a reason for reporting this provider. Your feedback is important for maintaining a safe community.
+                        {t('reportProviderDescription')}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-2">
-                    <Label htmlFor="report-reason">Reason</Label>
+                    <Label htmlFor="report-reason">{t('reason')}</Label>
                     <Textarea 
                         id="report-reason"
                         value={reportReason}
                         onChange={(e) => setReportReason(e.target.value)}
-                        placeholder="e.g., This provider was unprofessional, the work was incomplete..."
+                        placeholder={t('reportReasonPlaceholder')}
                     />
                 </div>
                 <DialogFooter>
-                    <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
+                    <DialogClose asChild><Button variant="ghost">{t('cancel')}</Button></DialogClose>
                     <Button onClick={handleReportProvider} disabled={isReporting}>
-                        {isReporting ? 'Submitting...' : 'Submit Report'}
+                        {isReporting ? t('submitting') : t('submitReport')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

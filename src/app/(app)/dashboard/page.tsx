@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List, ShieldCheck, Clock, Wallet, Info } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
+import { useTranslations } from 'next-intl';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -150,14 +151,14 @@ const processEarningsData = (bookings: Booking[]) => {
     return chartData;
 }
 
-const getAvailabilityBadge = (status: Provider['availabilityStatus']) => {
+const getAvailabilityBadge = (status: Provider['availabilityStatus'], t: any) => {
     switch (status) {
         case 'available':
-            return <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">Available</Badge>;
+            return <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">{t('available')}</Badge>;
         case 'limited':
-            return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">Limited</Badge>;
+            return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">{t('limited')}</Badge>;
         case 'unavailable':
-            return <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">Unavailable</Badge>;
+            return <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">{t('unavailable')}</Badge>;
         default:
             return null;
     }
@@ -172,7 +173,7 @@ const getAvatarFallback = (name: string | null | undefined) => {
     return name.substring(0, 2).toUpperCase();
 };
 
-const ProviderCard = ({ provider, isFavorite, onToggleFavorite }: { provider: Provider; isFavorite: boolean; onToggleFavorite: (provider: Provider) => void; }) => {
+const ProviderCard = ({ provider, isFavorite, onToggleFavorite, t }: { provider: Provider; isFavorite: boolean; onToggleFavorite: (provider: Provider) => void; t: any; }) => {
     return (
         <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col">
             {provider.searchReasoning && (
@@ -196,9 +197,9 @@ const ProviderCard = ({ provider, isFavorite, onToggleFavorite }: { provider: Pr
                 </Avatar>
                 <div className="flex items-center justify-center gap-2">
                     <h3 className="text-xl font-bold">{provider.displayName}</h3>
-                    {provider.isVerified && <ShieldCheck className="h-5 w-5 text-blue-500" title="Verified Provider" />}
+                    {provider.isVerified && <ShieldCheck className="h-5 w-5 text-blue-500" />}
                 </div>
-                 {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus)}
+                 {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus, t)}
                  {provider.reviewCount > 0 && (
                      <div className="flex items-center justify-center gap-1 mt-1 text-muted-foreground">
                         {renderStars(provider.rating)}
@@ -247,7 +248,7 @@ const ProviderRow = ({ provider, isFavorite, onToggleFavorite }: { provider: Pro
             <div className="flex-1">
                 <div className="flex items-center gap-2">
                     <Link href={`/providers/${provider.uid}`} className="font-bold hover:underline">{provider.displayName}</Link>
-                    {provider.isVerified && <ShieldCheck className="h-4 w-4 text-blue-500" title="Verified Provider" />}
+                    {provider.isVerified && <ShieldCheck className="h-4 w-4 text-blue-500" />}
                 </div>
                 {provider.searchReasoning && (
                     <p className="text-xs text-primary/80 mt-1">{provider.searchReasoning}</p>
@@ -273,6 +274,7 @@ const ProviderRow = ({ provider, isFavorite, onToggleFavorite }: { provider: Pro
 export default function DashboardPage() {
     const { user, userRole } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('Dashboard');
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
@@ -533,20 +535,20 @@ export default function DashboardPage() {
 
                 setProviders(matchedProviders);
                 toast({
-                    title: "Smart Search Complete",
+                    title: t('smartSearchComplete'),
                     description: `Found and ranked ${matchedProviders.length} providers for you.`,
                 });
             } else {
                 setProviders([]);
                  toast({
-                    title: "No Results",
+                    title: t('noResults'),
                     description: `Could not find any providers for your search. Try a broader term.`,
                 });
             }
         } catch (error) {
             console.error("Smart search failed:", error);
             toast({
-                title: "Smart Search Failed",
+                title: t('smartSearchFailed'),
                 description: "There was an error finding providers. Please try a different search.",
                 variant: "destructive",
             });
@@ -579,18 +581,18 @@ export default function DashboardPage() {
                     const docId = snapshot.docs[0].id;
                     await deleteDoc(doc(db, 'favorites', docId));
                 }
-                toast({ title: "Removed from Favorites" });
+                toast({ title: t('removedFromFavorites') });
             } else {
                 await addDoc(favoritesRef, {
                     userId: user.uid,
                     providerId: provider.uid,
                     favoritedAt: serverTimestamp()
                 });
-                toast({ title: "Added to Favorites" });
+                toast({ title: t('addedToFavorites') });
             }
         } catch (error) {
             console.error("Error toggling favorite:", error);
-            toast({ variant: "destructive", title: "Error", description: "Could not update favorites." });
+            toast({ variant: "destructive", title: "Error", description: t('couldNotUpdateFavorites') });
         }
     };
 
@@ -601,15 +603,15 @@ export default function DashboardPage() {
         return (
              <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Find a Service Provider</h1>
-                    <p className="text-muted-foreground">Describe what you need, and we'll find the right pro for the job.</p>
+                    <h1 className="text-3xl font-bold font-headline">{t('findServiceProvider')}</h1>
+                    <p className="text-muted-foreground">{t('describeNeed')}</p>
                 </div>
                  <Card>
                     <CardContent className="p-6 space-y-6">
                         <div className="flex flex-col sm:flex-row gap-4">
                             <div className="relative flex-1">
                                 <Input 
-                                    placeholder="e.g., 'I need a plumber for a clogged kitchen sink'" 
+                                    placeholder={t('searchPlaceholder')} 
                                     className="w-full h-12 text-base pl-4 pr-32" 
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -621,7 +623,7 @@ export default function DashboardPage() {
                                     disabled={isSmartSearching}
                                 >
                                     {isSmartSearching ? <Loader2 className="mr-2 animate-spin" /> : <Search className="mr-2" />}
-                                    {isSmartSearching ? 'Searching...' : 'Search'}
+                                    {isSmartSearching ? t('searching') : t('search')}
                                 </Button>
                             </div>
                             <div className="flex items-center gap-1 border p-1 rounded-lg bg-background h-12">
@@ -647,6 +649,7 @@ export default function DashboardPage() {
                                                 provider={provider} 
                                                 isFavorite={favoriteProviderIds.includes(provider.uid)}
                                                 onToggleFavorite={handleToggleFavorite}
+                                                t={t}
                                             />
                                         ))}
                                     </div>

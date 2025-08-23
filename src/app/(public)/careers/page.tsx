@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Zap, Users, Heart, Lightbulb } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { useTranslations } from 'next-intl';
 
 export const metadata: Metadata = {
   title: 'Careers',
@@ -30,12 +31,14 @@ const ourValues = [
 
 
 export default function CareersPage() {
+  const t = useTranslations('Careers');
+  
   return (
     <div className="container py-12 md:py-24 lg:py-32">
       <div className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">Build the Future with LocalPro</h1>
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">{t('title')}</h1>
         <p className="mt-6 text-lg leading-8 text-muted-foreground">
-          Join a passionate team dedicated to revolutionizing the service industry in the Philippines.
+          {t('subtitle')}
         </p>
       </div>
       
@@ -80,15 +83,15 @@ export default function CareersPage() {
       <section className="mt-20">
         <Card className="max-w-3xl mx-auto bg-secondary">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Open Positions</CardTitle>
+            <CardTitle className="text-2xl">{t('openPositions')}</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-muted-foreground mb-6">
-                We are always looking for passionate, talented individuals to join our mission. While we don't have specific openings at this moment, we encourage you to send us your resume. We'll keep it on file and reach out if a suitable role becomes available.
+                {t('noOpenings')} {t('checkBack')}
             </p>
             <Button asChild size="lg">
               <a href="mailto:careers@localpro.example.com">
-                Contact our HR team <ArrowRight className="ml-2" />
+                {t('contactSales')} <ArrowRight className="ml-2" />
               </a>
             </Button>
           </CardContent>

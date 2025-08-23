@@ -7,6 +7,7 @@ import { useActionState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import { forgotPasswordAction, type FormState } from "./actions";
+import { useTranslations } from 'next-intl';
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +26,7 @@ export default function ForgotPasswordPage() {
     const { toast } = useToast();
     const { user, loading: authLoading } = useAuth();
     const [state, formAction, isPending] = useActionState(forgotPasswordAction, initialState);
+    const t = useTranslations('ForgotPassword');
     
     useEffect(() => {
         if (!authLoading && user) {
@@ -35,7 +37,7 @@ export default function ForgotPasswordPage() {
     useEffect(() => {
         if (state.message) {
             toast({
-                title: state.error ? "Error" : "Request Submitted",
+                title: state.error ? t('error') : t('success'),
                 description: state.message,
                 variant: state.error ? "destructive" : "default",
             });
@@ -43,7 +45,7 @@ export default function ForgotPasswordPage() {
                 // Optionally redirect or clear form
             }
         }
-    }, [state, toast]);
+    }, [state, toast, t]);
 
     if (authLoading || user) {
         return (
@@ -60,25 +62,25 @@ export default function ForgotPasswordPage() {
                     <div className="flex justify-center">
                         <Logo />
                     </div>
-                    <CardTitle className="text-2xl">Forgot Password</CardTitle>
-                    <CardDescription>Enter your email and we'll send you a link to reset your password.</CardDescription>
+                    <CardTitle className="text-2xl">{t('title')}</CardTitle>
+                    <CardDescription>{t('subtitle')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form action={formAction} className="space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="email">Email Address</Label>
-                            <Input id="email" name="email" type="email" placeholder="you@example.com" required />
+                            <Label htmlFor="email">{t('email')}</Label>
+                            <Input id="email" name="email" type="email" placeholder={t('emailPlaceholder')} required />
                         </div>
                         {state.error && <p className="text-sm text-destructive">{state.error}</p>}
                         <Button type="submit" className="w-full" disabled={isPending}>
                             {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                            {isPending ? "Sending..." : "Send Reset Link"}
+                            {isPending ? t('sending') : t('sendResetLink')}
                         </Button>
                     </form>
                     <div className="mt-6 text-center text-sm">
-                        Remember your password?{" "}
+                        {t('backToLogin')}{" "}
                         <Link href="/login" className="underline">
-                            Log in
+                            {t('login')}
                         </Link>
                     </div>
                 </CardContent>

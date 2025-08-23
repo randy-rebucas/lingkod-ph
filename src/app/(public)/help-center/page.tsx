@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useTranslations } from 'next-intl';
 
 
 const clientFaqs = [
@@ -89,6 +90,7 @@ const AiChatbot = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslations('HelpCenter');
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +106,7 @@ const AiChatbot = () => {
       const assistantMessage: ChatMessage = { role: 'assistant', content: response.answer };
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      const errorMessage: ChatMessage = { role: 'assistant', content: "Sorry, I encountered an error. Please try again." };
+      const errorMessage: ChatMessage = { role: 'assistant', content: t('sorryError') };
       setMessages(prev => [...prev, errorMessage]);
       console.error("AI assistant error:", error);
     } finally {
@@ -115,9 +117,9 @@ const AiChatbot = () => {
   return (
     <DialogContent className="sm:max-w-[425px] flex flex-col h-[70vh]">
       <DialogHeader>
-        <DialogTitle>AI Assistant</DialogTitle>
+        <DialogTitle>{t('aiAssistant')}</DialogTitle>
         <DialogDescription>
-          Ask me anything about LocalPro. I'll do my best to help!
+          {t('aiAssistantSubtitle')}
         </DialogDescription>
       </DialogHeader>
       <ScrollArea className="flex-1 -mx-6 px-6">
@@ -156,10 +158,10 @@ const AiChatbot = () => {
           <Input 
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question..."
+            placeholder={t('askQuestion')}
             disabled={isLoading}
           />
-          <Button type="submit" disabled={isLoading}>Send</Button>
+          <Button type="submit" disabled={isLoading}>{t('send')}</Button>
         </form>
       </DialogFooter>
     </DialogContent>
@@ -173,15 +175,16 @@ const CreateTicketDialog = () => {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const t = useTranslations('HelpCenter');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to submit a ticket.' });
+      toast({ variant: 'destructive', title: t('error'), description: t('mustBeLoggedIn') });
       return;
     }
     if (!subject.trim() || !message.trim()) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Please fill out all fields.' });
+      toast({ variant: 'destructive', title: t('error'), description: t('fillAllFields') });
       return;
     }
     setIsSubmitting(true);
@@ -196,12 +199,12 @@ const CreateTicketDialog = () => {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
-      toast({ title: 'Ticket Submitted', description: 'Our team will get back to you shortly.' });
+      toast({ title: t('ticketSubmitted'), description: t('ticketSubmittedDesc') });
       setSubject("");
       setMessage("");
       setIsOpen(false);
     } catch (error) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to submit your ticket.' });
+      toast({ variant: 'destructive', title: t('error'), description: t('failedToSubmit') });
     } finally {
       setIsSubmitting(false);
     }
@@ -211,29 +214,29 @@ const CreateTicketDialog = () => {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">
-          <FilePenLine className="mr-2 h-4 w-4" /> Create Support Ticket
+          <FilePenLine className="mr-2 h-4 w-4" /> {t('createSupportTicket')}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create a Support Ticket</DialogTitle>
+          <DialogTitle>{t('createTicket')}</DialogTitle>
           <DialogDescription>
-            Can't find what you're looking for? Submit a ticket and our team will assist you.
+            {t('createTicketDesc')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="subject">Subject</Label>
-            <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g., Issue with my booking" />
+            <Label htmlFor="subject">{t('subject')}</Label>
+            <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder={t('subjectPlaceholder')} />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="message">Message</Label>
-            <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Please describe your issue in detail..." rows={5} />
+            <Label htmlFor="message">{t('message')}</Label>
+            <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t('messagePlaceholder')} rows={5} />
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className="mr-2 animate-spin" /> : null}
-              Submit Ticket
+              {t('submitTicket')}
             </Button>
           </DialogFooter>
         </form>
@@ -243,18 +246,20 @@ const CreateTicketDialog = () => {
 }
 
 export default function HelpCenterPage() {
+  const t = useTranslations('HelpCenter');
+  
   return (
     <Dialog>
       <div className="container py-12 md:py-24 lg:py-32">
         <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">Help Center</h1>
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">{t('title')}</h1>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
-            Find answers to your questions and get support.
+            {t('subtitle')}
           </p>
            <div className="relative mt-8 max-w-lg mx-auto">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder="Search for answers..."
+                placeholder={t('searchPlaceholder')}
                 className="w-full rounded-full h-12 pl-12 pr-4 shadow-sm"
               />
             </div>
@@ -262,7 +267,7 @@ export default function HelpCenterPage() {
 
         <div className="mx-auto max-w-3xl space-y-12 mt-16">
           <div>
-            <h2 className="text-2xl font-bold mb-6 text-center">For Clients</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center">{t('forClients')}</h2>
             <Accordion type="single" collapsible className="w-full">
               {clientFaqs.map((faq, index) => (
                 <AccordionItem value={`client-${index}`} key={index}>
@@ -276,7 +281,7 @@ export default function HelpCenterPage() {
           </div>
           
           <div>
-            <h2 className="text-2xl font-bold mb-6 text-center">For Providers & Agencies</h2>
+            <h2 className="text-2xl font-bold mb-6 text-center">{t('forProviders')}</h2>
              <Accordion type="single" collapsible className="w-full">
               {providerFaqs.map((faq, index) => (
                 <AccordionItem value={`provider-${index}`} key={index}>
@@ -293,13 +298,13 @@ export default function HelpCenterPage() {
          <Card className="mt-20 max-w-3xl mx-auto bg-secondary">
             <CardHeader className="text-center">
               <Bot className="mx-auto h-12 w-12 text-primary mb-4" />
-              <CardTitle className="text-2xl">Still Need Help?</CardTitle>
-              <p className="text-muted-foreground">Try our new AI Assistant for instant answers or create a support ticket.</p>
+              <CardTitle className="text-2xl">{t('stillNeedHelp')}</CardTitle>
+              <p className="text-muted-foreground">{t('aiAssistantDesc')}</p>
             </CardHeader>
             <CardContent className="flex justify-center gap-4">
                <DialogTrigger asChild>
                   <Button>
-                    Ask AI Assistant <ArrowRight className="ml-2 h-4 w-4" />
+                    {t('askAiAssistant')} <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </DialogTrigger>
                 <CreateTicketDialog />

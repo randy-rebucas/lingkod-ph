@@ -2,6 +2,7 @@
 "use client";
 
 import { useAuth } from "@/context/auth-context";
+import { useTranslations } from 'next-intl';
 import { BarChart2, TrendingUp, Users, DollarSign, CheckCircle, PieChart, Loader2, Slash, Star, Percent } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -88,6 +89,7 @@ const processServicePerformance = (bookings: Booking[]) => {
 
 export default function AnalyticsPage() {
     const { user, subscription } = useAuth();
+    const t = useTranslations('Analytics');
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
@@ -160,21 +162,21 @@ export default function AnalyticsPage() {
         return (
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Analytics</h1>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                     <p className="text-muted-foreground">
-                        Dive deep into your performance metrics.
+                        {t('subtitle')}
                     </p>
                 </div>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Upgrade to Elite!</CardTitle>
-                        <CardDescription>This page is exclusive to Elite subscribers. Upgrade your plan to access detailed analytics.</CardDescription>
+                        <CardTitle>{t('upgradeToElite')}</CardTitle>
+                        <CardDescription>{t('eliteExclusive')}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                         <BarChart2 className="h-16 w-16 mb-4" />
-                        <p className="mb-4">Your advanced analytics dashboard will be displayed here.</p>
+                        <p className="mb-4">{t('advancedAnalytics')}</p>
                          <Button asChild>
-                            <Link href="/subscription">View Subscription Plans</Link>
+                            <Link href="/subscription">{t('viewSubscriptionPlans')}</Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -185,9 +187,9 @@ export default function AnalyticsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Advanced Analytics</h1>
+                <h1 className="text-3xl font-bold font-headline">{t('advancedAnalyticsTitle')}</h1>
                 <p className="text-muted-foreground">
-                    Deep dive into your business performance and client data.
+                    {t('deepDiveDescription')}
                 </p>
             </div>
 
@@ -197,18 +199,18 @@ export default function AnalyticsPage() {
                 </div>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Avg. Booking Value</CardTitle><DollarSign className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">₱{analyticsData.averageBookingValue.toFixed(2)}</div></CardContent></Card>
-                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Cancellation Rate</CardTitle><Slash className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.cancellationRate.toFixed(1)}%</div></CardContent></Card>
-                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Utilization Rate</CardTitle><Percent className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.utilizationRate.toFixed(1)}%</div></CardContent></Card>
-                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Avg. Rating</CardTitle><Star className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.averageRating.toFixed(2)}</div></CardContent></Card>
+                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{t('avgBookingValue')}</CardTitle><DollarSign className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">₱{analyticsData.averageBookingValue.toFixed(2)}</div></CardContent></Card>
+                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{t('cancellationRate')}</CardTitle><Slash className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.cancellationRate.toFixed(1)}%</div></CardContent></Card>
+                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{t('utilizationRate')}</CardTitle><Percent className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.utilizationRate.toFixed(1)}%</div></CardContent></Card>
+                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{t('avgRating')}</CardTitle><Star className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.averageRating.toFixed(2)}</div></CardContent></Card>
                 </div>
             )}
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                 <Card className="lg:col-span-3">
                     <CardHeader>
-                        <CardTitle>Booking Trends</CardTitle>
-                        <CardDescription>Total vs. Completed bookings over the last 12 months.</CardDescription>
+                        <CardTitle>{t('bookingTrends')}</CardTitle>
+                        <CardDescription>{t('totalVsCompleted')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {loading ? <Skeleton className="h-[300px] w-full" /> : (
@@ -219,8 +221,8 @@ export default function AnalyticsPage() {
                                 <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false}/>
                                 <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
                                 <Legend />
-                                <Line type="monotone" dataKey="Total Bookings" stroke="hsl(var(--muted-foreground))" strokeWidth={2} dot={false} />
-                                <Line type="monotone" dataKey="Completed Jobs" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                                <Line type="monotone" dataKey={t('totalBookings')} stroke="hsl(var(--muted-foreground))" strokeWidth={2} dot={false} />
+                                <Line type="monotone" dataKey={t('completedJobs')} stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
                             </LineChart>
                         </ResponsiveContainer>
                         )}
@@ -228,8 +230,8 @@ export default function AnalyticsPage() {
                 </Card>
                  <Card className="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle>Service Performance</CardTitle>
-                        <CardDescription>Revenue distribution by service type.</CardDescription>
+                        <CardTitle>{t('servicePerformance')}</CardTitle>
+                        <CardDescription>{t('revenueDistribution')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                        {loading ? <Skeleton className="h-[300px] w-full" /> : (
@@ -251,16 +253,16 @@ export default function AnalyticsPage() {
             
             <Card>
                 <CardHeader>
-                    <CardTitle>Top Performing Services</CardTitle>
-                    <CardDescription>Your most profitable services based on completed bookings.</CardDescription>
+                    <CardTitle>{t('topPerformingServices')}</CardTitle>
+                    <CardDescription>{t('mostProfitableServices')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {loading ? <Skeleton className="h-48 w-full" /> : (
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Service</TableHead>
-                                <TableHead className="text-right">Total Revenue</TableHead>
+                                <TableHead>{t('service')}</TableHead>
+                                <TableHead className="text-right">{t('totalRevenue')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -270,7 +272,7 @@ export default function AnalyticsPage() {
                                     <TableCell className="text-right">₱{service.value.toFixed(2)}</TableCell>
                                 </TableRow>
                             )) : (
-                                <TableRow><TableCell colSpan={2} className="h-24 text-center">No completed services yet.</TableCell></TableRow>
+                                <TableRow><TableCell colSpan={2} className="h-24 text-center">{t('noCompletedServices')}</TableCell></TableRow>
                             )}
                         </TableBody>
                     </Table>

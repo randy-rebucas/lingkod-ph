@@ -14,6 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { handleInviteAction } from '@/app/(app)/profile/actions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 
 type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info' | 'renewal_reminder' | 'new_review' | 'new_job';
@@ -46,6 +47,7 @@ export function NotificationBell() {
     const { user } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
+    const t = useTranslations('NotificationBell');
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
 
@@ -88,9 +90,9 @@ export function NotificationBell() {
         const result = await handleInviteAction({ error: null, message: '' }, formData);
 
         if (result.error) {
-            toast({ variant: 'destructive', title: 'Error', description: result.error });
+            toast({ variant: 'destructive', title: t('error'), description: result.error });
         } else {
-            toast({ title: 'Success', description: result.message });
+            toast({ title: t('success'), description: result.message });
             // The notification will disappear as the invite status changes.
         }
     };
@@ -113,7 +115,7 @@ export function NotificationBell() {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-80">
-                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuLabel>{t('notifications')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {notifications.length > 0 ? (
                     notifications.map(notif => (
@@ -139,7 +141,7 @@ export function NotificationBell() {
                         </DropdownMenuItem>
                     ))
                 ) : (
-                    <p className="p-4 text-sm text-center text-muted-foreground">No new notifications.</p>
+                    <p className="p-4 text-sm text-center text-muted-foreground">{t('noNotifications')}</p>
                 )}
             </DropdownMenuContent>
         </DropdownMenu>

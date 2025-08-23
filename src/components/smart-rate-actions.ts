@@ -2,10 +2,11 @@
 
 import { suggestSmartRate, type SuggestSmartRateOutput } from "@/ai/flows/smart-rate-suggestions";
 import { z } from "zod";
+import { getTranslations } from 'next-intl/server';
 
-const SuggestionSchema = z.object({
-  servicesOffered: z.string().min(10, { message: "Please describe your services in more detail (at least 10 characters)." }),
-  location: z.string().min(3, { message: "Please provide a valid location (at least 3 characters)." }),
+const createSuggestionSchema = (t: any) => z.object({
+  servicesOffered: z.string().min(10, { message: t('servicesDescriptionRequired') }),
+  location: z.string().min(3, { message: t('locationRequired') }),
 });
 
 export interface FormState {
@@ -18,17 +19,20 @@ export async function handleSuggestSmartRate(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  const t = await getTranslations('SmartRateActions');
+  const SuggestionSchema = createSuggestionSchema(t);
+  
   const validatedFields = SuggestionSchema.safeParse({
     servicesOffered: formData.get("servicesOffered"),
     location: formData.get("location"),
   });
 
   if (!validatedFields.success) {
-    const errorMessage = validatedFields.error.errors.map((e) => e.message).join(", ");
+    const errorMessage = validatedFields.error.errors.map((e: any) => e.message).join(", ");
     return {
       data: null,
       error: errorMessage,
-      message: "Validation failed."
+      message: t('validationFailed')
     };
   }
   
@@ -37,14 +41,14 @@ export async function handleSuggestSmartRate(
     return {
         data: result,
         error: null,
-        message: "Suggestion successful."
+        message: t('suggestionSuccessful')
     };
-  } catch (e) {
-    const error = e instanceof Error ? e.message : "An unknown error occurred.";
+  } catch (e: unknown) {
+    const error = e instanceof Error ? e.message : t('unknownError');
     return {
         data: null,
-        error: `Failed to get suggestion: ${error}`,
-        message: "An error occurred."
+        error: t('failedToGetSuggestion', { error }),
+        message: t('anErrorOccurred')
     };
   }
 }

@@ -12,6 +12,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useTranslations } from "next-intl"
 
 type NotificationSettings = {
     bookingUpdates: boolean;
@@ -24,6 +25,7 @@ type NotificationSettings = {
 export default function SettingsPage() {
     const { user, userRole } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('Settings');
 
     const [settings, setSettings] = useState<NotificationSettings>({
         bookingUpdates: true,
@@ -56,16 +58,16 @@ export default function SettingsPage() {
 
     const handleSaveChanges = async () => {
         if (!user) {
-            toast({ variant: "destructive", title: "Error", description: "You must be logged in to save settings." });
+            toast({ variant: "destructive", title: t('error'), description: t('mustBeLoggedIn') });
             return;
         }
         setIsSaving(true);
         try {
             const userDocRef = doc(db, 'users', user.uid);
             await updateDoc(userDocRef, { notificationSettings: settings });
-            toast({ title: "Success", description: "Your preferences have been saved." });
+            toast({ title: "Success", description: t('preferencesSaved') });
         } catch (error: any) {
-            toast({ variant: "destructive", title: "Save Failed", description: error.message });
+            toast({ variant: "destructive", title: t('saveFailed'), description: error.message });
         } finally {
             setIsSaving(false);
         }
@@ -74,17 +76,17 @@ export default function SettingsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Settings</h1>
+                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                 <p className="text-muted-foreground">
-                    Manage your account settings and preferences.
+                    {t('description')}
                 </p>
             </div>
 
             <div className="grid gap-8">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Notifications</CardTitle>
-                        <CardDescription>Choose how you want to be notified.</CardDescription>
+                        <CardTitle>{t('notifications')}</CardTitle>
+                        <CardDescription>{t('notificationsDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         {isLoading ? (
@@ -98,14 +100,14 @@ export default function SettingsPage() {
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="booking-updates" className="flex items-center gap-3">
                                         <Bell className="h-5 w-5 text-accent" />
-                                        <span className="font-semibold">Booking Updates</span>
+                                        <span className="font-semibold">{t('bookingUpdates')}</span>
                                     </Label>
                                     <Switch id="booking-updates" checked={settings.bookingUpdates} onCheckedChange={(v) => handleNotificationChange('bookingUpdates', v)} />
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="new-messages" className="flex items-center gap-3">
                                         <MessageSquare className="h-5 w-5 text-accent" />
-                                        <span className="font-semibold">New Messages</span>
+                                        <span className="font-semibold">{t('newMessages')}</span>
                                     </Label>
                                     <Switch id="new-messages" checked={settings.newMessages} onCheckedChange={(v) => handleNotificationChange('newMessages', v)} />
                                 </div>
@@ -114,14 +116,14 @@ export default function SettingsPage() {
                                     <div className="flex items-center justify-between">
                                         <Label htmlFor="agency-invites" className="flex items-center gap-3">
                                             <UserPlus className="h-5 w-5 text-accent" />
-                                            <span className="font-semibold">Agency Invites</span>
+                                            <span className="font-semibold">{t('agencyInvites')}</span>
                                         </Label>
                                         <Switch id="agency-invites" checked={settings.agencyInvites} onCheckedChange={(v) => handleNotificationChange('agencyInvites', v)} />
                                     </div>
                                      <div className="flex items-center justify-between">
                                         <Label htmlFor="new-job-alerts" className="flex items-center gap-3">
                                             <Briefcase className="h-5 w-5 text-accent" />
-                                            <span className="font-semibold">New Job Alerts</span>
+                                            <span className="font-semibold">{t('newJobAlerts')}</span>
                                         </Label>
                                         <Switch id="new-job-alerts" checked={settings.newJobAlerts} onCheckedChange={(v) => handleNotificationChange('newJobAlerts', v)} />
                                     </div>
@@ -130,7 +132,7 @@ export default function SettingsPage() {
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="promotional-emails" className="flex items-center gap-3">
                                         <AtSign className="h-5 w-5 text-accent" />
-                                        <span className="font-semibold">Promotional Emails</span>
+                                        <span className="font-semibold">{t('promotionalEmails')}</span>
                                     </Label>
                                     <Switch id="promotional-emails" checked={settings.promotionalEmails} onCheckedChange={(v) => handleNotificationChange('promotionalEmails', v)} />
                                 </div>
@@ -140,7 +142,7 @@ export default function SettingsPage() {
                      <CardFooter className="justify-end">
                          <Button onClick={handleSaveChanges} disabled={isSaving || isLoading}>
                             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isSaving ? "Saving..." : "Save Preferences"}
+                            {isSaving ? t('saving') : t('savePreferences')}
                         </Button>
                     </CardFooter>
                 </Card>

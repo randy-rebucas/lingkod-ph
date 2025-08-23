@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
@@ -9,8 +10,27 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { Briefcase, CheckSquare } from "lucide-react";
-import { Job } from "../jobs/page"; // Reusing the Job type
 import { formatBudget } from "@/lib/utils";
+
+// Define the Job type locally to avoid import issues
+type Job = {
+    id: string;
+    title: string;
+    description: string;
+    categoryName: string;
+    budget: {
+      amount: number;
+      type: 'Fixed' | 'Daily' | 'Monthly';
+      negotiable: boolean;
+    };
+    location: string;
+    clientName: string;
+    clientId: string;
+    clientIsVerified?: boolean;
+    createdAt: Timestamp;
+    applications?: string[]; // Array of provider IDs
+    status?: string;
+};
 
 const getStatusVariant = (status: string) => {
     switch (status) {
@@ -24,6 +44,7 @@ const getStatusVariant = (status: string) => {
 
 export default function AppliedJobsPage() {
     const { user, userRole } = useAuth();
+    const t = useTranslations('AppliedJobs');
     const [appliedJobs, setAppliedJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -51,8 +72,8 @@ export default function AppliedJobsPage() {
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is only available to service providers.</CardDescription>
+                    <CardTitle>{t('accessDenied')}</CardTitle>
+                    <CardDescription>{t('providersOnly')}</CardDescription>
                 </CardHeader>
             </Card>
         );
@@ -62,8 +83,8 @@ export default function AppliedJobsPage() {
         return (
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Applied Jobs</h1>
-                    <p className="text-muted-foreground">Track the status of your job applications.</p>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-48" />)}
@@ -75,8 +96,8 @@ export default function AppliedJobsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Applied Jobs</h1>
-                <p className="text-muted-foreground">Track the status of your job applications.</p>
+                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
             
             {appliedJobs.length > 0 ? (
@@ -87,13 +108,13 @@ export default function AppliedJobsPage() {
                                 <CardHeader>
                                     <CardTitle className="hover:text-primary transition-colors">{job.title}</CardTitle>
                                     <CardDescription>
-                                        Posted by {job.clientName}
+                                        {t('postedBy', { clientName: job.clientName })}
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex justify-between items-center">
                                         <p className="font-bold text-lg text-primary">{formatBudget(job.budget)}</p>
-                                        <Badge variant={getStatusVariant(job.status)}>{job.status}</Badge>
+                                        <Badge variant={getStatusVariant(job.status || 'Open')}>{job.status || 'Open'}</Badge>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -104,8 +125,8 @@ export default function AppliedJobsPage() {
                  <Card>
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                         <CheckSquare className="h-16 w-16 mb-4" />
-                        <h3 className="text-xl font-semibold">No Applied Jobs</h3>
-                        <p>You haven't applied to any jobs yet. Go to the "Find Work" page to get started.</p>
+                        <h3 className="text-xl font-semibold">{t('noAppliedJobs')}</h3>
+                        <p>{t('noAppliedJobsDescription')}</p>
                     </CardContent>
                 </Card>
             )}

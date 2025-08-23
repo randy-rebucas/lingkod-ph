@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
@@ -96,6 +97,7 @@ const getStatusVariant = (status: PayoutRequest['status']) => {
 
 export default function ReportsPage() {
     const { user, userRole, subscription } = useAuth();
+    const t = useTranslations('Reports');
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
     const [loading, setLoading] = useState(true);
@@ -192,7 +194,7 @@ export default function ReportsPage() {
         if (!user) return;
         const result = await handleMarkAsPaid(payout.id, payout.providerId, payout.providerName, payout.amount, {id: user.uid, name: user.displayName});
         toast({
-            title: result.error ? 'Error' : 'Success',
+            title: result.error ? t('error') : t('success'),
             description: result.message,
             variant: result.error ? 'destructive' : 'default',
         });
@@ -203,19 +205,19 @@ export default function ReportsPage() {
         return (
             <div className="space-y-6">
                  <div>
-                    <h1 className="text-3xl font-bold font-headline">Reports</h1>
-                    <p className="text-muted-foreground">This feature is for agency subscribers.</p>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Upgrade to Access Reports</CardTitle>
-                        <CardDescription>Upgrade your agency plan to view performance reports.</CardDescription>
+                        <CardTitle>{t('upgradeTitle')}</CardTitle>
+                        <CardDescription>{t('upgradeDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                         <FilePieChart className="h-16 w-16 mb-4" />
-                        <p className="mb-4">Get insights into your agency's performance.</p>
+                        <p className="mb-4">{t('getInsights')}</p>
                          <Button asChild>
-                            <Link href="/subscription">View Subscription Plans</Link>
+                            <Link href="/subscription">{t('viewSubscriptionPlans')}</Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -238,10 +240,10 @@ export default function ReportsPage() {
         );
     }
     
-    const pageTitle = isProOrCustom ? "Advanced Reports" : "Basic Reports";
+    const pageTitle = isProOrCustom ? t('advancedReports') : t('basicReports');
     const pageDescription = isProOrCustom 
-        ? "Deep dive into your agency's performance with charts and detailed tables." 
-        : "An overview of your agency's performance.";
+        ? t('advancedDescription')
+        : t('basicDescription');
 
     return (
         <div className="space-y-6">
@@ -255,7 +257,7 @@ export default function ReportsPage() {
             <div className="grid gap-6 md:grid-cols-3">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('totalRevenue')}</CardTitle>
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -264,7 +266,7 @@ export default function ReportsPage() {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Completed Bookings</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('completedBookings')}</CardTitle>
                         <BookCheck className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -273,7 +275,7 @@ export default function ReportsPage() {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Avg. Booking Value</CardTitle>
+                        <CardTitle className="text-sm font-medium">{t('avgBookingValue')}</CardTitle>
                         <Calculator className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -284,19 +286,19 @@ export default function ReportsPage() {
             
              <Card>
                 <CardHeader>
-                    <CardTitle>Payout Requests</CardTitle>
-                    <CardDescription>Manage and track payout requests from your providers.</CardDescription>
+                    <CardTitle>{t('payoutRequests')}</CardTitle>
+                    <CardDescription>{t('payoutRequestsDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                      <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Transaction ID</TableHead>
-                                <TableHead>Provider</TableHead>
-                                <TableHead>Date Requested</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead className="text-center">Status</TableHead>
-                                <TableHead className="text-right">Action</TableHead>
+                                <TableHead>{t('transactionId')}</TableHead>
+                                <TableHead>{t('provider')}</TableHead>
+                                <TableHead>{t('dateRequested')}</TableHead>
+                                <TableHead>{t('amount')}</TableHead>
+                                <TableHead className="text-center">{t('status')}</TableHead>
+                                <TableHead className="text-right">{t('action')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -312,17 +314,17 @@ export default function ReportsPage() {
                                     <TableCell className="text-right">
                                         {payout.status === 'Pending' ? (
                                             <Button size="sm" onClick={() => onMarkAsPaid(payout)}>
-                                                <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
+                                                <CheckCircle className="mr-2 h-4 w-4" /> {t('markAsPaid')}
                                             </Button>
                                         ) : (
-                                            <span className="text-sm text-muted-foreground">Processed</span>
+                                            <span className="text-sm text-muted-foreground">{t('processed')}</span>
                                         )}
                                     </TableCell>
                                 </TableRow>
                             )) : (
                                 <TableRow>
                                     <TableCell colSpan={6} className="h-24 text-center">
-                                        No payout requests.
+                                        {t('noPayoutRequests')}
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -336,8 +338,8 @@ export default function ReportsPage() {
                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                     <Card className="lg:col-span-3">
                         <CardHeader>
-                            <CardTitle>Monthly Revenue</CardTitle>
-                            <CardDescription>Total revenue over the last 12 months.</CardDescription>
+                            <CardTitle>{t('monthlyRevenue')}</CardTitle>
+                            <CardDescription>{t('monthlyRevenueDescription')}</CardDescription>
                         </CardHeader>
                         <CardContent>
                              <ResponsiveContainer width="100%" height={300}>
@@ -354,8 +356,8 @@ export default function ReportsPage() {
                     </Card>
                     <Card className="lg:col-span-2">
                         <CardHeader>
-                            <CardTitle>Provider Bookings</CardTitle>
-                            <CardDescription>Number of completed bookings per provider.</CardDescription>
+                            <CardTitle>{t('providerBookings')}</CardTitle>
+                            <CardDescription>{t('providerBookingsDescription')}</CardDescription>
                         </CardHeader>
                         <CardContent>
                            <ResponsiveContainer width="100%" height={300}>
@@ -375,16 +377,16 @@ export default function ReportsPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Provider Performance</CardTitle>
-                    <CardDescription>A summary of bookings and revenue by each provider.</CardDescription>
+                    <CardTitle>{t('providerPerformance')}</CardTitle>
+                    <CardDescription>{t('providerPerformanceDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                      <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Provider</TableHead>
-                                <TableHead className="text-center">Completed Bookings</TableHead>
-                                <TableHead className="text-right">Total Revenue</TableHead>
+                                <TableHead>{t('provider')}</TableHead>
+                                <TableHead className="text-center">{t('completedBookings')}</TableHead>
+                                <TableHead className="text-right">{t('totalRevenue')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -397,7 +399,7 @@ export default function ReportsPage() {
                             )) : (
                                 <TableRow>
                                     <TableCell colSpan={3} className="h-24 text-center">
-                                        No data to display.
+                                        {t('noDataToDisplay')}
                                     </TableCell>
                                 </TableRow>
                             )}

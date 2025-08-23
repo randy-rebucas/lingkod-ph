@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/auth-context";
+import { useTranslations } from 'next-intl';
 import { db } from "@/lib/firebase";
 import { collection, query, onSnapshot, orderBy, limit, getDocs, startAfter, QueryDocumentSnapshot } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -28,6 +29,7 @@ const PAGE_SIZE = 10;
 export default function AdminCategoriesPage() {
     const { user, userRole } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('AdminCategories');
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState<Category | null>(null);
@@ -90,11 +92,11 @@ export default function AdminCategoriesPage() {
     }, [toast, currentPage]);
 
     useEffect(() => {
-        if (userRole === 'admin') {
-            fetchCategories(currentPage);
-        } else {
+        if (userRole !== 'admin') {
             setLoading(false);
+            return;
         }
+        fetchCategories(currentPage);
     }, [userRole, currentPage, fetchCategories]);
 
     const handleNextPage = () => {
@@ -175,7 +177,7 @@ export default function AdminCategoriesPage() {
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
+                    <CardTitle>{t('accessDenied')}</CardTitle>
                     <CardDescription>This page is for administrators only.</CardDescription>
                 </CardHeader>
             </Card>
@@ -187,12 +189,12 @@ export default function AdminCategoriesPage() {
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold font-headline">Category Management</h1>
+                        <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                         <p className="text-muted-foreground">
-                            Add, edit, or delete service categories.
+                            {t('subtitle')}
                         </p>
                     </div>
-                    <Button onClick={openAddDialog}><PlusCircle className="mr-2"/> Add Category</Button>
+                    <Button onClick={openAddDialog}><PlusCircle className="mr-2"/> {t('addCategory')}</Button>
                 </div>
                  <Card>
                     <CardContent className="p-0">

@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
+import { useTranslations } from 'next-intl';
 import { db } from "@/lib/firebase";
 import { collection, query, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,6 +71,7 @@ const getAvatarFallback = (name: string | null | undefined) => {
 export default function AdminUsersPage() {
     const { user, userRole } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('AdminUsers');
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -113,7 +115,7 @@ export default function AdminUsersPage() {
         if (!user) return;
         const result = await handleUserStatusUpdate(userId, status, {id: user.uid, name: user.displayName});
         toast({
-            title: result.error ? 'Error' : 'Success',
+            title: result.error ? t('error') : t('success'),
             description: result.message,
             variant: result.error ? 'destructive' : 'default',
         });
@@ -123,7 +125,7 @@ export default function AdminUsersPage() {
         if (!user) return;
         const result = await handleDeleteUser(userId, {id: user.uid, name: user.displayName});
         toast({
-            title: result.error ? 'Error' : 'Success',
+            title: result.error ? t('error') : t('success'),
             description: result.message,
             variant: result.error ? 'destructive' : 'default',
         });
@@ -147,7 +149,7 @@ export default function AdminUsersPage() {
         const result = await handleUpdateUser(selectedUser.uid, editForm, {id: user.uid, name: user.displayName});
 
         toast({
-            title: result.error ? 'Error' : 'Success',
+            title: result.error ? t('error') : t('success'),
             description: result.message,
             variant: result.error ? 'destructive' : 'default',
         });
@@ -171,7 +173,7 @@ export default function AdminUsersPage() {
         }, {id: user.uid, name: user.displayName});
 
         toast({
-            title: result.error ? 'Error' : 'Success',
+            title: result.error ? t('error') : t('success'),
             description: result.message,
             variant: result.error ? 'destructive' : 'default',
         });
@@ -188,7 +190,7 @@ export default function AdminUsersPage() {
         setIsSubmitting(true);
         const result = await handleSendDirectEmail(selectedUser.uid, emailForm.subject, emailForm.message, {id: user.uid, name: user.displayName});
         toast({
-            title: result.error ? 'Error' : 'Success',
+            title: result.error ? t('error') : t('success'),
             description: result.message,
             variant: result.error ? 'destructive' : 'default',
         });

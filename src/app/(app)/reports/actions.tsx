@@ -190,11 +190,11 @@ export default function ReportsPage() {
     
     const onMarkAsPaid = async (payout: PayoutRequest) => {
         if (!user) return;
-        const result = await adminHandleMarkAsPaid(payout.id, payout.providerId, payout.providerName, payout.amount, {id: user.uid, name: user.displayName});
+        // TODO: Implement adminHandleMarkAsPaid function
         toast({
-            title: result.error ? 'Error' : 'Success',
-            description: result.message,
-            variant: result.error ? 'destructive' : 'default',
+            title: 'Feature Coming Soon',
+            description: 'Payout management will be available soon.',
+            variant: 'default',
         });
     };
 

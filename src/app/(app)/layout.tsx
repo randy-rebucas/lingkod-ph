@@ -4,6 +4,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from 'next-intl';
 import {
   LayoutDashboard,
   Calendar,
@@ -81,64 +82,72 @@ import BroadcastBanner from "@/components/broadcast-banner";
 import { Logo } from "@/components/logo";
 import { SupportChat } from "@/components/support-chat";
 
-const SuccessTips = () => (
-  <Popover>
-    <PopoverTrigger asChild>
-      <Button
-        size="icon"
-        className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-accent hover:bg-accent/90"
-      >
-        <Lightbulb className="h-6 w-6" />
-        <span className="sr-only">Tips for Success</span>
-      </Button>
-    </PopoverTrigger>
-    <PopoverContent className="w-80 mb-2">
-      <div className="grid gap-4">
-        <div className="space-y-2">
-          <h4 className="font-medium leading-none">Tips for Success</h4>
-          <p className="text-sm text-muted-foreground">
-            Maximize your opportunities on LocalPro.
-          </p>
-        </div>
-        <ul className="space-y-3">
+const SuccessTips = () => {
+  const t = useTranslations('AppLayout');
+  
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          size="icon"
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-accent hover:bg-accent/90"
+        >
+          <Lightbulb className="h-6 w-6" />
+          <span className="sr-only">{t('tipsForSuccess')}</span>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 mb-2">
+        <div className="grid gap-4">
+          <div className="space-y-2">
+            <h4 className="font-medium leading-none">{t('tipsForSuccess')}</h4>
+            <p className="text-sm text-muted-foreground">
+              {t('maximizeOpportunities')}
+            </p>
+          </div>
+          <ul className="space-y-3">
             <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-                <span className="text-sm text-muted-foreground">Be punctual and respectful</span>
+              <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+              <span className="text-sm text-muted-foreground">Be punctual and respectful</span>
             </li>
-             <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-                <span className="text-sm text-muted-foreground">Bring your own tools (if possible)</span>
+            <li className="flex items-start gap-2">
+              <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+              <span className="text-sm text-muted-foreground">Bring your own tools (if possible)</span>
             </li>
-             <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-                <span className="text-sm text-muted-foreground">Keep your phone ready — jobs move fast</span>
+            <li className="flex items-start gap-2">
+              <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+              <span className="text-sm text-muted-foreground">Keep your phone ready — jobs move fast</span>
             </li>
-             <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-                <span className="text-sm text-muted-foreground">Ask for a review after each job</span>
+            <li className="flex items-start gap-2">
+              <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+              <span className="text-sm text-muted-foreground">Ask for a review after each job</span>
             </li>
-             <li className="flex items-start gap-2">
-                <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-                <span className="text-sm text-muted-foreground">Build your rating = Get more jobs!</span>
+            <li className="flex items-start gap-2">
+              <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
+              <span className="text-sm text-muted-foreground">Build your rating = Get more jobs!</span>
             </li>
-        </ul>
-      </div>
-    </PopoverContent>
-  </Popover>
-);
+          </ul>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
-const EmergencyHotlineButton = () => (
-  <Button
-    asChild
-    size="icon"
-    className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-  >
-    <a href="tel:911">
-      <Phone className="h-6 w-6" />
-      <span className="sr-only">Call Emergency Hotline</span>
-    </a>
-  </Button>
-);
+const EmergencyHotlineButton = () => {
+  const t = useTranslations('AppLayout');
+  
+  return (
+    <Button
+      asChild
+      size="icon"
+      className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+    >
+      <a href="tel:911">
+        <Phone className="h-6 w-6" />
+        <span className="sr-only">{t('emergencyHotline')}</span>
+      </a>
+    </Button>
+  );
+};
 
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -147,16 +156,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, userRole, subscription } = useAuth();
   const { toast } = useToast();
   const { setTheme } = useTheme();
+  const t = useTranslations('AppLayout');
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast({ title: "Success", description: "Logged out successfully." });
+      toast({ title: t('success'), description: t('loggedOutSuccessfully') });
       window.location.href = '/login'; // Force a full page reload to avoid fetch errors
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Logout Failed",
+        title: t('logoutFailed'),
         description: error.message,
       });
     }
@@ -173,7 +183,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
        <div className="flex h-screen w-full items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Logo />
-          <p>Loading your experience...</p>
+          <p>{t('loading')}</p>
         </div>
       </div>
     );
@@ -198,7 +208,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isElite = isPaidSubscriber && subscription?.planId === 'elite';
   const isAgencyPaidSubscriber = userRole === 'agency' && isPaidSubscriber;
   
-  const dashboardPath = userRole === 'admin' ? '/admin/dashboard' : (userRole === 'partner' ? '/partners/dashboard' : '/dashboard');
+  const dashboardPath = userRole === 'admin' ? '/admin/dashboard' : '/dashboard';
 
   const getPageTitle = (path: string) => {
     const parts = path.split('/').filter(Boolean);
@@ -233,18 +243,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <SidebarMenuButton asChild isActive={isActive(dashboardPath) && (pathname === dashboardPath)}>
                 <Link href={dashboardPath}>
                   <LayoutDashboard />
-                  <span>Dashboard</span>
+                  <span>{t('dashboard')}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
             
-            {(userRole !== 'admin' && userRole !== 'partner') && (
+            {(userRole !== 'admin') && (
               <>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isActive("/calendar")}>
                     <Link href="/calendar">
                       <Calendar />
-                      <span>Calendar</span>
+                      <span>{t('calendar')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -253,7 +263,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/bookings")}>
                     <Link href="/bookings">
                       <Briefcase />
-                      <span>Bookings</span>
+                      <span>{t('bookings')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -262,7 +272,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/messages")}>
                     <Link href="/messages">
                       <MessageSquare />
-                      <span>Messages</span>
+                      <span>{t('messages')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -275,7 +285,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/subscription")}>
                     <Link href="/subscription">
                       <Star />
-                      <span>Subscription</span>
+                      <span>{t('subscription')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -286,7 +296,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <SidebarMenuButton asChild isActive={isActive("/manage-providers")}>
                         <Link href="/manage-providers">
                           <Users2 />
-                          <span>Manage Providers</span>
+                          <span>{t('manageProviders')}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -294,7 +304,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <SidebarMenuButton asChild isActive={isActive("/reports")}>
                         <Link href="/reports">
                           <FilePieChart />
-                          <span>Reports</span>
+                          <span>{t('reports')}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -307,7 +317,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <SidebarMenuButton asChild isActive={isActive("/services")}>
                         <Link href="/services">
                           <BriefcaseBusiness />
-                          <span>My Services</span>
+                          <span>{t('myServices')}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -315,7 +325,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         <SidebarMenuButton asChild isActive={isActive("/jobs")}>
                             <Link href="/jobs">
                                 <Search />
-                                <span>Find Work</span>
+                                <span>{t('findWork')}</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -328,7 +338,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <SidebarMenuButton asChild isActive={isActive("/smart-rate")}>
                       <Link href="/smart-rate">
                         <Sparkles />
-                        <span>Smart Rate</span>
+                        <span>{t('smartRate')}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -338,7 +348,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <SidebarMenuButton asChild isActive={isActive("/invoices")}>
                         <Link href="/invoices">
                           <FileText />
-                          <span>Invoices</span>
+                          <span>{t('invoices')}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -348,7 +358,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <SidebarMenuButton asChild isActive={isActive("/earnings")}>
                         <Link href="/earnings">
                           <DollarSign />
-                          <span>Earnings</span>
+                          <span>{t('earnings')}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -359,7 +369,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <SidebarMenuButton asChild isActive={isActive("/quote-builder")}>
                         <Link href="/quote-builder">
                           <Calculator />
-                          <span>Quote Builder</span>
+                          <span>{t('quoteBuilder')}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -367,7 +377,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <SidebarMenuButton asChild isActive={isActive("/analytics")}>
                         <Link href="/analytics">
                           <BarChart2 />
-                          <span>Analytics</span>
+                          <span>{t('analytics')}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -382,7 +392,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/users")}>
                     <Link href="/admin/users">
                       <Users2 />
-                      <span>Users</span>
+                      <span>{t('users')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -390,7 +400,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/conversations")}>
                     <Link href="/admin/conversations">
                       <MessageSquare />
-                      <span>Conversations</span>
+                      <span>{t('conversations')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -398,7 +408,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/tickets")}>
                     <Link href="/admin/tickets">
                       <LifeBuoy />
-                      <span>Support Tickets</span>
+                      <span>{t('supportTickets')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -406,7 +416,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/broadcast")}>
                     <Link href="/admin/broadcast">
                       <Radio />
-                      <span>Broadcast</span>
+                      <span>{t('broadcast')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -414,7 +424,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/ads")}>
                     <Link href="/admin/ads">
                       <Megaphone />
-                      <span>Ad Management</span>
+                      <span>{t('adManagement')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -422,7 +432,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/bookings")}>
                     <Link href="/admin/bookings">
                       <Briefcase />
-                      <span>Bookings</span>
+                      <span>{t('bookings')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -430,7 +440,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/jobs")}>
                     <Link href="/admin/jobs">
                       <BriefcaseBusiness />
-                      <span>Job Posts</span>
+                      <span>{t('jobPosts')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -438,7 +448,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/moderation")}>
                     <Link href="/admin/moderation">
                       <Flag />
-                      <span>Moderation</span>
+                      <span>{t('moderation')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -446,7 +456,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/payouts")}>
                     <Link href="/admin/payouts">
                       <Wallet />
-                      <span>Payouts</span>
+                      <span>{t('payouts')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -454,7 +464,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/transactions")}>
                     <Link href="/admin/transactions">
                       <Receipt />
-                      <span>Transactions</span>
+                      <span>{t('transactions')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -462,7 +472,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/reports")}>
                     <Link href="/admin/reports">
                       <FilePieChart />
-                      <span>Platform Reports</span>
+                      <span>{t('platformReports')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -470,7 +480,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/client-reports")}>
                     <Link href="/admin/client-reports">
                       <Users />
-                      <span>Client Reports</span>
+                      <span>{t('clientReports')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -478,7 +488,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/backup")}>
                     <Link href="/admin/backup">
                       <DatabaseBackup />
-                      <span>Data Backup</span>
+                      <span>{t('dataBackup')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -486,7 +496,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/security-logs")}>
                     <Link href="/admin/security-logs">
                       <Shield />
-                      <span>Security Logs</span>
+                      <span>{t('securityLogs')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -494,7 +504,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/subscriptions")}>
                     <Link href="/admin/subscriptions">
                       <Star />
-                      <span>Subscriptions</span>
+                      <span>{t('subscriptions')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -502,7 +512,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/categories")}>
                     <Link href="/admin/categories">
                       <Shapes />
-                      <span>Categories</span>
+                      <span>{t('categories')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -510,7 +520,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/rewards")}>
                     <Link href="/admin/rewards">
                       <Gift />
-                      <span>Rewards</span>
+                      <span>{t('rewards')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -518,7 +528,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton asChild isActive={isActive("/admin/settings")}>
                     <Link href="/admin/settings">
                       <Settings />
-                      <span>Settings</span>
+                      <span>{t('settings')}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -531,7 +541,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem>
               <SidebarMenuButton onClick={handleLogout}>
                 <LogOut />
-                <span>Logout</span>
+                <span>{t('logout')}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -550,7 +560,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Button asChild variant="secondary">
                 <Link href="/jobs">
                   <Search className="mr-2" />
-                  <span>Find Jobs</span>
+                  <span>{t('findJobs')}</span>
                 </Link>
               </Button>
             )}
@@ -558,7 +568,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Button asChild>
                 <Link href="/post-a-job">
                   <PlusCircle className="mr-2" />
-                  <span>Post a Job</span>
+                  <span>{t('postAJob')}</span>
                 </Link>
               </Button>
             )}
@@ -566,7 +576,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Button asChild variant="ghost" size="icon">
               <Link href="/help-center">
                 <LifeBuoy className="h-5 w-5" />
-                <span className="sr-only">Help Center</span>
+                <span className="sr-only">{t('helpCenter')}</span>
               </Link>
             </Button>
             <DropdownMenu>
@@ -574,18 +584,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Button variant="ghost" size="icon">
                   <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                   <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                  <span className="sr-only">Toggle theme</span>
+                  <span className="sr-only">{t('toggleTheme')}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setTheme("light")}>
-                  Light
+                  {t('light')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme("dark")}>
-                  Dark
+                  {t('dark')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme("system")}>
-                  System
+                  {t('system')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -605,13 +615,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuItem asChild>
                   <Link href={profileLink}>
                     <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
+                    <span>{t('profile')}</span>
                   </Link>
                 </DropdownMenuItem>
                  <DropdownMenuItem asChild>
                   <Link href="/billing">
                     <Receipt className="mr-2 h-4 w-4" />
-                    <span>Billing</span>
+                    <span>{t('billing')}</span>
                   </Link>
                 </DropdownMenuItem>
 
@@ -619,7 +629,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                    <DropdownMenuItem asChild>
                       <Link href="/applied-jobs">
                         <CheckSquare className="mr-2 h-4 w-4" />
-                        <span>Applied Jobs</span>
+                        <span>{t('appliedJobs')}</span>
                       </Link>
                     </DropdownMenuItem>
                 )}
@@ -629,35 +639,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <DropdownMenuItem asChild>
                       <Link href="/my-job-posts">
                         <Briefcase className="mr-2 h-4 w-4" />
-                        <span>My Job Posts</span>
+                        <span>{t('myJobPosts')}</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/my-favorites">
                         <Heart className="mr-2 h-4 w-4" />
-                        <span>My Favorites</span>
+                        <span>{t('myFavorites')}</span>
                       </Link>
                     </DropdownMenuItem>
                   </>
                 )}
-                {userRole === 'partner' && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/partners/dashboard">
-                        <Handshake className="mr-2 h-4 w-4" />
-                        <span>Partners Dashboard</span>
-                      </Link>
-                    </DropdownMenuItem>
-                )}
+
                 <DropdownMenuItem asChild>
                   <Link href="/settings">
                     <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
+                    <span>{t('settings')}</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
+                  <span>{t('logOut')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

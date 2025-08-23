@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
@@ -80,6 +81,7 @@ const createNotification = async (userId: string, senderName: string, message: s
 export default function MessagesPage() {
     const { user } = useAuth();
     const { toast } = useToast();
+    const t = useTranslations('Messages');
     const searchParams = useSearchParams();
 
     const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -121,12 +123,12 @@ export default function MessagesPage() {
             setLoadingConversations(false);
         }, (error) => {
             console.error("Error fetching conversations: ", error);
-            toast({ variant: "destructive", title: "Error", description: "Could not fetch conversations."})
+            toast({ variant: "destructive", title: t('error'), description: t('couldNotFetchConversations')})
             setLoadingConversations(false);
         });
 
         return () => unsubscribe();
-    }, [user, toast]);
+    }, [user, toast, t]);
     
     useEffect(() => {
         if (!activeConversation) return;
@@ -144,13 +146,13 @@ export default function MessagesPage() {
             setLoadingMessages(false);
         }, (error) => {
             console.error("Error fetching messages: ", error);
-            toast({ variant: "destructive", title: "Error", description: "Could not fetch messages."})
+            toast({ variant: "destructive", title: t('error'), description: t('couldNotFetchMessages')})
             setLoadingMessages(false);
         });
 
         return () => unsubscribe();
 
-    }, [activeConversation, toast]);
+    }, [activeConversation, toast, t]);
     
      useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -197,13 +199,13 @@ export default function MessagesPage() {
             
             const conversationRef = doc(db, "conversations", activeConversation.id);
             await updateDoc(conversationRef, {
-                lastMessage: newMessage || "Image sent",
+                lastMessage: newMessage || t('imageSent'),
                 timestamp: serverTimestamp()
             });
 
             const recipientId = activeConversation.participants.find(p => p !== user.uid);
             if(recipientId) {
-                await createNotification(recipientId, user.displayName || 'Someone', newMessage || "sent an image.", `/messages?conversationId=${activeConversation.id}`);
+                await createNotification(recipientId, user.displayName || t('someone'), newMessage || t('sentAnImage'), `/messages?conversationId=${activeConversation.id}`);
             }
 
             setNewMessage("");
@@ -214,14 +216,14 @@ export default function MessagesPage() {
             }
         } catch (error) {
              console.error("Error sending message: ", error);
-             toast({ variant: "destructive", title: "Error", description: "Failed to send message."})
+             toast({ variant: "destructive", title: t('error'), description: t('failedToSendMessage')})
         } finally {
             setIsSending(false);
         }
     };
 
     const getOtherParticipantInfo = (convo: Conversation) => {
-        if (!user) return { name: 'User', avatar: '' };
+        if (!user) return { name: t('user'), avatar: '' };
         const otherId = convo.participants.find(p => p !== user.uid);
         if (otherId && convo.participantInfo[otherId]) {
             return {
@@ -229,16 +231,16 @@ export default function MessagesPage() {
                 avatar: convo.participantInfo[otherId].photoURL || ''
             };
         }
-        return { name: 'Unknown User', avatar: '' };
+        return { name: t('unknownUser'), avatar: '' };
     }
 
 
     return (
         <div className="space-y-6 h-full flex flex-col">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Messages</h1>
+                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                 <p className="text-muted-foreground">
-                    Communicate with clients and service providers.
+                    {t('subtitle')}
                 </p>
             </div>
             <Card className="flex-1 grid grid-cols-1 md:grid-cols-[300px_1fr] shadow-lg overflow-hidden">
@@ -247,7 +249,7 @@ export default function MessagesPage() {
                     <div className="p-4 border-b">
                          <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder="Search conversations..." className="pl-9 bg-background" />
+                            <Input placeholder={t('searchConversations')} className="pl-9 bg-background" />
                         </div>
                     </div>
                     <ScrollArea className="flex-1">
@@ -287,7 +289,7 @@ export default function MessagesPage() {
                             ) : (
                                 <div className="text-center text-muted-foreground p-8">
                                     <MessageSquare className="mx-auto h-10 w-10 mb-2"/>
-                                    No conversations yet.
+                                    {t('noConversationsYet')}
                                 </div>
                             )}
                         </div>
@@ -361,7 +363,7 @@ export default function MessagesPage() {
                             )}
                             <form className="relative flex items-center gap-2" onSubmit={handleSendMessage}>
                                 <Input 
-                                    placeholder="Type your message..." 
+                                    placeholder={t('typeMessage')} 
                                     className="flex-1"
                                     value={newMessage}
                                     onChange={(e) => setNewMessage(e.target.value)}
@@ -376,11 +378,11 @@ export default function MessagesPage() {
                                 />
                                 <Button size="icon" variant="ghost" type="button" onClick={() => fileInputRef.current?.click()} disabled={isSending}>
                                     <Paperclip className="h-5 w-5"/>
-                                    <span className="sr-only">Attach File</span>
+                                    <span className="sr-only">{t('attachFile')}</span>
                                 </Button>
                                 <Button size="icon" type="submit" disabled={isSending || (!newMessage.trim() && !selectedImage)}>
                                     {isSending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5"/>}
-                                    <span className="sr-only">Send Message</span>
+                                    <span className="sr-only">{t('sendMessage')}</span>
                                 </Button>
                             </form>
                         </div>
@@ -388,8 +390,8 @@ export default function MessagesPage() {
                    ) : (
                     <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8">
                         <MessageSquare className="h-16 w-16 mb-4" />
-                        <h3 className="text-xl font-semibold">Select a conversation</h3>
-                        <p>Choose a conversation from the left panel to start chatting.</p>
+                        <h3 className="text-xl font-semibold">{t('selectConversation')}</h3>
+                        <p>{t('selectConversationDescription')}</p>
                     </div>
                    )}
                 </div>

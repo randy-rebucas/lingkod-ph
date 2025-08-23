@@ -54,6 +54,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { InvoicePreview } from "@/components/invoice-preview";
+import { useTranslations } from 'next-intl';
 
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
@@ -92,6 +93,7 @@ const getStatusVariant = (status: InvoiceStatus) => {
 
 export default function InvoicesPage() {
     const { user, subscription } = useAuth();
+    const t = useTranslations('Invoices');
     const { toast } = useToast();
     const [invoices, setInvoices] = React.useState<Invoice[]>([]);
     const [loading, setLoading] = React.useState(true);
@@ -327,21 +329,21 @@ export default function InvoicesPage() {
          return (
             <div className="space-y-6">
                 <div>
-                  <h1 className="text-3xl font-bold font-headline">Invoices</h1>
+                  <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                   <p className="text-muted-foreground">
-                      Create and manage invoices for your clients.
+                      {t('subtitle')}
                   </p>
               </div>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Upgrade to Pro or Elite to Use Invoices</CardTitle>
-                        <CardDescription>This feature is available for Pro and Elite subscribers. Upgrade your plan to create and manage professional invoices.</CardDescription>
+                        <CardTitle>{t('upgradeToProOrElite')}</CardTitle>
+                        <CardDescription>{t('upgradeDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                         <FileText className="h-16 w-16 mb-4" />
-                        <p className="mb-4">Streamline your billing process with our invoice generator.</p>
+                        <p className="mb-4">{t('streamlineBilling')}</p>
                          <Button asChild>
-                            <Link href="/subscription">View Subscription Plans</Link>
+                            <Link href="/subscription">{t('viewSubscriptionPlans')}</Link>
                         </Button>
                     </CardContent>
                 </Card>

@@ -14,6 +14,7 @@ import PaymentHistory from "./payment-history";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { db } from "@/lib/firebase";
 import { collection, onSnapshot, getDoc, doc, updateDoc } from "firebase/firestore";
+import { useTranslations } from "next-intl";
 
 export type SubscriptionTier = {
     id: string;
@@ -41,6 +42,7 @@ export type AgencySubscriptionTier = {
 
 export default function SubscriptionPage() {
     const { user, userRole, subscription, loading } = useAuth();
+    const t = useTranslations('Subscription');
     const [isPaymentDialog, setPaymentDialog] = useState(false);
     const [plans, setPlans] = useState<(SubscriptionTier | AgencySubscriptionTier)[]>([]);
     const [platformSettings, setPlatformSettings] = useState<any>(null);
@@ -87,7 +89,7 @@ export default function SubscriptionPage() {
         const providerPlans = plans.filter(p => p.type === 'provider').sort((a, b) => a.sortOrder - b.sortOrder) as SubscriptionTier[];
          return (
          <section>
-            <h2 className="text-2xl font-bold font-headline mb-4">Provider Subscription Plans</h2>
+            <h2 className="text-2xl font-bold font-headline mb-4">{t('providerSubscriptionPlans')}</h2>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {providerPlans.map(tier => {
                     const isCurrentPlan = tier.id === subscription?.planId;
@@ -101,7 +103,7 @@ export default function SubscriptionPage() {
                                 <CardDescription>{tier.idealFor}</CardDescription>
                                 <div className="flex items-baseline">
                                     <span className="text-4xl font-bold">₱{tier.price}</span>
-                                    <span className="text-muted-foreground">/month</span>
+                                    <span className="text-muted-foreground">{t('perMonth')}</span>
                                 </div>
                             </CardHeader>
                             <CardContent className="flex-1 space-y-4">
@@ -118,20 +120,20 @@ export default function SubscriptionPage() {
                                 {isCurrentPlan ? (
                                     <Button className="w-full" disabled>
                                         <Check className="mr-2 h-4 w-4" />
-                                        Current Plan
+                                        {t('currentPlanButton')}
                                     </Button>
                                 ) : (
                                     <Dialog>
                                         <DialogTrigger asChild>
                                              <Button className="w-full" variant='default'>
                                                 <Star className="mr-2 h-4 w-4" />
-                                                Choose Plan
+                                                {t('choosePlan')}
                                             </Button>
                                         </DialogTrigger>
                                         <DialogContent>
                                             <DialogHeader>
-                                                <DialogTitle>Subscribe to {tier.name}</DialogTitle>
-                                                <DialogDescription>Choose your preferred payment method.</DialogDescription>
+                                                <DialogTitle>{t('subscribeTo', { planName: tier.name })}</DialogTitle>
+                                                <DialogDescription>{t('choosePaymentMethod')}</DialogDescription>
                                             </DialogHeader>
                                             <PayPalCheckoutButton 
                                                 plan={tier} 
@@ -157,7 +159,7 @@ export default function SubscriptionPage() {
         const agencyPlans = plans.filter(p => p.type === 'agency').sort((a,b) => a.sortOrder - b.sortOrder) as AgencySubscriptionTier[];
         return (
          <section>
-            <h2 className="text-2xl font-bold font-headline mb-4">Agency Subscription Plans</h2>
+            <h2 className="text-2xl font-bold font-headline mb-4">{t('agencySubscriptionPlans')}</h2>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                 {agencyPlans.map(tier => {
                     const isCurrentPlan = tier.id === subscription?.planId;
@@ -173,7 +175,7 @@ export default function SubscriptionPage() {
                                      {typeof tier.price === 'number' ? (
                                         <>
                                             <span className="text-4xl font-bold">₱{tier.price.toLocaleString()}</span>
-                                            <span className="text-muted-foreground">/month</span>
+                                            <span className="text-muted-foreground">{t('perMonth')}</span>
                                         </>
                                      ) : (
                                         <span className="text-2xl font-bold">{tier.price}</span>
@@ -192,21 +194,21 @@ export default function SubscriptionPage() {
                             </CardContent>
                             <CardFooter>
                                  {isCurrentPlan ? (
-                                    <Button className="w-full" disabled><Check className="mr-2 h-4 w-4" /> Current Plan</Button>
+                                    <Button className="w-full" disabled><Check className="mr-2 h-4 w-4" /> {t('currentPlanButton')}</Button>
                                 ) : tier.id === 'custom' ? (
-                                    <Button asChild className="w-full" variant="outline"><a href="mailto:sales@localpro.com"><Mail className="mr-2 h-4 w-4" /> Contact Us</a></Button>
+                                    <Button asChild className="w-full" variant="outline"><a href="mailto:sales@localpro.com"><Mail className="mr-2 h-4 w-4" /> {t('contactUs')}</a></Button>
                                 ) : (
                                     <Dialog>
                                         <DialogTrigger asChild>
                                             <Button className="w-full" variant='default'>
                                                 <Star className="mr-2 h-4 w-4" />
-                                                Choose Plan
+                                                {t('choosePlan')}
                                             </Button>
                                         </DialogTrigger>
                                         <DialogContent>
                                             <DialogHeader>
-                                                <DialogTitle>Subscribe to {tier.name}</DialogTitle>
-                                                <DialogDescription>Choose your preferred payment method.</DialogDescription>
+                                                <DialogTitle>{t('subscribeTo', { planName: tier.name })}</DialogTitle>
+                                                <DialogDescription>{t('choosePaymentMethod')}</DialogDescription>
                                             </DialogHeader>
                                             <PayPalCheckoutButton 
                                                 plan={tier} 
@@ -228,31 +230,31 @@ export default function SubscriptionPage() {
     )};
 
     const getPlanStatusDescription = () => {
-        if (!subscription) return 'Upgrade to a paid plan to access more features.';
+        if (!subscription) return t('upgradeToPaidPlan');
 
         if (subscription.status === 'pending') {
-            return `Your payment for the ${currentPlanDetails?.name} plan is pending verification.`;
+            return t('paymentPending', { planName: currentPlanDetails?.name || 'Unknown Plan' });
         }
 
         if (subscription.status === 'active' && subscription.renewsOn) {
-            return `Your plan renews on ${subscription.renewsOn.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+            return t('planRenewsOn', { date: subscription.renewsOn.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) });
         }
 
-        return 'Upgrade to a paid plan to access more features.';
+        return t('upgradeToPaidPlan');
     }
 
     return (
         <PayPalScriptProvider options={paypalOptions}>
             <div className="space-y-8">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Subscription & Pricing</h1>
+                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                     <p className="text-muted-foreground">
-                        Choose the perfect plan for your business and understand our commission structure.
+                        {t('description')}
                     </p>
                 </div>
 
                 <section>
-                    <h2 className="text-2xl font-bold font-headline mb-4">Current Plan</h2>
+                    <h2 className="text-2xl font-bold font-headline mb-4">{t('currentPlan')}</h2>
                     {loading ? (
                         <Card><CardContent className="p-6"><Skeleton className="h-24 w-full" /></CardContent></Card>
                     ) : (
@@ -260,7 +262,7 @@ export default function SubscriptionPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     {subscription?.status === 'pending' ? <Clock className="text-yellow-500"/> : <Star className="text-primary"/>}
-                                    {currentPlanDetails ? `You are on the ${currentPlanDetails.name} Plan` : 'You are on a Free Plan'}
+                                    {currentPlanDetails ? t('youAreOnPlan', { planName: currentPlanDetails.name }) : t('youAreOnFreePlan')}
                                     {subscription?.status && <Badge variant={subscription.status === 'pending' ? 'outline' : 'default'} className="capitalize">{subscription.status}</Badge>}
                                 </CardTitle>
                                 <CardDescription>{getPlanStatusDescription()}</CardDescription>
@@ -276,28 +278,28 @@ export default function SubscriptionPage() {
                 </section>
                 
                  <section>
-                    <h2 className="text-2xl font-bold font-headline mb-4">Commission per Completed Service</h2>
+                    <h2 className="text-2xl font-bold font-headline mb-4">{t('commissionPerCompletedService')}</h2>
                     <Card>
                         <CardContent className="p-0">
                              {platformSettings ? (
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>Job Value Tier</TableHead>
-                                            <TableHead>Commission Rate</TableHead>
+                                            <TableHead>{t('jobValueTier')}</TableHead>
+                                            <TableHead>{t('commissionRate')}</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell className="font-medium">Low-Ticket</TableCell>
+                                            <TableCell className="font-medium">{t('lowTicket')}</TableCell>
                                             <TableCell>{platformSettings.commissionRates.low}%</TableCell>
                                         </TableRow>
                                          <TableRow>
-                                            <TableCell className="font-medium">Mid-Ticket</TableCell>
+                                            <TableCell className="font-medium">{t('midTicket')}</TableCell>
                                             <TableCell>{platformSettings.commissionRates.mid}%</TableCell>
                                         </TableRow>
                                          <TableRow>
-                                            <TableCell className="font-medium">High-Ticket</TableCell>
+                                            <TableCell className="font-medium">{t('highTicket')}</TableCell>
                                             <TableCell>{platformSettings.commissionRates.high}%</TableCell>
                                         </TableRow>
                                     </TableBody>

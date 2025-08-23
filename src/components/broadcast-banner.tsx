@@ -7,6 +7,7 @@ import { collection, query, where, onSnapshot, limit } from "firebase/firestore"
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Megaphone, X } from "lucide-react";
 import { Button } from "./ui/button";
+import { useTranslations } from 'next-intl';
 
 type Broadcast = {
     id: string;
@@ -16,6 +17,7 @@ type Broadcast = {
 }
 
 export default function BroadcastBanner() {
+    const t = useTranslations('BroadcastBanner');
     const [broadcast, setBroadcast] = useState<Broadcast | null>(null);
     const [isVisible, setIsVisible] = useState(false);
 
@@ -71,6 +73,7 @@ export default function BroadcastBanner() {
                     size="icon"
                     className="h-7 w-7 text-accent-foreground hover:bg-accent-foreground/10 hover:text-accent-foreground"
                     onClick={handleDismiss}
+                    aria-label={t('close')}
                 >
                     <X className="h-4 w-4" />
                 </Button>

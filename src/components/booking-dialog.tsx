@@ -21,6 +21,7 @@ import { Calendar } from './ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import type { Service } from '@/app/(app)/providers/[providerId]/page';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 const bookingSchema = z.object({
   date: z.date({ required_error: "Please select a date." }),
@@ -63,6 +64,7 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
     const timeSlots = generateTimeSlots();
+    const t = useTranslations('BookingDialog');
 
     const form = useForm<BookingFormValues>({
         resolver: zodResolver(bookingSchema),
@@ -79,14 +81,14 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
 
     const onSubmit = async (data: BookingFormValues) => {
         if (!user) {
-            toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('mustBeLoggedIn') });
             return;
         }
         setIsSaving(true);
         try {
             const timeParts = data.time.match(/(\d+):(\d+)\s(AM|PM)/);
             if (!timeParts) {
-                toast({ variant: 'destructive', title: 'Error', description: 'Invalid time format.' });
+                toast({ variant: 'destructive', title: t('error'), description: t('invalidTimeFormat') });
                 setIsSaving(false);
                 return;
             }
@@ -122,7 +124,7 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
 
         } catch (error) {
             console.error("Error creating booking:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to create booking.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToCreateBooking') });
         } finally {
             setIsSaving(false);
         }
@@ -132,9 +134,9 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Book: {service.name}</DialogTitle>
+                    <DialogTitle>{t('book')}: {service.name}</DialogTitle>
                     <DialogDescription>
-                        Confirm date and time for your booking with {provider.displayName}.
+                        {t('confirmDateTime')} {provider.displayName}.
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
@@ -142,12 +144,12 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField control={form.control} name="date" render={({ field }) => (
                                 <FormItem className="flex flex-col">
-                                    <FormLabel className="mb-1">Date</FormLabel>
+                                    <FormLabel className="mb-1">{t('date')}</FormLabel>
                                     <Popover>
                                         <PopoverTrigger asChild>
                                             <FormControl>
                                                 <Button variant="outline" className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                    {field.value ? format(field.value, "PPP") : <span>{t('pickDate')}</span>}
                                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                 </Button>
                                             </FormControl>
@@ -161,11 +163,11 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
                             )} />
                              <FormField control={form.control} name="time" render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Time</FormLabel>
+                                    <FormLabel>{t('time')}</FormLabel>
                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a time slot" />
+                                                <SelectValue placeholder={t('selectTimeSlot')} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -178,26 +180,26 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
                         </div>
                         <FormField control={form.control} name="notes" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Additional Notes (optional)</FormLabel>
+                                <FormLabel>{t('additionalNotes')}</FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder="e.g., Please call upon arrival." {...field} />
+                                    <Textarea placeholder={t('notesPlaceholder')} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
 
                         <div className="rounded-lg border bg-secondary/50 p-4 flex justify-between items-center">
-                            <span className="font-semibold">Total Price:</span>
+                            <span className="font-semibold">{t('totalPrice')}:</span>
                             <span className="font-bold text-lg text-primary">₱{service.price.toFixed(2)}</span>
                         </div>
                         
                          <DialogFooter>
                              <DialogClose asChild>
-                                <Button type="button" variant="outline" disabled={isSaving}>Cancel</Button>
+                                <Button type="button" variant="outline" disabled={isSaving}>{t('cancel')}</Button>
                             </DialogClose>
                             <Button type="submit" disabled={isSaving}>
                                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isSaving ? 'Proceeding...' : 'Proceed to Payment'}
+                                {isSaving ? t('proceeding') : t('proceedToPayment')}
                             </Button>
                         </DialogFooter>
                     </form>

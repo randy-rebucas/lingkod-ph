@@ -4,8 +4,9 @@
 import { z } from "zod";
 import { Resend } from "resend";
 import ContactFormEmail from "@/emails/contact-form-email";
+import { getTranslations } from 'next-intl/server';
 
-const contactSchema = z.object({
+const createContactSchema = (t: any) => z.object({
   name: z.string().min(2),
   email: z.string().email(),
   subject: z.string().min(5),
@@ -21,6 +22,9 @@ export async function sendContactForm(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  const t = await getTranslations('ContactUs');
+  const contactSchema = createContactSchema(t);
+  
   const validatedFields = contactSchema.safeParse({
     name: formData.get("name"),
     email: formData.get("email"),
@@ -34,7 +38,7 @@ export async function sendContactForm(
       .join(", ");
     return {
       error: errorMessage,
-      message: "Validation failed. Please check the fields.",
+      message: t('validationFailed'),
     };
   }
 
@@ -52,14 +56,14 @@ export async function sendContactForm(
 
     return {
       error: null,
-      message: "Your message has been sent successfully!",
+      message: t('messageSent'),
     };
   } catch (e) {
-    const error = e instanceof Error ? e.message : "An unknown error occurred.";
+    const error = e instanceof Error ? e.message : t('unknownError');
     console.error("Email sending failed:", error);
     return {
-      error: `Failed to send email: ${error}`,
-      message: "An error occurred while sending your message.",
+      error: t('sendError', { error }),
+      message: t('errorOccurred'),
     };
   }
 }

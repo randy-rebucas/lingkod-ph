@@ -16,6 +16,7 @@ import { useAuth } from "@/context/auth-context";
 import { doc, getDoc, setDoc, serverTimestamp, getDocs, collection, query, limit } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 import { Logo } from "@/components/logo";
+import { useTranslations } from 'next-intl';
 
 // Function to generate a unique referral code
 const generateReferralCode = (userId: string): string => {
@@ -34,6 +35,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const [isSetupRequired, setIsSetupRequired] = useState<boolean | null>(null);
+  const t = useTranslations('Auth');
 
   useEffect(() => {
     // This check runs only once on component mount
@@ -71,13 +73,13 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      toast({ title: "Success", description: "Logged in successfully!" });
+      toast({ title: t('success'), description: t('loggedInSuccess') });
       router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Login Failed",
-        description: "Invalid credentials or user not found. Please check your email and password.",
+        title: t('loginFailed'),
+        description: t('invalidCredentials'),
       });
     } finally {
       setLoading(false);
@@ -107,16 +109,16 @@ export default function LoginPage() {
                 loyaltyPoints: 0,
                 referralCode: newReferralCode,
             });
-             toast({ title: "Welcome!", description: "Your account has been created." });
+             toast({ title: t('welcome'), description: t('accountCreated') });
         } else {
-            toast({ title: "Welcome Back!", description: "Logged in successfully with Google!" });
+            toast({ title: t('welcomeBackGoogle'), description: t('loggedInGoogle') });
         }
         
         router.push('/dashboard');
     } catch (error: any) {
         toast({
             variant: "destructive",
-            title: "Google Login Failed",
+            title: t('googleLoginFailed'),
             description: error.message,
         });
     } finally {
@@ -140,8 +142,8 @@ export default function LoginPage() {
              <Link href="/" className="inline-block mx-auto">
               <Logo />
             </Link>
-            <CardTitle className="text-2xl">Welcome Back!</CardTitle>
-            <CardDescription>Enter your credentials to access your account</CardDescription>
+            <CardTitle className="text-2xl">{t('welcomeBack')}</CardTitle>
+            <CardDescription>{t('enterCredentials')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
@@ -153,26 +155,26 @@ export default function LoginPage() {
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                   <Link href="/forgot-password" className="ml-auto inline-block text-sm underline">
-                    Forgot your password?
+                    {t('forgotPassword')}
                   </Link>
                 </div>
                 <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Logging in...' : 'Log In'}
+                {loading ? t('loggingIn') : t('logIn')}
               </Button>
             </form>
             <Separator className="my-6" />
             <div className="space-y-4">
-                <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={loading}>Login with Google</Button>
-                <Button variant="outline" className="w-full" disabled>Login with Facebook</Button>
+                <Button variant="outline" className="w-full" onClick={handleGoogleLogin} disabled={loading}>{t('loginWithGoogle')}</Button>
+                <Button variant="outline" className="w-full" disabled>{t('loginWithFacebook')}</Button>
             </div>
-            <div className="mt-6 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="underline">
-                Sign up
-              </Link>
-            </div>
+                          <div className="mt-6 text-center text-sm">
+                {t('noAccount')}{" "}
+                <Link href="/signup" className="underline">
+                  {t('signUp')}
+                </Link>
+              </div>
           </CardContent>
         </Card>
       </div>

@@ -3,6 +3,7 @@
 
 import { QRCodeSVG } from 'qrcode.react';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 // Using a placeholder value for the QR code.
 // In a real implementation, you would generate a unique payment request
@@ -10,10 +11,12 @@ import Image from 'next/image';
 const placeholderPaymentUrl = "https://localpro.ph/pay?tx=12345&amount=100";
 
 export function QRCode() {
+  const t = useTranslations('QRCode');
+  
   return (
     <Image 
         src="https://placehold.co/256x256.png" 
-        alt="Sample QR Code" 
+        alt={t('sampleQRCode')} 
         width={192} 
         height={192} 
         data-ai-hint="qr code"
