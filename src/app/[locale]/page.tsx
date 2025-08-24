@@ -11,7 +11,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslations } from 'next-intl';
 import { AdCarousel } from '@/components/ad-carousel';
-import HomeClient from '../home-client';
+import { useAuth } from '@/context/auth-context';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { Logo } from '@/components/logo';
+import { Loader2 } from 'lucide-react';
 
 
 const renderStars = (rating: number, keyPrefix: string) => {
@@ -35,9 +39,28 @@ const topProviders = [
 
 export default function HomePage() {
     const t = useTranslations('HomePage');
+    const { user, loading } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!loading && user) {
+            router.push('/dashboard');
+        }
+    }, [user, loading, router]);
+    
+    if (loading || user) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-secondary">
+                <div className="flex flex-col items-center gap-4">
+                    <Logo />
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <p>Loading your experience...</p>
+                </div>
+            </div>
+        );
+    }
     
     return (
-        <HomeClient>
         <>
             {/* Hero Section */}
             <section className="relative overflow-hidden bg-background">
@@ -209,6 +232,5 @@ export default function HomePage() {
                 </div>
             </section>
         </>
-        </HomeClient>
     );
 }

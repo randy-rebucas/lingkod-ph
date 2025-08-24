@@ -1,95 +1,92 @@
 
-import type {Metadata} from 'next';
-import '../globals.css';
-import { Toaster } from "@/components/ui/toaster"
-import { AuthProvider } from '@/context/auth-context';
-import { ThemeProvider } from '@/context/theme-provider';
-import { PT_Sans } from 'next/font/google';
-import Script from 'next/script';
-import {NextIntlClientProvider, useMessages} from 'next-intl';
+'use client';
 
-const ptSans = PT_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-body',
-  weight: ['400', '700'],
-})
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/logo';
+import { useTranslations } from 'next-intl';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
+const Header = () => {
+  const t = useTranslations('Navigation');
 
-export const metadata: Metadata = {
-  title: {
-    default: 'Lingkod PH | Find Trusted Local Service Providers in the Philippines',
-    template: '%s | Lingkod PH',
-  },
-  description: 'Lingkod PH is the leading platform for connecting clients with trusted, verified local service providers in the Philippines. From plumbing and electrical work to cleaning and beauty services, find the right pro for any job.',
-  keywords: ['local services Philippines', 'home services', 'find a plumber', 'electrician manila', 'cleaning services cebu', 'skilled workers Philippines', 'Lingkod PH', 'lingkod ph'],
-  openGraph: {
-    title: 'Lingkod PH | Find Trusted Local Service Providers in the Philippines',
-    description: 'The easiest way to hire verified local professionals for all your home and business needs.',
-    url: 'https://lingkod.ph', // Replace with your actual domain
-    siteName: 'Lingkod PH',
-    images: [
-      {
-        url: '/og-image.png', 
-        width: 1200,
-        height: 630,
-        alt: 'Lingkod PH - Connecting Communities with Trusted Providers',
-      },
-    ],
-    locale: 'en_PH',
-    type: 'website',
-  },
-   twitter: {
-    card: 'summary_large_image',
-    title: 'Lingkod PH | Find Trusted Local Service Providers',
-    description: 'Connecting you with the best local service professionals in the Philippines.',
-    images: ['/twitter-image.png'], 
-  },
+  return (
+  <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="container flex h-16 items-center justify-between">
+      <Link href="/" aria-label="Go to homepage">
+        <Logo />
+      </Link>
+      <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
+         <Link href="/about" className="transition-colors hover:text-primary">{t('about')}</Link>
+        <Link href="/careers" className="transition-colors hover:text-primary">{t('careers')}</Link>
+        <Link href="/contact-us" className="transition-colors hover:text-primary">{t('contact')}</Link>
+        <Link href="/help-center" className="transition-colors hover:text-primary">{t('helpCenter')}</Link>
+      </nav>
+      <div className="flex items-center space-x-2">
+        <p>
+          {t('language')}
+        </p>
+        <LanguageSwitcher />
+        <Button variant="ghost" asChild>
+          <Link href="/login">{t('login')}</Link>
+        </Button>
+        <Button asChild>
+          <Link href="/signup">{t('signup')}</Link>
+        </Button>
+      </div>
+    </div>
+  </header>
+  )
 };
 
-interface Props {
-    children: React.ReactNode;
-    params: {locale: string};
-}
-
-export default function LocaleLayout({ children, params: {locale} }: Props) {
-  const messages = useMessages();
- 
+const Footer = () => {
+  const t = useTranslations('Footer');
+  
   return (
-    <html lang={locale} suppressHydrationWarning className={`${ptSans.variable}`}>
-      <head>
-        <Script
-          strategy="afterInteractive"
-          src="https://www.googletagmanager.com/gtag/js?id=G-N6FJYX83QN"
-        />
-        <Script
-          id="gtag-init"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-N6FJYX83QN');
-            `,
-          }}
-        />
-      </head>
-      <body className="font-body antialiased">
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <AuthProvider>
-                {children}
-                <Toaster />
-            </AuthProvider>
-          </ThemeProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+  <footer className="border-t bg-secondary">
+    <div className="container grid grid-cols-1 md:grid-cols-4 gap-8 py-12">
+        <div>
+            <Logo />
+        </div>
+        <div>
+            <h4 className="font-semibold mb-2">{t('company')}</h4>
+            <ul className="space-y-2 text-sm">
+                <li><Link href="/about" className="text-muted-foreground hover:text-primary">{t('about')}</Link></li>
+                <li><Link href="/careers" className="text-muted-foreground hover:text-primary">{t('careers')}</Link></li>
+                <li><Link href="/partners" className="text-muted-foreground hover:text-primary">{t('partners')}</Link></li>
+            </ul>
+        </div>
+        <div>
+            <h4 className="font-semibold mb-2">{t('support')}</h4>
+            <ul className="space-y-2 text-sm">
+                <li><Link href="/help-center" className="text-muted-foreground hover:text-primary">{t('helpCenter')}</Link></li>
+                <li><Link href="/contact-us" className="text-muted-foreground hover:text-primary">{t('contact')}</Link></li>
+                <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-primary">{t('terms')}</Link></li>
+            </ul>
+        </div>
+        <div>
+             <h4 className="font-semibold mb-2">{t('stayConnected')}</h4>
+             <div className="flex space-x-4">
+                <p className="text-muted-foreground text-sm">&copy; {new Date().getFullYear()} LocalPro. {t('allRightsReserved')}</p>
+             </div>
+        </div>
+    </div>
+  </footer>
+  );
+};
+
+export default function PublicLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      <Header />
+      <main className="flex-1">
+        {children}
+      </main>
+      <Footer />
+    </div>
   );
 }
