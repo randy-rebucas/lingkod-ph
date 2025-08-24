@@ -6,11 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/language-switcher';
-import { useAuth } from '@/context/auth-context';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
-
 
 const Header = () => {
   const t = useTranslations('Navigation');
@@ -85,27 +80,6 @@ export default function PublicLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!loading && user) {
-        router.push('/dashboard');
-    }
-  }, [user, loading, router]);
-
-   if (loading || user) {
-      return (
-          <div className="flex min-h-screen items-center justify-center bg-secondary">
-              <div className="flex flex-col items-center gap-4">
-                  <Logo />
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                  <p>Loading your experience...</p>
-              </div>
-          </div>
-      );
-  }
-
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header />

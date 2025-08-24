@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTranslations } from 'next-intl';
 import { AdCarousel } from '@/components/ad-carousel';
+import HomeClient from '../home-client';
 
 
 const renderStars = (rating: number, keyPrefix: string) => {
@@ -36,6 +37,7 @@ export default function HomePage() {
     const t = useTranslations('HomePage');
     
     return (
+        <HomeClient>
         <>
             {/* Hero Section */}
             <section className="relative overflow-hidden bg-background">
@@ -207,5 +209,6 @@ export default function HomePage() {
                 </div>
             </section>
         </>
+        </HomeClient>
     );
 }
