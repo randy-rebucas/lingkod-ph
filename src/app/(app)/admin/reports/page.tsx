@@ -120,7 +120,7 @@ export default function AdminReportsPage() {
             averageBookingValue,
             providerPerformance,
             revenueChartData: processRevenueChartData(completedBookings),
-            providerChartData: providerPerformance.map(p => ({name: p.providerName, Bookings: p.completedBookings}))
+            providerChartData: providerPerformance.slice(0,10).map(p => ({name: p.providerName, Bookings: p.completedBookings}))
         };
     }, [bookings]);
     
@@ -210,7 +210,7 @@ export default function AdminReportsPage() {
                 </Card>
                 <Card className="lg:col-span-2">
                     <CardHeader>
-                        <CardTitle>Provider Bookings</CardTitle>
+                        <CardTitle>Top 10 Provider Bookings</CardTitle>
                         <CardDescription>Number of completed bookings per provider.</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -263,3 +263,5 @@ export default function AdminReportsPage() {
         </div>
     );
 }
+
+    

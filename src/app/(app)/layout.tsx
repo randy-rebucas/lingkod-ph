@@ -183,7 +183,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
        <div className="flex h-screen w-full items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Logo />
-          <p>{t('loading')}</p>
+          <p>{t('loadingExperience')}</p>
         </div>
       </div>
     );
@@ -213,13 +213,41 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const getPageTitle = (path: string) => {
     const parts = path.split('/').filter(Boolean);
     if (parts.length === 0) return "Dashboard";
+    if (path === dashboardPath) return "Dashboard";
+    
     const lastPart = parts[parts.length - 1];
+    
+    if (parts.includes('admin')) {
+        const adminRoutes: {[key: string]: string} = {
+            'dashboard': "Admin Dashboard",
+            'users': "User Management",
+            'conversations': "Conversation Monitoring",
+            'tickets': "Support Tickets",
+            'broadcast': "Broadcast Center",
+            'ads': "Ad Management",
+            'bookings': "Booking Management",
+            'jobs': "Job Post Management",
+            'moderation': "Content Moderation",
+            'payouts': "Payout Management",
+            'transactions': "Payment Verification",
+            'reports': "Platform Reports",
+            'client-reports': "Client Reports",
+            'backup': "Data Backup",
+            'security-logs': "Security Logs",
+            'subscriptions': "Subscription Management",
+            'categories': "Category Management",
+            'rewards': "Rewards Management",
+            'settings': "Platform Settings"
+        };
+        return adminRoutes[lastPart] || "Admin";
+    }
+
     if (parts.includes('partners') && lastPart === 'dashboard') return "Partners Dashboard";
     if (parts.includes('bookings') && lastPart === 'work-log') return "Work Log";
     if (parts.includes('my-job-posts') && lastPart === 'applicants') return "Applicants";
     if (parts.includes('providers')) return "Provider Profile";
     if (parts.includes('jobs')) return "Job Details";
-    if (parts.includes('broadcast')) return "Broadcast Center";
+    
 
     return lastPart.replace(/-/g, ' ');
   }
@@ -677,3 +705,5 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
+    
