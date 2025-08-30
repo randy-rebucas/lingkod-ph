@@ -223,8 +223,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
     return lastPart.replace(/-/g, ' ');
   }
-  
-  const profileLink = userRole === 'provider' || userRole === 'agency' ? `/providers/${user.uid}` : '/profile';
 
   return (
     <SidebarProvider>
@@ -613,7 +611,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuLabel>{user.displayName || 'User'}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href={profileLink}>
+                  <Link href={'/profile'}>
                     <User className="mr-2 h-4 w-4" />
                     <span>{t('profile')}</span>
                   </Link>
