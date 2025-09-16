@@ -7,7 +7,7 @@ import {
   updateDoc,
 } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
-import { logAdminAction } from '@/lib/audit-logger';
+import { AuditLogger } from '@/lib/audit-logger';
 
 type Actor = {
     id: string;
@@ -23,11 +23,12 @@ export async function handleUpdateReportStatus(
     const reportRef = doc(db, 'reports', reportId);
     await updateDoc(reportRef, { status });
     
-    await logAdminAction({
-        actor: { ...actor, role: 'admin' },
-        action: 'REPORT_STATUS_UPDATED',
-        details: { reportId, newStatus: status }
-    });
+    await AuditLogger.getInstance().logAction(
+        actor.id,
+        'reports',
+        'REPORT_STATUS_UPDATED',
+        { reportId, newStatus: status, actorRole: 'admin' }
+    );
 
     // Revalidate the path to update the UI
     revalidatePath('/admin/moderation');

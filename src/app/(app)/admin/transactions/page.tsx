@@ -19,6 +19,7 @@ import Image from "next/image";
 
 type PaymentVerificationBooking = Booking & {
     paymentProofUrl?: string;
+    createdAt?: Timestamp;
 };
 
 export default function AdminPaymentVerificationPage() {

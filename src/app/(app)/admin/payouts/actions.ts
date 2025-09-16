@@ -9,7 +9,7 @@ import {
   collection,
   addDoc,
 } from 'firebase/firestore';
-import { logAdminAction } from '@/lib/audit-logger';
+import { AuditLogger } from '@/lib/audit-logger';
 
 type Actor = {
     id: string;
@@ -40,11 +40,12 @@ export async function handleMarkAsPaid(
       createdAt: serverTimestamp(),
     });
     
-    await logAdminAction({
-        actor: { ...actor, role: 'admin' },
-        action: 'PAYOUT_PROCESSED',
-        details: { payoutId, providerId, providerName, amount }
-    });
+    await AuditLogger.getInstance().logAction(
+        'PAYOUT_PROCESSED',
+        actor.id,
+        'payouts',
+        { payoutId, providerId, providerName, amount, actorRole: 'admin' }
+    );
 
     return {
       error: null,

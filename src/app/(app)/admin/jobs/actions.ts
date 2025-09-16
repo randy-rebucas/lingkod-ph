@@ -7,7 +7,7 @@ import {
   updateDoc,
   deleteDoc,
 } from 'firebase/firestore';
-import { logAdminAction } from '@/lib/audit-logger';
+import { AuditLogger } from '@/lib/audit-logger';
 
 type Actor = {
     id: string;
@@ -23,11 +23,12 @@ export async function handleUpdateJobStatus(
     const jobRef = doc(db, 'jobs', jobId);
     await updateDoc(jobRef, { status });
 
-    await logAdminAction({
-        actor: { ...actor, role: 'admin' },
-        action: 'JOB_STATUS_UPDATED',
-        details: { jobId, newStatus: status }
-    });
+    await AuditLogger.getInstance().logAction(
+        actor.id,
+        'jobs',
+        'JOB_STATUS_UPDATED',
+        { jobId, newStatus: status, actorRole: 'admin' }
+    );
 
     return {
       error: null,
@@ -44,11 +45,12 @@ export async function handleDeleteJob(jobId: string, actor: Actor) {
     const jobRef = doc(db, 'jobs', jobId);
     await deleteDoc(jobRef);
 
-    await logAdminAction({
-        actor: { ...actor, role: 'admin' },
-        action: 'JOB_DELETED',
-        details: { jobId }
-    });
+    await AuditLogger.getInstance().logAction(
+        actor.id,
+        'jobs',
+        'JOB_DELETED',
+        { jobId, actorRole: 'admin' }
+    );
 
     return {
       error: null,

@@ -24,7 +24,7 @@ type Backup = {
 };
 
 export default function AdminBackupPage() {
-    const { userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const [backups, setBackups] = useState<Backup[]>([]);
     const [loading, setLoading] = useState(true);
@@ -51,13 +51,27 @@ export default function AdminBackupPage() {
     }, [userRole]);
 
     const handleCreateBackup = async () => {
+        if (!user) {
+            toast({
+                title: 'Authentication Error',
+                description: 'You must be logged in to create backups.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
         setIsCreatingBackup(true);
         toast({
             title: 'Backup In Progress...',
             description: 'This may take a few moments depending on the size of your database.',
         });
         try {
-            const result = await createBackup();
+            const actor = {
+                id: user.uid,
+                name: user.displayName,
+                role: userRole || 'client'
+            };
+            const result = await createBackup(actor);
             if (result.success) {
                 toast({
                     title: 'Backup Successful',
@@ -72,7 +86,11 @@ export default function AdminBackupPage() {
             }
         } catch (e: any) {
             console.error('Error creating backup: ', e);
-            toast({ error: e.message, message: 'Failed to create backup.' });
+            toast({
+                title: 'Backup Failed',
+                description: e.message,
+                variant: 'destructive',
+            });
         } finally {
             setIsCreatingBackup(false);
         }

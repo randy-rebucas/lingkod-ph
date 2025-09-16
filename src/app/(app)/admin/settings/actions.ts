@@ -4,7 +4,7 @@
 import { db } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { z } from 'zod';
-import { logAdminAction } from '@/lib/audit-logger';
+import { AuditLogger } from '@/lib/audit-logger';
 
 type Actor = {
     id: string;
@@ -39,11 +39,12 @@ export async function handleUpdatePlatformSettings(
     const settingsRef = doc(db, 'platform', 'settings');
     await setDoc(settingsRef, validatedSettings.data, { merge: true });
 
-    await logAdminAction({
-        actor: { ...actor, role: 'admin' },
-        action: 'PLATFORM_SETTINGS_UPDATED',
-        details: { settings: validatedSettings.data }
-    });
+    await AuditLogger.getInstance().logAction(
+        'PLATFORM_SETTINGS_UPDATED',
+        actor.id,
+        'platform',
+        { settings: validatedSettings.data, actorRole: 'admin' }
+    );
 
     return {
       error: null,

@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { z } from 'zod';
-import { logAdminAction } from '@/lib/audit-logger';
+import { AuditLogger } from '@/lib/audit-logger';
 import { Resend } from 'resend';
 import DirectMessageEmail from '@/emails/direct-message-email';
 
@@ -20,6 +20,7 @@ type UserStatus = 'active' | 'pending_approval' | 'suspended';
 type Actor = {
     id: string;
     name: string | null;
+    role: string;
 };
 
 const generateReferralCode = (userId: string): string => {
@@ -38,11 +39,12 @@ export async function handleUserStatusUpdate(
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, { accountStatus: status });
 
-    await logAdminAction({
-        actor: { ...actor, role: 'admin' },
-        action: 'USER_STATUS_UPDATED',
-        details: { targetUserId: userId, newStatus: status }
-    });
+    await AuditLogger.getInstance().logAction(
+        actor.id,
+        'users',
+        'USER_STATUS_UPDATED',
+        { targetUserId: userId, newStatus: status, actorRole: 'admin' }
+    );
 
     return {
       error: null,
@@ -59,11 +61,12 @@ export async function handleDeleteUser(userId: string, actor: Actor) {
         const userRef = doc(db, 'users', userId);
         await deleteDoc(userRef);
 
-         await logAdminAction({
-            actor: { ...actor, role: 'admin' },
-            action: 'USER_DELETED',
-            details: { targetUserId: userId }
-        });
+         await AuditLogger.getInstance().logAction(
+            actor.id,
+            'users',
+            'USER_DELETED',
+            { targetUserId: userId, actorRole: 'admin' }
+        );
 
         // Note: This does not delete the user from Firebase Auth.
         // That requires admin SDK privileges on the backend.
@@ -121,6 +124,14 @@ const updateUserSchema = z.object({
 
 
 export async function handleUpdateUser(userId: string, data: z.infer<typeof updateUserSchema>, actor: Actor) {
+    // Server-side role verification
+    if (actor.role !== 'admin') {
+        return {
+            error: 'Unauthorized',
+            message: 'Admin privileges required.'
+        };
+    }
+
     const validatedFields = updateUserSchema.safeParse(data);
     if (!validatedFields.success) {
         return {
@@ -138,11 +149,12 @@ export async function handleUpdateUser(userId: string, data: z.infer<typeof upda
         };
         await updateDoc(userRef, updateData);
 
-        await logAdminAction({
-            actor: { ...actor, role: 'admin' },
-            action: 'USER_UPDATED',
-            details: { targetUserId: userId, changes: updateData }
-        });
+        await AuditLogger.getInstance().logAction(
+            actor.id,
+            'users',
+            'USER_UPDATED',
+            { targetUserId: userId, changes: updateData, actorRole: 'admin' }
+        );
 
         return { error: null, message: 'User updated successfully.' };
     } catch (e: any) {
