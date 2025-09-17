@@ -11,6 +11,7 @@ import {
   getDoc,
 } from 'firebase/firestore';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { adminAuth } from '@/lib/firebase-admin';
 import { z } from 'zod';
 import { AuditLogger } from '@/lib/audit-logger';
 import { Resend } from 'resend';
@@ -100,17 +101,56 @@ export async function handleCreateUser(data: z.infer<typeof createUserSchema>, a
     const { name, email, password, role, phone } = validatedFields.data;
 
     try {
-        // This action can't use the regular client-side `auth` object because you can't create users on the client
-        // after the first one. This is a placeholder for a proper Admin SDK-backed server function.
-        // For the purpose of this prototype, we assume the initial admin setup is a special case.
-        // A real implementation would require a backend function with admin privileges.
-        return { error: "User creation from the admin panel requires a backend with Admin SDK privileges, which is not implemented in this prototype.", message: 'Feature not available.' };
+        // Use Firebase Admin SDK to create user
+        const userRecord = await adminAuth.createUser({
+            email: email,
+            password: password,
+            displayName: name,
+        });
+
+        // Generate referral code for the new user
+        const newReferralCode = generateReferralCode(userRecord.uid);
+
+        // Create user document in Firestore
+        await setDoc(doc(db, 'users', userRecord.uid), {
+            uid: userRecord.uid,
+            email: email,
+            displayName: name,
+            phone: phone || '',
+            role: role,
+            createdAt: serverTimestamp(),
+            loyaltyPoints: 0,
+            referralCode: newReferralCode,
+            accountStatus: 'active',
+        });
+
+        // Log the admin action
+        await AuditLogger.getInstance().logAction(
+            actor.id,
+            'users',
+            'USER_CREATED',
+            { 
+                targetUserId: userRecord.uid, 
+                userEmail: email, 
+                userRole: role, 
+                actorRole: 'admin' 
+            }
+        );
+
+        return { 
+            error: null, 
+            message: `User ${name} (${email}) created successfully with role: ${role}.` 
+        };
 
     } catch (e: any) {
          console.error('Error creating user: ', e);
          let errorMessage = e.message;
-         if (e.code === 'auth/email-already-in-use') {
+         if (e.code === 'auth/email-already-exists') {
              errorMessage = "This email address is already in use by another account.";
+         } else if (e.code === 'auth/invalid-email') {
+             errorMessage = "The email address is invalid.";
+         } else if (e.code === 'auth/weak-password') {
+             errorMessage = "The password is too weak.";
          }
         return { error: errorMessage, message: 'Failed to create user.' };
     }

@@ -23,7 +23,7 @@ import { BookingDialog } from "@/components/booking-dialog";
 import { useTranslations } from 'next-intl';
 
 
-type BookingStatus = "Pending Payment" | "Pending Verification" | "Upcoming" | "In Progress" | "Completed" | "Cancelled";
+type BookingStatus = "Pending Payment" | "Pending Verification" | "Upcoming" | "In Progress" | "Completed" | "Cancelled" | "Payment Rejected";
 
 export type Booking = {
     id: string;
@@ -43,6 +43,11 @@ export type Booking = {
     reviewId?: string;
     completionPhotoURL?: string;
     paymentProofUrl?: string;
+    paymentRejectionReason?: string;
+    paymentRejectedAt?: Timestamp;
+    paymentRejectedBy?: string;
+    paymentVerifiedAt?: Timestamp;
+    paymentVerifiedBy?: string;
 };
 
 const getStatusVariant = (status: string) => {
@@ -53,6 +58,7 @@ const getStatusVariant = (status: string) => {
         case "Cancelled": return "destructive";
         case "Pending Payment": return "outline";
         case "Pending Verification": return "outline";
+        case "Payment Rejected": return "destructive";
         default: return "outline";
     }
 }

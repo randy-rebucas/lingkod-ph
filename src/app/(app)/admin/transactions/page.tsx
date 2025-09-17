@@ -11,10 +11,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Loader2, Eye } from "lucide-react";
+import { CheckCircle, Loader2, Eye, XCircle, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Booking } from "@/app/(app)/bookings/page";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import Image from "next/image";
 
 type PaymentVerificationBooking = Booking & {
@@ -28,6 +31,8 @@ export default function AdminPaymentVerificationPage() {
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
     const [approvingId, setApprovingId] = useState<string | null>(null);
+    const [rejectingId, setRejectingId] = useState<string | null>(null);
+    const [rejectionReason, setRejectionReason] = useState<string>("");
 
      useEffect(() => {
         if (userRole !== 'admin') {
@@ -57,7 +62,25 @@ export default function AdminPaymentVerificationPage() {
         setApprovingId(booking.id);
         try {
             const bookingRef = doc(db, 'bookings', booking.id);
-            await updateDoc(bookingRef, { status: 'Upcoming' });
+            await updateDoc(bookingRef, { 
+                status: 'Upcoming',
+                paymentVerifiedAt: serverTimestamp(),
+                paymentVerifiedBy: user.uid
+            });
+
+            // Create payment record
+            await addDoc(collection(db, 'transactions'), {
+                bookingId: booking.id,
+                clientId: booking.clientId,
+                providerId: booking.providerId,
+                amount: booking.price,
+                type: 'booking_payment',
+                status: 'completed',
+                paymentMethod: 'manual_verification',
+                verifiedBy: user.uid,
+                verifiedAt: serverTimestamp(),
+                createdAt: serverTimestamp()
+            });
 
             // Notify client
             await addDoc(collection(db, `users/${booking.clientId}/notifications`), {
@@ -84,6 +107,56 @@ export default function AdminPaymentVerificationPage() {
             toast({ variant: "destructive", title: "Approval Failed", description: "There was an error approving the payment." });
         } finally {
             setApprovingId(null);
+        }
+    }
+
+    const handleRejectPayment = async (booking: PaymentVerificationBooking) => {
+        if (!user || !rejectionReason.trim()) {
+            toast({ variant: "destructive", title: "Error", description: "Please provide a reason for rejection."});
+            return;
+        }
+        setRejectingId(booking.id);
+        try {
+            const bookingRef = doc(db, 'bookings', booking.id);
+            await updateDoc(bookingRef, { 
+                status: 'Payment Rejected',
+                paymentRejectionReason: rejectionReason,
+                paymentRejectedAt: serverTimestamp(),
+                paymentRejectedBy: user.uid
+            });
+
+            // Notify client
+            await addDoc(collection(db, `users/${booking.clientId}/notifications`), {
+                type: 'booking_update',
+                message: `Your payment for "${booking.serviceName}" was rejected. Reason: ${rejectionReason}. Please contact support or try again.`,
+                link: '/bookings',
+                read: false,
+                createdAt: serverTimestamp(),
+            });
+
+            // Create payment record for tracking
+            await addDoc(collection(db, 'transactions'), {
+                bookingId: booking.id,
+                clientId: booking.clientId,
+                providerId: booking.providerId,
+                amount: booking.price,
+                type: 'booking_payment',
+                status: 'rejected',
+                paymentMethod: 'manual_verification',
+                rejectionReason: rejectionReason,
+                rejectedBy: user.uid,
+                rejectedAt: serverTimestamp(),
+                createdAt: serverTimestamp()
+            });
+
+            toast({ title: "Payment Rejected", description: `The payment for ${booking.clientName} has been rejected.` });
+            setRejectionReason("");
+
+        } catch (error) {
+            console.error("Error rejecting payment:", error);
+            toast({ variant: "destructive", title: "Rejection Failed", description: "There was an error rejecting the payment." });
+        } finally {
+            setRejectingId(null);
         }
     }
 
@@ -148,10 +221,47 @@ export default function AdminPaymentVerificationPage() {
                                             <DialogTrigger asChild>
                                                 <Button variant="outline" size="sm"><Eye className="mr-2 h-4 w-4"/> View Proof</Button>
                                             </DialogTrigger>
-                                            <Button size="sm" onClick={() => handleApprovePayment(booking)} disabled={approvingId === booking.id}>
+                                            <Button size="sm" onClick={() => handleApprovePayment(booking)} disabled={approvingId === booking.id || rejectingId === booking.id}>
                                                 {approvingId === booking.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
                                                 Approve
                                             </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="destructive" size="sm" disabled={approvingId === booking.id || rejectingId === booking.id}>
+                                                        {rejectingId === booking.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
+                                                        Reject
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Reject Payment</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Are you sure you want to reject this payment? Please provide a reason for the rejection.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <div className="space-y-4">
+                                                        <div>
+                                                            <Label htmlFor="rejection-reason">Rejection Reason</Label>
+                                                            <Textarea
+                                                                id="rejection-reason"
+                                                                placeholder="Please provide a detailed reason for rejecting this payment..."
+                                                                value={rejectionReason}
+                                                                onChange={(e) => setRejectionReason(e.target.value)}
+                                                                className="mt-1"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            onClick={() => handleRejectPayment(booking)}
+                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                        >
+                                                            Reject Payment
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </TableCell>
                                          <DialogContent>
                                             <DialogHeader>

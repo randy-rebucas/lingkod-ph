@@ -5,6 +5,8 @@ import { AdminSessionManager, validateAdminSession } from '@/lib/admin-session-m
 import { Admin2FAManager, requireAdmin2FA } from '@/lib/admin-2fa';
 import { AdminActivityLogger } from '@/lib/admin-activity-monitor';
 import { SecurityEventLogger } from '@/lib/admin-security-notifications';
+import { adminDb as db } from '@/lib/firebase-admin';
+import { AuditLogger } from '@/lib/audit-logger';
 
 /**
  * Enhanced admin API route with comprehensive security
@@ -36,7 +38,7 @@ export async function POST(request: NextRequest) {
         'Invalid Admin Token',
         'Attempted to access admin API with invalid token',
         { error: error instanceof Error ? error.message : 'Unknown error' },
-        { ipAddress: request.ip, userAgent: request.headers.get('user-agent') }
+        { ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown', userAgent: request.headers.get('user-agent') || undefined || undefined }
       );
       
       return NextResponse.json(
@@ -52,7 +54,7 @@ export async function POST(request: NextRequest) {
         'Non-Admin Access Attempt',
         'Non-admin user attempted to access admin API',
         { userId: decodedToken.uid, userRole: decodedToken.role },
-        { userId: decodedToken.uid, ipAddress: request.ip, userAgent: request.headers.get('user-agent') }
+        { userId: decodedToken.uid, ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown', userAgent: request.headers.get('user-agent') || undefined || undefined }
       );
       
       return NextResponse.json(
@@ -65,7 +67,7 @@ export async function POST(request: NextRequest) {
     const adminName = decodedToken.name || decodedToken.email || 'Unknown Admin';
 
     // Validate admin session
-    const sessionId = request.headers.get('x-admin-session-id');
+    const sessionId = request.headers.get('x-admin-session-id') || undefined;
     if (sessionId) {
       const sessionValidation = await validateAdminSession(request);
       if (!sessionValidation.valid) {
@@ -74,7 +76,7 @@ export async function POST(request: NextRequest) {
           'Invalid Admin Session',
           'Admin attempted to perform action with invalid session',
           { sessionId, error: sessionValidation.error },
-          { adminId, adminName, ipAddress: request.ip, userAgent: request.headers.get('user-agent') }
+          { adminId, adminName, ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown', userAgent: request.headers.get('user-agent') || undefined }
         );
         
         return NextResponse.json(
@@ -92,7 +94,7 @@ export async function POST(request: NextRequest) {
         '2FA Required',
         'Admin attempted critical operation without 2FA verification',
         { operation, action },
-        { adminId, adminName, ipAddress: request.ip, userAgent: request.headers.get('user-agent') }
+        { adminId, adminName, ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown', userAgent: request.headers.get('user-agent') || undefined }
       );
       
       return NextResponse.json(
@@ -115,7 +117,7 @@ export async function POST(request: NextRequest) {
           'Admin Rate Limit Exceeded',
           `Admin exceeded rate limit for operation: ${operation}`,
           { operation, limit: rateLimitCheck.retryAfter },
-          { adminId, adminName, ipAddress: request.ip, userAgent: request.headers.get('user-agent') }
+          { adminId, adminName, ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown', userAgent: request.headers.get('user-agent') || undefined }
         );
         
         return NextResponse.json(
@@ -141,8 +143,8 @@ export async function POST(request: NextRequest) {
       action as any,
       data || {},
       {
-        ipAddress: request.ip,
-        userAgent: request.headers.get('user-agent'),
+        ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+        userAgent: request.headers.get('user-agent') || undefined,
         sessionId,
         success: true
       }
@@ -177,8 +179,8 @@ export async function POST(request: NextRequest) {
       `${action}_${operation}` as any,
       { ...data, result: result.success },
       {
-        ipAddress: request.ip,
-        userAgent: request.headers.get('user-agent'),
+        ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+        userAgent: request.headers.get('user-agent') || undefined,
         sessionId,
         success: result.success
       }
@@ -194,7 +196,7 @@ export async function POST(request: NextRequest) {
       'Admin API Error',
       'Unexpected error in admin API',
       { error: error instanceof Error ? error.message : 'Unknown error' },
-      { ipAddress: request.ip, userAgent: request.headers.get('user-agent') }
+      { ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown', userAgent: request.headers.get('user-agent') || undefined }
     );
     
     return NextResponse.json(
@@ -260,8 +262,7 @@ async function handleFinancialOperation(
         return { success: true, message: 'Payment verified successfully' };
       
       case 'refund_transaction':
-        // Implement refund logic
-        return { success: true, message: 'Refund processed successfully' };
+        return await handleRefundTransaction(data, adminId, adminName);
       
       default:
         return { success: false, message: 'Unknown financial operation' };
@@ -269,6 +270,85 @@ async function handleFinancialOperation(
   } catch (error) {
     console.error('Financial operation error:', error);
     return { success: false, message: 'Financial operation failed' };
+  }
+}
+
+/**
+ * Handle refund transaction
+ */
+async function handleRefundTransaction(
+  data: any,
+  adminId: string,
+  adminName: string
+): Promise<{ success: boolean; message: string; data?: any }> {
+  try {
+    const { transactionId, reason, amount } = data;
+    
+    if (!transactionId || !reason) {
+      return { success: false, message: 'Transaction ID and reason are required' };
+    }
+
+    // Get the transaction
+    const transactionRef = db.collection('transactions').doc(transactionId);
+    const transactionDoc = await transactionRef.get();
+    
+    if (!transactionDoc.exists) {
+      return { success: false, message: 'Transaction not found' };
+    }
+
+    const transaction = transactionDoc.data();
+    
+    if (!transaction) {
+      return { success: false, message: 'Transaction data not found' };
+    }
+    
+    // Update transaction status
+    await transactionRef.update({
+      status: 'refunded',
+      refundReason: reason,
+      refundAmount: amount || transaction.amount,
+      refundedBy: adminId,
+      refundedAt: new Date()
+    });
+
+    // If it's a booking payment, update booking status
+    if (transaction.bookingId) {
+      const bookingRef = db.collection('bookings').doc(transaction.bookingId);
+      await bookingRef.update({
+        status: 'Cancelled',
+        cancellationReason: `Refunded: ${reason}`,
+        cancelledAt: new Date(),
+        cancelledBy: adminId
+      });
+    }
+
+    // Notify the client
+    await db.collection(`users/${transaction.clientId}/notifications`).add({
+      type: 'refund',
+      message: `Your payment of ₱${(amount || transaction.amount).toFixed(2)} has been refunded. Reason: ${reason}`,
+      link: '/payments',
+      read: false,
+      createdAt: new Date(),
+    });
+
+    // Log the refund action
+    await AuditLogger.getInstance().logAction(
+      'REFUND_PROCESSED',
+      adminId,
+      'transactions',
+      { 
+        transactionId, 
+        clientId: transaction.clientId, 
+        amount: amount || transaction.amount, 
+        reason,
+        adminName 
+      }
+    );
+
+    return { success: true, message: 'Refund processed successfully' };
+  } catch (error) {
+    console.error('Refund transaction error:', error);
+    return { success: false, message: 'Failed to process refund' };
   }
 }
 

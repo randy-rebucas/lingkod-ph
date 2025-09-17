@@ -12,13 +12,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Upload, Loader2, ClipboardCopy, Check, Wallet, Landmark, Info } from "lucide-react";
+import { ArrowLeft, Upload, Loader2, ClipboardCopy, Check, Wallet, Landmark, Info, Smartphone } from "lucide-react";
 import Image from 'next/image';
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Booking } from "../../page";
 import {QRCode} from "@/components/qrcode-svg";
+import { GCashPaymentButton } from "@/components/gcash-payment-button";
 
 export default function PaymentPage() {
     const { bookingId } = useParams();
@@ -82,6 +84,9 @@ export default function PaymentPage() {
             await updateDoc(bookingRef, {
                 paymentProofUrl: url,
                 status: "Pending Verification",
+                paymentRejectionReason: null, // Clear any previous rejection reason
+                paymentRejectedAt: null,
+                paymentRejectedBy: null
             });
             
             // Notify Admin
@@ -122,6 +127,7 @@ export default function PaymentPage() {
     if (!booking) return null;
     
     const isPaymentUploaded = booking.status === 'Pending Verification' || booking.status === 'Upcoming' || booking.status === 'Completed';
+    const isPaymentRejected = booking.status === 'Payment Rejected';
 
     return (
         <div className="space-y-6 max-w-4xl mx-auto">
@@ -160,11 +166,45 @@ export default function PaymentPage() {
                                  <Wallet className="h-6 w-6 text-blue-500"/>
                                 <h3 className="font-semibold text-lg">GCash Payment</h3>
                             </div>
-                            <div className="text-sm space-y-1 pl-9">
-                                <p><strong>Account Name:</strong> Lingkod PH Services</p>
-                                <p><strong>Account Number:</strong> 0917-123-4567</p>
-                                <div className="w-32 h-32 mt-2"><QRCode/></div>
-                            </div>
+                            
+                            <Tabs defaultValue="automated" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="automated" className="flex items-center gap-2">
+                                        <Smartphone className="h-4 w-4" />
+                                        Instant
+                                    </TabsTrigger>
+                                    <TabsTrigger value="manual" className="flex items-center gap-2">
+                                        <Upload className="h-4 w-4" />
+                                        Manual
+                                    </TabsTrigger>
+                                </TabsList>
+                                
+                                <TabsContent value="automated" className="mt-4">
+                                    <GCashPaymentButton
+                                        bookingId={booking.id}
+                                        amount={booking.price}
+                                        serviceName={booking.serviceName}
+                                        onPaymentSuccess={() => {
+                                            toast({ title: 'Payment Successful!', description: 'Your booking has been confirmed.' });
+                                            router.push('/bookings');
+                                        }}
+                                        onPaymentError={(error) => {
+                                            toast({ variant: 'destructive', title: 'Payment Failed', description: error });
+                                        }}
+                                    />
+                                </TabsContent>
+                                
+                                <TabsContent value="manual" className="mt-4">
+                                    <div className="text-sm space-y-1">
+                                        <p><strong>Account Name:</strong> Lingkod PH Services</p>
+                                        <p><strong>Account Number:</strong> 0917-123-4567</p>
+                                        <div className="w-32 h-32 mt-2"><QRCode/></div>
+                                        <p className="text-xs text-muted-foreground mt-2">
+                                            After payment, upload proof for manual verification
+                                        </p>
+                                    </div>
+                                </TabsContent>
+                            </Tabs>
                         </div>
                          <Separator />
                          <div className="space-y-4">
@@ -191,7 +231,27 @@ export default function PaymentPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                         {isPaymentUploaded && booking.paymentProofUrl ? (
+                         {isPaymentRejected ? (
+                             <div className="space-y-4 text-center">
+                                 <div className="relative aspect-video w-full rounded-md overflow-hidden border">
+                                    <Image src={booking.paymentProofUrl || "https://placehold.co/600x400.png"} alt="Payment proof" layout="fill" className="object-contain"/>
+                                </div>
+                                <Badge variant="destructive">Status: {booking.status}</Badge>
+                                {booking.paymentRejectionReason && (
+                                    <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                                        <p className="text-sm text-red-800"><strong>Rejection Reason:</strong> {booking.paymentRejectionReason}</p>
+                                    </div>
+                                )}
+                                <p className="text-sm text-muted-foreground">Please upload a new payment proof or contact support for assistance.</p>
+                                <Button onClick={() => {
+                                    setPaymentProofFile(null);
+                                    setPaymentProofPreview(null);
+                                    if (fileInputRef.current) fileInputRef.current.value = '';
+                                }} className="w-full">
+                                    Upload New Payment Proof
+                                </Button>
+                             </div>
+                         ) : isPaymentUploaded && booking.paymentProofUrl ? (
                              <div className="space-y-4 text-center">
                                  <div className="relative aspect-video w-full rounded-md overflow-hidden border">
                                     <Image src={booking.paymentProofUrl} alt="Payment proof" layout="fill" className="object-contain"/>
