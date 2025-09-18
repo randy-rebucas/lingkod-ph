@@ -51,9 +51,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error('Webhook processing error:', error);
+    
+    let errorMessage = 'Webhook processing failed';
+    let statusCode = 500;
+    
+    if (error instanceof Error) {
+      if (error.message.includes('signature')) {
+        errorMessage = 'Invalid webhook signature';
+        statusCode = 400;
+      } else if (error.message.includes('JSON')) {
+        errorMessage = 'Invalid webhook payload';
+        statusCode = 400;
+      } else if (error.message.includes('Adyen')) {
+        errorMessage = 'Payment service error';
+        statusCode = 503;
+      }
+    }
+    
     return NextResponse.json(
-      { error: 'Webhook processing failed' },
-      { status: 500 }
+      { error: errorMessage },
+      { status: statusCode }
     );
   }
 }

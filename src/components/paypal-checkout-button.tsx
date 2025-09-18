@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { type SubscriptionTier, type AgencySubscriptionTier } from "@/app/(app)/subscription/page";
 import { Loader2, Wallet, QrCode } from "lucide-react";
+import { PaymentConfig } from "@/lib/payment-config";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
 import Image from "next/image";
@@ -51,8 +52,8 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
     gcash: {
       name: "GCash",
       icon: Wallet,
-      accountName: "Juan Dela Cruz",
-      accountNumber: "0917-000-1234",
+      accountName: PaymentConfig.GCASH.accountName,
+      accountNumber: PaymentConfig.GCASH.accountNumber,
       steps: [
         t('gcashStep1'),
         t('gcashStep2'),
@@ -63,8 +64,8 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
     maya: {
       name: "Maya",
       icon: Wallet,
-      accountName: "Juan Dela Cruz",
-      accountNumber: "0918-000-5678",
+      accountName: PaymentConfig.MAYA.accountName,
+      accountNumber: PaymentConfig.MAYA.accountNumber,
       steps: [
         t('mayaStep1'),
         t('mayaStep2'),

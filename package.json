@@ -10,7 +10,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "email": "email dev"
+    "email": "email dev",
+    "validate-payments": "tsx src/scripts/validate-payment-system.ts",
+    "setup-dev": "tsx src/scripts/setup-dev-environment.ts"
   },
   "dependencies": {
     "@adyen/adyen-web": "^6.22.0",

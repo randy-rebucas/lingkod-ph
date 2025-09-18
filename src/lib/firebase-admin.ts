@@ -3,16 +3,27 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { getAuth } from 'firebase-admin/auth';
 
-// Initialize Firebase Admin SDK using Application Default Credentials (ADC)
-// This follows Google Cloud best practices for authentication
+// Initialize Firebase Admin SDK with fallback configuration for development
 if (!getApps().length) {
-  initializeApp({
-    // No explicit credentials - uses Application Default Credentials
-    // The client library automatically finds credentials using ADC
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  });
+  try {
+    // Try to initialize with project ID if available
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'lingkod-ph-dev';
+    
+    initializeApp({
+      projectId: projectId,
+      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${projectId}.appspot.com`,
+    });
+  } catch (error) {
+    console.warn('Firebase Admin initialization failed:', error);
+    // Initialize with minimal config for development
+    initializeApp({
+      projectId: 'lingkod-ph-dev',
+      storageBucket: 'lingkod-ph-dev.appspot.com',
+    });
+  }
 }
 
+// Export with error handling for development
 export const adminDb = getFirestore();
 export const adminStorage = getStorage();
 export const adminAuth = getAuth();

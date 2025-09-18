@@ -2,6 +2,7 @@ import { Client, Config, CheckoutAPI } from '@adyen/api-library';
 import { adminDb as db } from './firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { PaymentNotificationService } from './payment-notifications';
+import { PaymentConfig } from './payment-config';
 
 export interface AdyenPaymentConfig {
   apiKey: string;
@@ -34,15 +35,10 @@ export class AdyenPaymentService {
   private config: AdyenPaymentConfig;
 
   constructor() {
-    this.config = {
-      apiKey: process.env.ADYEN_API_KEY || '',
-      merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT || '',
-      environment: (process.env.ADYEN_ENVIRONMENT as 'test' | 'live') || 'test',
-      clientKey: process.env.ADYEN_CLIENT_KEY || ''
-    };
+    this.config = PaymentConfig.ADYEN;
 
     // Only initialize if we have the required configuration
-    if (this.config.apiKey && this.config.merchantAccount) {
+    if (PaymentConfig.validateAdyenConfig()) {
       const adyenConfig = new Config();
       adyenConfig.apiKey = this.config.apiKey;
       adyenConfig.environment = this.config.environment as any;
@@ -58,7 +54,7 @@ export class AdyenPaymentService {
   async createGCashPayment(paymentRequest: GCashPaymentRequest): Promise<PaymentResult> {
     try {
       // Check if Adyen is properly configured
-      if (!this.client || !this.checkout) {
+      if (!PaymentConfig.validateAdyenConfig() || !this.client || !this.checkout) {
         return {
           success: false,
           error: 'Adyen payment service is not configured. Please contact support.',
@@ -139,7 +135,7 @@ export class AdyenPaymentService {
   async handlePaymentResult(bookingId: string, pspReference: string): Promise<PaymentResult> {
     try {
       // Check if Adyen is properly configured
-      if (!this.client || !this.checkout) {
+      if (!PaymentConfig.validateAdyenConfig() || !this.client || !this.checkout) {
         return {
           success: false,
           error: 'Adyen payment service is not configured. Please contact support.',

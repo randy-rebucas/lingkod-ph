@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,39 +12,41 @@ import { useToast } from '@/hooks/use-toast';
 export default function PaymentResultPage() {
   const { bookingId } = useParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const { getIdToken } = useAuth();
   const { toast } = useToast();
   
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState<string>('');
-  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    if (!bookingId || !user) return;
-
     const handlePaymentResult = async () => {
       try {
-        setIsProcessing(true);
-        
-        // Get URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const pspReference = urlParams.get('pspReference');
-        const resultCode = urlParams.get('resultCode');
+        const pspReference = searchParams.get('pspReference');
+        const resultCode = searchParams.get('resultCode');
         
         if (!pspReference) {
           setStatus('error');
-          setMessage('No payment reference found');
+          setMessage('Invalid payment result');
           return;
         }
 
-        // Call API to verify payment result
+        const token = await getIdToken();
+        if (!token) {
+          setStatus('error');
+          setMessage('Authentication required');
+          return;
+        }
+
+        // Call the payment result API
         const response = await fetch('/api/payments/gcash/result', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({
-            bookingId: bookingId as string,
+            bookingId,
             pspReference,
           }),
         });
@@ -53,11 +55,16 @@ export default function PaymentResultPage() {
 
         if (result.success) {
           setStatus('success');
-          setMessage('Your payment has been successfully processed!');
+          setMessage('Payment confirmed successfully!');
           toast({
             title: 'Payment Successful!',
-            description: 'Your GCash payment has been confirmed.',
+            description: 'Your booking has been confirmed.',
           });
+          
+          // Redirect to bookings page after a short delay
+          setTimeout(() => {
+            router.push('/bookings');
+          }, 3000);
         } else {
           setStatus('error');
           setMessage(result.error || 'Payment verification failed');
@@ -70,105 +77,104 @@ export default function PaymentResultPage() {
       } catch (error) {
         console.error('Payment result handling error:', error);
         setStatus('error');
-        setMessage('An unexpected error occurred while verifying your payment');
+        setMessage('An unexpected error occurred');
         toast({
           variant: 'destructive',
-          title: 'Verification Error',
-          description: 'An unexpected error occurred while verifying your payment.',
+          title: 'Error',
+          description: 'An unexpected error occurred while processing your payment.',
         });
-      } finally {
-        setIsProcessing(false);
       }
     };
 
-    handlePaymentResult();
-  }, [bookingId, user, toast]);
+    if (bookingId) {
+      handlePaymentResult();
+    }
+  }, [bookingId, searchParams, getIdToken, router, toast]);
 
-  const handleBackToBookings = () => {
-    router.push('/bookings');
-  };
-
-  const handleRetryPayment = () => {
-    router.push(`/bookings/${bookingId}/payment`);
+  const renderContent = () => {
+    switch (status) {
+      case 'loading':
+        return (
+          <div className="text-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
+            <h2 className="text-xl font-semibold">Processing Payment...</h2>
+            <p className="text-muted-foreground">
+              Please wait while we verify your payment.
+            </p>
+          </div>
+        );
+      
+      case 'success':
+        return (
+          <div className="text-center space-y-4">
+            <CheckCircle className="h-12 w-12 mx-auto text-green-500" />
+            <h2 className="text-xl font-semibold text-green-700">Payment Successful!</h2>
+            <p className="text-muted-foreground">
+              Your payment has been confirmed and your booking is now active.
+            </p>
+            <Alert className="bg-green-50 border-green-200">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                You will be redirected to your bookings page shortly.
+              </AlertDescription>
+            </Alert>
+            <Button onClick={() => router.push('/bookings')} className="w-full">
+              Go to My Bookings
+            </Button>
+          </div>
+        );
+      
+      case 'error':
+        return (
+          <div className="text-center space-y-4">
+            <XCircle className="h-12 w-12 mx-auto text-red-500" />
+            <h2 className="text-xl font-semibold text-red-700">Payment Failed</h2>
+            <p className="text-muted-foreground">
+              {message}
+            </p>
+            <Alert variant="destructive">
+              <XCircle className="h-4 w-4" />
+              <AlertDescription>
+                Please try again or contact support if the problem persists.
+              </AlertDescription>
+            </Alert>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => router.push(`/bookings/${bookingId}/payment`)}
+                className="flex-1"
+              >
+                Try Again
+              </Button>
+              <Button onClick={() => router.push('/bookings')} className="flex-1">
+                Go to Bookings
+              </Button>
+            </div>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="flex items-center justify-center gap-2">
-            {status === 'loading' && <Loader2 className="h-6 w-6 animate-spin" />}
-            {status === 'success' && <CheckCircle className="h-6 w-6 text-green-500" />}
-            {status === 'error' && <XCircle className="h-6 w-6 text-red-500" />}
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ArrowLeft 
+              className="h-5 w-5 cursor-pointer" 
+              onClick={() => router.push('/bookings')}
+            />
             Payment Result
           </CardTitle>
           <CardDescription>
-            {status === 'loading' && 'Verifying your payment...'}
-            {status === 'success' && 'Payment completed successfully'}
-            {status === 'error' && 'Payment verification failed'}
+            Booking ID: {bookingId}
           </CardDescription>
         </CardHeader>
-        
-        <CardContent className="space-y-4">
-          {status === 'loading' && (
-            <div className="text-center space-y-4">
-              <div className="flex justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Please wait while we verify your payment...
-              </p>
-            </div>
-          )}
-
-          {status === 'success' && (
-            <div className="space-y-4">
-              <Alert className="border-green-200 bg-green-50">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-800">
-                  {message}
-                </AlertDescription>
-              </Alert>
-              
-              <div className="space-y-2">
-                <Button onClick={handleBackToBookings} className="w-full">
-                  View My Bookings
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => router.push('/')}
-                  className="w-full"
-                >
-                  Back to Home
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {status === 'error' && (
-            <div className="space-y-4">
-              <Alert variant="destructive">
-                <XCircle className="h-4 w-4" />
-                <AlertDescription>
-                  {message}
-                </AlertDescription>
-              </Alert>
-              
-              <div className="space-y-2">
-                <Button onClick={handleRetryPayment} className="w-full">
-                  Try Payment Again
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={handleBackToBookings}
-                  className="w-full"
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Bookings
-                </Button>
-              </div>
-            </div>
-          )}
+        <CardContent>
+          {renderContent()}
         </CardContent>
       </Card>
     </div>

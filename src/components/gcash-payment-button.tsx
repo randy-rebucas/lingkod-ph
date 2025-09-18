@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Smartphone, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/auth-context';
+import { PaymentRetryService } from '@/lib/payment-retry-service';
 
 interface GCashPaymentButtonProps {
   bookingId: string;
@@ -32,6 +34,7 @@ export function GCashPaymentButton({
   
   const router = useRouter();
   const { toast } = useToast();
+  const { getIdToken } = useAuth();
 
   const handleGCashPayment = async () => {
     try {
@@ -39,22 +42,43 @@ export function GCashPaymentButton({
       setPaymentStatus('processing');
       onPaymentStart?.();
 
+      const token = await getIdToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
       const returnUrl = `${window.location.origin}/bookings/${bookingId}/payment/result`;
       
-      const response = await fetch('/api/payments/gcash/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          bookingId,
-          returnUrl,
-        }),
+      // Use retry service for payment creation
+      const paymentResult = await PaymentRetryService.retryPaymentCreation(async () => {
+        const response = await fetch('/api/payments/gcash/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            bookingId,
+            returnUrl,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        return await response.json();
       });
 
-      const result = await response.json();
+      if (!paymentResult.success) {
+        throw new Error(paymentResult.error || 'Payment creation failed');
+      }
+
+      const result = paymentResult.data;
 
       if (result.success) {
+        // Payment event tracking will be handled server-side
+
         if (result.redirectUrl) {
           // Redirect to GCash payment page
           setRedirectUrl(result.redirectUrl);
@@ -89,12 +113,32 @@ export function GCashPaymentButton({
     } catch (error) {
       console.error('GCash payment error:', error);
       setPaymentStatus('error');
-      setErrorMessage('An unexpected error occurred');
-      onPaymentError?.('An unexpected error occurred');
+      
+      let errorMessage = 'An unexpected error occurred';
+      let toastMessage = 'An unexpected error occurred while processing your payment.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Authentication required')) {
+          errorMessage = 'Please log in to continue';
+          toastMessage = 'You need to be logged in to make a payment.';
+        } else if (error.message.includes('fetch') || error.message.includes('HTTP')) {
+          errorMessage = 'Network error. Please check your connection.';
+          toastMessage = 'Unable to connect to payment service. Please check your internet connection.';
+        } else if (error.message.includes('Adyen')) {
+          errorMessage = 'Payment service temporarily unavailable';
+          toastMessage = 'The payment service is temporarily unavailable. Please try again later.';
+        } else {
+          errorMessage = error.message;
+          toastMessage = error.message;
+        }
+      }
+      
+      setErrorMessage(errorMessage);
+      onPaymentError?.(errorMessage);
       toast({
         variant: 'destructive',
         title: 'Payment Error',
-        description: 'An unexpected error occurred while processing your payment.',
+        description: toastMessage,
       });
     } finally {
       setIsProcessing(false);
@@ -105,10 +149,16 @@ export function GCashPaymentButton({
     try {
       setIsProcessing(true);
       
+      const token = await getIdToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
       const response = await fetch('/api/payments/gcash/result', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           bookingId,
@@ -143,8 +193,30 @@ export function GCashPaymentButton({
     } catch (error) {
       console.error('Payment result handling error:', error);
       setPaymentStatus('error');
-      setErrorMessage('Failed to verify payment');
-      onPaymentError?.('Failed to verify payment');
+      
+      let errorMessage = 'Failed to verify payment';
+      let toastMessage = 'Unable to verify your payment. Please contact support.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Authentication required')) {
+          errorMessage = 'Please log in to continue';
+          toastMessage = 'You need to be logged in to verify your payment.';
+        } else if (error.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your connection.';
+          toastMessage = 'Unable to connect to payment service. Please check your internet connection.';
+        } else {
+          errorMessage = error.message;
+          toastMessage = error.message;
+        }
+      }
+      
+      setErrorMessage(errorMessage);
+      onPaymentError?.(errorMessage);
+      toast({
+        variant: 'destructive',
+        title: 'Verification Failed',
+        description: toastMessage,
+      });
     } finally {
       setIsProcessing(false);
     }

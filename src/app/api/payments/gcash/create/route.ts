@@ -72,9 +72,26 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('GCash payment creation error:', error);
+    
+    let errorMessage = 'Internal server error';
+    let statusCode = 500;
+    
+    if (error instanceof Error) {
+      if (error.message.includes('Adyen')) {
+        errorMessage = 'Payment service temporarily unavailable';
+        statusCode = 503;
+      } else if (error.message.includes('network') || error.message.includes('fetch')) {
+        errorMessage = 'Network error. Please try again.';
+        statusCode = 503;
+      } else if (error.message.includes('validation')) {
+        errorMessage = 'Invalid payment request';
+        statusCode = 400;
+      }
+    }
+    
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: errorMessage },
+      { status: statusCode }
     );
   }
 }
