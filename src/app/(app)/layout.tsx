@@ -82,48 +82,82 @@ import BroadcastBanner from "@/components/broadcast-banner";
 import { Logo } from "@/components/logo";
 import { SupportChat } from "@/components/support-chat";
 
+const SidebarSupportChat = () => {
+  const t = useTranslations('AppLayout');
+  
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <SidebarMenuButton className="w-full justify-start gap-2 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200">
+          <MessageSquare className="h-4 w-4" />
+          <span className="group-data-[collapsible=icon]:hidden">Support Chat</span>
+        </SidebarMenuButton>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 sm:w-96 p-0 flex flex-col h-[60vh] shadow-2xl border-0 bg-white/95 backdrop-blur-sm" side="right" align="start">
+        <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-blue-100">
+          <h4 className="font-semibold text-center text-gray-900">AI Assistant</h4>
+        </div>
+        <div className="flex-1 p-4">
+          <div className="text-center text-gray-600 text-sm p-4">
+            Ask me anything about the platform!
+          </div>
+        </div>
+        <div className="p-4 border-t bg-gradient-to-r from-gray-50 to-gray-100">
+          <div className="w-full flex gap-2">
+            <input
+              type="text"
+              placeholder="Ask a question..."
+              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-md bg-white focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+            />
+            <Button size="sm" className="bg-blue-500 hover:bg-blue-600">
+              <MessageSquare className="h-4 w-4"/>
+            </Button>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 const SuccessTips = () => {
   const t = useTranslations('AppLayout');
   
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button
-          size="icon"
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-accent hover:bg-accent/90"
-        >
-          <Lightbulb className="h-6 w-6" />
-          <span className="sr-only">{t('tipsForSuccess')}</span>
-        </Button>
+        <SidebarMenuButton className="w-full justify-start gap-2 hover:bg-yellow-50 hover:text-yellow-700 transition-colors duration-200">
+          <Lightbulb className="h-4 w-4" />
+          <span className="group-data-[collapsible=icon]:hidden">{t('tipsForSuccess')}</span>
+        </SidebarMenuButton>
       </PopoverTrigger>
-      <PopoverContent className="w-80 mb-2">
+      <PopoverContent className="w-80 shadow-2xl border-0 bg-white/95 backdrop-blur-sm" side="right" align="start">
         <div className="grid gap-4">
           <div className="space-y-2">
-            <h4 className="font-medium leading-none">{t('tipsForSuccess')}</h4>
-            <p className="text-sm text-muted-foreground">
+            <h4 className="font-semibold leading-none text-gray-900">{t('tipsForSuccess')}</h4>
+            <p className="text-sm text-gray-600">
               {t('maximizeOpportunities')}
             </p>
           </div>
           <ul className="space-y-3">
-            <li className="flex items-start gap-2">
+            <li className="flex items-start gap-3">
               <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-              <span className="text-sm text-muted-foreground">Be punctual and respectful</span>
+              <span className="text-sm text-gray-700">Be punctual and respectful</span>
             </li>
-            <li className="flex items-start gap-2">
+            <li className="flex items-start gap-3">
               <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-              <span className="text-sm text-muted-foreground">Bring your own tools (if possible)</span>
+              <span className="text-sm text-gray-700">Bring your own tools (if possible)</span>
             </li>
-            <li className="flex items-start gap-2">
+            <li className="flex items-start gap-3">
               <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-              <span className="text-sm text-muted-foreground">Keep your phone ready — jobs move fast</span>
+              <span className="text-sm text-gray-700">Keep your phone ready — jobs move fast</span>
             </li>
-            <li className="flex items-start gap-2">
+            <li className="flex items-start gap-3">
               <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-              <span className="text-sm text-muted-foreground">Ask for a review after each job</span>
+              <span className="text-sm text-gray-700">Ask for a review after each job</span>
             </li>
-            <li className="flex items-start gap-2">
+            <li className="flex items-start gap-3">
               <Check className="h-5 w-5 text-green-500 mt-0.5 shrink-0" />
-              <span className="text-sm text-muted-foreground">Build your rating = Get more jobs!</span>
+              <span className="text-sm text-gray-700">Build your rating = Get more jobs!</span>
             </li>
           </ul>
         </div>
@@ -136,16 +170,12 @@ const EmergencyHotlineButton = () => {
   const t = useTranslations('AppLayout');
   
   return (
-    <Button
-      asChild
-      size="icon"
-      className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-    >
-      <a href="tel:911">
-        <Phone className="h-6 w-6" />
-        <span className="sr-only">{t('emergencyHotline')}</span>
+    <SidebarMenuButton asChild className="w-full justify-start gap-2 hover:bg-red-50 hover:text-red-700 transition-colors duration-200">
+      <a href="tel:911" className="flex items-center gap-2 w-full">
+        <Phone className="h-4 w-4" />
+        <span className="group-data-[collapsible=icon]:hidden">{t('emergencyHotline')}</span>
       </a>
-    </Button>
+    </SidebarMenuButton>
   );
 };
 
@@ -532,14 +562,31 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </SidebarMenuItem>
               </>
               )}
+
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
           <SidebarMenu>
+            {userRole !== 'admin' && (
+              <SidebarMenuItem>
+                <SidebarSupportChat />
+              </SidebarMenuItem>
+            )}
             <SidebarMenuItem>
-              <SidebarMenuButton onClick={handleLogout}>
-                <LogOut />
-                <span>{t('logout')}</span>
+              <EmergencyHotlineButton />
+            </SidebarMenuItem>
+            {(userRole === 'provider' || userRole === 'agency') && (
+              <SidebarMenuItem>
+                <SuccessTips />
+              </SidebarMenuItem>
+            )}
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                onClick={handleLogout}
+                className="w-full justify-start gap-2 hover:bg-red-50 hover:text-red-700 border-t border-gray-200 mt-2 pt-3 transition-colors duration-200 font-medium"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="group-data-[collapsible=icon]:hidden">{t('logout')}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -667,9 +714,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <BroadcastBanner />
         <main className="flex-1 p-6 relative">
             {children}
-            {userRole !== 'admin' && <SupportChat />}
-            <EmergencyHotlineButton />
-            {(userRole === 'provider' || userRole === 'agency') && <SuccessTips />}
         </main>
       </SidebarInset>
     </SidebarProvider>
