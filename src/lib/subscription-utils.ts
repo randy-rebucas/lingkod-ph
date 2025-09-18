@@ -1,39 +1,28 @@
-// Define UserSubscription interface locally since context import is not available
-export interface UserSubscription {
-  id: string;
-  userId: string;
-  planId: string;
-  status: 'active' | 'cancelled' | 'expired' | 'pending';
-  startDate: Date;
-  endDate?: Date;
-  renewsOn?: Date;
-  features: string[];
-  limits: {
-    maxProviders?: number;
-    maxBookings?: number;
-    maxStorage?: number;
-  };
-  metadata?: Record<string, any>;
-}
+// Define UserSubscription interface to match auth context
+export type UserSubscription = {
+  planId: 'starter' | 'pro' | 'elite' | 'free' | 'lite' | 'custom';
+  status: 'active' | 'cancelled' | 'none' | 'pending';
+  renewsOn: any; // Timestamp from Firebase
+} | null;
 
-export function hasActiveSubscription(subscription: UserSubscription | null): boolean {
+export function hasActiveSubscription(subscription: UserSubscription): boolean {
   return subscription?.status === 'active' && subscription.planId !== 'free';
 }
 
-export function hasPaidSubscription(subscription: UserSubscription | null): boolean {
+export function hasPaidSubscription(subscription: UserSubscription): boolean {
   return hasActiveSubscription(subscription); // Same as hasActiveSubscription since it already excludes 'free'
 }
 
-export function hasProSubscription(subscription: UserSubscription | null): boolean {
+export function hasProSubscription(subscription: UserSubscription): boolean {
   return hasActiveSubscription(subscription) && subscription!.planId === 'pro';
 }
 
-export function hasEliteSubscription(subscription: UserSubscription | null): boolean {
+export function hasEliteSubscription(subscription: UserSubscription): boolean {
   return hasActiveSubscription(subscription) && subscription!.planId === 'elite';
 }
 
 export function canAccessFeature(
-  subscription: UserSubscription | null, 
+  subscription: UserSubscription, 
   feature: 'smart-rate' | 'invoices' | 'analytics' | 'quote-builder' | 'enhanced-profile' | 'top-placement'
 ): boolean {
   if (!hasActiveSubscription(subscription)) return false;
@@ -58,7 +47,7 @@ export function canAccessFeature(
   }
 }
 
-export function getSubscriptionTier(subscription: UserSubscription | null): string {
+export function getSubscriptionTier(subscription: UserSubscription): string {
   if (!subscription || subscription.status !== 'active') return 'free';
   return subscription.planId;
 }
@@ -77,7 +66,7 @@ export function getUpgradeMessage(currentPlan: string, requiredPlan: string): st
 }
 
 // Agency-specific utility functions
-export function canManageProviders(subscription: UserSubscription | null, currentProviderCount: number): boolean {
+export function canManageProviders(subscription: UserSubscription, currentProviderCount: number): boolean {
   if (!hasActiveSubscription(subscription)) return false;
   
   const plan = subscription!.planId;
@@ -94,7 +83,7 @@ export function canManageProviders(subscription: UserSubscription | null, curren
   }
 }
 
-export function getMaxProviders(subscription: UserSubscription | null): number {
+export function getMaxProviders(subscription: UserSubscription): number {
   if (!hasActiveSubscription(subscription)) return 0;
   
   const plan = subscription!.planId;
@@ -112,7 +101,7 @@ export function getMaxProviders(subscription: UserSubscription | null): number {
 }
 
 export function canAccessAgencyFeature(
-  subscription: UserSubscription | null,
+  subscription: UserSubscription,
   feature: 'basic-reports' | 'enhanced-reports' | 'branded-communications' | 'api-access'
 ): boolean {
   if (!hasActiveSubscription(subscription)) return false;

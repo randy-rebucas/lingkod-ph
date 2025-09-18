@@ -77,8 +77,8 @@ export default function ManageProvidersPage() {
     const [inviteEmail, setInviteEmail] = React.useState("");
     const [isInviting, setIsInviting] = React.useState(false);
 
-    const providerLimit = getMaxProviders(subscription);
-    const canAddMoreProviders = canManageProviders(subscription, providers.length);
+    const providerLimit = getMaxProviders(subscription as any);
+    const canAddMoreProviders = canManageProviders(subscription as any, providers.length);
     
     React.useEffect(() => {
         if (!user || userRole !== 'agency') {

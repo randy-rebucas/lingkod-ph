@@ -1177,6 +1177,8 @@
     "limitReachedDescription": "Naabot mo na ang provider limit para sa iyong current plan. Mangyaring i-upgrade ang iyong subscription para makapagdagdag ng mas maraming provider.",
     "upgradeSubscription": "i-upgrade ang iyong subscription",
     "name": "Pangalan",
+    "status": "Status",
+    "actions": "Mga Aksyon",
     "remove": "Tanggalin",
     "areYouSureRemove": "Sigurado ka ba?",
     "removeProviderDescription": "Ito ay tatanggalin ang provider mula sa iyong agency. Hindi na sila maa-associate sa iyong mga booking o analytics.",
@@ -1197,7 +1199,8 @@
     "providerRemoved": "Naalis ang provider mula sa iyong agency.",
     "failedToRemoveProvider": "Hindi matanggal ang provider.",
     "error": "Error",
-    "success": "Tagumpay"
+    "success": "Tagumpay",
+    "cancel": "Kanselahin"
   },
   "Jobs": {
     "title": "Maghanap ng Trabaho",
@@ -1727,5 +1730,13 @@
     "active": "Active",
     "archived": "Archived",
     "flagged": "Flagged"
+  },
+  "AgencyProviderLimit": {
+    "providerLimitReached": "Naabot na ang Provider Limit",
+    "currentPlanAllows": "Ang iyong current plan ay nagpapahintulot ng {current} sa {max} na mga provider.",
+    "upgradeToAddMore": "I-upgrade para makapagdagdag ng mas maraming provider",
+    "upgradePlan": "I-upgrade ang Plan",
+    "providerUsage": "Mayroon kang {current} sa {max} na mga provider ({remaining} na natitira)",
+    "limitReached": "Naabot na ang limit"
   }
 }

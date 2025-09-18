@@ -1171,6 +1171,8 @@
     "limitReachedDescription": "You have reached the provider limit for your current plan. Please upgrade your subscription to add more providers.",
     "upgradeSubscription": "upgrade your subscription",
     "name": "Name",
+    "status": "Status",
+    "actions": "Actions",
     "remove": "Remove",
     "areYouSureRemove": "Are you sure?",
     "removeProviderDescription": "This will remove the provider from your agency. They will no longer be associated with your bookings or analytics.",
@@ -1191,7 +1193,8 @@
     "providerRemoved": "Provider has been removed from your agency.",
     "failedToRemoveProvider": "Failed to remove provider.",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "cancel": "Cancel"
   },
   "Jobs": {
     "title": "Find Work",
@@ -1725,5 +1728,13 @@
     "active": "Active",
     "archived": "Archived",
     "flagged": "Flagged"
+  },
+  "AgencyProviderLimit": {
+    "providerLimitReached": "Provider Limit Reached",
+    "currentPlanAllows": "Your current plan allows {current} of {max} providers.",
+    "upgradeToAddMore": "Upgrade to add more providers",
+    "upgradePlan": "Upgrade Plan",
+    "providerUsage": "You have {current} of {max} providers ({remaining} remaining)",
+    "limitReached": "Limit reached"
   }
 }
