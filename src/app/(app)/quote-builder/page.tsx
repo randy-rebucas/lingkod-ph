@@ -14,10 +14,10 @@ import { Button } from "@/components/ui/button";
 
 export default function QuoteBuilderPage() {
   const { subscription } = useAuth();
-  const isElite = subscription?.status === 'active' && subscription.planId === 'elite';
+  const canAccess = subscription?.status === 'active' && (subscription.planId === 'pro' || subscription.planId === 'elite');
   const t = useTranslations('QuoteBuilder');
 
-  if (!isElite) {
+  if (!canAccess) {
     return (
         <div className="space-y-6">
             <div>
@@ -28,8 +28,8 @@ export default function QuoteBuilderPage() {
             </div>
             <Card>
                 <CardHeader>
-                    <CardTitle>{t('upgradeToEliteTitle')}</CardTitle>
-                    <CardDescription>{t('upgradeToEliteDescription')}</CardDescription>
+                    <CardTitle>{t('upgradeToProOrEliteTitle')}</CardTitle>
+                    <CardDescription>{t('upgradeToProOrEliteDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                     <Calculator className="h-16 w-16 mb-4" />

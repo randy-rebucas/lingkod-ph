@@ -59,6 +59,7 @@ type Provider = {
     isVerified?: boolean;
     searchRank?: number;
     searchReasoning?: string;
+    role?: 'provider' | 'agency';
 };
 
 type Payout = {
@@ -238,6 +239,77 @@ const ProviderCard = ({ provider, isFavorite, onToggleFavorite, t }: { provider:
     );
 };
 
+const AgencyCard = ({ agency, isFavorite, onToggleFavorite, t }: { agency: Provider; isFavorite: boolean; onToggleFavorite: (agency: Provider) => void; t: any; }) => {
+    return (
+        <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col border-2 border-gradient-to-r from-purple-500 to-blue-500 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
+            {agency.searchReasoning && (
+                 <Alert className="border-0 border-b rounded-none bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30">
+                    <Info className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    <AlertDescription className="text-purple-700 dark:text-purple-300 text-xs">{agency.searchReasoning}</AlertDescription>
+                </Alert>
+            )}
+            <CardHeader className="text-center relative">
+                 <Button 
+                    size="icon" 
+                    variant="ghost" 
+                    className="absolute top-2 right-2 rounded-full h-8 w-8"
+                    onClick={() => onToggleFavorite(agency)}
+                >
+                    <Heart className={cn("h-5 w-5 text-muted-foreground", isFavorite && "fill-red-500 text-red-500")} />
+                </Button>
+                 <div className="relative">
+                    <Avatar className="h-24 w-24 mx-auto mb-4 border-2 border-gradient-to-r from-purple-500 to-blue-500">
+                        <AvatarImage src={agency.photoURL} alt={agency.displayName} />
+                        <AvatarFallback className="text-3xl bg-gradient-to-r from-purple-500 to-blue-500 text-white">{getAvatarFallback(agency.displayName)}</AvatarFallback>
+                    </Avatar>
+                    <Badge className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0">
+                        <Users2 className="h-3 w-3 mr-1" />
+                        Agency
+                    </Badge>
+                </div>
+                <div className="flex items-center justify-center gap-2 mt-4">
+                    <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">{agency.displayName}</h3>
+                    {agency.isVerified && <ShieldCheck className="h-5 w-5 text-purple-500" />}
+                </div>
+                 {agency.availabilityStatus && getAvailabilityBadge(agency.availabilityStatus, t)}
+                 {agency.reviewCount > 0 && (
+                     <div className="flex items-center justify-center gap-1 mt-1 text-muted-foreground">
+                        {renderStars(agency.rating)}
+                        <span className="text-sm">({agency.reviewCount})</span>
+                    </div>
+                )}
+            </CardHeader>
+            <CardContent className="flex-1 space-y-4">
+               
+                 {agency.address && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span>{agency.address}</span>
+                    </div>
+                )}
+
+                {agency.keyServices && agency.keyServices.length > 0 && (
+                    <div>
+                         <h4 className="font-semibold flex items-center gap-2 mb-2 text-purple-700 dark:text-purple-300"><Briefcase className="h-4 w-4" /> Specializations</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {agency.keyServices.map(service => (
+                                <Badge key={service} variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700">{service}</Badge>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                <p className="text-sm text-muted-foreground mt-2 h-10 line-clamp-2">{agency.bio || 'Professional agency services.'}</p>
+            </CardContent>
+            <CardFooter>
+                 <Button className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0" asChild>
+                    <Link href={`/agencies/${agency.uid}`}>View Agency</Link>
+                </Button>
+            </CardFooter>
+        </Card>
+    );
+};
+
 const ProviderRow = ({ provider, isFavorite, onToggleFavorite }: { provider: Provider; isFavorite: boolean; onToggleFavorite: (provider: Provider) => void; }) => {
     return (
         <div className="flex items-center p-4 border-b last:border-b-0 hover:bg-secondary/50">
@@ -264,6 +336,43 @@ const ProviderRow = ({ provider, isFavorite, onToggleFavorite }: { provider: Pro
                 </div>
             </div>
             <Button size="icon" variant="ghost" onClick={() => onToggleFavorite(provider)}>
+                 <Heart className={cn("h-5 w-5 text-muted-foreground", isFavorite && "fill-red-500 text-red-500")} />
+            </Button>
+        </div>
+    )
+}
+
+const AgencyRow = ({ agency, isFavorite, onToggleFavorite }: { agency: Provider; isFavorite: boolean; onToggleFavorite: (agency: Provider) => void; }) => {
+    return (
+        <div className="flex items-center p-4 border-b last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 dark:hover:from-purple-950/20 dark:hover:to-blue-950/20 bg-gradient-to-r from-purple-50/30 to-blue-50/30 dark:from-purple-950/10 dark:to-blue-950/10">
+            <div className="relative">
+                <Avatar className="h-12 w-12 mr-4 border-2 border-gradient-to-r from-purple-500 to-blue-500">
+                    <AvatarImage src={agency.photoURL} alt={agency.displayName} />
+                    <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white">{getAvatarFallback(agency.displayName)}</AvatarFallback>
+                </Avatar>
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 text-xs flex items-center justify-center">
+                    <Users2 className="h-3 w-3" />
+                </Badge>
+            </div>
+            <div className="flex-1">
+                <div className="flex items-center gap-2">
+                    <Link href={`/agencies/${agency.uid}`} className="font-bold hover:underline bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">{agency.displayName}</Link>
+                    {agency.isVerified && <ShieldCheck className="h-4 w-4 text-purple-500" />}
+                </div>
+                {agency.searchReasoning && (
+                    <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">{agency.searchReasoning}</p>
+                )}
+                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                    {renderStars(agency.rating)}
+                    <span>({agency.reviewCount} reviews)</span>
+                </div>
+                <div className="flex flex-wrap gap-1 mt-2">
+                    {agency.keyServices?.slice(0, 3).map(service => (
+                        <Badge key={service} variant="outline" className="bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700">{service}</Badge>
+                    ))}
+                </div>
+            </div>
+            <Button size="icon" variant="ghost" onClick={() => onToggleFavorite(agency)}>
                  <Heart className={cn("h-5 w-5 text-muted-foreground", isFavorite && "fill-red-500 text-red-500")} />
             </Button>
         </div>
@@ -383,7 +492,7 @@ export default function DashboardPage() {
                     providerRatings[review.providerId].count++;
                 });
 
-                // Fetch all providers
+                // Fetch all providers and agencies
                 const q = query(collection(db, "users"), where("role", "in", ["provider", "agency"]));
                 const querySnapshot = await getDocs(q);
                 const providersData = querySnapshot.docs.map(doc => {
@@ -400,6 +509,7 @@ export default function DashboardPage() {
                         keyServices: data.keyServices,
                         address: data.address,
                         isVerified: data.verification?.status === 'Verified',
+                        role: data.role,
                     } as Provider;
                 });
                 setProviders(providersData);
@@ -641,32 +751,90 @@ export default function DashboardPage() {
                             </div>
                         ) : (
                              providers.length > 0 ? (
-                                viewMode === 'grid' ? (
-                                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                        {providers.map(provider => (
-                                            <ProviderCard 
-                                                key={provider.uid} 
-                                                provider={provider} 
-                                                isFavorite={favoriteProviderIds.includes(provider.uid)}
-                                                onToggleFavorite={handleToggleFavorite}
-                                                t={t}
-                                            />
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <Card>
-                                        <CardContent className="p-0">
-                                            {providers.map(provider => (
-                                                 <ProviderRow 
-                                                    key={provider.uid} 
-                                                    provider={provider} 
-                                                    isFavorite={favoriteProviderIds.includes(provider.uid)}
-                                                    onToggleFavorite={handleToggleFavorite}
-                                                />
-                                            ))}
-                                        </CardContent>
-                                    </Card>
-                                )
+                                (() => {
+                                    const agencies = providers.filter(p => p.role === 'agency');
+                                    const serviceProviders = providers.filter(p => p.role === 'provider');
+                                    
+                                    return (
+                                        <div className="space-y-8">
+                                            {/* Agencies Section */}
+                                            {agencies.length > 0 && (
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-4">
+                                                        <Users2 className="h-5 w-5 text-purple-600" />
+                                                        <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                                                            Agencies ({agencies.length})
+                                                        </h2>
+                                                    </div>
+                                                    {viewMode === 'grid' ? (
+                                                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                                            {agencies.map(agency => (
+                                                                <AgencyCard 
+                                                                    key={agency.uid} 
+                                                                    agency={agency} 
+                                                                    isFavorite={favoriteProviderIds.includes(agency.uid)}
+                                                                    onToggleFavorite={handleToggleFavorite}
+                                                                    t={t}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <Card>
+                                                            <CardContent className="p-0">
+                                                                {agencies.map(agency => (
+                                                                    <AgencyRow 
+                                                                        key={agency.uid} 
+                                                                        agency={agency} 
+                                                                        isFavorite={favoriteProviderIds.includes(agency.uid)}
+                                                                        onToggleFavorite={handleToggleFavorite}
+                                                                    />
+                                                                ))}
+                                                            </CardContent>
+                                                        </Card>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* Service Providers Section */}
+                                            {serviceProviders.length > 0 && (
+                                                <div>
+                                                    <div className="flex items-center gap-2 mb-4">
+                                                        <Briefcase className="h-5 w-5 text-blue-600" />
+                                                        <h2 className="text-xl font-semibold">
+                                                            Service Providers ({serviceProviders.length})
+                                                        </h2>
+                                                    </div>
+                                                    {viewMode === 'grid' ? (
+                                                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                                            {serviceProviders.map(provider => (
+                                                                <ProviderCard 
+                                                                    key={provider.uid} 
+                                                                    provider={provider} 
+                                                                    isFavorite={favoriteProviderIds.includes(provider.uid)}
+                                                                    onToggleFavorite={handleToggleFavorite}
+                                                                    t={t}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    ) : (
+                                                        <Card>
+                                                            <CardContent className="p-0">
+                                                                {serviceProviders.map(provider => (
+                                                                    <ProviderRow 
+                                                                        key={provider.uid} 
+                                                                        provider={provider} 
+                                                                        isFavorite={favoriteProviderIds.includes(provider.uid)}
+                                                                        onToggleFavorite={handleToggleFavorite}
+                                                                    />
+                                                                ))}
+                                                            </CardContent>
+                                                        </Card>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })()
                             ) : (
                                 <div className="col-span-full text-center text-muted-foreground p-12">
                                     <Users className="h-16 w-16 mx-auto mb-4" />

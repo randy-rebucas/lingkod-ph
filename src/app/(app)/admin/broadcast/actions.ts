@@ -3,7 +3,7 @@
 
 import { db } from '@/lib/firebase';
 import { collection, doc, writeBatch, query, where, getDocs, serverTimestamp, addDoc } from 'firebase/firestore';
-import { logAdminAction } from '@/lib/audit-logger';
+import { AuditLogger } from '@/lib/audit-logger';
 import { z } from 'zod';
 import { Resend } from 'resend';
 import CampaignEmail from '@/emails/campaign-email';
@@ -39,11 +39,12 @@ export async function sendBroadcastAction(message: string, actor: Actor): Promis
 
         await batch.commit();
 
-        await logAdminAction({
-            actor: { ...actor, role: 'admin' },
-            action: 'BROADCAST_SENT',
-            details: { message }
-        });
+        await AuditLogger.getInstance().logAction(
+            'BROADCAST_SENT',
+            actor.id,
+            'broadcast',
+            { message, actorRole: 'admin' }
+        );
 
         return { error: null, message: "Your message is now active for all users." };
 
@@ -95,11 +96,12 @@ export async function sendCampaignEmailAction(data: z.infer<typeof campaignEmail
             sentCount += batchEmails.length;
         }
 
-        await logAdminAction({
-            actor,
-            action: 'BROADCAST_SENT', // Reusing action type, could be more specific
-            details: { type: 'email_campaign', subject, providersCount: sentCount }
-        });
+        await AuditLogger.getInstance().logAction(
+            'EMAIL_CAMPAIGN_SENT',
+            actor.id,
+            'email_campaign',
+            { type: 'email_campaign', subject, providersCount: sentCount, actorRole: 'admin' }
+        );
 
         return { error: null, message: `Email campaign sent to ${sentCount} providers.` };
 

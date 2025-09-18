@@ -14,12 +14,21 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
     
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
     // Users Collection
     match /users/{userId} {
       // Any authenticated user can create their own user document
       allow create: if isAuthenticated();
-      // Only the owner can read or update their own document
-      allow read, update: if isAuthenticated() && isOwner(userId);
+      // Only the owner can read or update their own document, or admins can read all
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow update: if isAuthenticated() && isOwner(userId);
+      // Only admins can delete users
+      allow delete: if isAdmin();
     }
     
     // Services Collection
@@ -105,6 +114,27 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (isOwner(resource.data.referrerId) || isOwner(resource.data.referredId));
       // Creating referrals is handled by a backend process or transaction, so no direct client creation
       allow create, update, delete: if false;
+    }
+    
+    // Admin-only collections
+    match /auditLogs/{logId} {
+      allow read, write: if isAdmin();
+    }
+    
+    match /broadcasts/{broadcastId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    match /platformSettings/{settingId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+    
+    // Platform Collection (for global settings)
+    match /platform/{document} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
   }
 }

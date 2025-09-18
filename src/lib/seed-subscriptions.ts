@@ -55,7 +55,7 @@ const providerTiers = [
 ];
 
 const agencyTiers = [
-     {
+    {
         id: 'lite',
         name: 'Lite',
         price: 1999,
@@ -103,7 +103,7 @@ const agencyTiers = [
         isFeatured: false,
         type: 'agency',
         sortOrder: 3,
-    },
+    }
 ];
 
 export async function seedSubscriptions() {

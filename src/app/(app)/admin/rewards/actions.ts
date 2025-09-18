@@ -10,7 +10,7 @@ import {
   collection,
   serverTimestamp,
 } from 'firebase/firestore';
-import { logAdminAction } from '@/lib/audit-logger';
+import { AuditLogger } from '@/lib/audit-logger';
 
 type Actor = {
     id: string;
@@ -26,11 +26,12 @@ export async function handleUpdateReward(
     const rewardRef = doc(db, 'loyaltyRewards', rewardId);
     await updateDoc(rewardRef, data);
 
-    await logAdminAction({
-        actor: { ...actor, role: 'admin' },
-        action: 'REWARD_UPDATED',
-        details: { rewardId, changes: data }
-    });
+    await AuditLogger.getInstance().logAction(
+        'REWARD_UPDATED',
+        actor.id,
+        'reward',
+        { rewardId, changes: data, actorRole: 'admin' }
+    );
 
     return {
       error: null,
@@ -49,11 +50,12 @@ export async function handleAddReward(data: { title: string, description: string
     try {
         const newDoc = await addDoc(collection(db, 'loyaltyRewards'), { ...data, createdAt: serverTimestamp() });
         
-        await logAdminAction({
-            actor: { ...actor, role: 'admin' },
-            action: 'REWARD_CREATED',
-            details: { rewardId: newDoc.id, title: data.title }
-        });
+        await AuditLogger.getInstance().logAction(
+            'REWARD_CREATED',
+            actor.id,
+            'reward',
+            { rewardId: newDoc.id, title: data.title, actorRole: 'admin' }
+        );
 
         return {
             error: null,
@@ -70,11 +72,12 @@ export async function handleDeleteReward(rewardId: string, actor: Actor) {
     const rewardRef = doc(db, 'loyaltyRewards', rewardId);
     await deleteDoc(rewardRef);
 
-     await logAdminAction({
-        actor: { ...actor, role: 'admin' },
-        action: 'REWARD_DELETED',
-        details: { rewardId }
-    });
+     await AuditLogger.getInstance().logAction(
+        'REWARD_DELETED',
+        actor.id,
+        'reward',
+        { rewardId, actorRole: 'admin' }
+    );
 
     return {
       error: null,

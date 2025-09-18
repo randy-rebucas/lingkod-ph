@@ -63,20 +63,20 @@ export function SupportChat() {
       <PopoverTrigger asChild>
         <Button
           size="icon"
-          className="fixed bottom-6 right-24 h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90"
+          className="fixed bottom-6 right-28 h-16 w-16 rounded-full shadow-xl z-50 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-2xl group"
           aria-label="Open support chat"
         >
-          <MessageSquare className="h-6 w-6" />
+          <MessageSquare className="h-7 w-7 transition-transform duration-300 group-hover:scale-110" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 sm:w-96 p-0 flex flex-col h-[60vh] mb-2" side="top" align="end">
-        <div className="p-4 border-b bg-secondary">
-          <h4 className="font-medium text-center">{t('aiAssistant')}</h4>
+      <PopoverContent className="w-80 sm:w-96 p-0 flex flex-col h-[60vh] mb-4 mr-2 shadow-2xl border-0 bg-white/95 backdrop-blur-sm" side="top" align="end">
+        <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-blue-100">
+          <h4 className="font-semibold text-center text-gray-900">{t('aiAssistant')}</h4>
         </div>
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
             {messages.length === 0 && (
-              <div className="text-center text-muted-foreground text-sm p-4">
+              <div className="text-center text-gray-600 text-sm p-4">
                 {t('aiAssistantSubtitle')}
               </div>
             )}
@@ -87,7 +87,7 @@ export function SupportChat() {
                     <AvatarFallback><Bot className="h-5 w-5"/></AvatarFallback>
                   </Avatar>
                 )}
-                <div className={cn("rounded-lg p-3 max-w-[80%] text-sm", message.role === 'user' ? "bg-secondary" : "bg-primary/10")}>
+                <div className={cn("rounded-lg p-3 max-w-[80%] text-sm", message.role === 'user' ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900")}>
                   {message.content}
                 </div>
                 {message.role === 'user' && (
@@ -111,16 +111,16 @@ export function SupportChat() {
             )}
           </div>
         </ScrollArea>
-        <div className="p-4 border-t bg-secondary/50">
+        <div className="p-4 border-t bg-gradient-to-r from-gray-50 to-gray-100">
           <form onSubmit={handleSendMessage} className="w-full flex gap-2">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={t('askQuestion')}
               disabled={isLoading}
-              className="bg-background"
+              className="bg-white border-gray-200 focus:border-blue-500 focus:ring-blue-500"
             />
-            <Button type="submit" disabled={isLoading || !input.trim()}>
+            <Button type="submit" disabled={isLoading || !input.trim()} className="bg-blue-500 hover:bg-blue-600">
                 <Send className="h-4 w-4"/>
             </Button>
           </form>

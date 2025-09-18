@@ -10,7 +10,7 @@ import {
   collection,
   serverTimestamp,
 } from 'firebase/firestore';
-import { logAdminAction } from '@/lib/audit-logger';
+import { AuditLogger } from '@/lib/audit-logger';
 
 type Actor = {
     id: string;
@@ -26,11 +26,13 @@ export async function handleUpdateAdCampaign(
     const campaignRef = doc(db, 'adCampaigns', campaignId);
     await updateDoc(campaignRef, data);
 
-    await logAdminAction({
-        actor: { ...actor, role: 'admin' },
-        action: 'AD_CAMPAIGN_UPDATED',
-        details: { campaignId, changes: data }
-    });
+
+    await AuditLogger.getInstance().logAction(
+      'AD_CAMPAIGN_UPDATED',
+      actor.id,
+      'broadcast',
+      { campaignId, changes: data, actorRole: 'admin' }
+  );
 
     return {
       error: null,
@@ -49,11 +51,12 @@ export async function handleAddAdCampaign(data: any, actor: Actor) {
     try {
         const newDoc = await addDoc(collection(db, 'adCampaigns'), { ...data, createdAt: serverTimestamp() });
         
-        await logAdminAction({
-            actor: { ...actor, role: 'admin' },
-            action: 'AD_CAMPAIGN_CREATED',
-            details: { campaignId: newDoc.id, name: data.name }
-        });
+        await AuditLogger.getInstance().logAction(
+            'AD_CAMPAIGN_CREATED',
+            actor.id,
+            'ad_campaign',
+            { campaignId: newDoc.id, name: data.name, actorRole: 'admin' }
+        );
 
         return {
             error: null,
@@ -70,11 +73,12 @@ export async function handleDeleteAdCampaign(campaignId: string, actor: Actor) {
     const campaignRef = doc(db, 'adCampaigns', campaignId);
     await deleteDoc(campaignRef);
 
-    await logAdminAction({
-        actor: { ...actor, role: 'admin' },
-        action: 'AD_CAMPAIGN_DELETED',
-        details: { campaignId }
-    });
+    await AuditLogger.getInstance().logAction(
+        'AD_CAMPAIGN_DELETED',
+        actor.id,
+        'ad_campaign',
+        { campaignId, actorRole: 'admin' }
+    );
     
     return {
       error: null,

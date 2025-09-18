@@ -12,13 +12,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Upload, Loader2, ClipboardCopy, Check, Wallet, Landmark, Info } from "lucide-react";
+import { ArrowLeft, Upload, Loader2, ClipboardCopy, Check, Wallet, Landmark, Info, Smartphone } from "lucide-react";
 import Image from 'next/image';
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Booking } from "../../page";
 import {QRCode} from "@/components/qrcode-svg";
+import { PaymentConfig } from "@/lib/payment-config";
+import { PaymentRetryService } from "@/lib/payment-retry-service";
+import { GCashPaymentButton } from "@/components/gcash-payment-button";
 
 export default function PaymentPage() {
     const { bookingId } = useParams();
@@ -60,6 +64,18 @@ export default function PaymentPage() {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
+            
+            // Validate file using PaymentConfig
+            const validation = PaymentConfig.validateFileUpload(file);
+            if (!validation.valid) {
+                toast({ 
+                    variant: "destructive", 
+                    title: "Invalid File", 
+                    description: validation.error 
+                });
+                return;
+            }
+            
             setPaymentProofFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -70,19 +86,60 @@ export default function PaymentPage() {
     };
 
     const handleUploadProof = async () => {
-        if (!paymentProofFile || !booking) return;
+        if (!paymentProofFile || !booking || !user) return;
         setIsUploading(true);
+        
         try {
-            const storagePath = `payment-proofs/${booking.id}/${Date.now()}_${paymentProofFile.name}`;
-            const storageRef = ref(storage, storagePath);
-            const uploadResult = await uploadBytes(storageRef, paymentProofFile);
-            const url = await getDownloadURL(uploadResult.ref);
+            // Basic client-side validation
+            if (paymentProofFile.size > 5 * 1024 * 1024) { // 5MB limit
+                toast({ 
+                    variant: "destructive", 
+                    title: "File Too Large", 
+                    description: "Payment proof file must be less than 5MB" 
+                });
+                return;
+            }
 
-            const bookingRef = doc(db, "bookings", booking.id);
-            await updateDoc(bookingRef, {
-                paymentProofUrl: url,
-                status: "Pending Verification",
+            if (!paymentProofFile.type.startsWith('image/')) {
+                toast({ 
+                    variant: "destructive", 
+                    title: "Invalid File Type", 
+                    description: "Please upload an image file" 
+                });
+                return;
+            }
+
+
+            // Use retry service for file upload
+            const uploadResult = await PaymentRetryService.retryFileUpload(async () => {
+                const storagePath = `payment-proofs/${booking.id}/${Date.now()}_${paymentProofFile.name}`;
+                const storageRef = ref(storage, storagePath);
+                const uploadResult = await uploadBytes(storageRef, paymentProofFile);
+                return await getDownloadURL(uploadResult.ref);
             });
+
+            if (!uploadResult.success) {
+                throw new Error(uploadResult.error || 'Upload failed');
+            }
+
+            const url = uploadResult.data;
+
+            // Use retry service for database operations
+            const dbResult = await PaymentRetryService.retryDatabaseOperation(async () => {
+                const bookingRef = doc(db, "bookings", booking.id);
+                await updateDoc(bookingRef, {
+                    paymentProofUrl: url,
+                    status: "Pending Verification",
+                    paymentRejectionReason: null,
+                    paymentRejectedAt: null,
+                    paymentRejectedBy: null,
+                    paymentProofUploadedAt: serverTimestamp(),
+                });
+            });
+
+            if (!dbResult.success) {
+                throw new Error(dbResult.error || 'Database update failed');
+            }
             
             // Notify Admin
             const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
@@ -98,10 +155,37 @@ export default function PaymentPage() {
                 });
             }
 
+            // Payment event tracking will be handled server-side
+
+            // Clear the file input
+            setPaymentProofFile(null);
+            setPaymentProofPreview(null);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+
             toast({ title: 'Upload Successful', description: 'Your proof of payment has been submitted for verification.' });
         } catch (error) {
             console.error("Error uploading proof:", error);
-            toast({ variant: "destructive", title: "Upload Failed", description: "Could not upload your proof of payment." });
+            let errorMessage = "Could not upload your proof of payment.";
+            
+            if (error instanceof Error) {
+                if (error.message.includes('storage/unauthorized')) {
+                    errorMessage = "You don't have permission to upload files. Please contact support.";
+                } else if (error.message.includes('storage/network-request-failed')) {
+                    errorMessage = "Network error. Please check your connection and try again.";
+                } else if (error.message.includes('storage/quota-exceeded')) {
+                    errorMessage = "Storage quota exceeded. Please contact support.";
+                } else if (error.message.includes('Duplicate payment')) {
+                    errorMessage = "A payment for this booking has already been submitted. Please wait for verification.";
+                } else {
+                    errorMessage = error.message;
+                }
+            }
+            
+            toast({ 
+                variant: "destructive", 
+                title: "Upload Failed", 
+                description: errorMessage 
+            });
         } finally {
             setIsUploading(false);
         }
@@ -122,6 +206,7 @@ export default function PaymentPage() {
     if (!booking) return null;
     
     const isPaymentUploaded = booking.status === 'Pending Verification' || booking.status === 'Upcoming' || booking.status === 'Completed';
+    const isPaymentRejected = booking.status === 'Payment Rejected';
 
     return (
         <div className="space-y-6 max-w-4xl mx-auto">
@@ -160,11 +245,45 @@ export default function PaymentPage() {
                                  <Wallet className="h-6 w-6 text-blue-500"/>
                                 <h3 className="font-semibold text-lg">GCash Payment</h3>
                             </div>
-                            <div className="text-sm space-y-1 pl-9">
-                                <p><strong>Account Name:</strong> Lingkod PH Services</p>
-                                <p><strong>Account Number:</strong> 0917-123-4567</p>
-                                <div className="w-32 h-32 mt-2"><QRCode/></div>
-                            </div>
+                            
+                            <Tabs defaultValue="automated" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="automated" className="flex items-center gap-2">
+                                        <Smartphone className="h-4 w-4" />
+                                        Instant
+                                    </TabsTrigger>
+                                    <TabsTrigger value="manual" className="flex items-center gap-2">
+                                        <Upload className="h-4 w-4" />
+                                        Manual
+                                    </TabsTrigger>
+                                </TabsList>
+                                
+                                <TabsContent value="automated" className="mt-4">
+                                    <GCashPaymentButton
+                                        bookingId={booking.id}
+                                        amount={booking.price}
+                                        serviceName={booking.serviceName}
+                                        onPaymentSuccess={() => {
+                                            toast({ title: 'Payment Successful!', description: 'Your booking has been confirmed.' });
+                                            router.push('/bookings');
+                                        }}
+                                        onPaymentError={(error) => {
+                                            toast({ variant: 'destructive', title: 'Payment Failed', description: error });
+                                        }}
+                                    />
+                                </TabsContent>
+                                
+                                <TabsContent value="manual" className="mt-4">
+                                    <div className="text-sm space-y-1">
+                                        <p><strong>Account Name:</strong> {PaymentConfig.GCASH.accountName}</p>
+                                        <p><strong>Account Number:</strong> {PaymentConfig.GCASH.accountNumber}</p>
+                                        <div className="w-32 h-32 mt-2"><QRCode/></div>
+                                        <p className="text-xs text-muted-foreground mt-2">
+                                            After payment, upload proof for manual verification
+                                        </p>
+                                    </div>
+                                </TabsContent>
+                            </Tabs>
                         </div>
                          <Separator />
                          <div className="space-y-4">
@@ -173,8 +292,11 @@ export default function PaymentPage() {
                                 <h3 className="font-semibold text-lg">Bank Transfer (BPI)</h3>
                             </div>
                             <div className="text-sm space-y-1 pl-9">
-                                <p><strong>Account Name:</strong> Lingkod PH Services Inc.</p>
-                                <p><strong>Account Number:</strong> 1234-5678-90</p>
+                                <p><strong>Account Name:</strong> {PaymentConfig.BANK.accountName}</p>
+                                <p><strong>Account Number:</strong> {PaymentConfig.BANK.accountNumber}</p>
+                                {PaymentConfig.BANK.bankName && (
+                                    <p><strong>Bank:</strong> {PaymentConfig.BANK.bankName}</p>
+                                )}
                             </div>
                         </div>
 
@@ -191,7 +313,27 @@ export default function PaymentPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                         {isPaymentUploaded && booking.paymentProofUrl ? (
+                         {isPaymentRejected ? (
+                             <div className="space-y-4 text-center">
+                                 <div className="relative aspect-video w-full rounded-md overflow-hidden border">
+                                    <Image src={booking.paymentProofUrl || "https://placehold.co/600x400.png"} alt="Payment proof" layout="fill" className="object-contain"/>
+                                </div>
+                                <Badge variant="destructive">Status: {booking.status}</Badge>
+                                {booking.paymentRejectionReason && (
+                                    <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                                        <p className="text-sm text-red-800"><strong>Rejection Reason:</strong> {booking.paymentRejectionReason}</p>
+                                    </div>
+                                )}
+                                <p className="text-sm text-muted-foreground">Please upload a new payment proof or contact support for assistance.</p>
+                                <Button onClick={() => {
+                                    setPaymentProofFile(null);
+                                    setPaymentProofPreview(null);
+                                    if (fileInputRef.current) fileInputRef.current.value = '';
+                                }} className="w-full">
+                                    Upload New Payment Proof
+                                </Button>
+                             </div>
+                         ) : isPaymentUploaded && booking.paymentProofUrl ? (
                              <div className="space-y-4 text-center">
                                  <div className="relative aspect-video w-full rounded-md overflow-hidden border">
                                     <Image src={booking.paymentProofUrl} alt="Payment proof" layout="fill" className="object-contain"/>

@@ -24,6 +24,7 @@ interface AuthContextType {
   userRole: UserRole;
   subscription: UserSubscription;
   verificationStatus: VerificationStatus | null;
+  getIdToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -32,6 +33,7 @@ const AuthContext = createContext<AuthContextType>({
   userRole: null,
   subscription: null,
   verificationStatus: null,
+  getIdToken: async () => null,
 });
 
 const createSingletonNotification = async (userId: string, type: string, message: string, link: string) => {
@@ -78,6 +80,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setVerificationStatus(null);
   }, []);
 
+  const getIdToken = useCallback(async (): Promise<string | null> => {
+    if (!user) return null;
+    try {
+      return await user.getIdToken();
+    } catch (error) {
+      console.error('Error getting ID token:', error);
+      return null;
+    }
+  }, [user]);
+
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (authUser) => {
       if (authUser) {
@@ -123,7 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [toast, handleSignOut]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, userRole, subscription, verificationStatus }}>
+    <AuthContext.Provider value={{ user, loading, userRole, subscription, verificationStatus, getIdToken }}>
       {children}
     </AuthContext.Provider>
   );

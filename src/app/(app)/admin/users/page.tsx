@@ -113,7 +113,7 @@ export default function AdminUsersPage() {
     
     const onUpdateStatus = async (userId: string, status: UserStatus) => {
         if (!user) return;
-        const result = await handleUserStatusUpdate(userId, status, {id: user.uid, name: user.displayName});
+        const result = await handleUserStatusUpdate(userId, status, {id: user.uid, name: user.displayName || 'Unknown', role: userRole || 'admin'});
         toast({
             title: result.error ? t('error') : t('success'),
             description: result.message,
@@ -123,7 +123,7 @@ export default function AdminUsersPage() {
 
     const onDeleteUser = async (userId: string) => {
         if (!user) return;
-        const result = await handleDeleteUser(userId, {id: user.uid, name: user.displayName});
+        const result = await handleDeleteUser(userId, {id: user.uid, name: user.displayName || 'Unknown', role: userRole || 'admin'});
         toast({
             title: result.error ? t('error') : t('success'),
             description: result.message,
@@ -146,7 +146,7 @@ export default function AdminUsersPage() {
     const onUpdateUser = async () => {
         if (!selectedUser || !user) return;
         setIsSubmitting(true);
-        const result = await handleUpdateUser(selectedUser.uid, editForm, {id: user.uid, name: user.displayName});
+        const result = await handleUpdateUser(selectedUser.uid, editForm, {id: user.uid, name: user.displayName || 'Unknown', role: userRole || 'admin'});
 
         toast({
             title: result.error ? t('error') : t('success'),
@@ -170,7 +170,7 @@ export default function AdminUsersPage() {
             password: createForm.password,
             role: createForm.role,
             phone: createForm.phone
-        }, {id: user.uid, name: user.displayName});
+        }, {id: user.uid, name: user.displayName || 'Unknown', role: userRole || 'admin'});
 
         toast({
             title: result.error ? t('error') : t('success'),
@@ -188,7 +188,7 @@ export default function AdminUsersPage() {
     const onSendEmail = async () => {
         if (!selectedUser || !user) return;
         setIsSubmitting(true);
-        const result = await handleSendDirectEmail(selectedUser.uid, emailForm.subject, emailForm.message, {id: user.uid, name: user.displayName});
+        const result = await handleSendDirectEmail(selectedUser.uid, emailForm.subject, emailForm.message, {id: user.uid, name: user.displayName || 'Unknown', role: userRole || 'admin'});
         toast({
             title: result.error ? t('error') : t('success'),
             description: result.message,

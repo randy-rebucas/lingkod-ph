@@ -46,6 +46,8 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { canManageProviders, getMaxProviders } from "@/lib/subscription-utils";
+import { AgencyProviderLimitGuard, AgencyProviderLimitInfo } from "@/components/agency-provider-limit-guard";
 
 
 type Provider = {
@@ -63,14 +65,7 @@ const getStatusVariant = (status: Provider['status']) => {
   }
 };
 
-const getProviderLimit = (planId: string | undefined): number => {
-    switch(planId) {
-        case 'lite': return 3;
-        case 'pro': return 10;
-        case 'custom': return Infinity;
-        default: return 0;
-    }
-}
+// Removed getProviderLimit function - now using subscription-utils
 
 export default function ManageProvidersPage() {
     const { user, subscription, userRole } = useAuth();
@@ -82,8 +77,8 @@ export default function ManageProvidersPage() {
     const [inviteEmail, setInviteEmail] = React.useState("");
     const [isInviting, setIsInviting] = React.useState(false);
 
-    const providerLimit = getProviderLimit(subscription?.planId);
-    const canAddMoreProviders = providers.length < providerLimit;
+    const providerLimit = getMaxProviders(subscription as any);
+    const canAddMoreProviders = canManageProviders(subscription as any, providers.length);
     
     React.useEffect(() => {
         if (!user || userRole !== 'agency') {
@@ -315,13 +310,22 @@ export default function ManageProvidersPage() {
                       {t('subtitle')}
                   </p>
               </div>
-               <Dialog open={isInviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-                    <DialogTrigger asChild>
-                         <Button disabled={!canAddMoreProviders}>
+               <AgencyProviderLimitGuard 
+                    currentProviderCount={providers.length}
+                    fallback={
+                        <Button disabled>
                             <UserPlus className="mr-2 h-4 w-4" />
                             {t('inviteProvider')}
                         </Button>
-                    </DialogTrigger>
+                    }
+                >
+                    <Dialog open={isInviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+                        <DialogTrigger asChild>
+                             <Button>
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                {t('inviteProvider')}
+                            </Button>
+                        </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>{t('inviteNewProvider')}</DialogTitle>
@@ -350,13 +354,14 @@ export default function ManageProvidersPage() {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+                </AgencyProviderLimitGuard>
           </div>
           
           <Card>
             <CardHeader>
                 <CardTitle>{t('yourProviderNetwork')}</CardTitle>
                 <CardDescription>
-                    {t('providerCount', { count: providers.length, limit: isFinite(providerLimit) ? providerLimit : t('unlimited') })}
+                    <AgencyProviderLimitInfo currentProviderCount={providers.length} />
                 </CardDescription>
             </CardHeader>
              <CardContent>

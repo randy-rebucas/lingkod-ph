@@ -3,7 +3,7 @@
 
 import { db } from '@/lib/firebase';
 import { doc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
-import { logAdminAction } from '@/lib/audit-logger';
+import { AuditLogger } from '@/lib/audit-logger';
 
 type Actor = {
     id: string;
@@ -22,11 +22,12 @@ export async function handleUpdateTicketStatus(
             updatedAt: serverTimestamp() 
         });
 
-        await logAdminAction({
-            actor: { ...actor, role: 'admin' },
-            action: 'TICKET_STATUS_UPDATED',
-            details: { ticketId, newStatus: status }
-        });
+        await AuditLogger.getInstance().logAction(
+            actor.id,
+            'tickets',
+            'TICKET_STATUS_UPDATED',
+            { ticketId, newStatus: status, actorRole: 'admin' }
+        );
 
         return { error: null, message: `Ticket status updated to "${status}".` };
     } catch (e: any) {
@@ -56,11 +57,12 @@ export async function handleAddTicketNote(
             updatedAt: serverTimestamp()
         });
 
-         await logAdminAction({
-            actor: { ...actor, role: 'admin' },
-            action: 'TICKET_NOTE_ADDED',
-            details: { ticketId }
-        });
+         await AuditLogger.getInstance().logAction(
+            actor.id,
+            'tickets',
+            'TICKET_NOTE_ADDED',
+            { ticketId, actorRole: 'admin' }
+        );
 
         return { error: null, message: 'Note added successfully.' };
     } catch (e: any) {

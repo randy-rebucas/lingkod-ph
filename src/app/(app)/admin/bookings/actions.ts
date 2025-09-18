@@ -6,7 +6,7 @@ import {
   doc,
   updateDoc,
 } from 'firebase/firestore';
-import { logAdminAction } from '@/lib/audit-logger';
+import { AuditLogger } from '@/lib/audit-logger';
 
 type Actor = {
     id: string;
@@ -22,11 +22,12 @@ export async function handleUpdateBookingStatus(
     const bookingRef = doc(db, 'bookings', bookingId);
     await updateDoc(bookingRef, { status });
 
-    await logAdminAction({
-        actor: { ...actor, role: 'admin' },
-        action: 'BOOKING_STATUS_UPDATED',
-        details: { bookingId, newStatus: status }
-    });
+    await AuditLogger.getInstance().logAction(
+        actor.id,
+        'bookings',
+        'BOOKING_STATUS_UPDATED',
+        { bookingId, newStatus: status, actorRole: 'admin' }
+    );
 
     return {
       error: null,

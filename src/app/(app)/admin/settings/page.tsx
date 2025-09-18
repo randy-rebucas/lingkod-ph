@@ -63,6 +63,28 @@ export default function AdminSettingsPage() {
      const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
+            
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                toast({ 
+                    variant: 'destructive', 
+                    title: 'Invalid File Type', 
+                    description: 'Please select an image file (PNG, JPG, GIF, etc.)' 
+                });
+                return;
+            }
+            
+            // Validate file size (max 5MB)
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (file.size > maxSize) {
+                toast({ 
+                    variant: 'destructive', 
+                    title: 'File Too Large', 
+                    description: 'Please select an image smaller than 5MB' 
+                });
+                return;
+            }
+            
             setLogoFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -79,32 +101,84 @@ export default function AdminSettingsPage() {
         let finalSettings = { ...settings };
         
         if (logoFile) {
-             setIsUploadingLogo(true);
+            setIsUploadingLogo(true);
             try {
                 const storagePath = `platform/logo/${Date.now()}_${logoFile.name}`;
                 const storageRef = ref(storage, storagePath);
+                
+                console.log('Uploading logo to:', storagePath);
                 const uploadResult = await uploadBytes(storageRef, logoFile);
+                console.log('Upload successful:', uploadResult);
+                
                 const newLogoUrl = await getDownloadURL(uploadResult.ref);
+                console.log('Download URL:', newLogoUrl);
+                
                 finalSettings.logoUrl = newLogoUrl;
-                 toast({ title: 'Logo Uploaded', description: 'New logo has been uploaded.' });
-            } catch (error) {
-                toast({ variant: 'destructive', title: 'Upload Error', description: 'Failed to upload new logo.' });
+                toast({ title: 'Logo Uploaded', description: 'New logo has been uploaded successfully.' });
+            } catch (error: any) {
+                console.error('Logo upload error:', error);
+                
+                let errorMessage = 'Failed to upload new logo.';
+                if (error.code) {
+                    switch (error.code) {
+                        case 'storage/unauthorized':
+                            errorMessage = 'You do not have permission to upload files.';
+                            break;
+                        case 'storage/canceled':
+                            errorMessage = 'Upload was canceled.';
+                            break;
+                        case 'storage/unknown':
+                            errorMessage = 'An unknown error occurred during upload.';
+                            break;
+                        case 'storage/invalid-format':
+                            errorMessage = 'Invalid file format.';
+                            break;
+                        case 'storage/invalid-checksum':
+                            errorMessage = 'File corruption detected.';
+                            break;
+                        default:
+                            errorMessage = `Upload failed: ${error.message}`;
+                    }
+                }
+                
+                toast({ 
+                    variant: 'destructive', 
+                    title: 'Upload Error', 
+                    description: errorMessage 
+                });
                 setIsSaving(false);
                 setIsUploadingLogo(false);
                 return;
             }
-             setIsUploadingLogo(false);
+            setIsUploadingLogo(false);
         }
         
-        const result = await handleUpdatePlatformSettings(finalSettings, { id: user.uid, name: user.displayName });
+        try {
+            const result = await handleUpdatePlatformSettings(finalSettings, { id: user.uid, name: user.displayName });
 
-        setSettings(finalSettings);
-
-        toast({
-            title: result.error ? 'Error' : 'Success',
-            description: result.message,
-            variant: result.error ? 'destructive' : 'default',
-        });
+            if (result.error) {
+                toast({
+                    title: 'Error',
+                    description: result.message,
+                    variant: 'destructive',
+                });
+            } else {
+                setSettings(finalSettings);
+                toast({
+                    title: 'Success',
+                    description: result.message,
+                    variant: 'default',
+                });
+            }
+        } catch (error: any) {
+            console.error('Settings update error:', error);
+            toast({
+                title: 'Error',
+                description: 'Failed to save settings. Please try again.',
+                variant: 'destructive',
+            });
+        }
+        
         setIsSaving(false);
     };
 
