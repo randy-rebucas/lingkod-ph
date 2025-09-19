@@ -83,53 +83,49 @@ export default function BillingPage() {
 
     if (loading) {
         return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                    <p className="text-muted-foreground">{t('subtitle')}</p>
-                </div>
-                <Card>
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
+             <div className="max-w-6xl mx-auto space-y-8">
+                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                     <CardContent className="p-6">
+                         <Skeleton className="h-64 w-full" />
+                     </CardContent>
+                 </Card>
              </div>
         )
     }
 
     return (
         <Dialog onOpenChange={(open) => !open && setSelectedInvoice(null)}>
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                <p className="text-muted-foreground">{t('subtitle')}</p>
-            </div>
-             <Card>
-                <CardContent>
+        <div className="max-w-6xl mx-auto space-y-8">
+             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                    <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Invoice History</CardTitle>
+                    <CardDescription className="text-base">View and manage your billing invoices</CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                <TableHead>{t('invoiceNumber')}</TableHead>
-                                <TableHead>{t('dateIssued')}</TableHead>
-                                <TableHead>{t('dueDate')}</TableHead>
-                                <TableHead>{t('amount')}</TableHead>
-                                <TableHead>{t('status')}</TableHead>
-                                <TableHead className="text-right">{t('actions')}</TableHead>
+                            <TableRow className="border-b border-border/50">
+                                <TableHead className="font-semibold">{t('invoiceNumber')}</TableHead>
+                                <TableHead className="font-semibold">{t('dateIssued')}</TableHead>
+                                <TableHead className="font-semibold">{t('dueDate')}</TableHead>
+                                <TableHead className="font-semibold">{t('amount')}</TableHead>
+                                <TableHead className="font-semibold">{t('status')}</TableHead>
+                                <TableHead className="text-right font-semibold">{t('actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {invoices.length > 0 ? invoices.map(invoice => (
-                                <TableRow key={invoice.id}>
+                                <TableRow key={invoice.id} className="hover:bg-muted/30 transition-colors border-b border-border/30">
                                     <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
                                     <TableCell>{format(invoice.issueDate.toDate(), 'PP')}</TableCell>
                                     <TableCell>{format(invoice.dueDate.toDate(), 'PP')}</TableCell>
-                                    <TableCell>₱{invoice.amount.toFixed(2)}</TableCell>
+                                    <TableCell className="font-semibold text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">₱{invoice.amount.toFixed(2)}</TableCell>
                                     <TableCell>
-                                        <Badge variant={getStatusVariant(invoice.status)}>{t(invoice.status.toLowerCase())}</Badge>
+                                        <Badge variant={getStatusVariant(invoice.status)} className="shadow-soft">{t(invoice.status.toLowerCase())}</Badge>
                                     </TableCell>
                                      <TableCell className="text-right">
                                         <DialogTrigger asChild>
-                                            <Button variant="ghost" size="icon" onClick={() => handleViewDetails(invoice)}>
+                                            <Button variant="ghost" size="icon" onClick={() => handleViewDetails(invoice)} className="hover:bg-primary/10 transition-colors">
                                                 <Eye className="h-4 w-4" />
                                             </Button>
                                         </DialogTrigger>
@@ -137,9 +133,14 @@ export default function BillingPage() {
                                 </TableRow>
                             )) : (
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center h-24">
-                                        <Receipt className="mx-auto h-12 w-12 text-muted-foreground mb-2"/>
-                                        {t('noInvoicesFound')}
+                                    <TableCell colSpan={6} className="text-center h-32">
+                                        <div className="flex flex-col items-center justify-center space-y-3">
+                                            <Receipt className="h-16 w-16 text-primary opacity-60"/>
+                                            <div className="space-y-1">
+                                                <h3 className="text-lg font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">No Invoices Found</h3>
+                                                <p className="text-muted-foreground">{t('noInvoicesFound')}</p>
+                                            </div>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             )}
@@ -148,9 +149,11 @@ export default function BillingPage() {
                 </CardContent>
             </Card>
             {selectedInvoice && (
-                 <DialogContent className="max-w-4xl">
-                    <DialogHeader>
-                        <DialogTitle>{t('invoiceDetails', { invoiceNumber: selectedInvoice.invoiceNumber })}</DialogTitle>
+                 <DialogContent className="max-w-4xl shadow-glow border-0 bg-background/95 backdrop-blur-md">
+                    <DialogHeader className="border-b border-border/50 pb-4">
+                        <DialogTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                            {t('invoiceDetails', { invoiceNumber: selectedInvoice.invoiceNumber })}
+                        </DialogTitle>
                     </DialogHeader>
                     <InvoicePreview invoice={selectedInvoice as any} />
                  </DialogContent>

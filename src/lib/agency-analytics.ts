@@ -315,7 +315,12 @@ export class AgencyAnalyticsService {
       ];
 
       // Detect anomalies
-      const anomalies = [];
+      const anomalies: Array<{
+        metric: string;
+        anomaly: string;
+        severity: 'high' | 'medium' | 'low';
+        explanation: string;
+      }> = [];
       if (analytics.providerRetentionRate < 70) {
         anomalies.push({
           metric: 'Provider Retention',
@@ -489,13 +494,13 @@ export class AgencyAnalyticsService {
     ).length;
 
     const totalBookings = bookings.length;
-    const completedBookings = bookings.filter(b => b.status === 'Completed').length;
+    const completedBookings = bookings.filter(b => b.status === 'Completed');
     const totalRevenue = completedBookings.reduce((sum, b) => sum + (b.price || 0), 0);
 
     // Calculate rates and averages
     const providerRetentionRate = totalProviders > 0 ? (activeProviders / totalProviders) * 100 : 0;
     const averageRevenuePerProvider = totalProviders > 0 ? totalRevenue / totalProviders : 0;
-    const averageBookingValue = completedBookings > 0 ? totalRevenue / completedBookings : 0;
+    const averageBookingValue = completedBookings.length > 0 ? totalRevenue / completedBookings.length : 0;
 
     // Calculate growth rates (would be calculated from historical data)
     const revenueGrowth = 15; // Placeholder

@@ -93,12 +93,8 @@ export default function MyJobPostsPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                    <p className="text-muted-foreground">{t('subtitle')}</p>
-                </div>
-                <Card>
+            <div className="max-w-6xl mx-auto space-y-8">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-6">
                         <Skeleton className="h-48 w-full" />
                     </CardContent>
@@ -108,44 +104,50 @@ export default function MyJobPostsPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                <p className="text-muted-foreground">
-                    {t('subtitle')}
-                </p>
-            </div>
+        <div className="max-w-6xl mx-auto space-y-8">
+            <div className="relative z-10">
+                    <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
+                        {t('title')}
+                    </h1>
+                    <p className="text-xl text-muted-foreground leading-relaxed">
+                        {t('subtitle')}
+                    </p>
+                </div>
 
-            <Card>
+            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                    <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Job Posts</CardTitle>
+                    <CardDescription className="text-base">Manage your posted jobs and track applications</CardDescription>
+                </CardHeader>
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                <TableHead>{t('title')}</TableHead>
-                                <TableHead>{t('status')}</TableHead>
-                                <TableHead>{t('applicants')}</TableHead>
-                                <TableHead className="text-right">{t('budget')}</TableHead>
+                            <TableRow className="border-b border-border/50">
+                                <TableHead className="font-semibold">{t('title')}</TableHead>
+                                <TableHead className="font-semibold">{t('status')}</TableHead>
+                                <TableHead className="font-semibold">{t('applicants')}</TableHead>
+                                <TableHead className="text-right font-semibold">{t('budget')}</TableHead>
                                 <TableHead><span className="sr-only">{t('actions')}</span></TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {jobs.length > 0 ? jobs.map((job) => (
-                                <TableRow key={job.id}>
+                                <TableRow key={job.id} className="hover:bg-muted/30 transition-colors border-b border-border/30">
                                     <TableCell className="font-medium">{job.title}</TableCell>
-                                    <TableCell><Badge variant={getStatusVariant(job.status)}>{job.status}</Badge></TableCell>
-                                    <TableCell>{job.applications?.length || 0}</TableCell>
-                                    <TableCell className="text-right">{formatBudget(job.budget)}</TableCell>
+                                    <TableCell><Badge variant={getStatusVariant(job.status)} className="shadow-soft">{job.status}</Badge></TableCell>
+                                    <TableCell className="font-semibold text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{job.applications?.length || 0}</TableCell>
+                                    <TableCell className="text-right font-semibold text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{formatBudget(job.budget)}</TableCell>
                                     <TableCell className="text-right">
                                         <AlertDialog>
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                    <Button aria-haspopup="true" size="icon" variant="ghost" className="hover:bg-primary/10 transition-colors">
                                                         <MoreHorizontal className="h-4 w-4" />
                                                         <span className="sr-only">{t('toggleMenu')}</span>
                                                     </Button>
                                                 </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>{t('actions')}</DropdownMenuLabel>
+                                                <DropdownMenuContent align="end" className="shadow-glow border-0 bg-background/95 backdrop-blur-md">
+                                                    <DropdownMenuLabel className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('actions')}</DropdownMenuLabel>
                                                      <DropdownMenuItem asChild>
                                                         <Link href={`/my-job-posts/${job.id}/applicants`}><Eye className="mr-2 h-4 w-4" /> {t('viewApplicants')}</Link>
                                                     </DropdownMenuItem>
@@ -155,7 +157,7 @@ export default function MyJobPostsPage() {
                                                     <DropdownMenuItem onSelect={() => handleUpdateStatus(job.id, "Closed")}>
                                                         <CircleSlash className="mr-2 h-4 w-4" /> {t('closePost')}
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuSeparator className="bg-border/50" />
                                                     <AlertDialogTrigger asChild>
                                                         <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
                                                             <Trash2 className="mr-2 h-4 w-4" /> {t('delete')}
@@ -163,14 +165,14 @@ export default function MyJobPostsPage() {
                                                     </AlertDialogTrigger>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
-                                            <AlertDialogContent>
+                                            <AlertDialogContent className="shadow-glow border-0 bg-background/95 backdrop-blur-md">
                                                 <AlertDialogHeader>
-                                                    <AlertDialogTitle>{t('areYouSure')}</AlertDialogTitle>
+                                                    <AlertDialogTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('areYouSure')}</AlertDialogTitle>
                                                     <AlertDialogDescription>{t('deleteJobDescription')}</AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
-                                                    <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-                                                    <AlertDialogAction onClick={() => handleDeleteJob(job.id)} className="bg-destructive hover:bg-destructive/80">{t('delete')}</AlertDialogAction>
+                                                    <AlertDialogCancel className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">{t('cancel')}</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDeleteJob(job.id)} className="bg-destructive hover:bg-destructive/80 shadow-glow hover:shadow-glow/50 transition-all duration-300">{t('delete')}</AlertDialogAction>
                                                 </AlertDialogFooter>
                                             </AlertDialogContent>
                                         </AlertDialog>
@@ -178,10 +180,17 @@ export default function MyJobPostsPage() {
                                 </TableRow>
                             )) : (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center">
-                                        <Briefcase className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
-                                        {t('noJobsYet')}
-                                        <Button variant="link" asChild><Link href="/post-a-job">{t('postAJob')}</Link></Button>
+                                    <TableCell colSpan={5} className="h-32 text-center">
+                                        <div className="flex flex-col items-center justify-center space-y-3">
+                                            <Briefcase className="h-16 w-16 text-primary opacity-60" />
+                                            <div className="space-y-1">
+                                                <h3 className="text-lg font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">No Jobs Posted Yet</h3>
+                                                <p className="text-muted-foreground">{t('noJobsYet')}</p>
+                                            </div>
+                                            <Button variant="link" asChild className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                                                <Link href="/post-a-job">{t('postAJob')}</Link>
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             )}

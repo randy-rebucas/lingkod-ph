@@ -664,52 +664,46 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                <p className="text-muted-foreground">
-                    {t('subtitle')}
-                </p>
-            </div>
+        <div className="max-w-6xl mx-auto space-y-8">
 
-            <Card>
-                <CardHeader className="flex-row items-center gap-4 space-y-0">
+            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardHeader className="flex-row items-center gap-6 space-y-0 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20 p-6">
                     <div className="relative">
-                        <Avatar className="h-24 w-24 border-2 border-primary">
+                        <Avatar className="h-24 w-24 border-2 border-primary/20 shadow-soft">
                             <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
-                            <AvatarFallback className="text-3xl">{getAvatarFallback(user.displayName)}</AvatarFallback>
+                            <AvatarFallback className="text-3xl bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">{getAvatarFallback(user.displayName)}</AvatarFallback>
                         </Avatar>
-                        <Button size="icon" className="absolute bottom-0 right-0 rounded-full h-8 w-8" onClick={() => fileInputRef.current?.click()}>
+                        <Button size="icon" className="absolute bottom-0 right-0 rounded-full h-8 w-8 shadow-soft hover:shadow-glow/20 transition-all duration-300" onClick={() => fileInputRef.current?.click()}>
                             <Camera className="h-4 w-4"/>
                             <span className="sr-only">{t('changePhoto')}</span>
                         </Button>
                         <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
                     </div>
                     <div>
-                        <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-3 text-2xl font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                             {user.displayName}
                              {verificationStatus === 'Verified' && (
-                                <Badge variant="default" className="flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-200">
+                                <Badge variant="default" className="flex items-center gap-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border-blue-200 shadow-soft">
                                     <ShieldCheck className="h-4 w-4" />
                                     {t('verified')}
                                 </Badge>
                             )}
                              {subscription?.planId === 'pro' && (
-                                <Badge variant="default" className="flex items-center gap-1 bg-blue-100 text-blue-800 border-blue-200">
+                                <Badge variant="default" className="flex items-center gap-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border-blue-200 shadow-soft">
                                     <ShieldCheck className="h-4 w-4" />
                                     {t('pro')}
                                 </Badge>
                             )}
                              {subscription?.planId === 'elite' && (
-                                <Badge variant="default" className="flex items-center gap-1 bg-purple-100 text-purple-800 border-purple-200">
+                                <Badge variant="default" className="flex items-center gap-1 bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border-purple-200 shadow-soft">
                                     <Star className="h-4 w-4" />
                                     {t('elite')}
                                 </Badge>
                             )}
                         </CardTitle>
-                        <CardDescription className="flex items-center gap-2 mt-1">
+                        <CardDescription className="flex items-center gap-3 mt-2 text-base">
                            {user.email}
-                            <Badge variant="secondary" className="capitalize">{userRole}</Badge>
+                            <Badge variant="secondary" className="capitalize shadow-soft">{userRole}</Badge>
                         </CardDescription>
                          {imageFile && (
                             <div className="mt-2 space-y-2 text-left">
@@ -785,44 +779,45 @@ export default function ProfilePage() {
             )}
 
             <Tabs defaultValue="public-profile" className="w-full">
-                 <TabsList className="w-full h-auto justify-start overflow-x-auto">
-                    <TabsTrigger value="public-profile"><User className="mr-2"/> {t('publicProfile')}</TabsTrigger>
-                    {isProvider && <TabsTrigger value="provider-settings"><Briefcase className="mr-2"/> {t('provider')}</TabsTrigger>}
-                    {isAgency && <TabsTrigger value="business-settings"><Building className="mr-2"/> {t('business')}</TabsTrigger>}
-                    {(isProvider || isAgency) && <TabsTrigger value="payout-settings"><Wallet className="mr-2" /> {t('payout')}</TabsTrigger>}
-                    <TabsTrigger value="account-settings"><Settings className="mr-2"/> {t('account')}</TabsTrigger>
+                 <TabsList className="w-full h-auto justify-start overflow-x-auto bg-background/80 backdrop-blur-sm shadow-soft border-0">
+                    <TabsTrigger value="public-profile" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"><User className="mr-2 h-4 w-4"/> {t('publicProfile')}</TabsTrigger>
+                    {isProvider && <TabsTrigger value="provider-settings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"><Briefcase className="mr-2 h-4 w-4"/> {t('provider')}</TabsTrigger>}
+                    {isAgency && <TabsTrigger value="business-settings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"><Building className="mr-2 h-4 w-4"/> {t('business')}</TabsTrigger>}
+                    {(isProvider || isAgency) && <TabsTrigger value="payout-settings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"><Wallet className="mr-2 h-4 w-4" /> {t('payout')}</TabsTrigger>}
+                    <TabsTrigger value="account-settings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"><Settings className="mr-2 h-4 w-4"/> {t('account')}</TabsTrigger>
                     {userRole !== 'admin' && (
                         <>
-                            <TabsTrigger value="loyalty"><Award className="mr-2"/> {t('loyalty')}</TabsTrigger>
-                            <TabsTrigger value="referrals"><Users className="mr-2"/> {t('referrals')}</TabsTrigger>
+                            <TabsTrigger value="loyalty" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"><Award className="mr-2 h-4 w-4"/> {t('loyalty')}</TabsTrigger>
+                            <TabsTrigger value="referrals" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"><Users className="mr-2 h-4 w-4"/> {t('referrals')}</TabsTrigger>
                         </>
                     )}
                 </TabsList>
 
-                <TabsContent value="public-profile" className="mt-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Public Profile Information</CardTitle>
-                            <CardDescription>This information will be displayed on your public profile.</CardDescription>
+                <TabsContent value="public-profile" className="mt-8">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Public Profile Information</CardTitle>
+                            <CardDescription className="text-base">This information will be displayed on your public profile.</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-6 p-6">
                             <div className="space-y-2">
-                                <Label htmlFor="name">{isAgency ? 'Business Name' : 'Full Name'}</Label>
-                                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+                                <Label htmlFor="name" className="text-sm font-medium">{isAgency ? 'Business Name' : 'Full Name'}</Label>
+                                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft" />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="bio">Bio / About</Label>
+                                <Label htmlFor="bio" className="text-sm font-medium">Bio / About</Label>
                                 <Textarea 
                                     id="bio"
                                     placeholder="Tell us a little about yourself or your business..."
                                     value={bio}
                                     onChange={(e) => setBio(e.target.value)}
                                     rows={5}
+                                    className="bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft"
                                 />
                             </div>
                         </CardContent>
-                         <CardFooter>
-                            <Button onClick={handlePublicProfileUpdate} disabled={isSavingPublic}>
+                         <CardFooter className="p-6 pt-0">
+                            <Button onClick={handlePublicProfileUpdate} disabled={isSavingPublic} className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
                                 {isSavingPublic && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {isSavingPublic ? 'Saving...' : 'Update Profile'}
                             </Button>
@@ -830,21 +825,21 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
                 
-                <TabsContent value="account-settings" className="mt-6 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Personal Details</CardTitle>
-                            <CardDescription>This information is private and will not be shown on your profile.</CardDescription>
+                <TabsContent value="account-settings" className="mt-8 space-y-6">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Personal Details</CardTitle>
+                            <CardDescription className="text-base">This information is private and will not be shown on your profile.</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-6 p-6">
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email Address</Label>
-                                <Input id="email" type="email" value={user.email || ''} disabled />
+                                <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+                                <Input id="email" type="email" value={user.email || ''} disabled className="bg-muted/50 border-2 shadow-soft" />
                             </div>
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="phone">Mobile Number</Label>
-                                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., 09123456789" />
+                                    <Label htmlFor="phone" className="text-sm font-medium">Mobile Number</Label>
+                                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., 09123456789" className="bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="gender">Gender</Label>

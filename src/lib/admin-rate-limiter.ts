@@ -113,7 +113,7 @@ export class AdminRateLimiter {
     request: Request
   ): Promise<{ allowed: boolean; message?: string; retryAfter?: number }> {
     const rateLimiter = adminRateLimiters[operation];
-    return await rateLimiter.checkLimit(adminId, request as NextRequest);
+    return await rateLimiter.checkLimitByKey(adminId);
   }
 
   /**

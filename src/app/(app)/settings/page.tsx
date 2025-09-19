@@ -74,73 +74,67 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                <p className="text-muted-foreground">
-                    {t('description')}
-                </p>
-            </div>
+        <div className="max-w-6xl mx-auto space-y-8">
 
             <div className="grid gap-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('notifications')}</CardTitle>
-                        <CardDescription>{t('notificationsDescription')}</CardDescription>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('notifications')}</CardTitle>
+                        <CardDescription className="text-base">{t('notificationsDescription')}</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6">
+                    <CardContent className="space-y-6 p-6">
                         {isLoading ? (
                             <div className="space-y-6">
-                                <Skeleton className="h-8 w-full" />
-                                <Skeleton className="h-8 w-full" />
-                                <Skeleton className="h-8 w-full" />
+                                <Skeleton className="h-12 w-full" />
+                                <Skeleton className="h-12 w-full" />
+                                <Skeleton className="h-12 w-full" />
                             </div>
                         ) : (
                             <>
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
                                     <Label htmlFor="booking-updates" className="flex items-center gap-3">
-                                        <Bell className="h-5 w-5 text-accent" />
-                                        <span className="font-semibold">{t('bookingUpdates')}</span>
+                                        <Bell className="h-5 w-5 text-primary" />
+                                        <span className="font-semibold text-base">{t('bookingUpdates')}</span>
                                     </Label>
                                     <Switch id="booking-updates" checked={settings.bookingUpdates} onCheckedChange={(v) => handleNotificationChange('bookingUpdates', v)} />
                                 </div>
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
                                     <Label htmlFor="new-messages" className="flex items-center gap-3">
-                                        <MessageSquare className="h-5 w-5 text-accent" />
-                                        <span className="font-semibold">{t('newMessages')}</span>
+                                        <MessageSquare className="h-5 w-5 text-primary" />
+                                        <span className="font-semibold text-base">{t('newMessages')}</span>
                                     </Label>
                                     <Switch id="new-messages" checked={settings.newMessages} onCheckedChange={(v) => handleNotificationChange('newMessages', v)} />
                                 </div>
                                 {userRole === 'provider' && (
                                     <>
-                                    <div className="flex items-center justify-between">
+                                    <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
                                         <Label htmlFor="agency-invites" className="flex items-center gap-3">
-                                            <UserPlus className="h-5 w-5 text-accent" />
-                                            <span className="font-semibold">{t('agencyInvites')}</span>
+                                            <UserPlus className="h-5 w-5 text-primary" />
+                                            <span className="font-semibold text-base">{t('agencyInvites')}</span>
                                         </Label>
                                         <Switch id="agency-invites" checked={settings.agencyInvites} onCheckedChange={(v) => handleNotificationChange('agencyInvites', v)} />
                                     </div>
-                                     <div className="flex items-center justify-between">
+                                     <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
                                         <Label htmlFor="new-job-alerts" className="flex items-center gap-3">
-                                            <Briefcase className="h-5 w-5 text-accent" />
-                                            <span className="font-semibold">{t('newJobAlerts')}</span>
+                                            <Briefcase className="h-5 w-5 text-primary" />
+                                            <span className="font-semibold text-base">{t('newJobAlerts')}</span>
                                         </Label>
                                         <Switch id="new-job-alerts" checked={settings.newJobAlerts} onCheckedChange={(v) => handleNotificationChange('newJobAlerts', v)} />
                                     </div>
                                     </>
                                 )}
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
                                     <Label htmlFor="promotional-emails" className="flex items-center gap-3">
-                                        <AtSign className="h-5 w-5 text-accent" />
-                                        <span className="font-semibold">{t('promotionalEmails')}</span>
+                                        <AtSign className="h-5 w-5 text-primary" />
+                                        <span className="font-semibold text-base">{t('promotionalEmails')}</span>
                                     </Label>
                                     <Switch id="promotional-emails" checked={settings.promotionalEmails} onCheckedChange={(v) => handleNotificationChange('promotionalEmails', v)} />
                                 </div>
                             </>
                         )}
                     </CardContent>
-                     <CardFooter className="justify-end">
-                         <Button onClick={handleSaveChanges} disabled={isSaving || isLoading}>
+                     <CardFooter className="justify-end p-6 pt-0">
+                         <Button onClick={handleSaveChanges} disabled={isSaving || isLoading} className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
                             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             {isSaving ? t('saving') : t('savePreferences')}
                         </Button>

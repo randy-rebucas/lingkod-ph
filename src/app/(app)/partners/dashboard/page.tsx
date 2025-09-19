@@ -103,8 +103,8 @@ export default function PartnersDashboardPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title', { name: user?.displayName || 'User' })}</h1>
-                <p className="text-muted-foreground">{t('subtitle')}</p>
+                <h1 className="text-3xl font-bold font-headline">{t('dashboardTitle', { name: user?.displayName || 'User' })}</h1>
+                <p className="text-muted-foreground">{t('dashboardSubtitle')}</p>
             </div>
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -142,7 +142,7 @@ export default function PartnersDashboardPage() {
                     <CardContent>
                         <div className="text-2xl font-bold">₱{dashboardData?.totalRevenue?.toLocaleString() || '0'}</div>
                         <p className="text-xs text-muted-foreground">
-                            {dashboardData?.monthlyGrowth > 0 ? '+' : ''}{dashboardData?.monthlyGrowth?.toFixed(1) || '0'}% {t('monthlyGrowth')}
+                            {(dashboardData?.monthlyGrowth || 0) > 0 ? '+' : ''}{(dashboardData?.monthlyGrowth || 0).toFixed(1)}% {t('monthlyGrowth')}
                         </p>
                     </CardContent>
                 </Card>

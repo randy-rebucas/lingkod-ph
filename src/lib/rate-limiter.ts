@@ -172,6 +172,16 @@ export const rateLimiters = {
       const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
       return `job_posting:${ip}`;
     }
+  }),
+
+  // Job applications: 10 applications per hour
+  jobApplications: new RateLimiter({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    maxRequests: 10,
+    keyGenerator: (request) => {
+      const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+      return `job_applications:${ip}`;
+    }
   })
 };
 

@@ -335,7 +335,7 @@ export default function AgencyProfilePage() {
 
     if (loading) {
         return (
-            <div className="space-y-8">
+            <div className="max-w-6xl mx-auto space-y-8">
                 <Card className="flex flex-col md:flex-row items-center gap-6 p-6">
                     <Skeleton className="h-32 w-32 rounded-full" />
                     <div className="space-y-4 flex-1">

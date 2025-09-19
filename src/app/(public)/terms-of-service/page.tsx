@@ -2,6 +2,7 @@
 "use client";
 
 import { useTranslations } from 'next-intl';
+import { Card } from "@/components/ui/card";
 
 export default function TermsOfServicePage() {
   const t = useTranslations('TermsOfService');
@@ -118,29 +119,61 @@ export default function TermsOfServicePage() {
   ];
 
   return (
-    <div className="container py-12 md:py-24 lg:py-32">
-      <div className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">{t('title')}</h1>
-        <p className="mt-6 text-lg leading-8 text-muted-foreground">
-          {t('lastUpdated')}: 07/20/2025
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
 
-      <div className="mx-auto max-w-3xl space-y-12 mt-12">
-        <p className="text-muted-foreground leading-relaxed">
-          Welcome to LocalPro. These Terms of Service (&quot;Terms&quot;) govern your use of our platform, which connects service providers with clients through our website and mobile applications (collectively, the &quot;Platform&quot;). By accessing or using LocalPro, you agree to be bound by these Terms.
-        </p>
-
-        {sections.map(section => (
-          <div key={section.title}>
-            <h2 className="text-2xl font-semibold mb-4">{section.title}</h2>
-            <div className="space-y-4 text-muted-foreground leading-relaxed">
-              {section.content.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
-            </div>
+      <div className="container py-16">
+        <div className="max-w-4xl mx-auto">
+          {/* Introduction */}
+          <div className="mb-16">
+            <Card className="bg-background/60 backdrop-blur-sm border-0 shadow-soft p-8">
+              <p className="text-lg text-muted-foreground leading-relaxed">
+                Welcome to LocalPro. These Terms of Service (&quot;Terms&quot;) govern your use of our platform, which connects service providers with clients through our website and mobile applications (collectively, the &quot;Platform&quot;). By accessing or using LocalPro, you agree to be bound by these Terms.
+              </p>
+            </Card>
           </div>
-        ))}
+
+          {/* Terms Sections */}
+          <div className="space-y-8">
+            {sections.map((section, index) => (
+              <Card key={section.title} className="bg-background/60 backdrop-blur-sm border-0 shadow-soft">
+                <div className="p-8">
+                  <h2 className="text-2xl font-bold font-headline mb-6 text-primary">{section.title}</h2>
+                  <div className="space-y-4 text-muted-foreground leading-relaxed">
+                    {section.content.map((paragraph, paragraphIndex) => (
+                      <p key={paragraphIndex} className="text-base">{paragraph}</p>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Contact Information */}
+          <div className="mt-16">
+            <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-0 shadow-soft">
+              <div className="p-8 text-center">
+                <h3 className="text-2xl font-bold font-headline mb-4">Questions About These Terms?</h3>
+                <p className="text-muted-foreground mb-6">
+                  If you have any questions or concerns about these Terms of Service, please don't hesitate to contact us.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                  <a 
+                    href="mailto:support@localpro.asia" 
+                    className="inline-flex items-center justify-center px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    📧 support@localpro.asia
+                  </a>
+                  <a 
+                    href="tel:+639179157515" 
+                    className="inline-flex items-center justify-center px-6 py-3 border border-primary text-primary rounded-lg hover:bg-primary hover:text-primary-foreground transition-colors"
+                  >
+                    📞 +63 917 915 7515
+                  </a>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

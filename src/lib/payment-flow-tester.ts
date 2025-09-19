@@ -448,7 +448,7 @@ export class PaymentFlowTester {
 
       results.push({
         testName: 'HTTPS Configuration',
-        status: isHttps ? 'pass' : 'warning',
+        status: isHttps ? 'pass' : 'fail',
         message: isHttps ? 'HTTPS is properly configured' : 'HTTPS not configured - required for production',
         details: { appUrl, isHttps },
       });
@@ -464,13 +464,13 @@ export class PaymentFlowTester {
     const duration = Date.now() - startTime;
     const passedTests = results.filter(r => r.status === 'pass').length;
     const failedTests = results.filter(r => r.status === 'fail').length;
-    const warningTests = results.filter(r => r.status === 'warning').length;
+    const skippedTests = results.filter(r => r.status === 'skip').length;
 
     return {
       suiteName: 'Security Tests',
       results,
       overallStatus: failedTests === 0 ? 'pass' : 'partial',
-      summary: `${passedTests} passed, ${failedTests} failed, ${warningTests} warnings out of ${results.length} tests`,
+      summary: `${passedTests} passed, ${failedTests} failed, ${skippedTests} skipped out of ${results.length} tests`,
     };
   }
 

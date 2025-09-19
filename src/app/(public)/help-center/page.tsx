@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, MessageCircle, ArrowRight, Bot, Loader2, User, FilePenLine } from "lucide-react";
+import { Search, MessageCircle, ArrowRight, Bot, Loader2, User, FilePenLine, UserCheck, Building } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -250,69 +250,120 @@ export default function HelpCenterPage() {
   
   return (
     <Dialog>
-      <div className="container py-12 md:py-24 lg:py-32">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">{t('title')}</h1>
-          <p className="mt-6 text-lg leading-8 text-muted-foreground">
-            {t('subtitle')}
-          </p>
-           <div className="relative mt-8 max-w-lg mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                placeholder={t('searchPlaceholder')}
-                className="w-full rounded-full h-12 pl-12 pr-4 shadow-sm"
-              />
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+        {/* Header Section */}
+        <section className="relative py-20 overflow-hidden">
+          <div className="container relative z-10">
+            <div className="max-w-4xl mx-auto text-center space-y-8">
+              <h1 className="text-5xl md:text-6xl font-bold font-headline bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                {t('title')}
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                {t('subtitle')}
+              </p>
+              <div className="max-w-2xl mx-auto relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  placeholder={t('searchPlaceholder')}
+                  className="w-full rounded-full h-14 pl-12 pr-4 shadow-soft border-2 focus:border-primary transition-colors"
+                />
+              </div>
             </div>
-        </div>
-
-        <div className="mx-auto max-w-3xl space-y-12 mt-16">
-          <div>
-            <h2 className="text-2xl font-bold mb-6 text-center">{t('forClients')}</h2>
-            <Accordion type="single" collapsible className="w-full">
-              {clientFaqs.map((faq, index) => (
-                <AccordionItem value={`client-${index}`} key={index}>
-                  <AccordionTrigger className="text-lg text-left">{faq.question}</AccordionTrigger>
-                  <AccordionContent className="text-base text-muted-foreground">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
           </div>
-          
-          <div>
-            <h2 className="text-2xl font-bold mb-6 text-center">{t('forProviders')}</h2>
-             <Accordion type="single" collapsible className="w-full">
-              {providerFaqs.map((faq, index) => (
-                <AccordionItem value={`provider-${index}`} key={index}>
-                  <AccordionTrigger className="text-lg text-left">{faq.question}</AccordionTrigger>
-                  <AccordionContent className="text-base text-muted-foreground">
-                    {faq.answer}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+        </section>
+
+        <div className="container py-16">
+          <div className="max-w-4xl mx-auto space-y-16">
+            {/* Quick Help Cards */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <Card className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <UserCheck className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">For Clients</h3>
+                    <p className="text-muted-foreground text-sm">Find answers about booking services, payments, and more.</p>
+                  </div>
+                </div>
+              </Card>
+              
+              <Card className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 p-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                    <Building className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg mb-2">For Providers</h3>
+                    <p className="text-muted-foreground text-sm">Learn about becoming a provider, managing bookings, and payments.</p>
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* FAQ Sections */}
+            <div className="space-y-12">
+              <div>
+                <h2 className="text-3xl font-bold font-headline mb-8 text-center">{t('forClients')}</h2>
+                <Accordion type="single" collapsible className="w-full space-y-4">
+                  {clientFaqs.map((faq, index) => (
+                    <AccordionItem value={`client-${index}`} key={index} className="bg-background/60 backdrop-blur-sm border-0 shadow-soft rounded-xl px-6">
+                      <AccordionTrigger className="text-lg text-left hover:no-underline py-6">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-base text-muted-foreground pb-6 leading-relaxed">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+              
+              <div>
+                <h2 className="text-3xl font-bold font-headline mb-8 text-center">{t('forProviders')}</h2>
+                <Accordion type="single" collapsible className="w-full space-y-4">
+                  {providerFaqs.map((faq, index) => (
+                    <AccordionItem value={`provider-${index}`} key={index} className="bg-background/60 backdrop-blur-sm border-0 shadow-soft rounded-xl px-6">
+                      <AccordionTrigger className="text-lg text-left hover:no-underline py-6">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-base text-muted-foreground pb-6 leading-relaxed">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            </div>
           </div>
         </div>
         
-         <Card className="mt-20 max-w-3xl mx-auto bg-secondary">
-            <CardHeader className="text-center">
-              <Bot className="mx-auto h-12 w-12 text-primary mb-4" />
-              <CardTitle className="text-2xl">{t('stillNeedHelp')}</CardTitle>
-              <p className="text-muted-foreground">{t('aiAssistantDesc')}</p>
-            </CardHeader>
-            <CardContent className="flex justify-center gap-4">
-               <DialogTrigger asChild>
-                  <Button>
-                    {t('askAiAssistant')} <ArrowRight className="ml-2 h-4 w-4" />
+        {/* Support CTA */}
+        <section className="py-20 bg-gradient-to-b from-muted/50 to-background">
+          <div className="container">
+            <Card className="max-w-4xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5 border-0 shadow-soft">
+              <CardHeader className="text-center pb-8">
+                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Bot className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle className="text-3xl font-bold font-headline">{t('stillNeedHelp')}</CardTitle>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                  {t('aiAssistantDesc')}
+                </p>
+              </CardHeader>
+              <CardContent className="flex flex-col sm:flex-row justify-center gap-4 pb-8">
+                <DialogTrigger asChild>
+                  <Button size="lg" className="h-12 px-8 shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                    {t('askAiAssistant')} <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </DialogTrigger>
                 <CreateTicketDialog />
-            </CardContent>
-          </Card>
-
+              </CardContent>
+            </Card>
+          </div>
+        </section>
       </div>
-       <AiChatbot />
+      <AiChatbot />
     </Dialog>
   );
 }

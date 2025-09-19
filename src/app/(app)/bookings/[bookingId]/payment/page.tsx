@@ -193,8 +193,7 @@ export default function PaymentPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6 max-w-4xl mx-auto">
-                <Skeleton className="h-10 w-1/3" />
+            <div className="max-w-6xl mx-auto space-y-8 w-full">
                 <div className="grid md:grid-cols-2 gap-8">
                     <Skeleton className="h-96 w-full" />
                     <Skeleton className="h-80 w-full" />
@@ -209,31 +208,35 @@ export default function PaymentPage() {
     const isPaymentRejected = booking.status === 'Payment Rejected';
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
-            <div className="flex items-center gap-4">
-                <Button variant="outline" size="icon" onClick={() => router.push('/bookings')}>
+        <div className="max-w-6xl mx-auto space-y-8 w-full">
+            <div className="relative z-10 flex items-center gap-4">
+                <Button variant="outline" size="icon" onClick={() => router.push('/bookings')} className="hover:bg-primary/10 transition-colors">
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Payment Instructions</h1>
-                    <p className="text-muted-foreground">For booking: {booking.serviceName}</p>
+                    <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
+                        Payment Instructions
+                    </h1>
+                    <p className="text-xl text-muted-foreground leading-relaxed">
+                        For booking: {booking.serviceName}
+                    </p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Payment Details</CardTitle>
-                        <CardDescription>Please complete your payment using one of the methods below.</CardDescription>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payment Details</CardTitle>
+                        <CardDescription className="text-base">Please complete your payment using one of the methods below.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="p-4 rounded-lg bg-secondary text-center space-y-2">
-                             <p className="text-sm text-muted-foreground">Total Amount Due</p>
-                             <p className="text-4xl font-bold text-primary">₱{booking.price.toFixed(2)}</p>
-                             <div className="flex items-center justify-center gap-2 pt-2">
+                    <CardContent className="space-y-6 p-6">
+                        <div className="p-6 rounded-xl bg-gradient-to-r from-muted/50 to-muted/30 text-center space-y-3 border border-border/50 shadow-soft">
+                             <p className="text-sm text-muted-foreground font-medium">Total Amount Due</p>
+                             <p className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">₱{booking.price.toFixed(2)}</p>
+                             <div className="flex items-center justify-center gap-2 pt-3">
                                 <p className="text-sm text-muted-foreground">Booking ID:</p>
-                                <code className="font-mono text-sm p-1 rounded bg-background">{booking.id}</code>
-                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => handleCopy(booking.id)}>
+                                <code className="font-mono text-sm p-2 rounded-lg bg-background/80 border border-border/50 shadow-soft">{booking.id}</code>
+                                <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-primary/10 transition-colors" onClick={() => handleCopy(booking.id)}>
                                     {copied ? <Check className="h-4 w-4 text-green-500" /> : <ClipboardCopy className="h-4 w-4" />}
                                 </Button>
                              </div>
@@ -243,16 +246,16 @@ export default function PaymentPage() {
                         <div className="space-y-4">
                              <div className="flex items-center gap-3">
                                  <Wallet className="h-6 w-6 text-blue-500"/>
-                                <h3 className="font-semibold text-lg">GCash Payment</h3>
+                                <h3 className="font-semibold text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">GCash Payment</h3>
                             </div>
                             
                             <Tabs defaultValue="automated" className="w-full">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="automated" className="flex items-center gap-2">
+                                <TabsList className="grid w-full grid-cols-2 bg-background/80 backdrop-blur-sm shadow-soft border-0">
+                                    <TabsTrigger value="automated" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300">
                                         <Smartphone className="h-4 w-4" />
                                         Instant
                                     </TabsTrigger>
-                                    <TabsTrigger value="manual" className="flex items-center gap-2">
+                                    <TabsTrigger value="manual" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300">
                                         <Upload className="h-4 w-4" />
                                         Manual
                                     </TabsTrigger>
@@ -273,54 +276,58 @@ export default function PaymentPage() {
                                     />
                                 </TabsContent>
                                 
-                                <TabsContent value="manual" className="mt-4">
-                                    <div className="text-sm space-y-1">
-                                        <p><strong>Account Name:</strong> {PaymentConfig.GCASH.accountName}</p>
-                                        <p><strong>Account Number:</strong> {PaymentConfig.GCASH.accountNumber}</p>
-                                        <div className="w-32 h-32 mt-2"><QRCode/></div>
-                                        <p className="text-xs text-muted-foreground mt-2">
-                                            After payment, upload proof for manual verification
-                                        </p>
+                                <TabsContent value="manual" className="mt-6">
+                                    <div className="p-4 rounded-lg bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
+                                        <div className="text-sm space-y-2">
+                                            <p><strong>Account Name:</strong> {PaymentConfig.GCASH.accountName}</p>
+                                            <p><strong>Account Number:</strong> {PaymentConfig.GCASH.accountNumber}</p>
+                                            <div className="w-32 h-32 mt-3 mx-auto"><QRCode/></div>
+                                            <p className="text-xs text-muted-foreground mt-3 text-center">
+                                                After payment, upload proof for manual verification
+                                            </p>
+                                        </div>
                                     </div>
                                 </TabsContent>
                             </Tabs>
                         </div>
-                         <Separator />
+                         <Separator className="bg-border/50" />
                          <div className="space-y-4">
                             <div className="flex items-center gap-3">
                                 <Landmark className="h-6 w-6 text-indigo-700"/>
-                                <h3 className="font-semibold text-lg">Bank Transfer (BPI)</h3>
+                                <h3 className="font-semibold text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Bank Transfer (BPI)</h3>
                             </div>
-                            <div className="text-sm space-y-1 pl-9">
-                                <p><strong>Account Name:</strong> {PaymentConfig.BANK.accountName}</p>
-                                <p><strong>Account Number:</strong> {PaymentConfig.BANK.accountNumber}</p>
-                                {PaymentConfig.BANK.bankName && (
-                                    <p><strong>Bank:</strong> {PaymentConfig.BANK.bankName}</p>
-                                )}
+                            <div className="p-4 rounded-lg bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
+                                <div className="text-sm space-y-2">
+                                    <p><strong>Account Name:</strong> {PaymentConfig.BANK.accountName}</p>
+                                    <p><strong>Account Number:</strong> {PaymentConfig.BANK.accountNumber}</p>
+                                    {PaymentConfig.BANK.bankName && (
+                                        <p><strong>Bank:</strong> {PaymentConfig.BANK.bankName}</p>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Upload Proof of Payment</CardTitle>
-                        <CardDescription>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Upload Proof of Payment</CardTitle>
+                        <CardDescription className="text-base">
                             {isPaymentUploaded 
                                 ? "Your payment proof has been submitted."
                                 : "After paying, please upload a screenshot or photo of your receipt."
                             }
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
+                    <CardContent className="space-y-4 p-6">
                          {isPaymentRejected ? (
                              <div className="space-y-4 text-center">
-                                 <div className="relative aspect-video w-full rounded-md overflow-hidden border">
+                                 <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-border/50 shadow-soft">
                                     <Image src={booking.paymentProofUrl || "https://placehold.co/600x400.png"} alt="Payment proof" layout="fill" className="object-contain"/>
                                 </div>
-                                <Badge variant="destructive">Status: {booking.status}</Badge>
+                                <Badge variant="destructive" className="shadow-soft">Status: {booking.status}</Badge>
                                 {booking.paymentRejectionReason && (
-                                    <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg shadow-soft">
                                         <p className="text-sm text-red-800"><strong>Rejection Reason:</strong> {booking.paymentRejectionReason}</p>
                                     </div>
                                 )}
@@ -329,40 +336,41 @@ export default function PaymentPage() {
                                     setPaymentProofFile(null);
                                     setPaymentProofPreview(null);
                                     if (fileInputRef.current) fileInputRef.current.value = '';
-                                }} className="w-full">
+                                }} className="w-full shadow-glow hover:shadow-glow/50 transition-all duration-300">
                                     Upload New Payment Proof
                                 </Button>
                              </div>
                          ) : isPaymentUploaded && booking.paymentProofUrl ? (
                              <div className="space-y-4 text-center">
-                                 <div className="relative aspect-video w-full rounded-md overflow-hidden border">
+                                 <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-border/50 shadow-soft">
                                     <Image src={booking.paymentProofUrl} alt="Payment proof" layout="fill" className="object-contain"/>
                                 </div>
-                                <Badge>Status: {booking.status}</Badge>
+                                <Badge className="shadow-soft">Status: {booking.status}</Badge>
                                 <p className="text-sm text-muted-foreground">An admin will verify your payment shortly.</p>
                              </div>
                          ) : (
                             <div className="space-y-4">
-                                <div className="aspect-video w-full rounded-md border-2 border-dashed flex items-center justify-center bg-muted/50 overflow-hidden">
+                                <div className="aspect-video w-full rounded-lg border-2 border-dashed border-border/50 flex items-center justify-center bg-gradient-to-r from-muted/30 to-muted/20 overflow-hidden shadow-soft">
                                      {paymentProofPreview ? (
                                         <Image src={paymentProofPreview} alt="Payment proof preview" layout="fill" className="object-contain"/>
                                     ) : (
-                                        <div className="text-center text-muted-foreground p-4">
-                                            <Upload className="h-8 w-8 mx-auto mb-2"/>
-                                            <p>Select a file to upload</p>
+                                        <div className="text-center text-muted-foreground p-6">
+                                            <Upload className="h-12 w-12 mx-auto mb-3 text-primary opacity-60"/>
+                                            <p className="text-lg font-medium">Select a file to upload</p>
+                                            <p className="text-sm mt-1">Screenshot or photo of your payment receipt</p>
                                         </div>
                                     )}
                                 </div>
-                                <Input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="text-sm" />
-                                 <Button className="w-full" onClick={handleUploadProof} disabled={isUploading || !paymentProofFile}>
+                                <Input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="text-sm bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft" />
+                                 <Button className="w-full shadow-glow hover:shadow-glow/50 transition-all duration-300" onClick={handleUploadProof} disabled={isUploading || !paymentProofFile}>
                                     {isUploading ? <Loader2 className="mr-2 animate-spin"/> : <Upload className="mr-2"/>}
                                     {isUploading ? 'Uploading...' : 'Submit Proof of Payment'}
                                 </Button>
                             </div>
                          )}
-                         <Alert variant="default" className="bg-blue-50 border-blue-200 text-blue-800">
+                         <Alert variant="default" className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 text-blue-800 shadow-soft">
                             <Info className="h-4 w-4 !text-blue-700"/>
-                            <AlertTitle>Important</AlertTitle>
+                            <AlertTitle className="font-headline">Important</AlertTitle>
                             <AlertDescription>
                                 Your booking will only be confirmed and scheduled once an administrator has verified your payment. You will receive a notification upon confirmation.
                             </AlertDescription>

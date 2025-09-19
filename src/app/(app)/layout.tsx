@@ -44,6 +44,7 @@ import {
   LifeBuoy,
   Users,
   Handshake,
+  Bell,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -88,12 +89,12 @@ const SidebarSupportChat = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <SidebarMenuButton className="w-full justify-start gap-2 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200">
-          <MessageSquare className="h-4 w-4" />
-          <span className="group-data-[collapsible=icon]:hidden">Support Chat</span>
+        <SidebarMenuButton className="w-full justify-start gap-3 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 group">
+          <MessageSquare className="h-5 w-5 group-hover:scale-110 transition-transform" />
+          <span className="group-data-[collapsible=icon]:hidden font-medium">Support Chat</span>
         </SidebarMenuButton>
       </PopoverTrigger>
-      <PopoverContent className="w-80 sm:w-96 p-0 flex flex-col h-[60vh] shadow-2xl border-0 bg-white/95 backdrop-blur-sm" side="right" align="start">
+      <PopoverContent className="w-80 sm:w-96 p-0 flex flex-col h-[60vh] shadow-glow border-0 bg-background/95 backdrop-blur-md" side="right" align="start">
         <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-blue-100">
           <h4 className="font-semibold text-center text-gray-900">AI Assistant</h4>
         </div>
@@ -125,12 +126,12 @@ const SuccessTips = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <SidebarMenuButton className="w-full justify-start gap-2 hover:bg-yellow-50 hover:text-yellow-700 transition-colors duration-200">
-          <Lightbulb className="h-4 w-4" />
-          <span className="group-data-[collapsible=icon]:hidden">{t('tipsForSuccess')}</span>
+        <SidebarMenuButton className="w-full justify-start gap-3 hover:bg-yellow-50 hover:text-yellow-700 transition-all duration-200 group">
+          <Lightbulb className="h-5 w-5 group-hover:scale-110 transition-transform" />
+          <span className="group-data-[collapsible=icon]:hidden font-medium">{t('tipsForSuccess')}</span>
         </SidebarMenuButton>
       </PopoverTrigger>
-      <PopoverContent className="w-80 shadow-2xl border-0 bg-white/95 backdrop-blur-sm" side="right" align="start">
+      <PopoverContent className="w-80 shadow-glow border-0 bg-background/95 backdrop-blur-md" side="right" align="start">
         <div className="grid gap-4">
           <div className="space-y-2">
             <h4 className="font-semibold leading-none text-gray-900">{t('tipsForSuccess')}</h4>
@@ -170,10 +171,10 @@ const EmergencyHotlineButton = () => {
   const t = useTranslations('AppLayout');
   
   return (
-    <SidebarMenuButton asChild className="w-full justify-start gap-2 hover:bg-red-50 hover:text-red-700 transition-colors duration-200">
-      <a href="tel:911" className="flex items-center gap-2 w-full">
-        <Phone className="h-4 w-4" />
-        <span className="group-data-[collapsible=icon]:hidden">{t('emergencyHotline')}</span>
+    <SidebarMenuButton asChild className="w-full justify-start gap-3 hover:bg-red-50 hover:text-red-700 transition-all duration-200 group">
+      <a href="tel:911" className="flex items-center gap-3 w-full">
+        <Phone className="h-5 w-5 group-hover:scale-110 transition-transform" />
+        <span className="group-data-[collapsible=icon]:hidden font-medium">{t('emergencyHotline')}</span>
       </a>
     </SidebarMenuButton>
   );
@@ -256,316 +257,360 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
+      <Sidebar className="border-r-0 bg-background/80 backdrop-blur-md shadow-soft">
+        <SidebarHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20 p-6">
           <div className="flex items-center justify-between">
             <Logo />
             <div className="group-data-[collapsible=icon]:hidden">
-              <SidebarTrigger />
+              <SidebarTrigger className="hover:bg-primary/10 transition-colors" />
             </div>
           </div>
         </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={isActive(dashboardPath) && (pathname === dashboardPath)}>
-                <Link href={dashboardPath}>
-                  <LayoutDashboard />
-                  <span>{t('dashboard')}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            
+        <SidebarContent className="px-4">
+          <div className="space-y-6">
+            {/* Home & Overview */}
+            <div className="space-y-2">
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                Overview
+              </h3>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive(dashboardPath) && (pathname === dashboardPath)} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                    <Link href={dashboardPath} className="flex items-center gap-3 px-3 py-2">
+                      <LayoutDashboard className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                      <span className="font-medium">Dashboard</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </div>
+
+            {/* Work & Services */}
             {(userRole !== 'admin') && (
-              <>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/calendar")}>
-                    <Link href="/calendar">
-                      <Calendar />
-                      <span>{t('calendar')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/bookings")}>
-                    <Link href="/bookings">
-                      <Briefcase />
-                      <span>{t('bookings')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/messages")}>
-                    <Link href="/messages">
-                      <MessageSquare />
-                      <span>{t('messages')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </>
-            )}
-            
-            {(userRole === 'provider' || userRole === 'agency') && (
-              <>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/subscription")}>
-                    <Link href="/subscription">
-                      <Star />
-                      <span>{t('subscription')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-
-                {userRole === 'agency' && (
-                  <>
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  {userRole === 'client' ? 'My Services' : 'Work & Jobs'}
+                </h3>
+                <SidebarMenu>
+                  {userRole === 'provider' && (
                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/manage-providers")}>
-                        <Link href="/manage-providers">
-                          <Users2 />
-                          <span>{t('manageProviders')}</span>
+                      <SidebarMenuButton asChild isActive={isActive("/jobs")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                        <Link href="/jobs" className="flex items-center gap-3 px-3 py-2">
+                          <Search className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">Find Work</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
-                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/reports")}>
-                        <Link href="/reports">
-                          <FilePieChart />
-                          <span>{t('reports')}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </>
-                )}
-
-                {userRole === 'provider' && (
-                  <>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/services")}>
-                        <Link href="/services">
-                          <BriefcaseBusiness />
-                          <span>{t('myServices')}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                     <SidebarMenuItem>
-                        <SidebarMenuButton asChild isActive={isActive("/jobs")}>
-                            <Link href="/jobs">
-                                <Search />
-                                <span>{t('findWork')}</span>
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </>
-                )}
-
-
-                {isPaidSubscriber && (
+                  )}
+                  
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/smart-rate")}>
-                      <Link href="/smart-rate">
-                        <Sparkles />
-                        <span>{t('smartRate')}</span>
+                    <SidebarMenuButton asChild isActive={isActive("/bookings")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/bookings" className="flex items-center gap-3 px-3 py-2">
+                        <Briefcase className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">
+                          {userRole === 'client' ? 'My Bookings' : 'My Jobs'}
+                        </span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                )}
-                {isProOrElite && (
-                   <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/invoices")}>
-                        <Link href="/invoices">
-                          <FileText />
-                          <span>{t('invoices')}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                )}
-                 {isPaidSubscriber && (userRole === 'provider' || userRole === 'agency') && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/earnings")}>
-                        <Link href="/earnings">
-                          <DollarSign />
-                          <span>{t('earnings')}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                )}
-                {isElite && (
-                  <>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/quote-builder")}>
-                        <Link href="/quote-builder">
-                          <Calculator />
-                          <span>{t('quoteBuilder')}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/analytics")}>
-                        <Link href="/analytics">
-                          <BarChart2 />
-                          <span>{t('analytics')}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </>
-                )}
-              </>
+
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/calendar")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/calendar" className="flex items-center gap-3 px-3 py-2">
+                        <Calendar className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Schedule</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </div>
             )}
 
-             {userRole === 'admin' && (
-              <>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/users")}>
-                    <Link href="/admin/users">
-                      <Users2 />
-                      <span>{t('users')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/conversations")}>
-                    <Link href="/admin/conversations">
-                      <MessageSquare />
-                      <span>{t('conversations')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/tickets")}>
-                    <Link href="/admin/tickets">
-                      <LifeBuoy />
-                      <span>{t('supportTickets')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/broadcast")}>
-                    <Link href="/admin/broadcast">
-                      <Radio />
-                      <span>{t('broadcast')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/ads")}>
-                    <Link href="/admin/ads">
-                      <Megaphone />
-                      <span>{t('adManagement')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/bookings")}>
-                    <Link href="/admin/bookings">
-                      <Briefcase />
-                      <span>{t('bookings')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/jobs")}>
-                    <Link href="/admin/jobs">
-                      <BriefcaseBusiness />
-                      <span>{t('jobPosts')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/moderation")}>
-                    <Link href="/admin/moderation">
-                      <Flag />
-                      <span>{t('moderation')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/payouts")}>
-                    <Link href="/admin/payouts">
-                      <Wallet />
-                      <span>{t('payouts')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/transactions")}>
-                    <Link href="/admin/transactions">
-                      <Receipt />
-                      <span>{t('transactions')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/reports")}>
-                    <Link href="/admin/reports">
-                      <FilePieChart />
-                      <span>{t('platformReports')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/client-reports")}>
-                    <Link href="/admin/client-reports">
-                      <Users />
-                      <span>{t('clientReports')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/backup")}>
-                    <Link href="/admin/backup">
-                      <DatabaseBackup />
-                      <span>{t('dataBackup')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/security-logs")}>
-                    <Link href="/admin/security-logs">
-                      <Shield />
-                      <span>{t('securityLogs')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/subscriptions")}>
-                    <Link href="/admin/subscriptions">
-                      <Star />
-                      <span>{t('subscriptions')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/categories")}>
-                    <Link href="/admin/categories">
-                      <Shapes />
-                      <span>{t('categories')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/rewards")}>
-                    <Link href="/admin/rewards">
-                      <Gift />
-                      <span>{t('rewards')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={isActive("/admin/settings")}>
-                    <Link href="/admin/settings">
-                      <Settings />
-                      <span>{t('settings')}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </>
-              )}
+            {/* Communication */}
+            {(userRole !== 'admin') && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  Communication
+                </h3>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/messages")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/messages" className="flex items-center gap-3 px-3 py-2">
+                        <MessageSquare className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Messages</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/notifications")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/notifications" className="flex items-center gap-3 px-3 py-2">
+                        <Bell className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Notifications</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </div>
+            )}
+            
+            {/* Business Tools */}
+            {(userRole === 'provider' || userRole === 'agency') && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  Business Tools
+                </h3>
+                <SidebarMenu>
+                  {userRole === 'provider' && (
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/services")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                        <Link href="/services" className="flex items-center gap-3 px-3 py-2">
+                          <BriefcaseBusiness className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">My Services</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )}
 
-          </SidebarMenu>
+                  {userRole === 'agency' && (
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/manage-providers")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                        <Link href="/manage-providers" className="flex items-center gap-3 px-3 py-2">
+                          <Users2 className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">My Team</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )}
+
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/subscription")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/subscription" className="flex items-center gap-3 px-3 py-2">
+                        <Star className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Upgrade Plan</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </div>
+            )}
+
+            {/* Earnings & Analytics */}
+            {(userRole === 'provider' || userRole === 'agency') && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  Earnings & Reports
+                </h3>
+                <SidebarMenu>
+                  {isPaidSubscriber && (userRole === 'provider' || userRole === 'agency') && (
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/earnings")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                        <Link href="/earnings" className="flex items-center gap-3 px-3 py-2">
+                          <DollarSign className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">Earnings</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )}
+
+                  {userRole === 'agency' && (
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/reports")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                        <Link href="/reports" className="flex items-center gap-3 px-3 py-2">
+                          <FilePieChart className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">Reports</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )}
+
+                  {isProOrElite && (
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/invoices")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                        <Link href="/invoices" className="flex items-center gap-3 px-3 py-2">
+                          <FileText className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">Invoices</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )}
+                </SidebarMenu>
+              </div>
+            )}
+
+
+            {/* Premium Features */}
+            {(isPaidSubscriber || isElite) && (userRole === 'provider' || userRole === 'agency') && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  Premium Features
+                </h3>
+                <SidebarMenu>
+                  {isPaidSubscriber && (
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/smart-rate")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                        <Link href="/smart-rate" className="flex items-center gap-3 px-3 py-2">
+                          <Sparkles className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">Smart Pricing</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )}
+
+                  {isElite && (
+                    <>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/quote-builder")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/quote-builder" className="flex items-center gap-3 px-3 py-2">
+                            <Calculator className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Quote Builder</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/analytics")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/analytics" className="flex items-center gap-3 px-3 py-2">
+                            <BarChart2 className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Analytics</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </>
+                  )}
+                </SidebarMenu>
+              </div>
+            )}
+
+            {/* Admin Panel */}
+            {userRole === 'admin' && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  Platform Management
+                </h3>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/users")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/users" className="flex items-center gap-3 px-3 py-2">
+                        <Users2 className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Users</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/bookings")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/bookings" className="flex items-center gap-3 px-3 py-2">
+                        <Briefcase className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Bookings</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/jobs")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/jobs" className="flex items-center gap-3 px-3 py-2">
+                        <BriefcaseBusiness className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Job Posts</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/payouts")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/payouts" className="flex items-center gap-3 px-3 py-2">
+                        <Wallet className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Payouts</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </div>
+            )}
+
+            {userRole === 'admin' && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  Support & Moderation
+                </h3>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/tickets")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/tickets" className="flex items-center gap-3 px-3 py-2">
+                        <LifeBuoy className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Support Tickets</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/conversations")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/conversations" className="flex items-center gap-3 px-3 py-2">
+                        <MessageSquare className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Messages</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/moderation")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/moderation" className="flex items-center gap-3 px-3 py-2">
+                        <Flag className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Moderation</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </div>
+            )}
+
+            {userRole === 'admin' && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  Reports & Analytics
+                </h3>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/reports")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/reports" className="flex items-center gap-3 px-3 py-2">
+                        <FilePieChart className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Platform Reports</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/transactions")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/transactions" className="flex items-center gap-3 px-3 py-2">
+                        <Receipt className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Transactions</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </div>
+            )}
+
+            {userRole === 'admin' && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  System Settings
+                </h3>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/settings")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/settings" className="flex items-center gap-3 px-3 py-2">
+                        <Settings className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Settings</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/security-logs")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/security-logs" className="flex items-center gap-3 px-3 py-2">
+                        <Shield className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Security</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </div>
+            )}
+          </div>
         </SidebarContent>
-        <SidebarFooter>
+        <SidebarFooter className="border-t border-border/50 bg-gradient-to-r from-background/50 to-muted/20 p-4">
           <SidebarMenu>
             {userRole !== 'admin' && (
               <SidebarMenuItem>
@@ -583,9 +628,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem>
               <SidebarMenuButton 
                 onClick={handleLogout}
-                className="w-full justify-start gap-2 hover:bg-red-50 hover:text-red-700 border-t border-gray-200 mt-2 pt-3 transition-colors duration-200 font-medium"
+                className="w-full justify-start gap-3 hover:bg-red-50 hover:text-red-700 transition-all duration-200 font-medium group"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-5 w-5 group-hover:scale-110 transition-transform" />
                 <span className="group-data-[collapsible=icon]:hidden">{t('logout')}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -593,32 +638,32 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-         <header className="flex h-16 items-center justify-between border-b px-6 sticky top-0 bg-background/95 z-40">
+         <header className="flex h-16 items-center justify-between border-b border-border/50 px-6 sticky top-0 bg-background/80 backdrop-blur-md z-40 shadow-soft">
           <div className="md:hidden">
-            <SidebarTrigger />
+            <SidebarTrigger className="hover:bg-primary/10 transition-colors" />
           </div>
-          <div className="flex-1 text-center font-semibold text-lg md:text-left capitalize">
+          <div className="flex-1 text-center font-headline text-xl md:text-left capitalize bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
             {getPageTitle(pathname)}
           </div>
            <div className="flex items-center gap-4">
             {userRole === 'provider' && (
-              <Button asChild variant="secondary">
-                <Link href="/jobs">
-                  <Search className="mr-2" />
+              <Button asChild variant="secondary" className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
+                <Link href="/jobs" className="flex items-center gap-2">
+                  <Search className="h-4 w-4" />
                   <span>{t('findJobs')}</span>
                 </Link>
               </Button>
             )}
             {(userRole === 'client' || userRole === 'agency') && (
-              <Button asChild>
-                <Link href="/post-a-job">
-                  <PlusCircle className="mr-2" />
+              <Button asChild className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                <Link href="/post-a-job" className="flex items-center gap-2">
+                  <PlusCircle className="h-4 w-4" />
                   <span>{t('postAJob')}</span>
                 </Link>
               </Button>
             )}
             <NotificationBell />
-            <Button asChild variant="ghost" size="icon">
+            <Button asChild variant="ghost" size="icon" className="hover:bg-primary/10 transition-colors">
               <Link href="/help-center">
                 <LifeBuoy className="h-5 w-5" />
                 <span className="sr-only">{t('helpCenter')}</span>
@@ -626,7 +671,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="hover:bg-primary/10 transition-colors">
                   <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                   <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                   <span className="sr-only">{t('toggleTheme')}</span>
@@ -647,16 +692,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary/10 transition-colors">
+                  <Avatar className="border-2 border-primary/20 shadow-soft">
                     <AvatarImage src={user.photoURL || ''} alt="User avatar" />
-                    <AvatarFallback>{getAvatarFallback(user.displayName)}</AvatarFallback>
+                    <AvatarFallback className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">{getAvatarFallback(user.displayName)}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{user.displayName || 'User'}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
+              <DropdownMenuContent align="end" className="shadow-glow border-0 bg-background/95 backdrop-blur-md">
+                <DropdownMenuLabel className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{user.displayName || 'User'}</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-border/50" />
                 <DropdownMenuItem asChild>
                   <Link href={'/profile'}>
                     <User className="mr-2 h-4 w-4" />
@@ -712,7 +757,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         <BroadcastBanner />
-        <main className="flex-1 p-6 relative">
+        <main className="flex-1 p-6 relative bg-gradient-to-br from-background via-background to-muted/20 min-h-screen">
             {children}
         </main>
       </SidebarInset>
