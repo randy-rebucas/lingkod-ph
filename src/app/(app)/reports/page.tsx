@@ -203,7 +203,7 @@ export default function ReportsPage() {
 
      if (!isAgencyPaidSubscriber) {
         return (
-            <div className="space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
                  <div>
                     <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                     <p className="text-muted-foreground">{t('subtitle')}</p>
@@ -227,7 +227,7 @@ export default function ReportsPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
                 <Skeleton className="h-10 w-1/3" />
                 <Skeleton className="h-4 w-2/3" />
                 <div className="grid gap-6 md:grid-cols-3">
@@ -246,7 +246,7 @@ export default function ReportsPage() {
         : t('basicDescription');
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-6xl mx-auto space-y-8">
              <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold font-headline">{pageTitle}</h1>

@@ -12,7 +12,7 @@ type UserRole = 'client' | 'provider' | 'agency' | 'admin' | 'partner' | null;
 
 type UserSubscription = {
     planId: 'starter' | 'pro' | 'elite' | 'free' | 'lite' | 'custom';
-    status: 'active' | 'cancelled' | 'none' | 'pending';
+    status: 'active' | 'cancelled' | 'none' | 'pending' | 'pending_verification' | 'rejected';
     renewsOn: Timestamp | null;
 } | null;
 

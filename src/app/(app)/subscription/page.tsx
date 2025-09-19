@@ -6,10 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CheckCircle, Mail, Star, Check, Clock } from "lucide-react";
+import { CheckCircle, Mail, Star, Check, Clock, CreditCard, Smartphone, XCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PayPalCheckoutButton } from "@/components/paypal-checkout-button";
+import { ManualPaymentVerification } from "@/components/manual-payment-verification";
 import PaymentHistory from "./payment-history";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { db } from "@/lib/firebase";
@@ -130,19 +132,46 @@ export default function SubscriptionPage() {
                                                 {t('choosePlan')}
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent>
+                                        <DialogContent className="max-w-2xl">
                                             <DialogHeader>
                                                 <DialogTitle>{t('subscribeTo', { planName: tier.name })}</DialogTitle>
                                                 <DialogDescription>{t('choosePaymentMethod')}</DialogDescription>
                                             </DialogHeader>
-                                            <PayPalCheckoutButton 
-                                                plan={tier} 
-                                                onPaymentStart={() => setPaymentDialog(true)}
-                                                onPaymentSuccess={() => {
-                                                    setPaymentDialog(false)
-                                                    handleRoleUpgrade('provider');
-                                                }}
-                                            />
+                                            <Tabs defaultValue="paypal" className="w-full">
+                                                <TabsList className="grid w-full grid-cols-2">
+                                                    <TabsTrigger value="paypal" className="flex items-center gap-2">
+                                                        <CreditCard className="h-4 w-4" />
+                                                        PayPal (Instant)
+                                                    </TabsTrigger>
+                                                    <TabsTrigger value="manual" className="flex items-center gap-2">
+                                                        <Smartphone className="h-4 w-4" />
+                                                        Manual Payment
+                                                    </TabsTrigger>
+                                                </TabsList>
+                                                <TabsContent value="paypal" className="mt-4">
+                                                    <PayPalCheckoutButton 
+                                                        plan={tier} 
+                                                        onPaymentStart={() => setPaymentDialog(true)}
+                                                        onPaymentSuccess={() => {
+                                                            setPaymentDialog(false)
+                                                            handleRoleUpgrade('provider');
+                                                        }}
+                                                    />
+                                                </TabsContent>
+                                                <TabsContent value="manual" className="mt-4">
+                                                    <ManualPaymentVerification 
+                                                        plan={{
+                                                            id: tier.id,
+                                                            name: tier.name,
+                                                            price: typeof tier.price === 'number' ? tier.price : 0,
+                                                            type: tier.type
+                                                        }}
+                                                        onPaymentSubmitted={() => {
+                                                            setPaymentDialog(false);
+                                                        }}
+                                                    />
+                                                </TabsContent>
+                                            </Tabs>
                                         </DialogContent>
                                     </Dialog>
                                 )}
@@ -205,19 +234,46 @@ export default function SubscriptionPage() {
                                                 {t('choosePlan')}
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent>
+                                        <DialogContent className="max-w-2xl">
                                             <DialogHeader>
                                                 <DialogTitle>{t('subscribeTo', { planName: tier.name })}</DialogTitle>
                                                 <DialogDescription>{t('choosePaymentMethod')}</DialogDescription>
                                             </DialogHeader>
-                                            <PayPalCheckoutButton 
-                                                plan={tier} 
-                                                onPaymentStart={() => setPaymentDialog(true)}
-                                                onPaymentSuccess={() => {
-                                                    setPaymentDialog(false);
-                                                    handleRoleUpgrade('agency');
-                                                }}
-                                            />
+                                            <Tabs defaultValue="paypal" className="w-full">
+                                                <TabsList className="grid w-full grid-cols-2">
+                                                    <TabsTrigger value="paypal" className="flex items-center gap-2">
+                                                        <CreditCard className="h-4 w-4" />
+                                                        PayPal (Instant)
+                                                    </TabsTrigger>
+                                                    <TabsTrigger value="manual" className="flex items-center gap-2">
+                                                        <Smartphone className="h-4 w-4" />
+                                                        Manual Payment
+                                                    </TabsTrigger>
+                                                </TabsList>
+                                                <TabsContent value="paypal" className="mt-4">
+                                                    <PayPalCheckoutButton 
+                                                        plan={tier} 
+                                                        onPaymentStart={() => setPaymentDialog(true)}
+                                                        onPaymentSuccess={() => {
+                                                            setPaymentDialog(false);
+                                                            handleRoleUpgrade('agency');
+                                                        }}
+                                                    />
+                                                </TabsContent>
+                                                <TabsContent value="manual" className="mt-4">
+                                                    <ManualPaymentVerification 
+                                                        plan={{
+                                                            id: tier.id,
+                                                            name: tier.name,
+                                                            price: typeof tier.price === 'number' ? tier.price : 0,
+                                                            type: tier.type
+                                                        }}
+                                                        onPaymentSubmitted={() => {
+                                                            setPaymentDialog(false);
+                                                        }}
+                                                    />
+                                                </TabsContent>
+                                            </Tabs>
                                         </DialogContent>
                                     </Dialog>
                                 )}
@@ -232,12 +288,20 @@ export default function SubscriptionPage() {
     const getPlanStatusDescription = () => {
         if (!subscription) return t('upgradeToPaidPlan');
 
+        if (subscription.status === 'pending_verification') {
+            return `Your ${currentPlanDetails?.name || 'subscription'} payment is pending verification. Our team will review your payment proof within 24 hours.`;
+        }
+
         if (subscription.status === 'pending') {
             return t('paymentPending', { planName: currentPlanDetails?.name || 'Unknown Plan' });
         }
 
         if (subscription.status === 'active' && subscription.renewsOn) {
             return t('planRenewsOn', { date: subscription.renewsOn.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) });
+        }
+
+        if (subscription.status === 'rejected') {
+            return `Your ${currentPlanDetails?.name || 'subscription'} payment was rejected. Please check the reason and resubmit your payment.`;
         }
 
         return t('upgradeToPaidPlan');
@@ -261,9 +325,25 @@ export default function SubscriptionPage() {
                         <Card className="bg-secondary">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
-                                    {subscription?.status === 'pending' ? <Clock className="text-yellow-500"/> : <Star className="text-primary"/>}
+                                    {subscription?.status === 'pending' || subscription?.status === 'pending_verification' ? 
+                                        <Clock className="text-yellow-500"/> : 
+                                        subscription?.status === 'rejected' ? 
+                                        <XCircle className="text-red-500"/> :
+                                        <Star className="text-primary"/>
+                                    }
                                     {currentPlanDetails ? t('youAreOnPlan', { planName: currentPlanDetails.name }) : t('youAreOnFreePlan')}
-                                    {subscription?.status && <Badge variant={subscription.status === 'pending' ? 'outline' : 'default'} className="capitalize">{subscription.status}</Badge>}
+                                    {subscription?.status && (
+                                        <Badge 
+                                            variant={
+                                                subscription.status === 'pending' || subscription.status === 'pending_verification' ? 'outline' :
+                                                subscription.status === 'rejected' ? 'destructive' :
+                                                'default'
+                                            } 
+                                            className="capitalize"
+                                        >
+                                            {subscription.status.replace('_', ' ')}
+                                        </Badge>
+                                    )}
                                 </CardTitle>
                                 <CardDescription>{getPlanStatusDescription()}</CardDescription>
                             </CardHeader>
@@ -276,6 +356,68 @@ export default function SubscriptionPage() {
                 <section>
                     <PaymentHistory />
                 </section>
+
+                {/* Subscription Features Status */}
+                {subscription && subscription.status === 'active' && currentPlanDetails && (
+                    <section>
+                        <h2 className="text-2xl font-bold font-headline mb-4">Your Subscription Features</h2>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <CheckCircle className="h-5 w-5 text-green-500" />
+                                    Active Features for {currentPlanDetails.name}
+                                </CardTitle>
+                                <CardDescription>
+                                    You now have access to all premium features for your subscription plan.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    {currentPlanDetails.features.map((feature, index) => (
+                                        <div key={index} className="flex items-center gap-2 p-3 bg-green-50 rounded-lg border border-green-200">
+                                            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                            <span className="text-sm text-green-800">{feature}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </section>
+                )}
+
+                {/* Pending Verification Status */}
+                {subscription && subscription.status === 'pending_verification' && (
+                    <section>
+                        <h2 className="text-2xl font-bold font-headline mb-4">Payment Verification Status</h2>
+                        <Card className="border-yellow-200 bg-yellow-50">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2 text-yellow-800">
+                                    <Clock className="h-5 w-5" />
+                                    Payment Under Review
+                                </CardTitle>
+                                <CardDescription className="text-yellow-700">
+                                    Your payment proof has been submitted and is being reviewed by our team.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-3 text-sm text-yellow-700">
+                                    <div className="flex items-center gap-2">
+                                        <CheckCircle className="h-4 w-4" />
+                                        <span>Payment proof uploaded successfully</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="h-4 w-4" />
+                                        <span>Awaiting admin verification (usually within 24 hours)</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Mail className="h-4 w-4" />
+                                        <span>You'll receive an email notification once verified</span>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </section>
+                )}
                 
                  <section>
                     <h2 className="text-2xl font-bold font-headline mb-4">{t('commissionPerCompletedService')}</h2>

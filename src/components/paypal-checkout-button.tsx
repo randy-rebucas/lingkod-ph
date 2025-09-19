@@ -57,7 +57,7 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
       steps: [
         t('gcashStep1'),
         t('gcashStep2'),
-        t('gcashStep3'),
+        t('gcashStep3', { amount: Number(plan.price).toFixed(2) }),
         t('gcashStep4'),
       ],
     },
@@ -69,7 +69,7 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
       steps: [
         t('mayaStep1'),
         t('mayaStep2'),
-        t('mayaStep3'),
+        t('mayaStep3', { amount: Number(plan.price).toFixed(2) }),
         t('mayaStep4'),
       ],
     },
@@ -236,8 +236,8 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
                 <p><strong>{t('accountNumber')}:</strong> {details.accountNumber}</p>
              </div>
             <ol className="text-left space-y-2 text-sm text-muted-foreground list-decimal list-inside">
-                {details.steps.map((step: string) => (
-                    <li key={step}>{step.replace('{amount}', Number(plan.price).toFixed(2))}</li>
+                {details.steps.map((step: string, index: number) => (
+                    <li key={index}>{step}</li>
                 ))}
             </ol>
             <Button className="w-full" onClick={handleLocalPayment} disabled={isProcessing}>
