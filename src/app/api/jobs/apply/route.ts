@@ -87,14 +87,10 @@ export async function POST(request: NextRequest) {
 
     // Log successful application
     await auditLogger.logAction(
-      providerId,
-      'provider',
       'job_application_successful',
+      providerId,
       'jobs',
-      jobId,
-      { ...metadata, jobTitle: jobData.title, clientId: jobData.clientId },
-      'medium',
-      true
+      { ...metadata, jobTitle: jobData.title, clientId: jobData.clientId, userRole: 'provider', jobId }
     );
 
     const response = NextResponse.json({ 
@@ -102,7 +98,7 @@ export async function POST(request: NextRequest) {
       message: 'Successfully applied to job' 
     });
     
-    addRateLimitHeaders(response, rateLimitResult);
+    addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.resetTime);
     return response;
 
   } catch (error) {

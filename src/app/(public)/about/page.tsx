@@ -35,72 +35,80 @@ export default function AboutPage() {
   const t = useTranslations('About');
   
   return (
-    <div className="container py-12 md:py-24 lg:py-32">
-      <div className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl font-headline">{t('title')}</h1>
-        <p className="mt-6 text-lg leading-8 text-muted-foreground">
-          {t('subtitle')}
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
 
-      <div className="mx-auto max-w-3xl space-y-16 mt-16">
-        <section className="text-center">
-            <Target className="mx-auto h-12 w-12 text-primary" />
-            <h2 className="mt-4 text-3xl font-bold font-headline">{t('mission')}</h2>
-            <p className="mt-4 text-muted-foreground leading-relaxed">
-                {t('missionDesc')}
+      <div className="container py-16">
+        <div className="mx-auto max-w-4xl space-y-20">
+          <section className="text-center">
+            <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-8">
+              <Target className="h-10 w-10 text-primary" />
+            </div>
+            <h2 className="text-4xl font-bold font-headline mb-6">{t('mission')}</h2>
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+              {t('missionDesc')}
             </p>
-        </section>
+          </section>
 
-        <section className="text-center">
-            <BookOpen className="mx-auto h-12 w-12 text-primary" />
-            <h2 className="mt-4 text-3xl font-bold font-headline">{t('story')}</h2>
-            <p className="mt-4 text-muted-foreground leading-relaxed">
-               {t('storyDesc')}
+          <section className="text-center">
+            <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-8">
+              <BookOpen className="h-10 w-10 text-primary" />
+            </div>
+            <h2 className="text-4xl font-bold font-headline mb-6">{t('story')}</h2>
+            <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+              {t('storyDesc')}
             </p>
-        </section>
+          </section>
+        </div>
       </div>
       
-      <section className="mt-20">
-         <div className="mx-auto mb-12 max-w-2xl text-center">
-            <h2 className="text-3xl font-bold font-headline">{t('whyChoose')}</h2>
-         </div>
-         <div className="mx-auto grid max-w-lg gap-8 lg:max-w-none lg:grid-cols-3">
-             {whyChooseUs.map((item) => (
-                <Card key={item.titleKey} className="flex flex-col items-center text-center p-6">
-                    {item.icon}
-                    <h3 className="mt-4 text-xl font-semibold">{t(item.titleKey)}</h3>
-                    <p className="mt-2 text-muted-foreground">{t(item.descriptionKey)}</p>
-                </Card>
-             ))}
-         </div>
+      <section className="py-20 bg-gradient-to-b from-muted/50 to-background">
+        <div className="container">
+          <div className="mx-auto mb-16 max-w-3xl text-center">
+            <h2 className="font-headline text-4xl font-bold md:text-5xl mb-6">{t('whyChoose')}</h2>
+          </div>
+          <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-3">
+            {whyChooseUs.map((item) => (
+              <Card key={item.titleKey} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 text-center p-8">
+                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
+                  {item.icon}
+                </div>
+                <h3 className="text-xl font-semibold mb-4">{t(item.titleKey)}</h3>
+                <p className="text-muted-foreground leading-relaxed">{t(item.descriptionKey)}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
       </section>
       
-       <section className="mt-20">
-        <Card className="max-w-3xl mx-auto bg-secondary">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">{t('joinMission')}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-muted-foreground mb-6">
+      <section className="py-20">
+        <div className="container">
+          <Card className="max-w-4xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5 border-0 shadow-soft">
+            <CardHeader className="text-center pb-8">
+              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Heart className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-3xl font-bold font-headline">{t('joinMission')}</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center pb-8">
+              <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
                 {t('joinMissionDesc')}
-            </p>
-            <div className="flex justify-center gap-4">
-                <Button asChild size="lg">
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Button asChild size="lg" className="h-12 px-8 shadow-glow hover:shadow-glow/50 transition-all duration-300">
                   <Link href="/careers">
-                    {t('viewCareers')} <ArrowRight className="ml-2" />
+                    {t('viewCareers')} <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline">
-                   <Link href="/partners">
+                <Button asChild size="lg" variant="outline" className="h-12 px-8 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                  <Link href="/partners">
                     {t('partnerWithUs')}
                   </Link>
                 </Button>
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </section>
-
     </div>
   );
 }

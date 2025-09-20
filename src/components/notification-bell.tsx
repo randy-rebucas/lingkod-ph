@@ -8,9 +8,10 @@ import { db } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, limit, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { formatDistanceToNow } from 'date-fns';
 
-import { Bell, Briefcase, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X, Star } from 'lucide-react';
+import { Bell, Briefcase, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X, Star, Eye } from 'lucide-react';
 import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
+import Link from 'next/link';
 import { handleInviteAction } from '@/app/(app)/profile/actions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -142,6 +143,17 @@ export function NotificationBell() {
                     ))
                 ) : (
                     <p className="p-4 text-sm text-center text-muted-foreground">{t('noNotifications')}</p>
+                )}
+                {notifications.length > 0 && (
+                    <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                            <Link href="/notifications" className="flex items-center justify-center w-full">
+                                <Eye className="h-4 w-4 mr-2" />
+                                {t('viewAllNotifications')}
+                            </Link>
+                        </DropdownMenuItem>
+                    </>
                 )}
             </DropdownMenuContent>
         </DropdownMenu>

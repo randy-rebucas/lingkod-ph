@@ -43,11 +43,11 @@ const renderStars = (rating: number) => {
 const getAvailabilityBadge = (status: Provider['availabilityStatus'], t: any) => {
     switch (status) {
         case 'available':
-            return <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">{t('available')}</Badge>;
+            return <Badge variant="default" className="bg-gradient-to-r from-green-100 to-green-200 text-green-800 border-green-200 shadow-soft">{t('available')}</Badge>;
         case 'limited':
-            return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 border-yellow-200">{t('limited')}</Badge>;
+            return <Badge variant="secondary" className="bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border-yellow-200 shadow-soft">{t('limited')}</Badge>;
         case 'unavailable':
-            return <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">{t('unavailable')}</Badge>;
+            return <Badge variant="destructive" className="bg-gradient-to-r from-red-100 to-red-200 text-red-800 border-red-200 shadow-soft">{t('unavailable')}</Badge>;
         default:
             return null;
     }
@@ -56,14 +56,14 @@ const getAvailabilityBadge = (status: Provider['availabilityStatus'], t: any) =>
 const ProviderCard = ({ provider }: { provider: Provider }) => {
     const t = useTranslations('MyFavorites');
     return (
-        <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col">
-            <CardHeader className="text-center">
-                 <Avatar className="h-24 w-24 mx-auto mb-4 border-2 border-primary">
+        <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
+            <CardHeader className="text-center pb-3">
+                 <Avatar className="h-16 w-16 mx-auto mb-3 border-2 border-primary/20 shadow-soft">
                     <AvatarImage src={provider.photoURL} alt={provider.displayName} />
-                    <AvatarFallback className="text-3xl">{getAvatarFallback(provider.displayName)}</AvatarFallback>
+                    <AvatarFallback className="text-lg bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">{getAvatarFallback(provider.displayName)}</AvatarFallback>
                 </Avatar>
                 <div className="flex items-center justify-center gap-2">
-                    <h3 className="text-xl font-bold">{provider.displayName}</h3>
+                    <h3 className="text-lg font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent group-hover:from-primary group-hover:to-accent transition-all duration-300">{provider.displayName}</h3>
                      {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus, t)}
                 </div>
                  {provider.reviewCount > 0 && (
@@ -73,11 +73,11 @@ const ProviderCard = ({ provider }: { provider: Provider }) => {
                     </div>
                 )}
             </CardHeader>
-            <CardContent className="flex-1 space-y-4">
-                <p className="text-sm text-muted-foreground mt-2 h-10 line-clamp-2">{provider.bio || t('noBioAvailable')}</p>
+            <CardContent className="flex-1 space-y-3 px-4">
+                <p className="text-sm text-muted-foreground line-clamp-2">{provider.bio || t('noBioAvailable')}</p>
             </CardContent>
-            <CardFooter>
-                 <Button className="w-full" asChild>
+            <CardFooter className="pt-2 px-4 pb-4">
+                 <Button className="w-full shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground" asChild>
                     <Link href={`/providers/${provider.uid}`}>{t('viewProfile')}</Link>
                 </Button>
             </CardFooter>
@@ -145,38 +145,41 @@ export default function MyFavoritesPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                    <p className="text-muted-foreground">{t('subtitle')}</p>
-                </div>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
+            <div className="max-w-6xl mx-auto space-y-8">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                <p className="text-muted-foreground">{t('subtitle')}</p>
-            </div>
+        <div className="max-w-6xl mx-auto space-y-8">
+                
+                <div className="relative z-10">
+                    <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
+                        {t('title')}
+                    </h1>
+                    <p className="text-xl text-muted-foreground leading-relaxed">
+                        {t('subtitle')}
+                    </p>
+                </div>
             
             {providers.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {providers.map(provider => (
                         <ProviderCard key={provider.uid} provider={provider} />
                     ))}
                 </div>
             ) : (
-                <Card>
-                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <Heart className="h-16 w-16 mb-4" />
-                        <h3 className="text-xl font-semibold">{t('noFavoritesYet')}</h3>
-                        <p>{t('noFavoritesDescription')}</p>
-                        <Button asChild className="mt-4">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardContent className="flex flex-col items-center justify-center text-center p-12">
+                        <Heart className="h-20 w-20 mb-6 text-primary opacity-60" />
+                        <div className="space-y-3">
+                            <h3 className="text-2xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noFavoritesYet')}</h3>
+                            <p className="text-lg text-muted-foreground max-w-md">{t('noFavoritesDescription')}</p>
+                        </div>
+                        <Button asChild className="mt-6 shadow-glow hover:shadow-glow/50 transition-all duration-300">
                             <Link href="/dashboard">{t('findProviders')}</Link>
                         </Button>
                     </CardContent>

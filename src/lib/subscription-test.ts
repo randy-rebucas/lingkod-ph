@@ -21,7 +21,7 @@ const mockSubscriptions = {
   free: { 
     id: 'free-1', 
     userId: 'user-1', 
-    planId: 'free', 
+    planId: 'free' as const, 
     status: 'active' as const, 
     startDate: new Date(), 
     renewsOn: undefined,
@@ -31,7 +31,7 @@ const mockSubscriptions = {
   pro: { 
     id: 'pro-1', 
     userId: 'user-1', 
-    planId: 'pro', 
+    planId: 'pro' as const, 
     status: 'active' as const, 
     startDate: new Date(), 
     renewsOn: undefined,
@@ -41,7 +41,7 @@ const mockSubscriptions = {
   elite: { 
     id: 'elite-1', 
     userId: 'user-1', 
-    planId: 'elite', 
+    planId: 'elite' as const, 
     status: 'active' as const, 
     startDate: new Date(), 
     renewsOn: undefined,
@@ -51,7 +51,7 @@ const mockSubscriptions = {
   lite: { 
     id: 'lite-1', 
     userId: 'user-1', 
-    planId: 'lite', 
+    planId: 'lite' as const, 
     status: 'active' as const, 
     startDate: new Date(), 
     renewsOn: undefined,
@@ -61,7 +61,7 @@ const mockSubscriptions = {
   custom: { 
     id: 'custom-1', 
     userId: 'user-1', 
-    planId: 'custom', 
+    planId: 'custom' as const, 
     status: 'active' as const, 
     startDate: new Date(), 
     renewsOn: undefined,
@@ -71,7 +71,7 @@ const mockSubscriptions = {
   cancelled: { 
     id: 'pro-1', 
     userId: 'user-1', 
-    planId: 'pro', 
+    planId: 'pro' as const, 
     status: 'cancelled' as const, 
     startDate: new Date(), 
     renewsOn: undefined,
@@ -81,7 +81,7 @@ const mockSubscriptions = {
   pending: { 
     id: 'pro-1', 
     userId: 'user-1', 
-    planId: 'pro', 
+    planId: 'pro' as const, 
     status: 'pending' as const, 
     startDate: new Date(), 
     renewsOn: undefined,

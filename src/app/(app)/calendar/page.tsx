@@ -28,10 +28,10 @@ type BookingEvent = {
 
 const getStatusClass = (status: BookingEvent['status']) => {
     switch (status) {
-        case "Upcoming": return "bg-blue-500 hover:bg-blue-600";
-        case "Completed": return "bg-green-500 hover:bg-green-600";
-        case "Cancelled": return "bg-red-500 hover:bg-red-600";
-        default: return "bg-gray-400 hover:bg-gray-500";
+        case "Upcoming": return "bg-gradient-to-r from-blue-500 to-blue-600 shadow-soft";
+        case "Completed": return "bg-gradient-to-r from-green-500 to-green-600 shadow-soft";
+        case "Cancelled": return "bg-gradient-to-r from-red-500 to-red-600 shadow-soft";
+        default: return "bg-gradient-to-r from-gray-400 to-gray-500 shadow-soft";
     }
 };
 
@@ -118,12 +118,8 @@ export default function CalendarPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                    <p className="text-muted-foreground">{t('loadingSchedule')}</p>
-                </div>
-                <Card>
+            <div className="max-w-6xl mx-auto space-y-8">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-6">
                         <Skeleton className="h-[75vh] w-full" />
                     </CardContent>
@@ -133,45 +129,59 @@ export default function CalendarPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                <p className="text-muted-foreground">{t('subtitle')}</p>
-            </div>
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="text-2xl font-bold">{format(currentDate, 'MMMM yyyy')}</CardTitle>
+        <div className="max-w-6xl mx-auto space-y-8">
+            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                    <CardTitle className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                        {format(currentDate, 'MMMM yyyy')}
+                    </CardTitle>
                     <div className="flex gap-2">
-                        <Button variant="outline" size="icon" onClick={prevMonth}><ChevronLeft /></Button>
-                        <Button variant="outline" onClick={() => setCurrentDate(new Date())}>{t('today')}</Button>
-                        <Button variant="outline" size="icon" onClick={nextMonth}><ChevronRight /></Button>
+                        <Button variant="outline" size="icon" onClick={prevMonth} className="hover:bg-primary/10 transition-colors">
+                            <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" onClick={() => setCurrentDate(new Date())} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
+                            {t('today')}
+                        </Button>
+                        <Button variant="outline" size="icon" onClick={nextMonth} className="hover:bg-primary/10 transition-colors">
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-7 text-center font-semibold text-muted-foreground">
-                        {[t('sun'), t('mon'), t('tue'), t('wed'), t('thu'), t('fri'), t('sat')].map(day => <div key={day}>{day}</div>)}
+                <CardContent className="p-6">
+                    <div className="grid grid-cols-7 text-center font-semibold text-muted-foreground mb-4">
+                        {[t('sun'), t('mon'), t('tue'), t('wed'), t('thu'), t('fri'), t('sat')].map(day => (
+                            <div key={day} className="py-2 text-sm font-medium">{day}</div>
+                        ))}
                     </div>
-                    <div className="grid grid-cols-7 grid-rows-5 gap-px border-t border-l mt-2">
+                    <div className="grid grid-cols-7 gap-1">
                         {calendarGrid.map((day, index) => {
                              const dayEvents = getEventsForDay(day);
                              return (
                                 <div 
                                     key={index}
-                                    className={cn("relative border-r border-b p-2 h-28 flex flex-col group", 
-                                        !isSameMonth(day, currentDate) && "bg-secondary/30 text-muted-foreground",
-                                        dayEvents.length > 0 && "cursor-pointer hover:bg-secondary"
+                                    className={cn("relative p-2 h-24 flex flex-col group rounded-lg transition-all duration-200", 
+                                        !isSameMonth(day, currentDate) && "bg-muted/20 text-muted-foreground",
+                                        isSameMonth(day, currentDate) && "hover:bg-primary/5",
+                                        dayEvents.length > 0 && "cursor-pointer hover:bg-primary/10 hover:shadow-soft"
                                     )}
                                     onClick={() => handleDayClick(day)}
                                 >
-                                    <span className={cn("font-medium", isToday(day) && "bg-primary text-primary-foreground rounded-full h-8 w-8 flex items-center justify-center")}>
+                                    <span className={cn("font-medium text-sm mb-1", 
+                                        isToday(day) && "bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold"
+                                    )}>
                                         {format(day, 'd')}
                                     </span>
-                                    <div className="mt-1 space-y-1 overflow-y-auto">
-                                        {dayEvents.map((event, eventIndex) => (
-                                            <div key={eventIndex} className={cn("text-xs text-white rounded px-1 truncate", getStatusClass(event.status))}>
+                                    <div className="flex-1 space-y-0.5 overflow-hidden">
+                                        {dayEvents.slice(0, 2).map((event, eventIndex) => (
+                                            <div key={eventIndex} className={cn("text-xs text-white rounded px-1 py-0.5 truncate shadow-sm", getStatusClass(event.status))}>
                                                 {event.title}
                                             </div>
                                         ))}
+                                        {dayEvents.length > 2 && (
+                                            <div className="text-xs text-muted-foreground font-medium">
+                                                +{dayEvents.length - 2} more
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                              )
@@ -181,21 +191,23 @@ export default function CalendarPage() {
             </Card>
 
              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent>
+                <DialogContent className="shadow-glow border-0 bg-background/95 backdrop-blur-md">
                     <DialogHeader>
-                        <DialogTitle>{t('bookingsFor', { date: selectedDayEvents.length > 0 ? format(selectedDayEvents[0].start, 'PPP') : '' })}</DialogTitle>
+                        <DialogTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                            {t('bookingsFor', { date: selectedDayEvents.length > 0 ? format(selectedDayEvents[0].start, 'PPP') : '' })}
+                        </DialogTitle>
                     </DialogHeader>
-                     <div className="space-y-4">
+                     <div className="space-y-3">
                         {selectedDayEvents.map((event, index) => (
-                            <div key={index} className="p-4 border rounded-lg">
-                                <p className="font-bold">{event.title}</p>
-                                 <p className="text-sm text-muted-foreground">
+                            <div key={index} className="p-4 border border-border/50 rounded-lg bg-gradient-to-r from-muted/30 to-muted/10 shadow-soft">
+                                <p className="font-bold text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{event.title}</p>
+                                 <p className="text-sm text-muted-foreground mt-1">
                                     {t('with', { name: userRole === 'client' ? event.providerName : event.clientName })}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
                                     {t('time', { time: format(event.start, 'p') })}
                                 </p>
-                                 <Badge className={cn("mt-2 text-white", getStatusClass(event.status))}>{t(event.status.toLowerCase())}</Badge>
+                                 <Badge className={cn("mt-3 text-white shadow-soft", getStatusClass(event.status))}>{t(event.status.toLowerCase())}</Badge>
                             </div>
                         ))}
                     </div>

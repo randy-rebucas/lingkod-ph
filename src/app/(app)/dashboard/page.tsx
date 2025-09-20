@@ -85,10 +85,10 @@ const renderStars = (rating: number) => {
 const DashboardCard = ({ title, icon: Icon, value, change, isLoading }: { title: string, icon: React.ElementType, value: string, change?: string, isLoading: boolean }) => {
     if (isLoading) {
         return (
-            <Card>
+            <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                    <Icon className="h-4 w-4 text-muted-foreground" />
+                    <Icon className="h-5 w-5 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                     <Skeleton className="h-8 w-24 mb-2" />
@@ -98,14 +98,14 @@ const DashboardCard = ({ title, icon: Icon, value, change, isLoading }: { title:
         );
     }
     return (
-        <Card>
+        <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{title}</CardTitle>
+                <Icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{value}</div>
-                {change && <p className="text-xs text-muted-foreground">{change}</p>}
+                <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{value}</div>
+                {change && <p className="text-xs text-muted-foreground mt-1">{change}</p>}
             </CardContent>
         </Card>
     )
@@ -176,62 +176,63 @@ const getAvatarFallback = (name: string | null | undefined) => {
 
 const ProviderCard = ({ provider, isFavorite, onToggleFavorite, t }: { provider: Provider; isFavorite: boolean; onToggleFavorite: (provider: Provider) => void; t: any; }) => {
     return (
-        <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col">
+        <Card className="transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-glow/20 flex flex-col border-0 bg-background/80 backdrop-blur-sm shadow-soft group">
             {provider.searchReasoning && (
                  <Alert className="border-0 border-b rounded-none bg-primary/10 text-primary-foreground">
                     <Info className="h-4 w-4 text-primary" />
                     <AlertDescription className="text-primary text-xs">{provider.searchReasoning}</AlertDescription>
                 </Alert>
             )}
-            <CardHeader className="text-center relative">
+            <CardHeader className="text-center relative pb-3">
                  <Button 
                     size="icon" 
                     variant="ghost" 
-                    className="absolute top-2 right-2 rounded-full h-8 w-8"
+                    className="absolute top-2 right-2 rounded-full h-6 w-6 hover:bg-primary/10 transition-colors"
                     onClick={() => onToggleFavorite(provider)}
                 >
-                    <Heart className={cn("h-5 w-5 text-muted-foreground", isFavorite && "fill-red-500 text-red-500")} />
+                    <Heart className={cn("h-4 w-4 text-muted-foreground transition-colors", isFavorite && "fill-red-500 text-red-500")} />
                 </Button>
-                 <Avatar className="h-24 w-24 mx-auto mb-4 border-2 border-primary">
+                 <Avatar className="h-16 w-16 mx-auto mb-3 border-2 border-primary shadow-soft">
                     <AvatarImage src={provider.photoURL} alt={provider.displayName} />
-                    <AvatarFallback className="text-3xl">{getAvatarFallback(provider.displayName)}</AvatarFallback>
+                    <AvatarFallback className="text-lg bg-gradient-to-r from-primary to-accent text-primary-foreground">{getAvatarFallback(provider.displayName)}</AvatarFallback>
                 </Avatar>
                 <div className="flex items-center justify-center gap-2">
-                    <h3 className="text-xl font-bold">{provider.displayName}</h3>
-                    {provider.isVerified && <ShieldCheck className="h-5 w-5 text-blue-500" />}
+                    <h3 className="text-lg font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{provider.displayName}</h3>
+                    {provider.isVerified && <ShieldCheck className="h-4 w-4 text-blue-500" />}
                 </div>
                  {provider.availabilityStatus && getAvailabilityBadge(provider.availabilityStatus, t)}
                  {provider.reviewCount > 0 && (
                      <div className="flex items-center justify-center gap-1 mt-1 text-muted-foreground">
                         {renderStars(provider.rating)}
-                        <span className="text-sm">({provider.reviewCount})</span>
+                        <span className="text-xs">({provider.reviewCount})</span>
                     </div>
                 )}
             </CardHeader>
-            <CardContent className="flex-1 space-y-4">
-               
+            <CardContent className="flex-1 space-y-2">
                  {provider.address && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        <span>{provider.address}</span>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        <span className="truncate">{provider.address}</span>
                     </div>
                 )}
 
                 {provider.keyServices && provider.keyServices.length > 0 && (
                     <div>
-                         <h4 className="font-semibold flex items-center gap-2 mb-2"><Briefcase className="h-4 w-4" /> Key Services</h4>
-                        <div className="flex flex-wrap gap-2">
-                            {provider.keyServices.map(service => (
-                                <Badge key={service} variant="secondary">{service}</Badge>
+                        <div className="flex flex-wrap gap-1">
+                            {provider.keyServices.slice(0, 2).map(service => (
+                                <Badge key={service} variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-xs px-1 py-0">{service}</Badge>
                             ))}
+                            {provider.keyServices.length > 2 && (
+                                <Badge variant="outline" className="text-xs px-1 py-0">+{provider.keyServices.length - 2}</Badge>
+                            )}
                         </div>
                     </div>
                 )}
 
-                <p className="text-sm text-muted-foreground mt-2 h-10 line-clamp-2">{provider.bio || 'No bio available.'}</p>
+                <p className="text-xs text-muted-foreground line-clamp-1">{provider.bio || 'No bio available.'}</p>
             </CardContent>
-            <CardFooter>
-                 <Button className="w-full" asChild>
+            <CardFooter className="pt-2">
+                 <Button size="sm" className="w-full shadow-glow hover:shadow-glow/50 transition-all duration-300" asChild>
                     <Link href={`/providers/${provider.uid}`}>View Profile</Link>
                 </Button>
             </CardFooter>
@@ -248,61 +249,62 @@ const AgencyCard = ({ agency, isFavorite, onToggleFavorite, t }: { agency: Provi
                     <AlertDescription className="text-purple-700 dark:text-purple-300 text-xs">{agency.searchReasoning}</AlertDescription>
                 </Alert>
             )}
-            <CardHeader className="text-center relative">
+            <CardHeader className="text-center relative pb-3">
                  <Button 
                     size="icon" 
                     variant="ghost" 
-                    className="absolute top-2 right-2 rounded-full h-8 w-8"
+                    className="absolute top-2 right-2 rounded-full h-6 w-6"
                     onClick={() => onToggleFavorite(agency)}
                 >
-                    <Heart className={cn("h-5 w-5 text-muted-foreground", isFavorite && "fill-red-500 text-red-500")} />
+                    <Heart className={cn("h-4 w-4 text-muted-foreground", isFavorite && "fill-red-500 text-red-500")} />
                 </Button>
                  <div className="relative">
-                    <Avatar className="h-24 w-24 mx-auto mb-4 border-2 border-gradient-to-r from-purple-500 to-blue-500">
+                    <Avatar className="h-16 w-16 mx-auto mb-3 border-2 border-gradient-to-r from-purple-500 to-blue-500">
                         <AvatarImage src={agency.photoURL} alt={agency.displayName} />
-                        <AvatarFallback className="text-3xl bg-gradient-to-r from-purple-500 to-blue-500 text-white">{getAvatarFallback(agency.displayName)}</AvatarFallback>
+                        <AvatarFallback className="text-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white">{getAvatarFallback(agency.displayName)}</AvatarFallback>
                     </Avatar>
-                    <Badge className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0">
-                        <Users2 className="h-3 w-3 mr-1" />
+                    <Badge className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 text-xs px-1 py-0">
+                        <Users2 className="h-2 w-2 mr-1" />
                         Agency
                     </Badge>
                 </div>
-                <div className="flex items-center justify-center gap-2 mt-4">
-                    <h3 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">{agency.displayName}</h3>
-                    {agency.isVerified && <ShieldCheck className="h-5 w-5 text-purple-500" />}
+                <div className="flex items-center justify-center gap-2 mt-3">
+                    <h3 className="text-lg font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">{agency.displayName}</h3>
+                    {agency.isVerified && <ShieldCheck className="h-4 w-4 text-purple-500" />}
                 </div>
                  {agency.availabilityStatus && getAvailabilityBadge(agency.availabilityStatus, t)}
                  {agency.reviewCount > 0 && (
                      <div className="flex items-center justify-center gap-1 mt-1 text-muted-foreground">
                         {renderStars(agency.rating)}
-                        <span className="text-sm">({agency.reviewCount})</span>
+                        <span className="text-xs">({agency.reviewCount})</span>
                     </div>
                 )}
             </CardHeader>
-            <CardContent className="flex-1 space-y-4">
-               
+            <CardContent className="flex-1 space-y-2">
                  {agency.address && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        <span>{agency.address}</span>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <MapPin className="h-3 w-3" />
+                        <span className="truncate">{agency.address}</span>
                     </div>
                 )}
 
                 {agency.keyServices && agency.keyServices.length > 0 && (
                     <div>
-                         <h4 className="font-semibold flex items-center gap-2 mb-2 text-purple-700 dark:text-purple-300"><Briefcase className="h-4 w-4" /> Specializations</h4>
-                        <div className="flex flex-wrap gap-2">
-                            {agency.keyServices.map(service => (
-                                <Badge key={service} variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700">{service}</Badge>
+                        <div className="flex flex-wrap gap-1">
+                            {agency.keyServices.slice(0, 2).map(service => (
+                                <Badge key={service} variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700 text-xs px-1 py-0">{service}</Badge>
                             ))}
+                            {agency.keyServices.length > 2 && (
+                                <Badge variant="outline" className="text-xs px-1 py-0">+{agency.keyServices.length - 2}</Badge>
+                            )}
                         </div>
                     </div>
                 )}
 
-                <p className="text-sm text-muted-foreground mt-2 h-10 line-clamp-2">{agency.bio || 'Professional agency services.'}</p>
+                <p className="text-xs text-muted-foreground line-clamp-1">{agency.bio || 'Professional agency services.'}</p>
             </CardContent>
-            <CardFooter>
-                 <Button className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0" asChild>
+            <CardFooter className="pt-2">
+                 <Button size="sm" className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0" asChild>
                     <Link href={`/agencies/${agency.uid}`}>View Agency</Link>
                 </Button>
             </CardFooter>
@@ -398,7 +400,7 @@ export default function DashboardPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [isSmartSearching, setIsSmartSearching] = useState(false);
     const [favoriteProviderIds, setFavoriteProviderIds] = useState<string[]>([]);
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
 
 
     // For agency dashboard
@@ -711,24 +713,20 @@ export default function DashboardPage() {
     // If user is a client
     if (userRole === 'client') {
         return (
-             <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('findServiceProvider')}</h1>
-                    <p className="text-muted-foreground">{t('describeNeed')}</p>
-                </div>
-                 <Card>
-                    <CardContent className="p-6 space-y-6">
+             <div className="max-w-6xl mx-auto space-y-8">
+                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardContent className="p-8 space-y-6">
                         <div className="flex flex-col sm:flex-row gap-4">
                             <div className="relative flex-1">
                                 <Input 
                                     placeholder={t('searchPlaceholder')} 
-                                    className="w-full h-12 text-base pl-4 pr-32" 
+                                    className="w-full h-14 text-base pl-4 pr-36 border-2 focus:border-primary transition-colors shadow-soft" 
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSmartSearch()}
                                 />
                                 <Button 
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 h-9"
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10 shadow-glow hover:shadow-glow/50 transition-all duration-300"
                                     onClick={handleSmartSearch}
                                     disabled={isSmartSearching}
                                 >
@@ -736,18 +734,18 @@ export default function DashboardPage() {
                                     {isSmartSearching ? t('searching') : t('search')}
                                 </Button>
                             </div>
-                            <div className="flex items-center gap-1 border p-1 rounded-lg bg-background h-12">
-                                <Button size="icon" variant={viewMode === 'grid' ? 'secondary' : 'ghost'} onClick={() => setViewMode('grid')}>
+                            <div className="flex items-center gap-1 border-2 p-1 rounded-lg bg-background/50 backdrop-blur-sm h-14">
+                                <Button size="icon" variant={viewMode === 'grid' ? 'secondary' : 'ghost'} onClick={() => setViewMode('grid')} className="h-10 w-10">
                                     <LayoutGrid className="h-5 w-5" />
                                 </Button>
-                                 <Button size="icon" variant={viewMode === 'list' ? 'secondary' : 'ghost'} onClick={() => setViewMode('list')}>
+                                 <Button size="icon" variant={viewMode === 'list' ? 'secondary' : 'ghost'} onClick={() => setViewMode('list')} className="h-10 w-10">
                                     <List className="h-5 w-5" />
                                 </Button>
                             </div>
                         </div>
                         {loadingProviders || isSmartSearching ? (
-                            <div className={cn("gap-6", viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-2')}>
-                                {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
+                            <div className={cn("gap-4", viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-2')}>
+                                {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
                             </div>
                         ) : (
                              providers.length > 0 ? (
@@ -767,7 +765,7 @@ export default function DashboardPage() {
                                                         </h2>
                                                     </div>
                                                     {viewMode === 'grid' ? (
-                                                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                                             {agencies.map(agency => (
                                                                 <AgencyCard 
                                                                     key={agency.uid} 
@@ -805,7 +803,7 @@ export default function DashboardPage() {
                                                         </h2>
                                                     </div>
                                                     {viewMode === 'grid' ? (
-                                                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                                             {serviceProviders.map(provider => (
                                                                 <ProviderCard 
                                                                     key={provider.uid} 
@@ -852,11 +850,7 @@ export default function DashboardPage() {
     // Agency Dashboard
     if (userRole === 'agency') {
          return (
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Agency Dashboard</h1>
-                    <p className="text-muted-foreground">An overview of your agency&apos;s performance.</p>
-                </div>
+            <div className="max-w-6xl mx-auto space-y-8">
 
                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                     <DashboardCard isLoading={loadingAgencyData} title="Total Revenue" icon={DollarSign} value={`₱${agencyTotalRevenue.toFixed(2)}`} />
@@ -866,10 +860,10 @@ export default function DashboardPage() {
                     <DashboardCard isLoading={loadingAgencyData} title="Pending Payouts" icon={Wallet} value={`₱${agencyPendingPayouts.toFixed(2)}`} />
                 </div>
                 
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-                    <Card className="lg:col-span-4">
+                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+                    <Card className="lg:col-span-4 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader>
-                            <CardTitle>Recent Bookings</CardTitle>
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Recent Bookings</CardTitle>
                             <CardDescription>The latest bookings across your agency.</CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -905,9 +899,9 @@ export default function DashboardPage() {
                             )}
                         </CardContent>
                     </Card>
-                     <Card className="lg:col-span-3">
+                     <Card className="lg:col-span-3 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader>
-                            <CardTitle>Top Performing Providers</CardTitle>
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Top Performing Providers</CardTitle>
                             <CardDescription>Your most valuable providers by revenue.</CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -951,11 +945,7 @@ export default function DashboardPage() {
     
     // Provider Dashboard (Default)
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Welcome back, {user?.displayName || 'User'}!</h1>
-                <p className="text-muted-foreground">Here&apos;s a summary of your activity and performance.</p>
-            </div>
+        <div className="max-w-6xl mx-auto space-y-8">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                 <DashboardCard isLoading={loading} title="Total Revenue" icon={DollarSign} value={`₱${totalRevenue.toFixed(2)}`} />
                 <DashboardCard isLoading={loading} title="Pending Payouts" icon={Wallet} value={`₱${pendingPayouts.toFixed(2)}`} />
@@ -965,9 +955,9 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-                 <Card className="lg:col-span-4">
+                 <Card className="lg:col-span-4 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader>
-                        <CardTitle>Earnings Overview</CardTitle>
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Earnings Overview</CardTitle>
                         <CardDescription>Your earnings for the last 6 months.</CardDescription>
                     </CardHeader>
                     <CardContent className="pl-2">
@@ -995,9 +985,9 @@ export default function DashboardPage() {
                         )}
                     </CardContent>
                 </Card>
-                <Card className="lg:col-span-3">
+                <Card className="lg:col-span-3 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader>
-                        <CardTitle>Today&apos;s Schedule</CardTitle>
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Today&apos;s Schedule</CardTitle>
                         <CardDescription>Your upcoming jobs for today.</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -1035,9 +1025,9 @@ export default function DashboardPage() {
                 </Card>
             </div>
             
-            <Card>
+            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardHeader>
-                    <CardTitle>Recent Reviews</CardTitle>
+                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Recent Reviews</CardTitle>
                     <CardDescription>What your clients are saying about you.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -1080,7 +1070,7 @@ export default function DashboardPage() {
                         </div>
                     )}
                     <div className="text-center">
-                        <Button variant="outline">View All Reviews</Button>
+                        <Button variant="outline" className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">View All Reviews</Button>
                     </div>
                 </CardContent>
             </Card>

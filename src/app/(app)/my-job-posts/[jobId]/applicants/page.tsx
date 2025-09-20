@@ -194,11 +194,9 @@ export default function ApplicantsPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6">
-                <Skeleton className="h-10 w-1/3" />
-                <Skeleton className="h-4 w-2/3" />
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                     {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-80 w-full" />)}
+            <div className="max-w-6xl mx-auto space-y-8">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                     {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
                 </div>
             </div>
         )
@@ -206,27 +204,31 @@ export default function ApplicantsPage() {
 
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                 <Button variant="outline" size="icon" onClick={() => router.back()}>
-                    <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Applicants for "{job?.title}"</h1>
-                    <p className="text-muted-foreground">Review the providers who have applied for your job.</p>
+        <div className="max-w-6xl mx-auto space-y-8">
+                <div className="relative z-10 flex items-center gap-4">
+                    <Button variant="outline" size="icon" onClick={() => router.back()} className="hover:bg-primary/10 transition-colors">
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <div>
+                        <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
+                            Applicants for "{job?.title}"
+                        </h1>
+                        <p className="text-xl text-muted-foreground leading-relaxed">
+                            Review the providers who have applied for your job.
+                        </p>
+                    </div>
                 </div>
-            </div>
             
             {applicants.length > 0 ? (
-                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {applicants.map(applicant => (
-                        <Card key={applicant.uid} className="flex flex-col">
-                            <CardHeader className="text-center">
-                                <Avatar className="h-24 w-24 mx-auto mb-4 border-2 border-primary">
+                        <Card key={applicant.uid} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group flex flex-col">
+                            <CardHeader className="text-center pb-3">
+                                <Avatar className="h-16 w-16 mx-auto mb-3 border-2 border-primary/20 shadow-soft">
                                     <AvatarImage src={applicant.photoURL} alt={applicant.displayName} />
-                                    <AvatarFallback>{getAvatarFallback(applicant.displayName)}</AvatarFallback>
+                                    <AvatarFallback className="text-lg bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">{getAvatarFallback(applicant.displayName)}</AvatarFallback>
                                 </Avatar>
-                                <CardTitle>{applicant.displayName}</CardTitle>
+                                <CardTitle className="text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent group-hover:from-primary group-hover:to-accent transition-all duration-300">{applicant.displayName}</CardTitle>
                                 {applicant.reviewCount > 0 && (
                                      <div className="flex items-center justify-center gap-1 mt-1 text-muted-foreground">
                                         {renderStars(applicant.rating)}
@@ -234,44 +236,47 @@ export default function ApplicantsPage() {
                                     </div>
                                 )}
                             </CardHeader>
-                            <CardContent className="flex-1 space-y-4">
+                            <CardContent className="flex-1 space-y-3 px-4">
                                {applicant.keyServices && applicant.keyServices.length > 0 && (
                                     <div>
-                                        <h4 className="font-semibold flex items-center gap-2 mb-2"><Briefcase className="h-4 w-4" /> Key Services</h4>
-                                        <div className="flex flex-wrap gap-2">
-                                            {applicant.keyServices.map(service => (
-                                                <span key={service} className="text-xs bg-secondary text-secondary-foreground py-1 px-2 rounded-full">{service}</span>
+                                        <h4 className="font-semibold flex items-center gap-2 mb-2 text-sm"><Briefcase className="h-4 w-4" /> Key Services</h4>
+                                        <div className="flex flex-wrap gap-1">
+                                            {applicant.keyServices.slice(0, 2).map(service => (
+                                                <span key={service} className="text-xs bg-gradient-to-r from-muted/50 to-muted/30 text-muted-foreground py-1 px-2 rounded-full border border-border/50 shadow-soft">{service}</span>
                                             ))}
+                                            {applicant.keyServices.length > 2 && (
+                                                <span className="text-xs text-muted-foreground py-1 px-2">+{applicant.keyServices.length - 2} more</span>
+                                            )}
                                         </div>
                                     </div>
                                 )}
-                                <p className="text-sm text-muted-foreground mt-2 h-16 line-clamp-3">{applicant.bio || 'No bio available.'}</p>
+                                <p className="text-sm text-muted-foreground line-clamp-2">{applicant.bio || 'No bio available.'}</p>
                             </CardContent>
-                             <CardFooter className="flex flex-col gap-2">
+                             <CardFooter className="flex flex-col gap-2 pt-2 px-4 pb-4">
                                  <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button className="w-full" disabled={job?.status !== 'Open'}>
+                                        <Button className="w-full shadow-glow hover:shadow-glow/50 transition-all duration-300" disabled={job?.status !== 'Open'}>
                                             <Award className="mr-2 h-4 w-4" /> Award Job
                                         </Button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent>
+                                    <AlertDialogContent className="shadow-glow border-0 bg-background/95 backdrop-blur-md">
                                         <AlertDialogHeader>
-                                            <AlertDialogTitle>Award Job to {applicant.displayName}?</AlertDialogTitle>
+                                            <AlertDialogTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Award Job to {applicant.displayName}?</AlertDialogTitle>
                                             <AlertDialogDescription>
                                                 This will create a new booking with this provider and change the job status to "In Progress". Are you sure you want to proceed?
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleAwardJob(applicant)}>Confirm</AlertDialogAction>
+                                            <AlertDialogCancel className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">Cancel</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleAwardJob(applicant)} className="shadow-glow hover:shadow-glow/50 transition-all duration-300">Confirm</AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
                                 <div className="grid grid-cols-2 gap-2 w-full">
-                                    <Button variant="outline" asChild className="w-full">
+                                    <Button variant="outline" asChild className="w-full shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
                                         <Link href={`/providers/${applicant.uid}`}><User className="mr-2 h-4 w-4" /> View Profile</Link>
                                     </Button>
-                                    <Button variant="outline" className="w-full" onClick={() => handleSendMessage(applicant)}>
+                                    <Button variant="outline" className="w-full shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground" onClick={() => handleSendMessage(applicant)}>
                                         <MessageSquare className="mr-2 h-4 w-4" /> Message
                                     </Button>
                                 </div>
@@ -280,11 +285,13 @@ export default function ApplicantsPage() {
                     ))}
                  </div>
             ) : (
-                <Card>
-                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <Users className="h-16 w-16 mb-4" />
-                        <h3 className="text-xl font-semibold">No Applicants Yet</h3>
-                        <p>Check back later to see who has applied for your job.</p>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardContent className="flex flex-col items-center justify-center text-center p-12">
+                        <Users className="h-20 w-20 mb-6 text-primary opacity-60" />
+                        <div className="space-y-3">
+                            <h3 className="text-2xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">No Applicants Yet</h3>
+                            <p className="text-lg text-muted-foreground max-w-md">Check back later to see who has applied for your job.</p>
+                        </div>
                     </CardContent>
                 </Card>
             )}

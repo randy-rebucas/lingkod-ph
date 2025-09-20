@@ -39,6 +39,7 @@ const protectedRoutes = {
   '/bookings': ['client', 'provider', 'agency'],
   '/profile': ['client', 'provider', 'agency', 'admin', 'partner'],
   '/messages': ['client', 'provider', 'agency'],
+  '/notifications': ['client', 'provider', 'agency', 'admin', 'partner'],
   '/settings': ['client', 'provider', 'agency', 'admin', 'partner'],
   '/billing': ['client', 'provider', 'agency'],
 } as const;

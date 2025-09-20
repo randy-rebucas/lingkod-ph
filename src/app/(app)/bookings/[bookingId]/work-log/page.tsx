@@ -264,8 +264,7 @@ export default function WorkLogPage() {
 
     if (loading) {
         return (
-             <div className="space-y-6 max-w-4xl mx-auto">
-                <Skeleton className="h-10 w-1/3" />
+             <div className="space-y-8 max-w-6xl mx-auto">
                 <Skeleton className="h-96 w-full" />
              </div>
         )
@@ -281,48 +280,56 @@ export default function WorkLogPage() {
 
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
-             <div className="flex items-center gap-4">
-                 <Button variant="outline" size="icon" onClick={() => router.back()}>
+        <div className="space-y-8 max-w-6xl mx-auto">
+            <div className="flex items-center gap-4 mb-6">
+                <Button variant="outline" size="icon" onClick={() => router.back()} className="hover:bg-primary/10 transition-colors">
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Work Log</h1>
-                    <p className="text-muted-foreground">For booking: {booking.title}</p>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                        Work Log
+                    </h1>
+                    <p className="text-lg text-muted-foreground">
+                        For booking: {booking.title}
+                    </p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Left Column - Main Actions */}
                 <div className="md:col-span-2 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Timer /> Time Tracker</CardTitle>
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="flex items-center gap-2 font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                                <Timer className="h-5 w-5" /> Time Tracker
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className="flex items-center justify-between">
+                        <CardContent className="flex items-center justify-between p-6">
                             <div>
-                                <CardDescription>Total Logged Time</CardDescription>
-                                <p className="text-2xl font-bold">{totalDuration}</p>
+                                <CardDescription className="text-base">Total Logged Time</CardDescription>
+                                <p className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{totalDuration}</p>
                             </div>
                             {userRole === 'provider' && (
                                 isActiveLog ? (
-                                    <Button onClick={handleStopTimer} disabled={isSaving} variant="destructive">
-                                        <Square className="mr-2" /> Stop Timer
+                                    <Button onClick={handleStopTimer} disabled={isSaving} variant="destructive" className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                                        <Square className="mr-2 h-4 w-4" /> Stop Timer
                                     </Button>
                                 ) : (
-                                    <Button onClick={handleStartTimer} disabled={isSaving}>
-                                        <Play className="mr-2" /> Start Timer
+                                    <Button onClick={handleStartTimer} disabled={isSaving} className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                                        <Play className="mr-2 h-4 w-4" /> Start Timer
                                     </Button>
                                 )
                             )}
                         </CardContent>
                     </Card>
                     
-                     <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><CheckSquare /> Task Checklist</CardTitle>
+                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="flex items-center gap-2 font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                                <CheckSquare className="h-5 w-5" /> Task Checklist
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-4 p-6">
                            {userRole === 'provider' && (
                                 <div className="flex gap-2">
                                     <Input 
@@ -330,14 +337,17 @@ export default function WorkLogPage() {
                                         onChange={e => setNewChecklistItem(e.target.value)}
                                         placeholder="Add a new task..."
                                         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddChecklistItem(); }}}
+                                        className="bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft"
                                     />
-                                    <Button onClick={handleAddChecklistItem}><PlusCircle className="mr-2"/> Add Task</Button>
+                                    <Button onClick={handleAddChecklistItem} className="shadow-soft hover:shadow-glow/20 transition-all duration-300">
+                                        <PlusCircle className="mr-2 h-4 w-4"/> Add Task
+                                    </Button>
                                 </div>
                             )}
                              <div className="space-y-2">
                                 {booking.checklist && booking.checklist.length > 0 ? (
                                     booking.checklist.map(item => (
-                                        <div key={item.id} className="flex items-center gap-2 group">
+                                        <div key={item.id} className="flex items-center gap-2 group p-2 rounded-lg hover:bg-muted/30 transition-colors">
                                             <Checkbox 
                                                 id={item.id}
                                                 checked={item.completed}
@@ -351,7 +361,7 @@ export default function WorkLogPage() {
                                                 <Button 
                                                     variant="ghost" 
                                                     size="icon" 
-                                                    className="h-6 w-6 text-muted-foreground opacity-0 group-hover:opacity-100"
+                                                    className="h-6 w-6 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
                                                     onClick={() => handleDeleteChecklistItem(item)}
                                                 >
                                                     <Trash2 className="h-4 w-4"/>
@@ -366,23 +376,31 @@ export default function WorkLogPage() {
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader><CardTitle className="flex items-center gap-2"><Camera /> Photo Uploads</CardTitle></CardHeader>
-                        <CardContent className="space-y-4">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="flex items-center gap-2 font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                                <Camera className="h-5 w-5" /> Photo Uploads
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4 p-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <h3 className="font-semibold text-center mb-2">Before</h3>
+                                    <h3 className="font-semibold text-center mb-2 text-lg">Before</h3>
                                     <div className="grid grid-cols-2 gap-2">
                                         {booking.photos.filter(p => p.type === 'before').map((photo, i) => (
-                                            <div key={i} className="relative aspect-square"><Image src={photo.url} alt="Before" layout="fill" className="rounded-md object-cover" /></div>
+                                            <div key={i} className="relative aspect-square rounded-lg overflow-hidden shadow-soft">
+                                                <Image src={photo.url} alt="Before" layout="fill" className="object-cover" />
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
                                  <div>
-                                    <h3 className="font-semibold text-center mb-2">After</h3>
+                                    <h3 className="font-semibold text-center mb-2 text-lg">After</h3>
                                      <div className="grid grid-cols-2 gap-2">
                                         {booking.photos.filter(p => p.type === 'after').map((photo, i) => (
-                                            <div key={i} className="relative aspect-square"><Image src={photo.url} alt="After" layout="fill" className="rounded-md object-cover" /></div>
+                                            <div key={i} className="relative aspect-square rounded-lg overflow-hidden shadow-soft">
+                                                <Image src={photo.url} alt="After" layout="fill" className="object-cover" />
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
@@ -390,29 +408,41 @@ export default function WorkLogPage() {
                            
                             {userRole === 'provider' && (
                                 <>
-                                 <Separator />
-                                <div className="space-y-2">
-                                    <p className="font-medium">Add New Photo</p>
-                                    <Input type="file" accept="image/*" ref={photoInputRef} onChange={e => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                            setPhotoFile(file);
-                                            setPhotoPreview(URL.createObjectURL(file));
-                                        }
-                                    }}/>
-                                     {photoPreview && <div className="relative w-32 h-32"><Image src={photoPreview} alt="preview" layout="fill" className="rounded-md object-cover" /></div>}
+                                 <Separator className="bg-border/50" />
+                                <div className="space-y-3">
+                                    <p className="font-medium text-lg">Add New Photo</p>
+                                    <Input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        ref={photoInputRef} 
+                                        onChange={e => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                setPhotoFile(file);
+                                                setPhotoPreview(URL.createObjectURL(file));
+                                            }
+                                        }}
+                                        className="bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft"
+                                    />
+                                     {photoPreview && (
+                                        <div className="relative w-32 h-32 rounded-lg overflow-hidden shadow-soft">
+                                            <Image src={photoPreview} alt="preview" layout="fill" className="object-cover" />
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex gap-2 items-center">
                                     <Select value={photoType} onValueChange={(value) => setPhotoType(value as 'before' | 'after')}>
-                                        <SelectTrigger className="w-[120px]">
+                                        <SelectTrigger className="w-[120px] bg-background/80 backdrop-blur-sm border-2 shadow-soft">
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent>
+                                        <SelectContent className="shadow-glow border-0 bg-background/95 backdrop-blur-md">
                                             <SelectItem value="before">Before</SelectItem>
                                             <SelectItem value="after">After</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                    <Button onClick={handlePhotoUpload} disabled={!photoFile || isSaving}><PlusCircle className="mr-2"/> Upload</Button>
+                                    <Button onClick={handlePhotoUpload} disabled={!photoFile || isSaving} className="shadow-soft hover:shadow-glow/20 transition-all duration-300">
+                                        <PlusCircle className="mr-2 h-4 w-4"/> Upload
+                                    </Button>
                                 </div>
                                 </>
                             )}
@@ -422,22 +452,36 @@ export default function WorkLogPage() {
 
                 {/* Right Column - Notes */}
                 <div className="md:col-span-1">
-                    <Card>
-                        <CardHeader><CardTitle>Progress Notes</CardTitle></CardHeader>
-                        <CardContent className="space-y-4">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Progress Notes</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4 p-6">
                             {userRole === 'provider' && (
                                 <div className="flex gap-2">
-                                    <Textarea value={noteText} onChange={e => setNoteText(e.target.value)} placeholder="Add a new note..."/>
-                                    <Button size="icon" onClick={handleAddNote} disabled={isSaving}><Send /></Button>
+                                    <Textarea 
+                                        value={noteText} 
+                                        onChange={e => setNoteText(e.target.value)} 
+                                        placeholder="Add a new note..."
+                                        className="bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft"
+                                        rows={3}
+                                    />
+                                    <Button size="icon" onClick={handleAddNote} disabled={isSaving} className="shadow-soft hover:shadow-glow/20 transition-all duration-300">
+                                        <Send className="h-4 w-4" />
+                                    </Button>
                                 </div>
                             )}
                             <div className="space-y-3 max-h-96 overflow-y-auto">
                                 {booking.notes.length > 0 ? [...booking.notes].reverse().map((note, i) => (
-                                    <div key={i} className="text-sm p-2 bg-secondary rounded-md">
-                                        <p>{note.text}</p>
-                                        <p className="text-xs text-muted-foreground mt-1">{note.createdAt ? format(note.createdAt.toDate(), 'PPp') : 'Just now'}</p>
+                                    <div key={i} className="text-sm p-3 bg-gradient-to-r from-muted/30 to-muted/10 rounded-lg border border-border/50 shadow-soft">
+                                        <p className="mb-2">{note.text}</p>
+                                        <p className="text-xs text-muted-foreground">{note.createdAt ? format(note.createdAt.toDate(), 'PPp') : 'Just now'}</p>
                                     </div>
-                                )) : <p className="text-sm text-muted-foreground text-center">No notes yet.</p>}
+                                )) : (
+                                    <div className="text-center py-8">
+                                        <p className="text-sm text-muted-foreground">No notes yet.</p>
+                                    </div>
+                                )}
                             </div>
                         </CardContent>
                     </Card>
