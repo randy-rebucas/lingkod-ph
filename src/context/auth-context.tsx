@@ -3,18 +3,12 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
-import { doc, onSnapshot, Timestamp, collection, addDoc, serverTimestamp, getDocs, query, where, limit } from 'firebase/firestore';
+import { doc, onSnapshot, collection, addDoc, serverTimestamp, getDocs, query, where, limit } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
-import { differenceInDays, differenceInHours } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
 type UserRole = 'client' | 'provider' | 'agency' | 'admin' | 'partner' | null;
 
-type UserSubscription = {
-    planId: 'starter' | 'pro' | 'elite' | 'free' | 'lite' | 'custom';
-    status: 'active' | 'cancelled' | 'none' | 'pending' | 'pending_verification' | 'rejected';
-    renewsOn: Timestamp | null;
-} | null;
 
 type VerificationStatus = 'Unverified' | 'Pending' | 'Verified' | 'Rejected';
 
@@ -22,7 +16,6 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   userRole: UserRole;
-  subscription: UserSubscription;
   verificationStatus: VerificationStatus | null;
   getIdToken: () => Promise<string | null>;
 }
@@ -31,7 +24,6 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   userRole: null,
-  subscription: null,
   verificationStatus: null,
   getIdToken: async () => null,
 });
@@ -68,7 +60,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<UserRole>(null);
-  const [subscription, setSubscription] = useState<UserSubscription>(null);
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus | null>(null);
   const { toast } = useToast();
 
@@ -76,7 +67,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signOut(auth);
     setUser(null);
     setUserRole(null);
-    setSubscription(null);
     setVerificationStatus(null);
   }, []);
 
@@ -106,19 +96,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 return;
             }
 
-            const sub = data.subscription || { planId: 'free', status: 'active', renewsOn: null };
-
             setUserRole(data.role || null);
-            setSubscription(sub);
             setVerificationStatus(data.verification?.status || 'Unverified');
-            
-            // Check for subscription renewal
-            if (sub?.status === 'active' && sub.renewsOn) {
-                const daysUntilRenewal = differenceInDays(sub.renewsOn.toDate(), new Date());
-                if (daysUntilRenewal > 0 && daysUntilRenewal <= 7) {
-                    createSingletonNotification(authUser.uid, 'renewal_reminder', `Your ${sub.planId} plan will renew in ${daysUntilRenewal} day${daysUntilRenewal > 1 ? 's' : ''}.`, '/subscription');
-                }
-            }
           }
            setLoading(false);
         });
@@ -135,7 +114,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [toast, handleSignOut]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, userRole, subscription, verificationStatus, getIdToken }}>
+    <AuthContext.Provider value={{ user, loading, userRole, verificationStatus, getIdToken }}>
       {children}
     </AuthContext.Provider>
   );

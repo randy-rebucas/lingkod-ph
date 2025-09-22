@@ -160,17 +160,78 @@ export default function HomePage() {
             <div className="flex min-h-screen flex-col bg-background">
             <Header />
             <main className="flex-1">
+                {/* Hero Section */}
+                <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/20">
+                    {/* Background decorative elements */}
+                    <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+                    <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+                    
+                    <div className="container relative z-10 grid items-center gap-8 pb-24 pt-20 md:py-32">
+                        <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 text-center">
+                            <Badge variant="default" className="py-3 px-6 rounded-full bg-primary/10 text-primary border-primary/20 shadow-lg hover:shadow-xl transition-all duration-300 animate-fade-in">
+                                <Sparkles className="mr-2 h-4 w-4 animate-pulse" />
+                                {t('heroBadge')}
+                            </Badge>
+                            <h1 className="font-headline text-5xl font-bold tracking-tighter md:text-7xl lg:text-8xl bg-gradient-to-r from-foreground via-foreground to-foreground/80 bg-clip-text text-transparent animate-slide-up">
+                                {t('heroTitle')}
+                            </h1>
+                            <p className="max-w-3xl text-xl text-muted-foreground leading-relaxed animate-slide-up delay-200">
+                                {t('heroDescription')}
+                            </p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-8 animate-slide-up delay-300">
+                            <Button size="lg" asChild className="h-14 px-8 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                                <Link href="/signup">
+                                    {t('heroCtaPrimary')} <ArrowRight className="ml-2 h-5 w-5" />
+                                </Link>
+                            </Button>
+                            <Button size="lg" variant="outline" asChild className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105">
+                                <Link href="#join">{t('heroCtaSecondary')}</Link>
+                            </Button>
+                        </div>
+                        
+                        {/* Trust indicators */}
+                        <div className="flex flex-wrap items-center justify-center gap-8 mt-12 text-sm text-muted-foreground animate-fade-in delay-500">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                <span>10,000+ Happy Customers</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse delay-300"></div>
+                                <span>500+ Verified Providers</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse delay-500"></div>
+                                <span>4.9/5 Average Rating</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
                 
-                <section className="container -mt-16 relative z-20">
-                    <AdCarousel />
+                {/* Ad Carousel Section */}
+                <section className="container -mt-20 relative z-20 mb-8">
+                    <div className="rounded-2xl overflow-hidden shadow-2xl border border-border/50">
+                        <AdCarousel />
+                    </div>
                 </section>
 
                 {/* How It Works Section */}
-                <section id="features" className="bg-gradient-to-b from-muted/50 to-background py-24 pt-36">
-                    <div className="container">
-                        <div className="mx-auto mb-16 max-w-3xl text-center">
-                            <h2 className="font-headline text-4xl font-bold md:text-5xl mb-6">{t('seamlessExperience')}</h2>
-                            <p className="text-xl text-muted-foreground leading-relaxed">{t('seamlessDescription')}</p>
+                <section id="features" className="bg-gradient-to-b from-muted/50 to-background py-24 pt-32 relative overflow-hidden">
+                    {/* Background decoration */}
+                    <div className="absolute inset-0 bg-grid-pattern opacity-3"></div>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+                    
+                    <div className="container relative z-10">
+                        <div className="mx-auto mb-20 max-w-4xl text-center">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+                                <Sparkles className="h-4 w-4" />
+                                How It Works
+                            </div>
+                            <h2 className="font-headline text-4xl font-bold md:text-6xl mb-6 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                                {t('seamlessExperience')}
+                            </h2>
+                            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">{t('seamlessDescription')}</p>
                         </div>
                         <Tabs defaultValue="client" className="w-full max-w-6xl mx-auto">
                             <TabsList className="grid w-full grid-cols-2 mb-12 bg-background/80 backdrop-blur-sm border shadow-soft">
@@ -183,74 +244,80 @@ export default function HomePage() {
                             </TabsList>
                             <TabsContent value="client" className="mt-8">
                                 <div className="grid gap-8 lg:grid-cols-3">
-                                    <Card className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 text-center p-8">
-                                        <CardHeader className="pb-4">
-                                            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                                                <UserCheck className="h-8 w-8 text-primary" />
+                                    <Card className="group bg-background/70 backdrop-blur-sm border border-border/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 text-center p-8 relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                        <CardHeader className="pb-4 relative z-10">
+                                            <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                                                <UserCheck className="h-10 w-10 text-primary" />
                                             </div>
-                                            <CardTitle className="text-xl font-semibold">{t('searchDiscover')}</CardTitle>
+                                            <CardTitle className="text-2xl font-bold mb-2">{t('searchDiscover')}</CardTitle>
                                         </CardHeader>
-                                        <CardContent>
-                                            <p className="text-muted-foreground leading-relaxed">{t('searchDiscoverDesc')}</p>
+                                        <CardContent className="relative z-10">
+                                            <p className="text-muted-foreground leading-relaxed text-lg">{t('searchDiscoverDesc')}</p>
                                         </CardContent>
                                     </Card>
-                                    <Card className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 text-center p-8">
-                                        <CardHeader className="pb-4">
-                                            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                                                <Star className="h-8 w-8 text-primary" />
+                                    <Card className="group bg-background/70 backdrop-blur-sm border border-border/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 text-center p-8 relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                        <CardHeader className="pb-4 relative z-10">
+                                            <div className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                                                <Star className="h-10 w-10 text-blue-600" />
                                             </div>
-                                            <CardTitle className="text-xl font-semibold">{t('bookConfidence')}</CardTitle>
+                                            <CardTitle className="text-2xl font-bold mb-2">{t('bookConfidence')}</CardTitle>
                                         </CardHeader>
-                                        <CardContent>
-                                            <p className="text-muted-foreground leading-relaxed">{t('bookConfidenceDesc')}</p>
+                                        <CardContent className="relative z-10">
+                                            <p className="text-muted-foreground leading-relaxed text-lg">{t('bookConfidenceDesc')}</p>
                                         </CardContent>
                                     </Card>
-                                    <Card className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 text-center p-8">
-                                        <CardHeader className="pb-4">
-                                            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                                                <Sparkles className="h-8 w-8 text-primary" />
+                                    <Card className="group bg-background/70 backdrop-blur-sm border border-border/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 text-center p-8 relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                        <CardHeader className="pb-4 relative z-10">
+                                            <div className="w-20 h-20 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                                                <Sparkles className="h-10 w-10 text-purple-600" />
                                             </div>
-                                            <CardTitle className="text-xl font-semibold">{t('jobDone')}</CardTitle>
+                                            <CardTitle className="text-2xl font-bold mb-2">{t('jobDone')}</CardTitle>
                                         </CardHeader>
-                                        <CardContent>
-                                            <p className="text-muted-foreground leading-relaxed">{t('jobDoneDesc')}</p>
+                                        <CardContent className="relative z-10">
+                                            <p className="text-muted-foreground leading-relaxed text-lg">{t('jobDoneDesc')}</p>
                                         </CardContent>
                                     </Card>
                                 </div>
                             </TabsContent>
                             <TabsContent value="provider" className="mt-8">
                                 <div className="grid gap-8 lg:grid-cols-3">
-                                    <Card className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 text-center p-8">
-                                        <CardHeader className="pb-4">
-                                            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                                                <Building className="h-8 w-8 text-primary" />
+                                    <Card className="group bg-background/70 backdrop-blur-sm border border-border/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 text-center p-8 relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                        <CardHeader className="pb-4 relative z-10">
+                                            <div className="w-20 h-20 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                                                <Building className="h-10 w-10 text-green-600" />
                                             </div>
-                                            <CardTitle className="text-xl font-semibold">{t('createProfile')}</CardTitle>
+                                            <CardTitle className="text-2xl font-bold mb-2">{t('createProfile')}</CardTitle>
                                         </CardHeader>
-                                        <CardContent>
-                                            <p className="text-muted-foreground leading-relaxed">{t('createProfileDesc')}</p>
+                                        <CardContent className="relative z-10">
+                                            <p className="text-muted-foreground leading-relaxed text-lg">{t('createProfileDesc')}</p>
                                         </CardContent>
                                     </Card>
-                                    <Card className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 text-center p-8">
-                                        <CardHeader className="pb-4">
-                                            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                                                <UserCheck className="h-8 w-8 text-primary" />
+                                    <Card className="group bg-background/70 backdrop-blur-sm border border-border/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 text-center p-8 relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                        <CardHeader className="pb-4 relative z-10">
+                                            <div className="w-20 h-20 bg-gradient-to-br from-orange-500/10 to-orange-500/5 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                                                <UserCheck className="h-10 w-10 text-orange-600" />
                                             </div>
-                                            <CardTitle className="text-xl font-semibold">{t('manageBookings')}</CardTitle>
+                                            <CardTitle className="text-2xl font-bold mb-2">{t('manageBookings')}</CardTitle>
                                         </CardHeader>
-                                        <CardContent>
-                                            <p className="text-muted-foreground leading-relaxed">{t('manageBookingsDesc')}</p>
+                                        <CardContent className="relative z-10">
+                                            <p className="text-muted-foreground leading-relaxed text-lg">{t('manageBookingsDesc')}</p>
                                         </CardContent>
                                     </Card>
-                                    <Card className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 text-center p-8">
-                                        <CardHeader className="pb-4">
-                                            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                                                <ArrowRight className="h-8 w-8 text-primary" />
+                                    <Card className="group bg-background/70 backdrop-blur-sm border border-border/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 text-center p-8 relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                        <CardHeader className="pb-4 relative z-10">
+                                            <div className="w-20 h-20 bg-gradient-to-br from-red-500/10 to-red-500/5 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                                                <ArrowRight className="h-10 w-10 text-red-600" />
                                             </div>
-                                            <CardTitle className="text-xl font-semibold">{t('growBusiness')}</CardTitle>
+                                            <CardTitle className="text-2xl font-bold mb-2">{t('growBusiness')}</CardTitle>
                                         </CardHeader>
-                                        <CardContent>
-                                            <p className="text-muted-foreground leading-relaxed">{t('growBusinessDesc')}</p>
+                                        <CardContent className="relative z-10">
+                                            <p className="text-muted-foreground leading-relaxed text-lg">{t('growBusinessDesc')}</p>
                                         </CardContent>
                                     </Card>
                                 </div>
@@ -260,16 +327,28 @@ export default function HomePage() {
                 </section>
 
                 {/* Top Providers Section */}
-                <section id="providers" className="bg-gradient-to-b from-background to-muted/30 py-24">
-                    <div className="container">
-                        <div className="mx-auto mb-16 max-w-3xl text-center">
-                            <h2 className="font-headline text-4xl font-bold md:text-5xl mb-6">{t('topProviders')}</h2>
-                            <p className="text-xl text-muted-foreground leading-relaxed">{t('topProvidersDesc')}</p>
+                <section id="providers" className="bg-gradient-to-b from-background to-muted/30 py-24 relative overflow-hidden">
+                    {/* Background decoration */}
+                    <div className="absolute inset-0 bg-grid-pattern opacity-3"></div>
+                    <div className="absolute top-1/2 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl"></div>
+                    
+                    <div className="container relative z-10">
+                        <div className="mx-auto mb-20 max-w-4xl text-center">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+                                <Star className="h-4 w-4" />
+                                Featured Providers
+                            </div>
+                            <h2 className="font-headline text-4xl font-bold md:text-6xl mb-6 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                                {t('topProviders')}
+                            </h2>
+                            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">{t('topProvidersDesc')}</p>
                         </div>
                         <div className="grid gap-8 lg:grid-cols-3">
                             {topProviders.map((provider, index) => (
-                                <Card key={provider.name} className="group overflow-hidden bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-500 hover:-translate-y-3">
-                                    <div className="relative h-48 overflow-hidden">
+                                <Card key={provider.name} className="group overflow-hidden bg-background/80 backdrop-blur-sm border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-700 hover:-translate-y-4 relative">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                    <div className="relative h-56 overflow-hidden">
                                         <Image 
                                             src={provider.background} 
                                             alt={provider.specialty} 
@@ -277,25 +356,25 @@ export default function HomePage() {
                                             className="object-cover group-hover:scale-110 transition-transform duration-700" 
                                             data-ai-hint={provider.bgHint} 
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
                                         <div className="absolute top-4 right-4">
-                                            <Badge className="bg-primary/90 text-primary-foreground backdrop-blur-sm">
-                                                Top Rated
+                                            <Badge className="bg-primary/95 text-primary-foreground backdrop-blur-sm shadow-lg">
+                                                ⭐ Top Rated
                                             </Badge>
                                         </div>
-                                        <Avatar className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 h-28 w-28 border-4 border-background ring-4 ring-primary/20 shadow-glow">
+                                        <Avatar className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 h-32 w-32 border-4 border-background ring-4 ring-primary/30 shadow-2xl group-hover:scale-105 transition-transform duration-300">
                                             <AvatarImage src={provider.avatar} alt={provider.name} data-ai-hint={provider.hint} />
-                                            <AvatarFallback className="text-lg font-semibold">{provider.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
+                                            <AvatarFallback className="text-xl font-bold">{provider.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
                                         </Avatar>
                                     </div>
-                                    <CardContent className="text-center p-8 pt-20">
-                                        <CardTitle className="text-xl font-semibold mb-2">{provider.name}</CardTitle>
-                                        <CardDescription className="text-base mb-4">{provider.specialty}</CardDescription>
-                                        <div className="flex items-center justify-center gap-2 mb-2">
+                                    <CardContent className="text-center p-8 pt-24 relative z-10">
+                                        <CardTitle className="text-2xl font-bold mb-3">{provider.name}</CardTitle>
+                                        <CardDescription className="text-lg mb-6 font-medium">{provider.specialty}</CardDescription>
+                                        <div className="flex items-center justify-center gap-2 mb-3">
                                             {renderStars(provider.rating, provider.name)}
                                         </div>
-                                        <p className="text-sm text-muted-foreground mb-6">{provider.rating} stars ({provider.reviews} reviews)</p>
-                                        <Button asChild variant="default" className="w-full shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                                        <p className="text-base text-muted-foreground mb-8 font-medium">{provider.rating} stars ({provider.reviews} reviews)</p>
+                                        <Button asChild variant="default" className="w-full h-12 text-lg shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
                                             <Link href="/signup">{t('viewProfile')}</Link>
                                         </Button>
                                     </CardContent>
@@ -313,34 +392,43 @@ export default function HomePage() {
                 </section>
 
                 {/* Testimonials Section */}
-                <section className="bg-gradient-to-b from-muted/30 to-muted py-24">
-                    <div className="container">
-                        <div className="mx-auto mb-16 max-w-3xl text-center">
-                            <h2 className="font-headline text-4xl font-bold md:text-5xl mb-6">{t('communitySays')}</h2>
-                            <p className="text-xl text-muted-foreground leading-relaxed">{t('communitySaysDesc')}</p>
+                <section className="bg-gradient-to-b from-muted/30 to-muted py-24 relative overflow-hidden">
+                    {/* Background decoration */}
+                    <div className="absolute inset-0 bg-grid-pattern opacity-3"></div>
+                    <div className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 right-0 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl"></div>
+                    
+                    <div className="container relative z-10">
+                        <div className="mx-auto mb-20 max-w-4xl text-center">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+                                <Star className="h-4 w-4" />
+                                Customer Reviews
+                            </div>
+                            <h2 className="font-headline text-4xl font-bold md:text-6xl mb-6 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                                {t('communitySays')}
+                            </h2>
+                            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">{t('communitySaysDesc')}</p>
                         </div>
                         <div className="grid gap-8 lg:grid-cols-3">
                             {testimonials.map((testimonial, index) => (
-                                <Card key={index} className="group bg-background/80 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2">
-                                    <CardContent className="p-8">
-                                        <div className="flex items-center mb-6">
-                                            <Avatar className="h-16 w-16 mr-4 ring-2 ring-primary/20">
+                                <Card key={index} className="group bg-background/90 backdrop-blur-sm border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                    <CardContent className="p-8 relative z-10">
+                                        <div className="flex items-center mb-8">
+                                            <Avatar className="h-20 w-20 mr-6 ring-4 ring-primary/20 shadow-lg group-hover:scale-105 transition-transform duration-300">
                                                 <AvatarImage src={testimonial.avatar} alt={testimonial.name} data-ai-hint={testimonial.hint} />
-                                                <AvatarFallback className="text-lg font-semibold">{testimonial.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
+                                                <AvatarFallback className="text-xl font-bold">{testimonial.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <p className="font-semibold text-lg">{testimonial.name}</p>
-                                                <div className="flex mt-1">{renderStars(testimonial.rating, testimonial.name)}</div>
+                                                <p className="font-bold text-xl mb-2">{testimonial.name}</p>
+                                                <div className="flex">{renderStars(testimonial.rating, testimonial.name)}</div>
                                             </div>
                                         </div>
-                                        <blockquote className="text-muted-foreground leading-relaxed text-base italic">
-                                            "{testimonial.comment}"
+                                        <blockquote className="text-muted-foreground leading-relaxed text-lg italic relative">
+                                            <div className="absolute -top-2 -left-2 text-4xl text-primary/20 font-serif">"</div>
+                                            {testimonial.comment}
+                                            <div className="absolute -bottom-4 -right-2 text-4xl text-primary/20 font-serif">"</div>
                                         </blockquote>
-                                        <div className="mt-4 flex justify-end">
-                                            <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                                                <span className="text-primary text-lg">"</span>
-                                            </div>
-                                        </div>
                                     </CardContent>
                                 </Card>
                             ))}
@@ -350,14 +438,15 @@ export default function HomePage() {
 
 
                 {/* Join Platform Section (B2B2C CTA) */}
-                <section id="join" className="bg-gradient-to-br from-primary via-primary to-primary/80 py-24 relative overflow-hidden">
-                    {/* Background decoration */}
+                <section id="join" className="bg-gradient-to-br from-primary via-primary to-primary/80 py-32 relative overflow-hidden">
+                    {/* Enhanced background decoration */}
                     <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
-                    <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full blur-3xl"></div>
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+                    <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-pulse delay-500"></div>
                     
                     <div className="container relative z-10">
-                        <div className="relative rounded-3xl overflow-hidden p-12 lg:p-16 text-white shadow-2xl">
+                        <div className="relative rounded-3xl overflow-hidden p-12 lg:p-20 text-white shadow-2xl border border-white/20">
                             <Image 
                                 src="https://images.unsplash.com/photo-1521791136064-7986c2920216?q=80&w=1469" 
                                 layout="fill" 
@@ -365,38 +454,42 @@ export default function HomePage() {
                                 className="object-cover" 
                                 data-ai-hint="business team" 
                             />
-                            <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/80 to-primary/70"></div>
-                            <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
-                                <div className="space-y-6">
-                                    <h2 className="font-headline text-4xl font-bold md:text-5xl lg:text-6xl leading-tight">
+                            <div className="absolute inset-0 bg-gradient-to-r from-primary/95 via-primary/85 to-primary/75"></div>
+                            <div className="relative z-10 grid lg:grid-cols-2 gap-16 items-center">
+                                <div className="space-y-8">
+                                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 text-white text-sm font-medium mb-6">
+                                        <Sparkles className="h-4 w-4" />
+                                        Join Our Community
+                                    </div>
+                                    <h2 className="font-headline text-5xl font-bold md:text-6xl lg:text-7xl leading-tight bg-gradient-to-r from-white to-white/90 bg-clip-text text-transparent">
                                         {t('growBusinessTitle')}
                                     </h2>
-                                    <p className="text-xl opacity-90 leading-relaxed">
+                                    <p className="text-2xl opacity-95 leading-relaxed max-w-2xl">
                                         {t('growBusinessSubtitle')}
                                     </p>
                                 </div>
-                                <div className="bg-white/10 backdrop-blur-md p-8 lg:p-10 rounded-2xl border border-white/20">
-                                    <ul className="space-y-6 mb-8">
-                                        <li className="flex items-start gap-4">
-                                            <div className="mt-1 p-2 bg-white/20 rounded-lg">
-                                                <UserCheck className="h-6 w-6 text-white" />
+                                <div className="bg-white/15 backdrop-blur-lg p-10 lg:p-12 rounded-3xl border border-white/30 shadow-2xl">
+                                    <ul className="space-y-8 mb-10">
+                                        <li className="flex items-start gap-6">
+                                            <div className="mt-2 p-3 bg-white/25 rounded-xl shadow-lg">
+                                                <UserCheck className="h-8 w-8 text-white" />
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-lg mb-1">{t('individualProviders')}</p>
-                                                <p className="opacity-90">{t('individualProvidersDesc')}</p>
+                                                <p className="font-bold text-xl mb-2">{t('individualProviders')}</p>
+                                                <p className="opacity-95 text-lg leading-relaxed">{t('individualProvidersDesc')}</p>
                                             </div>
                                         </li>
-                                        <li className="flex items-start gap-4">
-                                            <div className="mt-1 p-2 bg-white/20 rounded-lg">
-                                                <Building className="h-6 w-6 text-white" />
+                                        <li className="flex items-start gap-6">
+                                            <div className="mt-2 p-3 bg-white/25 rounded-xl shadow-lg">
+                                                <Building className="h-8 w-8 text-white" />
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-lg mb-1">{t('agencies')}</p>
-                                                <p className="opacity-90">{t('agenciesDesc')}</p>
+                                                <p className="font-bold text-xl mb-2">{t('agencies')}</p>
+                                                <p className="opacity-95 text-lg leading-relaxed">{t('agenciesDesc')}</p>
                                             </div>
                                         </li>
                                     </ul>
-                                    <Button asChild variant="secondary" size="lg" className="w-full h-14 text-lg bg-white/20 hover:bg-white/30 border-white/30 text-white shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                                    <Button asChild variant="secondary" size="lg" className="w-full h-16 text-xl font-bold bg-white/25 hover:bg-white/35 border-white/40 text-white shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105">
                                         <Link href="/signup">{t('joinProvider')}</Link>
                                     </Button>
                                 </div>

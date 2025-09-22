@@ -92,38 +92,7 @@ import { useTheme } from "next-themes";
 import BroadcastBanner from "@/components/broadcast-banner";
 import { Logo } from "@/components/logo";
 import { SupportChat } from "@/components/support-chat";
-import { Badge } from "@/components/ui/badge";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
-import { db } from "@/lib/firebase";
 
-const SubscriptionPaymentBadge = () => {
-  const [pendingCount, setPendingCount] = useState(0);
-  const { userRole } = useAuth();
-
-  useEffect(() => {
-    if (userRole !== 'admin') return;
-
-    const unsubscribe = onSnapshot(
-      query(
-        collection(db, "subscriptionPayments"),
-        where("status", "==", "pending_verification")
-      ),
-      (snapshot) => {
-        setPendingCount(snapshot.size);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [userRole]);
-
-  if (pendingCount === 0) return null;
-
-  return (
-    <Badge variant="destructive" className="ml-auto text-xs">
-      {pendingCount}
-    </Badge>
-  );
-};
 
 const SidebarSupportChat = () => {
   const t = useTranslations('AppLayout');
@@ -226,7 +195,7 @@ const EmergencyHotlineButton = () => {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, userRole, subscription } = useAuth();
+  const { user, loading, userRole } = useAuth();
   const { toast } = useToast();
   const { setTheme } = useTheme();
   const t = useTranslations('AppLayout');
@@ -276,23 +245,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return name.substring(0, 2).toUpperCase();
   }
 
-  const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
-  
-  // Provider subscription logic
-  const isProviderPro = userRole === 'provider' && isPaidSubscriber && subscription?.planId === 'pro';
-  const isProviderElite = userRole === 'provider' && isPaidSubscriber && subscription?.planId === 'elite';
-  const isProviderPaid = userRole === 'provider' && isPaidSubscriber;
-  
-  // Agency subscription logic
-  const isAgencyLite = userRole === 'agency' && isPaidSubscriber && subscription?.planId === 'lite';
-  const isAgencyPro = userRole === 'agency' && isPaidSubscriber && subscription?.planId === 'pro';
-  const isAgencyCustom = userRole === 'agency' && isPaidSubscriber && subscription?.planId === 'custom';
-  const isAgencyPaid = userRole === 'agency' && isPaidSubscriber;
-  
-  // Legacy variables for backward compatibility
-  const isProOrElite = isProviderPro || isProviderElite || isAgencyPaid;
-  const isElite = isProviderElite;
-  const isAgencyPaidSubscriber = isAgencyPaid;
   
   const dashboardPath = userRole === 'admin' ? '/admin/dashboard' : userRole === 'partner' ? '/partners/dashboard' : '/dashboard';
 
@@ -459,7 +411,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </SidebarMenuItem>
                   )}
 
-                  {isAgencyPaid && (
+                  {userRole === 'agency' && (
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild isActive={isActive("/manage-providers")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                         <Link href="/manage-providers" className="flex items-center gap-3 px-3 py-2">
@@ -470,7 +422,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </SidebarMenuItem>
                   )}
 
-                  {isAgencyPaid && (
+                  {userRole === 'agency' && (
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild isActive={isActive("/reports")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                         <Link href="/reports" className="flex items-center gap-3 px-3 py-2">
@@ -480,15 +432,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   )}
-
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/subscription")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                      <Link href="/subscription" className="flex items-center gap-3 px-3 py-2">
-                        <Star className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                        <span className="font-medium">Upgrade Plan</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
                 </SidebarMenu>
               </div>
             )}
@@ -500,7 +443,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   Earnings & Reports
                 </h3>
                 <SidebarMenu>
-                  {(isProviderPaid || isAgencyPaid) && (
+                  {(userRole === 'provider' || userRole === 'agency') && (
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild isActive={isActive("/earnings")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                         <Link href="/earnings" className="flex items-center gap-3 px-3 py-2">
@@ -522,7 +465,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </SidebarMenuItem>
                   )}
 
-                  {(isProviderPro || isProviderElite || isAgencyPaid) && (
+                  {(userRole === 'provider' || userRole === 'agency') && (
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild isActive={isActive("/invoices")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                         <Link href="/invoices" className="flex items-center gap-3 px-3 py-2">
@@ -537,14 +480,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             )}
 
 
-            {/* Premium Features */}
-            {(isProviderPaid || isAgencyPaid) && (
+            {/* Business Tools */}
+            {(userRole === 'provider' || userRole === 'agency') && (
               <div className="space-y-2">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
-                  Premium Features
+                  Business Tools
                 </h3>
                 <SidebarMenu>
-                  {(isProviderPaid || isAgencyPaid) && (
+                  {(userRole === 'provider' || userRole === 'agency') && (
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild isActive={isActive("/smart-rate")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                         <Link href="/smart-rate" className="flex items-center gap-3 px-3 py-2">
@@ -555,7 +498,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </SidebarMenuItem>
                   )}
 
-                  {(isProviderPro || isProviderElite || isAgencyPaid) && (
+                  {(userRole === 'provider' || userRole === 'agency') && (
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild isActive={isActive("/quote-builder")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                         <Link href="/quote-builder" className="flex items-center gap-3 px-3 py-2">
@@ -566,7 +509,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </SidebarMenuItem>
                   )}
 
-                  {(isProviderPro || isProviderElite || isAgencyPaid) && (
+                  {(userRole === 'provider' || userRole === 'agency') && (
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild isActive={isActive("/analytics")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                         <Link href="/analytics" className="flex items-center gap-3 px-3 py-2">
@@ -687,27 +630,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/admin/subscriptions")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                      <Link href="/admin/subscriptions" className="flex items-center gap-3 px-3 py-2">
-                        <CreditCard className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                        <span className="font-medium">Subscriptions</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive("/admin/payouts")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                       <Link href="/admin/payouts" className="flex items-center gap-3 px-3 py-2">
                         <Wallet className="h-5 w-5 group-hover:scale-110 transition-transform" />
                         <span className="font-medium">Payouts</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/admin/subscription-payments")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                      <Link href="/admin/subscription-payments" className="flex items-center gap-3 px-3 py-2">
-                        <CheckSquare className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                        <span className="font-medium">Subscription Payments</span>
-                        <SubscriptionPaymentBadge />
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

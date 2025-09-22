@@ -42,7 +42,6 @@ export default function JobsPage() {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const isSubscribed = subscription?.status === 'active';
 
     useEffect(() => {
         if (userRole !== 'provider') {
@@ -146,25 +145,16 @@ export default function JobsPage() {
                                 <CardFooter className="flex justify-between items-center bg-secondary/50 p-4">
                                     <div className="font-bold text-lg text-primary">{formatBudget(job.budget)}</div>
                                     <Button
-                                        asChild={!isSubscribed}
                                         onClick={(e) => {
-                                            if (isSubscribed) {
-                                                e.stopPropagation();
-                                                handleApply(job.id, user!.uid);
-                                            }
+                                            e.stopPropagation();
+                                            handleApply(job.id, user!.uid);
                                         }}
-                                        disabled={!isSubscribed || hasApplied}
-                                        title={!isSubscribed ? t('needSubscriptionToApply') : (hasApplied ? t('alreadyApplied') : t('applyForThisJob'))}
+                                        disabled={hasApplied}
+                                        title={hasApplied ? t('alreadyApplied') : t('applyForThisJob')}
                                     >
-                                        {isSubscribed ? (
-                                             <div className="flex items-center gap-2">
-                                                {hasApplied ? t('applied') : t('applyNow')}
-                                             </div>
-                                        ) : (
-                                            <Link href="/subscription" className="flex items-center gap-2">
-                                                <Star className="h-4 w-4" /> {t('upgradeToApply')}
-                                            </Link>
-                                        )}
+                                        <div className="flex items-center gap-2">
+                                            {hasApplied ? t('applied') : t('applyNow')}
+                                        </div>
                                     </Button>
                                 </CardFooter>
                             </Card>

@@ -46,8 +46,6 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { canManageProviders, getMaxProviders } from "@/lib/subscription-utils";
-import { AgencyProviderLimitGuard, AgencyProviderLimitInfo } from "@/components/agency-provider-limit-guard";
 
 
 type Provider = {
@@ -65,10 +63,9 @@ const getStatusVariant = (status: Provider['status']) => {
   }
 };
 
-// Removed getProviderLimit function - now using subscription-utils
 
 export default function ManageProvidersPage() {
-    const { user, subscription, userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const t = useTranslations('ManageProviders');
     const [providers, setProviders] = React.useState<Provider[]>([]);
@@ -77,8 +74,6 @@ export default function ManageProvidersPage() {
     const [inviteEmail, setInviteEmail] = React.useState("");
     const [isInviting, setIsInviting] = React.useState(false);
 
-    const providerLimit = getMaxProviders(subscription as any);
-    const canAddMoreProviders = canManageProviders(subscription as any, providers.length);
     
     React.useEffect(() => {
         if (!user || userRole !== 'agency') {
@@ -310,16 +305,7 @@ export default function ManageProvidersPage() {
                       {t('subtitle')}
                   </p>
               </div>
-               <AgencyProviderLimitGuard 
-                    currentProviderCount={providers.length}
-                    fallback={
-                        <Button disabled>
-                            <UserPlus className="mr-2 h-4 w-4" />
-                            {t('inviteProvider')}
-                        </Button>
-                    }
-                >
-                    <Dialog open={isInviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+                <Dialog open={isInviteDialogOpen} onOpenChange={setInviteDialogOpen}>
                         <DialogTrigger asChild>
                              <Button>
                                 <UserPlus className="mr-2 h-4 w-4" />
@@ -354,26 +340,16 @@ export default function ManageProvidersPage() {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
-                </AgencyProviderLimitGuard>
           </div>
           
           <Card>
             <CardHeader>
                 <CardTitle>{t('yourProviderNetwork')}</CardTitle>
                 <CardDescription>
-                    <AgencyProviderLimitInfo currentProviderCount={providers.length} />
+                    {t('subtitle')}
                 </CardDescription>
             </CardHeader>
              <CardContent>
-                 {!canAddMoreProviders && (
-                    <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
-                        <AlertCircle className="h-4 w-4 !text-blue-700" />
-                        <AlertTitle className="text-blue-800">{t('providerLimitReached')}</AlertTitle>
-                        <AlertDescription className="text-blue-700">
-                           {t('limitReachedDescription')} <Button variant="link" asChild className="p-0 h-auto"><Link href="/subscription">{t('upgradeSubscription')}</Link></Button>.
-                        </AlertDescription>
-                    </Alert>
-                )}
                 <div className="rounded-md border bg-card">
                    {loading ? (
                      <div className="p-4 space-y-2">

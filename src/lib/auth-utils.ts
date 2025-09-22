@@ -29,23 +29,3 @@ export async function verifyUserRole(userId: string, allowedRoles: string[]): Pr
   }
 }
 
-export async function verifySubscription(userId: string, requiredPlan?: string): Promise<boolean> {
-  try {
-    const userDoc = await getDoc(doc(db, 'users', userId));
-    if (!userDoc.exists()) return false;
-    
-    const userData = userDoc.data();
-    const subscription = userData.subscription;
-    
-    if (!subscription || subscription.status !== 'active') return false;
-    
-    if (requiredPlan) {
-      return subscription.planId === requiredPlan;
-    }
-    
-    return subscription.planId !== 'free';
-  } catch (error) {
-    console.error('Error verifying subscription:', error);
-    return false;
-  }
-}

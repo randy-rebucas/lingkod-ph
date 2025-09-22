@@ -103,13 +103,10 @@ export default function ReportsPage() {
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
 
-    const isAgencyPaidSubscriber = userRole === 'agency' && subscription?.status === 'active' && subscription.planId !== 'free';
-    const isProOrCustom = useMemo(() => {
-        return isAgencyPaidSubscriber && (subscription?.planId === 'pro' || subscription?.planId === 'custom');
-    }, [isAgencyPaidSubscriber, subscription]);
+    const isAgency = userRole === 'agency';
     
     useEffect(() => {
-        if (!user || !isAgencyPaidSubscriber) {
+        if (!user || !isAgency) {
             setLoading(false);
             return;
         }
@@ -156,7 +153,7 @@ export default function ReportsPage() {
              unsubscribePromise.then(unsub => unsub && unsub());
         }
 
-    }, [user, isAgencyPaidSubscriber]);
+    }, [user, isAgency]);
 
     const reportData = useMemo(() => {
         const completedBookings = bookings.filter(b => b.status === 'Completed');
@@ -201,7 +198,7 @@ export default function ReportsPage() {
     };
 
 
-     if (!isAgencyPaidSubscriber) {
+     if (!isAgency) {
         return (
             <div className="max-w-6xl mx-auto space-y-8">
                  <div>
@@ -240,8 +237,8 @@ export default function ReportsPage() {
         );
     }
     
-    const pageTitle = isProOrCustom ? t('advancedReports') : t('basicReports');
-    const pageDescription = isProOrCustom 
+    const pageTitle = t('advancedReports');
+    const pageDescription = true 
         ? t('advancedDescription')
         : t('basicDescription');
 
@@ -334,7 +331,7 @@ export default function ReportsPage() {
             </Card>
 
 
-            {isProOrCustom && (
+            {true && (
                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                     <Card className="lg:col-span-3">
                         <CardHeader>

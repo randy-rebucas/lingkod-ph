@@ -21,7 +21,7 @@ type PaymentTransaction = {
     clientId: string;
     providerId?: string;
     amount: number;
-    type: 'booking_payment' | 'subscription_payment' | 'payout_request' | 'refund';
+    type: 'booking_payment' | 'payout_request' | 'refund';
     status: 'pending' | 'completed' | 'rejected' | 'failed';
     paymentMethod: string;
     createdAt: Timestamp;
@@ -80,8 +80,6 @@ export default function PaymentHistoryPage() {
         switch (type) {
             case 'booking_payment':
                 return 'Service Payment';
-            case 'subscription_payment':
-                return 'Subscription';
             case 'payout_request':
                 return 'Payout Request';
             case 'refund':

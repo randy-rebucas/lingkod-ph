@@ -7,18 +7,14 @@ interface RoleGuardProps {
   children: ReactNode;
   allowedRoles: string[];
   fallback?: ReactNode;
-  requireSubscription?: boolean;
-  requiredPlan?: string;
 }
 
 export function RoleGuard({ 
   children, 
   allowedRoles, 
-  fallback = null,
-  requireSubscription = false,
-  requiredPlan
+  fallback = null
 }: RoleGuardProps) {
-  const { userRole, subscription, loading } = useAuth();
+  const { userRole, loading } = useAuth();
 
   if (loading) {
     return <div>Loading...</div>;
@@ -27,20 +23,6 @@ export function RoleGuard({
   // Check role
   if (!userRole || !allowedRoles.includes(userRole)) {
     return <>{fallback}</>;
-  }
-
-  // Check subscription if required
-  if (requireSubscription) {
-    const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
-    
-    if (!isPaidSubscriber) {
-      return <>{fallback}</>;
-    }
-
-    // Check specific plan if required
-    if (requiredPlan && subscription.planId !== requiredPlan) {
-      return <>{fallback}</>;
-    }
   }
 
   return <>{children}</>;
@@ -79,23 +61,3 @@ export function AgencyOnly({ children, fallback }: { children: ReactNode; fallba
   );
 }
 
-export function PaidSubscriberOnly({ 
-  children, 
-  fallback, 
-  requiredPlan 
-}: { 
-  children: ReactNode; 
-  fallback?: ReactNode;
-  requiredPlan?: string;
-}) {
-  return (
-    <RoleGuard 
-      allowedRoles={['provider', 'agency']} 
-      requireSubscription={true}
-      requiredPlan={requiredPlan}
-      fallback={fallback}
-    >
-      {children}
-    </RoleGuard>
-  );
-}

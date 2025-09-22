@@ -102,7 +102,7 @@ const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
 });
 
 export default function ProfilePage() {
-    const { user, userRole, loading, subscription, verificationStatus } = useAuth();
+    const { user, userRole, loading, verificationStatus } = useAuth();
     const { toast } = useToast();
     const t = useTranslations('Profile');
     
@@ -688,18 +688,6 @@ export default function ProfilePage() {
                                     {t('verified')}
                                 </Badge>
                             )}
-                             {subscription?.planId === 'pro' && (
-                                <Badge variant="default" className="flex items-center gap-1 bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border-blue-200 shadow-soft">
-                                    <ShieldCheck className="h-4 w-4" />
-                                    {t('pro')}
-                                </Badge>
-                            )}
-                             {subscription?.planId === 'elite' && (
-                                <Badge variant="default" className="flex items-center gap-1 bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 border-purple-200 shadow-soft">
-                                    <Star className="h-4 w-4" />
-                                    {t('elite')}
-                                </Badge>
-                            )}
                         </CardTitle>
                         <CardDescription className="flex items-center gap-3 mt-2 text-base">
                            {user.email}
@@ -747,36 +735,6 @@ export default function ProfilePage() {
                 </Card>
             )}
 
-            {userRole === 'client' && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('becomeProvider')}</CardTitle>
-                        <CardDescription>{t('becomeProviderDescription')}</CardDescription>
-                    </CardHeader>
-                    <CardFooter>
-                        <Button asChild>
-                            <Link href="/subscription">
-                                {t('viewProviderPlans')} <ArrowRight className="ml-2 h-4 w-4"/>
-                            </Link>
-                        </Button>
-                    </CardFooter>
-                </Card>
-            )}
-             {userRole === 'provider' && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('upgradeToAgency')}</CardTitle>
-                        <CardDescription>{t('upgradeToAgencyDescription')}</CardDescription>
-                    </CardHeader>
-                    <CardFooter>
-                        <Button asChild>
-                            <Link href="/subscription">
-                                {t('viewAgencyPlans')} <ArrowRight className="ml-2 h-4 w-4"/>
-                            </Link>
-                        </Button>
-                    </CardFooter>
-                </Card>
-            )}
 
             <Tabs defaultValue="public-profile" className="w-full">
                  <TabsList className="w-full h-auto justify-start overflow-x-auto bg-background/80 backdrop-blur-sm shadow-soft border-0">
