@@ -15,12 +15,16 @@ import { useTranslations } from 'next-intl';
 
 type Transaction = {
     id: string;
-    planId: string;
+    planId?: string;
+    planName?: string;
     amount: number;
     paymentMethod: string;
     status: string;
-    paypalOrderId: string;
+    paypalOrderId?: string;
+    referenceNumber?: string;
     createdAt: Timestamp;
+    entity?: string;
+    action?: string;
 };
 
 export default function PaymentHistory() {
@@ -88,12 +92,23 @@ export default function PaymentHistory() {
                         {transactions.length > 0 ? transactions.map((tx) => (
                             <TableRow key={tx.id}>
                                 <TableCell>{tx.createdAt ? format(tx.createdAt.toDate(), 'PPP') : t('processing')}</TableCell>
-                                <TableCell className="capitalize">{tx.planId}</TableCell>
+                                <TableCell className="capitalize">{tx.planName || tx.planId || 'Unknown'}</TableCell>
                                 <TableCell>₱{tx.amount.toFixed(2)}</TableCell>
                                 <TableCell>
-                                    <Badge variant="secondary">{tx.paymentMethod}</Badge>
+                                    <Badge 
+                                        variant={
+                                            tx.status === 'completed' ? 'default' :
+                                            tx.status === 'pending' ? 'outline' :
+                                            tx.status === 'failed' ? 'destructive' :
+                                            'secondary'
+                                        }
+                                    >
+                                        {tx.paymentMethod}
+                                    </Badge>
                                 </TableCell>
-                                <TableCell className="font-mono text-xs">{tx.paypalOrderId}</TableCell>
+                                <TableCell className="font-mono text-xs">
+                                    {tx.paypalOrderId || tx.referenceNumber || tx.id.slice(0, 8)}
+                                </TableCell>
                             </TableRow>
                         )) : (
                             <TableRow>

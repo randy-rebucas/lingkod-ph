@@ -95,6 +95,13 @@ import { SupportChat } from "@/components/support-chat";
 import { Badge } from "@/components/ui/badge";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { 
+  hasActiveSubscription, 
+  canAccessFeature, 
+  canAccessAgencyFeature,
+  canManageProviders,
+  getSubscriptionTier 
+} from "@/lib/subscription-utils";
 
 const SubscriptionPaymentBadge = () => {
   const [pendingCount, setPendingCount] = useState(0);
@@ -222,6 +229,66 @@ const EmergencyHotlineButton = () => {
   );
 };
 
+// Helper component for subscription-locked menu items
+const SubscriptionLockedMenuItem = ({ 
+  href, 
+  icon: Icon, 
+  children, 
+  requiredFeature, 
+  requiredPlan,
+  className = ""
+}: {
+  href: string;
+  icon: any;
+  children: React.ReactNode;
+  requiredFeature?: 'smart-rate' | 'invoices' | 'analytics' | 'quote-builder' | 'enhanced-profile' | 'top-placement';
+  requiredPlan?: string;
+  className?: string;
+}) => {
+  const { subscription, userRole } = useAuth();
+  const pathname = usePathname();
+  const isActive = (path: string) => pathname.startsWith(path);
+  
+  const canAccess = requiredFeature 
+    ? canAccessFeature(subscription, requiredFeature)
+    : requiredPlan 
+    ? hasActiveSubscription(subscription) && subscription?.planId === requiredPlan
+    : true;
+
+  if (!canAccess) {
+    return (
+      <SidebarMenuItem>
+        <SidebarMenuButton 
+          asChild 
+          isActive={isActive(href)} 
+          className={`hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg opacity-60 ${className}`}
+        >
+          <Link href="/subscription" className="flex items-center gap-3 px-3 py-2">
+            <Icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+            <span className="font-medium">{children}</span>
+            <Star className="h-4 w-4 text-yellow-500 ml-auto" />
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  }
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton 
+        asChild 
+        isActive={isActive(href)} 
+        className={`hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg ${className}`}
+      >
+        <Link href={href} className="flex items-center gap-3 px-3 py-2">
+          <Icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+          <span className="font-medium">{children}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+};
+
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -276,17 +343,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return name.substring(0, 2).toUpperCase();
   }
 
-  const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
+  // Use subscription utility functions for consistent logic
+  const isPaidSubscriber = hasActiveSubscription(subscription);
+  const subscriptionTier = getSubscriptionTier(subscription);
   
   // Provider subscription logic
-  const isProviderPro = userRole === 'provider' && isPaidSubscriber && subscription?.planId === 'pro';
-  const isProviderElite = userRole === 'provider' && isPaidSubscriber && subscription?.planId === 'elite';
+  const isProviderPro = userRole === 'provider' && subscriptionTier === 'pro';
+  const isProviderElite = userRole === 'provider' && subscriptionTier === 'elite';
   const isProviderPaid = userRole === 'provider' && isPaidSubscriber;
   
   // Agency subscription logic
-  const isAgencyLite = userRole === 'agency' && isPaidSubscriber && subscription?.planId === 'lite';
-  const isAgencyPro = userRole === 'agency' && isPaidSubscriber && subscription?.planId === 'pro';
-  const isAgencyCustom = userRole === 'agency' && isPaidSubscriber && subscription?.planId === 'custom';
+  const isAgencyLite = userRole === 'agency' && subscriptionTier === 'lite';
+  const isAgencyPro = userRole === 'agency' && subscriptionTier === 'pro';
+  const isAgencyCustom = userRole === 'agency' && subscriptionTier === 'custom';
   const isAgencyPaid = userRole === 'agency' && isPaidSubscriber;
   
   // Legacy variables for backward compatibility
@@ -320,6 +389,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <SidebarTrigger className="hover:bg-primary/10 transition-colors" />
             </div>
           </div>
+          {/* Subscription Status Indicator */}
+          {(userRole === 'provider' || userRole === 'agency') && (
+            <div className="mt-4 px-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Plan:</span>
+                <Badge 
+                  variant={subscriptionTier === 'free' ? 'secondary' : 'default'}
+                  className="text-xs"
+                >
+                  {subscriptionTier === 'free' ? 'Free' : subscriptionTier.charAt(0).toUpperCase() + subscriptionTier.slice(1)}
+                </Badge>
+              </div>
+            </div>
+          )}
         </SidebarHeader>
         <SidebarContent className="px-4">
           <div className="space-y-6">
@@ -459,33 +542,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </SidebarMenuItem>
                   )}
 
-                  {isAgencyPaid && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/manage-providers")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/manage-providers" className="flex items-center gap-3 px-3 py-2">
-                          <Users2 className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">My Team</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
-
-                  {isAgencyPaid && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/reports")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/reports" className="flex items-center gap-3 px-3 py-2">
-                          <FilePieChart className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Reports</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                  {/* Agency team management - requires paid subscription */}
+                  {userRole === 'agency' && (
+                    <SubscriptionLockedMenuItem
+                      href="/manage-providers"
+                      icon={Users2}
+                      requiredPlan="lite"
+                    >
+                      My Team
+                    </SubscriptionLockedMenuItem>
                   )}
 
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive("/subscription")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                       <Link href="/subscription" className="flex items-center gap-3 px-3 py-2">
                         <Star className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                        <span className="font-medium">Upgrade Plan</span>
+                        <span className="font-medium">
+                          {isPaidSubscriber ? 'Manage Plan' : 'Upgrade Plan'}
+                        </span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -500,37 +574,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   Earnings & Reports
                 </h3>
                 <SidebarMenu>
-                  {(isProviderPaid || isAgencyPaid) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/earnings")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/earnings" className="flex items-center gap-3 px-3 py-2">
-                          <DollarSign className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Earnings</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
+                  {/* Earnings tracking - requires paid subscription */}
+                  <SubscriptionLockedMenuItem
+                    href="/earnings"
+                    icon={DollarSign}
+                    requiredPlan="pro"
+                  >
+                    Earnings
+                  </SubscriptionLockedMenuItem>
 
+                  {/* Invoices - requires Pro or Elite subscription */}
+                  <SubscriptionLockedMenuItem
+                    href="/invoices"
+                    icon={FileText}
+                    requiredFeature="invoices"
+                  >
+                    Invoices
+                  </SubscriptionLockedMenuItem>
+
+                  {/* Agency reports - requires paid subscription */}
                   {userRole === 'agency' && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/reports")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/reports" className="flex items-center gap-3 px-3 py-2">
-                          <FilePieChart className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Reports</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
-
-                  {(isProviderPro || isProviderElite || isAgencyPaid) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/invoices")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/invoices" className="flex items-center gap-3 px-3 py-2">
-                          <FileText className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Invoices</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    <SubscriptionLockedMenuItem
+                      href="/reports"
+                      icon={FilePieChart}
+                      requiredPlan="lite"
+                    >
+                      Reports
+                    </SubscriptionLockedMenuItem>
                   )}
                 </SidebarMenu>
               </div>
@@ -538,44 +608,38 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
 
             {/* Premium Features */}
-            {(isProviderPaid || isAgencyPaid) && (
+            {(userRole === 'provider' || userRole === 'agency') && (
               <div className="space-y-2">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
                   Premium Features
                 </h3>
                 <SidebarMenu>
-                  {(isProviderPaid || isAgencyPaid) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/smart-rate")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/smart-rate" className="flex items-center gap-3 px-3 py-2">
-                          <Sparkles className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Smart Pricing</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
+                  {/* Smart Rate - requires paid subscription */}
+                  <SubscriptionLockedMenuItem
+                    href="/smart-rate"
+                    icon={Sparkles}
+                    requiredFeature="smart-rate"
+                  >
+                    Smart Pricing
+                  </SubscriptionLockedMenuItem>
 
-                  {(isProviderPro || isProviderElite || isAgencyPaid) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/quote-builder")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/quote-builder" className="flex items-center gap-3 px-3 py-2">
-                          <Calculator className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Quote Builder</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
+                  {/* Quote Builder - requires Pro or Elite subscription */}
+                  <SubscriptionLockedMenuItem
+                    href="/quote-builder"
+                    icon={Calculator}
+                    requiredFeature="quote-builder"
+                  >
+                    Quote Builder
+                  </SubscriptionLockedMenuItem>
 
-                  {(isProviderPro || isProviderElite || isAgencyPaid) && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/analytics")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/analytics" className="flex items-center gap-3 px-3 py-2">
-                          <BarChart2 className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Analytics</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
+                  {/* Analytics - requires Elite subscription */}
+                  <SubscriptionLockedMenuItem
+                    href="/analytics"
+                    icon={BarChart2}
+                    requiredFeature="analytics"
+                  >
+                    Analytics
+                  </SubscriptionLockedMenuItem>
                 </SidebarMenu>
               </div>
             )}

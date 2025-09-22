@@ -18,12 +18,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { type SubscriptionTier, type AgencySubscriptionTier } from "@/app/(app)/subscription/page";
 import { Loader2, Wallet, QrCode } from "lucide-react";
+import { TransactionService } from "@/lib/transaction-service";
+import { TransactionAction, TransactionStatus, PaymentMethod } from "@/lib/transaction-types";
 import { PaymentConfig } from "@/lib/payment-config";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
 import Image from "next/image";
 import { QRCode } from "./qrcode-svg";
 import { useTranslations } from 'next-intl';
+import { getPlanIdFromName } from '@/lib/subscription-utils';
 
 // Define PayPal types locally since they're not exported from the package
 type OnApproveData = any;
@@ -38,7 +41,7 @@ type PayPalCheckoutButtonProps = {
   onPaymentSuccess?: () => void;
 };
 
-type PaymentMethod = 'paypal' | 'gcash' | 'maya';
+type LocalPaymentMethod = 'paypal' | 'gcash' | 'maya';
 
 export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }: PayPalCheckoutButtonProps) {
   const { user } = useAuth();
@@ -46,7 +49,21 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
   const router = useRouter();
   const t = useTranslations('PayPalCheckout');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('paypal');
+  const [selectedMethod, setSelectedMethod] = useState<LocalPaymentMethod>('paypal');
+
+  // Helper function to convert local payment method to enum
+  const getPaymentMethodEnum = (method: LocalPaymentMethod): PaymentMethod => {
+    switch (method) {
+      case 'paypal':
+        return PaymentMethod.PAYPAL;
+      case 'gcash':
+        return PaymentMethod.GCASH;
+      case 'maya':
+        return PaymentMethod.MAYA;
+      default:
+        return PaymentMethod.PAYPAL;
+    }
+  };
 
   const localPaymentInstructions = {
     gcash: {
@@ -94,15 +111,16 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
     setIsProcessing(true);
     onPaymentStart?.();
     return actions.order!.capture().then(async (details: any) => {
-              if (!user) {
-          toast({
-            variant: "destructive",
-            title: t('error'),
-            description: t('mustBeLoggedInToSubscribe'),
-          });
-          setIsProcessing(false);
-          return;
-        }
+      if (!user) {
+        toast({
+          variant: "destructive",
+          title: t('error'),
+          description: t('mustBeLoggedInToSubscribe'),
+        });
+        setIsProcessing(false);
+        return;
+      }
+      
       try {
         const renewalDate = new Date();
         renewalDate.setMonth(renewalDate.getMonth() + 1);
@@ -110,12 +128,16 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
         const userDocRef = doc(db, "users", user.uid);
         const updates: any = {
           subscription: {
-            planId: plan.id,
+            planId: getPlanIdFromName(plan.name, plan.type),
             status: "active",
             renewsOn: Timestamp.fromDate(renewalDate),
             paypalOrderId: details.id,
+            startDate: Timestamp.now(),
+            paymentMethod: 'paypal',
+            amount: Number(plan.price)
           },
         };
+        
         // Upgrade role if it's a new subscription type
         if (plan.type === 'provider' || plan.type === 'agency') {
           updates.role = plan.type;
@@ -123,22 +145,40 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
 
         await updateDoc(userDocRef, updates);
 
-        await addDoc(collection(db, "transactions"), {
-          userId: user.uid,
-          planId: plan.id,
-          amount: Number(plan.price),
-          paymentMethod: "PayPal",
-          status: "completed",
-          paypalOrderId: details.id,
-          payerEmail: details.payer.email_address,
-          createdAt: serverTimestamp(),
+        const transactionResult = await TransactionService.createSubscriptionTransaction(
+          {
+            userId: user.uid,
+            planId: getPlanIdFromName(plan.name, plan.type),
+            planName: plan.name,
+            planType: plan.type,
+            amount: Number(plan.price),
+            paymentMethod: PaymentMethod.PAYPAL,
+            paypalOrderId: details.id,
+            payerEmail: details.payer.email_address,
+            metadata: {
+              paypalOrderId: details.id,
+              payerEmail: details.payer.email_address,
+              transactionId: details.id
+            }
+          },
+          TransactionAction.SUBSCRIPTION_PURCHASE,
+          TransactionStatus.COMPLETED
+        );
+
+        if (!transactionResult.success) {
+          throw new Error(transactionResult.error || 'Failed to create transaction record');
+        }
+        
+        toast({
+          title: t('success'),
+          description: t('subscriptionActivated', { planName: plan.name }),
         });
         
         onPaymentSuccess?.();
         router.push("/subscription/success");
 
       } catch (error) {
-        console.error(error);
+        console.error('Payment processing error:', error);
         toast({
           variant: "destructive",
           title: t('error'),
@@ -164,18 +204,26 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
     onPaymentStart?.();
 
     try {
-        await addDoc(collection(db, "transactions"), {
-          userId: user.uid,
-          planId: plan.id,
-          amount: Number(plan.price),
-          paymentMethod: selectedMethod,
-          status: "pending",
-          createdAt: serverTimestamp(),
-        });
+        await TransactionService.createSubscriptionTransaction(
+          {
+            userId: user.uid,
+            planId: getPlanIdFromName(plan.name, plan.type),
+            planName: plan.name,
+            planType: plan.type,
+            amount: Number(plan.price),
+            paymentMethod: getPaymentMethodEnum(selectedMethod),
+            metadata: {
+              paymentMethod: selectedMethod,
+              timestamp: new Date().toISOString()
+            }
+          },
+          TransactionAction.SUBSCRIPTION_PURCHASE,
+          TransactionStatus.PENDING
+        );
         
         const updates: any = {
             subscription: {
-                planId: plan.id,
+                planId: getPlanIdFromName(plan.name, plan.type),
                 status: "pending",
                 renewsOn: null
             },
@@ -250,7 +298,7 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
 
   return (
     <Suspense fallback={<div className="flex justify-center p-8"><Loader2 className="animate-spin"/></div>}>
-      <Tabs value={selectedMethod} onValueChange={(v) => setSelectedMethod(v as PaymentMethod)} className="w-full">
+      <Tabs value={selectedMethod} onValueChange={(v) => setSelectedMethod(v as LocalPaymentMethod)} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="paypal">PayPal</TabsTrigger>
             <TabsTrigger value="gcash">GCash</TabsTrigger>
@@ -270,7 +318,7 @@ export function PayPalCheckoutButton({ plan, onPaymentStart, onPaymentSuccess }:
                     onApprove={onApprove}
                     onError={onError}
                     onCancel={onCancel}
-                    forceReRender={[plan.id]}
+                    forceReRender={[getPlanIdFromName(plan.name, plan.type)]}
                 />
             </div>
         </TabsContent>

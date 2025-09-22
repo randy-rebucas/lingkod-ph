@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 type UserRole = 'client' | 'provider' | 'agency' | 'admin' | 'partner' | null;
 
 type UserSubscription = {
-    planId: 'starter' | 'pro' | 'elite' | 'free' | 'lite' | 'custom';
+    planId: 'free' | 'pro' | 'elite' | 'lite' | 'custom';
     status: 'active' | 'cancelled' | 'none' | 'pending' | 'pending_verification' | 'rejected';
     renewsOn: Timestamp | null;
 } | null;

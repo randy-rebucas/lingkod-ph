@@ -1,9 +1,34 @@
 // Define UserSubscription interface to match auth context
 export type UserSubscription = {
   planId: 'starter' | 'pro' | 'elite' | 'free' | 'lite' | 'custom';
-  status: 'active' | 'cancelled' | 'none' | 'pending';
+  status: 'active' | 'cancelled' | 'none' | 'pending' | 'pending_verification' | 'rejected';
   renewsOn: any; // Timestamp from Firebase
 } | null;
+
+// Plan ID mapping from database names to lowercase IDs
+export const PLAN_ID_MAPPING = {
+  // Provider plans
+  'Starter': 'starter',
+  'Pro': 'pro', 
+  'Elite': 'elite',
+  // Agency plans
+  'Free': 'free',
+  'Lite': 'lite',
+  'Custom': 'custom'
+} as const;
+
+// Convert plan name from subscription collection to correct plan ID
+export function getPlanIdFromName(planName: string, planType: 'provider' | 'agency'): string {
+  const normalizedName = planName.trim();
+  
+  // Direct mapping for known plan names
+  if (PLAN_ID_MAPPING[normalizedName as keyof typeof PLAN_ID_MAPPING]) {
+    return PLAN_ID_MAPPING[normalizedName as keyof typeof PLAN_ID_MAPPING];
+  }
+  
+  // Fallback: convert to lowercase for consistency
+  return normalizedName.toLowerCase();
+}
 
 export function hasActiveSubscription(subscription: UserSubscription): boolean {
   return subscription?.status === 'active' && subscription.planId !== 'free';
@@ -110,11 +135,11 @@ export function canAccessAgencyFeature(
   
   switch (feature) {
     case 'basic-reports':
-      return plan === 'lite' || plan === 'pro' || plan === 'custom';
+      return plan === 'lite' || plan === 'custom';
     case 'enhanced-reports':
-      return plan === 'pro' || plan === 'custom';
+      return plan === 'custom';
     case 'branded-communications':
-      return plan === 'pro' || plan === 'custom';
+      return plan === 'custom';
     case 'api-access':
       return plan === 'custom';
     default:

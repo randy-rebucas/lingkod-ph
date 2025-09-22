@@ -136,5 +136,29 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
+    
+    // Transactions Collection
+    match /transactions/{transactionId} {
+      // Users can read their own transactions
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isOwner(resource.data.clientId) || isAdmin());
+      // Users can create transactions for themselves
+      allow create: if isAuthenticated() && (isOwner(request.resource.data.userId) || isOwner(request.resource.data.clientId));
+      // Only admins can update transactions (for verification purposes)
+      allow update: if isAdmin();
+      // Transactions should not be deleted
+      allow delete: if false;
+    }
+    
+    // Subscription Payments Collection
+    match /subscriptionPayments/{paymentId} {
+      // Users can read their own subscription payments
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isAdmin());
+      // Users can create subscription payments for themselves
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      // Only admins can update subscription payments (for verification purposes)
+      allow update: if isAdmin();
+      // Subscription payments should not be deleted
+      allow delete: if false;
+    }
   }
 }

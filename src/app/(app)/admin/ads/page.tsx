@@ -75,7 +75,6 @@ export default function AdminAdsPage() {
                 if (campaign.isActive && campaign.createdAt) {
                     const expirationDate = addDays(campaign.createdAt.toDate(), campaign.durationDays);
                     if (now > expirationDate) {
-                        console.log(`Campaign "${campaign.name}" has expired. Setting to inactive.`);
                         if (user) {
                            handleUpdateAdCampaign(campaign.id, { isActive: false }, {id: user.uid, name: user.displayName});
                         }

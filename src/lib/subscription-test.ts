@@ -26,6 +26,16 @@ const mockSubscriptions = {
     startDate: new Date(), 
     renewsOn: undefined,
     features: [],
+    limits: { maxProviders: 1 }
+  },
+  starter: { 
+    id: 'starter-1', 
+    userId: 'user-1', 
+    planId: 'starter' as const, 
+    status: 'active' as const, 
+    startDate: new Date(), 
+    renewsOn: undefined,
+    features: ['smart-rate'],
     limits: { maxProviders: 0 }
   },
   pro: { 
@@ -36,7 +46,7 @@ const mockSubscriptions = {
     startDate: new Date(), 
     renewsOn: undefined,
     features: ['smart-rate', 'invoices', 'quote-builder'],
-    limits: { maxProviders: 10 }
+    limits: { maxProviders: 0 }
   },
   elite: { 
     id: 'elite-1', 
@@ -46,7 +56,7 @@ const mockSubscriptions = {
     startDate: new Date(), 
     renewsOn: undefined,
     features: ['smart-rate', 'invoices', 'quote-builder', 'analytics'],
-    limits: { maxProviders: Infinity }
+    limits: { maxProviders: 0 }
   },
   lite: { 
     id: 'lite-1', 
@@ -143,27 +153,27 @@ export function runSubscriptionTests() {
   
   // Test 4: Agency provider limits
   console.log('\n📋 Testing Agency Provider Limits...');
+  test('Free plan can manage up to 1 provider', canManageProviders(mockSubscriptions.free, 0));
+  test('Free plan cannot manage more than 1 provider', !canManageProviders(mockSubscriptions.free, 1));
   test('Lite plan can manage up to 3 providers', canManageProviders(mockSubscriptions.lite, 2));
   test('Lite plan cannot manage more than 3 providers', !canManageProviders(mockSubscriptions.lite, 3));
-  test('Pro plan can manage up to 10 providers', canManageProviders(mockSubscriptions.pro, 9));
-  test('Pro plan cannot manage more than 10 providers', !canManageProviders(mockSubscriptions.pro, 10));
   test('Custom plan can manage unlimited providers', canManageProviders(mockSubscriptions.custom, 100));
   
   // Test 5: Max provider limits
   console.log('\n📋 Testing Max Provider Limits...');
+  test('Free plan max providers is 1', getMaxProviders(mockSubscriptions.free) === 1);
   test('Lite plan max providers is 3', getMaxProviders(mockSubscriptions.lite) === 3);
-  test('Pro plan max providers is 10', getMaxProviders(mockSubscriptions.pro) === 10);
   test('Custom plan max providers is unlimited', getMaxProviders(mockSubscriptions.custom) === Infinity);
-  test('Free plan max providers is 0', getMaxProviders(mockSubscriptions.free) === 0);
   
   // Test 6: Agency feature access
   console.log('\n📋 Testing Agency Feature Access...');
+  test('Free plan cannot access basic reports', !canAccessAgencyFeature(mockSubscriptions.free, 'basic-reports'));
   test('Lite plan can access basic reports', canAccessAgencyFeature(mockSubscriptions.lite, 'basic-reports'));
   test('Lite plan cannot access enhanced reports', !canAccessAgencyFeature(mockSubscriptions.lite, 'enhanced-reports'));
-  test('Pro plan can access enhanced reports', canAccessAgencyFeature(mockSubscriptions.pro, 'enhanced-reports'));
-  test('Pro plan can access branded communications', canAccessAgencyFeature(mockSubscriptions.pro, 'branded-communications'));
+  test('Custom plan can access enhanced reports', canAccessAgencyFeature(mockSubscriptions.custom, 'enhanced-reports'));
+  test('Custom plan can access branded communications', canAccessAgencyFeature(mockSubscriptions.custom, 'branded-communications'));
   test('Custom plan can access API', canAccessAgencyFeature(mockSubscriptions.custom, 'api-access'));
-  test('Pro plan cannot access API', !canAccessAgencyFeature(mockSubscriptions.pro, 'api-access'));
+  test('Lite plan cannot access API', !canAccessAgencyFeature(mockSubscriptions.lite, 'api-access'));
   
   // Test 7: Subscription tier identification
   console.log('\n📋 Testing Subscription Tier Identification...');

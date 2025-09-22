@@ -106,12 +106,9 @@ export default function AdminSettingsPage() {
                 const storagePath = `platform/logo/${Date.now()}_${logoFile.name}`;
                 const storageRef = ref(storage, storagePath);
                 
-                console.log('Uploading logo to:', storagePath);
                 const uploadResult = await uploadBytes(storageRef, logoFile);
-                console.log('Upload successful:', uploadResult);
                 
                 const newLogoUrl = await getDownloadURL(uploadResult.ref);
-                console.log('Download URL:', newLogoUrl);
                 
                 finalSettings.logoUrl = newLogoUrl;
                 toast({ title: 'Logo Uploaded', description: 'New logo has been uploaded successfully.' });

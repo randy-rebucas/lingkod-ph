@@ -19,6 +19,7 @@ import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogT
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { CreditCard } from "lucide-react";
 
 
 const SubscriptionPlanEditor = ({ plan, onEdit, onDelete }: { plan: (SubscriptionTier | AgencySubscriptionTier), onEdit: (plan: any) => void, onDelete: (planId: string) => void }) => {
@@ -322,9 +323,17 @@ export default function AdminSubscriptionsPage() {
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Subscription Management</h1>
-                    <p className="text-muted-foreground">Manage pricing and features for provider and agency plans.</p>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h1 className="text-3xl font-bold font-headline">Subscription Management</h1>
+                        <p className="text-muted-foreground">Manage pricing and features for provider and agency plans.</p>
+                    </div>
+                    <Button asChild variant="outline">
+                        <a href="/admin/transactions" className="flex items-center gap-2">
+                            <CreditCard className="h-4 w-4" />
+                            Payment Verification
+                        </a>
+                    </Button>
                 </div>
 
                 <Card>

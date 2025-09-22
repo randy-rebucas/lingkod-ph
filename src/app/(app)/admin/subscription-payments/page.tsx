@@ -37,39 +37,28 @@ import {
   query,
   where,
   orderBy,
-  addDoc
+  addDoc,
+  getDoc
 } from "firebase/firestore";
+import { SubscriptionPaymentProcessor, TransactionRecord } from "@/lib/subscription-payment-processor";
 
-interface SubscriptionPayment {
-  id: string;
-  userId: string;
-  planId: string;
-  planName: string;
-  planType: 'provider' | 'agency';
-  amount: number;
-  paymentMethod: 'gcash' | 'maya' | 'bank';
-  referenceNumber: string;
-  paymentProofUrl: string;
-  notes?: string;
-  status: 'pending_verification' | 'verified' | 'rejected';
-  createdAt: any;
-  verifiedAt?: any;
-  verifiedBy?: string;
-  rejectionReason?: string;
+interface SubscriptionTransaction extends TransactionRecord {
   userEmail?: string;
   userName?: string;
+  paymentProofUrl?: string;
+  notes?: string;
 }
 
 export default function AdminSubscriptionPaymentsPage() {
   const { user, userRole } = useAuth();
   const { toast } = useToast();
-  const [payments, setPayments] = useState<SubscriptionPayment[]>([]);
+  const [transactions, setTransactions] = useState<SubscriptionTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectionReason, setRejectionReason] = useState<string>("");
-  const [selectedPayment, setSelectedPayment] = useState<SubscriptionPayment | null>(null);
-  const [showAllPayments, setShowAllPayments] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<SubscriptionTransaction | null>(null);
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
 
   useEffect(() => {
     if (userRole !== 'admin') {
@@ -77,113 +66,83 @@ export default function AdminSubscriptionPaymentsPage() {
       return;
     }
 
-    console.log('Fetching subscription payments for admin...');
 
-    const paymentsQuery = showAllPayments 
+    const transactionsQuery = showAllTransactions 
       ? query(
-          collection(db, "subscriptionPayments"),
+          collection(db, "transactions"),
+          where("type", "==", "subscription_payment"),
           orderBy("createdAt", "desc")
         )
       : query(
-          collection(db, "subscriptionPayments"),
-          where("status", "==", "pending_verification"),
+          collection(db, "transactions"),
+          where("type", "==", "subscription_payment"),
+          where("status", "==", "pending"),
           orderBy("createdAt", "desc")
         );
 
-    const unsubscribe = onSnapshot(paymentsQuery, (snapshot) => {
-      console.log('Subscription payments snapshot:', snapshot.size, 'documents');
-      const data = snapshot.docs.map(doc => {
-        const docData = doc.data();
-        console.log('Payment document:', doc.id, docData);
+    const unsubscribe = onSnapshot(transactionsQuery, async (snapshot) => {
+      const data = await Promise.all(snapshot.docs.map(async (docSnapshot) => {
+        const docData = docSnapshot.data();
+        
+        // Get user information if userId exists
+        let userEmail = '';
+        let userName = '';
+        if (docData.userId) {
+          try {
+            const userDoc = await getDoc(doc(db, 'users', docData.userId));
+            if (userDoc.exists()) {
+              const userData = userDoc.data() as any;
+              userEmail = userData.email || '';
+              userName = userData.displayName || userData.name || '';
+            }
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+          }
+        }
+
         return { 
-          id: doc.id, 
-          ...docData 
-        } as SubscriptionPayment;
-      });
-      setPayments(data);
+          id: docSnapshot.id, 
+          ...docData,
+          userEmail,
+          userName
+        } as SubscriptionTransaction;
+      }));
+      setTransactions(data);
       setLoading(false);
     }, (error) => {
-      console.error("Error fetching subscription payments:", error);
+      console.error("Error fetching subscription transactions:", error);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [userRole, showAllPayments]);
+  }, [userRole, showAllTransactions]);
 
-  const handleVerifyPayment = async (payment: SubscriptionPayment) => {
+  const handleVerifyPayment = async (transaction: SubscriptionTransaction) => {
     if (!user) {
       toast({ variant: "destructive", title: "Error", description: "Authentication error." });
       return;
     }
 
-    setVerifyingId(payment.id);
+    setVerifyingId(transaction.id);
     try {
-      // Update payment status
-      const paymentRef = doc(db, 'subscriptionPayments', payment.id);
-      await updateDoc(paymentRef, {
-        status: 'verified',
-        verifiedAt: serverTimestamp(),
-        verifiedBy: user.uid
-      });
+      // Use the enhanced SubscriptionPaymentProcessor for comprehensive updates
+      const result = await SubscriptionPaymentProcessor.verifySubscriptionPayment(
+        transaction.id, 
+        user.uid
+      );
 
-      // Update user subscription and role
-      const userRef = doc(db, 'users', payment.userId);
-      await updateDoc(userRef, {
-        subscriptionStatus: 'active',
-        subscriptionPlanId: payment.planId,
-        subscriptionPlanName: payment.planName,
-        subscriptionAmount: payment.amount,
-        subscriptionPaymentMethod: payment.paymentMethod,
-        subscriptionReferenceNumber: payment.referenceNumber,
-        subscriptionVerifiedAt: serverTimestamp(),
-        subscriptionVerifiedBy: user.uid,
-        role: payment.planType, // Upgrade user role (provider/agency)
-        // Set subscription renewal date (1 month from now)
-        subscriptionRenewsOn: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-      });
-
-      // Create transaction record
-      await setDoc(doc(db, 'transactions', payment.id), {
-        type: 'subscription_payment',
-        status: 'completed',
-        verifiedAt: serverTimestamp(),
-        verifiedBy: user.uid,
-        paymentId: payment.id,
-        userId: payment.userId,
-        amount: payment.amount,
-        planName: payment.planName,
-        planType: payment.planType,
-        paymentMethod: payment.paymentMethod,
-        referenceNumber: payment.referenceNumber,
-        createdAt: serverTimestamp()
-      });
-
-      // Send notification to user via API
-      await fetch('/api/subscription-payments/notify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await user.getIdToken()}`
-        },
-        body: JSON.stringify({
-          type: 'payment_verified',
-          paymentData: {
-            type: 'payment_verified',
-            userEmail: payment.userEmail || '',
-            userName: payment.userName || 'User',
-            planName: payment.planName,
-            planType: payment.planType,
-            amount: payment.amount,
-            paymentMethod: payment.paymentMethod,
-            referenceNumber: payment.referenceNumber
-          }
-        })
-      });
-
-      toast({ 
-        title: "Payment Verified!", 
-        description: `The subscription payment for ${payment.userName || payment.userEmail} has been verified. Their account has been upgraded to ${payment.planType} role.` 
-      });
+      if (result.success) {
+        toast({ 
+          title: "Payment Verified!", 
+          description: result.message
+        });
+      } else {
+        toast({ 
+          variant: "destructive", 
+          title: "Verification Failed", 
+          description: result.message
+        });
+      }
     } catch (error) {
       console.error("Error verifying payment:", error);
       toast({ 
@@ -196,60 +155,34 @@ export default function AdminSubscriptionPaymentsPage() {
     }
   };
 
-  const handleRejectPayment = async (payment: SubscriptionPayment) => {
+  const handleRejectPayment = async (transaction: SubscriptionTransaction) => {
     if (!user || !rejectionReason.trim()) {
       toast({ variant: "destructive", title: "Error", description: "Please provide a rejection reason." });
       return;
     }
 
-    setRejectingId(payment.id);
+    setRejectingId(transaction.id);
     try {
-      // Update payment status
-      const paymentRef = doc(db, 'subscriptionPayments', payment.id);
-      await updateDoc(paymentRef, {
-        status: 'rejected',
-        rejectionReason: rejectionReason.trim(),
-        verifiedAt: serverTimestamp(),
-        verifiedBy: user.uid
-      });
+      // Use the enhanced SubscriptionPaymentProcessor for comprehensive rejection handling
+      const result = await SubscriptionPaymentProcessor.rejectSubscriptionPayment(
+        transaction.id,
+        user.uid,
+        rejectionReason.trim()
+      );
 
-      // Update user subscription status
-      const userRef = doc(db, 'users', payment.userId);
-      await updateDoc(userRef, {
-        subscriptionStatus: 'rejected',
-        subscriptionRejectionReason: rejectionReason.trim(),
-        subscriptionRejectedAt: serverTimestamp(),
-        subscriptionRejectedBy: user.uid
-      });
-
-      // Send notification to user via API
-      await fetch('/api/subscription-payments/notify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await user.getIdToken()}`
-        },
-        body: JSON.stringify({
-          type: 'payment_rejected',
-          paymentData: {
-            type: 'payment_rejected',
-            userEmail: payment.userEmail || '',
-            userName: payment.userName || 'User',
-            planName: payment.planName,
-            planType: payment.planType,
-            amount: payment.amount,
-            paymentMethod: payment.paymentMethod,
-            referenceNumber: payment.referenceNumber,
-            rejectionReason: rejectionReason.trim()
-          }
-        })
-      });
-
-      toast({ 
-        title: "Payment Rejected", 
-        description: `The subscription payment for ${payment.userName || payment.userEmail} has been rejected.` 
-      });
-      setRejectionReason("");
+      if (result.success) {
+        toast({ 
+          title: "Payment Rejected", 
+          description: result.message
+        });
+        setRejectionReason("");
+      } else {
+        toast({ 
+          variant: "destructive", 
+          title: "Rejection Failed", 
+          description: result.message
+        });
+      }
     } catch (error) {
       console.error("Error rejecting payment:", error);
       toast({ 
@@ -324,86 +257,25 @@ export default function AdminSubscriptionPaymentsPage() {
         </div>
         <div className="flex items-center gap-4">
           <Button
-            variant={showAllPayments ? "outline" : "default"}
-            onClick={() => setShowAllPayments(!showAllPayments)}
+            variant={showAllTransactions ? "outline" : "default"}
+            onClick={() => setShowAllTransactions(!showAllTransactions)}
             size="sm"
           >
-            {showAllPayments ? "Show Pending Only" : "Show All Payments"}
+            {showAllTransactions ? "Show Pending Only" : "Show All Transactions"}
           </Button>
           <Badge variant="outline" className="text-sm">
-            {payments.length} {showAllPayments ? "total" : "pending"} payments
+            {transactions.length} {showAllTransactions ? "total" : "pending"} transactions
           </Badge>
         </div>
       </div>
 
-      {/* Debug Information */}
-      {process.env.NODE_ENV === 'development' && (
-        <Card className="border-yellow-200 bg-yellow-50">
-          <CardHeader>
-            <CardTitle className="text-yellow-800">Debug Information</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm text-yellow-700 space-y-2">
-              <p><strong>User Role:</strong> {userRole}</p>
-              <p><strong>Show All Payments:</strong> {showAllPayments ? 'Yes' : 'No'}</p>
-              <p><strong>Payments Found:</strong> {payments.length}</p>
-              <p><strong>Loading:</strong> {loading ? 'Yes' : 'No'}</p>
-              {payments.length > 0 && (
-                <div>
-                  <p><strong>Payment Statuses:</strong></p>
-                  <ul className="ml-4">
-                    {payments.map(payment => (
-                      <li key={payment.id}>
-                        {payment.id}: {payment.status} - {payment.planName} - ₱{payment.amount}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <div className="mt-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={async () => {
-                    try {
-                      const testPayment = {
-                        userId: user?.uid || 'test-user',
-                        planId: 'test-plan',
-                        planName: 'Test Provider Plan',
-                        planType: 'provider',
-                        amount: 500,
-                        paymentMethod: 'gcash',
-                        referenceNumber: 'TEST-' + Date.now(),
-                        paymentProofUrl: 'https://via.placeholder.com/400x300?text=Test+Payment+Proof',
-                        notes: 'Test payment for debugging',
-                        status: 'pending_verification',
-                        createdAt: new Date(),
-                        userEmail: user?.email || 'test@example.com',
-                        userName: user?.displayName || 'Test User'
-                      };
-                      
-                      await addDoc(collection(db, 'subscriptionPayments'), testPayment);
-                      toast({ title: "Test payment created!", description: "A test subscription payment has been added." });
-                    } catch (error) {
-                      console.error('Error creating test payment:', error);
-                      toast({ variant: "destructive", title: "Error", description: "Failed to create test payment." });
-                    }
-                  }}
-                >
-                  Create Test Payment
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
-      {payments.length === 0 ? (
+      {transactions.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center">
             <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Pending Payments</h3>
-            <p className="text-muted-foreground">All subscription payments have been processed.</p>
+            <h3 className="text-lg font-semibold mb-2">No Pending Transactions</h3>
+            <p className="text-muted-foreground">All subscription transactions have been processed.</p>
           </CardContent>
         </Card>
       ) : (
@@ -411,10 +283,10 @@ export default function AdminSubscriptionPaymentsPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Pending Verification ({payments.length})
+              Pending Verification ({transactions.length})
             </CardTitle>
             <CardDescription>
-              Review payment proofs and verify subscription payments
+              Review and verify subscription transactions
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -432,58 +304,60 @@ export default function AdminSubscriptionPaymentsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {payments.map((payment) => (
-                  <TableRow key={payment.id}>
+                {transactions.map((transaction) => (
+                  <TableRow key={transaction.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4" />
                         <div>
-                          <div className="font-medium">{payment.userName || 'Unknown User'}</div>
-                          <div className="text-sm text-muted-foreground">{payment.userEmail}</div>
+                          <div className="font-medium">{transaction.userName || 'Unknown User'}</div>
+                          <div className="text-sm text-muted-foreground">{transaction.userEmail}</div>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{payment.planName}</div>
-                        <Badge variant="outline" className="text-xs">
-                          {payment.planType}
-                        </Badge>
+                        <div className="font-medium">{transaction.planName || 'N/A'}</div>
+                        {transaction.planType && (
+                          <Badge variant="outline" className="text-xs">
+                            {transaction.planType}
+                          </Badge>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <DollarSign className="h-4 w-4" />
-                        ₱{payment.amount.toLocaleString()}
+                        ₱{transaction.amount.toLocaleString()}
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {getPaymentMethodIcon(payment.paymentMethod)}
-                        {getPaymentMethodName(payment.paymentMethod)}
+                        {getPaymentMethodIcon(transaction.paymentMethod)}
+                        {getPaymentMethodName(transaction.paymentMethod)}
                       </div>
                     </TableCell>
                     <TableCell>
                       <code className="text-xs bg-muted px-2 py-1 rounded">
-                        {payment.referenceNumber}
+                        {transaction.referenceNumber || 'N/A'}
                       </code>
                     </TableCell>
                     <TableCell>
                       <Badge 
                         variant={
-                          payment.status === 'verified' ? 'default' :
-                          payment.status === 'rejected' ? 'destructive' :
+                          transaction.status === 'completed' ? 'default' :
+                          transaction.status === 'failed' ? 'destructive' :
                           'outline'
                         }
                         className="capitalize"
                       >
-                        {payment.status.replace('_', ' ')}
+                        {transaction.status}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
-                        {payment.createdAt?.toDate?.()?.toLocaleDateString() || 'Unknown'}
+                        {transaction.createdAt?.toDate?.()?.toLocaleDateString() || 'Unknown'}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -493,65 +367,67 @@ export default function AdminSubscriptionPaymentsPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setSelectedPayment(payment)}
+                              onClick={() => setSelectedTransaction(transaction)}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-2xl">
                             <DialogHeader>
-                              <DialogTitle>Payment Verification</DialogTitle>
+                              <DialogTitle>Transaction Verification</DialogTitle>
                               <DialogDescription>
-                                Review payment details and proof for {payment.userName || payment.userEmail}
+                                Review transaction details for {transaction.userName || transaction.userEmail}
                               </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4">
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
                                   <Label className="text-sm font-medium">Plan</Label>
-                                  <p className="text-sm text-muted-foreground">{payment.planName}</p>
+                                  <p className="text-sm text-muted-foreground">{transaction.planName || 'N/A'}</p>
                                 </div>
                                 <div>
                                   <Label className="text-sm font-medium">Amount</Label>
-                                  <p className="text-sm text-muted-foreground">₱{payment.amount.toLocaleString()}</p>
+                                  <p className="text-sm text-muted-foreground">₱{transaction.amount.toLocaleString()}</p>
                                 </div>
                                 <div>
                                   <Label className="text-sm font-medium">Payment Method</Label>
                                   <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                    {getPaymentMethodIcon(payment.paymentMethod)}
-                                    {getPaymentMethodName(payment.paymentMethod)}
+                                    {getPaymentMethodIcon(transaction.paymentMethod)}
+                                    {getPaymentMethodName(transaction.paymentMethod)}
                                   </p>
                                 </div>
                                 <div>
                                   <Label className="text-sm font-medium">Reference Number</Label>
-                                  <p className="text-sm text-muted-foreground font-mono">{payment.referenceNumber}</p>
+                                  <p className="text-sm text-muted-foreground font-mono">{transaction.referenceNumber || 'N/A'}</p>
                                 </div>
                               </div>
                               
-                              {payment.notes && (
+                              {transaction.notes && (
                                 <div>
                                   <Label className="text-sm font-medium">Notes</Label>
-                                  <p className="text-sm text-muted-foreground">{payment.notes}</p>
+                                  <p className="text-sm text-muted-foreground">{transaction.notes}</p>
                                 </div>
                               )}
 
-                              <div>
-                                <Label className="text-sm font-medium">Payment Proof</Label>
-                                <div className="mt-2">
-                                  <img
-                                    src={payment.paymentProofUrl}
-                                    alt="Payment proof"
-                                    className="max-w-full h-auto rounded-lg border"
-                                  />
+                              {transaction.paymentProofUrl && (
+                                <div>
+                                  <Label className="text-sm font-medium">Payment Proof</Label>
+                                  <div className="mt-2">
+                                    <img
+                                      src={transaction.paymentProofUrl}
+                                      alt="Payment proof"
+                                      className="max-w-full h-auto rounded-lg border"
+                                    />
+                                  </div>
                                 </div>
-                              </div>
+                              )}
 
-                              {payment.status === 'pending_verification' && (
+                              {transaction.status === 'pending' && (
                                 <div className="flex justify-end gap-2">
                                   <Button
                                     variant="destructive"
                                     onClick={() => {
-                                      setSelectedPayment(payment);
+                                      setSelectedTransaction(transaction);
                                       setRejectionReason("");
                                     }}
                                   >
@@ -561,9 +437,9 @@ export default function AdminSubscriptionPaymentsPage() {
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                       <Button
-                                        disabled={verifyingId === payment.id}
+                                        disabled={verifyingId === transaction.id}
                                       >
-                                        {verifyingId === payment.id ? (
+                                        {verifyingId === transaction.id ? (
                                           <>
                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                                             Verifying...
@@ -571,28 +447,28 @@ export default function AdminSubscriptionPaymentsPage() {
                                         ) : (
                                           <>
                                             <CheckCircle className="h-4 w-4 mr-2" />
-                                            Verify Payment
+                                            Verify Transaction
                                           </>
                                         )}
                                       </Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                       <AlertDialogHeader>
-                                        <AlertDialogTitle>Verify Subscription Payment</AlertDialogTitle>
+                                        <AlertDialogTitle>Verify Subscription Transaction</AlertDialogTitle>
                                         <AlertDialogDescription>
-                                          Are you sure you want to verify this payment? This will:
+                                          Are you sure you want to verify this transaction? This will:
                                         </AlertDialogDescription>
                                         <ul className="mt-2 ml-4 space-y-1 text-sm">
-                                          <li>• Activate the {payment.planName} subscription</li>
-                                          <li>• Upgrade the user's role to {payment.planType}</li>
+                                          <li>• Activate the {transaction.planName || 'subscription'} subscription</li>
+                                          {transaction.planType && <li>• Upgrade the user's role to {transaction.planType}</li>}
                                           <li>• Grant access to all premium features</li>
                                           <li>• Send confirmation notification to the user</li>
                                         </ul>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
                                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleVerifyPayment(payment)}>
-                                          Verify Payment
+                                        <AlertDialogAction onClick={() => handleVerifyPayment(transaction)}>
+                                          Verify Transaction
                                         </AlertDialogAction>
                                       </AlertDialogFooter>
                                     </AlertDialogContent>
@@ -600,20 +476,20 @@ export default function AdminSubscriptionPaymentsPage() {
                                 </div>
                               )}
                               
-                              {payment.status === 'verified' && (
+                              {transaction.status === 'completed' && (
                                 <div className="flex justify-end">
                                   <Badge variant="default" className="text-sm">
                                     <CheckCircle className="h-4 w-4 mr-1" />
-                                    Payment Verified
+                                    Transaction Verified
                                   </Badge>
                                 </div>
                               )}
                               
-                              {payment.status === 'rejected' && (
+                              {transaction.status === 'failed' && (
                                 <div className="flex justify-end">
                                   <Badge variant="destructive" className="text-sm">
                                     <XCircle className="h-4 w-4 mr-1" />
-                                    Payment Rejected
+                                    Transaction Rejected
                                   </Badge>
                                 </div>
                               )}
@@ -631,19 +507,19 @@ export default function AdminSubscriptionPaymentsPage() {
       )}
 
       {/* Rejection Dialog */}
-      <Dialog open={!!selectedPayment && rejectingId === selectedPayment?.id}>
+      <Dialog open={!!selectedTransaction && rejectingId === selectedTransaction?.id}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Reject Payment</DialogTitle>
+            <DialogTitle>Reject Transaction</DialogTitle>
             <DialogDescription>
-              Provide a reason for rejecting this payment
+              Provide a reason for rejecting this transaction
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                This action will notify the user and allow them to resubmit their payment.
+                This action will notify the user and mark the transaction as failed.
               </AlertDescription>
             </Alert>
             <div>
@@ -652,7 +528,7 @@ export default function AdminSubscriptionPaymentsPage() {
                 id="rejection-reason"
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Please provide a clear reason for rejecting this payment..."
+                placeholder="Please provide a clear reason for rejecting this transaction..."
                 rows={4}
               />
             </div>
@@ -660,7 +536,7 @@ export default function AdminSubscriptionPaymentsPage() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setSelectedPayment(null);
+                  setSelectedTransaction(null);
                   setRejectionReason("");
                 }}
               >
@@ -668,10 +544,10 @@ export default function AdminSubscriptionPaymentsPage() {
               </Button>
               <Button
                 variant="destructive"
-                onClick={() => selectedPayment && handleRejectPayment(selectedPayment)}
-                disabled={!rejectionReason.trim() || rejectingId === selectedPayment?.id}
+                onClick={() => selectedTransaction && handleRejectPayment(selectedTransaction)}
+                disabled={!rejectionReason.trim() || rejectingId === selectedTransaction?.id}
               >
-                {rejectingId === selectedPayment?.id ? (
+                {rejectingId === selectedTransaction?.id ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
                     Rejecting...
@@ -679,7 +555,7 @@ export default function AdminSubscriptionPaymentsPage() {
                 ) : (
                   <>
                     <XCircle className="h-4 w-4 mr-2" />
-                    Reject Payment
+                    Reject Transaction
                   </>
                 )}
               </Button>

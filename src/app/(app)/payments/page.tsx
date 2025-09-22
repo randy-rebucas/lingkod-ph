@@ -14,6 +14,8 @@ import { Eye, Download, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Image from "next/image";
+import { TransactionService } from "@/lib/transaction-service";
+import { TransactionEntity, TransactionAction, TransactionStatus, PaymentMethod } from "@/lib/transaction-types";
 
 type PaymentTransaction = {
     id: string;
@@ -21,7 +23,8 @@ type PaymentTransaction = {
     clientId: string;
     providerId?: string;
     amount: number;
-    type: 'booking_payment' | 'subscription_payment' | 'payout_request' | 'refund';
+    // Legacy fields
+    type?: 'booking_payment' | 'subscription_payment' | 'payout_request' | 'refund';
     status: 'pending' | 'completed' | 'rejected' | 'failed';
     paymentMethod: string;
     createdAt: Timestamp;
@@ -32,6 +35,12 @@ type PaymentTransaction = {
     rejectionReason?: string;
     paypalOrderId?: string;
     payerEmail?: string;
+    // New transaction type fields
+    entity?: TransactionEntity;
+    action?: TransactionAction;
+    currency?: string;
+    updatedAt?: Timestamp;
+    metadata?: Record<string, any>;
 };
 
 export default function PaymentHistoryPage() {
@@ -76,8 +85,26 @@ export default function PaymentHistoryPage() {
         }
     };
 
-    const getTypeLabel = (type: string) => {
-        switch (type) {
+    const getTypeLabel = (transaction: PaymentTransaction) => {
+        // Handle new transaction format
+        if (transaction.entity && transaction.action) {
+            const entityLabels: Record<TransactionEntity, string> = {
+                [TransactionEntity.BOOKING]: 'Service Payment',
+                [TransactionEntity.SUBSCRIPTION]: 'Subscription',
+                [TransactionEntity.PAYOUT]: 'Payout',
+                [TransactionEntity.ADVERTISEMENT]: 'Advertisement',
+                [TransactionEntity.COMMISSION]: 'Commission',
+                [TransactionEntity.REFUND]: 'Refund',
+                [TransactionEntity.LOYALTY]: 'Loyalty',
+                [TransactionEntity.PENALTY]: 'Penalty',
+                [TransactionEntity.BONUS]: 'Bonus',
+                [TransactionEntity.SYSTEM]: 'System'
+            };
+            return entityLabels[transaction.entity as TransactionEntity] || transaction.entity;
+        }
+        
+        // Handle legacy transaction format
+        switch (transaction.type) {
             case 'booking_payment':
                 return 'Service Payment';
             case 'subscription_payment':
@@ -87,7 +114,7 @@ export default function PaymentHistoryPage() {
             case 'refund':
                 return 'Refund';
             default:
-                return type;
+                return transaction.type || 'Unknown';
         }
     };
 
@@ -146,7 +173,7 @@ export default function PaymentHistoryPage() {
                                         {format(transaction.createdAt.toDate(), 'PPp')}
                                     </TableCell>
                                     <TableCell className="font-medium">
-                                        {getTypeLabel(transaction.type)}
+                                        {getTypeLabel(transaction)}
                                     </TableCell>
                                     <TableCell>₱{transaction.amount.toFixed(2)}</TableCell>
                                     <TableCell className="text-sm">
@@ -174,7 +201,7 @@ export default function PaymentHistoryPage() {
                                                     <div className="grid grid-cols-2 gap-4">
                                                         <div>
                                                             <label className="text-sm font-medium text-muted-foreground">Type</label>
-                                                            <p className="text-sm">{getTypeLabel(transaction.type)}</p>
+                                                            <p className="text-sm">{getTypeLabel(transaction)}</p>
                                                         </div>
                                                         <div>
                                                             <label className="text-sm font-medium text-muted-foreground">Amount</label>

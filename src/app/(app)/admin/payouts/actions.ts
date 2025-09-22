@@ -10,6 +10,8 @@ import {
   addDoc,
 } from 'firebase/firestore';
 import { AuditLogger } from '@/lib/audit-logger';
+import { TransactionService } from '@/lib/transaction-service';
+import { TransactionAction, TransactionStatus } from '@/lib/transaction-types';
 
 type Actor = {
     id: string;
@@ -45,6 +47,25 @@ export async function handleMarkAsPaid(
         actor.id,
         'payouts',
         { payoutId, providerId, providerName, amount, actorRole: 'admin' }
+    );
+
+    // Create payout completion transaction
+    await TransactionService.createPayoutTransaction(
+      {
+        payoutId: payoutId,
+        providerId: providerId,
+        amount: amount,
+        payoutDetails: {
+          method: 'bank_transfer' // Default, should be updated with actual details
+        },
+        metadata: {
+          processedBy: actor.id,
+          processedByName: actor.name,
+          processedAt: new Date().toISOString()
+        }
+      },
+      TransactionAction.PAYOUT_COMPLETION,
+      TransactionStatus.COMPLETED
     );
 
     return {

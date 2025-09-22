@@ -15,6 +15,8 @@ import { db } from '@/lib/firebase';
 import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Resend } from 'resend';
 import PayoutRequestEmail from '@/emails/payout-request-email';
+import { TransactionService } from '@/lib/transaction-service';
+import { TransactionAction, TransactionStatus } from '@/lib/transaction-types';
 
 const RequestPayoutInputSchema = z.object({
   providerId: z.string().describe('The ID of the provider requesting the payout.'),
@@ -63,6 +65,22 @@ const requestPayoutFlow = ai.defineFlow(
     
     // Create a record in the main payouts collection
     await addDoc(collection(db, 'payouts'), payoutData);
+
+    // Create transaction record using new transaction service
+    await TransactionService.createPayoutTransaction(
+      {
+        payoutId: transactionId,
+        providerId: providerId,
+        amount: amount,
+        payoutDetails: payoutDetails,
+        metadata: {
+          providerName: providerData.displayName,
+          agencyId: providerData.agencyId
+        }
+      },
+      TransactionAction.PAYOUT_REQUEST,
+      TransactionStatus.PENDING
+    );
 
 
     if (providerData.agencyId) {

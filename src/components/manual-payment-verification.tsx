@@ -31,6 +31,7 @@ import { storage } from "@/lib/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from "next-intl";
+import { getPlanIdFromName } from "@/lib/subscription-utils";
 
 interface ManualPaymentVerificationProps {
   plan: {
@@ -55,7 +56,7 @@ export function ManualPaymentVerification({ plan, onPaymentSubmitted }: ManualPa
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAccountDetails, setShowAccountDetails] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  console.log(plan);
   const paymentMethods = {
     gcash: {
       name: 'GCash',
@@ -187,10 +188,13 @@ export function ManualPaymentVerification({ plan, onPaymentSubmitted }: ManualPa
       const uploadResult = await uploadBytes(storageRef, paymentProof);
       const downloadURL = await getDownloadURL(uploadResult.ref);
 
+      // Convert plan name to correct plan ID
+      const correctPlanId = getPlanIdFromName(plan.name, plan.type);
+
       // Create subscription payment record
       const paymentData = {
         userId: user.uid,
-        planId: plan.id,
+        planId: correctPlanId,
         planName: plan.name,
         planType: plan.type,
         amount: plan.price,
@@ -210,8 +214,18 @@ export function ManualPaymentVerification({ plan, onPaymentSubmitted }: ManualPa
       // Update user subscription status
       const userRef = doc(db, 'users', user.uid);
       await updateDoc(userRef, {
+        subscription: {
+          planId: correctPlanId,
+          status: 'pending_verification',
+          planName: plan.name,
+          amount: plan.price,
+          paymentMethod: selectedMethod,
+          referenceNumber: referenceNumber.trim(),
+          submittedAt: serverTimestamp(),
+          type: plan.type
+        },
         subscriptionStatus: 'pending_verification',
-        subscriptionPlanId: plan.id,
+        subscriptionPlanId: correctPlanId,
         subscriptionPlanName: plan.name,
         subscriptionAmount: plan.price,
         subscriptionPaymentMethod: selectedMethod,
@@ -223,7 +237,7 @@ export function ManualPaymentVerification({ plan, onPaymentSubmitted }: ManualPa
       const notificationData = {
         type: 'payment_submitted',
         userEmail: user.email || '',
-        userName: user.displayName || user.name || 'User',
+        userName: user.displayName || 'User',
         planName: plan.name,
         planType: plan.type,
         amount: plan.price,
@@ -369,7 +383,7 @@ export function ManualPaymentVerification({ plan, onPaymentSubmitted }: ManualPa
                       <div>
                         <Label className="text-sm text-muted-foreground">Bank Name</Label>
                         <Input
-                          value={currentMethod.bankName}
+                          value={(currentMethod as typeof paymentMethods.bank).bankName}
                           readOnly
                           className="bg-background"
                         />

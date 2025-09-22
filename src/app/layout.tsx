@@ -7,12 +7,13 @@ import { ThemeProvider } from '@/context/theme-provider';
 import { Inter, Poppins } from 'next/font/google';
 import Script from 'next/script';
 import {NextIntlClientProvider} from 'next-intl';
+import { ProvidersWrapper } from '@/components/providers-wrapper';
 
 const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-body',
-})
+});
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -86,10 +87,12 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <AuthProvider>
-                {children}
-                <Toaster />
-            </AuthProvider>
+            <ProvidersWrapper>
+              <AuthProvider>
+                  {children}
+                  <Toaster />
+              </AuthProvider>
+            </ProvidersWrapper>
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>
