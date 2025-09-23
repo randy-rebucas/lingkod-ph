@@ -58,7 +58,7 @@ export const metadata: Metadata = {
 const serviceCategories = [
   {
     id: "home-property",
-    title: "🏠 Home & Property Services",
+    title: "Home & Property Services",
     description: "Complete home maintenance and improvement services",
     icon: <Home className="h-8 w-8 text-primary" />,
     services: [
@@ -79,7 +79,7 @@ const serviceCategories = [
   },
   {
     id: "personal-lifestyle",
-    title: "💇 Personal & Lifestyle Services",
+    title: "Personal & Lifestyle Services",
     description: "Personal care and lifestyle enhancement services",
     icon: <Heart className="h-8 w-8 text-primary" />,
     services: [
@@ -95,7 +95,7 @@ const serviceCategories = [
   },
   {
     id: "food-hospitality",
-    title: "🍴 Food & Hospitality Services",
+    title: "Food & Hospitality Services",
     description: "Culinary and hospitality support services",
     icon: <Utensils className="h-8 w-8 text-primary" />,
     services: [
@@ -107,7 +107,7 @@ const serviceCategories = [
   },
   {
     id: "creative-professional",
-    title: "📸 Creative & Professional Services",
+    title: "Creative & Professional Services",
     description: "Creative and professional business services",
     icon: <Camera className="h-8 w-8 text-primary" />,
     services: [
@@ -119,7 +119,7 @@ const serviceCategories = [
   },
   {
     id: "auto-mobile",
-    title: "🚗 Auto & Mobile Services",
+    title: "Auto & Mobile Services",
     description: "Automotive and mobile device services",
     icon: <Car className="h-8 w-8 text-primary" />,
     services: [
@@ -131,7 +131,7 @@ const serviceCategories = [
   },
   {
     id: "supplies-distribution",
-    title: "📦 Supplies & Distribution",
+    title: "Supplies & Distribution",
     description: "LocalPro add-on services and supplies",
     icon: <Package2 className="h-8 w-8 text-primary" />,
     services: [
