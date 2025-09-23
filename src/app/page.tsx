@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { UserCheck, Star, Sparkles, Building, ArrowRight } from 'lucide-react';
+import { UserCheck, Star, Sparkles, Building, ArrowRight, Megaphone } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -210,10 +210,20 @@ export default function HomePage() {
                 </section>
                 
                 {/* Ad Carousel Section */}
-                <section className="container -mt-20 relative z-20 mb-8">
-                    <div className="rounded-2xl overflow-hidden shadow-2xl border border-border/50">
-                        <AdCarousel />
+                <section className="container -mt-20 relative z-20 mb-16">
+                    <div className="text-center mb-8">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
+                            <Megaphone className="h-4 w-4" />
+                            Featured Partners
+                        </div>
+                        <h2 className="font-headline text-3xl font-bold md:text-4xl mb-4 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                            Trusted by Leading Businesses
+                        </h2>
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                            Discover our featured partners and see how they're growing their business with LocalPro
+                        </p>
                     </div>
+                    <AdCarousel />
                 </section>
 
                 {/* How It Works Section */}
