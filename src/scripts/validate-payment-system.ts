@@ -51,7 +51,7 @@ async function main() {
     }
     
     if (!paypalValid) {
-      console.log('   Missing PayPal configuration for subscription payments');
+      console.log('   Missing PayPal configuration for payments');
     }
 
     // 3. Production Readiness Validation

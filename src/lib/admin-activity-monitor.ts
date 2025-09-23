@@ -18,9 +18,6 @@ export type AdminActivityType =
   | 'category_created'
   | 'category_updated'
   | 'category_deleted'
-  | 'subscription_created'
-  | 'subscription_updated'
-  | 'subscription_deleted'
   | 'broadcast_sent'
   | 'email_campaign_sent'
   | 'backup_created'
@@ -418,9 +415,6 @@ ${JSON.stringify(activity.details, null, 2)}
       'category_created': 'medium',
       'category_updated': 'medium',
       'category_deleted': 'medium',
-      'subscription_created': 'medium',
-      'subscription_updated': 'medium',
-      'subscription_deleted': 'medium',
       'report_processed': 'medium',
       'job_managed': 'medium',
       'booking_managed': 'medium',
@@ -450,9 +444,6 @@ ${JSON.stringify(activity.details, null, 2)}
       'category_created': `Created category: ${details.categoryName || 'Unknown'}`,
       'category_updated': `Updated category: ${details.categoryName || 'Unknown'}`,
       'category_deleted': `Deleted category: ${details.categoryName || 'Unknown'}`,
-      'subscription_created': `Created subscription plan: ${details.planName || 'Unknown'}`,
-      'subscription_updated': `Updated subscription plan: ${details.planName || 'Unknown'}`,
-      'subscription_deleted': `Deleted subscription plan: ${details.planName || 'Unknown'}`,
       'broadcast_sent': `Sent broadcast: ${details.messageLength || 0} characters`,
       'email_campaign_sent': `Sent email campaign: ${details.recipientCount || 0} recipients`,
       'backup_created': `Created backup: ${details.backupSize || 'Unknown size'}`,

@@ -38,6 +38,10 @@ const rewards = [
 ];
 
 export async function seedRewards() {
+    if (!db) {
+        console.warn('Firebase not initialized, skipping rewards seeding');
+        return;
+    }
     const rewardsRef = collection(db, "loyaltyRewards");
     let count = 0;
 

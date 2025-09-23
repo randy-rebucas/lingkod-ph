@@ -53,7 +53,6 @@ The application supports five distinct user roles, each with specific permission
 - Invoices - Create and manage invoices (Pro/Elite plans)
 - Smart Rate - AI-powered pricing suggestions (Paid plans)
 - Quote Builder - Create professional quotes (Elite plan)
-- Subscription - Manage subscription plans
 - Profile - Manage professional profile
 - Messages - Communicate with clients
 - Settings - Account preferences
@@ -63,7 +62,7 @@ The application supports five distinct user roles, each with specific permission
 - Accept and manage bookings
 - Apply to job postings
 - Track earnings and request payouts
-- Access advanced features based on subscription tier
+- Access advanced features based on role
 - Manage professional profile and portfolio
 - Communicate with clients
 

@@ -71,19 +71,18 @@ const processChartData = (bookings: CompletedBooking[]) => {
 };
 
 export default function EarningsPage() {
-    const { user, userRole, subscription } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const t = useTranslations('Earnings');
     const [bookings, setBookings] = useState<CompletedBooking[]>([]);
     const [payouts, setPayouts] = useState<Payout[]>([]);
     const [loading, setLoading] = useState(true);
     const [isRequestingPayout, setIsRequestingPayout] = useState(false);
-    const isPaidSubscriber = subscription?.status === 'active' && subscription.planId !== 'free';
 
     const isSaturday = new Date().getDay() === 6;
 
     useEffect(() => {
-        if (!user || userRole !== 'provider' || !isPaidSubscriber) {
+        if (!user || userRole !== 'provider' || !db) {
             setLoading(false);
             return;
         }
@@ -114,7 +113,7 @@ export default function EarningsPage() {
             unsubscribeBookings();
             unsubscribePayouts();
         };
-    }, [user, userRole, isPaidSubscriber]);
+    }, [user, userRole, db]);
 
     const totalRevenue = bookings.reduce((sum, b) => sum + b.price, 0);
     const totalPaidOut = payouts.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);
@@ -125,7 +124,7 @@ export default function EarningsPage() {
     const chartData = processChartData(bookings);
 
     const handlePayoutRequest = async () => {
-        if (!user) return;
+        if (!user || !db) return;
         
         // Final check for payout details before proceeding
         const userDocRef = doc(db, 'users', user.uid);
@@ -173,31 +172,6 @@ export default function EarningsPage() {
         );
     }
     
-    if (!isPaidSubscriber) {
-         return (
-            <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                    <p className="text-muted-foreground">
-                        {t('subtitle')}
-                    </p>
-                </div>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('upgradeToAccessEarnings')}</CardTitle>
-                        <CardDescription>{t('upgradeDescription')}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <DollarSign className="h-16 w-16 mb-4" />
-                        <p className="mb-4">{t('takeControlOfFinances')}</p>
-                         <Button asChild>
-                            <Link href="/subscription">{t('viewSubscriptionPlans')}</Link>
-                        </Button>
-                    </CardContent>
-                </Card>
-            </div>
-        )
-    }
 
     if (loading) {
         return (

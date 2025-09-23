@@ -2,7 +2,7 @@
 
 ## 🎉 Status: PRODUCTION READY
 
-The Lingkod PH payment system has been fully implemented and is now production-ready. This comprehensive system supports subscription payments, booking payments, and payouts with robust security, monitoring, and error handling.
+The Lingkod PH payment system has been fully implemented and is now production-ready. This comprehensive system supports booking payments and payouts with robust security, monitoring, and error handling.
 
 ## 🚀 Quick Start
 
@@ -17,19 +17,13 @@ This will run a comprehensive validation of the entire payment system and provid
 
 ### ✅ Core Payment Features
 
-#### 1. Subscription Payments
-- **PayPal Integration**: Full PayPal SDK integration for subscription payments
-- **Manual Payment Methods**: GCash, Maya, and Bank Transfer for subscription payments
-- **Role Upgrades**: Automatic role upgrades (provider/agency) upon successful payment
-- **Subscription Management**: Active subscription tracking with renewal dates
-
-#### 2. Booking Payments
+#### 1. Booking Payments
 - **Automated GCash**: Adyen-powered GCash payments with instant confirmation
 - **Manual Payment Methods**: GCash, Maya, and Bank Transfer with proof upload
 - **Payment Verification**: Admin interface for manual payment verification
 - **Real-time Updates**: Live payment status updates and notifications
 
-#### 3. Payout System
+#### 2. Payout System
 - **Provider Payouts**: Automated payout request system for providers
 - **Agency Payouts**: Commission-based payout system for agencies
 - **Payout Validation**: Comprehensive validation for payout requests

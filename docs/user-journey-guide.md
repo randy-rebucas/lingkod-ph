@@ -270,7 +270,7 @@
    ```
    - Creates agency account
    - Completes business profile and verification
-   - Selects appropriate subscription plan
+   - Completes business verification
    - Invites existing cleaners to join agency
 
 2. **Provider Onboarding**

@@ -9,7 +9,7 @@
 6. [Partner Role](#partner-role)
 7. [Role Comparison Matrix](#role-comparison-matrix)
 8. [Security and Access Control](#security-and-access-control)
-9. [Subscription Tiers and Feature Access](#subscription-tiers-and-feature-access)
+9. [Feature Access Matrix](#feature-access-matrix)
 
 ---
 
@@ -191,7 +191,6 @@
 | **Invoices** | Create and manage invoices (Pro/Elite) | Professional billing |
 | **Smart Rate** | AI-powered pricing suggestions (Paid) | Optimize pricing strategy |
 | **Quote Builder** | Create professional quotes (Elite) | Professional proposals |
-| **Subscription** | Manage subscription plans | Upgrade for better features |
 | **Profile** | Manage professional profile | Build professional presence |
 | **Messages** | Communicate with clients | Client relationship management |
 | **Settings** | Account preferences | Configure business settings |

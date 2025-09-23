@@ -127,6 +127,10 @@ export class ProviderPerformanceMonitor {
     limitCount: number = 12
   ): Promise<PerformanceMetrics[]> {
     try {
+      if (!db) {
+        console.warn('Firebase not initialized, returning empty performance history');
+        return [];
+      }
       const metricsQuery = query(
         collection(db, 'performanceMetrics'),
         where('providerId', '==', providerId),
@@ -149,6 +153,10 @@ export class ProviderPerformanceMonitor {
 
   async getPerformanceAlerts(providerId: string): Promise<PerformanceAlert[]> {
     try {
+      if (!db) {
+        console.warn('Firebase not initialized, returning empty performance alerts');
+        return [];
+      }
       const alertsQuery = query(
         collection(db, 'performanceAlerts'),
         where('providerId', '==', providerId),
@@ -172,6 +180,10 @@ export class ProviderPerformanceMonitor {
 
   async resolveAlert(alertId: string, resolvedBy: string): Promise<void> {
     try {
+      if (!db) {
+        console.warn('Firebase not initialized, skipping alert resolution');
+        return;
+      }
       await updateDoc(doc(db, 'performanceAlerts', alertId), {
         resolved: true,
         resolvedAt: serverTimestamp(),
@@ -183,6 +195,10 @@ export class ProviderPerformanceMonitor {
   }
 
   private async getBookings(providerId: string, startDate: Date, endDate: Date): Promise<any[]> {
+    if (!db) {
+      console.warn('Firebase not initialized, returning empty bookings');
+      return [];
+    }
     const bookingsQuery = query(
       collection(db, 'bookings'),
       where('providerId', '==', providerId)
@@ -198,6 +214,10 @@ export class ProviderPerformanceMonitor {
   }
 
   private async getReviews(providerId: string, startDate: Date, endDate: Date): Promise<any[]> {
+    if (!db) {
+      console.warn('Firebase not initialized, returning empty reviews');
+      return [];
+    }
     const reviewsQuery = query(
       collection(db, 'reviews'),
       where('providerId', '==', providerId)
@@ -213,6 +233,10 @@ export class ProviderPerformanceMonitor {
   }
 
   private async getMessages(providerId: string, startDate: Date, endDate: Date): Promise<any[]> {
+    if (!db) {
+      console.warn('Firebase not initialized, returning empty messages');
+      return [];
+    }
     // Get conversations where provider is a participant
     const conversationsQuery = query(
       collection(db, 'conversations'),
@@ -245,6 +269,10 @@ export class ProviderPerformanceMonitor {
   }
 
   private async getServices(providerId: string): Promise<any[]> {
+    if (!db) {
+      console.warn('Firebase not initialized, returning empty services');
+      return [];
+    }
     const servicesQuery = query(
       collection(db, 'services'),
       where('userId', '==', providerId)
@@ -255,6 +283,10 @@ export class ProviderPerformanceMonitor {
   }
 
   private async getJobApplications(providerId: string, startDate: Date, endDate: Date): Promise<any[]> {
+    if (!db) {
+      console.warn('Firebase not initialized, returning empty job applications');
+      return [];
+    }
     // Note: This is a simplified implementation. In a real application, you would need
     // to track application timestamps separately, as the current structure doesn't
     // support filtering by application date.
@@ -408,6 +440,10 @@ export class ProviderPerformanceMonitor {
 
   private async storePerformanceMetrics(metrics: PerformanceMetrics): Promise<void> {
     try {
+      if (!db) {
+        console.warn('Firebase not initialized, skipping performance metrics storage');
+        return;
+      }
       await addDoc(collection(db, 'performanceMetrics'), {
         ...metrics,
         date: serverTimestamp() as Timestamp
@@ -476,6 +512,10 @@ export class ProviderPerformanceMonitor {
     }
 
     // Store alerts
+    if (!db) {
+      console.warn('Firebase not initialized, skipping performance alerts storage');
+      return;
+    }
     for (const alert of alerts) {
       await addDoc(collection(db, 'performanceAlerts'), {
         ...alert,

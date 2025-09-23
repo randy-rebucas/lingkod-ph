@@ -371,9 +371,6 @@ async function handleSystemConfiguration(
         // Implement backup creation logic
         return { success: true, message: 'Backup created successfully' };
       
-      case 'update_subscription_plans':
-        // Implement subscription plan update logic
-        return { success: true, message: 'Subscription plans updated successfully' };
       
       default:
         return { success: false, message: 'Unknown system configuration operation' };

@@ -4,7 +4,6 @@ config();
 
 import { seedCategories } from '@/lib/seed-categories';
 import { seedRewards } from '@/lib/seed-rewards';
-import { seedSubscriptions } from '@/lib/seed-subscriptions';
 
 import '@/ai/flows/smart-rate-suggestions.ts';
 import '@/ai/flows/generate-quote-description.ts';
@@ -20,7 +19,6 @@ async function seedDatabase() {
     console.log('Seeding database...');
     await seedCategories();
     await seedRewards();
-    await seedSubscriptions();
     console.log('Database seeding complete.');
 }
 

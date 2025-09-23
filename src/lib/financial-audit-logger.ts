@@ -4,13 +4,12 @@ import { auditLogger } from './audit-logger';
 
 export interface FinancialTransaction {
   id: string;
-  type: 'booking_payment' | 'payout_request' | 'payout_processed' | 'subscription_payment' | 'refund';
+  type: 'booking_payment' | 'payout_request' | 'payout_processed' | 'refund';
   amount: number;
   currency: string;
   providerId: string;
   clientId?: string;
   bookingId?: string;
-  subscriptionId?: string;
   status: 'pending' | 'completed' | 'failed' | 'cancelled';
   paymentMethod?: string;
   transactionId?: string;
@@ -93,22 +92,6 @@ export class FinancialAuditLogger {
     );
   }
 
-  async logSubscriptionPayment(transaction: FinancialTransaction, requestMetadata: any) {
-    await auditLogger.logAction(
-      'subscription_payment',
-      transaction.providerId,
-      'subscriptions',
-      {
-        userRole: 'provider',
-        resourceId: transaction.subscriptionId || 'unknown',
-        ...requestMetadata,
-        amount: transaction.amount,
-        currency: transaction.currency,
-        paymentMethod: transaction.paymentMethod,
-        transactionId: transaction.transactionId
-      }
-    );
-  }
 
   async logRefund(transaction: FinancialTransaction, requestMetadata: any) {
     await auditLogger.logAction(

@@ -98,7 +98,7 @@ export default function TermsOfServicePage() {
       icon: <CreditCard className="h-5 w-5" />,
       content: [
         "Clients pay Providers through the Platform using secure payment methods. All pricing, fees, and applicable taxes will be clearly displayed before checkout.",
-        "Providers may be charged subscription fees, transaction commissions, or advertising fees based on LocalPro's current pricing structure.",
+        "Providers may be charged transaction commissions or advertising fees based on LocalPro's current pricing structure.",
         "All transactions are processed in PHP (Philippine Peso) or USD, as selected during registration.",
         "Payment processing fees may apply and will be disclosed before transaction completion.",
         "We reserve the right to change our fee structure with 30 days' notice to users.",

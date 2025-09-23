@@ -88,16 +88,15 @@ const processServicePerformance = (bookings: Booking[]) => {
 
 
 export default function AnalyticsPage() {
-    const { user, subscription } = useAuth();
+    const { user } = useAuth();
     const t = useTranslations('Analytics');
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
-    const isElite = subscription?.status === 'active' && subscription.planId === 'elite';
 
 
     useEffect(() => {
-        if (!user || !isElite) {
+        if (!user || !db) {
             setLoading(false);
             return;
         };
@@ -124,7 +123,7 @@ export default function AnalyticsPage() {
             unsubBookings();
             unsubReviews();
         };
-    }, [user, isElite]);
+    }, [user, db]);
 
     const analyticsData = useMemo(() => {
         const completedBookings = bookings.filter(b => b.status === 'Completed');
@@ -158,7 +157,7 @@ export default function AnalyticsPage() {
         };
     }, [bookings, reviews]);
 
-    if (!isElite) {
+    if (!user) {
         return (
             <div className="space-y-6">
                 <div>
@@ -176,7 +175,6 @@ export default function AnalyticsPage() {
                         <BarChart2 className="h-16 w-16 mb-4" />
                         <p className="mb-4">{t('advancedAnalytics')}</p>
                          <Button asChild>
-                            <Link href="/subscription">{t('viewSubscriptionPlans')}</Link>
                         </Button>
                     </CardContent>
                 </Card>

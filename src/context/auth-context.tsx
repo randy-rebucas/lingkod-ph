@@ -9,7 +9,6 @@ import { useToast } from '@/hooks/use-toast';
 
 type UserRole = 'client' | 'provider' | 'agency' | 'admin' | 'partner' | null;
 
-
 type VerificationStatus = 'Unverified' | 'Pending' | 'Verified' | 'Rejected';
 
 interface AuthContextType {
@@ -29,6 +28,11 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 const createSingletonNotification = async (userId: string, type: string, message: string, link: string) => {
+    if (!db) {
+        console.warn('Firebase not initialized, skipping notification creation');
+        return;
+    }
+    
     try {
         const notificationsRef = collection(db, `users/${userId}/notifications`);
         // Check if a similar notification already exists to avoid duplicates
@@ -81,6 +85,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [user]);
 
   useEffect(() => {
+    if (!auth || !db) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribeAuth = onAuthStateChanged(auth, (authUser) => {
       if (authUser) {
         setUser(authUser);
@@ -111,7 +120,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribeAuth();
-  }, [toast, handleSignOut]);
+  }, [toast, handleSignOut, auth, db]);
 
   return (
     <AuthContext.Provider value={{ user, loading, userRole, verificationStatus, getIdToken }}>

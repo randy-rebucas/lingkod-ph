@@ -26,6 +26,10 @@ export class ProviderNotificationService {
 
   async sendJobApplicationConfirmation(providerId: string, jobTitle: string, clientName: string) {
     try {
+      if (!db) {
+        console.warn('Firebase not initialized, skipping job application confirmation');
+        return;
+      }
       const userDoc = await getDoc(doc(db, 'users', providerId));
       if (!userDoc.exists()) return;
 
@@ -57,6 +61,10 @@ export class ProviderNotificationService {
 
   async sendBookingConfirmation(providerId: string, bookingDetails: any) {
     try {
+      if (!db) {
+        console.warn('Firebase not initialized, skipping booking confirmation');
+        return;
+      }
       const userDoc = await getDoc(doc(db, 'users', providerId));
       if (!userDoc.exists()) return;
 
@@ -89,6 +97,10 @@ export class ProviderNotificationService {
 
   async sendPayoutRequestConfirmation(providerId: string, payoutDetails: any) {
     try {
+      if (!db) {
+        console.warn('Firebase not initialized, skipping payout request confirmation');
+        return;
+      }
       const userDoc = await getDoc(doc(db, 'users', providerId));
       if (!userDoc.exists()) return;
 
@@ -120,6 +132,10 @@ export class ProviderNotificationService {
 
   async sendPayoutProcessedNotification(providerId: string, payoutDetails: any) {
     try {
+      if (!db) {
+        console.warn('Firebase not initialized, skipping payout processed notification');
+        return;
+      }
       const userDoc = await getDoc(doc(db, 'users', providerId));
       if (!userDoc.exists()) return;
 
@@ -150,39 +166,13 @@ export class ProviderNotificationService {
     }
   }
 
-  async sendSubscriptionReminder(providerId: string, subscriptionDetails: any) {
-    try {
-      const userDoc = await getDoc(doc(db, 'users', providerId));
-      if (!userDoc.exists()) return;
-
-      const userData = userDoc.data();
-      const email = userData.email;
-      const providerName = userData.displayName || userData.name;
-
-      const template = this.getSubscriptionReminderTemplate(subscriptionDetails, providerName);
-      
-      await resend.emails.send({
-        from: 'Lingkod PH <notifications@lingkod-ph.com>',
-        to: [email],
-        subject: template.subject,
-        html: template.html,
-        text: template.text,
-      });
-
-      // Log notification
-      await this.logNotification(providerId, 'subscription_reminder', {
-        planName: subscriptionDetails.planName,
-        renewalDate: subscriptionDetails.renewalDate,
-        email
-      });
-
-    } catch (error) {
-      console.error('Failed to send subscription reminder:', error);
-    }
-  }
 
   async sendNewReviewNotification(providerId: string, reviewDetails: any) {
     try {
+      if (!db) {
+        console.warn('Firebase not initialized, skipping new review notification');
+        return;
+      }
       const userDoc = await getDoc(doc(db, 'users', providerId));
       if (!userDoc.exists()) return;
 
@@ -307,29 +297,6 @@ export class ProviderNotificationService {
     };
   }
 
-  private getSubscriptionReminderTemplate(subscriptionDetails: any, providerName: string): NotificationTemplate {
-    return {
-      subject: `Subscription Renewal Reminder - ${subscriptionDetails.planName}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #f59e0b;">Subscription Renewal Reminder</h2>
-          <p>Hello ${providerName},</p>
-          <p>Your ${subscriptionDetails.planName} subscription will renew on <strong>${new Date(subscriptionDetails.renewalDate).toLocaleDateString()}</strong>.</p>
-          <div style="background-color: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>Current Plan:</strong> ${subscriptionDetails.planName}</p>
-            <p><strong>Renewal Date:</strong> ${new Date(subscriptionDetails.renewalDate).toLocaleDateString()}</p>
-            <p><strong>Amount:</strong> ₱${subscriptionDetails.amount}</p>
-          </div>
-          <p>Make sure your payment method is up to date to avoid any service interruptions.</p>
-          <div style="margin: 20px 0;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/subscription" style="background-color: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Manage Subscription</a>
-          </div>
-          <p>Best regards,<br>Lingkod PH Team</p>
-        </div>
-      `,
-      text: `Hello ${providerName},\n\nYour ${subscriptionDetails.planName} subscription will renew on ${new Date(subscriptionDetails.renewalDate).toLocaleDateString()}.\n\nCurrent Plan: ${subscriptionDetails.planName}\nRenewal Date: ${new Date(subscriptionDetails.renewalDate).toLocaleDateString()}\nAmount: ₱${subscriptionDetails.amount}\n\nMake sure your payment method is up to date to avoid any service interruptions.\n\nBest regards,\nLingkod PH Team`
-    };
-  }
 
   private getNewReviewTemplate(reviewDetails: any, providerName: string): NotificationTemplate {
     return {
@@ -358,6 +325,10 @@ export class ProviderNotificationService {
 
   private async logNotification(providerId: string, type: string, details: any) {
     try {
+      if (!db) {
+        console.warn('Firebase not initialized, skipping notification logging');
+        return;
+      }
       await addDoc(collection(db, 'notifications'), {
         userId: providerId,
         type,

@@ -36,7 +36,7 @@ export type Job = {
 };
 
 export default function JobsPage() {
-    const { user, subscription, userRole } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const t = useTranslations('Jobs');
     const [jobs, setJobs] = useState<Job[]>([]);

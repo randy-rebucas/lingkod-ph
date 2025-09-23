@@ -55,6 +55,10 @@ const categories = [
 ];
 
 export async function seedCategories() {
+    if (!db) {
+        console.warn('Firebase not initialized, skipping category seeding');
+        return;
+    }
     const categoriesRef = collection(db, "categories");
     let count = 0;
 

@@ -95,7 +95,7 @@ const getStatusVariant = (status: PayoutRequest['status']) => {
 };
 
 export default function ReportsPage() {
-    const { user, userRole, subscription } = useAuth();
+    const { user, userRole } = useAuth();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
     const [loading, setLoading] = useState(true);
@@ -212,7 +212,6 @@ export default function ReportsPage() {
                         <FilePieChart className="h-16 w-16 mb-4" />
                         <p className="mb-4">Get insights into your agency's performance.</p>
                          <Button asChild>
-                            <Link href="/subscription">View Subscription Plans</Link>
                         </Button>
                     </CardContent>
                 </Card>

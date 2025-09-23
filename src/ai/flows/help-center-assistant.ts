@@ -49,7 +49,7 @@ A: Once a booking is confirmed, you can use our built-in messaging system to com
 
 === For Providers & Agencies ===
 Q: How do I become a provider on LocalPro?
-A: Sign up for a 'Client' account first. From your profile page, you will find an option to 'Become a Provider'. This will take you to our subscription page where you can choose a plan that fits your needs.
+A: Sign up for a 'Client' account first. From your profile page, you will find an option to 'Become a Provider'. Complete the verification process to start offering your services.
 
 Q: How do I create an effective profile?
 A: A great profile includes a clear photo of yourself or your business logo, a detailed bio describing your experience, and a comprehensive list of the services you offer with clear pricing. Complete our identity verification process to earn a 'Verified' badge, which greatly increases client trust.
@@ -61,7 +61,7 @@ Q: When can I request a payout?
 A: Payout requests are processed every Saturday. You must have a minimum available balance of ₱400 to be eligible for a payout. Please ensure your payout details are correctly set up in your profile.
 
 Q: What are the fees for using the platform?
-A: We charge a competitive commission fee on each completed booking. We also offer optional subscription plans for providers and agencies that provide access to advanced features and lower commission rates. You can find more details on our Subscription page.
+A: We charge a competitive commission fee on each completed booking. The commission rate varies based on the service category and is clearly displayed before you accept any booking.
 
 Q: How can I improve my ranking and get more bookings?
 A: High-quality service, positive client reviews, a complete and professional profile, and quick response times to inquiries all contribute to better visibility on our platform. Becoming a verified provider also significantly increases trust.

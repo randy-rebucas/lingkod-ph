@@ -52,11 +52,6 @@ export const adminRateLimiters = {
     message: 'Too many category management attempts. Please wait before making more changes.'
   }),
 
-  subscriptionManagement: new RateLimiter({
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 5, // 5 subscription plan changes per minute
-    message: 'Too many subscription management attempts. Please wait before making more changes.'
-  }),
 
   // Communication operations
   broadcastSending: new RateLimiter({
@@ -165,7 +160,6 @@ export const ADMIN_RATE_LIMIT_CONFIG = {
   // Content operations (less restrictive)
   CONTENT: {
     categoryManagement: adminRateLimiters.categoryManagement,
-    subscriptionManagement: adminRateLimiters.subscriptionManagement,
     jobManagement: adminRateLimiters.jobManagement,
     bookingManagement: adminRateLimiters.bookingManagement,
     reportProcessing: adminRateLimiters.reportProcessing

@@ -96,7 +96,7 @@ const getStatusVariant = (status: PayoutRequest['status']) => {
 };
 
 export default function ReportsPage() {
-    const { user, userRole, subscription } = useAuth();
+    const { user, userRole } = useAuth();
     const t = useTranslations('Reports');
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [payouts, setPayouts] = useState<PayoutRequest[]>([]);
@@ -214,7 +214,6 @@ export default function ReportsPage() {
                         <FilePieChart className="h-16 w-16 mb-4" />
                         <p className="mb-4">{t('getInsights')}</p>
                          <Button asChild>
-                            <Link href="/subscription">{t('viewSubscriptionPlans')}</Link>
                         </Button>
                     </CardContent>
                 </Card>

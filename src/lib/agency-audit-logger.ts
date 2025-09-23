@@ -6,7 +6,7 @@ export interface AgencyAuditLogEntry {
   agencyId: string;
   agencyName: string;
   action: AgencyAction;
-  targetType: 'provider' | 'booking' | 'job' | 'payout' | 'subscription' | 'profile' | 'system';
+  targetType: 'provider' | 'booking' | 'job' | 'payout' | 'profile' | 'system';
   targetId?: string;
   targetName?: string;
   details: Record<string, any>;
@@ -29,9 +29,6 @@ export type AgencyAction =
   | 'job_deleted'
   | 'payout_processed'
   | 'payout_rejected'
-  | 'subscription_upgraded'
-  | 'subscription_downgraded'
-  | 'subscription_cancelled'
   | 'profile_updated'
   | 'settings_changed'
   | 'data_exported'
@@ -157,27 +154,6 @@ export class AgencyAuditLogger {
     );
   }
 
-  /**
-   * Log subscription changes
-   */
-  async logSubscriptionChange(
-    action: 'subscription_upgraded' | 'subscription_downgraded' | 'subscription_cancelled',
-    fromPlan: string,
-    toPlan: string,
-    details: Record<string, any>,
-    options: { ipAddress?: string; userAgent?: string } = {}
-  ): Promise<void> {
-    await this.logAction(
-      action,
-      'subscription',
-      { ...details, fromPlan, toPlan },
-      {
-        severity: 'high',
-        category: 'system',
-        ...options,
-      }
-    );
-  }
 
   /**
    * Get audit logs for the agency
@@ -277,9 +253,6 @@ export class AgencyAuditLogger {
       job_deleted: 'medium',
       payout_processed: 'high',
       payout_rejected: 'high',
-      subscription_upgraded: 'high',
-      subscription_downgraded: 'high',
-      subscription_cancelled: 'critical',
       profile_updated: 'low',
       settings_changed: 'medium',
       data_exported: 'medium',
@@ -307,9 +280,6 @@ export class AgencyAuditLogger {
       job_deleted: 'system',
       payout_processed: 'financial',
       payout_rejected: 'financial',
-      subscription_upgraded: 'system',
-      subscription_downgraded: 'system',
-      subscription_cancelled: 'system',
       profile_updated: 'system',
       settings_changed: 'system',
       data_exported: 'compliance',

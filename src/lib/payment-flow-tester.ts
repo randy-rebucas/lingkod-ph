@@ -35,8 +35,6 @@ export class PaymentFlowTester {
     // Configuration tests
     suites.push(await this.testConfiguration());
 
-    // Subscription payment tests
-    suites.push(await this.testSubscriptionPayments());
 
     // Booking payment tests
     suites.push(await this.testBookingPayments());
@@ -135,64 +133,6 @@ export class PaymentFlowTester {
       results,
       overallStatus: failedTests === 0 ? 'pass' : 'partial',
       summary: `${passedTests} passed, ${failedTests} failed out of ${results.length} tests`,
-    };
-  }
-
-  /**
-   * Test subscription payment flows
-   */
-  private static async testSubscriptionPayments(): Promise<TestSuite> {
-    const results: TestResult[] = [];
-    const startTime = Date.now();
-
-    // Test PayPal subscription flow
-    try {
-      // This would test the actual PayPal integration
-      // For now, we'll test the configuration
-      const paypalValid = PaymentConfig.validatePayPalConfig();
-      results.push({
-        testName: 'PayPal Subscription Flow',
-        status: paypalValid ? 'pass' : 'skip',
-        message: paypalValid ? 'PayPal subscription configuration is ready' : 'PayPal not configured - skipping',
-        details: { configured: paypalValid },
-      });
-    } catch (error) {
-      results.push({
-        testName: 'PayPal Subscription Flow',
-        status: 'fail',
-        message: 'Error testing PayPal subscription flow',
-        details: { error: error instanceof Error ? error.message : String(error) },
-      });
-    }
-
-    // Test manual subscription payment flow
-    try {
-      const manualPaymentValid = PaymentValidator.validatePaymentMethodConfig('gcash');
-      results.push({
-        testName: 'Manual Subscription Payment',
-        status: manualPaymentValid.valid ? 'pass' : 'fail',
-        message: manualPaymentValid.valid ? 'Manual subscription payment is configured' : 'Manual subscription payment configuration invalid',
-        details: { errors: manualPaymentValid.error ? [manualPaymentValid.error] : [] },
-      });
-    } catch (error) {
-      results.push({
-        testName: 'Manual Subscription Payment',
-        status: 'fail',
-        message: 'Error testing manual subscription payment',
-        details: { error: error instanceof Error ? error.message : String(error) },
-      });
-    }
-
-    const duration = Date.now() - startTime;
-    const passedTests = results.filter(r => r.status === 'pass').length;
-    const failedTests = results.filter(r => r.status === 'fail').length;
-    const skippedTests = results.filter(r => r.status === 'skip').length;
-
-    return {
-      suiteName: 'Subscription Payment Tests',
-      results,
-      overallStatus: failedTests === 0 ? 'pass' : 'partial',
-      summary: `${passedTests} passed, ${failedTests} failed, ${skippedTests} skipped out of ${results.length} tests`,
     };
   }
 

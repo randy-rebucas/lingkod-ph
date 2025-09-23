@@ -44,7 +44,7 @@ type Job = {
 export default function JobDetailsPage() {
     const params = useParams();
     const router = useRouter();
-    const { user, userRole, subscription } = useAuth();
+    const { user, userRole } = useAuth();
     const { toast } = useToast();
     const jobId = params.jobId as string;
 
@@ -53,7 +53,6 @@ export default function JobDetailsPage() {
     const [reportReason, setReportReason] = useState("");
     const [isReporting, setIsReporting] = useState(false);
 
-    const isSubscribed = subscription?.status === 'active';
     const hasApplied = job?.applications?.includes(user?.uid || '');
 
     useEffect(() => {
@@ -236,10 +235,10 @@ export default function JobDetailsPage() {
                         size="lg"
                         className="w-full"
                         onClick={handleApply}
-                        disabled={!isSubscribed || !!hasApplied}
-                        title={!isSubscribed ? "You need an active subscription to apply" : (hasApplied ? "You have already applied" : "Apply for this job")}
+                        disabled={!!hasApplied}
+                        title={hasApplied ? "You have already applied" : "Apply for this job"}
                     >
-                        {hasApplied ? 'Applied' : (isSubscribed ? 'Apply Now' : <><Star className="mr-2 h-4 w-4" /> Upgrade to Apply</>)}
+                        {hasApplied ? 'Applied' : 'Apply Now'}
                     </Button>
                 </CardFooter>
             </Card>

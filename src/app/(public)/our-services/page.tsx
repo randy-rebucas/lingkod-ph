@@ -140,7 +140,7 @@ const serviceCategories = [
       { name: "Tools & Equipment Rentals", description: "Professional tools and equipment rental", icon: <ToolWrench className="h-5 w-5" /> },
       { name: "Plumbing / Electrical Parts", description: "Professional plumbing and electrical supplies", icon: <Droplets className="h-5 w-5" /> },
       { name: "Paints & Materials", description: "Quality paints and construction materials", icon: <PaintBucket className="h-5 w-5" /> },
-      { name: "Subscription Kits", description: "Convenient starter kits and subscriptions", icon: <Package2 className="h-5 w-5" /> }
+      { name: "Starter Kits", description: "Convenient starter kits and packages", icon: <Package2 className="h-5 w-5" /> }
     ]
   }
 ];

@@ -42,7 +42,7 @@ ADYEN_ENVIRONMENT=test
 ADYEN_CLIENT_KEY=
 ADYEN_HMAC_KEY=
 
-# PayPal Configuration (for subscriptions) - Set these for production
+# PayPal Configuration - Set these for production
 NEXT_PUBLIC_PAYPAL_CLIENT_ID=
 PAYPAL_CLIENT_SECRET=
 
@@ -86,7 +86,7 @@ function setupDevelopmentEnvironment() {
   console.log('🔧 Development Mode Features:');
   console.log('- Payment system will work with manual uploads');
   console.log('- GCash automated payments require Adyen configuration');
-  console.log('- PayPal subscriptions require PayPal configuration');
+  console.log('- PayPal payments require PayPal configuration');
   console.log('- Firebase features will be limited without proper configuration\n');
 
   console.log('🌐 Firebase Setup:');

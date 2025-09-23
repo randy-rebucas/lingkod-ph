@@ -7,7 +7,7 @@
 4. [Agency Role](#agency-role)
 5. [Admin Role](#admin-role)
 6. [Partner Role](#partner-role)
-7. [Subscription Tiers](#subscription-tiers)
+7. [Feature Tiers](#feature-tiers)
 8. [Upgrade Messages](#upgrade-messages)
 9. [Feature Access Matrix](#feature-access-matrix)
 10. [Implementation Notes](#implementation-notes)
@@ -16,7 +16,7 @@
 
 ## Overview
 
-**Lingkod PH** (also known as **LocalPro**) implements a comprehensive role-based access control system with subscription tiers that determine feature availability. This documentation provides a complete breakdown of features accessible to each user role, including upgrade messaging for premium features.
+**Lingkod PH** (also known as **LocalPro**) implements a comprehensive role-based access control system that determines feature availability. This documentation provides a complete breakdown of features accessible to each user role.
 
 ### Platform Architecture
 - **Framework**: Next.js 15.3.3 with TypeScript

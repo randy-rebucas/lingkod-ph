@@ -92,7 +92,7 @@ const getStatusVariant = (status: InvoiceStatus) => {
 
 
 export default function InvoicesPage() {
-    const { user, subscription } = useAuth();
+    const { user } = useAuth();
     const t = useTranslations('Invoices');
     const { toast } = useToast();
     const [invoices, setInvoices] = React.useState<Invoice[]>([]);
@@ -107,10 +107,9 @@ export default function InvoicesPage() {
     
     const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
-    const isProOrElite = subscription?.status === 'active' && (subscription.planId === 'pro' || subscription.planId === 'elite');
 
     const fetchInvoices = React.useCallback(() => {
-        if (!user || !isProOrElite) {
+        if (!user) {
             setLoading(false);
             return;
         }
@@ -132,7 +131,7 @@ export default function InvoicesPage() {
         });
 
         return unsubscribe;
-    }, [user, toast, isProOrElite]);
+    }, [user, toast]);
 
     React.useEffect(() => {
         const unsubscribe = fetchInvoices();
@@ -325,7 +324,7 @@ export default function InvoicesPage() {
         },
     });
     
-    if (!isProOrElite) {
+    if (!user) {
          return (
             <div className="space-y-6">
                 <div>
@@ -343,7 +342,6 @@ export default function InvoicesPage() {
                         <FileText className="h-16 w-16 mb-4" />
                         <p className="mb-4">{t('streamlineBilling')}</p>
                          <Button asChild>
-                            <Link href="/subscription">{t('viewSubscriptionPlans')}</Link>
                         </Button>
                     </CardContent>
                 </Card>

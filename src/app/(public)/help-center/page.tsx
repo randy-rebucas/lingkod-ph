@@ -94,7 +94,7 @@ const clientFaqs = [
 const providerFaqs = [
   {
     question: "How do I become a provider on LocalPro?",
-    answer: "Sign up for a 'Client' account first. From your profile page, you will find an option to 'Become a Provider'. This will take you to our subscription page where you can choose a plan that fits your needs.",
+    answer: "Sign up for a 'Client' account first. From your profile page, you will find an option to 'Become a Provider'. Complete the verification process to start offering your services.",
     category: "Getting Started",
     popular: true
   },
@@ -118,7 +118,7 @@ const providerFaqs = [
   },
   {
     question: "What are the fees for using the platform?",
-    answer: "We charge a competitive commission fee on each completed booking. We also offer optional subscription plans for providers and agencies that provide access to advanced features and lower commission rates. You can find more details on our Subscription page.",
+    answer: "We charge a competitive commission fee on each completed booking. The commission rate varies based on the service category and is clearly displayed before you accept any booking.",
     category: "Fees",
     popular: true
   },

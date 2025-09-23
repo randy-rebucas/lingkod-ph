@@ -2,7 +2,7 @@
 
 ## Overview
 
-The manual payment verification system allows users to pay for subscriptions using local payment methods (GCash, PayMaya, Bank Transfer) and provides an admin interface for verification.
+The manual payment verification system allows users to pay for bookings using local payment methods (GCash, PayMaya, Bank Transfer) and provides an admin interface for verification.
 
 ## Features
 
@@ -15,7 +15,7 @@ The manual payment verification system allows users to pay for subscriptions usi
 - **Status Tracking**: Real-time payment status updates
 
 ### For Admins
-- **Verification Interface**: Review pending subscription payments
+- **Verification Interface**: Review pending booking payments
 - **Payment Proof Viewing**: View uploaded payment proofs
 - **Approve/Reject**: Approve or reject payments with reasons
 - **User Notifications**: Automatic notifications to users
@@ -25,8 +25,8 @@ The manual payment verification system allows users to pay for subscriptions usi
 
 ### User Payment Flow
 
-1. **Select Plan**: User chooses a subscription plan
-2. **Choose Payment Method**: Select between PayPal (instant) or Manual Payment
+1. **Select Service**: User chooses a service and provider
+2. **Choose Payment Method**: Select between automated GCash or Manual Payment
 3. **Payment Instructions**: Follow step-by-step instructions for chosen method
 4. **Make Payment**: Complete payment using their preferred method
 5. **Upload Proof**: Upload screenshot/receipt of payment
@@ -39,7 +39,7 @@ The manual payment verification system allows users to pay for subscriptions usi
 2. **Review Payment**: Access admin panel to view payment details
 3. **Verify Proof**: Check payment proof against booking details
 4. **Approve/Reject**: Make decision and provide reason if rejecting
-5. **Update Status**: System automatically updates user subscription
+5. **Update Status**: System automatically updates booking payment status
 6. **Send Notifications**: User receives confirmation or rejection notice
 
 ## Payment Methods Supported
@@ -81,14 +81,13 @@ BANK_NAME=BPI
 
 ### Database Collections
 
-#### subscriptionPayments
+#### bookingPayments
 ```typescript
 {
   id: string;
-  userId: string;
-  planId: string;
-  planName: string;
-  planType: 'provider' | 'agency';
+  bookingId: string;
+  clientId: string;
+  providerId: string;
   amount: number;
   paymentMethod: 'gcash' | 'maya' | 'bank';
   referenceNumber: string;
@@ -102,41 +101,23 @@ BANK_NAME=BPI
 }
 ```
 
-#### users (subscription fields)
-```typescript
-{
-  subscriptionStatus: 'pending_verification' | 'active' | 'rejected';
-  subscriptionPlanId?: string;
-  subscriptionPlanName?: string;
-  subscriptionAmount?: number;
-  subscriptionPaymentMethod?: string;
-  subscriptionReferenceNumber?: string;
-  subscriptionSubmittedAt?: Timestamp;
-  subscriptionVerifiedAt?: Timestamp;
-  subscriptionVerifiedBy?: string;
-  subscriptionRejectionReason?: string;
-  subscriptionRejectedAt?: Timestamp;
-  subscriptionRejectedBy?: string;
-}
-```
-
 ## Admin Interface
 
 ### Access
-- Navigate to `/admin/subscription-payments`
+- Navigate to `/admin/payments`
 - Requires admin role
 - Shows all pending verification payments
 
 ### Verification Process
 1. **View Payment Details**: Click eye icon to view full payment information
 2. **Review Proof**: Check uploaded payment proof image
-3. **Verify Amount**: Ensure payment amount matches subscription price
+3. **Verify Amount**: Ensure payment amount matches booking price
 4. **Check Reference**: Verify reference number is valid
 5. **Approve**: Click "Verify Payment" to approve
 6. **Reject**: Click "Reject" and provide reason
 
 ### Actions Available
-- **Approve Payment**: Verifies payment and activates subscription
+- **Approve Payment**: Verifies payment and confirms booking
 - **Reject Payment**: Rejects payment with reason, allows resubmission
 - **View Proof**: Full-screen view of payment proof
 - **User Details**: Access to user information and contact details
@@ -169,7 +150,7 @@ BANK_NAME=BPI
 ## Best Practices
 
 ### For Users
-1. **Exact Amount**: Send exactly the subscription amount
+1. **Exact Amount**: Send exactly the booking amount
 2. **Clear Proof**: Upload clear, readable payment receipts
 3. **Valid Reference**: Use the provided reference number
 4. **Timely Submission**: Submit payment proof promptly
