@@ -421,40 +421,58 @@ export default function HelpCenterPage() {
   return (
     <Dialog>
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-        {/* Page Header */}
-        <section className="py-16">
-          <div className="container">
-            <div className="max-w-4xl mx-auto text-center space-y-8">
-              <h1 className="text-4xl md:text-5xl font-bold font-headline">
-                Help Center
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Find instant answers to your questions, get help from our AI assistant, or connect with our support team.
-              </p>
-              
-              {/* Search */}
-              <div className="max-w-2xl mx-auto relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search for help topics, questions, or guides..."
-                  className="w-full rounded-full h-12 pl-12 pr-4 shadow-soft border-2 focus:border-primary transition-all duration-300"
-                />
-                {searchQuery && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                  >
-                    ×
-                  </Button>
-                )}
-              </div>
+      {/* Hero Section */}
+      <section className="relative py-20 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        <div className="container relative">
+          <div className="mx-auto max-w-4xl text-center">
+            <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
+              <Star className="w-4 h-4 mr-2" />
+              24/7 Support Available
+            </Badge>
+            <h1 className="text-5xl lg:text-7xl font-bold font-headline mb-8 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Help Center
+            </h1>
+            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12">
+              Find instant answers to your questions, get help from our AI assistant, or connect with our support team.
+            </p>
+
+            {/* Search */}
+            <div className="max-w-2xl mx-auto relative mb-8">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search for help topics, questions, or guides..."
+                className="w-full rounded-full h-12 pl-12 pr-4 shadow-soft border-2 focus:border-primary transition-all duration-300"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                >
+                  ×
+                </Button>
+              )}
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                <Link href="/contact-us">
+                  Contact Support <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                <Link href="#quick-help">
+                  Quick Help
+                </Link>
+              </Button>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
         <div className="container py-16">
           <div className="max-w-6xl mx-auto space-y-16">

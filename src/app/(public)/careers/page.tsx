@@ -144,16 +144,33 @@ export default function CareersPage() {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      {/* Page Header */}
-      <section className="py-16">
-        <div className="container">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold font-headline mb-6">
-              Careers
+      {/* Hero Section */}
+      <section className="relative py-20 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        <div className="container relative">
+          <div className="mx-auto max-w-4xl text-center">
+            <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
+              <Star className="w-4 h-4 mr-2" />
+              Join Our Growing Team
+            </Badge>
+            <h1 className="text-5xl lg:text-7xl font-bold font-headline mb-8 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              Build the Future with Us
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12">
               Join LocalPro and help us revolutionize the service industry in the Philippines. Be part of a mission-driven team that's making a real difference in local communities.
             </p>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                <a href="#open-positions">
+                  View Open Positions <ArrowRight className="ml-2 h-5 w-5" />
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                <a href="mailto:careers@localpro.asia">
+                  Send Your Resume
+                </a>
+              </Button>
+            </div>
           </div>
         </div>
       </section>

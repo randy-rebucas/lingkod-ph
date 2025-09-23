@@ -17,7 +17,8 @@ const Header = () => {
         <Logo />
       </Link>
       <nav className="hidden items-center space-x-6 text-sm font-medium md:flex">
-         <Link href="/about" className="transition-colors hover:text-primary">{t('about')}</Link>
+        <Link href="/our-services" className="transition-colors hover:text-primary">{t('services')}</Link>
+        <Link href="/about" className="transition-colors hover:text-primary">{t('about')}</Link>
         <Link href="/careers" className="transition-colors hover:text-primary">{t('careers')}</Link>
         <Link href="/contact-us" className="transition-colors hover:text-primary">{t('contact')}</Link>
         <Link href="/help-center" className="transition-colors hover:text-primary">{t('helpCenter')}</Link>
@@ -51,6 +52,7 @@ const Footer = () => {
         <div>
             <h4 className="font-semibold mb-2">{t('company')}</h4>
             <ul className="space-y-2 text-sm">
+                <li><Link href="/our-services" className="text-muted-foreground hover:text-primary">{t('services')}</Link></li>
                 <li><Link href="/about" className="text-muted-foreground hover:text-primary">{t('about')}</Link></li>
                 <li><Link href="/careers" className="text-muted-foreground hover:text-primary">{t('careers')}</Link></li>
                 <li><Link href="/partners" className="text-muted-foreground hover:text-primary">{t('partners')}</Link></li>

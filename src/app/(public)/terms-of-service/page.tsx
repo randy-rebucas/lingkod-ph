@@ -2,6 +2,7 @@
 "use client";
 
 import { useTranslations } from 'next-intl';
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +28,8 @@ import {
   Lock,
   Globe,
   Heart,
-  Star
+  Star,
+  ArrowRight
 } from "lucide-react";
 import { useState } from "react";
 
@@ -276,19 +278,36 @@ export default function TermsOfServicePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      {/* Page Header */}
-      <section className="py-16">
-        <div className="container">
-          <div className="max-w-4xl mx-auto text-center space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold font-headline">
+      {/* Hero Section */}
+      <section className="relative py-20 lg:py-32 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+        <div className="container relative">
+          <div className="mx-auto max-w-4xl text-center">
+            <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
+              <Scale className="w-4 h-4 mr-2" />
+              Legal Document
+            </Badge>
+            <h1 className="text-5xl lg:text-7xl font-bold font-headline mb-8 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Terms of Service
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12">
               Please read these terms carefully. By using LocalPro, you agree to be bound by these terms and conditions.
             </p>
-            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-8">
               <Calendar className="h-4 w-4" />
               Last updated: December 2024
+            </div>
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                <a href="#quick-summary">
+                  Quick Summary <ArrowRight className="ml-2 h-5 w-5" />
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                <Link href="/contact-us">
+                  Questions?
+                </Link>
+              </Button>
             </div>
           </div>
         </div>

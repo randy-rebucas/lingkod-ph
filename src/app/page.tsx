@@ -29,6 +29,10 @@ const Header = () => {
             {t('home')}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </Link>
+          <Link href="/our-services" className="transition-colors hover:text-primary relative group">
+            {t('services')}
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </Link>
           <Link href="#providers" className="transition-colors hover:text-primary relative group">
             {t('providers')}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
@@ -76,6 +80,7 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4 text-foreground">Company</h4>
             <ul className="space-y-3 text-sm">
+              <li><Link href="/our-services" className="text-muted-foreground hover:text-primary transition-colors">{t('services')}</Link></li>
               <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">{t('about')}</Link></li>
               <li><Link href="/careers" className="text-muted-foreground hover:text-primary transition-colors">{t('careers')}</Link></li>
               <li><Link href="/partners" className="text-muted-foreground hover:text-primary transition-colors">{t('partners')}</Link></li>
