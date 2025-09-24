@@ -12,7 +12,12 @@
     "typecheck": "tsc --noEmit",
     "email": "email dev",
     "validate-payments": "tsx src/scripts/validate-payment-system.ts",
-    "setup-dev": "tsx src/scripts/setup-dev-environment.ts"
+    "setup-dev": "tsx src/scripts/setup-dev-environment.ts",
+    "init-subscriptions": "tsx src/scripts/initialize-subscription-system.ts",
+    "test-subscriptions": "tsx src/scripts/test-subscription-system.ts",
+    "check-production-readiness": "tsx src/scripts/production-readiness-checklist.ts",
+    "setup-firebase": "tsx src/scripts/setup-firebase-environment.ts",
+    "init-subscriptions-mock": "tsx src/scripts/initialize-subscription-system-mock.ts"
   },
   "dependencies": {
     "@adyen/adyen-web": "^6.22.0",

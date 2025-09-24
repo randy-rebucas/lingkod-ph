@@ -42,6 +42,11 @@ const protectedRoutes = {
   '/notifications': ['client', 'provider', 'agency', 'admin', 'partner'],
   '/settings': ['client', 'provider', 'agency', 'admin', 'partner'],
   '/billing': ['client', 'provider', 'agency'],
+  '/subscription': ['provider'],
+  '/supplies': ['provider'],
+  '/client-subscription': ['client'],
+  '/client-analytics': ['client'],
+  '/admin/client-subscriptions': ['admin'],
 } as const;
 
 // Public routes that don't require authentication

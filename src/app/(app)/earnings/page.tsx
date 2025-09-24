@@ -103,9 +103,10 @@ export default function EarningsPage() {
             setLoading(false);
         });
         
-        const payoutsQuery = query(collection(db, "payouts"), where("providerId", "==", user.uid), orderBy("requestedAt", "desc"));
+        const payoutsQuery = query(collection(db, "payouts"), where("providerId", "==", user.uid));
         const unsubscribePayouts = onSnapshot(payoutsQuery, (snapshot) => {
-            const payoutsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
+            const payoutsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout))
+                .sort((a, b) => b.requestedAt.toMillis() - a.requestedAt.toMillis());
             setPayouts(payoutsData);
         });
 
