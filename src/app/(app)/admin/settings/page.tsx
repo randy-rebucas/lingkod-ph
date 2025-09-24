@@ -15,6 +15,12 @@ import { Loader2, Upload } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { handleUpdatePlatformSettings, type PlatformSettings } from "./actions";
 import Image from "next/image";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 export default function AdminSettingsPage() {
     const { user, userRole } = useAuth();
@@ -183,35 +189,24 @@ export default function AdminSettingsPage() {
     };
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title="Access Denied" 
+            description="This page is for administrators only." 
+        />;
     }
     
     if (loading) {
-        return (
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Platform Settings</h1>
-                    <p className="text-muted-foreground">Manage global settings for the application.</p>
-                </div>
-                <Card><CardContent className="p-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
-                 <Card><CardContent className="p-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
-            </div>
-        );
+        return <LoadingState 
+            title="Platform Settings" 
+            description="Manage global settings for the application." 
+        />;
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Platform Settings</h1>
-                <p className="text-muted-foreground">Manage global settings for the application.</p>
-            </div>
+        <PageLayout 
+            title="Platform Settings" 
+            description="Manage global settings for the application."
+        >
             
             <Card>
                 <CardHeader>
@@ -327,6 +322,6 @@ export default function AdminSettingsPage() {
                     Save All Settings
                 </Button>
             </div>
-        </div>
+        </PageLayout>
     )
 }

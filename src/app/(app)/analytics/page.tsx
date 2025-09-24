@@ -39,6 +39,10 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { PageLayout } from '@/components/app/page-layout';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { designTokens } from '@/lib/design-tokens';
 
 type Booking = {
   id: string;
@@ -296,38 +300,14 @@ export default function AnalyticsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <Skeleton className="h-8 w-48 mb-2" />
-            <Skeleton className="h-4 w-64" />
-          </div>
-          <Skeleton className="h-10 w-32" />
-        </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-32" />
-          ))}
-        </div>
-        <Skeleton className="h-96" />
-      </div>
-    );
+    return <LoadingState title={t('title')} description={t('subtitle')} />;
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              {t('title')}
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              {t('subtitle')}
-            </p>
-          </div>
-        </div>
+    <PageLayout 
+      title={t('title')} 
+      description={t('subtitle')}
+    >
 
         {analyticsData && (
           <>
@@ -593,6 +573,6 @@ export default function AnalyticsPage() {
             </Card>
           </>
         )}
-      </div>
+    </PageLayout>
   );
 }

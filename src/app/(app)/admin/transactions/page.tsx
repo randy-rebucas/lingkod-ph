@@ -19,6 +19,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 type PaymentVerificationBooking = Booking & {
     paymentProofUrl?: string;
@@ -161,41 +167,25 @@ export default function AdminPaymentVerificationPage() {
     }
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title="Access Denied" 
+            description="This page is for administrators only." 
+        />;
     }
     
     if (loading) {
-        return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Payment Verification</h1>
-                    <p className="text-muted-foreground">Review and approve manual payments.</p>
-                </div>
-                <Card>
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
-             </div>
-        )
+        return <LoadingState 
+            title="Payment Verification" 
+            description="Review and approve manual payments." 
+        />;
     }
 
     return (
         <Dialog>
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Payment Verification</h1>
-                    <p className="text-muted-foreground">
-                       Review and approve manual payments submitted by users.
-                    </p>
-                </div>
+            <PageLayout 
+                title="Payment Verification" 
+                description="Review and approve manual payments submitted by users."
+            >
                 <Card>
                     <CardContent>
                         <Table>
@@ -286,7 +276,7 @@ export default function AdminPaymentVerificationPage() {
                         </Table>
                     </CardContent>
                 </Card>
-            </div>
+            </PageLayout>
         </Dialog>
     )
 }

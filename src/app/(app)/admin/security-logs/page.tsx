@@ -10,6 +10,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { Shield } from "lucide-react";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 type AuditLog = {
     id: string;
@@ -54,40 +60,24 @@ export default function SecurityLogsPage() {
 
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title="Access Denied" 
+            description="This page is for administrators only." 
+        />;
     }
     
     if (loading) {
-        return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Security & Access Logs</h1>
-                    <p className="text-muted-foreground">Monitor important actions performed on the platform.</p>
-                </div>
-                <Card>
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
-             </div>
-        )
+        return <LoadingState 
+            title="Security & Access Logs" 
+            description="Monitor important actions performed on the platform." 
+        />;
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Security & Access Logs</h1>
-                <p className="text-muted-foreground">
-                    Monitor important actions performed on the platform.
-                </p>
-            </div>
+        <PageLayout 
+            title="Security & Access Logs" 
+            description="Monitor important actions performed on the platform."
+        >
              <Card>
                 <CardHeader>
                     <CardTitle>Admin Action Log</CardTitle>
@@ -123,6 +113,6 @@ export default function SecurityLogsPage() {
                     </Table>
                 </CardContent>
             </Card>
-        </div>
+        </PageLayout>
     )
 }

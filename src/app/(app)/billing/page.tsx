@@ -15,6 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Eye, Receipt } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { InvoicePreview } from "@/components/invoice-preview";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { designTokens } from "@/lib/design-tokens";
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
 
@@ -82,25 +87,18 @@ export default function BillingPage() {
     };
 
     if (loading) {
-        return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                     <CardContent className="p-6">
-                         <Skeleton className="h-64 w-full" />
-                     </CardContent>
-                 </Card>
-             </div>
-        )
+        return <LoadingState 
+            title="Invoice History" 
+            description="View and manage your billing invoices" 
+        />;
     }
 
     return (
         <Dialog onOpenChange={(open) => !open && setSelectedInvoice(null)}>
-        <div className="max-w-6xl mx-auto space-y-8">
-             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                    <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Invoice History</CardTitle>
-                    <CardDescription className="text-base">View and manage your billing invoices</CardDescription>
-                </CardHeader>
+        <PageLayout 
+            title="Invoice History" 
+            description="View and manage your billing invoices"
+        >
                 <CardContent className="p-0">
                     <Table>
                         <TableHeader>
@@ -160,5 +158,6 @@ export default function BillingPage() {
             )}
         </div>
         </Dialog>
+        </PageLayout>
     )
 }

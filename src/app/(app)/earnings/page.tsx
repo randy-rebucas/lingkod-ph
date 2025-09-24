@@ -18,6 +18,11 @@ import Link from 'next/link';
 import { handleRequestPayout } from '@/ai/flows/request-payout';
 import { TooltipProvider, Tooltip as TooltipUI, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import AgencyEarningsPage from '@/app/(app)/agency-earnings/page';
+import { PageLayout } from '@/components/app/page-layout';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { AccessDenied } from '@/components/app/access-denied';
+import { designTokens } from '@/lib/design-tokens';
 
 type CompletedBooking = {
     id: string;
@@ -163,32 +168,18 @@ export default function EarningsPage() {
     }
 
     if (userRole !== 'provider') {
-        return (
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                    <p className="text-muted-foreground">{t('providersAndAgenciesOnly')}</p>
-                </div>
-            </div>
-        );
+        return <AccessDenied 
+            title={t('title')} 
+            description={t('providersAndAgenciesOnly')} 
+        />;
     }
     
 
     if (loading) {
-        return (
-            <div className="space-y-6">
-                <Skeleton className="h-10 w-1/3" />
-                <Skeleton className="h-4 w-2/3" />
-                <div className="grid gap-6 md:grid-cols-4">
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
-                </div>
-                <Skeleton className="h-80 w-full" />
-                <Skeleton className="h-64 w-full" />
-            </div>
-        );
+        return <LoadingState 
+            title={t('title')} 
+            description={t('subtitle')} 
+        />;
     }
 
     const payoutButton = (
@@ -199,14 +190,12 @@ export default function EarningsPage() {
     );
 
     return (
-        <div className="space-y-6">
+        <PageLayout 
+            title={t('title')} 
+            description={t('subtitle')}
+        >
              <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                    <p className="text-muted-foreground">
-                        {t('subtitle')}
-                    </p>
-                </div>
                 {isSaturday ? (
                     payoutButton
                 ) : (
@@ -360,6 +349,6 @@ export default function EarningsPage() {
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </PageLayout>
     );
 }

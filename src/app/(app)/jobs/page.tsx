@@ -17,6 +17,12 @@ import { formatDistanceToNow } from "date-fns";
 import { formatBudget } from '@/lib/utils';
 import { JobPriorityService, JobWithPriority } from '@/lib/job-priority-service';
 import { VerifiedProBadge } from '@/components/pro-badge';
+import { PageLayout } from '@/components/app/page-layout';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { EmptyState } from '@/components/app/empty-state';
+import { AccessDenied } from '@/components/app/access-denied';
+import { designTokens } from '@/lib/design-tokens';
 
 
 export type Job = {
@@ -122,43 +128,26 @@ export default function JobsPage() {
     };
 
     if (userRole !== 'provider') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('accessDenied')}</CardTitle>
-                    <CardDescription>{t('providersOnly')}</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title={t('accessDenied')} 
+            description={t('providersOnly')} 
+        />;
     }
     
     if (loading) {
-        return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                    <p className="text-muted-foreground">{t('subtitle')}</p>
-                </div>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-72" />)}
-                </div>
-            </div>
-        )
+        return <LoadingState 
+            title={t('title')} 
+            description={t('subtitle')} 
+        />;
     }
 
     const filteredJobs = getFilteredJobs();
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                        {t('title')}
-                    </h1>
-                    <p className="text-muted-foreground mt-1">
-                        {t('subtitle')}
-                    </p>
-                </div>
+        <PageLayout 
+            title={t('title')} 
+            description={t('subtitle')}
+        >
                 {isPro && isActive && (
                     <VerifiedProBadge variant="large" />
                 )}
@@ -310,6 +299,6 @@ export default function JobsPage() {
                     </CardContent>
                 </Card>
             )}
-        </div>
+        </PageLayout>
     );
 }

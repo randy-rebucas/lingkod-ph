@@ -11,6 +11,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { Briefcase, CheckSquare } from "lucide-react";
 import { formatBudget } from "@/lib/utils";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 // Define the Job type locally to avoid import issues
 type Job = {
@@ -69,36 +75,24 @@ export default function AppliedJobsPage() {
     }, [user, userRole]);
 
     if (userRole !== 'provider') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('accessDenied')}</CardTitle>
-                    <CardDescription>{t('providersOnly')}</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title={t('accessDenied')} 
+            description={t('providersOnly')} 
+        />;
     }
 
     if (loading) {
-        return (
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                    <p className="text-muted-foreground">{t('subtitle')}</p>
-                </div>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-48" />)}
-                </div>
-            </div>
-        )
+        return <LoadingState 
+            title={t('title')} 
+            description={t('subtitle')} 
+        />;
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                <p className="text-muted-foreground">{t('subtitle')}</p>
-            </div>
+        <PageLayout 
+            title={t('title')} 
+            description={t('subtitle')}
+        >
             
             {appliedJobs.length > 0 ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -130,6 +124,6 @@ export default function AppliedJobsPage() {
                     </CardContent>
                 </Card>
             )}
-        </div>
+        </PageLayout>
     );
 }

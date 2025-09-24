@@ -22,6 +22,11 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { format } from "date-fns";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { designTokens } from "@/lib/design-tokens";
 
 type Availability = {
     day: string;
@@ -294,32 +299,23 @@ export default function ProviderProfilePage() {
     const overallRating = reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : 0;
 
     if (loading) {
-        return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="flex flex-col md:flex-row items-center gap-6 p-6">
-                    <Skeleton className="h-32 w-32 rounded-full" />
-                    <div className="space-y-4 flex-1">
-                        <Skeleton className="h-8 w-48" />
-                        <Skeleton className="h-5 w-32" />
-                        <Skeleton className="h-16 w-full" />
-                    </div>
-                </Card>
-                <Skeleton className="h-64 w-full" />
-                <Skeleton className="h-48 w-full" />
-            </div>
-        )
+        return <LoadingState 
+            title="Provider Profile" 
+            description="Loading provider information..." 
+        />;
     }
 
     if (!provider) {
-        return (
-            <div className="container mx-auto text-center py-20">
-                <h1 className="text-4xl font-bold">{t('providerNotFound')}</h1>
-                <p className="text-muted-foreground mt-4">{t('providerNotFoundDescription')}</p>
-                <Button asChild className="mt-8">
+        return <EmptyState 
+            icon={BriefcaseBusiness}
+            title={t('providerNotFound')}
+            description={t('providerNotFoundDescription')}
+            action={
+                <Button asChild>
                     <Link href="/dashboard">{t('returnToDashboard')}</Link>
                 </Button>
-            </div>
-        )
+            }
+        />;
     }
 
     const today = new Date().toLocaleString('en-us', { weekday: 'long' });
@@ -328,7 +324,10 @@ export default function ProviderProfilePage() {
 
     return (
         <Dialog>
-            <div className="max-w-6xl mx-auto space-y-8">
+            <PageLayout 
+                title={provider.displayName} 
+                description="Provider Profile"
+            >
                 {/* Header Card */}
                 <Card className="shadow-lg">
                     <CardContent className="p-6">
@@ -501,6 +500,7 @@ export default function ProviderProfilePage() {
                     </Button>
                 </DialogFooter>
             </DialogContent>
+            </PageLayout>
         </Dialog>
     );
 }

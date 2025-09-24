@@ -16,6 +16,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleInviteAction } from '@/app/(app)/profile/actions';
 import { cn } from '@/lib/utils';
+import { PageLayout } from '@/components/app/page-layout';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { EmptyState } from '@/components/app/empty-state';
+import { designTokens } from '@/lib/design-tokens';
 
 type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info' | 'renewal_reminder' | 'new_review' | 'new_job';
 
@@ -161,50 +166,17 @@ export default function NotificationsPage() {
     const unreadCount = notifications.filter(n => !n.read).length;
 
     if (loading) {
-        return (
-            <div className="max-w-4xl mx-auto space-y-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <Skeleton className="h-8 w-48 mb-2" />
-                        <Skeleton className="h-4 w-64" />
-                    </div>
-                    <div className="flex gap-2">
-                        <Skeleton className="h-10 w-32" />
-                        <Skeleton className="h-10 w-32" />
-                    </div>
-                </div>
-                <div className="space-y-4">
-                    {[...Array(5)].map((_, i) => (
-                        <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                            <CardContent className="p-6">
-                                <div className="flex items-start space-x-4">
-                                    <Skeleton className="h-12 w-12 rounded-full" />
-                                    <div className="space-y-2 flex-1">
-                                        <Skeleton className="h-4 w-3/4" />
-                                        <Skeleton className="h-3 w-1/2" />
-                                    </div>
-                                    <Skeleton className="h-8 w-8" />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            </div>
-        );
+        return <LoadingState 
+            title={t('notifications')} 
+            description={t('notificationsDescription')} 
+        />;
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                        {t('notifications')}
-                    </h1>
-                    <p className="text-muted-foreground mt-1">
-                        {t('notificationsDescription')}
-                    </p>
-                </div>
+        <PageLayout 
+            title={t('notifications')} 
+            description={t('notificationsDescription')}
+        >
                 <div className="flex gap-2">
                     {unreadCount > 0 && (
                         <Button 
@@ -354,6 +326,6 @@ export default function NotificationsPage() {
                     </CardContent>
                 </Card>
             )}
-        </div>
+        </PageLayout>
     );
 }

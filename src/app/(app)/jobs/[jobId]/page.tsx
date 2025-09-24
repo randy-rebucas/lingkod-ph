@@ -19,6 +19,11 @@ import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, Di
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { formatBudget } from "@/lib/utils";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { designTokens } from "@/lib/design-tokens";
 
 
 type Job = {
@@ -124,28 +129,30 @@ export default function JobDetailsPage() {
 
 
     if (loading) {
-        return (
-            <div className="space-y-6">
-                <Skeleton className="h-10 w-1/3" />
-                <Skeleton className="h-4 w-2/3" />
-                 <Card>
-                    <CardHeader><Skeleton className="h-8 w-3/4" /></CardHeader>
-                    <CardContent className="space-y-4">
-                        <Skeleton className="h-24 w-full" />
-                        <Skeleton className="h-10 w-1/4" />
-                    </CardContent>
-                </Card>
-            </div>
-        )
+        return <LoadingState 
+            title="Job Details" 
+            description="Loading job information..." 
+        />;
     }
 
     if (!job) {
-        return null;
+        return <EmptyState 
+            icon={Briefcase}
+            title="Job not found"
+            description="The job you're looking for doesn't exist or has been removed."
+            action={
+                <Button asChild>
+                    <Link href="/jobs">Back to Jobs</Link>
+                </Button>
+            }
+        />;
     }
 
-
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <PageLayout 
+            title={job.title} 
+            description={`Posted by ${job.clientName}`}
+        >
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" onClick={() => router.back()}>
@@ -243,6 +250,6 @@ export default function JobDetailsPage() {
                 </CardFooter>
             </Card>
 
-        </div>
+        </PageLayout>
     );
 }

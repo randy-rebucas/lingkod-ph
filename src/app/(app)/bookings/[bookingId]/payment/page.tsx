@@ -23,6 +23,11 @@ import {QRCode} from "@/components/qrcode-svg";
 import { PaymentConfig } from "@/lib/payment-config";
 import { PaymentRetryService } from "@/lib/payment-retry-service";
 import { GCashPaymentButton } from "@/components/gcash-payment-button";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { designTokens } from "@/lib/design-tokens";
 
 export default function PaymentPage() {
     const { bookingId } = useParams();

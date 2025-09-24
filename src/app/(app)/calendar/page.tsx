@@ -14,6 +14,11 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isSameMonth, isToday, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
+import { PageLayout } from '@/components/app/page-layout';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { EmptyState } from '@/components/app/empty-state';
+import { designTokens } from '@/lib/design-tokens';
 
 type BookingEvent = {
     title: string;
@@ -117,19 +122,17 @@ export default function CalendarPage() {
 
 
     if (loading) {
-        return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-[75vh] w-full" />
-                    </CardContent>
-                </Card>
-            </div>
-        )
+        return <LoadingState 
+            title={t('title')} 
+            description={t('subtitle')} 
+        />;
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <PageLayout 
+            title={format(currentDate, 'MMMM yyyy')} 
+            description={t('subtitle')}
+        >
             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                     <CardTitle className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
@@ -213,6 +216,6 @@ export default function CalendarPage() {
                     </div>
                 </DialogContent>
             </Dialog>
-        </div>
+        </PageLayout>
     );
 }

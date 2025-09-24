@@ -15,6 +15,11 @@ import { AddEditServiceDialog, Service } from '@/components/add-edit-service-dia
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PageLayout } from '@/components/app/page-layout';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { EmptyState } from '@/components/app/empty-state';
+import { designTokens } from '@/lib/design-tokens';
 
 
 const getStatusVariant = (status: string) => {
@@ -92,14 +97,10 @@ export default function ServicesPage() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                    <p className="text-muted-foreground">
-                        {t('subtitle')}
-                    </p>
-                </div>
+        <PageLayout 
+            title={t('title')} 
+            description={t('subtitle')}
+        >
                  <div className="flex items-center gap-2">
                     <Button onClick={handleAddService}>
                         <PlusCircle className="mr-2" />
@@ -195,6 +196,6 @@ export default function ServicesPage() {
                 service={selectedService}
                 onServiceSaved={onServiceSaved}
             />
-        </div>
+        </PageLayout>
     );
 }

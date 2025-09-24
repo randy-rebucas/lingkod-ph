@@ -23,6 +23,12 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import Image from 'next/image';
 import { differenceInDays, addDays } from 'date-fns';
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 type AdCampaign = {
     id: string;
@@ -209,35 +215,25 @@ export default function AdminAdsPage() {
 
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title="Access Denied" 
+            description="This page is for administrators only." 
+        />;
     }
     
     if (loading) {
-        return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Ad Management</h1>
-                    <p className="text-muted-foreground">Manage promotional campaigns for providers.</p>
-                </div>
-                <Card>
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
-             </div>
-        )
+        return <LoadingState 
+            title="Ad Management" 
+            description="Manage promotional campaigns for providers." 
+        />;
     }
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={closeDialog}>
-            <div className="space-y-6">
+            <PageLayout 
+                title="Ad Management" 
+                description="Manage promotional campaigns for providers."
+            >
                 <div className="flex justify-between items-center">
                     <div>
                         <h1 className="text-3xl font-bold font-headline">Ad Management</h1>
@@ -397,7 +393,7 @@ export default function AdminAdsPage() {
                         </Button>
                     </DialogFooter>
                 </DialogContent>
-            </div>
+            </PageLayout>
         </Dialog>
     )
 }

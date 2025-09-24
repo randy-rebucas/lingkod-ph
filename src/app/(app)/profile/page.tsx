@@ -32,6 +32,10 @@ import { useLoadScript, Autocomplete } from "@react-google-maps/api";
 import { Separator } from "@/components/ui/separator";
 import { useActionState } from "react";
 import Link from 'next/link';
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { designTokens } from "@/lib/design-tokens";
 
 
 type Reward = {
@@ -664,10 +668,16 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader className="flex-row items-center gap-6 space-y-0 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20 p-6">
+        <PageLayout 
+            title={t('profile')} 
+            description={t('profileDescription')}
+        >
+            <StandardCard 
+                title="Profile Overview" 
+                description="Manage your public profile and personal information"
+                variant="elevated"
+            >
+                <div className="flex-row items-center gap-6 space-y-0 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20 p-6">
                     <div className="relative">
                         <Avatar className="h-24 w-24 border-2 border-primary/20 shadow-soft">
                             <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
@@ -1460,6 +1470,6 @@ export default function ProfilePage() {
                 </TabsContent>
                 
             </Tabs>
-        </div>
+        </PageLayout>
     );
 }

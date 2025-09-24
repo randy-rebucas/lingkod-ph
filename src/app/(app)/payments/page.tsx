@@ -14,6 +14,11 @@ import { Eye, Download, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Image from "next/image";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { designTokens } from "@/lib/design-tokens";
 
 type PaymentTransaction = {
     id: string;
@@ -90,28 +95,17 @@ export default function PaymentHistoryPage() {
     };
 
     if (loading) {
-        return (
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Payment History</h1>
-                    <p className="text-muted-foreground">View all your payment transactions and receipts.</p>
-                </div>
-                <Card>
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
-            </div>
-        );
+        return <LoadingState 
+            title="Payment History" 
+            description="View all your payment transactions and receipts." 
+        />;
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Payment History</h1>
-                    <p className="text-muted-foreground">View all your payment transactions and receipts.</p>
-                </div>
+        <PageLayout 
+            title="Payment History" 
+            description="View all your payment transactions and receipts."
+        >
                 <Button variant="outline" onClick={() => window.location.reload()}>
                     <RefreshCw className="mr-2 h-4 w-4" />
                     Refresh
@@ -240,7 +234,7 @@ export default function PaymentHistoryPage() {
                     </Table>
                 </CardContent>
             </Card>
-        </div>
+        </PageLayout>
     );
 }
 

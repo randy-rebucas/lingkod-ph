@@ -48,6 +48,12 @@ import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { AddEditInvoiceDialog } from "@/components/add-edit-invoice-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -325,39 +331,17 @@ export default function InvoicesPage() {
     });
     
     if (!user) {
-         return (
-            <div className="space-y-6">
-                <div>
-                  <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                  <p className="text-muted-foreground">
-                      {t('subtitle')}
-                  </p>
-              </div>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('upgradeToProOrElite')}</CardTitle>
-                        <CardDescription>{t('upgradeDescription')}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <FileText className="h-16 w-16 mb-4" />
-                        <p className="mb-4">{t('streamlineBilling')}</p>
-                         <Button asChild>
-                        </Button>
-                    </CardContent>
-                </Card>
-            </div>
-        )
+         return <AccessDenied 
+            title={t('title')} 
+            description={t('subtitle')} 
+        />;
     }
 
     return (
-      <div className="space-y-6">
-          <div className="flex items-center justify-between">
-              <div>
-                  <h1 className="text-3xl font-bold font-headline">Invoices</h1>
-                  <p className="text-muted-foreground">
-                      Create and manage invoices for your clients.
-                  </p>
-              </div>
+      <PageLayout 
+          title="Invoices" 
+          description="Create and manage invoices for your clients."
+      >
               <Button onClick={handleAddInvoice}>
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Create Invoice
@@ -499,6 +483,6 @@ export default function InvoicesPage() {
                    {selectedInvoice && <InvoicePreview invoice={selectedInvoice} />}
                 </DialogContent>
             </Dialog>
-      </div>
+      </PageLayout>
     );
 }

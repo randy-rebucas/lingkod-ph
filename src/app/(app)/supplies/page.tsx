@@ -22,6 +22,11 @@ import {
 import { VerifiedProBadge } from '@/components/pro-badge';
 import { FeatureGuard } from '@/components/feature-guard';
 import { format } from 'date-fns';
+import { PageLayout } from '@/components/app/page-layout';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { EmptyState } from '@/components/app/empty-state';
+import { designTokens } from '@/lib/design-tokens';
 
 // Types
 interface SuppliesDiscount {
@@ -105,38 +110,19 @@ export default function SuppliesPage() {
   };
 
   if (loading) {
-    return (
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <Skeleton className="h-8 w-48 mb-2" />
-            <Skeleton className="h-4 w-64" />
-          </div>
-          <Skeleton className="h-10 w-32" />
-        </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-80" />
-          ))}
-        </div>
-      </div>
-    );
+    return <LoadingState title={t('title')} description={t('subtitle')} />;
   }
 
   return (
     <FeatureGuard feature="supplies_discount">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
+      <PageLayout 
+        title={t('title')} 
+        description={t('subtitle')}
+      >
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              {t('title')}
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              {t('subtitle')}
-            </p>
+            <VerifiedProBadge variant="large" />
           </div>
-          <VerifiedProBadge variant="large" />
         </div>
 
         {/* Pro Benefits Banner */}
@@ -354,7 +340,7 @@ export default function SuppliesPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </PageLayout>
     </FeatureGuard>
   );
 }

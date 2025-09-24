@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/auth-context";
 import { ReactNode } from "react";
+import { LoadingState } from "@/components/app/loading-state";
 
 interface RoleGuardProps {
   children: ReactNode;
@@ -17,7 +18,7 @@ export function RoleGuard({
   const { userRole, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingState title="Loading..." description="Please wait while we verify your access." />;
   }
 
   // Check role

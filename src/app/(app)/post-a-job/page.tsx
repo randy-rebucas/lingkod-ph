@@ -30,6 +30,11 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { designTokens } from "@/lib/design-tokens";
 
 
 const postJobSchema = z.object({
@@ -215,11 +220,10 @@ export default function PostAJobPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold font-headline">{pageTitle}</h1>
-        <p className="text-muted-foreground">{pageDescription}</p>
-      </div>
+    <PageLayout 
+      title={pageTitle} 
+      description={pageDescription}
+    >
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -403,6 +407,6 @@ export default function PostAJobPage() {
           </Card>
         </form>
       </Form>
-    </div>
+    </PageLayout>
   );
 }

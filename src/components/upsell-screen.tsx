@@ -22,6 +22,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/auth-context';
 import { SubscriptionPaymentButton } from './subscription-payment-button';
 import { SubscriptionPlan } from '@/lib/subscription-types';
+import { StandardCard } from '@/components/app/standard-card';
+import { designTokens } from '@/lib/design-tokens';
 
 interface UpsellScreenProps {
   trigger: 'booking' | 'job_posting' | 'analytics' | 'featured_placement';
@@ -201,16 +203,17 @@ export function UpsellScreen({ trigger, onClose, className }: UpsellScreenProps)
 
   return (
     <div className={`fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 ${className}`}>
-      <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <CardHeader className="text-center">
+      <StandardCard 
+        variant="elevated"
+        title={config.title}
+        description={config.subtitle}
+        className="max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+      >
+        <div className="text-center mb-6">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-yellow-400 to-orange-500">
             <Crown className="h-8 w-8 text-white" />
           </div>
-          <CardTitle className="text-2xl font-bold">{config.title}</CardTitle>
-          <CardDescription className="text-lg">{config.subtitle}</CardDescription>
-        </CardHeader>
-        
-        <CardContent className="space-y-6">
+        </div>
           {/* Description */}
           <p className="text-center text-muted-foreground">{config.description}</p>
 
@@ -293,8 +296,7 @@ export function UpsellScreen({ trigger, onClose, className }: UpsellScreenProps)
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+      </StandardCard>
     </div>
   );
 }

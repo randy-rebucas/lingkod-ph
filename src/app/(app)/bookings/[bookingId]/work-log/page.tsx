@@ -19,6 +19,12 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 
 type WorkLogEntry = {
@@ -263,11 +269,10 @@ export default function WorkLogPage() {
     };
 
     if (loading) {
-        return (
-             <div className="space-y-8 max-w-6xl mx-auto">
-                <Skeleton className="h-96 w-full" />
-             </div>
-        )
+        return <LoadingState 
+            title="Work Log" 
+            description="Please wait while we fetch the work log information." 
+        />;
     }
 
     if (!booking) return null;
@@ -278,9 +283,11 @@ export default function WorkLogPage() {
     const totalTasks = booking.checklist?.length || 0;
     const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
-
     return (
-        <div className="space-y-8 max-w-6xl mx-auto">
+        <PageLayout 
+            title="Work Log" 
+            description="Track and manage your work progress for this booking."
+        >
             <div className="flex items-center gap-4 mb-6">
                 <Button variant="outline" size="icon" onClick={() => router.back()} className="hover:bg-primary/10 transition-colors">
                     <ArrowLeft className="h-4 w-4" />
@@ -487,6 +494,6 @@ export default function WorkLogPage() {
                     </Card>
                 </div>
             </div>
-        </div>
+        </PageLayout>
     );
 }

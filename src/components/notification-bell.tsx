@@ -16,6 +16,7 @@ import { handleInviteAction } from '@/app/(app)/profile/actions';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { designTokens } from '@/lib/design-tokens';
 
 
 type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info' | 'renewal_reminder' | 'new_review' | 'new_job';
@@ -115,8 +116,8 @@ export function NotificationBell() {
                     )}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-                <DropdownMenuLabel>{t('notifications')}</DropdownMenuLabel>
+            <DropdownMenuContent align="end" className={`w-80 ${designTokens.effects.cardElevated}`}>
+                <DropdownMenuLabel className={designTokens.typography.sectionTitle}>{t('notifications')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {notifications.length > 0 ? (
                     notifications.map(notif => (

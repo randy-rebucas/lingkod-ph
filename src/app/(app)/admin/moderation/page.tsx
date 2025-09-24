@@ -17,6 +17,12 @@ import { format } from "date-fns";
 import { handleUpdateReportStatus } from "./actions";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 
 type ReportStatus = "New" | "Action Taken" | "Dismissed";
@@ -77,32 +83,17 @@ export default function AdminModerationPage() {
     };
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title="Access Denied" 
+            description="This page is for administrators only." 
+        />;
     }
     
     if (loading) {
-        return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Content Moderation</h1>
-                    <p className="text-muted-foreground">
-                        Review and manage user-submitted reports.
-                    </p>
-                </div>
-                <Card>
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
-             </div>
-        )
+        return <LoadingState 
+            title="Content Moderation" 
+            description="Review and manage user-submitted reports." 
+        />;
     }
 
     const newReports = reports.filter(r => r.status === 'New');
@@ -161,13 +152,10 @@ export default function AdminModerationPage() {
     );
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Content Moderation</h1>
-                <p className="text-muted-foreground">
-                     Review and manage user-submitted reports.
-                </p>
-            </div>
+        <PageLayout 
+            title="Content Moderation" 
+            description="Review and manage user-submitted reports."
+        >
              <Tabs defaultValue="new">
                 <TabsList>
                     <TabsTrigger value="new">New Reports</TabsTrigger>
@@ -188,6 +176,6 @@ export default function AdminModerationPage() {
                     </Card>
                 </TabsContent>
              </Tabs>
-        </div>
+        </PageLayout>
     )
 }

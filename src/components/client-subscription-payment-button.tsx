@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/auth-context';
 import { ClientSubscriptionPlan } from '@/lib/client-subscription-types';
 import { GCashPaymentButton } from './gcash-payment-button';
+import { StandardCard } from '@/components/app/standard-card';
+import { designTokens } from '@/lib/design-tokens';
 
 interface ClientSubscriptionPaymentButtonProps {
   plan: ClientSubscriptionPlan;
@@ -237,21 +239,20 @@ export function ClientSubscriptionPaymentButton({
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Star className="h-5 w-5 text-blue-500" />
-          {startTrial ? 'Start Free Trial' : 'Upgrade to Premium'}
-        </CardTitle>
-        <CardDescription>
-          {startTrial 
-            ? 'Try Premium features for 7 days, then continue with a paid subscription'
-            : 'Get instant access to all Premium features'
-          }
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
+    <StandardCard 
+      variant="elevated"
+      title={startTrial ? 'Start Free Trial' : 'Upgrade to Premium'}
+      description={
+        startTrial 
+          ? 'Try Premium features for 7 days, then continue with a paid subscription'
+          : 'Get instant access to all Premium features'
+      }
+      className={className}
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <Star className="h-5 w-5 text-blue-500" />
+        <span className="font-semibold">{startTrial ? 'Start Free Trial' : 'Upgrade to Premium'}</span>
+      </div>
         {/* Plan Info */}
         <div className="text-center space-y-2">
           <div className="text-3xl font-bold text-primary">
@@ -272,8 +273,7 @@ export function ClientSubscriptionPaymentButton({
           <p>💳 All major payment methods accepted</p>
           {startTrial && <p>🎁 No credit card required for trial</p>}
         </div>
-      </CardContent>
-    </Card>
+    </StandardCard>
   );
 }
 

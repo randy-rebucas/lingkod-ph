@@ -8,19 +8,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { designTokens } from "@/lib/design-tokens";
 
 export default function SmartRatePage() {
     const t = useTranslations('SmartRate');
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold font-headline">{t('smartRateTitle')}</h1>
-        <p className="text-muted-foreground">
-          {t('smartRateDescription')}
-        </p>
-      </div>
+    <PageLayout 
+      title={t('smartRateTitle')} 
+      description={t('smartRateDescription')}
+    >
       <SmartRateClient />
-    </div>
+    </PageLayout>
   );
 }

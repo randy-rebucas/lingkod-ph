@@ -26,6 +26,11 @@ import {
   Minus
 } from 'lucide-react';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { PageLayout } from '@/components/app/page-layout';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { AccessDenied } from '@/components/app/access-denied';
+import { designTokens } from '@/lib/design-tokens';
 
 interface ClientAnalyticsData {
   metrics: {
@@ -155,32 +160,17 @@ export default function ClientAnalyticsPage() {
   };
 
   if (userRole !== 'client') {
-    return (
-      <div className="max-w-4xl mx-auto p-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Access Denied</CardTitle>
-            <CardDescription>This page is only available for clients.</CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    );
+    return <AccessDenied 
+      title="Access Denied" 
+      description="This page is only available for clients." 
+    />;
   }
 
-  return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <BarChart3 className="h-6 w-6 text-primary" />
-              <h1 className="text-3xl font-bold">Booking Analytics</h1>
-            </div>
-            <p className="text-muted-foreground">
-              Track your booking patterns, spending, and service preferences
-            </p>
-          </div>
-          
+    return (
+        <PageLayout 
+            title="Booking Analytics" 
+            description="Track your booking patterns, spending, and service preferences"
+        >
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
@@ -191,7 +181,6 @@ export default function ClientAnalyticsPage() {
               Refresh
             </Button>
           </div>
-        </div>
 
         {loading ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -470,6 +459,6 @@ export default function ClientAnalyticsPage() {
             </CardContent>
           </Card>
         )}
-      </div>
+    </PageLayout>
   );
 }

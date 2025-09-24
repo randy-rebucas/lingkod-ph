@@ -10,6 +10,12 @@ import { PartnerAnalyticsService } from "@/lib/partner-analytics";
 import { PartnerReferralTracker } from "@/lib/partner-referral-tracker";
 import { PartnerCommissionManager } from "@/lib/partner-commission-manager";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 interface PartnerDashboardData {
     totalReferrals: number;
@@ -65,47 +71,24 @@ export default function PartnersDashboardPage() {
     }, [user, userRole]);
 
     if (userRole !== 'partner') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('accessDenied')}</CardTitle>
-                    <CardDescription>{t('partnersOnly')}</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title={t('accessDenied')} 
+            description={t('partnersOnly')} 
+        />;
     }
 
     if (loading) {
-        return (
-            <div className="space-y-6">
-                <div>
-                    <Skeleton className="h-8 w-64" />
-                    <Skeleton className="h-4 w-96 mt-2" />
-                </div>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    {[...Array(4)].map((_, i) => (
-                        <Card key={i}>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <Skeleton className="h-4 w-24" />
-                                <Skeleton className="h-4 w-4" />
-                            </CardHeader>
-                            <CardContent>
-                                <Skeleton className="h-8 w-16" />
-                                <Skeleton className="h-3 w-20 mt-2" />
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            </div>
-        );
+        return <LoadingState 
+            title={t('dashboardTitle', { name: user?.displayName || 'User' })} 
+            description={t('dashboardSubtitle')} 
+        />;
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">{t('dashboardTitle', { name: user?.displayName || 'User' })}</h1>
-                <p className="text-muted-foreground">{t('dashboardSubtitle')}</p>
-            </div>
+        <PageLayout 
+            title={t('dashboardTitle', { name: user?.displayName || 'User' })} 
+            description={t('dashboardSubtitle')}
+        >
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
@@ -216,6 +199,6 @@ export default function PartnersDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </PageLayout>
     );
 }

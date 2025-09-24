@@ -46,6 +46,12 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 
 type Provider = {
@@ -286,25 +292,17 @@ export default function ManageProvidersPage() {
     });
 
     if (userRole !== 'agency') {
-        return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                    <p className="text-muted-foreground">{t('agencyOnly')}</p>
-                </div>
-            </div>
-        )
+        return <AccessDenied 
+            title={t('title')} 
+            description={t('agencyOnly')} 
+        />;
     }
 
     return (
-      <div className="space-y-6">
-          <div className="flex items-center justify-between">
-              <div>
-                  <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                  <p className="text-muted-foreground">
-                      {t('subtitle')}
-                  </p>
-              </div>
+      <PageLayout 
+          title={t('title')} 
+          description={t('subtitle')}
+      >
                 <Dialog open={isInviteDialogOpen} onOpenChange={setInviteDialogOpen}>
                         <DialogTrigger asChild>
                              <Button>
@@ -404,7 +402,7 @@ export default function ManageProvidersPage() {
                 </div>
             </CardContent>
           </Card>
-      </div>
+      </PageLayout>
     );
 }
 

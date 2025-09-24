@@ -19,6 +19,11 @@ import { cn } from "@/lib/utils";
 import { Send, Search, Paperclip, X, MessageSquare, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { designTokens } from "@/lib/design-tokens";
 
 
 type Conversation = {
@@ -236,8 +241,12 @@ export default function MessagesPage() {
 
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 h-full flex flex-col">
-            <Card className="flex-1 grid grid-cols-1 md:grid-cols-[320px_1fr] shadow-soft border-0 bg-background/80 backdrop-blur-sm overflow-hidden">
+        <PageLayout 
+            title={t('messages')} 
+            description={t('messagesDescription')}
+            className="h-full flex flex-col"
+        >
+            <StandardCard variant="elevated" className="flex-1 grid grid-cols-1 md:grid-cols-[320px_1fr] overflow-hidden">
                 {/* Conversation List */}
                 <div className="flex flex-col border-r border-border/50 bg-gradient-to-b from-background/50 to-muted/20">
                     <div className="p-4 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
@@ -402,7 +411,7 @@ export default function MessagesPage() {
                     </div>
                    )}
                 </div>
-            </Card>
-        </div>
+            </StandardCard>
+        </PageLayout>
     );
 }
