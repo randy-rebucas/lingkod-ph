@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { clientSubscriptionService } from '@/lib/client-subscription-service';
+import { subscriptionService } from '@/lib/subscription-service';
 import { verifyAuthToken } from '@/lib/auth-utils';
 
 export async function GET(request: NextRequest) {
@@ -12,19 +12,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { userId } = authResult;
-    const subscription = await clientSubscriptionService.getCurrentSubscription(userId);
+    const stats = await subscriptionService.getSubscriptionStats();
     
     return NextResponse.json({
       success: true,
-      subscription
+      stats
     });
   } catch (error) {
-    console.error('Error fetching current client subscription:', error);
+    console.error('Error fetching subscription stats:', error);
     return NextResponse.json(
       {
         success: false,
-        message: 'Failed to fetch current client subscription',
+        message: 'Failed to fetch subscription stats',
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }

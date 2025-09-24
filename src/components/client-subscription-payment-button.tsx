@@ -1,292 +1,287 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2, Star, CreditCard, Smartphone, Building, Wallet, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/auth-context';
-import { 
-  CreditCard, 
-  Smartphone, 
-  Building2, 
-  CheckCircle, 
-  Crown,
-  Star,
-  Zap,
-  Shield,
-  Gift,
-  MessageSquare
-} from 'lucide-react';
 import { ClientSubscriptionPlan } from '@/lib/client-subscription-types';
-import { PayPalCheckoutButton } from '@/components/paypal-checkout-button';
-import { GCashPaymentButton } from '@/components/gcash-payment-button';
+import { GCashPaymentButton } from './gcash-payment-button';
 
 interface ClientSubscriptionPaymentButtonProps {
   plan: ClientSubscriptionPlan;
-  onPaymentSuccess: (subscriptionId: string) => void;
-  onPaymentError: (error: string) => void;
+  onPaymentSuccess?: (subscriptionId: string) => void;
+  onPaymentError?: (error: string) => void;
+  startTrial?: boolean;
+  className?: string;
 }
 
-export function ClientSubscriptionPaymentButton({ 
-  plan, 
-  onPaymentSuccess, 
-  onPaymentError 
+const PAYMENT_METHODS = {
+  paypal: {
+    name: 'PayPal',
+    icon: CreditCard,
+    description: 'Pay securely with PayPal',
+    color: 'bg-blue-600 hover:bg-blue-700'
+  },
+  gcash: {
+    name: 'GCash',
+    icon: Smartphone,
+    description: 'Pay with GCash - instant confirmation',
+    color: 'bg-blue-500 hover:bg-blue-600'
+  },
+  maya: {
+    name: 'Maya',
+    icon: Smartphone,
+    description: 'Pay with Maya digital wallet',
+    color: 'bg-purple-600 hover:bg-purple-700'
+  },
+  bank_transfer: {
+    name: 'Bank Transfer',
+    icon: Building,
+    description: 'Traditional bank transfer',
+    color: 'bg-gray-600 hover:bg-gray-700'
+  }
+};
+
+export function ClientSubscriptionPaymentButton({
+  plan,
+  onPaymentSuccess,
+  onPaymentError,
+  startTrial = false,
+  className
 }: ClientSubscriptionPaymentButtonProps) {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'paypal' | 'gcash' | 'maya' | 'bank_transfer' | null>(null);
+  const [selectedMethod, setSelectedMethod] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  
+  const { toast } = useToast();
+  const { getIdToken } = useAuth();
 
-  const handlePaymentSuccess = async (paymentData: any) => {
-    if (!user) {
-      onPaymentError('User not authenticated');
+  const handlePayment = async (paymentMethod: string) => {
+    if (!paymentMethod) {
+      toast({
+        variant: 'destructive',
+        title: 'Payment Method Required',
+        description: 'Please select a payment method to continue.'
+      });
       return;
     }
 
-    setIsProcessing(true);
-    
     try {
+      setIsProcessing(true);
+      setPaymentStatus('processing');
+      setSelectedMethod(paymentMethod);
+
+      const token = await getIdToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
       const response = await fetch('/api/client-subscriptions/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await user.getIdToken()}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           planId: plan.id,
-          paymentMethod: selectedPaymentMethod,
-          paymentReference: paymentData.paymentId || paymentData.transactionId,
-          amount: plan.price
+          paymentMethod,
+          amount: plan.price,
+          startTrial
         })
       });
 
       const result = await response.json();
 
-      if (result.success) {
+      if (response.ok && result.success) {
+        setPaymentStatus('success');
+        onPaymentSuccess?.(result.subscription.id);
+        
         toast({
-          title: "Subscription Activated! 🎉",
-          description: `Welcome to ${plan.name}! Your premium features are now active.`,
+          title: startTrial ? 'Trial Started!' : 'Subscription Created!',
+          description: startTrial 
+            ? 'Your 7-day free trial has started. Enjoy Premium features!'
+            : 'Your Premium subscription is now active. Welcome to Premium!'
         });
-        onPaymentSuccess(result.subscriptionId);
       } else {
-        throw new Error(result.error || 'Failed to create subscription');
+        throw new Error(result.message || 'Payment failed');
       }
     } catch (error) {
-      console.error('Payment processing error:', error);
-      onPaymentError(error instanceof Error ? error.message : 'Payment processing failed');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handlePaymentError = (error: string) => {
-    console.error('Payment error:', error);
-    onPaymentError(error);
-    setIsProcessing(false);
-  };
-
-  const handleManualPayment = async () => {
-    if (!user) {
-      onPaymentError('User not authenticated');
-      return;
-    }
-
-    setIsProcessing(true);
-    
-    try {
-      const response = await fetch('/api/client-subscriptions/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await user.getIdToken()}`
-        },
-        body: JSON.stringify({
-          planId: plan.id,
-          paymentMethod: selectedPaymentMethod,
-          paymentReference: `manual_${Date.now()}`,
-          amount: plan.price
-        })
+      console.error('Client subscription payment error:', error);
+      setPaymentStatus('error');
+      
+      let errorMessage = 'An unexpected error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      setErrorMessage(errorMessage);
+      onPaymentError?.(errorMessage);
+      
+      toast({
+        variant: 'destructive',
+        title: 'Payment Failed',
+        description: errorMessage
       });
-
-      const result = await response.json();
-
-      if (result.success) {
-        toast({
-          title: "Subscription Created! 📋",
-          description: "Your subscription is pending payment verification. You'll receive confirmation once payment is verified.",
-        });
-        onPaymentSuccess(result.subscriptionId);
-      } else {
-        throw new Error(result.error || 'Failed to create subscription');
-      }
-    } catch (error) {
-      console.error('Manual payment error:', error);
-      onPaymentError(error instanceof Error ? error.message : 'Failed to create subscription');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const getFeatureIcon = (category: string) => {
-    switch (category) {
-      case 'search': return <Zap className="h-4 w-4" />;
-      case 'booking': return <Star className="h-4 w-4" />;
-      case 'support': return <MessageSquare className="h-4 w-4" />;
-      case 'analytics': return <Shield className="h-4 w-4" />;
-      case 'priority': return <Gift className="h-4 w-4" />;
-      default: return <CheckCircle className="h-4 w-4" />;
-    }
+  const handleGCashPayment = async () => {
+    await handlePayment('gcash');
   };
 
-  const getPaymentMethodIcon = (method: string) => {
-    switch (method) {
-      case 'paypal': return <CreditCard className="h-5 w-5" />;
-      case 'gcash': return <Smartphone className="h-5 w-5" />;
-      case 'maya': return <Smartphone className="h-5 w-5" />;
-      case 'bank_transfer': return <Building2 className="h-5 w-5" />;
-      default: return <CreditCard className="h-5 w-5" />;
-    }
+  const handlePayPalPayment = async () => {
+    await handlePayment('paypal');
   };
 
-  const getPaymentMethodName = (method: string) => {
-    switch (method) {
-      case 'paypal': return 'PayPal';
-      case 'gcash': return 'GCash';
-      case 'maya': return 'Maya';
-      case 'bank_transfer': return 'Bank Transfer';
-      default: return method;
+  const handleMayaPayment = async () => {
+    await handlePayment('maya');
+  };
+
+  const handleBankTransferPayment = async () => {
+    await handlePayment('bank_transfer');
+  };
+
+  const renderPaymentButton = (method: string, handler: () => void) => {
+    const config = PAYMENT_METHODS[method as keyof typeof PAYMENT_METHODS];
+    const Icon = config.icon;
+    const isSelected = selectedMethod === method;
+    const isDisabled = isProcessing || paymentStatus === 'success';
+
+    return (
+      <Button
+        key={method}
+        onClick={handler}
+        disabled={isDisabled}
+        className={`w-full ${config.color} text-white ${
+          isSelected ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+        }`}
+      >
+        {isProcessing && isSelected ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <Icon className="mr-2 h-4 w-4" />
+        )}
+        {config.name}
+      </Button>
+    );
+  };
+
+  const renderContent = () => {
+    switch (paymentStatus) {
+      case 'processing':
+        return (
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
+            <div>
+              <h3 className="font-semibold">Processing Payment...</h3>
+              <p className="text-sm text-muted-foreground">
+                Please wait while we process your {startTrial ? 'trial' : 'subscription'}
+              </p>
+            </div>
+          </div>
+        );
+      
+      case 'success':
+        return (
+          <div className="text-center space-y-4">
+            <CheckCircle className="h-8 w-8 mx-auto text-green-500" />
+            <div>
+              <h3 className="font-semibold text-green-700">
+                {startTrial ? 'Trial Started!' : 'Subscription Active!'}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {startTrial 
+                  ? 'Your 7-day free trial is now active. Enjoy Premium features!'
+                  : 'Welcome to Premium! Your subscription is now active.'
+                }
+              </p>
+            </div>
+          </div>
+        );
+      
+      case 'error':
+        return (
+          <div className="space-y-4">
+            <Alert variant="destructive">
+              <XCircle className="h-4 w-4" />
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+            <div className="grid grid-cols-2 gap-3">
+              {renderPaymentButton('gcash', handleGCashPayment)}
+              {renderPaymentButton('paypal', handlePayPalPayment)}
+            </div>
+          </div>
+        );
+      
+      default:
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              {renderPaymentButton('gcash', handleGCashPayment)}
+              {renderPaymentButton('paypal', handlePayPalPayment)}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {renderPaymentButton('maya', handleMayaPayment)}
+              {renderPaymentButton('bank_transfer', handleBankTransferPayment)}
+            </div>
+          </div>
+        );
     }
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader className="text-center">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <Crown className="h-6 w-6 text-yellow-500" />
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
-            {plan.name}
-          </CardTitle>
-        </div>
-        <CardDescription className="text-lg">
-          Unlock premium features for your service needs
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Star className="h-5 w-5 text-blue-500" />
+          {startTrial ? 'Start Free Trial' : 'Upgrade to Premium'}
+        </CardTitle>
+        <CardDescription>
+          {startTrial 
+            ? 'Try Premium features for 7 days, then continue with a paid subscription'
+            : 'Get instant access to all Premium features'
+          }
         </CardDescription>
-        <div className="text-3xl font-bold text-primary mt-4">
-          ₱{plan.price.toLocaleString()}
-          <span className="text-sm font-normal text-muted-foreground">/month</span>
-        </div>
       </CardHeader>
-
-      <CardContent className="space-y-6">
-        {/* Features List */}
-        <div className="space-y-3">
-          <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-            Premium Features
-          </h4>
-          {plan.features.map((feature) => (
-            <div key={feature.id} className="flex items-start gap-3">
-              <div className="text-green-500 mt-0.5">
-                {getFeatureIcon(feature.category)}
-              </div>
-              <div className="flex-1">
-                <div className="font-medium text-sm">{feature.name}</div>
-                <div className="text-xs text-muted-foreground">{feature.description}</div>
-              </div>
-            </div>
-          ))}
+      
+      <CardContent className="space-y-4">
+        {/* Plan Info */}
+        <div className="text-center space-y-2">
+          <div className="text-3xl font-bold text-primary">
+            {plan.price === 0 ? 'Free' : `₱${plan.price}`}
+            {plan.price > 0 && <span className="text-lg text-muted-foreground">/month</span>}
+          </div>
+          <Badge variant="outline" className="text-sm">
+            {plan.name}
+          </Badge>
         </div>
-
-        <Separator />
 
         {/* Payment Methods */}
-        <div className="space-y-4">
-          <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-            Choose Payment Method
-          </h4>
-          
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { id: 'paypal', name: 'PayPal', description: 'Instant processing' },
-              { id: 'gcash', name: 'GCash', description: 'Quick & easy' },
-              { id: 'maya', name: 'Maya', description: 'Digital wallet' },
-              { id: 'bank_transfer', name: 'Bank Transfer', description: 'Traditional banking' }
-            ].map((method) => (
-              <Button
-                key={method.id}
-                variant={selectedPaymentMethod === method.id ? 'default' : 'outline'}
-                className="h-auto p-4 flex flex-col items-center gap-2"
-                onClick={() => setSelectedPaymentMethod(method.id as any)}
-                disabled={isProcessing}
-              >
-                {getPaymentMethodIcon(method.id)}
-                <div className="text-center">
-                  <div className="font-medium text-sm">{method.name}</div>
-                  <div className="text-xs text-muted-foreground">{method.description}</div>
-                </div>
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Payment Buttons */}
-        {selectedPaymentMethod && (
-          <div className="space-y-3">
-            {selectedPaymentMethod === 'paypal' && (
-              <PayPalCheckoutButton
-                amount={plan.price}
-                currency="PHP"
-                description={`${plan.name} - Monthly Subscription`}
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-                disabled={isProcessing}
-              />
-            )}
-
-            {selectedPaymentMethod === 'gcash' && (
-              <GCashPaymentButton
-                amount={plan.price}
-                description={`${plan.name} - Monthly Subscription`}
-                onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
-                disabled={isProcessing}
-              />
-            )}
-
-            {(selectedPaymentMethod === 'maya' || selectedPaymentMethod === 'bank_transfer') && (
-              <div className="space-y-3">
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <h5 className="font-medium text-blue-900 mb-2">
-                    Manual Payment Required
-                  </h5>
-                  <p className="text-sm text-blue-800 mb-3">
-                    For {getPaymentMethodName(selectedPaymentMethod)} payments, we'll create your subscription 
-                    and send you payment instructions via email.
-                  </p>
-                  <div className="text-sm text-blue-700">
-                    <strong>Amount:</strong> ₱{plan.price.toLocaleString()}<br />
-                    <strong>Method:</strong> {getPaymentMethodName(selectedPaymentMethod)}
-                  </div>
-                </div>
-                
-                <Button
-                  onClick={handleManualPayment}
-                  disabled={isProcessing}
-                  className="w-full"
-                >
-                  {isProcessing ? 'Processing...' : `Create ${getPaymentMethodName(selectedPaymentMethod)} Subscription`}
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
+        {renderContent()}
 
         {/* Security Notice */}
-        <div className="text-center text-xs text-muted-foreground">
-          <Shield className="h-4 w-4 inline mr-1" />
-          Secure payment processing with industry-standard encryption
+        <div className="text-xs text-muted-foreground text-center space-y-1">
+          <p>🔒 Secure payment processing</p>
+          <p>💳 All major payment methods accepted</p>
+          {startTrial && <p>🎁 No credit card required for trial</p>}
         </div>
       </CardContent>
     </Card>
   );
+}
+
+// Specialized components for different scenarios
+export function ClientTrialPaymentButton({ plan, ...props }: Omit<ClientSubscriptionPaymentButtonProps, 'startTrial'>) {
+  return <ClientSubscriptionPaymentButton plan={plan} startTrial={true} {...props} />;
+}
+
+export function ClientPremiumPaymentButton({ plan, ...props }: Omit<ClientSubscriptionPaymentButtonProps, 'startTrial'>) {
+  return <ClientSubscriptionPaymentButton plan={plan} startTrial={false} {...props} />;
 }

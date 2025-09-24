@@ -1,262 +1,196 @@
 'use client';
 
-import { ReactNode } from 'react';
+import React from 'react';
+import { useClientFeatureAccess } from '@/hooks/use-client-subscription';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useClientFeatureAccess } from '@/hooks/use-client-subscription';
-import { ClientSubscriptionFeatureKey } from '@/lib/client-subscription-types';
-import { 
-  Crown, 
-  Zap, 
-  Star, 
-  MessageSquare, 
-  Shield, 
-  Gift,
-  ArrowRight,
-  CheckCircle
-} from 'lucide-react';
-import Link from 'next/link';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Star, Lock, TrendingUp, Search, Calendar, Heart, BarChart3, ShoppingBag, Zap } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 interface ClientFeatureGuardProps {
-  feature: ClientSubscriptionFeatureKey;
-  children: ReactNode;
-  fallback?: ReactNode;
+  feature: string;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
   showUpgradePrompt?: boolean;
+  className?: string;
 }
+
+const CLIENT_FEATURE_CONFIG = {
+  advanced_search: {
+    title: 'Advanced Search',
+    description: 'Find exactly what you need with advanced filters and verified provider access',
+    icon: Search,
+    benefits: ['Advanced filters', 'Verified provider access', 'Smart recommendations', 'Location-based search'],
+    upgradeMessage: 'Unlock advanced search to find the perfect provider faster'
+  },
+  priority_booking: {
+    title: 'Priority Booking',
+    description: 'Get priority access to top-rated providers and secure bookings faster',
+    icon: Zap,
+    benefits: ['Priority notifications', 'Top-rated provider access', 'Faster booking confirmation', 'Exclusive opportunities'],
+    upgradeMessage: 'Get priority access to the best providers in your area'
+  },
+  analytics: {
+    title: 'Booking Analytics',
+    description: 'Track your booking history and spending patterns with detailed insights',
+    icon: BarChart3,
+    benefits: ['Spending tracking', 'Booking history', 'Provider ratings', 'Cost analysis'],
+    upgradeMessage: 'Understand your service usage with detailed analytics'
+  },
+  priority_support: {
+    title: 'Priority Support',
+    description: 'Get 24/7 priority customer support for all your booking needs',
+    icon: Star,
+    benefits: ['24/7 support', 'Priority response', 'Dedicated support team', 'Faster issue resolution'],
+    upgradeMessage: 'Get priority support when you need help'
+  },
+  exclusive_deals: {
+    title: 'Exclusive Deals',
+    description: 'Access exclusive partner discounts and special offers',
+    icon: ShoppingBag,
+    benefits: ['Partner discounts', 'Special offers', 'Exclusive promotions', 'Cost savings'],
+    upgradeMessage: 'Save money with exclusive partner deals and discounts'
+  },
+  custom_requests: {
+    title: 'Custom Requests',
+    description: 'Post custom requests for specialized needs and unique services',
+    icon: TrendingUp,
+    benefits: ['Custom service requests', 'Specialized needs', 'Unique opportunities', 'Tailored solutions'],
+    upgradeMessage: 'Post custom requests for specialized services'
+  },
+  job_posts: {
+    title: 'Extended Job Posts',
+    description: 'Post more job requests with increased monthly limits',
+    icon: Calendar,
+    benefits: ['More job posts', 'Better opportunities', 'Increased visibility', 'Higher success rate'],
+    upgradeMessage: 'Post more job requests to find the right provider'
+  },
+  bookings: {
+    title: 'Extended Bookings',
+    description: 'Book more services with increased monthly limits',
+    icon: Calendar,
+    benefits: ['More bookings', 'Flexible scheduling', 'Better service access', 'Convenience'],
+    upgradeMessage: 'Book more services and get things done faster'
+  },
+  favorites: {
+    title: 'Extended Favorites',
+    description: 'Save more favorite providers for easy access',
+    icon: Heart,
+    benefits: ['More favorites', 'Quick access', 'Provider comparison', 'Personalized experience'],
+    upgradeMessage: 'Save more favorite providers for easy access'
+  }
+};
 
 export function ClientFeatureGuard({ 
   feature, 
   children, 
-  fallback,
-  showUpgradePrompt = true 
+  fallback, 
+  showUpgradePrompt = true,
+  className 
 }: ClientFeatureGuardProps) {
-  const { hasAccess, loading } = useClientFeatureAccess(feature);
+  const { hasAccess, remainingUsage, limit, isUnlimited, message, loading } = useClientFeatureAccess(feature);
+  const router = useRouter();
+  const t = useTranslations('Subscription');
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className={`animate-pulse ${className}`}>
+        <div className="h-32 bg-gray-200 rounded-lg"></div>
       </div>
     );
   }
 
   if (hasAccess) {
-    return <>{children}</>;
+    return <div className={className}>{children}</div>;
   }
 
   if (fallback) {
-    return <>{fallback}</>;
+    return <div className={className}>{fallback}</div>;
   }
 
   if (!showUpgradePrompt) {
     return null;
   }
 
-  return <ClientUpgradePrompt feature={feature} />;
-}
-
-// Specialized guards for specific features
-export function AdvancedSearchGuard({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return (
-    <ClientFeatureGuard feature="advanced_search" fallback={fallback}>
-      {children}
-    </ClientFeatureGuard>
-  );
-}
-
-export function PriorityBookingGuard({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return (
-    <ClientFeatureGuard feature="priority_booking" fallback={fallback}>
-      {children}
-    </ClientFeatureGuard>
-  );
-}
-
-export function BookingAnalyticsGuard({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return (
-    <ClientFeatureGuard feature="booking_analytics" fallback={fallback}>
-      {children}
-    </ClientFeatureGuard>
-  );
-}
-
-export function PrioritySupportGuard({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return (
-    <ClientFeatureGuard feature="priority_support" fallback={fallback}>
-      {children}
-    </ClientFeatureGuard>
-  );
-}
-
-export function ExclusiveDealsGuard({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return (
-    <ClientFeatureGuard feature="exclusive_deals" fallback={fallback}>
-      {children}
-    </ClientFeatureGuard>
-  );
-}
-
-export function CustomRequestsGuard({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
-  return (
-    <ClientFeatureGuard feature="custom_requests" fallback={fallback}>
-      {children}
-    </ClientFeatureGuard>
-  );
-}
-
-// Upgrade prompt component
-function ClientUpgradePrompt({ feature }: { feature: ClientSubscriptionFeatureKey }) {
-  const getFeatureInfo = (feature: ClientSubscriptionFeatureKey) => {
-    switch (feature) {
-      case 'advanced_search':
-        return {
-          icon: <Zap className="h-6 w-6 text-yellow-500" />,
-          title: 'Advanced Search',
-          description: 'Get access to advanced filters, verified providers, and priority search results.',
-          benefits: [
-            'Filter by verified providers only',
-            'Advanced location and availability filters',
-            'Priority search result placement',
-            'Save and manage search preferences'
-          ]
-        };
-      case 'priority_booking':
-        return {
-          icon: <Star className="h-6 w-6 text-blue-500" />,
-          title: 'Priority Booking',
-          description: 'Get priority access to top-rated providers and faster booking confirmations.',
-          benefits: [
-            'Priority access to top-rated providers',
-            'Faster booking confirmations',
-            'Exclusive booking slots',
-            'Priority customer support'
-          ]
-        };
-      case 'booking_analytics':
-        return {
-          icon: <Shield className="h-6 w-6 text-green-500" />,
-          title: 'Booking Analytics',
-          description: 'Track your booking history, spending patterns, and service preferences.',
-          benefits: [
-            'Detailed booking history and trends',
-            'Spending analysis and insights',
-            'Service preference tracking',
-            'Performance recommendations'
-          ]
-        };
-      case 'priority_support':
-        return {
-          icon: <MessageSquare className="h-6 w-6 text-purple-500" />,
-          title: 'Priority Support',
-          description: 'Get 24/7 priority customer support with faster response times.',
-          benefits: [
-            '24/7 priority customer support',
-            'Faster response times',
-            'Dedicated support agent',
-            'Phone and chat support'
-          ]
-        };
-      case 'exclusive_deals':
-        return {
-          icon: <Gift className="h-6 w-6 text-red-500" />,
-          title: 'Exclusive Deals',
-          description: 'Access to exclusive partner discounts and special offers.',
-          benefits: [
-            'Exclusive partner discounts',
-            'Special seasonal offers',
-            'Early access to promotions',
-            'VIP customer benefits'
-          ]
-        };
-      case 'custom_requests':
-        return {
-          icon: <Crown className="h-6 w-6 text-orange-500" />,
-          title: 'Custom Service Requests',
-          description: 'Post custom service requests for specialized needs and get matched with providers.',
-          benefits: [
-            'Post custom service requests',
-            'Get matched with specialized providers',
-            'Detailed requirement specifications',
-            'Priority request processing'
-          ]
-        };
-      default:
-        return {
-          icon: <Crown className="h-6 w-6 text-primary" />,
-          title: 'Premium Feature',
-          description: 'This feature is available with a Premium subscription.',
-          benefits: [
-            'Access to premium features',
-            'Enhanced service experience',
-            'Priority support',
-            'Exclusive benefits'
-          ]
-        };
-    }
-  };
-
-  const featureInfo = getFeatureInfo(feature);
+  const config = CLIENT_FEATURE_CONFIG[feature as keyof typeof CLIENT_FEATURE_CONFIG];
+  const Icon = config?.icon || Lock;
 
   return (
-    <Card className="w-full max-w-2xl mx-auto border-2 border-dashed border-primary/20">
+    <Card className={`border-dashed border-2 border-gray-200 ${className}`}>
       <CardHeader className="text-center">
-        <div className="flex items-center justify-center gap-2 mb-2">
-          {featureInfo.icon}
-          <CardTitle className="text-xl font-bold">
-            {featureInfo.title}
-          </CardTitle>
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-blue-400 to-purple-500">
+          <Icon className="h-6 w-6 text-white" />
         </div>
+        <CardTitle className="text-xl font-semibold">
+          {config?.title || 'Premium Feature'}
+        </CardTitle>
         <CardDescription className="text-base">
-          {featureInfo.description}
+          {config?.description || 'This feature is available with a Premium subscription'}
         </CardDescription>
       </CardHeader>
-
+      
       <CardContent className="space-y-6">
-        {/* Benefits List */}
-        <div className="space-y-3">
-          <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-            What you'll get:
-          </h4>
-          {featureInfo.benefits.map((benefit, index) => (
-            <div key={index} className="flex items-center gap-3">
-              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-              <span className="text-sm">{benefit}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Pricing */}
-        <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 rounded-lg text-center">
-          <div className="text-2xl font-bold text-primary mb-1">
-            ₱199<span className="text-sm font-normal text-muted-foreground">/month</span>
-          </div>
-          <div className="text-sm text-muted-foreground">
-            Premium Client Plan - Cancel anytime
-          </div>
-        </div>
-
-        {/* Upgrade Button */}
-        <div className="flex flex-col gap-3">
-          <Button asChild className="w-full">
-            <Link href="/client-subscription">
-              <Crown className="h-4 w-4 mr-2" />
-              Upgrade to Premium
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Link>
-          </Button>
-          
-          <div className="text-center text-xs text-muted-foreground">
-            <Badge variant="outline" className="text-xs">
-              7-day money-back guarantee
+        {/* Usage Info */}
+        {!isUnlimited && limit > 0 && (
+          <div className="text-center">
+            <Badge variant="outline" className="mb-2">
+              {remainingUsage} of {limit} remaining this month
             </Badge>
+            {message && (
+              <p className="text-sm text-muted-foreground">{message}</p>
+            )}
           </div>
+        )}
+
+        {/* Benefits */}
+        {config?.benefits && (
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm text-muted-foreground">What you'll get:</h4>
+            <ul className="space-y-1">
+              {config.benefits.map((benefit, index) => (
+                <li key={index} className="flex items-center text-sm">
+                  <div className="mr-2 h-1.5 w-1.5 rounded-full bg-blue-500"></div>
+                  {benefit}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Upgrade Message */}
+        {config?.upgradeMessage && (
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+            <p className="text-sm font-medium text-blue-800">
+              {config.upgradeMessage}
+            </p>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button 
+            onClick={() => router.push('/client-subscription')}
+            className="flex-1 bg-gradient-to-r from-blue-400 to-purple-500 hover:from-blue-500 hover:to-purple-600 text-white"
+          >
+            <Star className="mr-2 h-4 w-4" />
+            Upgrade to Premium
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => router.push('/client-subscription')}
+            className="flex-1"
+          >
+            View Plans
+          </Button>
         </div>
 
-        {/* Additional Info */}
-        <div className="text-center text-xs text-muted-foreground">
-          <p>
-            Join thousands of satisfied clients who have upgraded to Premium for a better service experience.
+        {/* Trial Offer */}
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground">
+            Start with a <span className="font-semibold text-green-600">7-day free trial</span> - no credit card required
           </p>
         </div>
       </CardContent>
@@ -264,49 +198,39 @@ function ClientUpgradePrompt({ feature }: { feature: ClientSubscriptionFeatureKe
   );
 }
 
-// Client subscription badge component
-interface ClientSubscriptionBadgeProps {
-  tier: 'free' | 'premium';
-  variant?: 'compact' | 'large';
-  className?: string;
+// Specialized client feature guards
+export function AdvancedSearchGuard({ children, ...props }: Omit<ClientFeatureGuardProps, 'feature'>) {
+  return <ClientFeatureGuard feature="advanced_search" {...props}>{children}</ClientFeatureGuard>;
 }
 
-export function ClientSubscriptionBadge({ tier, variant = 'compact', className }: ClientSubscriptionBadgeProps) {
-  if (tier === 'free') {
-    return null; // Don't show badge for free tier
-  }
-
-  const isLarge = variant === 'large';
-
-  return (
-    <Badge 
-      className={`bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 ${
-        isLarge ? 'px-3 py-1 text-sm' : 'px-2 py-0.5 text-xs'
-      } ${className}`}
-    >
-      <Crown className={`${isLarge ? 'h-4 w-4' : 'h-3 w-3'} mr-1`} />
-      Premium Client
-    </Badge>
-  );
+export function PriorityBookingGuard({ children, ...props }: Omit<ClientFeatureGuardProps, 'feature'>) {
+  return <ClientFeatureGuard feature="priority_booking" {...props}>{children}</ClientFeatureGuard>;
 }
 
-// Verified premium client badge
-interface VerifiedPremiumClientBadgeProps {
-  variant?: 'compact' | 'large';
-  className?: string;
+export function BookingAnalyticsGuard({ children, ...props }: Omit<ClientFeatureGuardProps, 'feature'>) {
+  return <ClientFeatureGuard feature="analytics" {...props}>{children}</ClientFeatureGuard>;
 }
 
-export function VerifiedPremiumClientBadge({ variant = 'compact', className }: VerifiedPremiumClientBadgeProps) {
-  const isLarge = variant === 'large';
+export function PrioritySupportGuard({ children, ...props }: Omit<ClientFeatureGuardProps, 'feature'>) {
+  return <ClientFeatureGuard feature="priority_support" {...props}>{children}</ClientFeatureGuard>;
+}
 
-  return (
-    <Badge 
-      className={`bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 ${
-        isLarge ? 'px-3 py-1 text-sm' : 'px-2 py-0.5 text-xs'
-      } ${className}`}
-    >
-      <Crown className={`${isLarge ? 'h-4 w-4' : 'h-3 w-3'} mr-1`} />
-      Verified Premium
-    </Badge>
-  );
+export function ExclusiveDealsGuard({ children, ...props }: Omit<ClientFeatureGuardProps, 'feature'>) {
+  return <ClientFeatureGuard feature="exclusive_deals" {...props}>{children}</ClientFeatureGuard>;
+}
+
+export function CustomRequestsGuard({ children, ...props }: Omit<ClientFeatureGuardProps, 'feature'>) {
+  return <ClientFeatureGuard feature="custom_requests" {...props}>{children}</ClientFeatureGuard>;
+}
+
+export function ExtendedJobPostsGuard({ children, ...props }: Omit<ClientFeatureGuardProps, 'feature'>) {
+  return <ClientFeatureGuard feature="job_posts" {...props}>{children}</ClientFeatureGuard>;
+}
+
+export function ExtendedBookingsGuard({ children, ...props }: Omit<ClientFeatureGuardProps, 'feature'>) {
+  return <ClientFeatureGuard feature="bookings" {...props}>{children}</ClientFeatureGuard>;
+}
+
+export function ExtendedFavoritesGuard({ children, ...props }: Omit<ClientFeatureGuardProps, 'feature'>) {
+  return <ClientFeatureGuard feature="favorites" {...props}>{children}</ClientFeatureGuard>;
 }

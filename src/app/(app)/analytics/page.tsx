@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
-import { useProSubscription } from '@/hooks/use-subscription';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,8 +38,6 @@ import {
   Clock,
   CheckCircle
 } from 'lucide-react';
-import { AnalyticsGuard } from '@/components/feature-guard';
-import { VerifiedProBadge } from '@/components/pro-badge';
 import { format } from 'date-fns';
 
 type Booking = {
@@ -87,7 +84,9 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function AnalyticsPage() {
   const { user } = useAuth();
-  const { isPro, isActive } = useProSubscription();
+  // No subscription functionality
+  const isPro = false;
+  const isActive = false;
   const t = useTranslations('Analytics');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -95,7 +94,7 @@ export default function AnalyticsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
 
   useEffect(() => {
-    if (!user || !isPro || !isActive) {
+    if (!user) {
       setLoading(false);
       return;
     }
@@ -108,8 +107,7 @@ export default function AnalyticsPage() {
     
     const bookingsQuery = query(
       collection(db, "bookings"),
-      where("providerId", "==", user.uid),
-      orderBy("createdAt", "desc")
+      where("providerId", "==", user.uid)
     );
 
     const unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
@@ -119,14 +117,17 @@ export default function AnalyticsPage() {
         createdAt: doc.data().createdAt as Timestamp,
         completedAt: doc.data().completedAt as Timestamp,
       })) as Booking[];
-      setBookings(bookingsData);
+      // Sort by createdAt in descending order
+      setBookings(bookingsData.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()));
+    }, (error) => {
+      console.error("Error fetching bookings:", error);
+      setLoading(false);
     });
 
     // Fetch reviews
     const reviewsQuery = query(
       collection(db, "reviews"),
-      where("providerId", "==", user.uid),
-      orderBy("createdAt", "desc")
+      where("providerId", "==", user.uid)
     );
 
     const unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
@@ -135,39 +136,43 @@ export default function AnalyticsPage() {
         ...doc.data(),
         createdAt: doc.data().createdAt as Timestamp,
       })) as Review[];
-      setReviews(reviewsData);
+      // Sort by createdAt in descending order
+      setReviews(reviewsData.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()));
+    }, (error) => {
+      console.error("Error fetching reviews:", error);
+      setLoading(false);
     });
 
     return () => {
       unsubscribeBookings();
       unsubscribeReviews();
     };
-  }, [user, isPro, isActive]);
+  }, [user]);
 
   useEffect(() => {
-    if (bookings.length > 0 || reviews.length > 0) {
-      calculateAnalytics();
-    }
+    // Calculate analytics even with empty data to show zero states
+    calculateAnalytics();
   }, [bookings, reviews]);
 
   const calculateAnalytics = () => {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const currentYear = now.getFullYear();
+    try {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
 
-    // Calculate basic metrics
-    const totalRevenue = bookings
-      .filter(b => b.status === 'Completed')
-      .reduce((sum, b) => sum + b.price, 0);
+      // Calculate basic metrics
+      const totalRevenue = bookings
+        .filter(b => b.status === 'Completed' && b.price && !isNaN(b.price))
+        .reduce((sum, b) => sum + b.price, 0);
 
-    const totalBookings = bookings.length;
-    const completedBookings = bookings.filter(b => b.status === 'Completed').length;
-    
-    const averageRating = reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-      : 0;
+      const totalBookings = bookings.length;
+      const completedBookings = bookings.filter(b => b.status === 'Completed').length;
+      
+      const averageRating = reviews.length > 0
+        ? reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
+        : 0;
 
-    const totalReviews = reviews.length;
+      const totalReviews = reviews.length;
 
     // Calculate monthly metrics
     const monthlyBookings = bookings.filter(b => {
@@ -261,29 +266,33 @@ export default function AnalyticsPage() {
     // Calculate additional metrics
     const completionRate = totalBookings > 0 ? (completedBookings / totalBookings) * 100 : 0;
     const averageResponseTime = 2.5; // Placeholder - would need to track actual response times
-    const featuredPlacementViews = 0; // Placeholder - would need to track from subscription service
-    const priorityJobApplications = 0; // Placeholder - would need to track from subscription service
+    const featuredPlacementViews = 0; // No subscription features
+    const priorityJobApplications = 0; // No subscription features
 
-    setAnalyticsData({
-      totalRevenue,
-      totalBookings,
-      completedBookings,
-      averageRating,
-      totalReviews,
-      monthlyRevenue,
-      monthlyBookings: monthlyBookingsCount,
-      ratingTrend,
-      reviewTrend,
-      topServices,
-      monthlyData,
-      ratingDistribution,
-      completionRate,
-      averageResponseTime,
-      featuredPlacementViews,
-      priorityJobApplications
-    });
+      setAnalyticsData({
+        totalRevenue,
+        totalBookings,
+        completedBookings,
+        averageRating,
+        totalReviews,
+        monthlyRevenue,
+        monthlyBookings: monthlyBookingsCount,
+        ratingTrend,
+        reviewTrend,
+        topServices,
+        monthlyData,
+        ratingDistribution,
+        completionRate,
+        averageResponseTime,
+        featuredPlacementViews,
+        priorityJobApplications
+      });
 
-    setLoading(false);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error calculating analytics:", error);
+      setLoading(false);
+    }
   };
 
   if (loading) {
@@ -307,8 +316,7 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <AnalyticsGuard>
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -319,7 +327,6 @@ export default function AnalyticsPage() {
               {t('subtitle')}
             </p>
           </div>
-          <VerifiedProBadge variant="large" />
         </div>
 
         {analyticsData && (
@@ -587,6 +594,5 @@ export default function AnalyticsPage() {
           </>
         )}
       </div>
-    </AnalyticsGuard>
   );
 }

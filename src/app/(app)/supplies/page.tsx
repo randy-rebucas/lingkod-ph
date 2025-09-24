@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
-import { useProSubscription } from '@/hooks/use-subscription';
-import { subscriptionService } from '@/lib/subscription-service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,10 +19,8 @@ import {
   AlertCircle,
   Crown
 } from 'lucide-react';
-import { FeatureGuard } from '@/components/feature-guard';
 import { VerifiedProBadge } from '@/components/pro-badge';
 import { format } from 'date-fns';
-import { SuppliesDiscount } from '@/lib/subscription-types';
 
 export default function SuppliesPage() {
   const { user } = useAuth();
@@ -41,7 +37,8 @@ export default function SuppliesPage() {
 
     const fetchDiscounts = async () => {
       try {
-        const availableDiscounts = await subscriptionService.getAvailableDiscounts(user.uid);
+        // No subscription discounts available
+        const availableDiscounts: any[] = [];
         setDiscounts(availableDiscounts);
       } catch (error) {
         console.error('Error fetching discounts:', error);

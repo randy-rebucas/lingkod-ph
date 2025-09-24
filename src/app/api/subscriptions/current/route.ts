@@ -1,35 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from 'firebase-admin/auth';
 import { subscriptionService } from '@/lib/subscription-service';
+import { verifyAuthToken } from '@/lib/auth-utils';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get authorization header
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const authResult = await verifyAuthToken(request);
+    if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, message: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const token = authHeader.replace('Bearer ', '');
+    const { userId } = authResult;
+    const subscription = await subscriptionService.getCurrentSubscription(userId);
     
-    // Verify token
-    const decodedToken = await getAuth().verifyIdToken(token);
-    const userId = decodedToken.uid;
-
-    // Get current subscription
-    const subscription = await subscriptionService.getProviderSubscription(userId);
-
     return NextResponse.json({
       success: true,
       subscription
     });
   } catch (error) {
-    console.error('Get subscription error:', error);
+    console.error('Error fetching current subscription:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      {
+        success: false,
+        message: 'Failed to fetch current subscription',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

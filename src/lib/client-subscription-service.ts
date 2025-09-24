@@ -7,64 +7,109 @@ import {
   where, 
   getDocs, 
   doc, 
-  getDoc,
+  getDoc, 
   addDoc, 
   updateDoc, 
   deleteDoc, 
   serverTimestamp, 
   writeBatch,
-  Timestamp,
   orderBy,
-  limit
+  limit,
+  Timestamp,
+  runTransaction
 } from 'firebase/firestore';
 import {
   ClientSubscriptionPlan,
   ClientSubscription,
   ClientSubscriptionUsage,
   ClientSubscriptionPayment,
-  ClientAnalytics,
-  ClientExclusiveDeal,
-  CustomServiceRequest,
-  PriorityBooking,
-  ClientSubscriptionTier,
-  ClientSubscriptionFeatureKey,
-  DEFAULT_CLIENT_SUBSCRIPTION_PLANS,
-  CLIENT_SUBSCRIPTION_FEATURES
+  ClientSubscriptionAnalytics,
+  ClientFeatureAccessResult,
+  CreateClientSubscriptionInput,
+  UpdateClientSubscriptionInput,
+  TrackClientUsageInput,
+  ClientSubscriptionStats,
+  ClientSubscriptionFeature,
+  ClientSubscriptionLimits
 } from './client-subscription-types';
 
 export class ClientSubscriptionService {
-  private static readonly PLANS_COLLECTION = 'clientSubscriptionPlans';
-  private static readonly SUBSCRIPTIONS_COLLECTION = 'clientSubscriptions';
-  private static readonly USAGE_COLLECTION = 'clientSubscriptionUsage';
-  private static readonly PAYMENTS_COLLECTION = 'clientSubscriptionPayments';
-  private static readonly ANALYTICS_COLLECTION = 'clientAnalytics';
-  private static readonly DEALS_COLLECTION = 'clientExclusiveDeals';
-  private static readonly CUSTOM_REQUESTS_COLLECTION = 'customServiceRequests';
-  private static readonly PRIORITY_BOOKINGS_COLLECTION = 'priorityBookings';
+  private static instance: ClientSubscriptionService;
+  private static readonly COLLECTIONS = {
+    PLANS: 'clientSubscriptionPlans',
+    SUBSCRIPTIONS: 'clientSubscriptions',
+    USAGE: 'clientSubscriptionUsage',
+    PAYMENTS: 'clientSubscriptionPayments',
+    ANALYTICS: 'clientAnalytics'
+  };
+
+  public static getInstance(): ClientSubscriptionService {
+    if (!ClientSubscriptionService.instance) {
+      ClientSubscriptionService.instance = new ClientSubscriptionService();
+    }
+    return ClientSubscriptionService.instance;
+  }
 
   /**
    * Initialize default client subscription plans
    */
-  static async initializeDefaultPlans(): Promise<void> {
-    if (!db) {
-      throw new Error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-    }
-    
+  async initializeDefaultPlans(): Promise<void> {
     try {
-      const plansSnapshot = await getDocs(collection(db, this.PLANS_COLLECTION));
+      const plansRef = collection(db, ClientSubscriptionService.COLLECTIONS.PLANS);
+      const existingPlans = await getDocs(plansRef);
       
-      if (plansSnapshot.empty) {
+      if (existingPlans.empty) {
         const batch = writeBatch(db);
         
-        for (const plan of DEFAULT_CLIENT_SUBSCRIPTION_PLANS) {
-          const planRef = doc(collection(db, this.PLANS_COLLECTION));
-          batch.set(planRef, {
-            ...plan,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-          });
-        }
-        
+        // Free Plan
+        const freePlanRef = doc(plansRef);
+        batch.set(freePlanRef, {
+          name: 'Free Plan',
+          tier: 'free',
+          price: 0,
+          currency: 'PHP',
+          billingCycle: 'monthly',
+          features: this.getFreePlanFeatures(),
+          limits: this.getFreePlanLimits(),
+          isActive: true,
+          isTrial: false,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        // Premium Plan
+        const premiumPlanRef = doc(plansRef);
+        batch.set(premiumPlanRef, {
+          name: 'Premium Plan',
+          tier: 'premium',
+          price: 199,
+          currency: 'PHP',
+          billingCycle: 'monthly',
+          features: this.getPremiumPlanFeatures(),
+          limits: this.getPremiumPlanLimits(),
+          isActive: true,
+          isTrial: false,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        // Trial Plan
+        const trialPlanRef = doc(plansRef);
+        batch.set(trialPlanRef, {
+          name: '7-Day Free Trial',
+          tier: 'trial',
+          price: 0,
+          currency: 'PHP',
+          billingCycle: 'monthly',
+          features: this.getPremiumPlanFeatures(),
+          limits: this.getPremiumPlanLimits(),
+          isActive: true,
+          isTrial: true,
+          trialDays: 7,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
         await batch.commit();
         console.log('Default client subscription plans initialized');
       }
@@ -77,583 +122,580 @@ export class ClientSubscriptionService {
   /**
    * Get all available client subscription plans
    */
-  static async getClientSubscriptionPlans(): Promise<ClientSubscriptionPlan[]> {
-    if (!db) {
-      console.error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-      return [];
-    }
-    
+  async getPlans(): Promise<ClientSubscriptionPlan[]> {
     try {
-      const plansQuery = query(
-        collection(db, this.PLANS_COLLECTION),
-        where('isActive', '==', true),
-        orderBy('price', 'asc')
-      );
+      const plansRef = collection(db, ClientSubscriptionService.COLLECTIONS.PLANS);
+      const q = query(plansRef, where('isActive', '==', true), orderBy('price', 'asc'));
+      const snapshot = await getDocs(q);
       
-      const snapshot = await getDocs(plansQuery);
       return snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt as Timestamp,
-        updatedAt: doc.data().updatedAt as Timestamp
-      })) as ClientSubscriptionPlan[];
+        ...doc.data()
+      } as ClientSubscriptionPlan));
     } catch (error) {
-      console.error('Error getting client subscription plans:', error);
-      return [];
+      console.error('Error getting client plans:', error);
+      throw error;
     }
   }
 
   /**
-   * Get client's current subscription
+   * Get current subscription for a client
    */
-  static async getClientSubscription(clientId: string): Promise<ClientSubscription | null> {
-    if (!db) {
-      console.error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-      return null;
-    }
-    
+  async getCurrentSubscription(clientId: string): Promise<ClientSubscription | null> {
     try {
-      const subscriptionQuery = query(
-        collection(db, this.SUBSCRIPTIONS_COLLECTION),
+      const subscriptionsRef = collection(db, ClientSubscriptionService.COLLECTIONS.SUBSCRIPTIONS);
+      const q = query(
+        subscriptionsRef,
         where('clientId', '==', clientId),
-        where('status', '==', 'active'),
-        orderBy('startDate', 'desc'),
+        where('status', 'in', ['active', 'trial']),
+        orderBy('createdAt', 'desc'),
         limit(1)
       );
       
-      const snapshot = await getDocs(subscriptionQuery);
-      
-      if (snapshot.empty) {
-        return null;
-      }
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) return null;
       
       const doc = snapshot.docs[0];
       return {
         id: doc.id,
-        ...doc.data(),
-        startDate: doc.data().startDate as Timestamp,
-        endDate: doc.data().endDate as Timestamp,
-        nextBillingDate: doc.data().nextBillingDate as Timestamp,
-        createdAt: doc.data().createdAt as Timestamp,
-        updatedAt: doc.data().updatedAt as Timestamp
+        ...doc.data()
       } as ClientSubscription;
     } catch (error) {
-      console.error('Error getting client subscription:', error);
-      return null;
+      console.error('Error getting current client subscription:', error);
+      throw error;
     }
   }
 
   /**
-   * Create new client subscription
+   * Create a new client subscription
    */
-  static async createClientSubscription(
-    clientId: string,
-    planId: string,
-    paymentData: {
-      paymentMethod: 'paypal' | 'gcash' | 'maya' | 'bank_transfer';
-      paymentReference: string;
-      amount: number;
-    }
-  ): Promise<{ success: boolean; subscriptionId?: string; error?: string }> {
-    if (!db) {
-      return { success: false, error: 'Firebase Firestore is not initialized. Please check your Firebase configuration.' };
-    }
-    
+  async createSubscription(clientId: string, input: CreateClientSubscriptionInput): Promise<ClientSubscription> {
     try {
-      // Get plan details
-      const planDoc = await getDoc(doc(db, this.PLANS_COLLECTION, planId));
-      if (!planDoc.exists()) {
-        return { success: false, error: 'Client subscription plan not found' };
-      }
-      
-      const plan = planDoc.data() as ClientSubscriptionPlan;
-      
-      // Calculate subscription dates
+      const plan = await this.getPlanById(input.planId);
+      if (!plan) throw new Error('Plan not found');
+
       const now = new Date();
-      const startDate = new Date(now);
-      const endDate = new Date(now);
-      endDate.setMonth(endDate.getMonth() + 1);
+      const startDate = Timestamp.fromDate(now);
       
-      const nextBillingDate = new Date(endDate);
-      
-      // Create subscription
+      let endDate: Timestamp;
+      let nextBillingDate: Timestamp;
+      let trialEndDate: Timestamp | undefined;
+      let status: 'active' | 'trial' = 'active';
+
+      if (input.startTrial && plan.isTrial) {
+        // Start trial
+        const trialEnd = new Date(now.getTime() + (plan.trialDays || 7) * 24 * 60 * 60 * 1000);
+        trialEndDate = Timestamp.fromDate(trialEnd);
+        endDate = trialEndDate;
+        nextBillingDate = trialEndDate;
+        status = 'trial';
+      } else {
+        // Regular subscription
+        const end = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+        endDate = Timestamp.fromDate(end);
+        nextBillingDate = endDate;
+      }
+
       const subscriptionData: Omit<ClientSubscription, 'id'> = {
         clientId,
-        planId,
+        planId: input.planId,
         tier: plan.tier,
-        status: 'active',
-        startDate: Timestamp.fromDate(startDate),
-        endDate: Timestamp.fromDate(endDate),
-        nextBillingDate: Timestamp.fromDate(nextBillingDate),
+        status,
+        startDate,
+        endDate,
+        nextBillingDate,
+        trialEndDate,
         autoRenew: true,
-        paymentMethod: paymentData.paymentMethod,
-        paymentReference: paymentData.paymentReference,
-        amount: paymentData.amount,
+        paymentMethod: input.paymentMethod,
+        paymentReference: input.paymentReference,
+        amount: input.amount,
         currency: 'PHP',
         features: plan.features,
         limits: plan.limits,
-        createdAt: serverTimestamp() as Timestamp,
-        updatedAt: serverTimestamp() as Timestamp
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       };
+
+      const subscriptionRef = await addDoc(collection(db, ClientSubscriptionService.COLLECTIONS.SUBSCRIPTIONS), subscriptionData);
       
-      const subscriptionRef = await addDoc(collection(db, this.SUBSCRIPTIONS_COLLECTION), subscriptionData);
-      
-      // Create payment record
-      await this.recordClientSubscriptionPayment({
-        subscriptionId: subscriptionRef.id,
-        clientId,
-        amount: paymentData.amount,
-        paymentMethod: paymentData.paymentMethod,
-        paymentReference: paymentData.paymentReference,
-        status: 'completed',
-        description: `Client subscription payment for ${plan.name}`
-      });
-      
-      // Initialize usage tracking
-      await this.initializeClientUsageTracking(clientId, subscriptionRef.id);
-      
-      return { success: true, subscriptionId: subscriptionRef.id };
+      // Record payment if provided
+      if (input.paymentReference) {
+        await this.recordPayment(subscriptionRef.id, clientId, {
+          amount: input.amount,
+          paymentMethod: input.paymentMethod,
+          paymentReference: input.paymentReference,
+          status: 'completed'
+        });
+      }
+
+      return {
+        id: subscriptionRef.id,
+        ...subscriptionData
+      } as ClientSubscription;
     } catch (error) {
       console.error('Error creating client subscription:', error);
-      return { success: false, error: 'Failed to create client subscription' };
+      throw error;
     }
   }
 
   /**
-   * Check if client has access to a specific feature
+   * Check feature access for a client
    */
-  static async checkClientFeatureAccess(
-    clientId: string, 
-    feature: ClientSubscriptionFeatureKey
-  ): Promise<{ hasAccess: boolean; remainingUsage?: number; limit?: number }> {
+  async checkFeatureAccess(clientId: string, feature: string): Promise<ClientFeatureAccessResult> {
     try {
-      const subscription = await this.getClientSubscription(clientId);
-      
+      const subscription = await this.getCurrentSubscription(clientId);
       if (!subscription) {
-        // Free tier access
-        return this.checkClientFreeTierAccess(feature);
+        return {
+          hasAccess: false,
+          remainingUsage: 0,
+          limit: 0,
+          isUnlimited: false,
+          message: 'No active subscription'
+        };
       }
-      
-      // Check if feature is enabled in subscription
-      const featureEnabled = subscription.features.some(f => f.id === feature && f.isEnabled);
-      
-      if (!featureEnabled) {
-        return { hasAccess: false };
+
+      // Check if feature is included in subscription
+      const featureData = subscription.features.find(f => f.id === feature);
+      if (!featureData) {
+        return {
+          hasAccess: false,
+          remainingUsage: 0,
+          limit: 0,
+          isUnlimited: false,
+          message: 'Feature not included in current plan'
+        };
       }
-      
-      // Check usage limits
-      const usage = await this.getClientCurrentUsage(clientId);
-      const limit = this.getClientFeatureLimit(subscription.limits, feature);
-      
-      if (limit === -1) { // Unlimited
-        return { hasAccess: true, remainingUsage: -1, limit: -1 };
+
+      if (featureData.isUnlimited) {
+        return {
+          hasAccess: true,
+          remainingUsage: -1,
+          limit: -1,
+          isUnlimited: true
+        };
       }
+
+      // Check usage for the current month
+      const currentPeriod = new Date().toISOString().slice(0, 7); // YYYY-MM
+      const usage = await this.getUsageForPeriod(clientId, currentPeriod);
       
-      const currentUsage = this.getClientFeatureUsage(usage, feature);
+      const currentUsage = this.getFeatureUsage(usage, feature);
+      const limit = featureData.limit || 0;
       const remainingUsage = Math.max(0, limit - currentUsage);
-      
+
       return {
         hasAccess: remainingUsage > 0,
         remainingUsage,
-        limit
+        limit,
+        isUnlimited: false,
+        message: remainingUsage <= 0 ? 'Usage limit exceeded' : undefined
       };
     } catch (error) {
       console.error('Error checking client feature access:', error);
-      return { hasAccess: false };
+      throw error;
     }
   }
 
   /**
-   * Get current usage for client
+   * Track feature usage for a client
    */
-  static async getClientCurrentUsage(clientId: string): Promise<ClientSubscriptionUsage | null> {
-    if (!db) {
-      console.error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-      return null;
-    }
-    
+  async trackUsage(clientId: string, input: TrackClientUsageInput): Promise<void> {
     try {
-      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-      
-      const usageQuery = query(
-        collection(db, this.USAGE_COLLECTION),
+      const currentPeriod = new Date().toISOString().slice(0, 7);
+      const usageRef = collection(db, ClientSubscriptionService.COLLECTIONS.USAGE);
+      const q = query(
+        usageRef,
         where('clientId', '==', clientId),
-        where('period', '==', currentMonth),
-        limit(1)
+        where('period', '==', currentPeriod)
       );
-      
-      const snapshot = await getDocs(usageQuery);
-      
-      if (snapshot.empty) {
-        return null;
-      }
-      
-      const doc = snapshot.docs[0];
-      return {
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt as Timestamp,
-        updatedAt: doc.data().updatedAt as Timestamp
-      } as ClientSubscriptionUsage;
-    } catch (error) {
-      console.error('Error getting client current usage:', error);
-      return null;
-    }
-  }
 
-  /**
-   * Record client feature usage
-   */
-  static async recordClientFeatureUsage(
-    clientId: string,
-    feature: ClientSubscriptionFeatureKey,
-    amount: number = 1
-  ): Promise<{ success: boolean; error?: string }> {
-    if (!db) {
-      return { success: false, error: 'Firebase Firestore is not initialized. Please check your Firebase configuration.' };
-    }
-    
-    try {
-      const currentMonth = new Date().toISOString().slice(0, 7);
+      const snapshot = await getDocs(q);
+      const subscription = await this.getCurrentSubscription(clientId);
       
-      // Get or create usage record
-      let usage = await this.getClientCurrentUsage(clientId);
-      
-      if (!usage) {
+      if (!subscription) throw new Error('No active subscription');
+
+      if (snapshot.empty) {
         // Create new usage record
-        const subscription = await this.getClientSubscription(clientId);
-        const limits = subscription?.limits || this.getClientFreeTierLimits();
-        
         const usageData: Omit<ClientSubscriptionUsage, 'id'> = {
           clientId,
-          subscriptionId: subscription?.id || 'free',
-          period: currentMonth,
-          usage: {
-            jobPosts: 0,
-            bookings: 0,
-            favorites: 0,
-            advancedSearches: 0,
-            priorityBookings: 0,
-            customRequests: 0,
-            analyticsViews: 0
-          },
-          limits,
-          createdAt: serverTimestamp() as Timestamp,
-          updatedAt: serverTimestamp() as Timestamp
+          subscriptionId: subscription.id,
+          period: currentPeriod,
+          usage: this.getInitialUsage(),
+          limits: subscription.limits,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
         };
         
-        const usageRef = await addDoc(collection(db, this.USAGE_COLLECTION), usageData);
-        usage = { id: usageRef.id, ...usageData };
+        await addDoc(usageRef, usageData);
+      } else {
+        // Update existing usage
+        const usageDoc = snapshot.docs[0];
+        const currentUsage = usageDoc.data().usage;
+        const updatedUsage = this.updateFeatureUsage(currentUsage, input.feature, input.amount || 1);
+        
+        await updateDoc(usageDoc.ref, {
+          usage: updatedUsage,
+          updatedAt: serverTimestamp()
+        });
       }
-      
-      // Update usage
-      const updatedUsage = { ...usage.usage };
-      switch (feature) {
-        case CLIENT_SUBSCRIPTION_FEATURES.EXTENDED_JOB_POSTS:
-          updatedUsage.jobPosts += amount;
-          break;
-        case CLIENT_SUBSCRIPTION_FEATURES.EXTENDED_BOOKINGS:
-          updatedUsage.bookings += amount;
-          break;
-        case CLIENT_SUBSCRIPTION_FEATURES.EXTENDED_FAVORITES:
-          updatedUsage.favorites += amount;
-          break;
-        case CLIENT_SUBSCRIPTION_FEATURES.ADVANCED_SEARCH:
-          updatedUsage.advancedSearches += amount;
-          break;
-        case CLIENT_SUBSCRIPTION_FEATURES.PRIORITY_BOOKING:
-          updatedUsage.priorityBookings += amount;
-          break;
-        case CLIENT_SUBSCRIPTION_FEATURES.CUSTOM_REQUESTS:
-          updatedUsage.customRequests += amount;
-          break;
-        case CLIENT_SUBSCRIPTION_FEATURES.BOOKING_ANALYTICS:
-          updatedUsage.analyticsViews += amount;
-          break;
+    } catch (error) {
+      console.error('Error tracking client usage:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Convert trial to paid subscription
+   */
+  async convertTrialToPaid(clientId: string, paymentMethod: string, paymentReference: string): Promise<ClientSubscription> {
+    try {
+      const subscription = await this.getCurrentSubscription(clientId);
+      if (!subscription || subscription.status !== 'trial') {
+        throw new Error('No active trial subscription found');
       }
-      
-      await updateDoc(doc(db, this.USAGE_COLLECTION, usage.id), {
-        usage: updatedUsage,
+
+      const premiumPlan = await this.getPlanByTier('premium');
+      if (!premiumPlan) throw new Error('Premium plan not found');
+
+      await runTransaction(db, async (transaction) => {
+        const subscriptionRef = doc(db, ClientSubscriptionService.COLLECTIONS.SUBSCRIPTIONS, subscription.id);
+        
+        // Update subscription to Premium
+        transaction.update(subscriptionRef, {
+          tier: 'premium',
+          status: 'active',
+          planId: premiumPlan.id,
+          features: premiumPlan.features,
+          limits: premiumPlan.limits,
+          paymentMethod,
+          paymentReference,
+          amount: premiumPlan.price,
+          autoRenew: true,
+          updatedAt: serverTimestamp()
+        });
+
+        // Record payment
+        const paymentRef = doc(collection(db, ClientSubscriptionService.COLLECTIONS.PAYMENTS));
+        transaction.set(paymentRef, {
+          subscriptionId: subscription.id,
+          clientId,
+          amount: premiumPlan.price,
+          currency: 'PHP',
+          paymentMethod,
+          paymentReference,
+          status: 'completed',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      });
+
+      return await this.getCurrentSubscription(clientId) as ClientSubscription;
+    } catch (error) {
+      console.error('Error converting client trial:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update client subscription
+   */
+  async updateSubscription(clientId: string, input: UpdateClientSubscriptionInput): Promise<void> {
+    try {
+      const subscription = await this.getCurrentSubscription(clientId);
+      if (!subscription) throw new Error('No active subscription found');
+
+      const subscriptionRef = doc(db, ClientSubscriptionService.COLLECTIONS.SUBSCRIPTIONS, subscription.id);
+      const updateData: any = {
+        updatedAt: serverTimestamp()
+      };
+
+      if (input.autoRenew !== undefined) {
+        updateData.autoRenew = input.autoRenew;
+      }
+
+      if (input.paymentMethod) {
+        updateData.paymentMethod = input.paymentMethod;
+      }
+
+      if (input.paymentReference) {
+        updateData.paymentReference = input.paymentReference;
+      }
+
+      await updateDoc(subscriptionRef, updateData);
+    } catch (error) {
+      console.error('Error updating client subscription:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cancel client subscription
+   */
+  async cancelSubscription(clientId: string): Promise<void> {
+    try {
+      const subscription = await this.getCurrentSubscription(clientId);
+      if (!subscription) throw new Error('No active subscription found');
+
+      const subscriptionRef = doc(db, ClientSubscriptionService.COLLECTIONS.SUBSCRIPTIONS, subscription.id);
+      await updateDoc(subscriptionRef, {
+        status: 'cancelled',
+        autoRenew: false,
         updatedAt: serverTimestamp()
       });
-      
-      return { success: true };
     } catch (error) {
-      console.error('Error recording client feature usage:', error);
-      return { success: false, error: 'Failed to record client usage' };
+      console.error('Error cancelling client subscription:', error);
+      throw error;
     }
   }
 
   /**
-   * Get client analytics
+   * Get client subscription statistics
    */
-  static async getClientAnalytics(clientId: string): Promise<ClientAnalytics | null> {
-    if (!db) {
-      console.error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-      return null;
-    }
-    
+  async getSubscriptionStats(): Promise<ClientSubscriptionStats> {
     try {
-      const currentMonth = new Date().toISOString().slice(0, 7);
+      const subscriptionsRef = collection(db, ClientSubscriptionService.COLLECTIONS.SUBSCRIPTIONS);
+      const snapshot = await getDocs(subscriptionsRef);
       
-      const analyticsQuery = query(
-        collection(db, this.ANALYTICS_COLLECTION),
-        where('clientId', '==', clientId),
-        where('period', '==', currentMonth),
-        limit(1)
-      );
-      
-      const snapshot = await getDocs(analyticsQuery);
-      
-      if (snapshot.empty) {
-        return null;
-      }
-      
-      const doc = snapshot.docs[0];
-      return {
-        ...doc.data(),
-        createdAt: doc.data().createdAt as Timestamp
-      } as ClientAnalytics;
-    } catch (error) {
-      console.error('Error getting client analytics:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Get available exclusive deals for premium clients
-   */
-  static async getAvailableExclusiveDeals(clientId: string): Promise<ClientExclusiveDeal[]> {
-    if (!db) {
-      console.error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-      return [];
-    }
-    
-    try {
-      const subscription = await this.getClientSubscription(clientId);
-      
-      if (!subscription || !subscription.limits.exclusiveDeals) {
-        return [];
-      }
-      
-      const now = new Date();
-      const dealsQuery = query(
-        collection(db, this.DEALS_COLLECTION),
-        where('isActive', '==', true),
-        where('validFrom', '<=', Timestamp.fromDate(now)),
-        where('validTo', '>=', Timestamp.fromDate(now))
-      );
-      
-      const snapshot = await getDocs(dealsQuery);
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        validFrom: doc.data().validFrom as Timestamp,
-        validTo: doc.data().validTo as Timestamp,
-        createdAt: doc.data().createdAt as Timestamp
-      })) as ClientExclusiveDeal[];
-    } catch (error) {
-      console.error('Error getting available exclusive deals:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Create custom service request
-   */
-  static async createCustomServiceRequest(
-    clientId: string,
-    requestData: Omit<CustomServiceRequest, 'id' | 'clientId' | 'status' | 'matchedProviders' | 'createdAt' | 'updatedAt'>
-  ): Promise<{ success: boolean; requestId?: string; error?: string }> {
-    if (!db) {
-      return { success: false, error: 'Firebase Firestore is not initialized. Please check your Firebase configuration.' };
-    }
-    
-    try {
-      // Check if client has access to custom requests
-      const access = await this.checkClientFeatureAccess(clientId, CLIENT_SUBSCRIPTION_FEATURES.CUSTOM_REQUESTS);
-      if (!access.hasAccess) {
-        return { success: false, error: 'Custom service requests require Premium subscription' };
-      }
-      
-      const request: Omit<CustomServiceRequest, 'id'> = {
-        ...requestData,
-        clientId,
-        status: 'published',
-        matchedProviders: [],
-        createdAt: serverTimestamp() as Timestamp,
-        updatedAt: serverTimestamp() as Timestamp
+      const stats: ClientSubscriptionStats = {
+        totalSubscriptions: 0,
+        activeSubscriptions: 0,
+        trialSubscriptions: 0,
+        premiumSubscriptions: 0,
+        freeSubscriptions: 0,
+        monthlyRevenue: 0,
+        conversionRate: 0,
+        churnRate: 0
       };
-      
-      const requestRef = await addDoc(collection(db, this.CUSTOM_REQUESTS_COLLECTION), request);
-      
-      // Record usage
-      await this.recordClientFeatureUsage(clientId, CLIENT_SUBSCRIPTION_FEATURES.CUSTOM_REQUESTS);
-      
-      return { success: true, requestId: requestRef.id };
+
+      snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        stats.totalSubscriptions++;
+        
+        if (data.status === 'active' || data.status === 'trial') {
+          stats.activeSubscriptions++;
+        }
+        
+        if (data.tier === 'trial') {
+          stats.trialSubscriptions++;
+        } else if (data.tier === 'premium') {
+          stats.premiumSubscriptions++;
+        } else {
+          stats.freeSubscriptions++;
+        }
+        
+        if (data.tier === 'premium' && data.status === 'active') {
+          stats.monthlyRevenue += data.amount || 0;
+        }
+      });
+
+      // Calculate conversion rate (trials to paid)
+      const totalTrials = stats.trialSubscriptions;
+      const convertedTrials = stats.premiumSubscriptions;
+      stats.conversionRate = totalTrials > 0 ? (convertedTrials / totalTrials) * 100 : 0;
+
+      return stats;
     } catch (error) {
-      console.error('Error creating custom service request:', error);
-      return { success: false, error: 'Failed to create custom service request' };
+      console.error('Error getting client subscription stats:', error);
+      throw error;
     }
   }
 
-  /**
-   * Create priority booking request
-   */
-  static async createPriorityBooking(
-    clientId: string,
-    bookingData: Omit<PriorityBooking, 'id' | 'clientId' | 'status' | 'createdAt' | 'updatedAt'>
-  ): Promise<{ success: boolean; bookingId?: string; error?: string }> {
-    if (!db) {
-      return { success: false, error: 'Firebase Firestore is not initialized. Please check your Firebase configuration.' };
-    }
+  // Private helper methods
+  private async getPlanById(planId: string): Promise<ClientSubscriptionPlan | null> {
+    const planRef = doc(db, ClientSubscriptionService.COLLECTIONS.PLANS, planId);
+    const planDoc = await getDoc(planRef);
     
-    try {
-      // Check if client has access to priority booking
-      const access = await this.checkClientFeatureAccess(clientId, CLIENT_SUBSCRIPTION_FEATURES.PRIORITY_BOOKING);
-      if (!access.hasAccess) {
-        return { success: false, error: 'Priority booking requires Premium subscription' };
-      }
-      
-      const booking: Omit<PriorityBooking, 'id'> = {
-        ...bookingData,
-        clientId,
-        status: 'pending',
-        createdAt: serverTimestamp() as Timestamp,
-        updatedAt: serverTimestamp() as Timestamp
-      };
-      
-      const bookingRef = await addDoc(collection(db, this.PRIORITY_BOOKINGS_COLLECTION), booking);
-      
-      // Record usage
-      await this.recordClientFeatureUsage(clientId, CLIENT_SUBSCRIPTION_FEATURES.PRIORITY_BOOKING);
-      
-      return { success: true, bookingId: bookingRef.id };
-    } catch (error) {
-      console.error('Error creating priority booking:', error);
-      return { success: false, error: 'Failed to create priority booking' };
-    }
-  }
-
-  // Helper methods
-  private static checkClientFreeTierAccess(feature: ClientSubscriptionFeatureKey): { hasAccess: boolean; remainingUsage?: number; limit?: number } {
-    const freeLimits = this.getClientFreeTierLimits();
-    const limit = this.getClientFeatureLimit(freeLimits, feature);
+    if (!planDoc.exists()) return null;
     
-    if (limit === -1) {
-      return { hasAccess: true, remainingUsage: -1, limit: -1 };
-    }
+    return {
+      id: planDoc.id,
+      ...planDoc.data()
+    } as ClientSubscriptionPlan;
+  }
+
+  private async getPlanByTier(tier: string): Promise<ClientSubscriptionPlan | null> {
+    const plansRef = collection(db, ClientSubscriptionService.COLLECTIONS.PLANS);
+    const q = query(plansRef, where('tier', '==', tier), where('isActive', '==', true));
+    const snapshot = await getDocs(q);
     
-    return { hasAccess: true, remainingUsage: limit, limit };
+    if (snapshot.empty) return null;
+    
+    const doc = snapshot.docs[0];
+    return {
+      id: doc.id,
+      ...doc.data()
+    } as ClientSubscriptionPlan;
   }
 
-  private static getClientFreeTierLimits() {
-    return DEFAULT_CLIENT_SUBSCRIPTION_PLANS[0].limits;
+  private async getUsageForPeriod(clientId: string, period: string): Promise<ClientSubscriptionUsage | null> {
+    const usageRef = collection(db, ClientSubscriptionService.COLLECTIONS.USAGE);
+    const q = query(
+      usageRef,
+      where('clientId', '==', clientId),
+      where('period', '==', period)
+    );
+    
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return null;
+    
+    const doc = snapshot.docs[0];
+    return {
+      id: doc.id,
+      ...doc.data()
+    } as ClientSubscriptionUsage;
   }
 
-  private static getClientFeatureLimit(limits: any, feature: ClientSubscriptionFeatureKey): number {
-    switch (feature) {
-      case CLIENT_SUBSCRIPTION_FEATURES.EXTENDED_JOB_POSTS:
-        return limits.maxJobPosts;
-      case CLIENT_SUBSCRIPTION_FEATURES.EXTENDED_BOOKINGS:
-        return limits.maxBookingsPerMonth;
-      case CLIENT_SUBSCRIPTION_FEATURES.EXTENDED_FAVORITES:
-        return limits.maxFavorites;
-      case CLIENT_SUBSCRIPTION_FEATURES.ADVANCED_SEARCH:
-        return limits.advancedSearch ? -1 : 0;
-      case CLIENT_SUBSCRIPTION_FEATURES.PRIORITY_BOOKING:
-        return limits.priorityBooking ? -1 : 0;
-      case CLIENT_SUBSCRIPTION_FEATURES.BOOKING_ANALYTICS:
-        return limits.bookingAnalytics ? -1 : 0;
-      case CLIENT_SUBSCRIPTION_FEATURES.PRIORITY_SUPPORT:
-        return limits.prioritySupport ? -1 : 0;
-      case CLIENT_SUBSCRIPTION_FEATURES.EXCLUSIVE_DEALS:
-        return limits.exclusiveDeals ? -1 : 0;
-      case CLIENT_SUBSCRIPTION_FEATURES.CUSTOM_REQUESTS:
-        return limits.customRequests ? -1 : 0;
-      case CLIENT_SUBSCRIPTION_FEATURES.VERIFIED_PROVIDER_ACCESS:
-        return limits.verifiedProviderAccess ? -1 : 0;
-      default:
-        return 0;
-    }
-  }
-
-  private static getClientFeatureUsage(usage: ClientSubscriptionUsage | null, feature: ClientSubscriptionFeatureKey): number {
+  private getFeatureUsage(usage: ClientSubscriptionUsage | null, feature: string): number {
     if (!usage) return 0;
     
     switch (feature) {
-      case CLIENT_SUBSCRIPTION_FEATURES.EXTENDED_JOB_POSTS:
-        return usage.usage.jobPosts;
-      case CLIENT_SUBSCRIPTION_FEATURES.EXTENDED_BOOKINGS:
-        return usage.usage.bookings;
-      case CLIENT_SUBSCRIPTION_FEATURES.EXTENDED_FAVORITES:
-        return usage.usage.favorites;
-      case CLIENT_SUBSCRIPTION_FEATURES.ADVANCED_SEARCH:
-        return usage.usage.advancedSearches;
-      case CLIENT_SUBSCRIPTION_FEATURES.PRIORITY_BOOKING:
-        return usage.usage.priorityBookings;
-      case CLIENT_SUBSCRIPTION_FEATURES.CUSTOM_REQUESTS:
-        return usage.usage.customRequests;
-      case CLIENT_SUBSCRIPTION_FEATURES.BOOKING_ANALYTICS:
-        return usage.usage.analyticsViews;
-      default:
-        return 0;
+      case 'job_posts': return usage.usage.jobPosts;
+      case 'bookings': return usage.usage.bookings;
+      case 'favorites': return usage.usage.favorites;
+      case 'advanced_search': return usage.usage.advancedSearch;
+      case 'priority_booking': return usage.usage.priorityBooking;
+      case 'analytics': return usage.usage.analyticsViews;
+      case 'custom_requests': return usage.usage.customRequests;
+      default: return 0;
     }
   }
 
-  private static async recordClientSubscriptionPayment(paymentData: {
-    subscriptionId: string;
-    clientId: string;
-    amount: number;
-    paymentMethod: 'paypal' | 'gcash' | 'maya' | 'bank_transfer';
-    paymentReference: string;
-    status: 'pending' | 'completed' | 'failed' | 'refunded';
-    description: string;
-  }): Promise<void> {
-    if (!db) {
-      throw new Error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
+  private updateFeatureUsage(currentUsage: any, feature: string, amount: number): any {
+    const updated = { ...currentUsage };
+    
+    switch (feature) {
+      case 'job_posts': updated.jobPosts += amount; break;
+      case 'bookings': updated.bookings += amount; break;
+      case 'favorites': updated.favorites += amount; break;
+      case 'advanced_search': updated.advancedSearch += amount; break;
+      case 'priority_booking': updated.priorityBooking += amount; break;
+      case 'analytics': updated.analyticsViews += amount; break;
+      case 'custom_requests': updated.customRequests += amount; break;
     }
     
-    const paymentRecord: Omit<ClientSubscriptionPayment, 'id'> = {
-      ...paymentData,
-      currency: 'PHP',
-      paymentDate: serverTimestamp() as Timestamp,
-      dueDate: serverTimestamp() as Timestamp,
-      createdAt: serverTimestamp() as Timestamp,
-      updatedAt: serverTimestamp() as Timestamp
+    return updated;
+  }
+
+  private getInitialUsage() {
+    return {
+      jobPosts: 0,
+      bookings: 0,
+      favorites: 0,
+      advancedSearch: 0,
+      priorityBooking: 0,
+      analyticsViews: 0,
+      customRequests: 0
     };
-    
-    await addDoc(collection(db, this.PAYMENTS_COLLECTION), paymentRecord);
   }
 
-  private static async initializeClientUsageTracking(clientId: string, subscriptionId: string): Promise<void> {
-    if (!db) {
-      throw new Error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-    }
-    
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    
-    const usageData: Omit<ClientSubscriptionUsage, 'id'> = {
-      clientId,
+  private async recordPayment(subscriptionId: string, clientId: string, paymentData: any): Promise<void> {
+    const paymentRef = collection(db, ClientSubscriptionService.COLLECTIONS.PAYMENTS);
+    await addDoc(paymentRef, {
       subscriptionId,
-      period: currentMonth,
-      usage: {
-        jobPosts: 0,
-        bookings: 0,
-        favorites: 0,
-        advancedSearches: 0,
-        priorityBookings: 0,
-        customRequests: 0,
-        analyticsViews: 0
+      clientId,
+      ...paymentData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+  }
+
+  private getFreePlanFeatures(): ClientSubscriptionFeature[] {
+    return [
+      {
+        id: 'basic_search',
+        name: 'Basic Search',
+        description: 'Standard provider search and filtering',
+        isUnlimited: true
       },
-      limits: DEFAULT_CLIENT_SUBSCRIPTION_PLANS[1].limits, // Premium limits
-      createdAt: serverTimestamp() as Timestamp,
-      updatedAt: serverTimestamp() as Timestamp
+      {
+        id: 'job_posts',
+        name: 'Job Posts',
+        description: 'Post job requests',
+        isUnlimited: false,
+        limit: 3
+      },
+      {
+        id: 'bookings',
+        name: 'Bookings',
+        description: 'Book services',
+        isUnlimited: false,
+        limit: 10
+      },
+      {
+        id: 'favorites',
+        name: 'Favorites',
+        description: 'Save favorite providers',
+        isUnlimited: false,
+        limit: 20
+      }
+    ];
+  }
+
+  private getPremiumPlanFeatures(): ClientSubscriptionFeature[] {
+    return [
+      ...this.getFreePlanFeatures(),
+      {
+        id: 'advanced_search',
+        name: 'Advanced Search',
+        description: 'Advanced filters and verified provider access',
+        isUnlimited: true
+      },
+      {
+        id: 'priority_booking',
+        name: 'Priority Booking',
+        description: 'Get priority access to top-rated providers',
+        isUnlimited: true
+      },
+      {
+        id: 'analytics',
+        name: 'Booking Analytics',
+        description: 'Track booking history and spending patterns',
+        isUnlimited: true
+      },
+      {
+        id: 'priority_support',
+        name: 'Priority Support',
+        description: '24/7 priority customer support',
+        isUnlimited: true
+      },
+      {
+        id: 'exclusive_deals',
+        name: 'Exclusive Deals',
+        description: 'Access to exclusive partner discounts',
+        isUnlimited: true
+      },
+      {
+        id: 'custom_requests',
+        name: 'Custom Requests',
+        description: 'Post custom requests for specialized needs',
+        isUnlimited: true
+      }
+    ];
+  }
+
+  private getFreePlanLimits(): ClientSubscriptionLimits {
+    return {
+      jobPosts: 3,
+      bookings: 10,
+      favorites: 20,
+      advancedSearch: 0,
+      priorityBooking: 0,
+      analyticsViews: 0,
+      customRequests: 0
     };
-    
-    await addDoc(collection(db, this.USAGE_COLLECTION), usageData);
+  }
+
+  private getPremiumPlanLimits(): ClientSubscriptionLimits {
+    return {
+      jobPosts: 10,
+      bookings: 50,
+      favorites: 100,
+      advancedSearch: -1, // unlimited
+      priorityBooking: -1, // unlimited
+      analyticsViews: -1, // unlimited
+      customRequests: -1 // unlimited
+    };
   }
 }
 
-// Export singleton instance
-export const clientSubscriptionService = new ClientSubscriptionService();
+export const clientSubscriptionService = ClientSubscriptionService.getInstance();

@@ -1,71 +1,56 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from 'firebase-admin/auth';
 import { subscriptionService } from '@/lib/subscription-service';
+import { verifyAuthToken } from '@/lib/auth-utils';
+import { CreateSubscriptionInput } from '@/lib/subscription-types';
 
 export async function POST(request: NextRequest) {
   try {
-    // Get authorization header
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const authResult = await verifyAuthToken(request);
+    if (!authResult.success) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, message: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    
-    // Verify token
-    const decodedToken = await getAuth().verifyIdToken(token);
-    const userId = decodedToken.uid;
-
-    // Parse request body
+    const { userId } = authResult;
     const body = await request.json();
-    const { planId, paymentMethod, paymentReference, amount } = body;
-
+    
     // Validate required fields
-    if (!planId || !paymentMethod || !paymentReference || amount === undefined) {
+    const { planId, paymentMethod, amount, startTrial } = body;
+    
+    if (!planId || !paymentMethod || amount === undefined) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields' },
+        {
+          success: false,
+          message: 'Missing required fields: planId, paymentMethod, amount'
+        },
         { status: 400 }
       );
     }
 
-    // Validate payment method
-    const validPaymentMethods = ['paypal', 'gcash', 'maya', 'bank_transfer'];
-    if (!validPaymentMethods.includes(paymentMethod)) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid payment method' },
-        { status: 400 }
-      );
-    }
-
-    // Create subscription
-    const result = await subscriptionService.createSubscription(
-      userId,
+    const input: CreateSubscriptionInput = {
       planId,
-      {
-        paymentMethod,
-        paymentReference,
-        amount
-      }
-    );
+      paymentMethod,
+      amount,
+      startTrial: startTrial || false
+    };
 
-    if (result.success) {
-      return NextResponse.json({
-        success: true,
-        subscriptionId: result.subscriptionId
-      });
-    } else {
-      return NextResponse.json(
-        { success: false, error: result.error },
-        { status: 400 }
-      );
-    }
+    const subscription = await subscriptionService.createSubscription(userId, input);
+    
+    return NextResponse.json({
+      success: true,
+      subscription,
+      message: startTrial ? 'Trial started successfully' : 'Subscription created successfully'
+    });
   } catch (error) {
-    console.error('Subscription creation error:', error);
+    console.error('Error creating subscription:', error);
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      {
+        success: false,
+        message: 'Failed to create subscription',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

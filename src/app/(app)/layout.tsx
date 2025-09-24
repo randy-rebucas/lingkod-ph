@@ -202,9 +202,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
-      toast({ title: t('success'), description: t('loggedOutSuccessfully') });
-      window.location.href = '/login'; // Force a full page reload to avoid fetch errors
+      if (auth) {
+        await signOut(auth);
+        toast({ title: t('success'), description: t('loggedOutSuccessfully') });
+        window.location.href = '/login'; // Force a full page reload to avoid fetch errors
+      }
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -422,12 +424,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </SidebarMenuItem>
                   )}
 
-                  {userRole === 'agency' && (
+                  {(userRole === 'provider' || userRole === 'agency') && (
                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/reports")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/reports" className="flex items-center gap-3 px-3 py-2">
-                          <FilePieChart className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Reports</span>
+                      <SidebarMenuButton asChild isActive={isActive("/smart-rate")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                        <Link href="/smart-rate" className="flex items-center gap-3 px-3 py-2">
+                          <Sparkles className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">Smart Pricing</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )}
+
+                  {(userRole === 'provider' || userRole === 'agency') && (
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/quote-builder")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                        <Link href="/quote-builder" className="flex items-center gap-3 px-3 py-2">
+                          <Calculator className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">Quote Builder</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -440,7 +453,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {(userRole === 'provider' || userRole === 'agency') && (
               <div className="space-y-2">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
-                  Earnings & Reports
+                  Earnings & Analytics
                 </h3>
                 <SidebarMenu>
                   {(userRole === 'provider' || userRole === 'agency') && (
@@ -467,54 +480,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
                   {(userRole === 'provider' || userRole === 'agency') && (
                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/invoices")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/invoices" className="flex items-center gap-3 px-3 py-2">
-                          <FileText className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Invoices</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
-                </SidebarMenu>
-              </div>
-            )}
-
-
-            {/* Business Tools */}
-            {(userRole === 'provider' || userRole === 'agency') && (
-              <div className="space-y-2">
-                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
-                  Business Tools
-                </h3>
-                <SidebarMenu>
-                  {(userRole === 'provider' || userRole === 'agency') && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/smart-rate")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/smart-rate" className="flex items-center gap-3 px-3 py-2">
-                          <Sparkles className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Smart Pricing</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
-
-                  {(userRole === 'provider' || userRole === 'agency') && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/quote-builder")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/quote-builder" className="flex items-center gap-3 px-3 py-2">
-                          <Calculator className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Quote Builder</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
-
-                  {(userRole === 'provider' || userRole === 'agency') && (
-                    <SidebarMenuItem>
                       <SidebarMenuButton asChild isActive={isActive("/analytics")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                         <Link href="/analytics" className="flex items-center gap-3 px-3 py-2">
                           <BarChart2 className="h-5 w-5 group-hover:scale-110 transition-transform" />
                           <span className="font-medium">Analytics</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )}
+
+                  {(userRole === 'provider' || userRole === 'agency') && (
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild isActive={isActive("/invoices")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                        <Link href="/invoices" className="flex items-center gap-3 px-3 py-2">
+                          <FileText className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                          <span className="font-medium">Invoices</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

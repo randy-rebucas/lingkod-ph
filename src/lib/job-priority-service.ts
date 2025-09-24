@@ -1,4 +1,3 @@
-'use server';
 
 import { db } from './firebase';
 import { 
@@ -10,8 +9,6 @@ import {
   limit,
   Timestamp
 } from 'firebase/firestore';
-import { subscriptionService } from './subscription-service';
-import { SUBSCRIPTION_FEATURES } from './subscription-types';
 
 export interface Job {
   id: string;
@@ -38,7 +35,6 @@ export interface Job {
 
 export interface JobWithPriority extends Job {
   isPriorityAccess: boolean;
-  subscriptionTier: 'free' | 'pro';
   canAccess: boolean;
   accessReason: string;
 }
@@ -52,12 +48,9 @@ export class JobPriorityService {
     limitCount: number = 50
   ): Promise<JobWithPriority[]> {
     try {
-      // Check if provider has Pro subscription
-      const subscription = await subscriptionService.getProviderSubscription(providerId);
-      const isPro = subscription?.tier === 'pro';
-      const hasPriorityAccess = subscription?.features.some(f => 
-        f.id === 'priority_job_access' && f.isEnabled
-      ) || false;
+      // Simplified: all providers can access jobs (no subscription required)
+      const isPro = false; // No subscription tiers
+      const hasPriorityAccess = false; // No priority access
 
       // Get all open jobs
       const jobsQuery = query(
@@ -87,15 +80,14 @@ export class JobPriorityService {
         } else if (isUrgent && canAccess) {
           accessReason = 'Urgent job - Pro access';
         } else if (isHighValue && !canAccess) {
-          accessReason = 'High-value job - Pro subscription required';
+          accessReason = 'High-value job - verification required';
         } else if (isUrgent && !canAccess) {
-          accessReason = 'Urgent job - Pro subscription required';
+          accessReason = 'Urgent job - verification required';
         }
 
         return {
           ...job,
           isPriorityAccess,
-          subscriptionTier: isPro ? 'pro' : 'free',
           canAccess,
           accessReason
         };
@@ -252,10 +244,7 @@ export class JobPriorityService {
     accessType: 'high_value' | 'urgent' | 'priority'
   ): Promise<void> {
     try {
-      await subscriptionService.recordFeatureUsage(
-        providerId,
-        SUBSCRIPTION_FEATURES.PRIORITY_JOB_ACCESS
-      );
+      // No subscription tracking needed
     } catch (error) {
       console.error('Error recording priority job access:', error);
     }

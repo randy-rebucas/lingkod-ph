@@ -7,7 +7,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
-import { BookingAnalyticsGuard, VerifiedPremiumClientBadge } from '@/components/client-feature-guard';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -168,15 +167,13 @@ export default function ClientAnalyticsPage() {
   }
 
   return (
-    <BookingAnalyticsGuard>
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <BarChart3 className="h-6 w-6 text-primary" />
               <h1 className="text-3xl font-bold">Booking Analytics</h1>
-              <VerifiedPremiumClientBadge variant="compact" />
             </div>
             <p className="text-muted-foreground">
               Track your booking patterns, spending, and service preferences
@@ -473,6 +470,5 @@ export default function ClientAnalyticsPage() {
           </Card>
         )}
       </div>
-    </BookingAnalyticsGuard>
   );
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { clientSubscriptionService } from '@/lib/client-subscription-service';
+import { subscriptionService } from '@/lib/subscription-service';
 import { verifyAuthToken } from '@/lib/auth-utils';
+import { TrackUsageInput } from '@/lib/subscription-types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
     const { userId } = authResult;
     const body = await request.json();
     
-    const { feature } = body;
+    const { feature, amount, metadata } = body;
     
     if (!feature) {
       return NextResponse.json(
@@ -27,18 +28,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await clientSubscriptionService.checkFeatureAccess(userId, feature);
+    const input: TrackUsageInput = {
+      feature,
+      amount: amount || 1,
+      metadata
+    };
+
+    await subscriptionService.trackUsage(userId, input);
     
     return NextResponse.json({
       success: true,
-      result
+      message: 'Usage tracked successfully'
     });
   } catch (error) {
-    console.error('Error checking client feature access:', error);
+    console.error('Error tracking usage:', error);
     return NextResponse.json(
       {
         success: false,
-        message: 'Failed to check client feature access',
+        message: 'Failed to track usage',
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }

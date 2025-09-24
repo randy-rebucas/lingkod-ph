@@ -13,32 +13,19 @@ export async function POST(request: NextRequest) {
     }
 
     const { userId } = authResult;
-    const body = await request.json();
     
-    const { feature } = body;
-    
-    if (!feature) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Feature parameter is required'
-        },
-        { status: 400 }
-      );
-    }
-
-    const result = await clientSubscriptionService.checkFeatureAccess(userId, feature);
+    await clientSubscriptionService.cancelSubscription(userId);
     
     return NextResponse.json({
       success: true,
-      result
+      message: 'Client subscription cancelled successfully'
     });
   } catch (error) {
-    console.error('Error checking client feature access:', error);
+    console.error('Error cancelling client subscription:', error);
     return NextResponse.json(
       {
         success: false,
-        message: 'Failed to check client feature access',
+        message: 'Failed to cancel client subscription',
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }

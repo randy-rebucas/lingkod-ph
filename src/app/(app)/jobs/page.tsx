@@ -4,7 +4,6 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
-import { useProSubscription } from "@/hooks/use-subscription";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, doc, updateDoc, arrayUnion, Timestamp, orderBy } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +16,6 @@ import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { formatBudget } from '@/lib/utils';
 import { JobPriorityService, JobWithPriority } from '@/lib/job-priority-service';
-import { PriorityJobGuard } from '@/components/feature-guard';
 import { VerifiedProBadge } from '@/components/pro-badge';
 
 
@@ -41,7 +39,9 @@ export type Job = {
 
 export default function JobsPage() {
     const { user, userRole } = useAuth();
-    const { isPro, isActive } = useProSubscription();
+    // No subscription functionality
+    const isPro = false;
+    const isActive = false;
     const { toast } = useToast();
     const t = useTranslations('Jobs');
     const [jobs, setJobs] = useState<JobWithPriority[]>([]);
@@ -259,7 +259,7 @@ export default function JobsPage() {
                                         {job.isPriorityAccess && !job.canAccess && (
                                             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                                                 <p className="text-sm text-yellow-800 font-medium">
-                                                    Pro subscription required for this job
+                                                    Verification required for this job
                                                 </p>
                                             </div>
                                         )}
@@ -280,11 +280,9 @@ export default function JobsPage() {
                                             {hasApplied ? t('applied') : t('apply')}
                                         </Button>
                                     ) : (
-                                        <PriorityJobGuard>
                                             <Button className="w-full" disabled>
                                                 {t('apply')}
                                             </Button>
-                                        </PriorityJobGuard>
                                     )}
                                 </CardFooter>
                             </Card>

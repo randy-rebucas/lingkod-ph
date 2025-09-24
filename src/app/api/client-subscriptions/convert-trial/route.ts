@@ -15,30 +15,35 @@ export async function POST(request: NextRequest) {
     const { userId } = authResult;
     const body = await request.json();
     
-    const { feature } = body;
+    const { paymentMethod, paymentReference } = body;
     
-    if (!feature) {
+    if (!paymentMethod || !paymentReference) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Feature parameter is required'
+          message: 'Missing required fields: paymentMethod, paymentReference'
         },
         { status: 400 }
       );
     }
 
-    const result = await clientSubscriptionService.checkFeatureAccess(userId, feature);
+    const subscription = await clientSubscriptionService.convertTrialToPaid(
+      userId, 
+      paymentMethod, 
+      paymentReference
+    );
     
     return NextResponse.json({
       success: true,
-      result
+      subscription,
+      message: 'Client trial converted to paid subscription successfully'
     });
   } catch (error) {
-    console.error('Error checking client feature access:', error);
+    console.error('Error converting client trial:', error);
     return NextResponse.json(
       {
         success: false,
-        message: 'Failed to check client feature access',
+        message: 'Failed to convert client trial',
         error: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }

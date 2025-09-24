@@ -7,65 +7,109 @@ import {
   where, 
   getDocs, 
   doc, 
-  getDoc,
+  getDoc, 
   addDoc, 
   updateDoc, 
   deleteDoc, 
   serverTimestamp, 
   writeBatch,
-  Timestamp,
   orderBy,
-  limit
+  limit,
+  Timestamp,
+  runTransaction
 } from 'firebase/firestore';
 import {
   SubscriptionPlan,
   ProviderSubscription,
   SubscriptionUsage,
   SubscriptionPayment,
-  FeatureAccess,
   SubscriptionAnalytics,
-  SuppliesDiscount,
-  SuppliesDiscountUsage,
-  SubscriptionChange,
-  SubscriptionTier,
-  SubscriptionFeatureKey,
-  DEFAULT_SUBSCRIPTION_PLANS,
-  SUBSCRIPTION_FEATURES
+  FeatureAccessResult,
+  CreateSubscriptionInput,
+  UpdateSubscriptionInput,
+  TrackUsageInput,
+  SubscriptionStats,
+  SubscriptionFeature,
+  SubscriptionLimits
 } from './subscription-types';
 
 export class SubscriptionService {
-  private static readonly PLANS_COLLECTION = 'subscriptionPlans';
-  private static readonly SUBSCRIPTIONS_COLLECTION = 'providerSubscriptions';
-  private static readonly USAGE_COLLECTION = 'subscriptionUsage';
-  private static readonly PAYMENTS_COLLECTION = 'subscriptionPayments';
-  private static readonly ANALYTICS_COLLECTION = 'subscriptionAnalytics';
-  private static readonly DISCOUNTS_COLLECTION = 'suppliesDiscounts';
-  private static readonly DISCOUNT_USAGE_COLLECTION = 'suppliesDiscountUsage';
-  private static readonly CHANGES_COLLECTION = 'subscriptionChanges';
+  private static instance: SubscriptionService;
+  private static readonly COLLECTIONS = {
+    PLANS: 'subscriptionPlans',
+    SUBSCRIPTIONS: 'providerSubscriptions',
+    USAGE: 'subscriptionUsage',
+    PAYMENTS: 'subscriptionPayments',
+    ANALYTICS: 'subscriptionAnalytics'
+  };
+
+  public static getInstance(): SubscriptionService {
+    if (!SubscriptionService.instance) {
+      SubscriptionService.instance = new SubscriptionService();
+    }
+    return SubscriptionService.instance;
+  }
 
   /**
    * Initialize default subscription plans
    */
-  static async initializeDefaultPlans(): Promise<void> {
-    if (!db) {
-      throw new Error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-    }
-    
+  async initializeDefaultPlans(): Promise<void> {
     try {
-      const plansSnapshot = await getDocs(collection(db, this.PLANS_COLLECTION));
+      const plansRef = collection(db, SubscriptionService.COLLECTIONS.PLANS);
+      const existingPlans = await getDocs(plansRef);
       
-      if (plansSnapshot.empty) {
+      if (existingPlans.empty) {
         const batch = writeBatch(db);
         
-        for (const plan of DEFAULT_SUBSCRIPTION_PLANS) {
-          const planRef = doc(collection(db, this.PLANS_COLLECTION));
-          batch.set(planRef, {
-            ...plan,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-          });
-        }
-        
+        // Free Plan
+        const freePlanRef = doc(plansRef);
+        batch.set(freePlanRef, {
+          name: 'Free Plan',
+          tier: 'free',
+          price: 0,
+          currency: 'PHP',
+          billingCycle: 'monthly',
+          features: this.getFreePlanFeatures(),
+          limits: this.getFreePlanLimits(),
+          isActive: true,
+          isTrial: false,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        // Pro Plan
+        const proPlanRef = doc(plansRef);
+        batch.set(proPlanRef, {
+          name: 'Pro Plan',
+          tier: 'pro',
+          price: 399,
+          currency: 'PHP',
+          billingCycle: 'monthly',
+          features: this.getProPlanFeatures(),
+          limits: this.getProPlanLimits(),
+          isActive: true,
+          isTrial: false,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
+        // Trial Plan
+        const trialPlanRef = doc(plansRef);
+        batch.set(trialPlanRef, {
+          name: '7-Day Free Trial',
+          tier: 'trial',
+          price: 0,
+          currency: 'PHP',
+          billingCycle: 'monthly',
+          features: this.getProPlanFeatures(),
+          limits: this.getProPlanLimits(),
+          isActive: true,
+          isTrial: true,
+          trialDays: 7,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+
         await batch.commit();
         console.log('Default subscription plans initialized');
       }
@@ -78,495 +122,569 @@ export class SubscriptionService {
   /**
    * Get all available subscription plans
    */
-  static async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
-    if (!db) {
-      console.error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-      return [];
-    }
-    
+  async getPlans(): Promise<SubscriptionPlan[]> {
     try {
-      const plansQuery = query(
-        collection(db, this.PLANS_COLLECTION),
-        where('isActive', '==', true),
-        orderBy('price', 'asc')
-      );
+      const plansRef = collection(db, SubscriptionService.COLLECTIONS.PLANS);
+      const q = query(plansRef, where('isActive', '==', true), orderBy('price', 'asc'));
+      const snapshot = await getDocs(q);
       
-      const snapshot = await getDocs(plansQuery);
       return snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt as Timestamp,
-        updatedAt: doc.data().updatedAt as Timestamp
-      })) as SubscriptionPlan[];
+        ...doc.data()
+      } as SubscriptionPlan));
     } catch (error) {
-      console.error('Error getting subscription plans:', error);
-      return [];
+      console.error('Error getting plans:', error);
+      throw error;
     }
   }
 
   /**
-   * Get provider's current subscription
+   * Get current subscription for a provider
    */
-  static async getProviderSubscription(providerId: string): Promise<ProviderSubscription | null> {
-    if (!db) {
-      console.error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-      return null;
-    }
-    
+  async getCurrentSubscription(providerId: string): Promise<ProviderSubscription | null> {
     try {
-      const subscriptionQuery = query(
-        collection(db, this.SUBSCRIPTIONS_COLLECTION),
+      const subscriptionsRef = collection(db, SubscriptionService.COLLECTIONS.SUBSCRIPTIONS);
+      const q = query(
+        subscriptionsRef,
         where('providerId', '==', providerId),
-        where('status', '==', 'active'),
-        orderBy('startDate', 'desc'),
+        where('status', 'in', ['active', 'trial']),
+        orderBy('createdAt', 'desc'),
         limit(1)
       );
       
-      const snapshot = await getDocs(subscriptionQuery);
-      
-      if (snapshot.empty) {
-        return null;
-      }
+      const snapshot = await getDocs(q);
+      if (snapshot.empty) return null;
       
       const doc = snapshot.docs[0];
       return {
         id: doc.id,
-        ...doc.data(),
-        startDate: doc.data().startDate as Timestamp,
-        endDate: doc.data().endDate as Timestamp,
-        nextBillingDate: doc.data().nextBillingDate as Timestamp,
-        createdAt: doc.data().createdAt as Timestamp,
-        updatedAt: doc.data().updatedAt as Timestamp
+        ...doc.data()
       } as ProviderSubscription;
     } catch (error) {
-      console.error('Error getting provider subscription:', error);
-      return null;
+      console.error('Error getting current subscription:', error);
+      throw error;
     }
   }
 
   /**
-   * Create new subscription for provider
+   * Create a new subscription
    */
-  static async createSubscription(
-    providerId: string,
-    planId: string,
-    paymentData: {
-      paymentMethod: 'paypal' | 'gcash' | 'maya' | 'bank_transfer';
-      paymentReference: string;
-      amount: number;
-    }
-  ): Promise<{ success: boolean; subscriptionId?: string; error?: string }> {
-    if (!db) {
-      return { success: false, error: 'Firebase Firestore is not initialized. Please check your Firebase configuration.' };
-    }
-    
+  async createSubscription(providerId: string, input: CreateSubscriptionInput): Promise<ProviderSubscription> {
     try {
-      // Get plan details
-      const planDoc = await getDoc(doc(db, this.PLANS_COLLECTION, planId));
-      if (!planDoc.exists()) {
-        return { success: false, error: 'Subscription plan not found' };
-      }
-      
-      const plan = planDoc.data() as SubscriptionPlan;
-      
-      // Calculate subscription dates
+      const plan = await this.getPlanById(input.planId);
+      if (!plan) throw new Error('Plan not found');
+
       const now = new Date();
-      const startDate = new Date(now);
-      const endDate = new Date(now);
-      endDate.setMonth(endDate.getMonth() + 1);
+      const startDate = Timestamp.fromDate(now);
       
-      const nextBillingDate = new Date(endDate);
-      
-      // Create subscription
+      let endDate: Timestamp;
+      let nextBillingDate: Timestamp;
+      let trialEndDate: Timestamp | undefined;
+      let status: 'active' | 'trial' = 'active';
+
+      if (input.startTrial && plan.isTrial) {
+        // Start trial
+        const trialEnd = new Date(now.getTime() + (plan.trialDays || 7) * 24 * 60 * 60 * 1000);
+        trialEndDate = Timestamp.fromDate(trialEnd);
+        endDate = trialEndDate;
+        nextBillingDate = trialEndDate;
+        status = 'trial';
+      } else {
+        // Regular subscription
+        const end = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days
+        endDate = Timestamp.fromDate(end);
+        nextBillingDate = endDate;
+      }
+
       const subscriptionData: Omit<ProviderSubscription, 'id'> = {
         providerId,
-        planId,
+        planId: input.planId,
         tier: plan.tier,
-        status: 'active',
-        startDate: Timestamp.fromDate(startDate),
-        endDate: Timestamp.fromDate(endDate),
-        nextBillingDate: Timestamp.fromDate(nextBillingDate),
+        status,
+        startDate,
+        endDate,
+        nextBillingDate,
+        trialEndDate,
         autoRenew: true,
-        paymentMethod: paymentData.paymentMethod,
-        paymentReference: paymentData.paymentReference,
-        amount: paymentData.amount,
+        paymentMethod: input.paymentMethod,
+        paymentReference: input.paymentReference,
+        amount: input.amount,
         currency: 'PHP',
         features: plan.features,
         limits: plan.limits,
-        createdAt: serverTimestamp() as Timestamp,
-        updatedAt: serverTimestamp() as Timestamp
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
       };
+
+      const subscriptionRef = await addDoc(collection(db, SubscriptionService.COLLECTIONS.SUBSCRIPTIONS), subscriptionData);
       
-      const subscriptionRef = await addDoc(collection(db, this.SUBSCRIPTIONS_COLLECTION), subscriptionData);
-      
-      // Create payment record
-      await this.recordSubscriptionPayment({
-        subscriptionId: subscriptionRef.id,
-        providerId,
-        amount: paymentData.amount,
-        paymentMethod: paymentData.paymentMethod,
-        paymentReference: paymentData.paymentReference,
-        status: 'completed',
-        description: `Subscription payment for ${plan.name}`
-      });
-      
-      // Initialize usage tracking
-      await this.initializeUsageTracking(providerId, subscriptionRef.id);
-      
-      return { success: true, subscriptionId: subscriptionRef.id };
+      // Record payment if provided
+      if (input.paymentReference) {
+        await this.recordPayment(subscriptionRef.id, providerId, {
+          amount: input.amount,
+          paymentMethod: input.paymentMethod,
+          paymentReference: input.paymentReference,
+          status: 'completed'
+        });
+      }
+
+      return {
+        id: subscriptionRef.id,
+        ...subscriptionData
+      } as ProviderSubscription;
     } catch (error) {
       console.error('Error creating subscription:', error);
-      return { success: false, error: 'Failed to create subscription' };
+      throw error;
     }
   }
 
   /**
-   * Check if provider has access to a specific feature
+   * Check feature access for a provider
    */
-  static async checkFeatureAccess(
-    providerId: string, 
-    feature: SubscriptionFeatureKey
-  ): Promise<{ hasAccess: boolean; remainingUsage?: number; limit?: number }> {
+  async checkFeatureAccess(providerId: string, feature: string): Promise<FeatureAccessResult> {
     try {
-      const subscription = await this.getProviderSubscription(providerId);
-      
+      const subscription = await this.getCurrentSubscription(providerId);
       if (!subscription) {
-        // Free tier access
-        return this.checkFreeTierAccess(feature);
+        return {
+          hasAccess: false,
+          remainingUsage: 0,
+          limit: 0,
+          isUnlimited: false,
+          message: 'No active subscription'
+        };
       }
-      
-      // Check if feature is enabled in subscription
-      const featureEnabled = subscription.features.some(f => f.id === feature && f.isEnabled);
-      
-      if (!featureEnabled) {
-        return { hasAccess: false };
+
+      // Check if feature is included in subscription
+      const featureData = subscription.features.find(f => f.id === feature);
+      if (!featureData) {
+        return {
+          hasAccess: false,
+          remainingUsage: 0,
+          limit: 0,
+          isUnlimited: false,
+          message: 'Feature not included in current plan'
+        };
       }
-      
-      // Check usage limits
-      const usage = await this.getCurrentUsage(providerId);
-      const limit = this.getFeatureLimit(subscription.limits, feature);
-      
-      if (limit === -1) { // Unlimited
-        return { hasAccess: true, remainingUsage: -1, limit: -1 };
+
+      if (featureData.isUnlimited) {
+        return {
+          hasAccess: true,
+          remainingUsage: -1,
+          limit: -1,
+          isUnlimited: true
+        };
       }
+
+      // Check usage for the current month
+      const currentPeriod = new Date().toISOString().slice(0, 7); // YYYY-MM
+      const usage = await this.getUsageForPeriod(providerId, currentPeriod);
       
       const currentUsage = this.getFeatureUsage(usage, feature);
+      const limit = featureData.limit || 0;
       const remainingUsage = Math.max(0, limit - currentUsage);
-      
+
       return {
         hasAccess: remainingUsage > 0,
         remainingUsage,
-        limit
+        limit,
+        isUnlimited: false,
+        message: remainingUsage <= 0 ? 'Usage limit exceeded' : undefined
       };
     } catch (error) {
       console.error('Error checking feature access:', error);
-      return { hasAccess: false };
+      throw error;
     }
   }
 
   /**
-   * Get current usage for provider
+   * Track feature usage
    */
-  static async getCurrentUsage(providerId: string): Promise<SubscriptionUsage | null> {
-    if (!db) {
-      console.error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-      return null;
-    }
-    
+  async trackUsage(providerId: string, input: TrackUsageInput): Promise<void> {
     try {
-      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-      
-      const usageQuery = query(
-        collection(db, this.USAGE_COLLECTION),
+      const currentPeriod = new Date().toISOString().slice(0, 7);
+      const usageRef = collection(db, SubscriptionService.COLLECTIONS.USAGE);
+      const q = query(
+        usageRef,
         where('providerId', '==', providerId),
-        where('period', '==', currentMonth),
-        limit(1)
+        where('period', '==', currentPeriod)
       );
-      
-      const snapshot = await getDocs(usageQuery);
-      
-      if (snapshot.empty) {
-        return null;
-      }
-      
-      const doc = snapshot.docs[0];
-      return {
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt as Timestamp,
-        updatedAt: doc.data().updatedAt as Timestamp
-      } as SubscriptionUsage;
-    } catch (error) {
-      console.error('Error getting current usage:', error);
-      return null;
-    }
-  }
 
-  /**
-   * Record feature usage
-   */
-  static async recordFeatureUsage(
-    providerId: string,
-    feature: SubscriptionFeatureKey,
-    amount: number = 1
-  ): Promise<{ success: boolean; error?: string }> {
-    if (!db) {
-      return { success: false, error: 'Firebase Firestore is not initialized. Please check your Firebase configuration.' };
-    }
-    
-    try {
-      const currentMonth = new Date().toISOString().slice(0, 7);
+      const snapshot = await getDocs(q);
+      const subscription = await this.getCurrentSubscription(providerId);
       
-      // Get or create usage record
-      let usage = await this.getCurrentUsage(providerId);
-      
-      if (!usage) {
+      if (!subscription) throw new Error('No active subscription');
+
+      if (snapshot.empty) {
         // Create new usage record
-        const subscription = await this.getProviderSubscription(providerId);
-        const limits = subscription?.limits || this.getFreeTierLimits();
-        
         const usageData: Omit<SubscriptionUsage, 'id'> = {
           providerId,
-          subscriptionId: subscription?.id || 'free',
-          period: currentMonth,
-          usage: {
-            jobApplications: 0,
-            services: 0,
-            bookings: 0,
-            featuredPlacementViews: 0,
-            priorityJobAccess: 0,
-            analyticsViews: 0
-          },
-          limits,
-          createdAt: serverTimestamp() as Timestamp,
-          updatedAt: serverTimestamp() as Timestamp
+          subscriptionId: subscription.id,
+          period: currentPeriod,
+          usage: this.getInitialUsage(),
+          limits: subscription.limits,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
         };
         
-        const usageRef = await addDoc(collection(db, this.USAGE_COLLECTION), usageData);
-        usage = { id: usageRef.id, ...usageData };
+        await addDoc(usageRef, usageData);
+      } else {
+        // Update existing usage
+        const usageDoc = snapshot.docs[0];
+        const currentUsage = usageDoc.data().usage;
+        const updatedUsage = this.updateFeatureUsage(currentUsage, input.feature, input.amount || 1);
+        
+        await updateDoc(usageDoc.ref, {
+          usage: updatedUsage,
+          updatedAt: serverTimestamp()
+        });
       }
-      
-      // Update usage
-      const updatedUsage = { ...usage.usage };
-      switch (feature) {
-        case SUBSCRIPTION_FEATURES.EXTENDED_JOB_APPLICATIONS:
-          updatedUsage.jobApplications += amount;
-          break;
-        case SUBSCRIPTION_FEATURES.EXTENDED_SERVICES:
-          updatedUsage.services += amount;
-          break;
-        case SUBSCRIPTION_FEATURES.EXTENDED_BOOKINGS:
-          updatedUsage.bookings += amount;
-          break;
-        case SUBSCRIPTION_FEATURES.FEATURED_PLACEMENT:
-          updatedUsage.featuredPlacementViews += amount;
-          break;
-        case SUBSCRIPTION_FEATURES.PRIORITY_JOB_ACCESS:
-          updatedUsage.priorityJobAccess += amount;
-          break;
-        case SUBSCRIPTION_FEATURES.PERFORMANCE_ANALYTICS:
-          updatedUsage.analyticsViews += amount;
-          break;
+    } catch (error) {
+      console.error('Error tracking usage:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Convert trial to paid subscription
+   */
+  async convertTrialToPaid(providerId: string, paymentMethod: string, paymentReference: string): Promise<ProviderSubscription> {
+    try {
+      const subscription = await this.getCurrentSubscription(providerId);
+      if (!subscription || subscription.status !== 'trial') {
+        throw new Error('No active trial subscription found');
       }
-      
-      await updateDoc(doc(db, this.USAGE_COLLECTION, usage.id), {
-        usage: updatedUsage,
+
+      const proPlan = await this.getPlanByTier('pro');
+      if (!proPlan) throw new Error('Pro plan not found');
+
+      await runTransaction(db, async (transaction) => {
+        const subscriptionRef = doc(db, SubscriptionService.COLLECTIONS.SUBSCRIPTIONS, subscription.id);
+        
+        // Update subscription to Pro
+        transaction.update(subscriptionRef, {
+          tier: 'pro',
+          status: 'active',
+          planId: proPlan.id,
+          features: proPlan.features,
+          limits: proPlan.limits,
+          paymentMethod,
+          paymentReference,
+          amount: proPlan.price,
+          autoRenew: true,
+          updatedAt: serverTimestamp()
+        });
+
+        // Record payment
+        const paymentRef = doc(collection(db, SubscriptionService.COLLECTIONS.PAYMENTS));
+        transaction.set(paymentRef, {
+          subscriptionId: subscription.id,
+          providerId,
+          amount: proPlan.price,
+          currency: 'PHP',
+          paymentMethod,
+          paymentReference,
+          status: 'completed',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+      });
+
+      return await this.getCurrentSubscription(providerId) as ProviderSubscription;
+    } catch (error) {
+      console.error('Error converting trial to paid:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Update subscription
+   */
+  async updateSubscription(providerId: string, input: UpdateSubscriptionInput): Promise<void> {
+    try {
+      const subscription = await this.getCurrentSubscription(providerId);
+      if (!subscription) throw new Error('No active subscription found');
+
+      const subscriptionRef = doc(db, SubscriptionService.COLLECTIONS.SUBSCRIPTIONS, subscription.id);
+      const updateData: any = {
+        updatedAt: serverTimestamp()
+      };
+
+      if (input.autoRenew !== undefined) {
+        updateData.autoRenew = input.autoRenew;
+      }
+
+      if (input.paymentMethod) {
+        updateData.paymentMethod = input.paymentMethod;
+      }
+
+      if (input.paymentReference) {
+        updateData.paymentReference = input.paymentReference;
+      }
+
+      await updateDoc(subscriptionRef, updateData);
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Cancel subscription
+   */
+  async cancelSubscription(providerId: string): Promise<void> {
+    try {
+      const subscription = await this.getCurrentSubscription(providerId);
+      if (!subscription) throw new Error('No active subscription found');
+
+      const subscriptionRef = doc(db, SubscriptionService.COLLECTIONS.SUBSCRIPTIONS, subscription.id);
+      await updateDoc(subscriptionRef, {
+        status: 'cancelled',
+        autoRenew: false,
         updatedAt: serverTimestamp()
       });
-      
-      return { success: true };
     } catch (error) {
-      console.error('Error recording feature usage:', error);
-      return { success: false, error: 'Failed to record usage' };
+      console.error('Error cancelling subscription:', error);
+      throw error;
     }
   }
 
   /**
-   * Get subscription analytics for provider
+   * Get subscription statistics
    */
-  static async getSubscriptionAnalytics(providerId: string): Promise<SubscriptionAnalytics | null> {
-    if (!db) {
-      console.error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-      return null;
-    }
-    
+  async getSubscriptionStats(): Promise<SubscriptionStats> {
     try {
-      const currentMonth = new Date().toISOString().slice(0, 7);
+      const subscriptionsRef = collection(db, SubscriptionService.COLLECTIONS.SUBSCRIPTIONS);
+      const snapshot = await getDocs(subscriptionsRef);
       
-      const analyticsQuery = query(
-        collection(db, this.ANALYTICS_COLLECTION),
-        where('providerId', '==', providerId),
-        where('period', '==', currentMonth),
-        limit(1)
-      );
-      
-      const snapshot = await getDocs(analyticsQuery);
-      
-      if (snapshot.empty) {
-        return null;
-      }
-      
-      const doc = snapshot.docs[0];
-      return {
-        ...doc.data(),
-        createdAt: doc.data().createdAt as Timestamp
-      } as SubscriptionAnalytics;
+      const stats: SubscriptionStats = {
+        totalSubscriptions: 0,
+        activeSubscriptions: 0,
+        trialSubscriptions: 0,
+        proSubscriptions: 0,
+        freeSubscriptions: 0,
+        monthlyRevenue: 0,
+        conversionRate: 0,
+        churnRate: 0
+      };
+
+      snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        stats.totalSubscriptions++;
+        
+        if (data.status === 'active' || data.status === 'trial') {
+          stats.activeSubscriptions++;
+        }
+        
+        if (data.tier === 'trial') {
+          stats.trialSubscriptions++;
+        } else if (data.tier === 'pro') {
+          stats.proSubscriptions++;
+        } else {
+          stats.freeSubscriptions++;
+        }
+        
+        if (data.tier === 'pro' && data.status === 'active') {
+          stats.monthlyRevenue += data.amount || 0;
+        }
+      });
+
+      // Calculate conversion rate (trials to paid)
+      const totalTrials = stats.trialSubscriptions;
+      const convertedTrials = stats.proSubscriptions;
+      stats.conversionRate = totalTrials > 0 ? (convertedTrials / totalTrials) * 100 : 0;
+
+      return stats;
     } catch (error) {
-      console.error('Error getting subscription analytics:', error);
-      return null;
+      console.error('Error getting subscription stats:', error);
+      throw error;
     }
   }
 
-  /**
-   * Get available supplies discounts for provider
-   */
-  static async getAvailableDiscounts(providerId: string): Promise<SuppliesDiscount[]> {
-    if (!db) {
-      console.error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-      return [];
-    }
+  // Private helper methods
+  private async getPlanById(planId: string): Promise<SubscriptionPlan | null> {
+    const planRef = doc(db, SubscriptionService.COLLECTIONS.PLANS, planId);
+    const planDoc = await getDoc(planRef);
     
-    try {
-      const subscription = await this.getProviderSubscription(providerId);
-      
-      if (!subscription || !subscription.limits.suppliesDiscount) {
-        return [];
-      }
-      
-      const now = new Date();
-      const discountsQuery = query(
-        collection(db, this.DISCOUNTS_COLLECTION),
-        where('isActive', '==', true),
-        where('validFrom', '<=', Timestamp.fromDate(now)),
-        where('validTo', '>=', Timestamp.fromDate(now))
-      );
-      
-      const snapshot = await getDocs(discountsQuery);
-      return snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        validFrom: doc.data().validFrom as Timestamp,
-        validTo: doc.data().validTo as Timestamp,
-        createdAt: doc.data().createdAt as Timestamp
-      })) as SuppliesDiscount[];
-    } catch (error) {
-      console.error('Error getting available discounts:', error);
-      return [];
-    }
-  }
-
-  // Helper methods
-  private static checkFreeTierAccess(feature: SubscriptionFeatureKey): { hasAccess: boolean; remainingUsage?: number; limit?: number } {
-    const freeLimits = this.getFreeTierLimits();
-    const limit = this.getFeatureLimit(freeLimits, feature);
+    if (!planDoc.exists()) return null;
     
-    if (limit === -1) {
-      return { hasAccess: true, remainingUsage: -1, limit: -1 };
-    }
+    return {
+      id: planDoc.id,
+      ...planDoc.data()
+    } as SubscriptionPlan;
+  }
+
+  private async getPlanByTier(tier: string): Promise<SubscriptionPlan | null> {
+    const plansRef = collection(db, SubscriptionService.COLLECTIONS.PLANS);
+    const q = query(plansRef, where('tier', '==', tier), where('isActive', '==', true));
+    const snapshot = await getDocs(q);
     
-    return { hasAccess: true, remainingUsage: limit, limit };
+    if (snapshot.empty) return null;
+    
+    const doc = snapshot.docs[0];
+    return {
+      id: doc.id,
+      ...doc.data()
+    } as SubscriptionPlan;
   }
 
-  private static getFreeTierLimits() {
-    return DEFAULT_SUBSCRIPTION_PLANS[0].limits;
+  private async getUsageForPeriod(providerId: string, period: string): Promise<SubscriptionUsage | null> {
+    const usageRef = collection(db, SubscriptionService.COLLECTIONS.USAGE);
+    const q = query(
+      usageRef,
+      where('providerId', '==', providerId),
+      where('period', '==', period)
+    );
+    
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return null;
+    
+    const doc = snapshot.docs[0];
+    return {
+      id: doc.id,
+      ...doc.data()
+    } as SubscriptionUsage;
   }
 
-  private static getFeatureLimit(limits: any, feature: SubscriptionFeatureKey): number {
-    switch (feature) {
-      case SUBSCRIPTION_FEATURES.EXTENDED_JOB_APPLICATIONS:
-        return limits.maxJobApplications;
-      case SUBSCRIPTION_FEATURES.EXTENDED_SERVICES:
-        return limits.maxServices;
-      case SUBSCRIPTION_FEATURES.EXTENDED_BOOKINGS:
-        return limits.maxBookingsPerMonth;
-      case SUBSCRIPTION_FEATURES.FEATURED_PLACEMENT:
-        return limits.featuredPlacement ? -1 : 0;
-      case SUBSCRIPTION_FEATURES.PRIORITY_JOB_ACCESS:
-        return limits.priorityJobAccess ? -1 : 0;
-      case SUBSCRIPTION_FEATURES.PERFORMANCE_ANALYTICS:
-        return limits.analyticsAccess ? -1 : 0;
-      case SUBSCRIPTION_FEATURES.PRO_BADGE:
-        return limits.proBadge ? -1 : 0;
-      case SUBSCRIPTION_FEATURES.SUPPLIES_DISCOUNT:
-        return limits.suppliesDiscount ? -1 : 0;
-      default:
-        return 0;
-    }
-  }
-
-  private static getFeatureUsage(usage: SubscriptionUsage | null, feature: SubscriptionFeatureKey): number {
+  private getFeatureUsage(usage: SubscriptionUsage | null, feature: string): number {
     if (!usage) return 0;
     
     switch (feature) {
-      case SUBSCRIPTION_FEATURES.EXTENDED_JOB_APPLICATIONS:
-        return usage.usage.jobApplications;
-      case SUBSCRIPTION_FEATURES.EXTENDED_SERVICES:
-        return usage.usage.services;
-      case SUBSCRIPTION_FEATURES.EXTENDED_BOOKINGS:
-        return usage.usage.bookings;
-      case SUBSCRIPTION_FEATURES.FEATURED_PLACEMENT:
-        return usage.usage.featuredPlacementViews;
-      case SUBSCRIPTION_FEATURES.PRIORITY_JOB_ACCESS:
-        return usage.usage.priorityJobAccess;
-      case SUBSCRIPTION_FEATURES.PERFORMANCE_ANALYTICS:
-        return usage.usage.analyticsViews;
-      default:
-        return 0;
+      case 'job_applications': return usage.usage.jobApplications;
+      case 'services': return usage.usage.services;
+      case 'bookings': return usage.usage.bookings;
+      case 'featured_placement': return usage.usage.featuredPlacementViews;
+      case 'priority_job_access': return usage.usage.priorityJobAccess;
+      case 'analytics': return usage.usage.analyticsViews;
+      default: return 0;
     }
   }
 
-  private static async recordSubscriptionPayment(paymentData: {
-    subscriptionId: string;
-    providerId: string;
-    amount: number;
-    paymentMethod: 'paypal' | 'gcash' | 'maya' | 'bank_transfer';
-    paymentReference: string;
-    status: 'pending' | 'completed' | 'failed' | 'refunded';
-    description: string;
-  }): Promise<void> {
-    if (!db) {
-      throw new Error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
+  private updateFeatureUsage(currentUsage: any, feature: string, amount: number): any {
+    const updated = { ...currentUsage };
+    
+    switch (feature) {
+      case 'job_applications': updated.jobApplications += amount; break;
+      case 'services': updated.services += amount; break;
+      case 'bookings': updated.bookings += amount; break;
+      case 'featured_placement': updated.featuredPlacementViews += amount; break;
+      case 'priority_job_access': updated.priorityJobAccess += amount; break;
+      case 'analytics': updated.analyticsViews += amount; break;
     }
     
-    const paymentRecord: Omit<SubscriptionPayment, 'id'> = {
-      ...paymentData,
-      currency: 'PHP',
-      paymentDate: serverTimestamp() as Timestamp,
-      dueDate: serverTimestamp() as Timestamp,
-      createdAt: serverTimestamp() as Timestamp,
-      updatedAt: serverTimestamp() as Timestamp
+    return updated;
+  }
+
+  private getInitialUsage() {
+    return {
+      jobApplications: 0,
+      services: 0,
+      bookings: 0,
+      featuredPlacementViews: 0,
+      priorityJobAccess: 0,
+      analyticsViews: 0
     };
-    
-    await addDoc(collection(db, this.PAYMENTS_COLLECTION), paymentRecord);
   }
 
-  private static async initializeUsageTracking(providerId: string, subscriptionId: string): Promise<void> {
-    if (!db) {
-      throw new Error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
-    }
-    
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    
-    const usageData: Omit<SubscriptionUsage, 'id'> = {
-      providerId,
+  private async recordPayment(subscriptionId: string, providerId: string, paymentData: any): Promise<void> {
+    const paymentRef = collection(db, SubscriptionService.COLLECTIONS.PAYMENTS);
+    await addDoc(paymentRef, {
       subscriptionId,
-      period: currentMonth,
-      usage: {
-        jobApplications: 0,
-        services: 0,
-        bookings: 0,
-        featuredPlacementViews: 0,
-        priorityJobAccess: 0,
-        analyticsViews: 0
+      providerId,
+      ...paymentData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+  }
+
+  private getFreePlanFeatures(): SubscriptionFeature[] {
+    return [
+      {
+        id: 'basic_profile',
+        name: 'Basic Profile',
+        description: 'Standard profile visibility',
+        isUnlimited: true
       },
-      limits: DEFAULT_SUBSCRIPTION_PLANS[1].limits, // Pro limits
-      createdAt: serverTimestamp() as Timestamp,
-      updatedAt: serverTimestamp() as Timestamp
+      {
+        id: 'job_applications',
+        name: 'Job Applications',
+        description: 'Apply to job postings',
+        isUnlimited: false,
+        limit: 10
+      },
+      {
+        id: 'services',
+        name: 'Services',
+        description: 'List your services',
+        isUnlimited: false,
+        limit: 5
+      },
+      {
+        id: 'bookings',
+        name: 'Bookings',
+        description: 'Accept bookings',
+        isUnlimited: false,
+        limit: 20
+      }
+    ];
+  }
+
+  private getProPlanFeatures(): SubscriptionFeature[] {
+    return [
+      ...this.getFreePlanFeatures(),
+      {
+        id: 'featured_placement',
+        name: 'Featured Placement',
+        description: 'Show up at the top of search results',
+        isUnlimited: true
+      },
+      {
+        id: 'priority_job_access',
+        name: 'Priority Job Access',
+        description: 'Early access to high-value jobs',
+        isUnlimited: true
+      },
+      {
+        id: 'analytics',
+        name: 'Performance Analytics',
+        description: 'Detailed performance insights',
+        isUnlimited: true
+      },
+      {
+        id: 'pro_badge',
+        name: 'Pro Badge',
+        description: 'Verified Pro badge',
+        isUnlimited: true
+      },
+      {
+        id: 'supplies_discount',
+        name: 'Supplies Discount',
+        description: 'Access to exclusive partner deals',
+        isUnlimited: true
+      }
+    ];
+  }
+
+  private getFreePlanLimits(): SubscriptionLimits {
+    return {
+      jobApplications: 10,
+      services: 5,
+      bookings: 20,
+      featuredPlacementViews: 0,
+      priorityJobAccess: 0,
+      analyticsViews: 0
     };
-    
-    await addDoc(collection(db, this.USAGE_COLLECTION), usageData);
+  }
+
+  private getProPlanLimits(): SubscriptionLimits {
+    return {
+      jobApplications: 50,
+      services: 20,
+      bookings: 100,
+      featuredPlacementViews: -1, // unlimited
+      priorityJobAccess: -1, // unlimited
+      analyticsViews: -1 // unlimited
+    };
   }
 }
 
-// Export singleton instance
-export const subscriptionService = new SubscriptionService();
+export const subscriptionService = SubscriptionService.getInstance();
