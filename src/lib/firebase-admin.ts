@@ -1,29 +1,39 @@
-import { initializeApp, getApps } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getStorage } from 'firebase-admin/storage';
-import { getAuth } from 'firebase-admin/auth';
+import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
+import { getAuth, Auth } from 'firebase-admin/auth';
+import { getFirestore, Firestore } from 'firebase-admin/firestore';
+import { getStorage, Storage } from 'firebase-admin/storage';
 
-// Initialize Firebase Admin SDK with fallback configuration for development
-if (!getApps().length) {
-  try {
-    // Try to initialize with project ID if available
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'lingkod-ph-dev';
-    
-    initializeApp({
-      projectId: projectId,
-      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${projectId}.appspot.com`,
+let adminApp: App;
+let adminAuth: Auth;
+let adminDb: Firestore;
+let adminStorage: Storage;
+
+try {
+  // Initialize Firebase Admin SDK
+  if (!getApps().length) {
+    adminApp = initializeApp({
+      credential: cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      }),
     });
-  } catch (error) {
-    console.warn('Firebase Admin initialization failed:', error);
-    // Initialize with minimal config for development
-    initializeApp({
-      projectId: 'lingkod-ph-dev',
-      storageBucket: 'lingkod-ph-dev.appspot.com',
-    });
+  } else {
+    adminApp = getApps()[0];
   }
+  
+  adminAuth = getAuth(adminApp);
+  adminDb = getFirestore(adminApp);
+  adminStorage = getStorage(adminApp);
+} catch (error) {
+  console.warn('Firebase Admin initialization failed:', error);
+  console.warn('Please configure your Firebase Admin environment variables');
+  
+  // Create mock objects for development
+  adminApp = {} as App;
+  adminAuth = {} as Auth;
+  adminDb = {} as Firestore;
+  adminStorage = {} as Storage;
 }
 
-// Export with error handling for development
-export const adminDb = getFirestore();
-export const adminStorage = getStorage();
-export const adminAuth = getAuth();
+export { adminApp, adminAuth, adminDb, adminStorage };

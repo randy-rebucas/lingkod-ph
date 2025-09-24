@@ -1,4 +1,4 @@
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, FieldValue } from 'firebase/firestore';
 
 export interface ClientSubscriptionFeature {
   id: string;
@@ -30,8 +30,8 @@ export interface ClientSubscriptionPlan {
   isActive: boolean;
   isTrial: boolean;
   trialDays?: number;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface ClientSubscription {
@@ -51,8 +51,8 @@ export interface ClientSubscription {
   currency: 'PHP';
   features: ClientSubscriptionFeature[];
   limits: ClientSubscriptionLimits;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface ClientSubscriptionUsage {
@@ -70,8 +70,8 @@ export interface ClientSubscriptionUsage {
     customRequests: number;
   };
   limits: ClientSubscriptionLimits;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface ClientSubscriptionPayment {
@@ -83,8 +83,8 @@ export interface ClientSubscriptionPayment {
   paymentMethod: 'paypal' | 'gcash' | 'maya' | 'bank_transfer';
   paymentReference: string;
   status: 'pending' | 'completed' | 'failed' | 'refunded';
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface ClientSubscriptionAnalytics {
@@ -104,8 +104,8 @@ export interface ClientSubscriptionAnalytics {
     spendingGrowth: number;
     satisfactionTrend: number;
   };
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 // Feature access result

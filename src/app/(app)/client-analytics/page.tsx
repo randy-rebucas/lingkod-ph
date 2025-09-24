@@ -18,6 +18,7 @@ import {
   Award,
   BarChart3,
   PieChart,
+  CheckCircle,
   Download,
   RefreshCw,
   ArrowUpRight,

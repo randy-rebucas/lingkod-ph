@@ -13,6 +13,12 @@ export async function POST(request: NextRequest) {
     }
 
     const { userId } = authResult;
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, message: 'User ID not found' },
+        { status: 400 }
+      );
+    }
     const body = await request.json();
     
     const { feature } = body;

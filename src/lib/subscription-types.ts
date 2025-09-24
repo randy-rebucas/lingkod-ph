@@ -1,4 +1,4 @@
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, FieldValue } from 'firebase/firestore';
 
 export interface SubscriptionFeature {
   id: string;
@@ -20,7 +20,7 @@ export interface SubscriptionLimits {
 export interface SubscriptionPlan {
   id: string;
   name: string;
-  tier: 'free' | 'pro' | 'trial';
+  tier: 'free' | 'pro' | 'trial' | 'premium';
   price: number;
   currency: 'PHP';
   billingCycle: 'monthly' | 'annual';
@@ -29,15 +29,15 @@ export interface SubscriptionPlan {
   isActive: boolean;
   isTrial: boolean;
   trialDays?: number;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface ProviderSubscription {
   id: string;
   providerId: string;
   planId: string;
-  tier: 'free' | 'pro' | 'trial';
+  tier: 'free' | 'pro' | 'trial' | 'premium';
   status: 'active' | 'cancelled' | 'expired' | 'pending' | 'trial';
   startDate: Timestamp;
   endDate: Timestamp;
@@ -50,8 +50,8 @@ export interface ProviderSubscription {
   currency: 'PHP';
   features: SubscriptionFeature[];
   limits: SubscriptionLimits;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface SubscriptionUsage {
@@ -68,8 +68,8 @@ export interface SubscriptionUsage {
     analyticsViews: number;
   };
   limits: SubscriptionLimits;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface SubscriptionPayment {
@@ -81,8 +81,8 @@ export interface SubscriptionPayment {
   paymentMethod: 'paypal' | 'gcash' | 'maya' | 'bank_transfer';
   paymentReference: string;
   status: 'pending' | 'completed' | 'failed' | 'refunded';
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 export interface SubscriptionAnalytics {
@@ -103,8 +103,8 @@ export interface SubscriptionAnalytics {
     bookingGrowth: number;
     ratingTrend: number;
   };
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Timestamp | FieldValue;
+  updatedAt: Timestamp | FieldValue;
 }
 
 // Feature access result

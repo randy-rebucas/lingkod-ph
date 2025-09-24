@@ -14,10 +14,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase with error handling for development
-let app: FirebaseApp | null;
-let auth: Auth | null;
-let db: Firestore | null;
-let storage: FirebaseStorage | null;
+let app: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
+let storage: FirebaseStorage;
 
 try {
   app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
@@ -28,11 +28,19 @@ try {
   console.warn('Firebase client initialization failed:', error);
   console.warn('Please configure your Firebase environment variables in .env.local');
   
-  // Create mock objects for development
-  app = null;
-  auth = null;
-  db = null;
-  storage = null;
+  // For development, we'll still initialize with demo config
+  // This prevents null reference errors during development
+  app = initializeApp({
+    apiKey: "demo-api-key",
+    authDomain: "demo-project.firebaseapp.com",
+    projectId: "demo-project",
+    storageBucket: "demo-project.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:demo",
+  });
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
 }
 
 export { app, auth, db, storage };

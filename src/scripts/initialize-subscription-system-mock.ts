@@ -16,7 +16,7 @@ import { join } from 'path';
 interface MockSubscriptionPlan {
   id: string;
   name: string;
-  tier: 'free' | 'pro' | 'trial';
+  tier: 'free' | 'pro' | 'trial' | 'premium';
   price: number;
   currency: 'PHP';
   billingCycle: 'monthly' | 'annual';

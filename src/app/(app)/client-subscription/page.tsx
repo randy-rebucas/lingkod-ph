@@ -23,7 +23,7 @@ import {
   CreditCard
 } from 'lucide-react';
 import { useClientSubscription, usePremiumClientSubscription } from '@/hooks/use-client-subscription';
-import { SubscriptionPaymentButton } from '@/components/subscription-payment-button';
+import { ClientSubscriptionPaymentButton } from '@/components/client-subscription-payment-button';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
@@ -399,7 +399,7 @@ export default function ClientSubscriptionPage() {
       {selectedPlan && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-md w-full">
-            <SubscriptionPaymentButton
+            <ClientSubscriptionPaymentButton
               plan={selectedPlan}
               onPaymentSuccess={handlePaymentSuccess}
               onPaymentError={handlePaymentError}

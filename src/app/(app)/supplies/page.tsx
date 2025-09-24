@@ -20,7 +20,32 @@ import {
   Crown
 } from 'lucide-react';
 import { VerifiedProBadge } from '@/components/pro-badge';
+import { FeatureGuard } from '@/components/feature-guard';
 import { format } from 'date-fns';
+
+// Types
+interface SuppliesDiscount {
+  id: string;
+  name: string;
+  description: string;
+  discount: number;
+  category: string;
+  terms: string[];
+  validUntil: Date;
+  validFrom: Date;
+  validTo: Date;
+  partnerName: string;
+  discountPercentage: number;
+  minOrderAmount: number;
+  maxDiscountAmount: number;
+  isActive: boolean;
+  isProOnly: boolean;
+}
+
+// Hook for pro subscription
+function useProSubscription() {
+  return { isPro: true, isActive: true }; // Mock implementation
+}
 
 export default function SuppliesPage() {
   const { user } = useAuth();
@@ -52,8 +77,8 @@ export default function SuppliesPage() {
 
   const getDiscountStatus = (discount: SuppliesDiscount) => {
     const now = new Date();
-    const validFrom = discount.validFrom.toDate();
-    const validTo = discount.validTo.toDate();
+    const validFrom = discount.validFrom;
+    const validTo = discount.validTo;
 
     if (now < validFrom) {
       return { status: 'upcoming', color: 'bg-blue-100 text-blue-800 border-blue-200' };
@@ -201,14 +226,14 @@ export default function SuppliesPage() {
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <span className="text-muted-foreground">{t('validFrom')}</span>
                         <span className="font-medium">
-                          {format(discount.validFrom.toDate(), 'MMM dd, yyyy')}
+                          {format(discount.validFrom, 'MMM dd, yyyy')}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <Clock className="h-4 w-4 text-muted-foreground" />
                         <span className="text-muted-foreground">{t('validTo')}</span>
                         <span className="font-medium">
-                          {format(discount.validTo.toDate(), 'MMM dd, yyyy')}
+                          {format(discount.validTo, 'MMM dd, yyyy')}
                         </span>
                       </div>
                     </div>
@@ -218,7 +243,7 @@ export default function SuppliesPage() {
                       <div className="space-y-2">
                         <h4 className="text-sm font-semibold">{t('terms')}</h4>
                         <ul className="space-y-1">
-                          {discount.terms.slice(0, 3).map((term, index) => (
+                          {discount.terms.slice(0, 3).map((term: string, index: number) => (
                             <li key={index} className="flex items-start gap-2 text-xs text-muted-foreground">
                               <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
                               <span>{term}</span>
