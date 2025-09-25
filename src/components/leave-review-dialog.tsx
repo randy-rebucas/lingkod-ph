@@ -17,6 +17,7 @@ import { Loader2, Star } from 'lucide-react';
 import { Booking } from '@/app/(app)/bookings/page';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { designTokens } from '@/lib/design-tokens';
 
 const reviewSchema = z.object({
   rating: z.number().min(1, "Rating is required.").max(5),
@@ -97,7 +98,7 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className={`sm:max-w-md ${designTokens.effects.cardElevated}`}>
                 <DialogHeader>
                     <DialogTitle>{t('leaveReview')} {booking.providerName}</DialogTitle>
                     <DialogDescription>

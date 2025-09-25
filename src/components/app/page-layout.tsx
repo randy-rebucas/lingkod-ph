@@ -5,14 +5,22 @@ export const PageLayout = ({
   title, 
   description, 
   children, 
-  className 
+  className,
+  action
 }: PageLayoutProps) => {
   return (
     <div className={cn(designTokens.layout.pageContainer, className)}>
-      <div className={designTokens.layout.pageHeader}>
-        <h1 className={designTokens.typography.pageTitle}>{title}</h1>
-        {description && (
-          <p className={designTokens.typography.pageSubtitle}>{description}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div className={designTokens.layout.pageHeader}>
+          <h1 className={designTokens.typography.pageTitle}>{title}</h1>
+          {description && (
+            <p className={designTokens.typography.pageSubtitle}>{description}</p>
+          )}
+        </div>
+        {action && (
+          <div className="flex-shrink-0">
+            {action}
+          </div>
         )}
       </div>
       {children}

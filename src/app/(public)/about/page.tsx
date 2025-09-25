@@ -2,6 +2,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { StandardCard } from "@/components/app/standard-card";
+import { designTokens } from "@/lib/design-tokens";
 import { ArrowRight, Zap, Users, Heart, Lightbulb, Target, BookOpen, ShieldCheck, Star, Award, TrendingUp, Globe, CheckCircle, Quote } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -96,19 +98,19 @@ export default function AboutPage() {
               <Star className="w-4 h-4 mr-2" />
               Trusted by 50,000+ Customers
             </Badge>
-            <h1 className="text-5xl lg:text-7xl font-bold font-headline mb-8 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            <h1 className={`text-5xl lg:text-7xl font-bold font-headline mb-8 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent ${designTokens.typography.pageTitle}`}>
               {t('title')}
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12">
+            <p className={`text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12 ${designTokens.typography.pageDescription}`}>
               {t('subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
+              <Button asChild size="lg" className={`h-14 px-8 text-lg ${designTokens.effects.buttonGlow}`}>
                 <Link href="/signup">
                   Join Our Community <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+              <Button asChild size="lg" variant="outline" className={`h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300 ${designTokens.effects.buttonGlow}`}>
                 <Link href="/providers">
                   Find Services
                 </Link>
@@ -141,8 +143,8 @@ export default function AboutPage() {
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
                   <Target className="h-8 w-8 text-primary" />
                 </div>
-                <h2 className="text-4xl font-bold font-headline mb-6">{t('mission')}</h2>
-                <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+                <h2 className={`text-4xl font-bold font-headline mb-6 ${designTokens.typography.sectionTitle}`}>{t('mission')}</h2>
+                <p className={`text-lg text-muted-foreground leading-relaxed mb-8 ${designTokens.typography.sectionDescription}`}>
                   {t('missionDesc')}
                 </p>
                 <div className="space-y-4">
@@ -194,8 +196,8 @@ export default function AboutPage() {
                 <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mb-6">
                   <BookOpen className="h-8 w-8 text-accent" />
                 </div>
-                <h2 className="text-4xl font-bold font-headline mb-6">{t('story')}</h2>
-                <p className="text-lg text-muted-foreground leading-relaxed">
+                <h2 className={`text-4xl font-bold font-headline mb-6 ${designTokens.typography.sectionTitle}`}>{t('story')}</h2>
+                <p className={`text-lg text-muted-foreground leading-relaxed ${designTokens.typography.sectionDescription}`}>
                   {t('storyDesc')}
                 </p>
               </div>
@@ -208,20 +210,20 @@ export default function AboutPage() {
       <section className="py-20">
         <div className="container">
           <div className="mx-auto max-w-3xl text-center mb-16">
-            <h2 className="text-4xl font-bold font-headline mb-6">Our Core Values</h2>
-            <p className="text-lg text-muted-foreground">
+            <h2 className={`text-4xl font-bold font-headline mb-6 ${designTokens.typography.sectionTitle}`}>Our Core Values</h2>
+            <p className={`text-lg text-muted-foreground ${designTokens.typography.sectionDescription}`}>
               The principles that guide everything we do at LocalPro
             </p>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
-              <Card key={index} className="text-center p-6 border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-1">
+              <StandardCard key={index} variant="elevated" className="text-center p-6 hover:-translate-y-1 transition-all duration-300">
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   {value.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-3">{value.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{value.description}</p>
-              </Card>
+                <h3 className={`text-xl font-semibold mb-3 ${designTokens.typography.cardTitle}`}>{value.title}</h3>
+                <p className={`text-muted-foreground text-sm leading-relaxed ${designTokens.typography.cardDescription}`}>{value.description}</p>
+              </StandardCard>
             ))}
           </div>
         </div>
@@ -231,20 +233,20 @@ export default function AboutPage() {
       <section className="py-20 bg-muted/30">
         <div className="container">
           <div className="mx-auto mb-16 max-w-3xl text-center">
-            <h2 className="font-headline text-4xl font-bold md:text-5xl mb-6">{t('whyChoose')}</h2>
-            <p className="text-lg text-muted-foreground">
+            <h2 className={`font-headline text-4xl font-bold md:text-5xl mb-6 ${designTokens.typography.sectionTitle}`}>{t('whyChoose')}</h2>
+            <p className={`text-lg text-muted-foreground ${designTokens.typography.sectionDescription}`}>
               Discover what makes LocalPro the trusted choice for service providers and customers alike
             </p>
           </div>
           <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-3">
             {whyChooseUs.map((item) => (
-              <Card key={item.titleKey} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 text-center p-8">
+              <StandardCard key={item.titleKey} variant="elevated" className="group hover:-translate-y-2 transition-all duration-300 text-center p-8">
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
                   {item.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-4">{t(item.titleKey)}</h3>
-                <p className="text-muted-foreground leading-relaxed">{t(item.descriptionKey)}</p>
-              </Card>
+                <h3 className={`text-xl font-semibold mb-4 ${designTokens.typography.cardTitle}`}>{t(item.titleKey)}</h3>
+                <p className={`text-muted-foreground leading-relaxed ${designTokens.typography.cardDescription}`}>{t(item.descriptionKey)}</p>
+              </StandardCard>
             ))}
           </div>
         </div>
@@ -254,26 +256,26 @@ export default function AboutPage() {
       <section className="py-20">
         <div className="container">
           <div className="mx-auto max-w-3xl text-center mb-16">
-            <h2 className="text-4xl font-bold font-headline mb-6">What Our Community Says</h2>
-            <p className="text-lg text-muted-foreground">
+            <h2 className={`text-4xl font-bold font-headline mb-6 ${designTokens.typography.sectionTitle}`}>What Our Community Says</h2>
+            <p className={`text-lg text-muted-foreground ${designTokens.typography.sectionDescription}`}>
               Real stories from real people who trust LocalPro
             </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="p-6 border-0 shadow-soft">
+              <StandardCard key={index} variant="elevated" className="p-6">
                 <div className="flex items-center gap-1 mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
                     <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
                 <Quote className="h-8 w-8 text-primary/30 mb-4" />
-                <p className="text-muted-foreground mb-6 leading-relaxed">"{testimonial.content}"</p>
+                <p className={`text-muted-foreground mb-6 leading-relaxed ${designTokens.typography.cardDescription}`}>"{testimonial.content}"</p>
                 <div>
-                  <div className="font-semibold">{testimonial.name}</div>
-                  <div className="text-sm text-muted-foreground">{testimonial.role}</div>
+                  <div className={`font-semibold ${designTokens.typography.cardTitle}`}>{testimonial.name}</div>
+                  <div className={`text-sm text-muted-foreground ${designTokens.typography.cardDescription}`}>{testimonial.role}</div>
                 </div>
-              </Card>
+              </StandardCard>
             ))}
           </div>
         </div>
@@ -282,31 +284,31 @@ export default function AboutPage() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
         <div className="container">
-          <Card className="max-w-4xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5 border-0 shadow-soft">
+          <StandardCard variant="elevated" className="max-w-4xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5">
             <CardHeader className="text-center pb-8">
               <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Heart className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle className="text-3xl font-bold font-headline">{t('joinMission')}</CardTitle>
+              <CardTitle className={`text-3xl font-bold font-headline ${designTokens.typography.sectionTitle}`}>{t('joinMission')}</CardTitle>
             </CardHeader>
             <CardContent className="text-center pb-8">
-              <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+              <p className={`text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed ${designTokens.typography.sectionDescription}`}>
                 {t('joinMissionDesc')}
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Button asChild size="lg" className="h-12 px-8 shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                <Button asChild size="lg" className={`h-12 px-8 ${designTokens.effects.buttonGlow}`}>
                   <Link href="/careers">
                     {t('viewCareers')} <ArrowRight className="ml-2 h-5 w-5" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="h-12 px-8 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                <Button asChild size="lg" variant="outline" className={`h-12 px-8 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300 ${designTokens.effects.buttonGlow}`}>
                   <Link href="/partners">
                     {t('partnerWithUs')}
                   </Link>
                 </Button>
               </div>
             </CardContent>
-          </Card>
+          </StandardCard>
         </div>
       </section>
     </div>

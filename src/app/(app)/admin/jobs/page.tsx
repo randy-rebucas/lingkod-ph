@@ -35,9 +35,9 @@ type Job = {
     title: string;
     clientName: string;
     budget: {
-      amount: number;
-      type: 'Fixed' | 'Daily' | 'Monthly';
-      negotiable: boolean;
+        amount: number;
+        type: 'Fixed' | 'Daily' | 'Monthly';
+        negotiable: boolean;
     };
     status: JobStatus;
     createdAt: Timestamp;
@@ -65,14 +65,14 @@ export default function AdminJobsPage() {
     const [selectedJob, setSelectedJob] = useState<Job | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-     useEffect(() => {
+    useEffect(() => {
         if (userRole !== 'admin') {
             setLoading(false);
             return;
         }
 
         const jobsQuery = query(collection(db, "jobs"), orderBy("createdAt", "desc"));
-        
+
         const unsubscribe = onSnapshot(jobsQuery, (snapshot) => {
             const jobsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
             setJobs(jobsData);
@@ -109,7 +109,7 @@ export default function AdminJobsPage() {
         const jobRef = doc(db, 'jobs', jobId);
         const jobSnap = await getDoc(jobRef);
         if (jobSnap.exists()) {
-            setSelectedJob({ id: jobSnap.id, ...jobSnap.data()} as Job);
+            setSelectedJob({ id: jobSnap.id, ...jobSnap.data() } as Job);
             setIsDetailsOpen(true);
         } else {
             toast({ variant: 'destructive', title: 'Error', description: 'Job details could not be found.' });
@@ -127,158 +127,147 @@ export default function AdminJobsPage() {
             </Card>
         );
     }
-    
+
     if (loading) {
         return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Job Post Management</h1>
-                    <p className="text-muted-foreground">
-                        Monitor and manage all job posts on the platform.
-                    </p>
-                </div>
+            <PageLayout className="space-y-6" title="Job Post Management" description="Monitor and manage all job posts on the platform.">
                 <Card>
                     <CardContent className="p-6">
                         <Skeleton className="h-64 w-full" />
                     </CardContent>
                 </Card>
-             </div>
+            </PageLayout>
         )
     }
 
     return (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Job Post Management</h1>
-                <p className="text-muted-foreground">
-                     Monitor and manage all job posts on the platform.
-                </p>
-            </div>
-             <Card>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Date Posted</TableHead>
-                                <TableHead>Job Title</TableHead>
-                                <TableHead>Client</TableHead>
-                                <TableHead>Budget</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {jobs.length > 0 ? jobs.map(job => (
-                                <TableRow key={job.id}>
-                                    <TableCell className="text-xs text-muted-foreground">
-                                        {format(job.createdAt.toDate(), 'PP')}
-                                    </TableCell>
-                                    <TableCell className="font-medium">{job.title}</TableCell>
-                                    <TableCell>{job.clientName}</TableCell>
-                                    <TableCell>{formatBudget(job.budget)}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={getStatusVariant(job.status)}>{job.status}</Badge>
-                                    </TableCell>
-                                     <TableCell className="text-right">
-                                        <AlertDialog>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem onSelect={() => handleViewDetails(job.id)}><Eye className="mr-2 h-4 w-4" />View Job Details</DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem onClick={() => onUpdateStatus(job.id, "Closed")}><CircleSlash className="mr-2 h-4 w-4" />Mark as Closed</DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <AlertDialogTrigger asChild>
-                                                        <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onSelect={(e) => e.preventDefault()}>
-                                                            <Trash2 className="mr-2 h-4 w-4" />Delete Job
-                                                        </DropdownMenuItem>
-                                                    </AlertDialogTrigger>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                    <AlertDialogDescription>This action cannot be undone. This will permanently delete the job post "{job.title}".</AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction className="bg-destructive hover:bg-destructive/80" onClick={() => onDeleteJob(job.id)}>
-                                                        Confirm Deletion
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </TableCell>
-                                </TableRow>
-                            )) : (
+            <PageLayout className="space-y-6" title="Job Post Management" description="Monitor and manage all job posts on the platform.">
+
+                <Card>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center h-24">
-                                        No jobs found.
-                                    </TableCell>
+                                    <TableHead>Date Posted</TableHead>
+                                    <TableHead>Job Title</TableHead>
+                                    <TableHead>Client</TableHead>
+                                    <TableHead>Budget</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-             {selectedJob && (
-                <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                        <DialogTitle>{selectedJob.title}</DialogTitle>
-                        <DialogDescription>
-                            Posted by {selectedJob.clientName}
-                             <span className="text-muted-foreground mx-2">•</span> 
-                             {formatDistanceToNow(selectedJob.createdAt.toDate(), { addSuffix: true })}
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
-                        <div>
-                            <h3 className="font-semibold mb-2 text-sm">Description</h3>
-                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedJob.description}</p>
-                        </div>
-                        <Separator />
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                            </TableHeader>
+                            <TableBody>
+                                {jobs.length > 0 ? jobs.map(job => (
+                                    <TableRow key={job.id}>
+                                        <TableCell className="text-xs text-muted-foreground">
+                                            {format(job.createdAt.toDate(), 'PP')}
+                                        </TableCell>
+                                        <TableCell className="font-medium">{job.title}</TableCell>
+                                        <TableCell>{job.clientName}</TableCell>
+                                        <TableCell>{formatBudget(job.budget)}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getStatusVariant(job.status)}>{job.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <AlertDialog>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                        <DropdownMenuItem onSelect={() => handleViewDetails(job.id)}><Eye className="mr-2 h-4 w-4" />View Job Details</DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem onClick={() => onUpdateStatus(job.id, "Closed")}><CircleSlash className="mr-2 h-4 w-4" />Mark as Closed</DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <AlertDialogTrigger asChild>
+                                                            <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onSelect={(e) => e.preventDefault()}>
+                                                                <Trash2 className="mr-2 h-4 w-4" />Delete Job
+                                                            </DropdownMenuItem>
+                                                        </AlertDialogTrigger>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>This action cannot be undone. This will permanently delete the job post "{job.title}".</AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction className="bg-destructive hover:bg-destructive/80" onClick={() => onDeleteJob(job.id)}>
+                                                            Confirm Deletion
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="text-center h-24">
+                                            No jobs found.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+                {selectedJob && (
+                    <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                            <DialogTitle>{selectedJob.title}</DialogTitle>
+                            <DialogDescription>
+                                Posted by {selectedJob.clientName}
+                                <span className="text-muted-foreground mx-2">•</span>
+                                {formatDistanceToNow(selectedJob.createdAt.toDate(), { addSuffix: true })}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 max-h-[70vh] overflow-y-auto p-1">
                             <div>
-                                <h4 className="font-semibold">Category</h4>
-                                <p className="text-muted-foreground">{selectedJob.categoryName || 'N/A'}</p>
+                                <h3 className="font-semibold mb-2 text-sm">Description</h3>
+                                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{selectedJob.description}</p>
                             </div>
-                            <div>
-                                <h4 className="font-semibold">Location</h4>
-                                <p className="text-muted-foreground">{selectedJob.location || 'N/A'}</p>
-                            </div>
-                             <div>
-                                <h4 className="font-semibold">Budget</h4>
-                                <p className="text-muted-foreground">{formatBudget(selectedJob.budget)}</p>
-                            </div>
-                             <div>
-                                <h4 className="font-semibold">Status</h4>
-                                <p className="text-muted-foreground">{selectedJob.status}</p>
-                            </div>
-                        </div>
-                         {selectedJob.additionalDetails && selectedJob.additionalDetails.length > 0 && (
-                            <>
-                                <Separator />
+                            <Separator />
+                            <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <h3 className="font-semibold mb-2 text-sm">Additional Details</h3>
-                                    <div className="space-y-3">
-                                    {selectedJob.additionalDetails.map((detail, index) => (
-                                        <div key={index}>
-                                            <p className="font-medium text-xs">{detail.question}</p>
-                                            <p className="text-muted-foreground text-xs pl-4 border-l-2 ml-2 mt-1">{detail.answer || "No answer provided."}</p>
-                                        </div>
-                                    ))}
-                                    </div>
+                                    <h4 className="font-semibold">Category</h4>
+                                    <p className="text-muted-foreground">{selectedJob.categoryName || 'N/A'}</p>
                                 </div>
-                            </>
-                        )}
-                    </div>
-                </DialogContent>
-            )}
-        </div>
+                                <div>
+                                    <h4 className="font-semibold">Location</h4>
+                                    <p className="text-muted-foreground">{selectedJob.location || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Budget</h4>
+                                    <p className="text-muted-foreground">{formatBudget(selectedJob.budget)}</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Status</h4>
+                                    <p className="text-muted-foreground">{selectedJob.status}</p>
+                                </div>
+                            </div>
+                            {selectedJob.additionalDetails && selectedJob.additionalDetails.length > 0 && (
+                                <>
+                                    <Separator />
+                                    <div>
+                                        <h3 className="font-semibold mb-2 text-sm">Additional Details</h3>
+                                        <div className="space-y-3">
+                                            {selectedJob.additionalDetails.map((detail, index) => (
+                                                <div key={index}>
+                                                    <p className="font-medium text-xs">{detail.question}</p>
+                                                    <p className="text-muted-foreground text-xs pl-4 border-l-2 ml-2 mt-1">{detail.answer || "No answer provided."}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </DialogContent>
+                )}
+            </PageLayout>
         </Dialog>
     )
 }

@@ -233,16 +233,11 @@ export default function AdminAdsPage() {
             <PageLayout 
                 title="Ad Management" 
                 description="Manage promotional campaigns for providers."
-            >
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold font-headline">Ad Management</h1>
-                        <p className="text-muted-foreground">
-                            Manage promotional campaigns for providers.
-                        </p>
-                    </div>
+                action={
                     <Button onClick={openAddDialog}><PlusCircle className="mr-2"/> Add Campaign</Button>
-                </div>
+                }
+            >
+                
                  <Card>
                     <CardContent>
                         <Table>

@@ -22,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import type { Service } from '@/app/(app)/providers/[providerId]/page';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { designTokens } from '@/lib/design-tokens';
 
 const bookingSchema = z.object({
   date: z.date({ required_error: "Please select a date." }),
@@ -132,7 +133,7 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className={`sm:max-w-md ${designTokens.effects.cardElevated}`}>
                 <DialogHeader>
                     <DialogTitle>{t('book')}: {service.name}</DialogTitle>
                     <DialogDescription>

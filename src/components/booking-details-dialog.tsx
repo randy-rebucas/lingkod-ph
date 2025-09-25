@@ -10,6 +10,7 @@ import { Separator } from "./ui/separator";
 import { useAuth } from "@/context/auth-context";
 import Image from "next/image";
 import { useTranslations } from 'next-intl';
+import { designTokens } from '@/lib/design-tokens';
 
 type BookingDetailsDialogProps = {
     isOpen: boolean;
@@ -35,7 +36,7 @@ export function BookingDetailsDialog({ isOpen, setIsOpen, booking }: BookingDeta
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className={`sm:max-w-md ${designTokens.effects.cardElevated}`}>
                 <DialogHeader>
                     <DialogTitle>{t('bookingDetails')}</DialogTitle>
                     <DialogDescription>

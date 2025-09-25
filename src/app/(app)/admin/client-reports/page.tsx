@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Star } from 'lucide-react';
+import { Star, Users } from 'lucide-react';
 import type { User } from '@/app/(app)/admin/users/page';
 import { PageLayout } from '@/components/app/page-layout';
 import { StandardCard } from '@/components/app/standard-card';
@@ -139,6 +139,21 @@ export default function ClientReportsPage() {
         />;
     }
 
+    if (clientReports.length === 0) {
+        return (
+            <PageLayout 
+                title="Client Reports" 
+                description="Analyze client usage, spending habits, and satisfaction scores."
+            >
+                <EmptyState 
+                    title="No Client Data" 
+                    description="No client reports available to display. Client data will appear here once users start making bookings and leaving reviews."
+                    icon={Users}
+                />
+            </PageLayout>
+        );
+    }
+
     return (
         <PageLayout 
             title="Client Reports" 
@@ -160,7 +175,7 @@ export default function ClientReportsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {clientReports.length > 0 ? clientReports.map(report => (
+                            {clientReports.map(report => (
                                 <TableRow key={report.user.uid}>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
@@ -177,13 +192,7 @@ export default function ClientReportsPage() {
                                         {report.averageRating > 0 ? renderStars(report.averageRating) : <span className="text-muted-foreground text-xs">No ratings yet</span>}
                                     </TableCell>
                                 </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={4} className="text-center h-24">
-                                        No client data to display.
-                                    </TableCell>
-                                </TableRow>
-                            )}
+                            ))}
                         </TableBody>
                     </Table>
                 </CardContent>

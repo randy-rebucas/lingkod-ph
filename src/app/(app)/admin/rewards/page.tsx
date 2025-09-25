@@ -42,7 +42,7 @@ export default function AdminRewardsPage() {
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState<Reward | null>(null);
     const [isAdding, setIsAdding] = useState(false);
-    
+
     // Form state
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -58,7 +58,7 @@ export default function AdminRewardsPage() {
         }
 
         const rewardsQuery = query(collection(db, "loyaltyRewards"), orderBy("pointsRequired"));
-        
+
         const unsubscribe = onSnapshot(rewardsQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reward));
             setRewards(data);
@@ -77,7 +77,7 @@ export default function AdminRewardsPage() {
         setPointsRequired(0);
         setIsActive(true);
     };
-    
+
     const closeDialog = () => {
         setIsDialogOpen(false);
         setIsEditing(null);
@@ -94,7 +94,7 @@ export default function AdminRewardsPage() {
         setIsActive(reward.isActive);
         setIsDialogOpen(true);
     };
-    
+
     const openAddDialog = () => {
         setIsAdding(true);
         setIsEditing(null);
@@ -117,7 +117,7 @@ export default function AdminRewardsPage() {
             closeDialog();
         }
     };
-    
+
     const onDeleteReward = async (rewardId: string) => {
         if (!user) return;
         const result = await handleDeleteReward(rewardId, { id: user.uid, name: user.displayName });
@@ -138,36 +138,18 @@ export default function AdminRewardsPage() {
             </Card>
         );
     }
-    
+
     if (loading) {
         return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Loyalty Rewards</h1>
-                    <p className="text-muted-foreground">Manage rewards for the loyalty program.</p>
-                </div>
-                <Card>
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
-             </div>
+            <LoadingState title="Loyalty Rewards" description="Manage rewards for the loyalty program." />
         )
     }
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={closeDialog}>
-            <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold font-headline">Loyalty Rewards</h1>
-                        <p className="text-muted-foreground">
-                            Manage rewards for the loyalty program.
-                        </p>
-                    </div>
-                    <Button onClick={openAddDialog}><PlusCircle className="mr-2"/> Add Reward</Button>
-                </div>
-                 <Card>
+            <PageLayout className="space-y-6" title="Loyalty Rewards" description="Manage rewards for the loyalty program." action={<Button onClick={openAddDialog}><PlusCircle className="mr-2" /> Add Reward</Button>}>
+
+                <Card>
                     <CardContent>
                         <Table>
                             <TableHeader>
@@ -188,7 +170,7 @@ export default function AdminRewardsPage() {
                                                 {reward.isActive ? 'Active' : 'Inactive'}
                                             </Badge>
                                         </TableCell>
-                                         <TableCell className="text-right">
+                                        <TableCell className="text-right">
                                             <AlertDialog>
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
@@ -233,12 +215,12 @@ export default function AdminRewardsPage() {
                     <DialogHeader>
                         <DialogTitle>{isAdding ? "Add New Reward" : "Edit Reward"}</DialogTitle>
                     </DialogHeader>
-                     <div className="grid gap-4 py-4">
+                    <div className="grid gap-4 py-4">
                         <div className="space-y-2">
                             <Label htmlFor="title">Title</Label>
                             <Input id="title" value={title} onChange={e => setTitle(e.target.value)} />
                         </div>
-                         <div className="space-y-2">
+                        <div className="space-y-2">
                             <Label htmlFor="description">Description</Label>
                             <Textarea id="description" value={description} onChange={e => setDescription(e.target.value)} />
                         </div>
@@ -247,8 +229,8 @@ export default function AdminRewardsPage() {
                             <Input id="points" type="number" value={pointsRequired} onChange={e => setPointsRequired(Number(e.target.value))} />
                         </div>
                         <div className="flex items-center space-x-2">
-                             <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
-                             <Label htmlFor="isActive">Active</Label>
+                            <Switch id="isActive" checked={isActive} onCheckedChange={setIsActive} />
+                            <Label htmlFor="isActive">Active</Label>
                         </div>
                     </div>
                     <DialogFooter>
@@ -256,7 +238,7 @@ export default function AdminRewardsPage() {
                         <Button onClick={handleFormSubmit}>Save changes</Button>
                     </DialogFooter>
                 </DialogContent>
-            </div>
+            </PageLayout>
         </Dialog>
     )
 }

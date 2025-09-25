@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { StandardCard } from "@/components/app/standard-card";
+import { designTokens } from "@/lib/design-tokens";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -146,12 +148,12 @@ export default function QuoteBuilderClient() {
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid gap-6 lg:grid-cols-3">
                         <div className="lg:col-span-1 space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>{t('clientInformation')}</CardTitle>
-                                    <CardDescription>{t('clientInformationDescription')}</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
+                            <StandardCard 
+                                title={t('clientInformation')}
+                                description={t('clientInformationDescription')}
+                                variant="elevated"
+                            >
+                                <div className="space-y-4">
                                     <FormField control={form.control} name="clientName" render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>{t('clientName')}</FormLabel>
@@ -173,14 +175,14 @@ export default function QuoteBuilderClient() {
                                             <FormMessage />
                                         </FormItem>
                                     )} />
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </StandardCard>
 
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>{t('quoteDetails')}</CardTitle>
-                                    <CardDescription>{t('quoteDetailsDescription')}</CardDescription>
-                                </CardHeader>
+                            <StandardCard 
+                                title={t('quoteDetails')}
+                                description={t('quoteDetailsDescription')}
+                                variant="elevated"
+                            >
                                 <CardContent className="space-y-4">
                                     <FormField control={form.control} name="quoteNumber" render={({ field }) => (
                                         <FormItem>
@@ -228,14 +230,14 @@ export default function QuoteBuilderClient() {
                                         </FormItem>
                                     )} />
                                 </CardContent>
-                            </Card>
+                            </StandardCard>
 
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>{t('lineItems')}</CardTitle>
-                                    <CardDescription>{t('lineItemsDescription')}</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
+                            <StandardCard 
+                                title={t('lineItems')}
+                                description={t('lineItemsDescription')}
+                                variant="elevated"
+                            >
+                                <div className="space-y-4">
                                     {fields.map((field, index) => (
                                         <div key={field.id} className="p-4 rounded-lg border bg-secondary/50 space-y-4 relative">
                                             <FormField control={form.control} name={`lineItems.${index}.description`} render={({ field }) => (
@@ -274,14 +276,17 @@ export default function QuoteBuilderClient() {
                                     <Button type="button" variant="outline" size="sm" className="mt-4" onClick={() => append({ description: "", quantity: 1, price: 0 })}>
                                         <PlusCircle className="mr-2 h-4 w-4" /> {t('addLineItem')}
                                     </Button>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </StandardCard>
                         </div>
 
                         <div className="lg:col-span-2">
-                             <Card className="sticky top-20">
-                                <CardHeader><CardTitle>{t('quoteSummary')}</CardTitle></CardHeader>
-                                <CardContent className="space-y-4">
+                             <StandardCard 
+                                title={t('quoteSummary')}
+                                variant="elevated"
+                                className="sticky top-20"
+                            >
+                                <div className="space-y-4">
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">{t('subtotal')}</span>
                                         <span className="font-medium">₱{subtotal.toFixed(2)}</span>
@@ -300,8 +305,8 @@ export default function QuoteBuilderClient() {
                                         <span>{t('total')}</span>
                                         <span>₱{total.toFixed(2)}</span>
                                     </div>
-                                </CardContent>
-                                <CardFooter className="flex flex-col gap-2">
+                                </div>
+                                <div className="flex flex-col gap-2">
                                     <Button type="submit" className="w-full" disabled={isSaving}>
                                         {isSaving ? <Loader2 className="mr-2 animate-spin" /> : <FileDown className="mr-2" />}
                                         {isSaving ? t('saving') : t('saveQuote')}
@@ -312,8 +317,8 @@ export default function QuoteBuilderClient() {
                                             {t('preview')}
                                         </Button>
                                     </DialogTrigger>
-                                </CardFooter>
-                            </Card>
+                                </div>
+                            </StandardCard>
                         </div>
                     </div>
                 </form>

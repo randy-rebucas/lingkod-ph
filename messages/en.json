@@ -288,6 +288,8 @@
     "loading": "Loading..."
   },
   "Dashboard": {
+    "dashboard": "Dashboard",
+    "dashboardDescription": "Overview of your account and recent activity",
     "findServiceProvider": "Find a Service Provider",
     "describeNeed": "Describe what you need, and we'll find the right pro for the job.",
     "searchPlaceholder": "e.g., 'I need a plumber for a clogged kitchen sink'",

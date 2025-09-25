@@ -191,16 +191,10 @@ export default function AdminCategoriesPage() {
             <PageLayout 
                 title={t('title')} 
                 description={t('subtitle')}
-            >
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                        <p className="text-muted-foreground">
-                            {t('subtitle')}
-                        </p>
-                    </div>
+                action={
                     <Button onClick={openAddDialog}><PlusCircle className="mr-2"/> {t('addCategory')}</Button>
-                </div>
+                }
+            >
                  <Card>
                     <CardContent className="p-0">
                         {loading ? (

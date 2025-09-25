@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { StandardCard } from "@/components/app/standard-card";
+import { designTokens } from "@/lib/design-tokens";
 import { Loader2, Send, Mail, Phone, MapPin, Clock, MessageCircle, Users, Star, CheckCircle, ArrowRight, Globe, Calendar, Zap, Shield, Heart, Award, TrendingUp, UserCheck, Building, Briefcase } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 
@@ -180,20 +182,20 @@ export default function ContactUsPage() {
               <Star className="w-4 h-4 mr-2" />
               We're Here to Help
             </Badge>
-            <h1 className="text-5xl lg:text-7xl font-bold font-headline mb-8 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            <h1 className={`text-5xl lg:text-7xl font-bold font-headline mb-8 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent ${designTokens.typography.pageTitle}`}>
               Contact Us
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12">
+            <p className={`text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12 ${designTokens.typography.pageDescription}`}>
               Get in touch with our friendly support team. Whether you have questions, need help, or want to share feedback,
               we're here to make your LocalPro experience exceptional.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
+              <Button asChild size="lg" className={`h-14 px-8 text-lg ${designTokens.effects.buttonGlow}`}>
                 <a href="#contact-form">
                   Send Message <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+              <Button asChild size="lg" variant="outline" className={`h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300 ${designTokens.effects.buttonGlow}`}>
                 <a href="tel:+639179157515">
                   Call Now
                 </a>
@@ -208,14 +210,14 @@ export default function ContactUsPage() {
           {/* Contact Methods */}
           <section>
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold font-headline mb-4">Choose Your Preferred Contact Method</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <h2 className={`text-3xl font-bold font-headline mb-4 ${designTokens.typography.sectionTitle}`}>Choose Your Preferred Contact Method</h2>
+              <p className={`text-lg text-muted-foreground max-w-2xl mx-auto ${designTokens.typography.sectionDescription}`}>
                 We offer multiple ways to get in touch. Pick the method that works best for you.
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {contactMethods.map((method, index) => (
-                <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 relative">
+                <StandardCard key={index} variant="elevated" className="group hover:-translate-y-2 transition-all duration-300 relative">
                   {method.popular && (
                     <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
                       Popular
@@ -225,8 +227,8 @@ export default function ContactUsPage() {
                     <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
                       {method.icon}
                     </div>
-                    <h3 className="font-semibold text-lg mb-2">{method.title}</h3>
-                    <p className="text-muted-foreground text-sm mb-4">{method.description}</p>
+                    <h3 className={`font-semibold text-lg mb-2 ${designTokens.typography.cardTitle}`}>{method.title}</h3>
+                    <p className={`text-muted-foreground text-sm mb-4 ${designTokens.typography.cardDescription}`}>{method.description}</p>
                     <div className="space-y-2 mb-4">
                       <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />
@@ -237,11 +239,11 @@ export default function ContactUsPage() {
                         {method.responseTime}
                       </div>
                     </div>
-                    <Button size="sm" className="w-full">
+                    <Button size="sm" className={`w-full ${designTokens.effects.buttonGlow}`}>
                       {method.action}
                     </Button>
                   </CardContent>
-                </Card>
+                </StandardCard>
               ))}
             </div>
           </section>
@@ -252,8 +254,8 @@ export default function ContactUsPage() {
               {/* Contact Information & Business Hours */}
               <div className="space-y-8">
                 <div>
-                  <h2 className="text-3xl font-bold font-headline mb-6">Get in Touch</h2>
-                  <p className="text-muted-foreground leading-relaxed mb-8">
+                  <h2 className={`text-3xl font-bold font-headline mb-6 ${designTokens.typography.sectionTitle}`}>Get in Touch</h2>
+                  <p className={`text-muted-foreground leading-relaxed mb-8 ${designTokens.typography.sectionDescription}`}>
                     We'd love to hear from you. Send us a message and we'll respond as soon as possible.
                   </p>
                 </div>
@@ -300,7 +302,7 @@ export default function ContactUsPage() {
                 </div>
 
                 {/* Business Hours */}
-                <Card className="bg-background/60 backdrop-blur-sm border-0 shadow-soft">
+                <StandardCard variant="elevated" title="Business Hours" className="bg-background/60 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Calendar className="h-5 w-5 text-primary" />
@@ -311,9 +313,9 @@ export default function ContactUsPage() {
                     <div className="space-y-3">
                       {businessHours.map((schedule, index) => (
                         <div key={index} className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{schedule.day}</span>
+                          <span className={`text-sm font-medium ${designTokens.typography.cardTitle}`}>{schedule.day}</span>
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">{schedule.hours}</span>
+                            <span className={`text-sm text-muted-foreground ${designTokens.typography.cardDescription}`}>{schedule.hours}</span>
                             <span className={`text-xs px-2 py-1 rounded-full ${
                               schedule.status === 'Open' ? 'bg-green-100 text-green-800' :
                               schedule.status === 'Limited' ? 'bg-yellow-100 text-yellow-800' :
@@ -326,14 +328,14 @@ export default function ContactUsPage() {
                       ))}
                     </div>
                   </CardContent>
-                </Card>
+                </StandardCard>
               </div>
 
               {/* Enhanced Contact Form */}
-              <Card className="bg-background/60 backdrop-blur-sm border-0 shadow-soft">
+              <StandardCard variant="elevated" title={t('sendMessage')} description={t('messageDescription')} className="bg-background/60 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-bold">{t('sendMessage')}</CardTitle>
-                  <CardDescription className="text-base">{t('messageDescription')}</CardDescription>
+                  <CardTitle className={`text-2xl font-bold ${designTokens.typography.sectionTitle}`}>{t('sendMessage')}</CardTitle>
+                  <CardDescription className={`text-base ${designTokens.typography.sectionDescription}`}>{t('messageDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Form {...form}>
@@ -392,7 +394,7 @@ export default function ContactUsPage() {
                           </FormItem>
                         )}
                       />
-                      <Button type="submit" className="w-full h-12 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300" disabled={isPending}>
+                      <Button type="submit" className={`w-full h-12 text-lg ${designTokens.effects.buttonGlow}`} disabled={isPending}>
                         {isPending ? (
                           <>
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -415,24 +417,24 @@ export default function ContactUsPage() {
           {/* FAQ Section */}
           <section>
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold font-headline mb-4">Frequently Asked Questions</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <h2 className={`text-3xl font-bold font-headline mb-4 ${designTokens.typography.sectionTitle}`}>Frequently Asked Questions</h2>
+              <p className={`text-lg text-muted-foreground max-w-2xl mx-auto ${designTokens.typography.sectionDescription}`}>
                 Quick answers to common questions about contacting us and getting support.
               </p>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
               {faqData.map((faq, index) => (
-                <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300">
+                <StandardCard key={index} variant="elevated" className="group hover:shadow-glow/20 transition-all duration-300">
                   <CardContent className="p-6">
-                    <h3 className="font-semibold text-lg mb-3">{faq.question}</h3>
-                    <p className="text-muted-foreground leading-relaxed mb-3">{faq.answer}</p>
+                    <h3 className={`font-semibold text-lg mb-3 ${designTokens.typography.cardTitle}`}>{faq.question}</h3>
+                    <p className={`text-muted-foreground leading-relaxed mb-3 ${designTokens.typography.cardDescription}`}>{faq.answer}</p>
                     <div className="flex items-center gap-2">
                       <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
                         {faq.category}
                       </span>
                     </div>
                   </CardContent>
-                </Card>
+                </StandardCard>
               ))}
             </div>
           </section>
@@ -440,32 +442,32 @@ export default function ContactUsPage() {
           {/* Testimonials */}
           <section>
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold font-headline mb-4">What Our Customers Say</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <h2 className={`text-3xl font-bold font-headline mb-4 ${designTokens.typography.sectionTitle}`}>What Our Customers Say</h2>
+              <p className={`text-lg text-muted-foreground max-w-2xl mx-auto ${designTokens.typography.sectionDescription}`}>
                 Hear from satisfied customers about their experience with our support team.
               </p>
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {testimonials.map((testimonial, index) => (
-                <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300">
+                <StandardCard key={index} variant="elevated" className="group hover:shadow-glow/20 transition-all duration-300">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-1 mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (
                         <Star key={i} className="h-4 w-4 fill-primary text-primary" />
                       ))}
                     </div>
-                    <p className="text-muted-foreground leading-relaxed mb-4">"{testimonial.content}"</p>
+                    <p className={`text-muted-foreground leading-relaxed mb-4 ${designTokens.typography.cardDescription}`}>"{testimonial.content}"</p>
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-semibold text-primary">
                         {testimonial.avatar}
                       </div>
                       <div>
-                        <h4 className="font-semibold text-sm">{testimonial.name}</h4>
-                        <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                        <h4 className={`font-semibold text-sm ${designTokens.typography.cardTitle}`}>{testimonial.name}</h4>
+                        <p className={`text-xs text-muted-foreground ${designTokens.typography.cardDescription}`}>{testimonial.role}</p>
                       </div>
                     </div>
                   </CardContent>
-                </Card>
+                </StandardCard>
               ))}
             </div>
           </section>

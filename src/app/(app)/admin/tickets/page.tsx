@@ -132,10 +132,6 @@ export default function AdminTicketsPage() {
                 title="Support Tickets" 
                 description="Manage user-submitted support requests."
             >
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Support Tickets</h1>
-                    <p className="text-muted-foreground">Manage user-submitted support requests.</p>
-                </div>
                  <Card>
                     <CardContent>
                         <Table>

@@ -26,7 +26,8 @@ export const designTokens = {
     cardGrid: 'grid gap-6',
     cardGrid2: 'grid gap-6 md:grid-cols-2',
     cardGrid3: 'grid gap-6 md:grid-cols-2 lg:grid-cols-3',
-    cardGrid4: 'grid gap-6 md:grid-cols-2 lg:grid-cols-4'
+    cardGrid4: 'grid gap-6 md:grid-cols-2 lg:grid-cols-4',
+    pageHeaderAction: 'flex justify-end items-center'
   },
   
   // Effects
@@ -60,6 +61,7 @@ export interface PageLayoutProps {
   description?: string;
   children: React.ReactNode;
   className?: string;
+  action?: React.ReactNode;
 }
 
 // Standardized card component props

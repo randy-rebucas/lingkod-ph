@@ -120,19 +120,13 @@ export default function AdminBackupPage() {
         <PageLayout 
             title="Data Backup & Recovery" 
             description="Manage and download backups of your platform's data."
-        >
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Data Backup & Recovery</h1>
-                    <p className="text-muted-foreground">
-                        Manage and download backups of your platform's data.
-                    </p>
-                </div>
+            action={
                 <Button onClick={handleCreateBackup} disabled={isCreatingBackup}>
                     {isCreatingBackup ? <Loader2 className="mr-2 animate-spin"/> : <PlusCircle className="mr-2"/>}
                      {isCreatingBackup ? 'Creating Backup...' : 'Create New Backup'}
                 </Button>
-            </div>
+            }
+        >
              <Card>
                 <CardHeader>
                     <CardTitle>Backup History</CardTitle>
