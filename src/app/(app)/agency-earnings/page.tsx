@@ -52,7 +52,7 @@ export default function AgencyEarningsPage() {
     const [providerCount, setProviderCount] = useState(0);
 
     useEffect(() => {
-        if (!user) {
+        if (!user || !db) {
             setLoading(false);
             return;
         }
@@ -60,18 +60,18 @@ export default function AgencyEarningsPage() {
         const fetchAgencyData = async () => {
             setLoading(true);
             try {
-                const providersQuery = query(collection(db, "users"), where("agencyId", "==", user.uid));
+                const providersQuery = query(collection(db!, "users"), where("agencyId", "==", user.uid));
                 const providersSnapshot = await getDocs(providersQuery);
                 const providerIds = providersSnapshot.docs.map(doc => doc.id);
                 setProviderCount(providerIds.length);
 
                 if (providerIds.length > 0) {
-                    const bookingsQuery = query(collection(db, "bookings"), where("providerId", "in", providerIds), where("status", "==", "Completed"));
+                    const bookingsQuery = query(collection(db!, "bookings"), where("providerId", "in", providerIds), where("status", "==", "Completed"));
                     const unsubBookings = onSnapshot(bookingsQuery, (snapshot) => {
                         setBookings(snapshot.docs.map(doc => doc.data() as Booking));
                     });
 
-                    const payoutsQuery = query(collection(db, "payouts"), where("agencyId", "==", user.uid), orderBy("requestedAt", "desc"));
+                    const payoutsQuery = query(collection(db!, "payouts"), where("agencyId", "==", user.uid), orderBy("requestedAt", "desc"));
                     const unsubPayouts = onSnapshot(payoutsQuery, (snapshot) => {
                         setPayouts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PayoutRequest)));
                     });
@@ -117,7 +117,7 @@ export default function AgencyEarningsPage() {
     
     if (loading) {
         return (
-             <div className="space-y-6">
+             <div className="max-w-6xl mx-auto space-y-8">
                 <Skeleton className="h-10 w-1/3" />
                 <Skeleton className="h-4 w-2/3" />
                 <div className="grid gap-6 md:grid-cols-3">
@@ -131,48 +131,48 @@ export default function AgencyEarningsPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-6xl mx-auto space-y-8">
             <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                 <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-3">
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('totalAgencyRevenue')}</CardTitle>
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                 <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('totalAgencyRevenue')}</CardTitle>
+                        <DollarSign className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{stats.totalRevenue.toFixed(2)}</div>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{stats.totalRevenue.toFixed(2)}</div>
                         <p className="text-xs text-muted-foreground">{t('fromCompletedJobs', { bookings: bookings.length, providers: providerCount })}</p>
                     </CardContent>
                 </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('totalPaidOut')}</CardTitle>
-                        <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                 <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('totalPaidOut')}</CardTitle>
+                        <CheckCircle className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{stats.totalPaidOut.toFixed(2)}</div>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{stats.totalPaidOut.toFixed(2)}</div>
                         <p className="text-xs text-muted-foreground">{t('acrossAllProviders')}</p>
                     </CardContent>
                 </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('pendingPayouts')}</CardTitle>
-                        <Wallet className="h-4 w-4 text-muted-foreground" />
+                 <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('pendingPayouts')}</CardTitle>
+                        <Wallet className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{stats.totalPending.toFixed(2)}</div>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{stats.totalPending.toFixed(2)}</div>
                          <p className="text-xs text-muted-foreground">{t('awaitingProcessing')}</p>
                     </CardContent>
                 </Card>
             </div>
 
-             <Card>
-                <CardHeader>
-                    <CardTitle>{t('payoutRequests')}</CardTitle>
+             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('payoutRequests')}</CardTitle>
                     <CardDescription>{t('managePayoutRequests')}</CardDescription>
                 </CardHeader>
                 <CardContent>

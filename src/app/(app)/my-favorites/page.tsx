@@ -93,7 +93,7 @@ export default function MyFavoritesPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!user) {
+        if (!user || !db) {
             setLoading(false);
             return;
         }
@@ -111,10 +111,10 @@ export default function MyFavoritesPage() {
                 return;
             }
             
-            const providersQuery = query(collection(db, "users"), where("uid", "in", favoriteProviderIds));
+            const providersQuery = query(collection(db!, "users"), where("uid", "in", favoriteProviderIds));
             const providersSnap = await getDocs(providersQuery);
 
-            const reviewsSnapshot = await getDocs(collection(db, "reviews"));
+            const reviewsSnapshot = await getDocs(collection(db!, "reviews"));
             const allReviews = reviewsSnapshot.docs.map(doc => doc.data());
             
             const providerRatings: { [key: string]: { totalRating: number, count: number } } = {};

@@ -39,7 +39,7 @@ export default function PaymentPage() {
     const [copied, setCopied] = useState(false);
 
     useEffect(() => {
-        if (!bookingId || !user) return;
+        if (!bookingId || !user || !db) return;
 
         const bookingRef = doc(db, "bookings", bookingId as string);
         const unsubscribe = onSnapshot(bookingRef, (docSnap) => {
@@ -113,7 +113,7 @@ export default function PaymentPage() {
             // Use retry service for file upload
             const uploadResult = await PaymentRetryService.retryFileUpload(async () => {
                 const storagePath = `payment-proofs/${booking.id}/${Date.now()}_${paymentProofFile.name}`;
-                const storageRef = ref(storage, storagePath);
+                const storageRef = ref(storage!, storagePath);
                 const uploadResult = await uploadBytes(storageRef, paymentProofFile);
                 return await getDownloadURL(uploadResult.ref);
             });
@@ -126,7 +126,7 @@ export default function PaymentPage() {
 
             // Use retry service for database operations
             const dbResult = await PaymentRetryService.retryDatabaseOperation(async () => {
-                const bookingRef = doc(db, "bookings", booking.id);
+                const bookingRef = doc(db!, "bookings", booking.id);
                 await updateDoc(bookingRef, {
                     paymentProofUrl: url,
                     status: "Pending Verification",
@@ -142,11 +142,11 @@ export default function PaymentPage() {
             }
             
             // Notify Admin
-            const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
+            const adminQuery = query(collection(db!, 'users'), where('role', '==', 'admin'));
             const adminSnapshot = await getDocs(adminQuery);
             if (!adminSnapshot.empty) {
                 const adminId = adminSnapshot.docs[0].id;
-                await addDoc(collection(db, `users/${adminId}/notifications`), {
+                await addDoc(collection(db!, `users/${adminId}/notifications`), {
                     type: 'info',
                     message: `A payment for booking #${booking.id.slice(0, 6)} has been uploaded and requires verification.`,
                     link: '/admin/transactions',

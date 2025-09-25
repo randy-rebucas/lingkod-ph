@@ -133,7 +133,7 @@ export default function AgencyProfilePage() {
     const [isReporting, setIsReporting] = useState(false);
 
     useEffect(() => {
-        if (!agencyId) return;
+        if (!agencyId || !db) return;
 
         const fetchAgencyData = async () => {
             setLoading(true);
@@ -189,7 +189,7 @@ export default function AgencyProfilePage() {
     }, [agencyId]);
     
     useEffect(() => {
-        if (!user || !agencyId) {
+        if (!user || !agencyId || !db) {
             setIsFavoriteLoading(false);
             return;
         }
@@ -352,12 +352,17 @@ export default function AgencyProfilePage() {
 
     if (!agency) {
         return (
-            <div className="container mx-auto text-center py-20">
-                <h1 className="text-4xl font-bold">{t('agencyNotFound')}</h1>
-                <p className="text-muted-foreground mt-4">{t('agencyNotFoundDescription')}</p>
-                <Button asChild className="mt-8">
-                    <Link href="/dashboard">{t('returnToDashboard')}</Link>
-                </Button>
+            <div className="max-w-6xl mx-auto space-y-8">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
+                        <Building className="h-16 w-16 mb-4 text-primary opacity-60" />
+                        <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('agencyNotFound')}</h1>
+                        <p className="text-muted-foreground mt-4">{t('agencyNotFoundDescription')}</p>
+                        <Button asChild className="mt-8 shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
+                            <Link href="/dashboard">{t('returnToDashboard')}</Link>
+                        </Button>
+                    </CardContent>
+                </Card>
             </div>
         )
     }
@@ -369,7 +374,7 @@ export default function AgencyProfilePage() {
         <Dialog>
             <div className="max-w-6xl mx-auto space-y-8">
                 {/* Header Card */}
-                <Card className="shadow-lg">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-6">
                         <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
                             <Avatar className="h-32 w-32 border-4 border-primary">
@@ -378,7 +383,7 @@ export default function AgencyProfilePage() {
                             </Avatar>
                             <div className="flex-1 space-y-2">
                                 <div className="flex items-center justify-center md:justify-start gap-2">
-                                    <CardTitle className="text-4xl font-bold font-headline">{agency.displayName}</CardTitle>
+                                    <CardTitle className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{agency.displayName}</CardTitle>
                                     {getAvailabilityBadge(agency.availabilityStatus)}
                                     {agency.isVerified && <Badge variant="default" className="bg-blue-100 text-blue-800 border-blue-200">Verified</Badge>}
                                 </div>

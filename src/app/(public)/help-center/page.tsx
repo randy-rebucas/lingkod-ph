@@ -424,7 +424,7 @@ export default function HelpCenterPage() {
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="container relative">
+        <div className="max-w-6xl mx-auto space-y-8 relative">
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
               <Star className="w-4 h-4 mr-2" />
@@ -481,7 +481,7 @@ export default function HelpCenterPage() {
               <h2 className="text-3xl font-bold font-headline mb-8 text-center">Quick Help Resources</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {quickHelpResources.map((resource, index) => (
-                  <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2">
+                  <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2">
                     <CardContent className="p-6 text-center">
                       <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
                         {resource.icon}
@@ -503,7 +503,7 @@ export default function HelpCenterPage() {
               <h2 className="text-3xl font-bold font-headline mb-8 text-center">Popular Topics</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {popularTopics.map((topic, index) => (
-                  <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+                  <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1 cursor-pointer">
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3">
                         <Star className="h-5 w-5 text-primary flex-shrink-0" />
@@ -524,7 +524,7 @@ export default function HelpCenterPage() {
               <h2 className="text-3xl font-bold font-headline mb-8 text-center">Get in Touch</h2>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {contactOptions.map((option, index) => (
-                  <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2">
+                  <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2">
                     <CardContent className="p-6 text-center">
                       <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
                         {option.icon}
@@ -638,12 +638,12 @@ export default function HelpCenterPage() {
         {/* Enhanced Support CTA */}
         <section className="py-20 bg-gradient-to-b from-muted/50 to-background">
           <div className="container">
-            <Card className="max-w-5xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5 border-0 shadow-soft">
+            <Card className="max-w-5xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
               <CardHeader className="text-center pb-8">
                 <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <Bot className="h-10 w-10 text-primary" />
                 </div>
-                <CardTitle className="text-4xl font-bold font-headline">Still Need Help?</CardTitle>
+                <CardTitle className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Still Need Help?</CardTitle>
                 <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
                   Our AI assistant is available 24/7 to answer your questions instantly. 
                   For more complex issues, our human support team is ready to help.

@@ -46,6 +46,7 @@ export default function LoginPage() {
             return;
         }; 
         try {
+            if (!db) return;
             const usersRef = collection(db, "users");
             const q = query(usersRef, limit(1));
             const snapshot = await getDocs(q);

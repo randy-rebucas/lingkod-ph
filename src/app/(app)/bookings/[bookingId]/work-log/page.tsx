@@ -77,7 +77,7 @@ export default function WorkLogPage() {
     useEffect(() => {
         if (!bookingId || !user) return;
         
-        const bookingRef = doc(db, "bookings", bookingId as string);
+        const bookingRef = doc(db!, "bookings", bookingId as string);
         const unsubscribe = onSnapshot(bookingRef, (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
@@ -118,8 +118,8 @@ export default function WorkLogPage() {
         if (!booking) return;
         setIsSaving(true);
         try {
-            const bookingRef = doc(db, "bookings", booking.id);
-            const batch = writeBatch(db);
+            const bookingRef = doc(db!, "bookings", booking.id);
+            const batch = writeBatch(db!);
 
             batch.update(bookingRef, {
                 status: "In Progress",
@@ -130,7 +130,7 @@ export default function WorkLogPage() {
             });
 
             if (booking.jobId) {
-                const jobRef = doc(db, "jobs", booking.jobId);
+                const jobRef = doc(db!, "jobs", booking.jobId);
                 batch.update(jobRef, { status: "In Progress" });
             }
 
@@ -155,7 +155,7 @@ export default function WorkLogPage() {
             const updatedWorkLog = [...booking.workLog];
             updatedWorkLog[activeLogIndex] = { ...updatedWorkLog[activeLogIndex], endTime: Timestamp.now() };
 
-            const bookingRef = doc(db, "bookings", booking.id);
+            const bookingRef = doc(db!, "bookings", booking.id);
             await updateDoc(bookingRef, { workLog: updatedWorkLog });
             toast({ title: "Timer Stopped", description: "Work session has been logged." });
         } catch (error) {
@@ -170,7 +170,7 @@ export default function WorkLogPage() {
         if (!noteText.trim() || !booking) return;
         setIsSaving(true);
         try {
-            const bookingRef = doc(db, "bookings", booking.id);
+            const bookingRef = doc(db!, "bookings", booking.id);
             await updateDoc(bookingRef, {
                 notes: arrayUnion({
                     text: noteText,
@@ -191,11 +191,11 @@ export default function WorkLogPage() {
         setIsSaving(true);
         try {
             const storagePath = `work-log-photos/${booking.id}/${Date.now()}_${photoFile.name}`;
-            const storageRef = ref(storage, storagePath);
+            const storageRef = ref(storage!, storagePath);
             const uploadResult = await uploadBytes(storageRef, photoFile);
             const url = await getDownloadURL(uploadResult.ref);
             
-            const bookingRef = doc(db, "bookings", booking.id);
+            const bookingRef = doc(db!, "bookings", booking.id);
             await updateDoc(bookingRef, {
                 photos: arrayUnion({
                     url,
@@ -224,7 +224,7 @@ export default function WorkLogPage() {
             completed: false,
         };
         try {
-            const bookingRef = doc(db, "bookings", booking.id);
+            const bookingRef = doc(db!, "bookings", booking.id);
             await updateDoc(bookingRef, {
                 checklist: arrayUnion(newItem)
             });
@@ -241,7 +241,7 @@ export default function WorkLogPage() {
             item.id === itemToToggle.id ? { ...item, completed: !item.completed } : item
         );
         try {
-            const bookingRef = doc(db, "bookings", booking.id);
+            const bookingRef = doc(db!, "bookings", booking.id);
             await updateDoc(bookingRef, { checklist: updatedChecklist });
         } catch (error) {
             console.error("Error updating checklist:", error);
@@ -252,7 +252,7 @@ export default function WorkLogPage() {
     const handleDeleteChecklistItem = async (itemToDelete: ChecklistItem) => {
         if (!booking?.checklist) return;
         try {
-            const bookingRef = doc(db, "bookings", booking.id);
+            const bookingRef = doc(db!, "bookings", booking.id);
             await updateDoc(bookingRef, {
                 checklist: arrayRemove(itemToDelete)
             });
@@ -264,7 +264,7 @@ export default function WorkLogPage() {
 
     if (loading) {
         return (
-             <div className="space-y-8 max-w-6xl mx-auto">
+             <div className="max-w-6xl mx-auto space-y-8">
                 <Skeleton className="h-96 w-full" />
              </div>
         )
@@ -280,7 +280,7 @@ export default function WorkLogPage() {
 
 
     return (
-        <div className="space-y-8 max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto space-y-8">
             <div className="flex items-center gap-4 mb-6">
                 <Button variant="outline" size="icon" onClick={() => router.back()} className="hover:bg-primary/10 transition-colors">
                     <ArrowLeft className="h-4 w-4" />

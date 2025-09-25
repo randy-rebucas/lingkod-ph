@@ -419,7 +419,7 @@ export default function BookingsPage() {
     const t = useTranslations('Bookings');
 
     useEffect(() => {
-        if (!user) {
+        if (!user || !db) {
             setLoading(false);
             return;
         };

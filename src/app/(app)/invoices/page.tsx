@@ -109,7 +109,7 @@ export default function InvoicesPage() {
 
 
     const fetchInvoices = React.useCallback(() => {
-        if (!user) {
+        if (!user || !db) {
             setLoading(false);
             return;
         }
@@ -326,9 +326,9 @@ export default function InvoicesPage() {
     
     if (!user) {
          return (
-            <div className="space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
                 <div>
-                  <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                  <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                   <p className="text-muted-foreground">
                       {t('subtitle')}
                   </p>
@@ -350,15 +350,15 @@ export default function InvoicesPage() {
     }
 
     return (
-      <div className="space-y-6">
+      <div className="max-w-6xl mx-auto space-y-8">
           <div className="flex items-center justify-between">
               <div>
-                  <h1 className="text-3xl font-bold font-headline">Invoices</h1>
+                  <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Invoices</h1>
                   <p className="text-muted-foreground">
                       Create and manage invoices for your clients.
                   </p>
               </div>
-              <Button onClick={handleAddInvoice}>
+              <Button onClick={handleAddInvoice} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Create Invoice
               </Button>
@@ -400,7 +400,7 @@ export default function InvoicesPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <div className="rounded-md border bg-card">
+            <div className="rounded-md border bg-card shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                {loading ? (
                  <div className="p-4">
                      <Skeleton className="h-10 w-full mb-4" />

@@ -70,7 +70,7 @@ export default function AdminPayoutsPage() {
     const [loading, setLoading] = useState(true);
 
      useEffect(() => {
-        if (userRole !== 'admin') {
+        if (userRole !== 'admin' || !db) {
             setLoading(false);
             return;
         }
@@ -101,25 +101,27 @@ export default function AdminPayoutsPage() {
 
     if (userRole !== 'admin') {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
+            <div className="max-w-6xl mx-auto space-y-8">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                        <CardDescription>This page is for administrators only.</CardDescription>
+                    </CardHeader>
+                </Card>
+            </div>
         );
     }
     
     if (loading) {
         return (
-             <div className="space-y-6">
+             <div className="max-w-6xl mx-auto space-y-8">
                  <div>
-                    <h1 className="text-3xl font-bold font-headline">Payout Requests</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payout Requests</h1>
                     <p className="text-muted-foreground">
                         Review and process provider payout requests.
                     </p>
                 </div>
-                <Card>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-6">
                         <Skeleton className="h-64 w-full" />
                     </CardContent>
@@ -132,16 +134,16 @@ export default function AdminPayoutsPage() {
     const paidPayouts = payouts.filter(p => p.status === 'Paid');
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-6xl mx-auto space-y-8">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Payout Requests</h1>
+                <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payout Requests</h1>
                 <p className="text-muted-foreground">
                      Review and process provider payout requests.
                 </p>
             </div>
-             <Card>
-                <CardHeader>
-                    <CardTitle>Pending Payouts</CardTitle>
+             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Pending Payouts</CardTitle>
                     <CardDescription>These requests need to be processed.</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -184,9 +186,9 @@ export default function AdminPayoutsPage() {
                     </Table>
                 </CardContent>
             </Card>
-            <Card>
-                <CardHeader>
-                    <CardTitle>Completed Payouts</CardTitle>
+            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Completed Payouts</CardTitle>
                     <CardDescription>History of all processed payouts.</CardDescription>
                 </CardHeader>
                 <CardContent>

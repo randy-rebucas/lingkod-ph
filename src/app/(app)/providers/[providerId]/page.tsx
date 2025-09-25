@@ -113,9 +113,10 @@ export default function ProviderProfilePage() {
     const [isReporting, setIsReporting] = useState(false);
 
     useEffect(() => {
-        if (!providerId) return;
+        if (!providerId || !db) return;
 
         const fetchProviderData = async () => {
+            if (!db) return;
             setLoading(true);
             try {
                 // Fetch provider details
@@ -148,7 +149,7 @@ export default function ProviderProfilePage() {
     }, [providerId]);
     
     useEffect(() => {
-        if (!user || !providerId) {
+        if (!user || !providerId || !db) {
             setIsFavoriteLoading(false);
             return;
         }
@@ -169,7 +170,7 @@ export default function ProviderProfilePage() {
 
 
     const handleToggleFavorite = async () => {
-        if (!user || !provider) {
+        if (!user || !provider || !db) {
             toast({ variant: "destructive", title: t('error'), description: t('mustBeLoggedInToFavorite') });
             return;
         }
@@ -201,7 +202,7 @@ export default function ProviderProfilePage() {
     };
     
     const handleSendMessage = async () => {
-        if (!user || !provider) {
+        if (!user || !provider || !db) {
             toast({ variant: "destructive", title: t('error'), description: t('mustBeLoggedInToMessage') });
             return;
         }
@@ -253,7 +254,7 @@ export default function ProviderProfilePage() {
     };
 
     const handleReportProvider = async () => {
-        if (!user || !provider || !reportReason) {
+        if (!user || !provider || !reportReason || !db) {
             toast({ variant: "destructive", title: t('error'), description: t('pleaseProvideReason') });
             return;
         }

@@ -39,7 +39,7 @@ export default function SettingsPage() {
 
     useEffect(() => {
         const fetchSettings = async () => {
-            if (user) {
+            if (user && db) {
                 const userDocRef = doc(db, 'users', user.uid);
                 const userDoc = await getDoc(userDocRef);
                 if (userDoc.exists() && userDoc.data().notificationSettings) {
@@ -57,7 +57,7 @@ export default function SettingsPage() {
     };
 
     const handleSaveChanges = async () => {
-        if (!user) {
+        if (!user || !db) {
             toast({ variant: "destructive", title: t('error'), description: t('mustBeLoggedIn') });
             return;
         }

@@ -201,7 +201,7 @@ export default function ProfilePage() {
     }, [state, toast, t]);
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || !db) return;
         
         const userDocRef = doc(db, "users", user.uid);
         const unsubscribeUser = onSnapshot(userDocRef, (doc) => {
@@ -250,6 +250,7 @@ export default function ProfilePage() {
         });
 
         const fetchCategories = async () => {
+            if (!db) return;
             try {
                 const categoriesRef = collection(db, "categories");
                 const q = query(categoriesRef, orderBy("name"));
@@ -314,7 +315,7 @@ export default function ProfilePage() {
     };
 
     const handleRedeemReward = async (reward: Reward) => {
-        if (!user || loyaltyPoints < reward.pointsRequired) {
+        if (!user || !db || loyaltyPoints < reward.pointsRequired) {
             toast({ variant: "destructive", title: t('error'), description: t('notEnoughPoints') });
             return;
         }
@@ -333,7 +334,7 @@ export default function ProfilePage() {
                 const newTotalPoints = currentPoints - reward.pointsRequired;
                 transaction.update(userRef, { loyaltyPoints: newTotalPoints });
 
-                const loyaltyTxRef = doc(collection(db, `users/${user.uid}/loyaltyTransactions`));
+                const loyaltyTxRef = doc(collection(db!, `users/${user.uid}/loyaltyTransactions`));
                 transaction.set(loyaltyTxRef, {
                     points: reward.pointsRequired, type: 'redeem',
                     description: `Redeemed: ${reward.title}`,
@@ -367,7 +368,7 @@ export default function ProfilePage() {
     };
 
     const handlePublicProfileUpdate = async () => {
-        if (!user) return;
+        if (!user || !db) return;
         setIsSavingPublic(true);
         try {
             const userDocRef = doc(db, "users", user.uid);
@@ -390,7 +391,7 @@ export default function ProfilePage() {
     }
 
     const handlePersonalDetailsUpdate = async () => {
-        if (!user) return;
+        if (!user || !db) return;
         setIsSavingPersonal(true);
         try {
             const userDocRef = doc(db, "users", user.uid);
@@ -419,7 +420,7 @@ export default function ProfilePage() {
     }
     
     const handleProviderDetailsUpdate = async () => {
-        if (!user) return;
+        if (!user || !db) return;
         setIsSavingProvider(true);
          try {
             const userDocRef = doc(db, "users", user.uid);
@@ -447,7 +448,7 @@ export default function ProfilePage() {
     }
 
     const handlePayoutDetailsUpdate = async () => {
-        if (!user) return;
+        if (!user || !db) return;
         setIsSavingPayout(true);
         try {
             const userDocRef = doc(db, "users", user.uid);
@@ -469,7 +470,7 @@ export default function ProfilePage() {
     };
     
     const handleUpload = async () => {
-        if (!imageFile || !user) return;
+        if (!imageFile || !user || !storage) return;
 
         setIsUploading(true);
         setUploadProgress(0);
@@ -495,8 +496,10 @@ export default function ProfilePage() {
                 try {
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                     await updateProfile(user, { photoURL: downloadURL });
-                    const userDocRef = doc(db, "users", user.uid);
-                    await updateDoc(userDocRef, { photoURL: downloadURL });
+                    if (db) {
+                        const userDocRef = doc(db, "users", user.uid);
+                        await updateDoc(userDocRef, { photoURL: downloadURL });
+                    }
                     toast({ title: t('success'), description: t('profilePictureUpdated') });
                 } catch (error: any) {
                      toast({ variant: "destructive", title: t('updateFailed'), description: t('failedToUpdateProfilePicture') });
@@ -510,7 +513,7 @@ export default function ProfilePage() {
     };
 
     const handleUploadDocument = async () => {
-        if (!user || !newDocFile || !newDocName) {
+        if (!user || !newDocFile || !newDocName || !storage || !db) {
             toast({ variant: 'destructive', title: t('missingInfo'), description: t('pleaseProvideDocumentInfo') });
             return;
         }
@@ -545,7 +548,7 @@ export default function ProfilePage() {
     };
 
     const handleDeleteDocument = async (docToDelete: Document) => {
-        if (!user) return;
+        if (!user || !storage || !db) return;
         try {
             // Delete from Storage
             const fileRef = ref(storage, docToDelete.url);

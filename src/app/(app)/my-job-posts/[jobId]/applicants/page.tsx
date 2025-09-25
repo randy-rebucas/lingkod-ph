@@ -59,13 +59,13 @@ export default function ApplicantsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!jobId || !user) return;
+        if (!jobId || !user || !db) return;
 
         const fetchJobAndApplicants = async () => {
             setLoading(true);
             try {
                 // Fetch job details
-                const jobRef = doc(db, "jobs", jobId);
+                const jobRef = doc(db!, "jobs", jobId);
                 const jobSnap = await getDoc(jobRef);
 
                 if (!jobSnap.exists() || jobSnap.data().clientId !== user.uid) {
@@ -78,11 +78,11 @@ export default function ApplicantsPage() {
 
                 // Fetch applicants if any
                 if (jobData.applications && jobData.applications.length > 0) {
-                    const applicantsQuery = query(collection(db, "users"), where("uid", "in", jobData.applications));
+                    const applicantsQuery = query(collection(db!, "users"), where("uid", "in", jobData.applications));
                     const applicantsSnap = await getDocs(applicantsQuery);
 
                     // Fetch all reviews to calculate ratings
-                    const reviewsSnapshot = await getDocs(collection(db, "reviews"));
+                    const reviewsSnapshot = await getDocs(collection(db!, "reviews"));
                     const allReviews = reviewsSnapshot.docs.map(doc => doc.data());
                     
                     const providerRatings: { [key: string]: { totalRating: number, count: number } } = {};
@@ -122,10 +122,11 @@ export default function ApplicantsPage() {
         if (!job || !user) return;
         
         try {
+            if (!db) return;
             const batch = writeBatch(db);
             
             // 1. Create a booking document
-            const bookingRef = doc(collection(db, 'bookings'));
+            const bookingRef = doc(collection(db!, 'bookings'));
             batch.set(bookingRef, {
                 jobId: job.id,
                 providerId: provider.uid,
@@ -144,7 +145,7 @@ export default function ApplicantsPage() {
             });
 
             // 2. Update job status to 'In Progress'
-            const jobRef = doc(db, "jobs", jobId);
+            const jobRef = doc(db!, "jobs", jobId);
             batch.update(jobRef, { status: "In Progress" });
 
             await batch.commit();
@@ -161,6 +162,7 @@ export default function ApplicantsPage() {
     const handleSendMessage = async (provider: Provider) => {
          if (!user || !provider) return;
         try {
+            if (!db) return;
             const conversationsRef = collection(db, "conversations");
             const q = query(conversationsRef, where("participants", "array-contains", user.uid));
             const querySnapshot = await getDocs(q);

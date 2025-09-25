@@ -163,9 +163,9 @@ export default function EarningsPage() {
 
     if (userRole !== 'provider') {
         return (
-            <div className="space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">{t('providersAndAgenciesOnly')}</p>
                 </div>
             </div>
@@ -175,7 +175,7 @@ export default function EarningsPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
                 <Skeleton className="h-10 w-1/3" />
                 <Skeleton className="h-4 w-2/3" />
                 <div className="grid gap-6 md:grid-cols-4">
@@ -198,10 +198,10 @@ export default function EarningsPage() {
     );
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-6xl mx-auto space-y-8">
              <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">
                         {t('subtitle')}
                     </p>
@@ -223,51 +223,51 @@ export default function EarningsPage() {
             </div>
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
+                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('lifetimeGrossRevenue')}</CardTitle>
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('lifetimeGrossRevenue')}</CardTitle>
+                        <DollarSign className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{totalRevenue.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">{t('allTimeEarnings')}</p>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{totalRevenue.toFixed(2)}</div>
+                        <p className="text-xs text-muted-foreground mt-1">{t('allTimeEarnings')}</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('totalPaidOut')}</CardTitle>
-                        <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('totalPaidOut')}</CardTitle>
+                        <CheckCircle className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{totalPaidOut.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">{t('totalAmountPaidOut')}</p>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{totalPaidOut.toFixed(2)}</div>
+                        <p className="text-xs text-muted-foreground mt-1">{t('totalAmountPaidOut')}</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('pendingPayouts')}</CardTitle>
-                        <Hourglass className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('pendingPayouts')}</CardTitle>
+                        <Hourglass className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{totalPending.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">{t('amountBeingProcessed')}</p>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{totalPending.toFixed(2)}</div>
+                        <p className="text-xs text-muted-foreground mt-1">{t('amountBeingProcessed')}</p>
                     </CardContent>
                 </Card>
-                 <Card>
+                 <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('availableForPayout')}</CardTitle>
-                        <WalletCards className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('availableForPayout')}</CardTitle>
+                        <WalletCards className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{availableForPayout.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">{t('minimumPayout')}</p>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{availableForPayout.toFixed(2)}</div>
+                        <p className="text-xs text-muted-foreground mt-1">{t('minimumPayout')}</p>
                     </CardContent>
                 </Card>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('earningsHistory')}</CardTitle>
+            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('earningsHistory')}</CardTitle>
                     <CardDescription>{t('monthlyEarningsDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -290,9 +290,9 @@ export default function EarningsPage() {
             </Card>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('recentCompletedJobs')}</CardTitle>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('recentCompletedJobs')}</CardTitle>
                         <CardDescription>{t('completedJobsDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -322,9 +322,9 @@ export default function EarningsPage() {
                         </Table>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('payoutHistory')}</CardTitle>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('payoutHistory')}</CardTitle>
                         <CardDescription>{t('payoutHistoryDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent>

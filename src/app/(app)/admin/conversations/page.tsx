@@ -57,7 +57,7 @@ export default function AdminConversationsPage() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (userRole !== 'admin') {
+        if (userRole !== 'admin' || !db) {
             setLoadingConversations(false);
             return;
         }
@@ -81,7 +81,7 @@ export default function AdminConversationsPage() {
     }, [userRole, toast]);
     
     useEffect(() => {
-        if (!activeConversation) return;
+        if (!activeConversation || !db) return;
 
         setLoadingMessages(true);
         const messagesRef = collection(db, "conversations", activeConversation.id, "messages");
@@ -114,24 +114,26 @@ export default function AdminConversationsPage() {
 
     if (userRole !== 'admin') {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
+            <div className="max-w-6xl mx-auto space-y-8">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                        <CardDescription>This page is for administrators only.</CardDescription>
+                    </CardHeader>
+                </Card>
+            </div>
         );
     }
 
     return (
-        <div className="space-y-6 h-full flex flex-col">
+        <div className="max-w-6xl mx-auto space-y-8 h-full flex flex-col">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Conversation Monitoring</h1>
+                <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Conversation Monitoring</h1>
                 <p className="text-muted-foreground">
                     Review user conversations on the platform.
                 </p>
             </div>
-            <Card className="flex-1 grid grid-cols-1 md:grid-cols-[350px_1fr] shadow-lg overflow-hidden">
+            <Card className="flex-1 grid grid-cols-1 md:grid-cols-[350px_1fr] shadow-soft border-0 bg-background/80 backdrop-blur-sm overflow-hidden">
                 <div className="flex flex-col border-r bg-background/50">
                     <ScrollArea className="flex-1">
                         <div className="p-2 space-y-1">

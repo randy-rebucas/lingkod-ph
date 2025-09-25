@@ -10,6 +10,7 @@ import { PartnerAnalyticsService } from "@/lib/partner-analytics";
 import { PartnerReferralTracker } from "@/lib/partner-referral-tracker";
 import { PartnerCommissionManager } from "@/lib/partner-commission-manager";
 import { Skeleton } from "@/components/ui/skeleton";
+import { db } from "@/lib/firebase";
 
 interface PartnerDashboardData {
     totalReferrals: number;
@@ -31,7 +32,7 @@ export default function PartnersDashboardPage() {
 
     useEffect(() => {
         const loadDashboardData = async () => {
-            if (user && userRole === 'partner') {
+            if (user && userRole === 'partner' && db) {
                 try {
                     // Get performance metrics
                     const performanceMetrics = await PartnerAnalyticsService.getPartnerPerformanceMetrics(user.uid);
@@ -77,15 +78,15 @@ export default function PartnersDashboardPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
                 <div>
                     <Skeleton className="h-8 w-64" />
                     <Skeleton className="h-4 w-96 mt-2" />
                 </div>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                     {[...Array(4)].map((_, i) => (
-                        <Card key={i}>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                                 <Skeleton className="h-4 w-24" />
                                 <Skeleton className="h-4 w-4" />
                             </CardHeader>
@@ -101,59 +102,59 @@ export default function PartnersDashboardPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-6xl mx-auto space-y-8">
             <div>
-                <h1 className="text-3xl font-bold font-headline">{t('dashboardTitle', { name: user?.displayName || 'User' })}</h1>
+                <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('dashboardTitle', { name: user?.displayName || 'User' })}</h1>
                 <p className="text-muted-foreground">{t('dashboardSubtitle')}</p>
             </div>
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('totalReferrals')}</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
+                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('totalReferrals')}</CardTitle>
+                        <Users className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{dashboardData?.totalReferrals || 0}</div>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{dashboardData?.totalReferrals || 0}</div>
                         <p className="text-xs text-muted-foreground">
                             {dashboardData?.activeReferrals || 0} {t('activeReferrals')}
                         </p>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('completedJobs')}</CardTitle>
-                        <Briefcase className="h-4 w-4 text-muted-foreground" />
+                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('completedJobs')}</CardTitle>
+                        <Briefcase className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{dashboardData?.completedJobs || 0}</div>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{dashboardData?.completedJobs || 0}</div>
                         <p className="text-xs text-muted-foreground">
                             ₱{dashboardData?.averageJobValue?.toLocaleString() || '0'} {t('averageJobValue')}
                         </p>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('totalRevenue')}</CardTitle>
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('totalRevenue')}</CardTitle>
+                        <DollarSign className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{dashboardData?.totalRevenue?.toLocaleString() || '0'}</div>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{dashboardData?.totalRevenue?.toLocaleString() || '0'}</div>
                         <p className="text-xs text-muted-foreground">
                             {(dashboardData?.monthlyGrowth || 0) > 0 ? '+' : ''}{(dashboardData?.monthlyGrowth || 0).toFixed(1)}% {t('monthlyGrowth')}
                         </p>
                     </CardContent>
                 </Card>
 
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('totalCommission')}</CardTitle>
-                        <Award className="h-4 w-4 text-muted-foreground" />
+                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('totalCommission')}</CardTitle>
+                        <Award className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{dashboardData?.totalCommission?.toLocaleString() || '0'}</div>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{dashboardData?.totalCommission?.toLocaleString() || '0'}</div>
                         <p className="text-xs text-muted-foreground">
                             {dashboardData?.conversionRate?.toFixed(1) || '0'}% {t('conversionRate')}
                         </p>

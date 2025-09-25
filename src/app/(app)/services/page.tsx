@@ -38,7 +38,7 @@ export default function ServicesPage() {
     const [selectedService, setSelectedService] = useState<Service | null>(null);
 
     const fetchServices = async () => {
-        if (!user) return;
+        if (!user || !db) return;
         setLoading(true);
         try {
             const q = query(collection(db, "services"), where("userId", "==", user.uid));
@@ -76,6 +76,7 @@ export default function ServicesPage() {
     };
     
     const handleDeleteService = async (serviceId: string) => {
+        if (!db) return;
         try {
             await deleteDoc(doc(db, 'services', serviceId));
             toast({ title: t('success'), description: t('serviceDeletedSuccessfully') });
@@ -95,13 +96,13 @@ export default function ServicesPage() {
         <div className="max-w-6xl mx-auto space-y-8">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">
                         {t('subtitle')}
                     </p>
                 </div>
                  <div className="flex items-center gap-2">
-                    <Button onClick={handleAddService}>
+                    <Button onClick={handleAddService} className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
                         <PlusCircle className="mr-2" />
                         {t('addNewService')}
                     </Button>
@@ -111,7 +112,7 @@ export default function ServicesPage() {
             {loading ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {[...Array(3)].map((_, i) => (
-                        <Card key={i}>
+                        <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                             <CardHeader>
                                 <Skeleton className="h-6 w-3/4" />
                                 <Skeleton className="h-4 w-1/4" />
@@ -128,10 +129,10 @@ export default function ServicesPage() {
             ) : services.length > 0 ? (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {services.map((service) => (
-                        <Card key={service.id} className="flex flex-col">
-                            <CardHeader>
+                        <Card key={service.id} className="flex flex-col shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                            <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                                 <div className="flex items-start justify-between">
-                                    <CardTitle>{service.name}</CardTitle>
+                                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent group-hover:from-primary group-hover:to-accent">{service.name}</CardTitle>
                                     <AlertDialog>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
@@ -173,17 +174,17 @@ export default function ServicesPage() {
                             <CardContent className="flex-1">
                                 <p className="text-sm text-muted-foreground line-clamp-3">{service.description}</p>
                             </CardContent>
-                            <CardFooter>
-                                <p className="text-lg font-semibold">₱{Number(service.price).toFixed(2)}</p>
+                            <CardFooter className="flex justify-between items-center bg-gradient-to-r from-muted/30 to-muted/20 border-t border-border/50 p-4">
+                                <p className="font-bold text-lg text-primary font-headline bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">₱{Number(service.price).toFixed(2)}</p>
                             </CardFooter>
                         </Card>
                     ))}
                 </div>
             ) : (
-                <Card>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                         <BriefcaseBusiness className="h-16 w-16 mb-4" />
-                        <h3 className="text-xl font-semibold">{t('noServicesFound')}</h3>
+                         <BriefcaseBusiness className="h-16 w-16 mb-4 text-primary opacity-60" />
+                        <h3 className="text-xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noServicesFound')}</h3>
                         <p>{t('noServicesDescription')}</p>
                     </CardContent>
                 </Card>

@@ -44,7 +44,7 @@ export default function JobsPage() {
 
 
     useEffect(() => {
-        if (userRole !== 'provider') {
+        if (userRole !== 'provider' || !db) {
             setLoading(false);
             return;
         }
@@ -104,7 +104,7 @@ export default function JobsPage() {
     return (
         <div className="max-w-6xl mx-auto space-y-8">
             <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                 <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
             {jobs.length > 0 ? (
@@ -112,12 +112,12 @@ export default function JobsPage() {
                     {jobs.map(job => {
                         const hasApplied = job.applications?.includes(user?.uid || '');
                         return (
-                            <Card key={job.id} className="flex flex-col hover:shadow-lg transition-shadow">
+                            <Card key={job.id} className="flex flex-col shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
                                <Link href={`/jobs/${job.id}`} className="flex flex-col flex-1">
-                                    <CardHeader>
-                                        <CardTitle className="hover:text-primary transition-colors">{job.title}</CardTitle>
+                                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                                        <CardTitle className="hover:text-primary transition-colors font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent group-hover:from-primary group-hover:to-accent">{job.title}</CardTitle>
                                         <CardDescription>
-                                            <Badge variant="secondary">{job.categoryName}</Badge>
+                                            <Badge variant="secondary" className="shadow-soft">{job.categoryName}</Badge>
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent className="flex-1 space-y-4">
@@ -142,8 +142,8 @@ export default function JobsPage() {
                                         </div>
                                     </CardContent>
                                 </Link>
-                                <CardFooter className="flex justify-between items-center bg-secondary/50 p-4">
-                                    <div className="font-bold text-lg text-primary">{formatBudget(job.budget)}</div>
+                                <CardFooter className="flex justify-between items-center bg-gradient-to-r from-muted/30 to-muted/20 border-t border-border/50 p-4">
+                                    <div className="font-bold text-lg text-primary font-headline bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{formatBudget(job.budget)}</div>
                                     <Button
                                         onClick={(e) => {
                                             e.stopPropagation();
@@ -151,6 +151,7 @@ export default function JobsPage() {
                                         }}
                                         disabled={hasApplied}
                                         title={hasApplied ? t('alreadyApplied') : t('applyForThisJob')}
+                                        className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground"
                                     >
                                         <div className="flex items-center gap-2">
                                             {hasApplied ? t('applied') : t('applyNow')}
@@ -162,10 +163,10 @@ export default function JobsPage() {
                     })}
                 </div>
             ) : (
-                <Card>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <Briefcase className="h-16 w-16 mb-4" />
-                        <h3 className="text-xl font-semibold">{t('noOpenJobs')}</h3>
+                        <Briefcase className="h-16 w-16 mb-4 text-primary opacity-60" />
+                        <h3 className="text-xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noOpenJobs')}</h3>
                         <p>{t('noOpenJobsDescription')}</p>
                     </CardContent>
                 </Card>

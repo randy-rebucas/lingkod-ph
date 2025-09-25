@@ -81,8 +81,8 @@ export default function ManageProvidersPage() {
             return;
         }
 
-        const providersQuery = query(collection(db, "users"), where("agencyId", "==", user.uid));
-        const invitesQuery = query(collection(db, "invites"), where("agencyId", "==", user.uid), where("status", "==", "pending"));
+        const providersQuery = query(collection(db!, "users"), where("agencyId", "==", user.uid));
+        const invitesQuery = query(collection(db!, "invites"), where("agencyId", "==", user.uid), where("status", "==", "pending"));
 
         const unsubscribeProviders = onSnapshot(providersQuery, (snapshot) => {
             const activeProviders = snapshot.docs.map(doc => ({
@@ -120,11 +120,11 @@ export default function ManageProvidersPage() {
     }, [user, userRole]);
     
     const handleInviteProvider = async () => {
-        if (!user || !inviteEmail) return;
+        if (!user || !inviteEmail || !db) return;
 
         setIsInviting(true);
         try {
-            const userQuery = query(collection(db, "users"), where("email", "==", inviteEmail));
+            const userQuery = query(collection(db!, "users"), where("email", "==", inviteEmail));
             const userSnapshot = await getDocs(userQuery);
 
             if (userSnapshot.empty) {
@@ -148,7 +148,7 @@ export default function ManageProvidersPage() {
                 return;
             }
 
-            const existingInviteQuery = query(collection(db, "invites"), where("email", "==", inviteEmail), where("status", "==", "pending"));
+            const existingInviteQuery = query(collection(db!, "invites"), where("email", "==", inviteEmail), where("status", "==", "pending"));
             const inviteSnapshot = await getDocs(existingInviteQuery);
 
              if (!inviteSnapshot.empty) {
@@ -158,7 +158,7 @@ export default function ManageProvidersPage() {
             }
 
             const batch = writeBatch(db);
-            const inviteRef = doc(collection(db, "invites"));
+            const inviteRef = doc(collection(db!, "invites"));
             batch.set(inviteRef, {
                 agencyId: user.uid,
                 agencyName: user.displayName,
@@ -170,7 +170,7 @@ export default function ManageProvidersPage() {
 
             const providerNotifSettings = providerData.notificationSettings;
             if (providerNotifSettings?.agencyInvites !== false) {
-                 const notificationRef = doc(collection(db, `users/${providerDoc.id}/notifications`));
+                 const notificationRef = doc(collection(db!, `users/${providerDoc.id}/notifications`));
                 batch.set(notificationRef, {
                     type: 'agency_invite',
                     message: `You have been invited to join ${user.displayName}.`,
@@ -197,14 +197,14 @@ export default function ManageProvidersPage() {
     };
 
     const handleRemoveProvider = async (providerId: string, status: Provider['status']) => {
-        if (!user) return;
+        if (!user || !db) return;
         try {
-            const batch = writeBatch(db);
+            const batch = writeBatch(db!);
             if (status === 'Active') {
-                const providerRef = doc(db, "users", providerId);
+                const providerRef = doc(db!, "users", providerId);
                 batch.update(providerRef, { agencyId: null });
             } else { // Pending
-                const inviteRef = doc(db, "invites", providerId);
+                const inviteRef = doc(db!, "invites", providerId);
                 batch.delete(inviteRef);
             }
             await batch.commit();
@@ -287,9 +287,9 @@ export default function ManageProvidersPage() {
 
     if (userRole !== 'agency') {
         return (
-             <div className="space-y-6">
+             <div className="max-w-6xl mx-auto space-y-8">
                  <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">{t('agencyOnly')}</p>
                 </div>
             </div>
@@ -297,17 +297,17 @@ export default function ManageProvidersPage() {
     }
 
     return (
-      <div className="space-y-6">
+      <div className="max-w-6xl mx-auto space-y-8">
           <div className="flex items-center justify-between">
               <div>
-                  <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                  <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                   <p className="text-muted-foreground">
                       {t('subtitle')}
                   </p>
               </div>
                 <Dialog open={isInviteDialogOpen} onOpenChange={setInviteDialogOpen}>
                         <DialogTrigger asChild>
-                             <Button>
+                             <Button className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
                                 <UserPlus className="mr-2 h-4 w-4" />
                                 {t('inviteProvider')}
                             </Button>
@@ -350,7 +350,7 @@ export default function ManageProvidersPage() {
                 </CardDescription>
             </CardHeader>
              <CardContent>
-                <div className="rounded-md border bg-card">
+                <div className="rounded-md border bg-card shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                    {loading ? (
                      <div className="p-4 space-y-2">
                          {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}

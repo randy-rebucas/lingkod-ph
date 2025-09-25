@@ -53,7 +53,7 @@ export function NotificationBell() {
     const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || !db) return;
 
         const notifsRef = collection(db, `users/${user.uid}/notifications`);
         const q = query(notifsRef, orderBy('createdAt', 'desc'), limit(10));

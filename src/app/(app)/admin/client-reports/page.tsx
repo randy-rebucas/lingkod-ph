@@ -68,7 +68,7 @@ export default function ClientReportsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (userRole !== 'admin') {
+        if (userRole !== 'admin' || !db) {
             setLoading(false);
             return;
         }
@@ -121,23 +121,25 @@ export default function ClientReportsPage() {
 
     if (userRole !== 'admin') {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
+            <div className="max-w-6xl mx-auto space-y-8">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                        <CardDescription>This page is for administrators only.</CardDescription>
+                    </CardHeader>
+                </Card>
+            </div>
         );
     }
     
     if (loading) {
         return (
-             <div className="space-y-6">
+             <div className="max-w-6xl mx-auto space-y-8">
                  <div>
-                    <h1 className="text-3xl font-bold font-headline">Client Reports</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Client Reports</h1>
                     <p className="text-muted-foreground">Analyze client usage and satisfaction.</p>
                 </div>
-                <Card>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-6">
                         <Skeleton className="h-64 w-full" />
                     </CardContent>
@@ -148,16 +150,16 @@ export default function ClientReportsPage() {
 
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-6xl mx-auto space-y-8">
             <div>
-                <h1 className="text-3xl font-bold font-headline">Client Reports</h1>
+                <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Client Reports</h1>
                 <p className="text-muted-foreground">
                     Analyze client usage, spending habits, and satisfaction scores.
                 </p>
             </div>
-             <Card>
-                 <CardHeader>
-                    <CardTitle>Client Usage Overview</CardTitle>
+             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                 <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Client Usage Overview</CardTitle>
                     <CardDescription>All clients on the platform, sorted by total amount spent.</CardDescription>
                 </CardHeader>
                 <CardContent>

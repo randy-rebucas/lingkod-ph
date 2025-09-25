@@ -89,6 +89,7 @@ export default function PostAJobPage() {
 
    useEffect(() => {
         const fetchCategories = async () => {
+            if (!db) return;
             try {
                 const categoriesRef = collection(db, "categories");
                 const q = query(categoriesRef, orderBy("name"));
@@ -104,7 +105,7 @@ export default function PostAJobPage() {
     
      useEffect(() => {
         const fetchJobData = async () => {
-            if (!editJobId || !user) return;
+            if (!editJobId || !user || !db) return;
             setIsLoadingJob(true);
             const jobRef = doc(db, "jobs", editJobId);
             const jobSnap = await getDoc(jobRef);
@@ -215,9 +216,9 @@ export default function PostAJobPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold font-headline">{pageTitle}</h1>
+        <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{pageTitle}</h1>
         <p className="text-muted-foreground">{pageDescription}</p>
       </div>
 

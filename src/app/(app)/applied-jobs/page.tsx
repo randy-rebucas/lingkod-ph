@@ -49,7 +49,7 @@ export default function AppliedJobsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!user || userRole !== 'provider') {
+        if (!user || userRole !== 'provider' || !db) {
             setLoading(false);
             return;
         }
@@ -81,9 +81,9 @@ export default function AppliedJobsPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -94,9 +94,9 @@ export default function AppliedJobsPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-6xl mx-auto space-y-8">
             <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                 <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
             
@@ -104,17 +104,17 @@ export default function AppliedJobsPage() {
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {appliedJobs.map(job => (
                         <Link key={job.id} href={`/jobs/${job.id}`}>
-                            <Card className="hover:shadow-lg transition-shadow h-full">
-                                <CardHeader>
-                                    <CardTitle className="hover:text-primary transition-colors">{job.title}</CardTitle>
+                            <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group h-full">
+                                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent group-hover:from-primary group-hover:to-accent">{job.title}</CardTitle>
                                     <CardDescription>
                                         {t('postedBy', { clientName: job.clientName })}
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="flex justify-between items-center">
-                                        <p className="font-bold text-lg text-primary">{formatBudget(job.budget)}</p>
-                                        <Badge variant={getStatusVariant(job.status || 'Open')}>{job.status || 'Open'}</Badge>
+                                        <p className="font-bold text-lg text-primary font-headline bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{formatBudget(job.budget)}</p>
+                                        <Badge variant={getStatusVariant(job.status || 'Open')} className="shadow-soft">{job.status || 'Open'}</Badge>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -122,10 +122,10 @@ export default function AppliedJobsPage() {
                     ))}
                 </div>
             ) : (
-                 <Card>
+                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <CheckSquare className="h-16 w-16 mb-4" />
-                        <h3 className="text-xl font-semibold">{t('noAppliedJobs')}</h3>
+                        <CheckSquare className="h-16 w-16 mb-4 text-primary opacity-60" />
+                        <h3 className="text-xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noAppliedJobs')}</h3>
                         <p>{t('noAppliedJobsDescription')}</p>
                     </CardContent>
                 </Card>

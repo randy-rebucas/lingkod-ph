@@ -106,12 +106,13 @@ export default function ReportsPage() {
     const isAgency = userRole === 'agency';
     
     useEffect(() => {
-        if (!user || !isAgency) {
+        if (!user || !isAgency || !db) {
             setLoading(false);
             return;
         }
 
         const fetchAgencyData = async () => {
+            if (!db) return;
             setLoading(true);
             try {
                 const providersQuery = query(collection(db, "users"), where("agencyId", "==", user.uid));
@@ -202,18 +203,18 @@ export default function ReportsPage() {
         return (
             <div className="max-w-6xl mx-auto space-y-8">
                  <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('upgradeTitle')}</CardTitle>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('upgradeTitle')}</CardTitle>
                         <CardDescription>{t('upgradeDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <FilePieChart className="h-16 w-16 mb-4" />
+                        <FilePieChart className="h-16 w-16 mb-4 text-primary opacity-60" />
                         <p className="mb-4">{t('getInsights')}</p>
-                         <Button asChild>
+                         <Button asChild className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
                         </Button>
                     </CardContent>
                 </Card>
@@ -245,44 +246,44 @@ export default function ReportsPage() {
         <div className="max-w-6xl mx-auto space-y-8">
              <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">{pageTitle}</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{pageTitle}</h1>
                     <p className="text-muted-foreground">{pageDescription}</p>
                 </div>
             </div>
             
             <div className="grid gap-6 md:grid-cols-3">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('totalRevenue')}</CardTitle>
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('totalRevenue')}</CardTitle>
+                        <DollarSign className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{reportData.totalRevenue.toFixed(2)}</div>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{reportData.totalRevenue.toFixed(2)}</div>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('completedBookings')}</CardTitle>
-                        <BookCheck className="h-4 w-4 text-muted-foreground" />
+                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('completedBookings')}</CardTitle>
+                        <BookCheck className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{reportData.totalCompletedBookings}</div>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{reportData.totalCompletedBookings}</div>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">{t('avgBookingValue')}</CardTitle>
-                        <Calculator className="h-4 w-4 text-muted-foreground" />
+                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('avgBookingValue')}</CardTitle>
+                        <Calculator className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₱{reportData.averageBookingValue.toFixed(2)}</div>
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{reportData.averageBookingValue.toFixed(2)}</div>
                     </CardContent>
                 </Card>
             </div>
             
-             <Card>
-                <CardHeader>
-                    <CardTitle>{t('payoutRequests')}</CardTitle>
+             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('payoutRequests')}</CardTitle>
                     <CardDescription>{t('payoutRequestsDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
