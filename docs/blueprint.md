@@ -1,4 +1,4 @@
-# **App Name**: Lingkod PH
+# **App Name**: LocalPro
 
 ## Core Features:
 

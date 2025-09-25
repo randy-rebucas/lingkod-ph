@@ -141,7 +141,7 @@ export default function CookiesPage() {
         "We comply with the Data Privacy Act of 2012 (Republic Act No. 10173) and other applicable data protection laws.",
         "Personal data collected through cookies is processed in accordance with our Privacy Policy.",
         "We implement appropriate technical and organizational measures to protect your personal data.",
-        "You have the right to access, correct, or delete your personal data. Contact us at privacy@localpro.asia for data subject requests.",
+        "You have the right to access, correct, or delete your personal data. Contact us at admin@localpro.asia for data subject requests.",
         "We do not sell your personal data to third parties. We may share data with trusted partners only as described in our Privacy Policy.",
       ],
       important: true
@@ -165,10 +165,10 @@ export default function CookiesPage() {
       icon: <Mail className="h-5 w-5" />,
       content: [
         "If you have any questions about our use of cookies or this Cookie Policy, please contact us:",
-        "📧 Privacy Team: privacy@localpro.asia",
-        "📧 General Support: support@localpro.asia",
-        "📞 Phone: +63 917 915 7515",
-        "📍 Address: Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6530",
+        "📧 Privacy Team: admin@localpro.asia",
+        "📧 General Support: admin@localpro.asia",
+        "📞 Phone: +639179157515",
+        "📍 Address: A. Bonifacio St, Baybay City, Leyte Philippines 6521",
         "We're here to help and will respond to your inquiries within 48 hours.",
       ],
       important: false
@@ -448,7 +448,7 @@ export default function CookiesPage() {
                   </p>
                   <div className="grid md:grid-cols-2 gap-4 max-w-2xl mx-auto">
                     <Button asChild size="lg" className="h-12">
-                      <a href="mailto:privacy@localpro.asia">
+                      <a href="mailto:admin@localpro.asia">
                         <Mail className="mr-2 h-5 w-5" />
                         {t('privacyTeam')}
                       </a>

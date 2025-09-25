@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Lingkod PH payment system is a comprehensive solution that handles multiple payment methods, verification processes, and transaction management. The system supports both automated payments (PayPal) and manual payment verification for local payment methods (GCash, Maya, Bank Transfer).
+The LocalPro payment system is a comprehensive solution that handles multiple payment methods, verification processes, and transaction management. The system supports both automated payments (PayPal) and manual payment verification for local payment methods (GCash, Maya, Bank Transfer).
 
 ## Architecture
 
@@ -266,14 +266,14 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
 ```typescript
 // GCash Configuration
 const gcashConfig = {
-  accountName: "Lingkod PH Services",
-  accountNumber: "0917-123-4567",
+  accountName: "LocalPro Services",
+  accountNumber: "09179157515",
   qrCode: "base64_encoded_qr_code"
 };
 
 // Bank Transfer Configuration
 const bankConfig = {
-  accountName: "Lingkod PH Services Inc.",
+  accountName: "LocalPro Services Inc.",
   accountNumber: "1234-5678-90",
   bankName: "BPI"
 };
@@ -428,9 +428,9 @@ const testBooking = {
    - Check SMTP logs
 
 ### Support Contacts
-- **Technical Issues**: development@lingkodph.com
-- **Payment Issues**: payments@lingkodph.com
-- **General Support**: support@lingkodph.com
+- **Technical Issues**: admin@localpro.asia
+- **Payment Issues**: admin@localpro.asia
+- **General Support**: admin@localpro.asia
 
 ## Future Enhancements
 
@@ -453,6 +453,6 @@ const testBooking = {
 
 ## Conclusion
 
-The Lingkod PH payment system provides a robust, secure, and user-friendly solution for handling various payment methods and verification processes. The system is designed to scale with the platform's growth while maintaining security and reliability standards.
+The LocalPro payment system provides a robust, secure, and user-friendly solution for handling various payment methods and verification processes. The system is designed to scale with the platform's growth while maintaining security and reliability standards.
 
 For technical support or questions about the payment system, please contact the development team or refer to the API documentation for detailed implementation guides.

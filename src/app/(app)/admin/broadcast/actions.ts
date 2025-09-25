@@ -87,7 +87,7 @@ export async function sendCampaignEmailAction(data: z.infer<typeof campaignEmail
         for (let i = 0; i < providerEmails.length; i += BATCH_SIZE) {
             const batchEmails = providerEmails.slice(i, i + BATCH_SIZE);
             await resend.emails.send({
-                from: 'LocalPro Team <onboarding@resend.dev>',
+                from: 'LocalPro Team <admin@localpro.asia>',
                 to: 'delivered@resend.dev', // Required, but BCC is used for the actual list
                 bcc: batchEmails.map(p => p.email),
                 subject: subject,

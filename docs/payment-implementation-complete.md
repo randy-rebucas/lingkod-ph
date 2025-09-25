@@ -2,7 +2,7 @@
 
 ## Overview
 
-The payment system for Lingkod PH has been fully implemented and is now fully functional. The system supports multiple payment methods including PayPal, GCash (via Adyen), Maya, and Bank Transfer with comprehensive error handling and user feedback.
+The payment system for LocalPro has been fully implemented and is now fully functional. The system supports multiple payment methods including PayPal, GCash (via Adyen), Maya, and Bank Transfer with comprehensive error handling and user feedback.
 
 ## ✅ Completed Features
 
@@ -118,11 +118,11 @@ ADYEN_HMAC_KEY=your_hmac_key
 
 ### Local Payment Methods
 ```env
-GCASH_ACCOUNT_NAME=Lingkod PH Services
-GCASH_ACCOUNT_NUMBER=0917-123-4567
-MAYA_ACCOUNT_NAME=Lingkod PH Services
-MAYA_ACCOUNT_NUMBER=0918-000-5678
-BANK_ACCOUNT_NAME=Lingkod PH Services Inc.
+GCASH_ACCOUNT_NAME=LocalPro Services
+GCASH_ACCOUNT_NUMBER=09179157515
+MAYA_ACCOUNT_NAME=LocalPro Services
+MAYA_ACCOUNT_NUMBER=09179157515
+BANK_ACCOUNT_NAME=LocalPro Services Inc.
 BANK_ACCOUNT_NUMBER=1234-5678-90
 BANK_NAME=BPI
 ```

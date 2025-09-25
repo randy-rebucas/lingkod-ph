@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This report presents a comprehensive security audit of the **Partner** role in the Lingkod PH platform. The Partner role is designed for business partners and affiliates, providing access to partner-specific analytics and management features.
+This report presents a comprehensive security audit of the **Partner** role in the LocalPro platform. The Partner role is designed for business partners and affiliates, providing access to partner-specific analytics and management features.
 
 **Overall Security Rating: 8/10** ⭐⭐⭐⭐⭐⭐⭐⭐
 

@@ -386,7 +386,7 @@
     "servicesOffered": "Mga Serbisyong Inaalok",
     "servicesPlaceholder": "e.g., Deep cleaning, plumbing repairs, haircut at color",
     "location": "Lokasyon",
-    "locationPlaceholder": "e.g., Quezon City, Metro Manila",
+    "locationPlaceholder": "e.g., Baybay City, Leyte",
     "locationHint": "I-specify ang city o region para sa accurate na local pricing.",
     "analyzing": "Sinusuri...",
     "getSuggestion": "Kumuha ng Suggestion",
@@ -700,9 +700,9 @@
     "clientName": "Pangalan ng Client",
     "clientNamePlaceholder": "Juan Dela Cruz",
     "clientEmail": "Email ng Client",
-    "clientEmailPlaceholder": "juan@example.com",
+    "clientEmailPlaceholder": "juan@admin.localpro.asia",
     "clientAddress": "Address ng Client",
-    "clientAddressPlaceholder": "123 Rizal St, Brgy. Poblacion, Quezon City",
+    "clientAddressPlaceholder": "A. Bonifacio St, Baybay City, Leyte Philippines 6521",
     "quoteDetails": "Mga Detalye ng Quote",
     "quoteDetailsDescription": "I-set ang quote number at validity period.",
     "quoteNumber": "Quote Number",
@@ -788,7 +788,7 @@
     "name": "Pangalan",
     "namePlaceholder": "Ang Iyong Pangalan",
     "email": "Email",
-    "emailPlaceholder": "your@email.com",
+    "emailPlaceholder": "your@admin.localpro.asia",
     "subject": "Subject",
     "subjectPlaceholder": "Subject ng iyong mensahe",
     "message": "Mensahe",
@@ -1193,7 +1193,7 @@
     "agencyOnly": "Ang page na ito ay para sa mga agency account lamang.",
     "inviteProvider": "Mag-invite ng Provider",
     "inviteNewProvider": "Mag-invite ng Bagong Provider",
-    "inviteDescription": "I-enter ang email address ng provider na gusto mong i-invite. Dapat na registered provider na sila sa LingkodPH.",
+    "inviteDescription": "I-enter ang email address ng provider na gusto mong i-invite. Dapat na registered provider na sila sa LocalPro.",
     "email": "Email",
     "sendInvite": "Ipadala ang Invite",
     "yourProviderNetwork": "Ang Iyong Provider Network",
@@ -1210,7 +1210,7 @@
     "noProvidersYet": "Wala pang mga provider.",
     "noProvidersDescription": "I-click ang \"Mag-invite ng Provider\" para makabuo ng iyong team.",
     "providerNotFound": "Hindi Nahanap ang Provider",
-    "providerNotFoundDescription": "Ang user na ito ay hindi registered sa LingkodPH. Mangyaring sabihin sa kanila na mag-sign up bilang provider muna.",
+    "providerNotFoundDescription": "Ang user na ito ay hindi registered sa LocalPro. Mangyaring sabihin sa kanila na mag-sign up bilang provider muna.",
     "invalidUserRole": "Hindi Valid na User Role",
     "invalidUserRoleDescription": "Ang user na ito ay hindi registered na provider.",
     "alreadyInAgency": "Nasa Agency na",
@@ -1757,7 +1757,7 @@
     "contactDescription": "Kung may mga tanong kayo tungkol sa kung paano namin ginagamit ang mga cookies o kailangan ng tulong sa pagpamahala ng inyong mga kagustuhan, nandito ang aming privacy team para tumulong.",
     "privacyTeam": "Privacy Team",
     "callSupport": "Tumawag sa Support",
-    "address": "📍 Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6530"
+    "address": "📍 A. Bonifacio St, Baybay City, Leyte Philippines 6521"
   },
   "PrivacyPolicy": {
     "title": "Patakaran sa Privacy",
@@ -1785,6 +1785,6 @@
     "contactDescription": "Kung may mga tanong kayo tungkol sa Privacy Policy na ito o kung paano namin hinahawakan ang inyong personal na impormasyon, mangyaring makipag-ugnayan sa aming privacy team.",
     "privacyOfficer": "Privacy Officer",
     "callSupport": "Tumawag sa Support",
-    "address": "📍 Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6530"
+    "address": "📍 A. Bonifacio St, Baybay City, Leyte Philippines 6521"
   }
 }

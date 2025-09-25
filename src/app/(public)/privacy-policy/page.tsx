@@ -208,11 +208,11 @@ export default function PrivacyPolicyPage() {
       icon: <Mail className="h-5 w-5" />,
       content: [
         "If you have any questions about this Privacy Policy or our data practices, please contact us:",
-        "📧 Privacy Officer: privacy@localpro.asia",
-        "📧 Data Protection Officer: dpo@localpro.asia",
-        "📧 General Support: support@localpro.asia",
-        "📞 Phone: +63 917 915 7515",
-        "📍 Address: Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6530",
+        "📧 Privacy Officer: admin@localpro.asia",
+        "📧 Data Protection Officer: admin@localpro.asia",
+        "📧 General Support: admin@localpro.asia",
+        "📞 Phone: +639179157515",
+        "📍 Address: A. Bonifacio St, Baybay City, Leyte Philippines 6521",
         "We will respond to your inquiries within 48 hours and address any concerns promptly.",
       ],
       important: false
@@ -406,7 +406,7 @@ export default function PrivacyPolicyPage() {
                   </p>
                   <div className="grid md:grid-cols-2 gap-4 max-w-2xl mx-auto">
                     <Button asChild size="lg" className="h-12">
-                      <a href="mailto:privacy@localpro.asia">
+                      <a href="mailto:admin@localpro.asia">
                         <Mail className="mr-2 h-5 w-5" />
                         {t('privacyOfficer')}
                       </a>

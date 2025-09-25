@@ -1,6 +1,6 @@
-# Lingkod PH - Client Subscription User Guide
+# LocalPro - Client Subscription User Guide
 
-## Welcome to Lingkod PH Client Subscriptions! 🎉
+## Welcome to LocalPro Client Subscriptions! 🎉
 
 This guide will help you understand and make the most of our subscription plans designed to enhance your service discovery and booking experience.
 
@@ -22,7 +22,7 @@ This guide will help you understand and make the most of our subscription plans 
 
 ## Subscription Plans Overview
 
-Lingkod PH offers two subscription tiers designed to help clients at different stages of their service discovery journey:
+LocalPro offers two subscription tiers designed to help clients at different stages of their service discovery journey:
 
 ### 🆓 Free Plan
 **Perfect for getting started**
@@ -382,9 +382,9 @@ A: Contact our support team with the partner name and discount details, and we'l
 ### 📞 Getting Help
 
 **Email Support:**
-- **General Questions:** support@lingkod.ph
-- **Billing Issues:** billing@lingkod.ph
-- **Technical Problems:** tech@lingkod.ph
+- **General Questions:** admin@localpro.asia
+- **Billing Issues:** admin@localpro.asia
+- **Technical Problems:** admin@localpro.asia
 
 **Response Times:**
 - **General Inquiries:** Within 24 hours
@@ -457,7 +457,7 @@ A: Contact our support team with the partner name and discount details, and we'l
 
 ---
 
-## Thank You for Choosing Lingkod PH! 🙏
+## Thank You for Choosing LocalPro! 🙏
 
 We're committed to helping you find the best services for your needs. Our Premium plan is designed to give you the tools and access you need to discover and book services faster and more efficiently.
 

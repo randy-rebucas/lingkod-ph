@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully implemented a complete GCash payment integration with Adyen for Lingkod PH, providing both automated and manual payment options for users.
+Successfully implemented a complete GCash payment integration with Adyen for LocalPro, providing both automated and manual payment options for users.
 
 ## ✅ Completed Features
 
@@ -291,8 +291,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ### Support Contacts
 - **Adyen Support**: [Adyen Support Portal](https://support.adyen.com)
-- **Technical Issues**: development@lingkodph.com
-- **Payment Issues**: payments@lingkodph.com
+- **Technical Issues**: admin@localpro.asia
+- **Payment Issues**: admin@localpro.asia
 
 ---
 

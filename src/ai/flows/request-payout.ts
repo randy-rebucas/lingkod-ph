@@ -84,7 +84,7 @@ const requestPayoutFlow = ai.defineFlow(
       }
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
-        from: 'Payouts <onboarding@resend.dev>',
+        from: 'Payouts <admin@localpro.asia>',
         to: adminEmail,
         subject: `New Payout Request from ${providerData.displayName}`,
         react: PayoutRequestEmail({

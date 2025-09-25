@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the comprehensive enhancements implemented for the Partner role in the Lingkod PH platform. These enhancements address the immediate (high priority) recommendations from the Partner Role Security Audit Report.
+This document outlines the comprehensive enhancements implemented for the Partner role in the LocalPro platform. These enhancements address the immediate (high priority) recommendations from the Partner Role Security Audit Report.
 
 ## Implemented Enhancements
 

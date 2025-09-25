@@ -75,7 +75,7 @@ const partnershipTypes = [
 
 const successStories = [
   {
-    company: "Metro Manila LGU",
+    company: "Baybay City LGU",
     type: "Government Partnership",
     result: "300% increase in local employment",
     description: "Partnered with LocalPro to create a comprehensive job matching program for residents, resulting in over 2,000 successful job placements in the first year.",
@@ -119,7 +119,7 @@ const partnerTestimonials = [
   {
     name: "Juan Dela Cruz",
     role: "Mayor",
-    company: "Quezon City LGU",
+    company: "Baybay City LGU",
     content: "The partnership with LocalPro has created hundreds of jobs in our community. It's been a game-changer for local employment and economic development. Highly recommended for any LGU.",
     rating: 5,
     avatar: "JD",
@@ -495,7 +495,7 @@ export default function PartnersPage() {
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                  <a href="mailto:partnerships@localpro.asia">
+                  <a href="mailto:admin@localpro.asia">
                     <Mail className="mr-2 h-5 w-5" />
                     Contact Sales Team
                   </a>

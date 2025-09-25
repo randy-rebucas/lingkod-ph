@@ -246,7 +246,7 @@ const SignupFormContainer = () => {
             <Input 
               id="email" 
               type="email" 
-              placeholder="m@example.com" 
+              placeholder="m@admin.localpro.asia" 
               required 
               value={email} 
               onChange={e => setEmail(e.target.value)}

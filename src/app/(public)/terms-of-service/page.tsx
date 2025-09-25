@@ -246,10 +246,10 @@ export default function TermsOfServicePage() {
       icon: <Mail className="h-5 w-5" />,
       content: [
         "For questions, concerns, or legal notices regarding these Terms, please contact us at:",
-        "📧 Legal Department: legal@localpro.asia",
-        "📧 General Support: support@localpro.asia",
-        "📞 Phone: +63 917 915 7515",
-        "📍 Address: Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6530",
+        "📧 Legal Department: admin@localpro.asia",
+        "📧 General Support: admin@localpro.asia",
+        "📞 Phone: +639179157515",
+        "📍 Address: A. Bonifacio St, Baybay City, Leyte Philippines 6521",
       ],
       important: false
     },
@@ -442,7 +442,7 @@ export default function TermsOfServicePage() {
                   </p>
                   <div className="grid md:grid-cols-2 gap-4 max-w-2xl mx-auto">
                     <Button asChild size="lg" className="h-12">
-                      <a href="mailto:legal@localpro.asia">
+                      <a href="mailto:admin@localpro.asia">
                         <Mail className="mr-2 h-5 w-5" />
                         Legal Department
                       </a>
@@ -455,7 +455,7 @@ export default function TermsOfServicePage() {
                     </Button>
                   </div>
                   <div className="mt-6 text-sm text-muted-foreground">
-                    <p>📍 Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6530</p>
+                    <p>📍 A. Bonifacio St, Baybay City, Leyte Philippines 6521</p>
                   </div>
                 </CardContent>
               </Card>

@@ -1,4 +1,4 @@
-# Lingkod PH - API Documentation
+# LocalPro - API Documentation
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -16,11 +16,11 @@
 
 ## Overview
 
-The Lingkod PH API provides role-based access to platform functionality through RESTful endpoints. All API requests require authentication and are subject to role-based access control.
+The LocalPro API provides role-based access to platform functionality through RESTful endpoints. All API requests require authentication and are subject to role-based access control.
 
 ### Base URL
 ```
-Production: https://lingkod-ph.com/api
+Production: https://localpro.asia/api
 Development: http://localhost:9002/api
 ```
 
@@ -93,12 +93,12 @@ POST /api/auth/register
 Content-Type: application/json
 
 {
-  "email": "client@example.com",
+  "email": "client@admin.localpro.asia",
   "password": "securepassword",
   "role": "client",
   "firstName": "Maria",
   "lastName": "Santos",
-  "phone": "+639123456789"
+  "phone": "+639179157515"
 }
 ```
 
@@ -108,7 +108,7 @@ Content-Type: application/json
   "success": true,
   "user": {
     "uid": "user123",
-    "email": "client@example.com",
+    "email": "client@admin.localpro.asia",
     "role": "client",
     "firstName": "Maria",
     "lastName": "Santos"
@@ -123,7 +123,7 @@ POST /api/auth/login
 Content-Type: application/json
 
 {
-  "email": "client@example.com",
+  "email": "client@admin.localpro.asia",
   "password": "securepassword"
 }
 ```
@@ -252,7 +252,7 @@ Content-Type: application/json
     "max": 80000
   },
   "timeline": "2-3 months",
-  "location": "Quezon City",
+  "location": "Baybay City, Leyte",
   "requirements": [
     "Licensed contractor",
     "5+ years experience",
@@ -307,7 +307,7 @@ Content-Type: application/json
   "category": "cleaning",
   "price": 1500,
   "duration": 120,
-  "location": "Metro Manila",
+  "location": "Baybay City, Leyte",
   "requirements": "Access to water and electricity"
 }
 ```
@@ -471,7 +471,7 @@ Authorization: Bearer <jwt_token>
 Content-Type: application/json
 
 {
-  "email": "provider@example.com",
+  "email": "provider@admin.localpro.asia",
   "role": "provider",
   "message": "Join our agency team!"
 }
@@ -553,11 +553,11 @@ Authorization: Bearer <jwt_token>
 Content-Type: application/json
 
 {
-  "email": "newuser@example.com",
+  "email": "newuser@admin.localpro.asia",
   "role": "provider",
   "firstName": "John",
   "lastName": "Doe",
-  "phone": "+639123456789"
+  "phone": "+639179157515"
 }
 ```
 
@@ -804,4 +804,4 @@ X-RateLimit-Reset: 1640995200
 
 ---
 
-This API documentation provides comprehensive information about all available endpoints, authentication methods, and best practices for integrating with the Lingkod PH platform.
+This API documentation provides comprehensive information about all available endpoints, authentication methods, and best practices for integrating with the LocalPro platform.

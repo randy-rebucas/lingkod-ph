@@ -1,7 +1,7 @@
 # Payment System Quick Reference
 
 ## Overview
-Complete payment integration for Lingkod PH with support for PayPal, GCash, Maya, and Bank Transfer payments.
+Complete payment integration for LocalPro with support for PayPal, GCash, Maya, and Bank Transfer payments.
 
 ## Key Features Completed ✅
 
@@ -150,8 +150,8 @@ POST /api/admin/secure-action
 ### GCash
 ```typescript
 {
-  accountName: "Lingkod PH Services",
-  accountNumber: "0917-123-4567",
+  accountName: "LocalPro Services",
+  accountNumber: "09179157515",
   qrCode: "QR_CODE_COMPONENT"
 }
 ```
@@ -159,15 +159,15 @@ POST /api/admin/secure-action
 ### Maya
 ```typescript
 {
-  accountName: "Lingkod PH Services", 
-  accountNumber: "0918-000-5678"
+  accountName: "LocalPro Services", 
+  accountNumber: "09179157515"
 }
 ```
 
 ### Bank Transfer (BPI)
 ```typescript
 {
-  accountName: "Lingkod PH Services Inc.",
+  accountName: "LocalPro Services Inc.",
   accountNumber: "1234-5678-90",
   bankName: "BPI"
 }
@@ -310,9 +310,9 @@ match /transactions/{transactionId} {
 4. **Status not updating**: Check real-time listeners, verify database
 
 ### Contact Information
-- **Technical Issues**: development@lingkodph.com
-- **Payment Issues**: payments@lingkodph.com
-- **General Support**: support@lingkodph.com
+- **Technical Issues**: admin@localpro.asia
+- **Payment Issues**: admin@localpro.asia
+- **General Support**: admin@localpro.asia
 
 ---
 

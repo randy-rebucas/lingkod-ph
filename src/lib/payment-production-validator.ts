@@ -96,7 +96,7 @@ export class PaymentProductionValidator {
     }
 
     // Check for default values
-    if (PaymentConfig.GCASH.accountNumber === '0917-123-4567') {
+    if (PaymentConfig.GCASH.accountNumber === '09179157515') {
       status = status === 'fail' ? 'fail' : 'warning';
       details.push('Using default GCash account number');
     }

@@ -211,11 +211,11 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
                                         <FormItem><FormLabel>Client Name</FormLabel><FormControl><Input placeholder="Juan Dela Cruz" {...field} /></FormControl><FormMessage /></FormItem>
                                     )} />
                                     <FormField control={form.control} name="clientEmail" render={({ field }) => (
-                                        <FormItem><FormLabel>Client Email</FormLabel><FormControl><Input type="email" placeholder="juan@example.com" {...field} /></FormControl><FormMessage /></FormItem>
+                                        <FormItem><FormLabel>Client Email</FormLabel><FormControl><Input type="email" placeholder="juan@admin.localpro.asia" {...field} /></FormControl><FormMessage /></FormItem>
                                     )} />
                                 </div>
                                 <FormField control={form.control} name="clientAddress" render={({ field }) => (
-                                    <FormItem><FormLabel>Client Address</FormLabel><FormControl><Textarea placeholder="123 Rizal St, Brgy. Poblacion, Quezon City" {...field} rows={2} /></FormControl><FormMessage /></FormItem>
+                                    <FormItem><FormLabel>Client Address</FormLabel><FormControl><Textarea placeholder="A. Bonifacio St, Baybay City, Leyte Philippines 6521" {...field} rows={2} /></FormControl><FormMessage /></FormItem>
                                 )} />
                             </div>
 

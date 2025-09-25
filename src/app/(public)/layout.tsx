@@ -202,8 +202,8 @@ const Footer = () => {
               Follow us for updates and community news.
             </p>
             <div className="space-y-2 text-sm">
-              <p className="text-muted-foreground">📧 support@localpro.asia</p>
-              <p className="text-muted-foreground">📞 +63 2 1234 5678</p>
+              <p className="text-muted-foreground">📧 admin@localpro.asia</p>
+              <p className="text-muted-foreground">📞 +639179157515</p>
             </div>
           </div>
         </div>

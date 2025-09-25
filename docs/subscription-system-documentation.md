@@ -1,4 +1,4 @@
-# Lingkod PH - Subscription System Documentation
+# LocalPro - Subscription System Documentation
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -18,7 +18,7 @@
 
 ## Overview
 
-The Lingkod PH subscription system provides a comprehensive tiered access model for providers, offering both free and premium (Pro) subscription plans. The system includes feature access control, payment processing, analytics, and administrative tools.
+The LocalPro subscription system provides a comprehensive tiered access model for providers, offering both free and premium (Pro) subscription plans. The system includes feature access control, payment processing, analytics, and administrative tools.
 
 ### Key Features
 - **Two-tier subscription model**: Free and Pro plans
@@ -749,6 +749,6 @@ gcloud firestore export gs://your-backup-bucket/subscriptions-$(date +%Y%m%d)
 
 ## Conclusion
 
-The Lingkod PH subscription system provides a robust, scalable solution for managing provider subscriptions with comprehensive feature access control, payment processing, and administrative tools. The system is designed to grow with your platform and provide clear value to both free and Pro subscribers.
+The LocalPro subscription system provides a robust, scalable solution for managing provider subscriptions with comprehensive feature access control, payment processing, and administrative tools. The system is designed to grow with your platform and provide clear value to both free and Pro subscribers.
 
 For additional support or feature requests, please refer to the development team or create an issue in the project repository.

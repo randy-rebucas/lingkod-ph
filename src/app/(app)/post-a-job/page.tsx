@@ -371,7 +371,7 @@ export default function PostAJobPage() {
                         render={({ field }) => (
                         <FormItem>
                             <FormLabel>Location / Address</FormLabel>
-                            <FormControl><Input placeholder="e.g., 123 Rizal St, Brgy. Poblacion, Quezon City" {...field} /></FormControl>
+                            <FormControl><Input placeholder="e.g., A. Bonifacio St, Baybay City, Leyte Philippines 6521" {...field} /></FormControl>
                             <FormMessage />
                         </FormItem>
                         )}

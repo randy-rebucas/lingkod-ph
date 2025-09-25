@@ -89,7 +89,7 @@ export const ADMIN_ACTIVITY_CONFIG = {
   MAX_ACTIVITIES_PER_MINUTE: 100,
   
   // Alert recipients (admin emails)
-  DEFAULT_ALERT_RECIPIENTS: ['admin@lingkod.ph', 'security@lingkod.ph']
+  DEFAULT_ALERT_RECIPIENTS: ['admin@localpro.asia', 'admin@localpro.asia']
 };
 
 /**
@@ -358,7 +358,7 @@ ${JSON.stringify(activity.details, null, 2)}
           </div>
           <hr>
           <p style="color: #666; font-size: 12px;">
-            This is an automated alert from Lingkod PH Admin Activity Monitor.
+            This is an automated alert from LocalPro Admin Activity Monitor.
           </p>
         </div>
       `;

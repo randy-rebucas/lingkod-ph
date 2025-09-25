@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides comprehensive instructions for setting up the payment system environment variables and configurations for the Lingkod PH application.
+This guide provides comprehensive instructions for setting up the payment system environment variables and configurations for the LocalPro application.
 
 ## Required Environment Variables
 
@@ -42,15 +42,15 @@ PAYPAL_CLIENT_SECRET=your_paypal_secret_here
 
 ```env
 # GCash Configuration
-GCASH_ACCOUNT_NAME=Lingkod PH Services
-GCASH_ACCOUNT_NUMBER=0917-123-4567
+GCASH_ACCOUNT_NAME=LocalPro Services
+GCASH_ACCOUNT_NUMBER=09179157515
 
 # Maya Configuration
-MAYA_ACCOUNT_NAME=Lingkod PH Services
-MAYA_ACCOUNT_NUMBER=0918-000-5678
+MAYA_ACCOUNT_NAME=LocalPro Services
+MAYA_ACCOUNT_NUMBER=09179157515
 
 # Bank Transfer Configuration
-BANK_ACCOUNT_NAME=Lingkod PH Services Inc.
+BANK_ACCOUNT_NAME=LocalPro Services Inc.
 BANK_ACCOUNT_NUMBER=1234-5678-90
 BANK_NAME=BPI
 ```
@@ -183,7 +183,7 @@ export function validatePaymentConfiguration(): {
   }
 
   // Check for default values (warnings)
-  if (PaymentConfig.GCASH.accountNumber === '0917-123-4567') {
+  if (PaymentConfig.GCASH.accountNumber === '09179157515') {
     warnings.push('Using default GCash account number');
   }
 

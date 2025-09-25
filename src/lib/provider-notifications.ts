@@ -40,7 +40,7 @@ export class ProviderNotificationService {
       const template = this.getJobApplicationTemplate(jobTitle, clientName, providerName);
       
       await resend.emails.send({
-        from: 'Lingkod PH <notifications@lingkod-ph.com>',
+        from: 'LocalPro <admin@localpro.asia>',
         to: [email],
         subject: template.subject,
         html: template.html,
@@ -75,7 +75,7 @@ export class ProviderNotificationService {
       const template = this.getBookingConfirmationTemplate(bookingDetails, providerName);
       
       await resend.emails.send({
-        from: 'Lingkod PH <notifications@lingkod-ph.com>',
+        from: 'LocalPro <admin@localpro.asia>',
         to: [email],
         subject: template.subject,
         html: template.html,
@@ -111,7 +111,7 @@ export class ProviderNotificationService {
       const template = this.getPayoutConfirmationTemplate(payoutDetails, providerName);
       
       await resend.emails.send({
-        from: 'Lingkod PH <notifications@lingkod-ph.com>',
+        from: 'LocalPro <admin@localpro.asia>',
         to: [email],
         subject: template.subject,
         html: template.html,
@@ -146,7 +146,7 @@ export class ProviderNotificationService {
       const template = this.getPayoutProcessedTemplate(payoutDetails, providerName);
       
       await resend.emails.send({
-        from: 'Lingkod PH <notifications@lingkod-ph.com>',
+        from: 'LocalPro <admin@localpro.asia>',
         to: [email],
         subject: template.subject,
         html: template.html,
@@ -183,7 +183,7 @@ export class ProviderNotificationService {
       const template = this.getNewReviewTemplate(reviewDetails, providerName);
       
       await resend.emails.send({
-        from: 'Lingkod PH <notifications@lingkod-ph.com>',
+        from: 'LocalPro <admin@localpro.asia>',
         to: [email],
         subject: template.subject,
         html: template.html,
@@ -216,10 +216,10 @@ export class ProviderNotificationService {
           <div style="margin: 20px 0;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/applied-jobs" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">View Applications</a>
           </div>
-          <p>Best regards,<br>Lingkod PH Team</p>
+          <p>Best regards,<br>LocalPro Team</p>
         </div>
       `,
-      text: `Hello ${providerName},\n\nYour application for the job "${jobTitle}" has been successfully submitted.\n\nClient: ${clientName}\n\nThe client will review your application and get back to you soon. You can track the status of your application in your dashboard.\n\nBest regards,\nLingkod PH Team`
+      text: `Hello ${providerName},\n\nYour application for the job "${jobTitle}" has been successfully submitted.\n\nClient: ${clientName}\n\nThe client will review your application and get back to you soon. You can track the status of your application in your dashboard.\n\nBest regards,\nLocalPro Team`
     };
   }
 
@@ -241,10 +241,10 @@ export class ProviderNotificationService {
           <div style="margin: 20px 0;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/bookings" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">View Booking</a>
           </div>
-          <p>Best regards,<br>Lingkod PH Team</p>
+          <p>Best regards,<br>LocalPro Team</p>
         </div>
       `,
-      text: `Hello ${providerName},\n\nYou have a new booking for your service "${bookingDetails.serviceName}".\n\nClient: ${bookingDetails.clientName}\nService: ${bookingDetails.serviceName}\nDate: ${new Date(bookingDetails.date).toLocaleDateString()}\nAmount: ₱${bookingDetails.price}\n\nPlease prepare for the service and ensure you have all necessary materials ready.\n\nBest regards,\nLingkod PH Team`
+      text: `Hello ${providerName},\n\nYou have a new booking for your service "${bookingDetails.serviceName}".\n\nClient: ${bookingDetails.clientName}\nService: ${bookingDetails.serviceName}\nDate: ${new Date(bookingDetails.date).toLocaleDateString()}\nAmount: ₱${bookingDetails.price}\n\nPlease prepare for the service and ensure you have all necessary materials ready.\n\nBest regards,\nLocalPro Team`
     };
   }
 
@@ -265,10 +265,10 @@ export class ProviderNotificationService {
           <div style="margin: 20px 0;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/earnings" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">View Earnings</a>
           </div>
-          <p>Best regards,<br>Lingkod PH Team</p>
+          <p>Best regards,<br>LocalPro Team</p>
         </div>
       `,
-      text: `Hello ${providerName},\n\nYour payout request has been successfully submitted and is being processed.\n\nAmount: ₱${payoutDetails.amount}\nMethod: ${payoutDetails.method}\nStatus: Processing\n\nYour payout will be processed within 3-5 business days. You will receive another notification once the payment has been completed.\n\nBest regards,\nLingkod PH Team`
+      text: `Hello ${providerName},\n\nYour payout request has been successfully submitted and is being processed.\n\nAmount: ₱${payoutDetails.amount}\nMethod: ${payoutDetails.method}\nStatus: Processing\n\nYour payout will be processed within 3-5 business days. You will receive another notification once the payment has been completed.\n\nBest regards,\nLocalPro Team`
     };
   }
 
@@ -286,14 +286,14 @@ export class ProviderNotificationService {
             <p><strong>Transaction ID:</strong> ${payoutDetails.transactionId}</p>
             <p><strong>Status:</strong> Completed</p>
           </div>
-          <p>Thank you for using Lingkod PH. Keep up the great work!</p>
+          <p>Thank you for using LocalPro. Keep up the great work!</p>
           <div style="margin: 20px 0;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/earnings" style="background-color: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">View Earnings</a>
           </div>
-          <p>Best regards,<br>Lingkod PH Team</p>
+          <p>Best regards,<br>LocalPro Team</p>
         </div>
       `,
-      text: `Hello ${providerName},\n\nYour payout has been successfully processed and should appear in your account within 1-2 business days.\n\nAmount: ₱${payoutDetails.amount}\nMethod: ${payoutDetails.method}\nTransaction ID: ${payoutDetails.transactionId}\nStatus: Completed\n\nThank you for using Lingkod PH. Keep up the great work!\n\nBest regards,\nLingkod PH Team`
+      text: `Hello ${providerName},\n\nYour payout has been successfully processed and should appear in your account within 1-2 business days.\n\nAmount: ₱${payoutDetails.amount}\nMethod: ${payoutDetails.method}\nTransaction ID: ${payoutDetails.transactionId}\nStatus: Completed\n\nThank you for using LocalPro. Keep up the great work!\n\nBest regards,\nLocalPro Team`
     };
   }
 
@@ -316,10 +316,10 @@ export class ProviderNotificationService {
           <div style="margin: 20px 0;">
             <a href="${process.env.NEXT_PUBLIC_APP_URL}/profile" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">View Profile</a>
           </div>
-          <p>Best regards,<br>Lingkod PH Team</p>
+          <p>Best regards,<br>LocalPro Team</p>
         </div>
       `,
-      text: `Hello ${providerName},\n\nYou have received a new review for your service "${reviewDetails.serviceName}".\n\nRating: ${'⭐'.repeat(reviewDetails.rating)} (${reviewDetails.rating}/5)\nClient: ${reviewDetails.clientName}\nService: ${reviewDetails.serviceName}\n${reviewDetails.comment ? `Comment: "${reviewDetails.comment}"` : ''}\n\nGreat job! Keep up the excellent work to maintain your high ratings.\n\nBest regards,\nLingkod PH Team`
+      text: `Hello ${providerName},\n\nYou have received a new review for your service "${reviewDetails.serviceName}".\n\nRating: ${'⭐'.repeat(reviewDetails.rating)} (${reviewDetails.rating}/5)\nClient: ${reviewDetails.clientName}\nService: ${reviewDetails.serviceName}\n${reviewDetails.comment ? `Comment: "${reviewDetails.comment}"` : ''}\n\nGreat job! Keep up the excellent work to maintain your high ratings.\n\nBest regards,\nLocalPro Team`
     };
   }
 

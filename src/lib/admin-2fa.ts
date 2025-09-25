@@ -142,7 +142,7 @@ export class Admin2FAManager {
             <p>If you didn't request this code, please contact your system administrator immediately.</p>
             <hr>
             <p style="color: #666; font-size: 12px;">
-              This is an automated message from Lingkod PH Admin Panel.
+              This is an automated message from LocalPro Admin Panel.
             </p>
           </div>
         `

@@ -219,7 +219,7 @@ export default function ContactUsPage() {
                                     type="email"
                                     value={formData.email}
                                     onChange={handleInputChange}
-                                    placeholder="your.email@example.com"
+                                    placeholder="your.email@admin.localpro.asia"
                                     className={cn(formErrors.email && "border-destructive focus-visible:ring-destructive")}
                                     required
                                 />
@@ -360,7 +360,7 @@ export default function ContactUsPage() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <h3 className={designTokens.typography.cardTitle}>Email Support</h3>
-                                    <p className="text-muted-foreground font-medium">support@lingkod.ph</p>
+                                    <p className="text-muted-foreground font-medium">admin@localpro.asia</p>
                                     <p className={designTokens.typography.cardDescription}>We'll respond within 24 hours</p>
                                     <Badge variant="secondary" className="mt-2">
                                         <CheckCircle className="h-3 w-3 mr-1" />
@@ -375,7 +375,7 @@ export default function ContactUsPage() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <h3 className={designTokens.typography.cardTitle}>Phone Support</h3>
-                                    <p className="text-muted-foreground font-medium">+63 (2) 1234-5678</p>
+                                    <p className="text-muted-foreground font-medium">+639179157515</p>
                                     <p className={designTokens.typography.cardDescription}>Mon-Fri 9AM-6PM PST</p>
                                     <Badge variant="outline" className="mt-2">
                                         <Clock className="h-3 w-3 mr-1" />
@@ -391,13 +391,13 @@ export default function ContactUsPage() {
                                 <div className="flex-1 min-w-0">
                                     <h3 className={designTokens.typography.cardTitle}>Office Location</h3>
                                     <p className="text-muted-foreground">
-                                        123 Business District<br />
-                                        Makati City, Metro Manila<br />
-                                        Philippines 1200
+                                        A. Bonifacio St<br />
+                                        Baybay City, Leyte<br />
+                                        Philippines 6521
                                     </p>
                                     <Badge variant="secondary" className="mt-2">
                                         <MapPin className="h-3 w-3 mr-1" />
-                                        Metro Manila
+                                        Leyte
                                     </Badge>
                                 </div>
                             </div>
@@ -478,7 +478,7 @@ export default function ContactUsPage() {
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Button asChild size="lg" className="h-12 px-8 shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                                    <a href="mailto:support@lingkod.ph">
+                                    <a href="mailto:admin@localpro.asia">
                                         Email Support <Mail className="ml-2 h-5 w-5" />
                                     </a>
                                 </Button>

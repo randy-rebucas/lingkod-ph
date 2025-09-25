@@ -1,8 +1,8 @@
-# Lingkod PH - Documentation Index
+# LocalPro - Documentation Index
 
-## Welcome to Lingkod PH Documentation
+## Welcome to LocalPro Documentation
 
-This comprehensive documentation suite provides detailed information about the Lingkod PH platform, including user roles, features, use cases, and technical implementation details.
+This comprehensive documentation suite provides detailed information about the LocalPro platform, including user roles, features, use cases, and technical implementation details.
 
 ## 📚 Documentation Overview
 
@@ -275,6 +275,6 @@ If you find errors or have suggestions for improving the documentation:
 
 **Last Updated**: January 2024  
 **Version**: 1.0  
-**Platform**: Lingkod PH (LocalPro)
+**Platform**: LocalPro
 
-This documentation suite provides comprehensive information about the Lingkod PH platform, ensuring users, developers, and administrators have the resources they need to effectively use and integrate with the platform.
+This documentation suite provides comprehensive information about the LocalPro platform, ensuring users, developers, and administrators have the resources they need to effectively use and integrate with the platform.

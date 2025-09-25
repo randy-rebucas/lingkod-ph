@@ -386,7 +386,7 @@ export class ProviderAnalyticsService {
     // Simplified demographic analysis
     return {
       ageGroups: { '18-25': 20, '26-35': 35, '36-45': 25, '46+': 20 },
-      locations: { 'Metro Manila': 60, 'Cebu': 20, 'Davao': 10, 'Others': 10 },
+      locations: { 'Baybay City, Leyte': 60, 'Cebu': 20, 'Davao': 10, 'Others': 10 },
       preferences: { 'Quality': 40, 'Price': 30, 'Speed': 20, 'Convenience': 10 }
     };
   }

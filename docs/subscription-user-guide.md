@@ -1,6 +1,6 @@
-# Lingkod PH - Subscription User Guide
+# LocalPro - Subscription User Guide
 
-## Welcome to Lingkod PH Subscriptions! 🎉
+## Welcome to LocalPro Subscriptions! 🎉
 
 This guide will help you understand and make the most of our subscription plans designed to help you grow your service business.
 
@@ -22,7 +22,7 @@ This guide will help you understand and make the most of our subscription plans 
 
 ## Subscription Plans Overview
 
-Lingkod PH offers two subscription tiers designed to help providers at different stages of their business journey:
+LocalPro offers two subscription tiers designed to help providers at different stages of their business journey:
 
 ### 🆓 Free Plan
 **Perfect for getting started**
@@ -350,9 +350,9 @@ A: Contact our support team with the partner name and discount details, and we'l
 ### 📞 Getting Help
 
 **Email Support:**
-- **General Questions:** support@lingkod.ph
-- **Billing Issues:** billing@lingkod.ph
-- **Technical Problems:** tech@lingkod.ph
+- **General Questions:** admin@localpro.asia
+- **Billing Issues:** admin@localpro.asia
+- **Technical Problems:** admin@localpro.asia
 
 **Response Times:**
 - **General Inquiries:** Within 24 hours
@@ -424,7 +424,7 @@ A: Contact our support team with the partner name and discount details, and we'l
 
 ---
 
-## Thank You for Choosing Lingkod PH! 🙏
+## Thank You for Choosing LocalPro! 🙏
 
 We're committed to helping you succeed in your service business. Our Pro plan is designed to give you the tools and visibility you need to grow faster and earn more.
 

@@ -13,7 +13,7 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
     console.log('Email would be sent:', {
       to: options.to,
       subject: options.subject,
-      from: options.from || 'Lingkod PH <noreply@lingkod-ph.com>'
+      from: options.from || 'LocalPro <admin@localpro.asia>'
     });
     
     // In production, integrate with your email service (Resend, SendGrid, etc.)

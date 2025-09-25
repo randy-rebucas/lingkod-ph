@@ -20,7 +20,7 @@ export const BACKUP_VERIFICATION_CONFIG = {
   // Alert thresholds
   MAX_FAILED_VERIFICATIONS: 3,
   ALERT_ON_FAILURE: true,
-  ALERT_RECIPIENTS: ['admin@lingkod.ph', 'backup@lingkod.ph'],
+  ALERT_RECIPIENTS: ['admin@localpro.asia', 'admin@localpro.asia'],
   
   // Retention
   VERIFICATION_HISTORY_DAYS: 30
@@ -456,7 +456,7 @@ export class AdminBackupVerifier {
 
           <hr>
           <p style="color: #666; font-size: 12px;">
-            This is an automated alert from Lingkod PH Backup Verification System.
+            This is an automated alert from LocalPro Backup Verification System.
           </p>
         </div>
       `;

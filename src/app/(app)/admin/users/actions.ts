@@ -231,7 +231,7 @@ export async function handleSendDirectEmail(targetUserId: string, subject: strin
         
         const resend = new Resend(process.env.RESEND_API_KEY);
         await resend.emails.send({
-            from: `LocalPro Admin <onboarding@resend.dev>`,
+            from: `LocalPro Admin <admin@localpro.asia>`,
             to: targetUserEmail,
             subject: subject,
             react: DirectMessageEmail({

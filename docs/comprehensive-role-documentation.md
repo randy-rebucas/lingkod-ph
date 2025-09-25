@@ -1,4 +1,4 @@
-# Lingkod PH - Comprehensive Role Documentation with Use Cases
+# LocalPro - Comprehensive Role Documentation with Use Cases
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -15,7 +15,7 @@
 
 ## Overview
 
-**Lingkod PH** (also known as **LocalPro**) is a comprehensive service marketplace platform that connects clients with trusted local service providers in the Philippines. The platform supports five distinct user roles, each designed for specific use cases and business needs.
+**LocalPro** is a comprehensive service marketplace platform that connects clients with trusted local service providers in the Philippines. The platform supports five distinct user roles, each designed for specific use cases and business needs.
 
 ### Platform Architecture
 - **Framework**: Next.js 15.3.3 with TypeScript
@@ -238,7 +238,7 @@
 ### Primary Use Cases
 
 #### 1. **Multi-Provider Business Management**
-**Scenario**: "CleanPro Services" is a cleaning agency managing 15 cleaners across Metro Manila.
+**Scenario**: "CleanPro Services" is a cleaning agency managing 15 cleaners across Baybay City, Leyte.
 
 **User Journey**:
 1. **Agency Setup**: Creates agency profile and sets up business structure
@@ -676,8 +676,8 @@
 
 ## Conclusion
 
-Lingkod PH's role-based system provides a comprehensive platform for different types of users, each with specific needs and use cases. The platform's architecture ensures security, scalability, and user experience while supporting the diverse requirements of clients, providers, agencies, administrators, and partners.
+LocalPro's role-based system provides a comprehensive platform for different types of users, each with specific needs and use cases. The platform's architecture ensures security, scalability, and user experience while supporting the diverse requirements of clients, providers, agencies, administrators, and partners.
 
 The subscription-based model allows for business growth and feature access based on user needs, while the security implementation ensures data protection and platform integrity across all roles.
 
-This documentation serves as a comprehensive guide for understanding the platform's capabilities, user journeys, and feature access for each role in the Lingkod PH ecosystem.
+This documentation serves as a comprehensive guide for understanding the platform's capabilities, user journeys, and feature access for each role in the LocalPro ecosystem.
