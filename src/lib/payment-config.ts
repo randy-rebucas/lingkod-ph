@@ -25,19 +25,19 @@ export interface PayPalConfig {
 export class PaymentConfig {
   // GCash Configuration
   static readonly GCASH: PaymentMethodConfig = {
-    accountName: process.env.GCASH_ACCOUNT_NAME || 'Lingkod PH Services',
+    accountName: process.env.GCASH_ACCOUNT_NAME || 'LocalPro Services',
     accountNumber: process.env.GCASH_ACCOUNT_NUMBER || '0917-123-4567',
   };
 
   // Maya Configuration
   static readonly MAYA: PaymentMethodConfig = {
-    accountName: process.env.MAYA_ACCOUNT_NAME || 'Lingkod PH Services',
+    accountName: process.env.MAYA_ACCOUNT_NAME || 'LocalPro Services',
     accountNumber: process.env.MAYA_ACCOUNT_NUMBER || '0918-000-5678',
   };
 
   // Bank Transfer Configuration
   static readonly BANK: PaymentMethodConfig = {
-    accountName: process.env.BANK_ACCOUNT_NAME || 'Lingkod PH Services Inc.',
+    accountName: process.env.BANK_ACCOUNT_NAME || 'LocalPro Services Inc.',
     accountNumber: process.env.BANK_ACCOUNT_NUMBER || '1234-5678-90',
     bankName: process.env.BANK_NAME || 'BPI',
   };

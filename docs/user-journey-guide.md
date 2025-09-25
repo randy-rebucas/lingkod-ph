@@ -1,4 +1,4 @@
-# Lingkod PH - User Journey Guide
+# LocalPro - User Journey Guide
 
 ## Table of Contents
 1. [Client User Journeys](#client-user-journeys)
@@ -563,4 +563,4 @@ Users Register/Book → Partner Earns Commission → Payment Processing
 
 ---
 
-This user journey guide provides detailed step-by-step processes for each role, helping users understand how to effectively use the platform and achieve their goals within the Lingkod PH ecosystem.
+This user journey guide provides detailed step-by-step processes for each role, helping users understand how to effectively use the platform and achieve their goals within the LocalPro ecosystem.

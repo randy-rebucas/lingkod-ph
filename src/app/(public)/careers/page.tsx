@@ -166,7 +166,7 @@ export default function CareersPage() {
                 </a>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                <a href="mailto:careers@localpro.asia">
+                <a href="mailto:admin@localpro.asia">
                   Send Your Resume
                 </a>
               </Button>
@@ -325,7 +325,7 @@ export default function CareersPage() {
                     </div>
                   </div>
                   <Button asChild className="shrink-0">
-                    <a href={`mailto:careers@localpro.asia?subject=Application for ${position.title}`}>
+                    <a href={`mailto:admin@localpro.asia?subject=Application for ${position.title}`}>
                       Apply Now
                     </a>
                   </Button>
@@ -380,7 +380,7 @@ export default function CareersPage() {
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Button asChild size="lg" className="h-12 px-8 shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                  <a href="mailto:careers@localpro.asia">
+                  <a href="mailto:admin@localpro.asia">
                     Send Your Resume <ArrowRight className="ml-2 h-5 w-5" />
                   </a>
                 </Button>

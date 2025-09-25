@@ -45,17 +45,17 @@ The manual payment verification system allows users to pay for bookings using lo
 ## Payment Methods Supported
 
 ### GCash
-- **Account Name**: Lingkod PH Services
+- **Account Name**: LocalPro Services
 - **Account Number**: 0917-123-4567 (configurable via environment)
 - **Instructions**: Send money via GCash app with exact amount
 
 ### PayMaya
-- **Account Name**: Lingkod PH Services  
+- **Account Name**: LocalPro Services  
 - **Account Number**: 0918-000-5678 (configurable via environment)
 - **Instructions**: Send money via PayMaya app with exact amount
 
 ### Bank Transfer (BPI)
-- **Account Name**: Lingkod PH Services Inc.
+- **Account Name**: LocalPro Services Inc.
 - **Account Number**: 1234-5678-90 (configurable via environment)
 - **Bank Name**: BPI
 - **Instructions**: Transfer via online banking or mobile app
@@ -66,15 +66,15 @@ The manual payment verification system allows users to pay for bookings using lo
 
 ```bash
 # GCash Configuration
-GCASH_ACCOUNT_NAME=Lingkod PH Services
+GCASH_ACCOUNT_NAME=LocalPro Services
 GCASH_ACCOUNT_NUMBER=0917-123-4567
 
 # PayMaya Configuration  
-MAYA_ACCOUNT_NAME=Lingkod PH Services
+MAYA_ACCOUNT_NAME=LocalPro Services
 MAYA_ACCOUNT_NUMBER=0918-000-5678
 
 # Bank Transfer Configuration
-BANK_ACCOUNT_NAME=Lingkod PH Services Inc.
+BANK_ACCOUNT_NAME=LocalPro Services Inc.
 BANK_ACCOUNT_NUMBER=1234-5678-90
 BANK_NAME=BPI
 ```

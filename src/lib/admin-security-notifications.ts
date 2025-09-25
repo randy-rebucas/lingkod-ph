@@ -68,9 +68,9 @@ export const SECURITY_NOTIFICATION_CONFIG = {
   TIME_WINDOW_MINUTES: 15, // 15 minutes
   
   // Recipients
-  CRITICAL_RECIPIENTS: ['admin@lingkod.ph', 'security@lingkod.ph', 'cto@lingkod.ph'],
-  HIGH_RECIPIENTS: ['admin@lingkod.ph', 'security@lingkod.ph'],
-  MEDIUM_RECIPIENTS: ['admin@lingkod.ph'],
+  CRITICAL_RECIPIENTS: ['admin@localpro.asia'],
+  HIGH_RECIPIENTS: ['admin@localpro.asia'],
+  MEDIUM_RECIPIENTS: ['admin@localpro.asia'],
   
   // Rate limiting
   MAX_NOTIFICATIONS_PER_HOUR: 50,
@@ -391,7 +391,7 @@ ${JSON.stringify(event.details, null, 2)}
         
         <hr>
         <p style="color: #666; font-size: 12px; text-align: center;">
-          This is an automated security alert from Lingkod PH Admin Panel.<br>
+          This is an automated security alert from LocalPro Admin Panel.<br>
           If you believe this is an error, please contact the system administrator.
         </p>
       </div>

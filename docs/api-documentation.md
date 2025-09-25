@@ -1,4 +1,4 @@
-# Lingkod PH - API Documentation
+# LocalPro - API Documentation
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -16,11 +16,11 @@
 
 ## Overview
 
-The Lingkod PH API provides role-based access to platform functionality through RESTful endpoints. All API requests require authentication and are subject to role-based access control.
+The LocalPro API provides role-based access to platform functionality through RESTful endpoints. All API requests require authentication and are subject to role-based access control.
 
 ### Base URL
 ```
-Production: https://lingkod-ph.com/api
+Production: https://localpro.asia/api
 Development: http://localhost:9002/api
 ```
 
@@ -98,7 +98,7 @@ Content-Type: application/json
   "role": "client",
   "firstName": "Maria",
   "lastName": "Santos",
-  "phone": "+639123456789"
+  "phone": "+639179157515"
 }
 ```
 
@@ -557,7 +557,7 @@ Content-Type: application/json
   "role": "provider",
   "firstName": "John",
   "lastName": "Doe",
-  "phone": "+639123456789"
+  "phone": "+639179157515"
 }
 ```
 
@@ -804,4 +804,4 @@ X-RateLimit-Reset: 1640995200
 
 ---
 
-This API documentation provides comprehensive information about all available endpoints, authentication methods, and best practices for integrating with the Lingkod PH platform.
+This API documentation provides comprehensive information about all available endpoints, authentication methods, and best practices for integrating with the LocalPro platform.

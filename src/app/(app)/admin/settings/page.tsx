@@ -45,8 +45,8 @@ export default function AdminSettingsPage() {
                 }
             } else {
                 setSettings({
-                    appName: 'Lingkod PH',
-                    supportEmail: 'support@lingkod.ph',
+                    appName: 'LocalPro',
+                    supportEmail: 'admin@localpro.asia',
                     logoUrl: '',
                     commissionRates: { low: 10, mid: 12, high: 15 },
                     referralBonus: 250,

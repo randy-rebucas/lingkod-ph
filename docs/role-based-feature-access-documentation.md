@@ -1,4 +1,4 @@
-# Lingkod PH - Role-Based Feature Access Documentation
+# LocalPro - Role-Based Feature Access Documentation
 
 ## Table of Contents
 1. [Overview](#overview)
@@ -16,7 +16,7 @@
 
 ## Overview
 
-**Lingkod PH** (also known as **LocalPro**) implements a comprehensive role-based access control system that determines feature availability. This documentation provides a complete breakdown of features accessible to each user role.
+**LocalPro** implements a comprehensive role-based access control system that determines feature availability. This documentation provides a complete breakdown of features accessible to each user role.
 
 ### Platform Architecture
 - **Framework**: Next.js 15.3.3 with TypeScript
@@ -396,7 +396,7 @@ All Pro features plus:
 
 ## Conclusion
 
-This documentation provides a comprehensive overview of the role-based feature access system in Lingkod PH. The platform's subscription model ensures that users have access to appropriate features based on their role and subscription tier, while providing clear upgrade paths for premium features.
+This documentation provides a comprehensive overview of the role-based feature access system in LocalPro. The platform's subscription model ensures that users have access to appropriate features based on their role and subscription tier, while providing clear upgrade paths for premium features.
 
 The system is designed to be scalable, secure, and user-friendly, with clear messaging about feature availability and upgrade requirements. This approach helps users understand the value of different subscription tiers while maintaining a smooth user experience across all roles.
 

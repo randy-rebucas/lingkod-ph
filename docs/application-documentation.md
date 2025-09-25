@@ -1,8 +1,8 @@
-# Lingkod PH - Application Documentation
+# LocalPro - Application Documentation
 
 ## Overview
 
-**Lingkod PH** (also known as **LocalPro**) is a comprehensive service marketplace platform that connects clients with trusted local service providers in the Philippines. The platform facilitates service discovery, booking management, payment processing, and business growth for both individual providers and agencies.
+**LocalPro** is a comprehensive service marketplace platform that connects clients with trusted local service providers in the Philippines. The platform facilitates service discovery, booking management, payment processing, and business growth for both individual providers and agencies.
 
 ## Application Architecture
 
@@ -323,4 +323,4 @@ All user-facing content is localized using the `next-intl` library.
 
 ---
 
-*This documentation provides a comprehensive overview of the Lingkod PH application, including user roles, permissions, features, and technical implementation details. For specific implementation details or additional information, please refer to the source code and related documentation files.*
+*This documentation provides a comprehensive overview of the LocalPro application, including user roles, permissions, features, and technical implementation details. For specific implementation details or additional information, please refer to the source code and related documentation files.*

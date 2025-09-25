@@ -2,7 +2,7 @@
 
 ## Overview
 
-This checklist ensures the payment system is fully functional and production-ready for Lingkod PH. Complete all items before deploying to production.
+This checklist ensures the payment system is fully functional and production-ready for LocalPro. Complete all items before deploying to production.
 
 ## Pre-Deployment Validation
 

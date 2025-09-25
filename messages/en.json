@@ -1160,7 +1160,7 @@
     "agencyOnly": "This page is for agency accounts only.",
     "inviteProvider": "Invite Provider",
     "inviteNewProvider": "Invite a New Provider",
-    "inviteDescription": "Enter the email address of the provider you wish to invite. They must already be a registered provider on LingkodPH.",
+    "inviteDescription": "Enter the email address of the provider you wish to invite. They must already be a registered provider on LocalPro.",
     "email": "Email",
     "sendInvite": "Send Invite",
     "yourProviderNetwork": "Your Provider Network",
@@ -1177,7 +1177,7 @@
     "noProvidersYet": "No providers yet.",
     "noProvidersDescription": "Click \"Invite Provider\" to build your team.",
     "providerNotFound": "Provider Not Found",
-    "providerNotFoundDescription": "This user is not registered on LingkodPH. Please ask them to sign up as a provider first.",
+    "providerNotFoundDescription": "This user is not registered on LocalPro. Please ask them to sign up as a provider first.",
     "invalidUserRole": "Invalid User Role",
     "invalidUserRoleDescription": "This user is not a registered provider.",
     "alreadyInAgency": "Already in an Agency",
@@ -1744,7 +1744,7 @@
     "contactDescription": "If you have any questions about how we use cookies or need help managing your preferences, our privacy team is here to help.",
     "privacyTeam": "Privacy Team",
     "callSupport": "Call Support",
-    "address": "📍 Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6530"
+    "address": "📍 Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6521"
   },
   "PrivacyPolicy": {
     "title": "Privacy Policy",
@@ -1772,6 +1772,6 @@
     "contactDescription": "If you have any questions about this Privacy Policy or how we handle your personal information, please contact our privacy team.",
     "privacyOfficer": "Privacy Officer",
     "callSupport": "Call Support",
-    "address": "📍 Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6530"
+    "address": "📍 Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6521"
   }
 }

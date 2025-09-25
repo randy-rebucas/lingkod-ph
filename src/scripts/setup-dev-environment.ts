@@ -9,10 +9,10 @@ import { writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
 const ENV_TEMPLATE = `# Firebase Configuration
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=lingkod-ph-dev
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=localpro-dev
 NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=lingkod-ph-dev.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=lingkod-ph-dev.appspot.com
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=localpro-dev.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=localpro-dev.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
 NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:abcdef123456
 
@@ -23,15 +23,15 @@ ENCRYPTION_KEY=dev-encryption-key-32-chars-long
 
 # Payment Configuration
 # GCash Configuration
-GCASH_ACCOUNT_NAME=Lingkod PH Services
+GCASH_ACCOUNT_NAME=LocalPro Services
 GCASH_ACCOUNT_NUMBER=0917-123-4567
 
 # Maya Configuration
-MAYA_ACCOUNT_NAME=Lingkod PH Services
+MAYA_ACCOUNT_NAME=LocalPro Services
 MAYA_ACCOUNT_NUMBER=0918-000-5678
 
 # Bank Configuration
-BANK_ACCOUNT_NAME=Lingkod PH Services Inc.
+BANK_ACCOUNT_NAME=LocalPro Services Inc.
 BANK_ACCOUNT_NUMBER=1234-5678-90
 BANK_NAME=BPI
 

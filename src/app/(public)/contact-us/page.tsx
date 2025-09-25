@@ -67,7 +67,7 @@ const contactMethods = [
     title: "Office Visit",
     description: "Visit our office for in-person assistance",
     icon: <MapPin className="h-6 w-6" />,
-    contact: "Poblacion Zone 2, Baybay City",
+    contact: "Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6521",
     availability: "Mon-Fri 9AM-5PM",
     responseTime: "By Appointment",
     action: "Schedule Visit",
@@ -292,7 +292,7 @@ export default function ContactUsPage() {
                         Poblacion Zone 2<br />
                         A Bonifacio Street<br />
                         Baybay City, Leyte<br />
-                        Philippines 6530
+                        Philippines 6521
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">Mon-Fri 9AM-5PM • By appointment</p>
                     </div>

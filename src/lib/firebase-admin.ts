@@ -7,7 +7,7 @@ import { getAuth } from 'firebase-admin/auth';
 if (!getApps().length) {
   try {
     // Try to initialize with project ID if available
-    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'lingkod-ph-dev';
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'localpro-dev';
     
     initializeApp({
       projectId: projectId,
@@ -17,8 +17,8 @@ if (!getApps().length) {
     console.warn('Firebase Admin initialization failed:', error);
     // Initialize with minimal config for development
     initializeApp({
-      projectId: 'lingkod-ph-dev',
-      storageBucket: 'lingkod-ph-dev.appspot.com',
+      projectId: 'localpro-dev',
+      storageBucket: 'localpro-dev.appspot.com',
     });
   }
 }
