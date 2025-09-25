@@ -13,6 +13,7 @@ import { Booking } from '@/app/(app)/bookings/page';
 import Image from 'next/image';
 import { completeBookingAction } from '@/app/(app)/bookings/actions';
 import { useTranslations } from 'next-intl';
+import { designTokens } from '@/lib/design-tokens';
 
 type CompleteBookingDialogProps = {
     isOpen: boolean;
@@ -87,7 +88,7 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
             }
             setIsOpen(open);
         }}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className={`sm:max-w-md ${designTokens.effects.cardElevated}`}>
                 <DialogHeader>
                     <DialogTitle>{t('completeBooking')}</DialogTitle>
                     <DialogDescription>

@@ -9,6 +9,8 @@ import { Loader2, Smartphone, CheckCircle, XCircle, ExternalLink } from 'lucide-
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/auth-context';
 import { PaymentRetryService } from '@/lib/payment-retry-service';
+import { StandardCard } from '@/components/app/standard-card';
+import { designTokens } from '@/lib/design-tokens';
 
 interface GCashPaymentButtonProps {
   bookingId: string;
@@ -292,17 +294,15 @@ export function GCashPaymentButton({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Smartphone className="h-5 w-5 text-blue-500" />
-          GCash Payment
-        </CardTitle>
-        <CardDescription>
-          Pay securely with GCash - instant confirmation
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <StandardCard 
+      variant="elevated"
+      title="GCash Payment"
+      description="Pay securely with GCash - instant confirmation"
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <Smartphone className="h-5 w-5 text-blue-500" />
+        <span className="font-semibold">GCash Payment</span>
+      </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-primary">₱{amount.toFixed(2)}</div>
           <div className="text-sm text-muted-foreground">{serviceName}</div>
@@ -332,7 +332,6 @@ export function GCashPaymentButton({
           <p>• Instant payment confirmation</p>
           <p>• No manual verification required</p>
         </div>
-      </CardContent>
-    </Card>
+    </StandardCard>
   );
 }

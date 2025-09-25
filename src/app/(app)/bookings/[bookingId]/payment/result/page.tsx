@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
@@ -8,6 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { PageLayout } from '@/components/app/page-layout';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { EmptyState } from '@/components/app/empty-state';
+import { AccessDenied } from '@/components/app/access-denied';
+import { designTokens } from '@/lib/design-tokens';
 
 export default function PaymentResultPage() {
   const { bookingId } = useParams();
@@ -174,16 +182,20 @@ export default function PaymentResultPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-          
-          <div className="relative z-10 flex items-center gap-3">
-            <Button variant="outline" size="icon" onClick={() => router.push('/bookings')} className="hover:bg-primary/10 transition-colors">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                Payment Result
+    <PageLayout 
+      title="Payment Result" 
+      description="View the result of your payment transaction."
+    >
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="w-full max-w-md">
+            
+            <div className="relative z-10 flex items-center gap-3">
+              <Button variant="outline" size="icon" onClick={() => router.push('/bookings')} className="hover:bg-primary/10 transition-colors">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                  Payment Result
               </h1>
               <p className="text-sm text-muted-foreground">
                 Booking ID: {bookingId}
@@ -198,6 +210,7 @@ export default function PaymentResultPage() {
             {renderContent()}
           </CardContent>
         </Card>
-    </div>
+      </div>
+    </PageLayout>
   );
 }

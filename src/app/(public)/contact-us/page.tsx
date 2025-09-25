@@ -1,476 +1,497 @@
+'use client';
 
-"use client";
-
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useToast } from "@/hooks/use-toast";
-import { sendContactForm, FormState } from "./actions";
-import { useActionState, useEffect } from "react";
-import type { Metadata } from "next";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { Mail, Phone, MapPin, Clock, Send, MessageSquare, CheckCircle, AlertCircle, Loader2, Star, Users, Heart } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Loader2, Send, Mail, Phone, MapPin, Clock, MessageCircle, Users, Star, CheckCircle, ArrowRight, Globe, Calendar, Zap, Shield, Heart, Award, TrendingUp, UserCheck, Building, Briefcase } from "lucide-react";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-
-
-const createContactSchema = (t: any) => z.object({
-  name: z.string().min(2, { message: t('nameRequired') }),
-  email: z.string().email({ message: t('emailRequired') }),
-  subject: z.string().min(5, { message: t('subjectRequired') }),
-  message: z.string().min(10, { message: t('messageRequired') }),
-});
-
-const initialState: FormState = {
-  error: null,
-  message: "",
-};
-
-const contactMethods = [
-  {
-    title: "Email Support",
-    description: "Send us a detailed message and we'll respond within 2 hours",
-    icon: <Mail className="h-6 w-6" />,
-    contact: "admin@localpro.asia",
-    availability: "24/7 Available",
-    responseTime: "Average: 2 hours",
-    action: "Send Email",
-    popular: true
-  },
-  {
-    title: "Phone Support",
-    description: "Speak directly with our customer service team",
-    icon: <Phone className="h-6 w-6" />,
-    contact: "+639179157515",
-    availability: "Mon-Fri 9AM-6PM",
-    responseTime: "Immediate",
-    action: "Call Now",
-    popular: true
-  },
-  {
-    title: "Live Chat",
-    description: "Get instant help from our support team",
-    icon: <MessageCircle className="h-6 w-6" />,
-    contact: "Available on website",
-    availability: "24/7 Available",
-    responseTime: "Average: 2 minutes",
-    action: "Start Chat",
-    popular: true
-  },
-  {
-    title: "Office Visit",
-    description: "Visit our office for in-person assistance",
-    icon: <MapPin className="h-6 w-6" />,
-    contact: "Poblacion Zone 2, Baybay City",
-    availability: "Mon-Fri 9AM-5PM",
-    responseTime: "By Appointment",
-    action: "Schedule Visit",
-    popular: false
-  }
-];
-
-const businessHours = [
-  { day: "Monday - Friday", hours: "9:00 AM - 6:00 PM", status: "Open" },
-  { day: "Saturday", hours: "10:00 AM - 4:00 PM", status: "Limited" },
-  { day: "Sunday", hours: "Closed", status: "Closed" }
-];
-
-const faqData = [
-  {
-    question: "How quickly will I receive a response?",
-    answer: "We typically respond to emails within 2 hours during business hours, and within 24 hours on weekends. Phone calls are answered immediately during business hours.",
-    category: "Response Time"
-  },
-  {
-    question: "What's the best way to reach you?",
-    answer: "For urgent matters, call us directly. For detailed inquiries, email is best. For quick questions, try our live chat feature.",
-    category: "Contact Methods"
-  },
-  {
-    question: "Do you offer support in Filipino?",
-    answer: "Yes! Our team is fluent in both English and Filipino. We're happy to assist you in your preferred language.",
-    category: "Language Support"
-  },
-  {
-    question: "Can I visit your office?",
-    answer: "Absolutely! We welcome office visits by appointment. Please call ahead to schedule a convenient time.",
-    category: "Office Visits"
-  },
-  {
-    question: "What if I have a technical issue?",
-    answer: "For technical problems, please contact our support team with as much detail as possible. We'll escalate to our technical team if needed.",
-    category: "Technical Support"
-  },
-  {
-    question: "Do you have emergency support?",
-    answer: "For urgent service-related emergencies, call our hotline. For non-urgent matters, email or live chat is preferred.",
-    category: "Emergency Support"
-  }
-];
-
-const testimonials = [
-  {
-    name: "Maria Santos",
-    role: "Homeowner",
-    content: "The customer service team was incredibly helpful when I had issues with my booking. They resolved everything quickly and professionally.",
-    rating: 5,
-    avatar: "MS"
-  },
-  {
-    name: "Juan Dela Cruz",
-    role: "Service Provider",
-    content: "LocalPro's support team helped me set up my provider account and answered all my questions. Great service!",
-    rating: 5,
-    avatar: "JD"
-  },
-  {
-    name: "Ana Rodriguez",
-    role: "Business Owner",
-    content: "Excellent communication and quick response times. The team really cares about their customers.",
-    rating: 5,
-    avatar: "AR"
-  }
-];
+import { StandardCard } from '@/components/app/standard-card';
+import { designTokens } from '@/lib/design-tokens';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 export default function ContactUsPage() {
-  const { toast } = useToast();
-  const [state, formAction, isPending] = useActionState(sendContactForm, initialState);
-  const t = useTranslations('ContactUs');
-  const contactSchema = createContactSchema(t);
-  
-  type ContactFormValues = z.infer<typeof contactSchema>;
+    const { toast } = useToast();
+    const t = useTranslations('ContactUs');
+    
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+        inquiryType: ''
+    });
+    
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+    const [isSuccess, setIsSuccess] = useState(false);
 
-  const form = useForm<ContactFormValues>({
-    resolver: zodResolver(contactSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      subject: "",
-      message: "",
-    },
-  });
+    const validateForm = () => {
+        const errors: Record<string, string> = {};
+        
+        if (!formData.name.trim()) {
+            errors.name = 'Name is required';
+        }
+        
+        if (!formData.email.trim()) {
+            errors.email = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            errors.email = 'Please enter a valid email address';
+        }
+        
+        if (!formData.subject.trim()) {
+            errors.subject = 'Subject is required';
+        }
+        
+        if (!formData.message.trim()) {
+            errors.message = 'Message is required';
+        } else if (formData.message.trim().length < 10) {
+            errors.message = 'Message must be at least 10 characters long';
+        }
+        
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
 
-  useEffect(() => {
-    if (state.message) {
-      toast({
-        title: state.error ? t('error') : t('success'),
-        description: state.message,
-        variant: state.error ? "destructive" : "default",
-      });
-      if (!state.error) {
-        form.reset();
-      }
-    }
-  }, [state, toast, form, t]);
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        
+        // Clear error when user starts typing
+        if (formErrors[name]) {
+            setFormErrors(prev => ({
+                ...prev,
+                [name]: ''
+            }));
+        }
+    };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-      {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="container relative">
-          <div className="mx-auto max-w-4xl text-center">
-            <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
-              <Star className="w-4 h-4 mr-2" />
-              We're Here to Help
-            </Badge>
-            <h1 className="text-5xl lg:text-7xl font-bold font-headline mb-8 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Contact Us
-            </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12">
-              Get in touch with our friendly support team. Whether you have questions, need help, or want to share feedback,
-              we're here to make your LocalPro experience exceptional.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                <a href="#contact-form">
-                  Send Message <ArrowRight className="ml-2 h-5 w-5" />
-                </a>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                <a href="tel:+639179157515">
-                  Call Now
-                </a>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
+    const handleSelectChange = (value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            inquiryType: value
+        }));
+    };
 
-      <div className="container py-16">
-        <div className="max-w-7xl mx-auto space-y-16">
-          {/* Contact Methods */}
-          <section>
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold font-headline mb-4">Choose Your Preferred Contact Method</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                We offer multiple ways to get in touch. Pick the method that works best for you.
-              </p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {contactMethods.map((method, index) => (
-                <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 relative">
-                  {method.popular && (
-                    <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
-                      Popular
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (!validateForm()) {
+            toast({
+                variant: "destructive",
+                title: "Validation Error",
+                description: "Please fix the errors in the form before submitting.",
+            });
+            return;
+        }
+        
+        setIsSubmitting(true);
+        setFormErrors({});
+
+        try {
+            // Here you would typically send the form data to your backend
+            // For now, we'll just simulate a successful submission
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            setIsSuccess(true);
+            toast({
+                title: "Message Sent Successfully!",
+                description: "Thank you for contacting us. We'll get back to you within 24 hours.",
+            });
+
+            // Reset form
+            setFormData({
+                name: '',
+                email: '',
+                phone: '',
+                subject: '',
+                message: '',
+                inquiryType: ''
+            });
+            
+            // Reset success state after 3 seconds
+            setTimeout(() => setIsSuccess(false), 3000);
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to send message. Please try again or contact us directly.",
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+            {/* Hero Section */}
+            <section className="relative py-20 lg:py-32 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+                <div className="container relative">
+                    <div className="mx-auto max-w-4xl text-center">
+                        <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
+                            <MessageSquare className="w-4 h-4 mr-2" />
+                            24/7 Support Available
+                        </Badge>
+                        <h1 className="text-5xl lg:text-7xl font-bold font-headline mb-8 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                            Get in Touch
+                        </h1>
+                        <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12">
+                            Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+                        </p>
                     </div>
-                  )}
-                  <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                      {method.icon}
-                    </div>
-                    <h3 className="font-semibold text-lg mb-2">{method.title}</h3>
-                    <p className="text-muted-foreground text-sm mb-4">{method.description}</p>
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        {method.availability}
-                      </div>
-                      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                        <Zap className="h-3 w-3" />
-                        {method.responseTime}
-                      </div>
-                    </div>
-                    <Button size="sm" className="w-full">
-                      {method.action}
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
-
-          {/* Main Contact Section */}
-          <section>
-            <div className="grid lg:grid-cols-2 gap-12 items-start">
-              {/* Contact Information & Business Hours */}
-              <div className="space-y-8">
-                <div>
-                  <h2 className="text-3xl font-bold font-headline mb-6">Get in Touch</h2>
-                  <p className="text-muted-foreground leading-relaxed mb-8">
-                    We'd love to hear from you. Send us a message and we'll respond as soon as possible.
-                  </p>
                 </div>
-                
-                {/* Contact Details */}
-                <div className="space-y-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <Mail className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Email</h3>
-                      <p className="text-muted-foreground">admin@localpro.asia</p>
-                      <p className="text-xs text-muted-foreground mt-1">24/7 Available • 2hr avg response</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <Phone className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Phone</h3>
-                      <p className="text-muted-foreground">+639179157515</p>
-                      <p className="text-xs text-muted-foreground mt-1">Mon-Fri 9AM-6PM • Immediate response</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <MapPin className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold mb-1">Office Address</h3>
-                      <p className="text-muted-foreground">
-                        Poblacion Zone 2<br />
-                        A Bonifacio Street<br />
-                        Baybay City, Leyte<br />
-                        Philippines 6530
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">Mon-Fri 9AM-5PM • By appointment</p>
-                    </div>
-                  </div>
-                </div>
+            </section>
 
-                {/* Business Hours */}
-                <Card className="bg-background/60 backdrop-blur-sm border-0 shadow-soft">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5 text-primary" />
-                      Business Hours
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {businessHours.map((schedule, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{schedule.day}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-muted-foreground">{schedule.hours}</span>
-                            <span className={`text-xs px-2 py-1 rounded-full ${
-                              schedule.status === 'Open' ? 'bg-green-100 text-green-800' :
-                              schedule.status === 'Limited' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {schedule.status}
-                            </span>
-                          </div>
+            {/* Stats Section */}
+            <section className="py-16 bg-muted/30">
+                <div className="container">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div className="text-center">
+                            <div className="text-4xl lg:text-5xl font-bold text-primary mb-2">24h</div>
+                            <div className="text-muted-foreground font-medium">Response Time</div>
                         </div>
-                      ))}
+                        <div className="text-center">
+                            <div className="text-4xl lg:text-5xl font-bold text-primary mb-2">99%</div>
+                            <div className="text-muted-foreground font-medium">Satisfaction Rate</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-4xl lg:text-5xl font-bold text-primary mb-2">10K+</div>
+                            <div className="text-muted-foreground font-medium">Happy Customers</div>
+                        </div>
+                        <div className="text-center">
+                            <div className="text-4xl lg:text-5xl font-bold text-primary mb-2">4.9</div>
+                            <div className="text-muted-foreground font-medium">Average Rating</div>
+                        </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
+                </div>
+            </section>
 
-              {/* Enhanced Contact Form */}
-              <Card className="bg-background/60 backdrop-blur-sm border-0 shadow-soft">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-bold">{t('sendMessage')}</CardTitle>
-                  <CardDescription className="text-base">{t('messageDescription')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Form {...form}>
-                    <form action={formAction} className="space-y-6">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <Label htmlFor="name">{t('name')}</Label>
-                              <FormControl>
-                                <Input id="name" placeholder={t('namePlaceholder')} {...field} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <Label htmlFor="email">{t('email')}</Label>
-                              <FormControl>
-                                <Input id="email" type="email" placeholder={t('emailPlaceholder')} {...field} className="h-12" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <FormField
-                        control={form.control}
-                        name="subject"
-                        render={({ field }) => (
-                          <FormItem>
-                            <Label htmlFor="subject">{t('subject')}</Label>
-                            <FormControl>
-                              <Input id="subject" placeholder={t('subjectPlaceholder')} {...field} className="h-12" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="message"
-                        render={({ field }) => (
-                          <FormItem>
-                            <Label htmlFor="message">{t('message')}</Label>
-                            <FormControl>
-                              <Textarea id="message" placeholder={t('messagePlaceholder')} {...field} rows={6} className="resize-none" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button type="submit" className="w-full h-12 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300" disabled={isPending}>
-                        {isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            {t('sending')}
-                          </>
-                        ) : (
-                          <>
-                            <Send className="mr-2 h-5 w-5" />
-                            {t('submit')}
-                          </>
-                        )}
-                      </Button>
+            {/* Main Content */}
+            <section className="py-20">
+                <div className="container">
+                    <div className={cn(designTokens.layout.cardGrid2, "max-w-7xl mx-auto")}>
+                {/* Contact Form */}
+                <StandardCard 
+                    title="Send us a Message"
+                    description="Fill out the form below and we'll get back to you within 24 hours."
+                    variant="elevated"
+                >
+                    <form onSubmit={handleSubmit} className={designTokens.spacing.section}>
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="name" className="flex items-center gap-2">
+                                    Full Name *
+                                    {formErrors.name && <AlertCircle className="h-4 w-4 text-destructive" />}
+                                </Label>
+                                <Input
+                                    id="name"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={handleInputChange}
+                                    placeholder="Your full name"
+                                    className={cn(formErrors.name && "border-destructive focus-visible:ring-destructive")}
+                                    required
+                                />
+                                {formErrors.name && (
+                                    <p className="text-sm text-destructive flex items-center gap-1">
+                                        <AlertCircle className="h-3 w-3" />
+                                        {formErrors.name}
+                                    </p>
+                                )}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="flex items-center gap-2">
+                                    Email Address *
+                                    {formErrors.email && <AlertCircle className="h-4 w-4 text-destructive" />}
+                                </Label>
+                                <Input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    placeholder="your.email@example.com"
+                                    className={cn(formErrors.email && "border-destructive focus-visible:ring-destructive")}
+                                    required
+                                />
+                                {formErrors.email && (
+                                    <p className="text-sm text-destructive flex items-center gap-1">
+                                        <AlertCircle className="h-3 w-3" />
+                                        {formErrors.email}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="phone">Phone Number</Label>
+                                <Input
+                                    id="phone"
+                                    name="phone"
+                                    type="tel"
+                                    value={formData.phone}
+                                    onChange={handleInputChange}
+                                    placeholder="+1 (555) 123-4567"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="inquiryType">Inquiry Type</Label>
+                                <Select value={formData.inquiryType} onValueChange={handleSelectChange}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select inquiry type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="general">General Question</SelectItem>
+                                        <SelectItem value="support">Technical Support</SelectItem>
+                                        <SelectItem value="billing">Billing Inquiry</SelectItem>
+                                        <SelectItem value="partnership">Partnership</SelectItem>
+                                        <SelectItem value="feedback">Feedback</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="subject" className="flex items-center gap-2">
+                                Subject *
+                                {formErrors.subject && <AlertCircle className="h-4 w-4 text-destructive" />}
+                            </Label>
+                            <Input
+                                id="subject"
+                                name="subject"
+                                value={formData.subject}
+                                onChange={handleInputChange}
+                                placeholder="Brief subject of your message"
+                                className={cn(formErrors.subject && "border-destructive focus-visible:ring-destructive")}
+                                required
+                            />
+                            {formErrors.subject && (
+                                <p className="text-sm text-destructive flex items-center gap-1">
+                                    <AlertCircle className="h-3 w-3" />
+                                    {formErrors.subject}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="message" className="flex items-center gap-2">
+                                Message *
+                                {formErrors.message && <AlertCircle className="h-4 w-4 text-destructive" />}
+                            </Label>
+                            <Textarea
+                                id="message"
+                                name="message"
+                                value={formData.message}
+                                onChange={handleInputChange}
+                                placeholder="Tell us more about your inquiry..."
+                                rows={6}
+                                className={cn(formErrors.message && "border-destructive focus-visible:ring-destructive")}
+                                required
+                            />
+                            <div className="flex justify-between items-center">
+                                {formErrors.message ? (
+                                    <p className="text-sm text-destructive flex items-center gap-1">
+                                        <AlertCircle className="h-3 w-3" />
+                                        {formErrors.message}
+                                    </p>
+                                ) : (
+                                    <p className="text-xs text-muted-foreground">
+                                        Minimum 10 characters
+                                    </p>
+                                )}
+                                <p className="text-xs text-muted-foreground">
+                                    {formData.message.length}/500
+                                </p>
+                            </div>
+                        </div>
+
+                        <Button 
+                            type="submit" 
+                            className={cn(
+                                "w-full transition-all duration-300",
+                                isSuccess 
+                                    ? "bg-green-600 hover:bg-green-700" 
+                                    : designTokens.effects.buttonGlow
+                            )}
+                            disabled={isSubmitting || isSuccess}
+                            size="lg"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    Sending Message...
+                                </>
+                            ) : isSuccess ? (
+                                <>
+                                    <CheckCircle className="h-4 w-4 mr-2" />
+                                    Message Sent!
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="h-4 w-4 mr-2" />
+                                    Send Message
+                                </>
+                            )}
+                        </Button>
                     </form>
-                  </Form>
-                </CardContent>
-              </Card>
-            </div>
-          </section>
+                </StandardCard>
 
-          {/* FAQ Section */}
-          <section>
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold font-headline mb-4">Frequently Asked Questions</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Quick answers to common questions about contacting us and getting support.
-              </p>
-            </div>
-            <div className="grid md:grid-cols-2 gap-6">
-              {faqData.map((faq, index) => (
-                <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300">
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold text-lg mb-3">{faq.question}</h3>
-                    <p className="text-muted-foreground leading-relaxed mb-3">{faq.answer}</p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                        {faq.category}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
+                {/* Contact Information */}
+                <div className="space-y-6">
+                    <StandardCard 
+                        title="Contact Information"
+                        description="Reach out to us through any of these channels"
+                        variant="elevated"
+                    >
+                        <div className="grid gap-4">
+                            <div className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted/30 transition-colors">
+                                <div className="p-3 rounded-full bg-primary/10 ring-2 ring-primary/20 flex-shrink-0">
+                                    <Mail className="h-6 w-6 text-primary" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className={designTokens.typography.cardTitle}>Email Support</h3>
+                                    <p className="text-muted-foreground font-medium">support@lingkod.ph</p>
+                                    <p className={designTokens.typography.cardDescription}>We'll respond within 24 hours</p>
+                                    <Badge variant="secondary" className="mt-2">
+                                        <CheckCircle className="h-3 w-3 mr-1" />
+                                        Verified
+                                    </Badge>
+                                </div>
+                            </div>
 
-          {/* Testimonials */}
-          <section>
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold font-headline mb-4">What Our Customers Say</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Hear from satisfied customers about their experience with our support team.
-              </p>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              {testimonials.map((testimonial, index) => (
-                <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-1 mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                      ))}
+                            <div className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted/30 transition-colors">
+                                <div className="p-3 rounded-full bg-primary/10 ring-2 ring-primary/20 flex-shrink-0">
+                                    <Phone className="h-6 w-6 text-primary" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className={designTokens.typography.cardTitle}>Phone Support</h3>
+                                    <p className="text-muted-foreground font-medium">+63 (2) 1234-5678</p>
+                                    <p className={designTokens.typography.cardDescription}>Mon-Fri 9AM-6PM PST</p>
+                                    <Badge variant="outline" className="mt-2">
+                                        <Clock className="h-3 w-3 mr-1" />
+                                        Business Hours
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted/30 transition-colors">
+                                <div className="p-3 rounded-full bg-primary/10 ring-2 ring-primary/20 flex-shrink-0">
+                                    <MapPin className="h-6 w-6 text-primary" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className={designTokens.typography.cardTitle}>Office Location</h3>
+                                    <p className="text-muted-foreground">
+                                        123 Business District<br />
+                                        Makati City, Metro Manila<br />
+                                        Philippines 1200
+                                    </p>
+                                    <Badge variant="secondary" className="mt-2">
+                                        <MapPin className="h-3 w-3 mr-1" />
+                                        Metro Manila
+                                    </Badge>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted/30 transition-colors">
+                                <div className="p-3 rounded-full bg-primary/10 ring-2 ring-primary/20 flex-shrink-0">
+                                    <Clock className="h-6 w-6 text-primary" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h3 className={designTokens.typography.cardTitle}>Business Hours</h3>
+                                    <p className="text-muted-foreground">
+                                        Monday - Friday: 9:00 AM - 6:00 PM<br />
+                                        Saturday: 10:00 AM - 4:00 PM<br />
+                                        Sunday: Closed
+                                    </p>
+                                    <Badge variant="outline" className="mt-2">
+                                        <Clock className="h-3 w-3 mr-1" />
+                                        PST Timezone
+                                    </Badge>
+                                </div>
+                            </div>
+                        </div>
+                    </StandardCard>
+
+
+                    {/* FAQ Section */}
+                    <StandardCard 
+                        title="Frequently Asked Questions"
+                        variant="elevated"
+                    >
+                        <div className="space-y-4">
+                            <div className="p-4 rounded-lg border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all duration-200">
+                                <h4 className={designTokens.typography.cardTitle}>How quickly do you respond?</h4>
+                                <p className={designTokens.typography.cardDescription}>
+                                    We typically respond to all inquiries within 24 hours during business days. For urgent matters, you can call us directly.
+                                </p>
+                            </div>
+                            <div className="p-4 rounded-lg border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all duration-200">
+                                <h4 className={designTokens.typography.cardTitle}>Do you offer phone support?</h4>
+                                <p className={designTokens.typography.cardDescription}>
+                                    Yes, we provide phone support during our business hours (Mon-Fri 9AM-6PM PST) for urgent matters and complex inquiries.
+                                </p>
+                            </div>
+                            <div className="p-4 rounded-lg border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all duration-200">
+                                <h4 className={designTokens.typography.cardTitle}>What information should I include?</h4>
+                                <p className={designTokens.typography.cardDescription}>
+                                    Please provide as much detail as possible about your inquiry, including your account information if applicable, to help us assist you better.
+                                </p>
+                            </div>
+                            <div className="p-4 rounded-lg border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all duration-200">
+                                <h4 className={designTokens.typography.cardTitle}>Can I visit your office?</h4>
+                                <p className={designTokens.typography.cardDescription}>
+                                    Yes, our office is open for visits by appointment. Please contact us in advance to schedule a meeting with our team.
+                                </p>
+                            </div>
+                        </div>
+                    </StandardCard>
                     </div>
-                    <p className="text-muted-foreground leading-relaxed mb-4">"{testimonial.content}"</p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-semibold text-primary">
-                        {testimonial.avatar}
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-sm">{testimonial.name}</h4>
-                        <p className="text-xs text-muted-foreground">{testimonial.role}</p>
-                      </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </section>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
+                <div className="container">
+                    <StandardCard 
+                        title=""
+                        variant="elevated" 
+                        className="max-w-4xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5"
+                    >
+                        <div className="text-center pb-8">
+                            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                                <MessageSquare className="h-8 w-8 text-primary" />
+                            </div>
+                            <h2 className="text-3xl font-bold font-headline mb-6">Still Have Questions?</h2>
+                            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+                                Can't find what you're looking for? Our support team is here to help you with any questions or concerns you may have.
+                            </p>
+                            <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                <Button asChild size="lg" className="h-12 px-8 shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                                    <a href="mailto:support@lingkod.ph">
+                                        Email Support <Mail className="ml-2 h-5 w-5" />
+                                    </a>
+                                </Button>
+                                <Button asChild size="lg" variant="outline" className="h-12 px-8 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                                    <a href="tel:+63212345678">
+                                        Call Us <Phone className="ml-2 h-5 w-5" />
+                                    </a>
+                                </Button>
+                            </div>
+                        </div>
+                    </StandardCard>
+                </div>
+            </section>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

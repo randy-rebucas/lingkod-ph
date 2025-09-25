@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Megaphone, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTranslations } from 'next-intl';
+import { designTokens } from '@/lib/design-tokens';
 
 type Broadcast = {
     id: string;
@@ -58,11 +59,11 @@ export default function BroadcastBanner() {
 
     return (
         <div className="sticky top-16 z-30">
-            <Alert variant="default" className="flex items-center justify-between rounded-none border-x-0 border-t-0 bg-accent text-accent-foreground">
+            <Alert variant="default" className={`flex items-center justify-between rounded-none border-x-0 border-t-0 bg-accent text-accent-foreground ${designTokens.effects.cardElevated}`}>
                 <div className="flex items-center gap-3">
                     <Megaphone className="h-5 w-5" />
                     <div>
-                        <AlertTitle className="font-bold">Announcement</AlertTitle>
+                        <AlertTitle className={`font-bold ${designTokens.typography.sectionTitle}`}>Announcement</AlertTitle>
                         <AlertDescription className="text-accent-foreground/90">
                             {broadcast.message}
                         </AlertDescription>
@@ -71,7 +72,7 @@ export default function BroadcastBanner() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-accent-foreground hover:bg-accent-foreground/10 hover:text-accent-foreground"
+                    className={`h-7 w-7 text-accent-foreground hover:bg-accent-foreground/10 hover:text-accent-foreground ${designTokens.effects.buttonGlow}`}
                     onClick={handleDismiss}
                     aria-label={t('close')}
                 >

@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
@@ -12,6 +14,12 @@ import { cn } from "@/lib/utils";
 import { MessageSquare, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 type Conversation = {
     id: string;
@@ -113,24 +121,18 @@ export default function AdminConversationsPage() {
     }
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title="Access Denied" 
+            description="This page is for administrators only." 
+        />;
     }
 
     return (
-        <div className="space-y-6 h-full flex flex-col">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Conversation Monitoring</h1>
-                <p className="text-muted-foreground">
-                    Review user conversations on the platform.
-                </p>
-            </div>
+        <PageLayout 
+            title="Conversation Monitoring" 
+            description="Review user conversations on the platform."
+            className="h-full flex flex-col"
+        >
             <Card className="flex-1 grid grid-cols-1 md:grid-cols-[350px_1fr] shadow-lg overflow-hidden">
                 <div className="flex flex-col border-r bg-background/50">
                     <ScrollArea className="flex-1">
@@ -209,6 +211,6 @@ export default function AdminConversationsPage() {
                    )}
                 </div>
             </Card>
-        </div>
+        </PageLayout>
     );
 }

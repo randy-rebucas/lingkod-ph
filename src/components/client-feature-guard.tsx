@@ -9,6 +9,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Star, Lock, TrendingUp, Search, Calendar, Heart, BarChart3, ShoppingBag, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { StandardCard } from '@/components/app/standard-card';
+import { designTokens } from '@/lib/design-tokens';
 
 interface ClientFeatureGuardProps {
   feature: string;
@@ -119,20 +121,17 @@ export function ClientFeatureGuard({
   const Icon = config?.icon || Lock;
 
   return (
-    <Card className={`border-dashed border-2 border-gray-200 ${className}`}>
-      <CardHeader className="text-center">
+    <StandardCard 
+      variant="elevated"
+      title={config?.title || 'Premium Feature'}
+      description={config?.description || 'This feature is available with a Premium subscription'}
+      className={`border-dashed border-2 border-gray-200 ${className}`}
+    >
+      <div className="text-center mb-6">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-blue-400 to-purple-500">
           <Icon className="h-6 w-6 text-white" />
         </div>
-        <CardTitle className="text-xl font-semibold">
-          {config?.title || 'Premium Feature'}
-        </CardTitle>
-        <CardDescription className="text-base">
-          {config?.description || 'This feature is available with a Premium subscription'}
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="space-y-6">
+      </div>
         {/* Usage Info */}
         {!isUnlimited && limit > 0 && (
           <div className="text-center">
@@ -193,8 +192,7 @@ export function ClientFeatureGuard({
             Start with a <span className="font-semibold text-green-600">7-day free trial</span> - no credit card required
           </p>
         </div>
-      </CardContent>
-    </Card>
+    </StandardCard>
   );
 }
 

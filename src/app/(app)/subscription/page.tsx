@@ -27,6 +27,12 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
 import { SubscriptionPlan, ProviderSubscription } from '@/lib/subscription-types';
+import { PageLayout } from '@/components/app/page-layout';
+import { LoadingState } from '@/components/app/loading-state';
+import { AccessDenied } from '@/components/app/access-denied';
+import { StandardCard } from '@/components/app/standard-card';
+import { EmptyState } from '@/components/app/empty-state';
+import { designTokens } from '@/lib/design-tokens';
 
 export default function SubscriptionPage() {
   const { user, userRole } = useAuth();
@@ -337,32 +343,21 @@ export default function SubscriptionPage() {
   };
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">Loading subscription information...</div>
-      </div>
-    );
+    return <LoadingState title="Loading subscription information..." />;
   }
 
   if (userRole !== 'provider') {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-          <p className="text-muted-foreground">This page is only available for service providers.</p>
-        </div>
-      </div>
-    );
+    return <AccessDenied 
+      title="Access Denied" 
+      description="This page is only available for service providers." 
+    />;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold">Subscription Management</h1>
-        <p className="text-muted-foreground">
-          Manage your subscription and access premium features
-        </p>
-      </div>
+    <PageLayout 
+      title="Subscription Management" 
+      description="Manage your subscription and access premium features"
+    >
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
@@ -415,6 +410,6 @@ export default function SubscriptionPage() {
           </div>
         </div>
       )}
-    </div>
+    </PageLayout>
   );
 }

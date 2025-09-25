@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
@@ -9,8 +11,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Star } from 'lucide-react';
+import { Star, Users } from 'lucide-react';
 import type { User } from '@/app/(app)/admin/users/page';
+import { PageLayout } from '@/components/app/page-layout';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { EmptyState } from '@/components/app/empty-state';
+import { AccessDenied } from '@/components/app/access-denied';
+import { designTokens } from '@/lib/design-tokens';
 
 type Booking = {
     id: string;
@@ -120,41 +128,39 @@ export default function ClientReportsPage() {
     }, [clients, bookings, reviews]);
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title="Access Denied" 
+            description="This page is for administrators only." 
+        />;
     }
     
     if (loading) {
-        return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Client Reports</h1>
-                    <p className="text-muted-foreground">Analyze client usage and satisfaction.</p>
-                </div>
-                <Card>
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
-             </div>
-        )
+        return <LoadingState 
+            title="Client Reports" 
+            description="Analyze client usage and satisfaction." 
+        />;
     }
 
+    if (clientReports.length === 0) {
+        return (
+            <PageLayout 
+                title="Client Reports" 
+                description="Analyze client usage, spending habits, and satisfaction scores."
+            >
+                <EmptyState 
+                    title="No Client Data" 
+                    description="No client reports available to display. Client data will appear here once users start making bookings and leaving reviews."
+                    icon={Users}
+                />
+            </PageLayout>
+        );
+    }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Client Reports</h1>
-                <p className="text-muted-foreground">
-                    Analyze client usage, spending habits, and satisfaction scores.
-                </p>
-            </div>
+        <PageLayout 
+            title="Client Reports" 
+            description="Analyze client usage, spending habits, and satisfaction scores."
+        >
              <Card>
                  <CardHeader>
                     <CardTitle>Client Usage Overview</CardTitle>
@@ -171,7 +177,7 @@ export default function ClientReportsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {clientReports.length > 0 ? clientReports.map(report => (
+                            {clientReports.map(report => (
                                 <TableRow key={report.user.uid}>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
@@ -188,17 +194,11 @@ export default function ClientReportsPage() {
                                         {report.averageRating > 0 ? renderStars(report.averageRating) : <span className="text-muted-foreground text-xs">No ratings yet</span>}
                                     </TableCell>
                                 </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={4} className="text-center h-24">
-                                        No client data to display.
-                                    </TableCell>
-                                </TableRow>
-                            )}
+                            ))}
                         </TableBody>
                     </Table>
                 </CardContent>
             </Card>
-        </div>
+        </PageLayout>
     )
 }

@@ -4,6 +4,8 @@ import { useActionState, useEffect, useState } from "react";
 import { handleSuggestSmartRate, type FormState } from "./smart-rate-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { StandardCard } from "@/components/app/standard-card";
+import { designTokens } from "@/lib/design-tokens";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,18 +33,18 @@ export default function SmartRateClient() {
 
   return (
     <div className="grid gap-8 md:grid-cols-2">
-      <Card className="shadow-lg">
+      <StandardCard 
+        title={t('title')}
+        description={t('description')}
+        variant="elevated"
+        className="shadow-lg"
+      >
         <form action={formAction}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="text-accent" />
-              <span>{t('title')}</span>
-            </CardTitle>
-            <CardDescription>
-              {t('description')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="text-accent" />
+            <span className={designTokens.typography.cardTitle}>{t('title')}</span>
+          </div>
+          <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="servicesOffered">{t('servicesOffered')}</Label>
               <Textarea
@@ -66,26 +68,26 @@ export default function SmartRateClient() {
               </p>
             </div>
             {state.error && <p className="text-sm text-destructive">{state.error}</p>}
-          </CardContent>
-          <CardFooter>
+          </div>
+          <div className="mt-4">
             <Button type="submit" disabled={isPending} className="w-full">
               {isPending ? t('analyzing') : t('getSuggestion')}
             </Button>
-          </CardFooter>
+          </div>
         </form>
-      </Card>
+      </StandardCard>
       
-      <Card className="shadow-lg">
-        <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-                <Bot className="text-primary" />
-                <span>{t('aiPoweredSuggestion')}</span>
-            </CardTitle>
-            <CardDescription>
-                {t('analysisWillAppear')}
-            </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <StandardCard 
+        title={t('aiPoweredSuggestion')}
+        description={t('analysisWillAppear')}
+        variant="elevated"
+        className="shadow-lg"
+      >
+        <div className="flex items-center gap-2 mb-4">
+            <Bot className="text-primary" />
+            <span className={designTokens.typography.cardTitle}>{t('aiPoweredSuggestion')}</span>
+        </div>
+        <div>
             {isPending ? (
                 <div className="space-y-6">
                     <div className="space-y-2">
@@ -124,8 +126,8 @@ export default function SmartRateClient() {
                     <p>{t('suggestionWillShow')}</p>
                 </div>
             )}
-        </CardContent>
-      </Card>
+        </div>
+      </StandardCard>
     </div>
   );
 }

@@ -15,6 +15,8 @@ import { Upload, Loader2, CheckCircle, AlertCircle, Clock, ShieldCheck, User, Cr
 import { Badge } from './ui/badge';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
+import { StandardCard } from '@/components/app/standard-card';
+import { designTokens } from '@/lib/design-tokens';
 
 type VerificationStatus = 'Unverified' | 'Pending' | 'Verified' | 'Rejected';
 
@@ -135,15 +137,18 @@ export default function IdentityVerification() {
     const currentStatusInfo = StatusInfo[verificationStatus || 'Unverified'];
 
     return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+        <StandardCard 
+            variant="elevated"
+            title="Identity Verification"
+            description="Verify your identity to build trust on the platform."
+        >
+            <div className="flex flex-row items-center justify-between mb-4">
                 <div>
-                    <CardTitle>Identity Verification</CardTitle>
-                    <CardDescription>Verify your identity to build trust on the platform.</CardDescription>
+                    <h3 className="text-lg font-semibold">Identity Verification</h3>
+                    <p className="text-muted-foreground">Verify your identity to build trust on the platform.</p>
                 </div>
                 {verificationStatus && <Badge variant={currentStatusInfo.badgeVariant}>{currentStatusInfo.title}</Badge>}
-            </CardHeader>
-            <CardContent>
+            </div>
                 {verificationStatus === 'Verified' ? (
                     <div className="flex flex-col items-center justify-center text-center p-8 bg-green-50 rounded-lg">
                         {currentStatusInfo.icon}
@@ -211,7 +216,6 @@ export default function IdentityVerification() {
                         </Button>
                     </div>
                 )}
-            </CardContent>
-        </Card>
+        </StandardCard>
     );
 }

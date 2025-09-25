@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
@@ -11,10 +13,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, CheckCircle, Wallet } from "lucide-react";
+import { MoreHorizontal, CheckCircle, Wallet, PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { handleMarkAsPaid } from "./actions";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 type PayoutStatus = "Pending" | "Paid";
 
@@ -69,14 +77,14 @@ export default function AdminPayoutsPage() {
     const [payouts, setPayouts] = useState<Payout[]>([]);
     const [loading, setLoading] = useState(true);
 
-     useEffect(() => {
+    useEffect(() => {
         if (userRole !== 'admin') {
             setLoading(false);
             return;
         }
 
         const payoutsQuery = query(collection(db, "payouts"), orderBy("requestedAt", "desc"));
-        
+
         const unsubscribe = onSnapshot(payoutsQuery, (snapshot) => {
             const payoutsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
             setPayouts(payoutsData);
@@ -109,22 +117,16 @@ export default function AdminPayoutsPage() {
             </Card>
         );
     }
-    
+
     if (loading) {
         return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Payout Requests</h1>
-                    <p className="text-muted-foreground">
-                        Review and process provider payout requests.
-                    </p>
-                </div>
+            <PageLayout className="space-y-6" title="Payout Requests" description="Review and process provider payout requests.">
                 <Card>
                     <CardContent className="p-6">
                         <Skeleton className="h-64 w-full" />
                     </CardContent>
                 </Card>
-             </div>
+            </PageLayout>
         )
     }
 
@@ -132,14 +134,8 @@ export default function AdminPayoutsPage() {
     const paidPayouts = payouts.filter(p => p.status === 'Paid');
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Payout Requests</h1>
-                <p className="text-muted-foreground">
-                     Review and process provider payout requests.
-                </p>
-            </div>
-             <Card>
+        <PageLayout className="space-y-6" title="Payout Requests" description="Review and process provider payout requests.">
+            <Card>
                 <CardHeader>
                     <CardTitle>Pending Payouts</CardTitle>
                     <CardDescription>These requests need to be processed.</CardDescription>
@@ -166,7 +162,7 @@ export default function AdminPayoutsPage() {
                                     <TableCell>
                                         <PayoutDetails payout={payout} />
                                     </TableCell>
-                                     <TableCell className="text-right">
+                                    <TableCell className="text-right">
                                         <Button size="sm" onClick={() => onMarkAsPaid(payout)}>
                                             <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
                                         </Button>
@@ -200,7 +196,7 @@ export default function AdminPayoutsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                             {paidPayouts.length > 0 ? paidPayouts.map(payout => (
+                            {paidPayouts.length > 0 ? paidPayouts.map(payout => (
                                 <TableRow key={payout.id}>
                                     <TableCell className="text-xs text-muted-foreground">
                                         {payout.processedAt ? format(payout.processedAt.toDate(), 'PP') : 'N/A'}
@@ -211,15 +207,15 @@ export default function AdminPayoutsPage() {
                                         <Badge variant={getStatusVariant(payout.status)}>{payout.status}</Badge>
                                     </TableCell>
                                 </TableRow>
-                             )) : (
+                            )) : (
                                 <TableRow>
                                     <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">No completed payouts found.</TableCell>
                                 </TableRow>
-                             )}
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>
             </Card>
-        </div>
+        </PageLayout>
     )
 }

@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Sparkles } from 'lucide-react';
 import { generateServiceDescription } from '@/ai/flows/generate-service-description';
 import { useTranslations } from 'next-intl';
+import { designTokens } from '@/lib/design-tokens';
 
 export type Service = {
     id?: string;
@@ -174,7 +175,7 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className={`sm:max-w-[425px] ${designTokens.effects.cardElevated}`}>
                 <DialogHeader>
                     <DialogTitle>{service ? t('editService') : t('addNewService')}</DialogTitle>
                     <DialogDescription>

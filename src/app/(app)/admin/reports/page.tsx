@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
@@ -21,6 +23,12 @@ import {
   Bar,
   BarChart,
 } from 'recharts';
+import { PageLayout } from '@/components/app/page-layout';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { EmptyState } from '@/components/app/empty-state';
+import { AccessDenied } from '@/components/app/access-denied';
+import { designTokens } from '@/lib/design-tokens';
 
 type Booking = {
     id: string;
@@ -124,40 +132,25 @@ export default function AdminReportsPage() {
         };
     }, [bookings]);
     
-     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+    if (userRole !== 'admin') {
+        return <AccessDenied 
+            title="Access Denied" 
+            description="This page is for administrators only." 
+        />;
     }
 
     if (loading) {
-        return (
-            <div className="space-y-6">
-                <Skeleton className="h-10 w-1/3" />
-                <Skeleton className="h-4 w-2/3" />
-                <div className="grid gap-6 md:grid-cols-3">
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
-                </div>
-                <Skeleton className="h-64 w-full" />
-            </div>
-        );
+        return <LoadingState 
+            title="Platform Reports" 
+            description="Deep dive into the platform's performance with charts and detailed tables." 
+        />;
     }
-    
+
     return (
-        <div className="space-y-6">
-             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Platform Reports</h1>
-                    <p className="text-muted-foreground">Deep dive into the platform's performance with charts and detailed tables.</p>
-                </div>
-            </div>
+        <PageLayout 
+            title="Platform Reports" 
+            description="Deep dive into the platform's performance with charts and detailed tables."
+        >
             
             <div className="grid gap-6 md:grid-cols-3">
                 <Card>
@@ -260,6 +253,6 @@ export default function AdminReportsPage() {
                     </Table>
                 </CardContent>
             </Card>
-        </div>
+        </PageLayout>
     );
 }

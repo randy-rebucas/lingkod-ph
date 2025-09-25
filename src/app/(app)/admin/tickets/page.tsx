@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
@@ -19,6 +21,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { handleUpdateTicketStatus, handleAddTicketNote } from "./actions";
 import { Separator } from "@/components/ui/separator";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 type TicketStatus = "New" | "In Progress" | "Closed";
 
@@ -107,39 +115,25 @@ export default function AdminTicketsPage() {
     };
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title="Access Denied" 
+            description="This page is for administrators only." 
+        />;
     }
     
     if (loading) {
-        return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Support Tickets</h1>
-                    <p className="text-muted-foreground">Manage user-submitted support requests.</p>
-                </div>
-                <Card>
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
-             </div>
-        )
+        return <LoadingState 
+            title="Support Tickets" 
+            description="Manage user-submitted support requests." 
+        />;
     }
 
     return (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Support Tickets</h1>
-                    <p className="text-muted-foreground">Manage user-submitted support requests.</p>
-                </div>
+            <PageLayout 
+                title="Support Tickets" 
+                description="Manage user-submitted support requests."
+            >
                  <Card>
                     <CardContent>
                         <Table>
@@ -225,7 +219,7 @@ export default function AdminTicketsPage() {
                         </div>
                     </DialogContent>
                 )}
-            </div>
+            </PageLayout>
         </Dialog>
     )
 }

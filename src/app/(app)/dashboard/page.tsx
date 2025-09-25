@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -22,6 +24,10 @@ import { format, startOfDay, endOfDay } from "date-fns";
 import { findMatchingProviders } from "@/ai/flows/find-matching-providers";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AdCarousel } from "@/components/ad-carousel";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { designTokens } from "@/lib/design-tokens";
 
 
 type Booking = {
@@ -85,29 +91,26 @@ const renderStars = (rating: number) => {
 const DashboardCard = ({ title, icon: Icon, value, change, isLoading }: { title: string, icon: React.ElementType, value: string, change?: string, isLoading: boolean }) => {
     if (isLoading) {
         return (
-            <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                    <Icon className="h-5 w-5 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <Skeleton className="h-8 w-24 mb-2" />
-                    <Skeleton className="h-4 w-32" />
-                </CardContent>
-            </Card>
+            <StandardCard title={title} variant="elevated">
+                <Skeleton className="h-8 w-24 mb-2" />
+                <Skeleton className="h-4 w-32" />
+            </StandardCard>
         );
     }
     return (
-        <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{title}</CardTitle>
+        <StandardCard 
+            title={title} 
+            variant="elevated"
+            className="group hover:shadow-glow/20 transition-all duration-300"
+        >
+            <div className="flex items-center justify-between">
+                <div>
+                    <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{value}</div>
+                    {change && <p className="text-xs text-muted-foreground mt-1">{change}</p>}
+                </div>
                 <Icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{value}</div>
-                {change && <p className="text-xs text-muted-foreground mt-1">{change}</p>}
-            </CardContent>
-        </Card>
+            </div>
+        </StandardCard>
     )
 }
 
@@ -945,8 +948,11 @@ export default function DashboardPage() {
     
     // Provider Dashboard (Default)
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+        <PageLayout 
+            title={t('dashboard')} 
+            description={t('dashboardDescription')}
+        >
+            <div className={designTokens.layout.cardGrid4}>
                 <DashboardCard isLoading={loading} title="Total Revenue" icon={DollarSign} value={`₱${totalRevenue.toFixed(2)}`} />
                 <DashboardCard isLoading={loading} title="Pending Payouts" icon={Wallet} value={`₱${pendingPayouts.toFixed(2)}`} />
                 <DashboardCard isLoading={loading} title="Upcoming Bookings" icon={Calendar} value={`${upcomingBookingsCount}`} />
@@ -955,82 +961,80 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-                 <Card className="lg:col-span-4 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader>
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Earnings Overview</CardTitle>
-                        <CardDescription>Your earnings for the last 6 months.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pl-2">
-                        {loading ? (
-                             <div className="flex items-center justify-center h-[300px]">
-                                <Skeleton className="w-full h-full" />
-                            </div>
-                        ) : (
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={earningsData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₱${value >= 1000 ? `${value/1000}k` : value}`} />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: "hsl(var(--background))",
-                                        border: "1px solid hsl(var(--border))",
-                                        borderRadius: "var(--radius)"
-                                    }}
-                                    cursor={{ fill: 'hsl(var(--secondary))' }}
-                                />
-                                <Bar dataKey="earnings" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                        )}
-                    </CardContent>
-                </Card>
-                <Card className="lg:col-span-3 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader>
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Today&apos;s Schedule</CardTitle>
-                        <CardDescription>Your upcoming jobs for today.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                         {loading ? (
-                            <div className="space-y-4">
-                                <Skeleton className="h-10 w-full" />
-                                <Skeleton className="h-10 w-full" />
-                                <Skeleton className="h-10 w-full" />
-                            </div>
-                        ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Time</TableHead>
-                                    <TableHead>Client</TableHead>
-                                    <TableHead>Service</TableHead>
+                 <StandardCard 
+                    title="Earnings Overview" 
+                    description="Your earnings for the last 6 months."
+                    variant="elevated"
+                    className="lg:col-span-4"
+                >
+                    {loading ? (
+                         <div className="flex items-center justify-center h-[300px]">
+                            <Skeleton className="w-full h-full" />
+                        </div>
+                    ) : (
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={earningsData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                            <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₱${value >= 1000 ? `${value/1000}k` : value}`} />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: "hsl(var(--background))",
+                                    border: "1px solid hsl(var(--border))",
+                                    borderRadius: "var(--radius)"
+                                }}
+                                cursor={{ fill: 'hsl(var(--secondary))' }}
+                            />
+                            <Bar dataKey="earnings" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                    )}
+                </StandardCard>
+                <StandardCard 
+                    title="Today's Schedule" 
+                    description="Your upcoming jobs for today."
+                    variant="elevated"
+                    className="lg:col-span-3"
+                >
+                    {loading ? (
+                        <div className="space-y-4">
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                            <Skeleton className="h-10 w-full" />
+                        </div>
+                    ) : (
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Time</TableHead>
+                                <TableHead>Client</TableHead>
+                                <TableHead>Service</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {todaysJobs.length > 0 ? todaysJobs.map((booking) => (
+                                <TableRow key={booking.id}>
+                                    <TableCell>{format(booking.date.toDate(), 'p')}</TableCell>
+                                    <TableCell className="font-medium">{booking.clientName}</TableCell>
+                                    <TableCell>{booking.serviceName}</TableCell>
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {todaysJobs.length > 0 ? todaysJobs.map((booking) => (
-                                    <TableRow key={booking.id}>
-                                        <TableCell>{format(booking.date.toDate(), 'p')}</TableCell>
-                                        <TableCell className="font-medium">{booking.clientName}</TableCell>
-                                        <TableCell>{booking.serviceName}</TableCell>
-                                    </TableRow>
-                                )) : (
-                                    <TableRow>
-                                        <TableCell colSpan={3} className="h-24 text-center">No jobs scheduled for today.</TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                        )}
-                    </CardContent>
-                </Card>
+                            )) : (
+                                <TableRow>
+                                    <TableCell colSpan={3} className="h-24 text-center">No jobs scheduled for today.</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                    )}
+                </StandardCard>
             </div>
             
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader>
-                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Recent Reviews</CardTitle>
-                    <CardDescription>What your clients are saying about you.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
+            <StandardCard 
+                title="Recent Reviews" 
+                description="What your clients are saying about you."
+                variant="elevated"
+            >
+                <div className="space-y-6">
                      {loading ? (
                         <div className="space-y-6">
                            {[...Array(2)].map((_, i) => (
@@ -1072,9 +1076,9 @@ export default function DashboardPage() {
                     <div className="text-center">
                         <Button variant="outline" className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">View All Reviews</Button>
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </StandardCard>
 
-        </div>
+        </PageLayout>
     );
 }

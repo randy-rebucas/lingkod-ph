@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useTranslations } from 'next-intl';
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

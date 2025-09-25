@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import { useAuth } from "@/context/auth-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +9,11 @@ import { AlertTriangle, Home, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { designTokens } from "@/lib/design-tokens";
 
 export default function UnauthorizedPage() {
   const { userRole } = useAuth();
@@ -23,17 +30,21 @@ export default function UnauthorizedPage() {
   }, [userRole, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-            <AlertTriangle className="h-6 w-6 text-destructive" />
-          </div>
-          <CardTitle className="text-2xl">Access Denied</CardTitle>
-          <CardDescription>
-            You don't have permission to access this page.
-          </CardDescription>
-        </CardHeader>
+    <PageLayout 
+      title="Access Denied" 
+      description="You don't have permission to access this page."
+    >
+      <div className="flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
+              <AlertTriangle className="h-6 w-6 text-destructive" />
+            </div>
+            <CardTitle className="text-2xl">Access Denied</CardTitle>
+            <CardDescription>
+              You don't have permission to access this page.
+            </CardDescription>
+          </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-center text-sm text-muted-foreground">
             <p>Your current role: <span className="font-medium capitalize">{userRole || 'Unknown'}</span></p>
@@ -59,7 +70,8 @@ export default function UnauthorizedPage() {
             <p>You will be automatically redirected to your dashboard in 5 seconds.</p>
           </div>
         </CardContent>
-      </Card>
-    </div>
+        </Card>
+      </div>
+    </PageLayout>
   );
 }

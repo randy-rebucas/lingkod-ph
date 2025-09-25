@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/auth-context';
 import { SubscriptionPlan } from '@/lib/subscription-types';
 import { GCashPaymentButton } from './gcash-payment-button';
+import { StandardCard } from '@/components/app/standard-card';
+import { designTokens } from '@/lib/design-tokens';
 
 interface SubscriptionPaymentButtonProps {
   plan: SubscriptionPlan;
@@ -237,21 +239,20 @@ export function SubscriptionPaymentButton({
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Crown className="h-5 w-5 text-yellow-500" />
-          {startTrial ? 'Start Free Trial' : 'Upgrade to Pro'}
-        </CardTitle>
-        <CardDescription>
-          {startTrial 
-            ? 'Try Pro features for 7 days, then continue with a paid subscription'
-            : 'Get instant access to all Pro features'
-          }
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
+    <StandardCard 
+      variant="elevated"
+      title={startTrial ? 'Start Free Trial' : 'Upgrade to Pro'}
+      description={
+        startTrial 
+          ? 'Try Pro features for 7 days, then continue with a paid subscription'
+          : 'Get instant access to all Pro features'
+      }
+      className={className}
+    >
+      <div className="flex items-center gap-2 mb-4">
+        <Crown className="h-5 w-5 text-yellow-500" />
+        <span className="font-semibold">{startTrial ? 'Start Free Trial' : 'Upgrade to Pro'}</span>
+      </div>
         {/* Plan Info */}
         <div className="text-center space-y-2">
           <div className="text-3xl font-bold text-primary">
@@ -272,8 +273,7 @@ export function SubscriptionPaymentButton({
           <p>💳 All major payment methods accepted</p>
           {startTrial && <p>🎁 No credit card required for trial</p>}
         </div>
-      </CardContent>
-    </Card>
+    </StandardCard>
   );
 }
 

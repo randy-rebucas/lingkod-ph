@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Globe, ChevronDown } from 'lucide-react';
+import { designTokens } from '@/lib/design-tokens';
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -56,7 +57,7 @@ export function LanguageSwitcher() {
           <span className="sr-only">Toggle language</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className={designTokens.effects.cardElevated}>
         {languages.map((language) => (
           <DropdownMenuItem
             key={language.code}

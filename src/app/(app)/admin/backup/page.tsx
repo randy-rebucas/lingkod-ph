@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
@@ -13,6 +15,12 @@ import { PlusCircle, Loader2, Download, DatabaseBackup, ListTree } from "lucide-
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { createBackup } from "@/ai/flows/create-backup";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 type Backup = {
     id: string;
@@ -97,46 +105,30 @@ export default function AdminBackupPage() {
     }
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title="Access Denied" 
+            description="This page is for administrators only." 
+        />;
     }
     
     if (loading) {
-        return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Data Backup & Recovery</h1>
-                    <p className="text-muted-foreground">Manage and download backups of your platform's data.</p>
-                </div>
-                <Card>
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
-             </div>
-        )
+        return <LoadingState 
+            title="Data Backup & Recovery" 
+            description="Manage and download backups of your platform's data." 
+        />;
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">Data Backup & Recovery</h1>
-                    <p className="text-muted-foreground">
-                        Manage and download backups of your platform's data.
-                    </p>
-                </div>
+        <PageLayout 
+            title="Data Backup & Recovery" 
+            description="Manage and download backups of your platform's data."
+            action={
                 <Button onClick={handleCreateBackup} disabled={isCreatingBackup}>
                     {isCreatingBackup ? <Loader2 className="mr-2 animate-spin"/> : <PlusCircle className="mr-2"/>}
                      {isCreatingBackup ? 'Creating Backup...' : 'Create New Backup'}
                 </Button>
-            </div>
+            }
+        >
              <Card>
                 <CardHeader>
                     <CardTitle>Backup History</CardTitle>
@@ -178,6 +170,6 @@ export default function AdminBackupPage() {
                     </Table>
                 </CardContent>
             </Card>
-        </div>
+        </PageLayout>
     )
 }

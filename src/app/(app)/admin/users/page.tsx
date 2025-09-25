@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
@@ -24,6 +26,11 @@ import Link from "next/link";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 
 type UserStatus = 'active' | 'pending_approval' | 'suspended';
@@ -210,41 +217,24 @@ export default function AdminUsersPage() {
     });
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title="Access Denied" 
+            description="This page is for administrators only." 
+        />;
     }
     
     if (loading) {
-        return (
-             <div className="space-y-6">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline">User Management</h1>
-                    <p className="text-muted-foreground">View and manage all users.</p>
-                </div>
-                <Card>
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
-             </div>
-        )
+        return <LoadingState 
+            title="User Management" 
+            description="View and manage all users." 
+        />;
     }
 
     return (
-        <>
-            <div className="space-y-6">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline">User Management</h1>
-                    <p className="text-muted-foreground">
-                        View and manage all users on the platform.
-                    </p>
-                </div>
+        <PageLayout 
+            title="User Management" 
+            description="View and manage all users on the platform."
+        >
                 <Card>
                     <CardHeader>
                         <div className="flex flex-col sm:flex-row gap-4">
@@ -388,7 +378,6 @@ export default function AdminUsersPage() {
                         </Table>
                     </CardContent>
                 </Card>
-            </div>
             
             {/* Create User Dialog */}
             <Dialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen}>
@@ -479,7 +468,7 @@ export default function AdminUsersPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </>
+        </PageLayout>
     )
 }
 

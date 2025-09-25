@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -15,6 +17,12 @@ import { Star, MessageSquare, Award, User, Briefcase, Mail, ArrowLeft, Users } f
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import type { Job as JobType } from "@/app/(app)/my-job-posts/page";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 
 type Provider = {
@@ -193,27 +201,26 @@ export default function ApplicantsPage() {
 
 
     if (loading) {
-        return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                     {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
-                </div>
-            </div>
-        )
+        return <LoadingState 
+            title="Loading Applicants" 
+            description="Please wait while we fetch the applicant information." 
+        />;
     }
 
-
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-                <div className="relative z-10 flex items-center gap-4">
-                    <Button variant="outline" size="icon" onClick={() => router.back()} className="hover:bg-primary/10 transition-colors">
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <div>
-                        <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
-                            Applicants for "{job?.title}"
-                        </h1>
-                        <p className="text-xl text-muted-foreground leading-relaxed">
+        <PageLayout 
+            title={`Applicants for "${job?.title}"`} 
+            description="Review and manage applications for your job posting."
+        >
+            <div className="relative z-10 flex items-center gap-4">
+                <Button variant="outline" size="icon" onClick={() => router.back()} className="hover:bg-primary/10 transition-colors">
+                    <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div>
+                    <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
+                        Applicants for "{job?.title}"
+                    </h1>
+                    <p className="text-xl text-muted-foreground leading-relaxed">
                             Review the providers who have applied for your job.
                         </p>
                     </div>
@@ -296,7 +303,7 @@ export default function ApplicantsPage() {
                 </Card>
             )}
 
-        </div>
+        </PageLayout>
     );
 }
 

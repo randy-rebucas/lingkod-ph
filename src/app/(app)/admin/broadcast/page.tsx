@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
@@ -13,6 +15,12 @@ import { sendBroadcastAction, sendCampaignEmailAction } from "./actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 export default function BroadcastPage() {
     const { user, userRole } = useAuth();
@@ -72,24 +80,17 @@ export default function BroadcastPage() {
 
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title="Access Denied" 
+            description="This page is for administrators only." 
+        />;
     }
 
     return (
-        <div className="space-y-6">
-             <div>
-                <h1 className="text-3xl font-bold font-headline">{t('BroadcastCenterTitle')}</h1>
-                <p className="text-muted-foreground">
-                    {t('BroadcastCenterDescription')}
-                </p>
-            </div>
+        <PageLayout 
+            title={t('BroadcastCenterTitle')} 
+            description={t('BroadcastCenterDescription')}
+        >
             <Tabs defaultValue="banner">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="banner">{t('SiteBannerTab')}</TabsTrigger>
@@ -149,6 +150,6 @@ export default function BroadcastPage() {
                     </Card>
                 </TabsContent>
             </Tabs>
-        </div>
+        </PageLayout>
     );
 }

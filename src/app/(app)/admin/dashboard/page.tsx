@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
@@ -13,6 +15,11 @@ import { db } from "@/lib/firebase";
 import { collection, query, onSnapshot, orderBy, limit, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 type Booking = {
     id: string;
@@ -140,22 +147,17 @@ export default function AdminDashboardPage() {
     }, []);
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('accessDenied')}</CardTitle>
-                    <CardDescription>{t('adminOnly')}</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title={t('accessDenied')} 
+            description={t('adminOnly')} 
+        />;
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                <p className="text-muted-foreground">{t('subtitle')}</p>
-            </div>
+        <PageLayout 
+            title={t('title')} 
+            description={t('subtitle')}
+        >
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <AdminDashboardCard isLoading={loading} title={t('totalRevenue')} icon={DollarSign} value={`₱${stats.totalRevenue.toFixed(2)}`} />
@@ -229,7 +231,7 @@ export default function AdminDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </PageLayout>
     );
 
     

@@ -23,6 +23,7 @@ import { Calendar } from './ui/calendar';
 import { Separator } from './ui/separator';
 import { generateQuoteDescription } from '@/ai/flows/generate-quote-description';
 import { useTranslations } from 'next-intl';
+import { designTokens } from '@/lib/design-tokens';
 
 const lineItemSchema = z.object({
     description: z.string().min(1, "Description is required."),
@@ -192,7 +193,7 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="max-w-4xl">
+            <DialogContent className={`max-w-4xl ${designTokens.effects.cardElevated}`}>
                 <DialogHeader>
                     <DialogTitle>{invoice ? t('editInvoice') : t('createNewInvoice')}</DialogTitle>
                     <DialogDescription>

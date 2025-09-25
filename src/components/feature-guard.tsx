@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Crown, Lock, TrendingUp, Star, Zap, BarChart3, ShoppingBag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { StandardCard } from '@/components/app/standard-card';
+import { designTokens } from '@/lib/design-tokens';
 
 interface FeatureGuardProps {
   feature: string;
@@ -111,20 +113,17 @@ export function FeatureGuard({
   const Icon = config?.icon || Lock;
 
   return (
-    <Card className={`border-dashed border-2 border-gray-200 ${className}`}>
-      <CardHeader className="text-center">
+    <StandardCard 
+      variant="elevated"
+      title={config?.title || 'Premium Feature'}
+      description={config?.description || 'This feature is available with a Pro subscription'}
+      className={`border-dashed border-2 border-gray-200 ${className}`}
+    >
+      <div className="text-center mb-6">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-yellow-400 to-orange-500">
           <Icon className="h-6 w-6 text-white" />
         </div>
-        <CardTitle className="text-xl font-semibold">
-          {config?.title || 'Premium Feature'}
-        </CardTitle>
-        <CardDescription className="text-base">
-          {config?.description || 'This feature is available with a Pro subscription'}
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent className="space-y-6">
+      </div>
         {/* Usage Info */}
         {!isUnlimited && limit > 0 && (
           <div className="text-center">
@@ -185,8 +184,7 @@ export function FeatureGuard({
             Start with a <span className="font-semibold text-green-600">7-day free trial</span> - no credit card required
           </p>
         </div>
-      </CardContent>
-    </Card>
+    </StandardCard>
   );
 }
 

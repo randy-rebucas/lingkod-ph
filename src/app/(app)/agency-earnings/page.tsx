@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
@@ -15,6 +17,11 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { handleMarkAsPaid } from '../admin/payouts/actions';
+import { PageLayout } from '@/components/app/page-layout';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { EmptyState } from '@/components/app/empty-state';
+import { designTokens } from '@/lib/design-tokens';
 
 
 type Booking = {
@@ -116,26 +123,17 @@ export default function AgencyEarningsPage() {
     }, [bookings, payouts]);
     
     if (loading) {
-        return (
-             <div className="space-y-6">
-                <Skeleton className="h-10 w-1/3" />
-                <Skeleton className="h-4 w-2/3" />
-                <div className="grid gap-6 md:grid-cols-3">
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
-                </div>
-                <Skeleton className="h-64 w-full" />
-            </div>
-        )
+        return <LoadingState 
+            title={t('title')} 
+            description={t('subtitle')} 
+        />;
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                <p className="text-muted-foreground">{t('subtitle')}</p>
-            </div>
+        <PageLayout 
+            title={t('title')} 
+            description={t('subtitle')}
+        >
 
             <div className="grid gap-6 md:grid-cols-3">
                  <Card>
@@ -216,6 +214,6 @@ export default function AgencyEarningsPage() {
                     </Table>
                 </CardContent>
             </Card>
-        </div>
+        </PageLayout>
     );
 }

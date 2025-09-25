@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { helpCenterAssistant } from '@/ai/flows/help-center-assistant';
 import { useAuth } from '@/context/auth-context';
 import { useTranslations } from 'next-intl';
+import { designTokens } from '@/lib/design-tokens';
 
 type ChatMessage = {
   role: 'user' | 'assistant';
@@ -63,15 +64,15 @@ export function SupportChat() {
       <PopoverTrigger asChild>
         <Button
           size="icon"
-          className="fixed bottom-6 right-28 h-16 w-16 rounded-full shadow-xl z-50 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-2xl group"
+          className={`fixed bottom-6 right-28 h-16 w-16 rounded-full shadow-xl z-50 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-2 border-white/20 transition-all duration-300 hover:scale-110 hover:shadow-2xl group ${designTokens.effects.buttonGlow}`}
           aria-label="Open support chat"
         >
           <MessageSquare className="h-7 w-7 transition-transform duration-300 group-hover:scale-110" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 sm:w-96 p-0 flex flex-col h-[60vh] mb-4 mr-2 shadow-2xl border-0 bg-white/95 backdrop-blur-sm" side="top" align="end">
-        <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-blue-100">
-          <h4 className="font-semibold text-center text-gray-900">{t('aiAssistant')}</h4>
+      <PopoverContent className={`w-80 sm:w-96 p-0 flex flex-col h-[60vh] mb-4 mr-2 shadow-2xl border-0 bg-white/95 backdrop-blur-sm ${designTokens.effects.cardElevated}`} side="top" align="end">
+        <div className={`p-4 border-b bg-gradient-to-r from-blue-50 to-blue-100 ${designTokens.spacing.cardHeader}`}>
+          <h4 className={`font-semibold text-center text-gray-900 ${designTokens.typography.sectionTitle}`}>{t('aiAssistant')}</h4>
         </div>
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">

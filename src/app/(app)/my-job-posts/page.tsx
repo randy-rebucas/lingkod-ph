@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+
 import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
@@ -17,6 +19,11 @@ import { useRouter } from "next/navigation";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import Link from "next/link";
 import { formatBudget } from "@/lib/utils";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { designTokens } from "@/lib/design-tokens";
 
 type JobStatus = "Open" | "In Progress" | "Completed" | "Closed";
 
@@ -92,27 +99,17 @@ export default function MyJobPostsPage() {
     }
 
     if (loading) {
-        return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-48 w-full" />
-                    </CardContent>
-                </Card>
-            </div>
-        )
+        return <LoadingState 
+            title={t('title')} 
+            description={t('subtitle')} 
+        />;
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div className="relative z-10">
-                    <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
-                        {t('title')}
-                    </h1>
-                    <p className="text-xl text-muted-foreground leading-relaxed">
-                        {t('subtitle')}
-                    </p>
-                </div>
+        <PageLayout 
+            title={t('title')} 
+            description={t('subtitle')}
+        >
 
             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
@@ -198,6 +195,6 @@ export default function MyJobPostsPage() {
                     </Table>
                 </CardContent>
             </Card>
-        </div>
+        </PageLayout>
     );
 }

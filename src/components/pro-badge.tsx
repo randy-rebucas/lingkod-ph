@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Crown, Zap, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { designTokens } from '@/lib/design-tokens';
 
 interface ProBadgeProps {
   variant?: 'default' | 'compact' | 'large';
@@ -42,6 +43,7 @@ export function ProBadge({
       className={cn(
         'bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 shadow-sm',
         'hover:from-yellow-500 hover:to-orange-600 transition-all duration-200',
+        designTokens.effects.buttonGlow,
         getVariantStyles(),
         className
       )}
@@ -92,6 +94,7 @@ export function VerifiedProBadge({
       className={cn(
         'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-sm',
         'hover:from-blue-600 hover:to-purple-700 transition-all duration-200',
+        designTokens.effects.buttonGlow,
         getVariantStyles(),
         className
       )}

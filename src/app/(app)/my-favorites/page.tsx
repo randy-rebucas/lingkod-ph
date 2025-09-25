@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
@@ -13,6 +15,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star, Users, Heart } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { designTokens } from "@/lib/design-tokens";
 
 type Provider = {
     uid: string;
@@ -144,26 +151,17 @@ export default function MyFavoritesPage() {
     }, [user]);
 
     if (loading) {
-        return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
-                </div>
-            </div>
-        );
+        return <LoadingState 
+            title={t('title')} 
+            description={t('subtitle')} 
+        />;
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-                
-                <div className="relative z-10">
-                    <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
-                        {t('title')}
-                    </h1>
-                    <p className="text-xl text-muted-foreground leading-relaxed">
-                        {t('subtitle')}
-                    </p>
-                </div>
+        <PageLayout 
+            title={t('title')} 
+            description={t('subtitle')}
+        >
             
             {providers.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -172,19 +170,17 @@ export default function MyFavoritesPage() {
                     ))}
                 </div>
             ) : (
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="flex flex-col items-center justify-center text-center p-12">
-                        <Heart className="h-20 w-20 mb-6 text-primary opacity-60" />
-                        <div className="space-y-3">
-                            <h3 className="text-2xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noFavoritesYet')}</h3>
-                            <p className="text-lg text-muted-foreground max-w-md">{t('noFavoritesDescription')}</p>
-                        </div>
+                <EmptyState
+                    icon={Heart}
+                    title={t('noFavoritesYet')}
+                    description={t('noFavoritesDescription')}
+                    action={
                         <Button asChild className="mt-6 shadow-glow hover:shadow-glow/50 transition-all duration-300">
                             <Link href="/dashboard">{t('findProviders')}</Link>
                         </Button>
-                    </CardContent>
-                </Card>
+                    }
+                />
             )}
-        </div>
+        </PageLayout>
     );
 }

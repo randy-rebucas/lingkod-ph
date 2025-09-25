@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
@@ -11,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Eye, MoreHorizontal, User, CircleSlash, Trash2 } from "lucide-react";
+import { Eye, MoreHorizontal, User, CircleSlash, Trash2, PlusCircle } from "lucide-react";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
 import type { Booking as BookingType } from "@/app/(app)/bookings/page";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -19,6 +21,12 @@ import { handleUpdateBookingStatus } from "./actions";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 const getStatusVariant = (status: string) => {
     switch (status) {
@@ -40,14 +48,14 @@ export default function AdminBookingsPage() {
     const [selectedBooking, setSelectedBooking] = useState<BookingType | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-     useEffect(() => {
+    useEffect(() => {
         if (userRole !== 'admin') {
             setLoading(false);
             return;
         }
 
         const bookingsQuery = query(collection(db, "bookings"), orderBy("createdAt", "desc"));
-        
+
         const unsubscribe = onSnapshot(bookingsQuery, (snapshot) => {
             const bookingsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BookingType));
             setBookings(bookingsData);
@@ -85,11 +93,11 @@ export default function AdminBookingsPage() {
             </Card>
         );
     }
-    
+
     if (loading) {
         return (
-             <div className="space-y-6">
-                 <div>
+            <div className="space-y-6">
+                <div>
                     <h1 className="text-3xl font-bold font-headline">Booking Management</h1>
                     <p className="text-muted-foreground">
                         Monitor all bookings on the platform.
@@ -100,19 +108,18 @@ export default function AdminBookingsPage() {
                         <Skeleton className="h-64 w-full" />
                     </CardContent>
                 </Card>
-             </div>
+            </div>
         )
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Booking Management</h1>
-                <p className="text-muted-foreground">
-                    Monitor all bookings on the platform.
-                </p>
-            </div>
-             <Card>
+        <PageLayout
+            className="space-y-6"
+            title="Booking Management"
+            description="Monitor all bookings on the platform." >
+
+
+            <Card>
                 <CardContent>
                     <Table>
                         <TableHeader>
@@ -129,7 +136,7 @@ export default function AdminBookingsPage() {
                         <TableBody>
                             {bookings.length > 0 ? bookings.map(booking => (
                                 <TableRow key={booking.id}>
-                                     <TableCell className="text-xs text-muted-foreground">
+                                    <TableCell className="text-xs text-muted-foreground">
                                         {booking.date ? format(booking.date.toDate(), 'PP') : 'N/A'}
                                     </TableCell>
                                     <TableCell className="font-medium">{booking.serviceName}</TableCell>
@@ -172,6 +179,6 @@ export default function AdminBookingsPage() {
                 </CardContent>
             </Card>
             {selectedBooking && <BookingDetailsDialog isOpen={isDetailsOpen} setIsOpen={setIsDetailsOpen} booking={selectedBooking} />}
-        </div>
+        </PageLayout >
     )
 }

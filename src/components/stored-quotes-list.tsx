@@ -53,6 +53,10 @@ import { Card, CardContent } from "./ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { QuotePreview } from "./quote-preview";
 import { useTranslations } from 'next-intl';
+import { StandardCard } from '@/components/app/standard-card';
+import { LoadingState } from '@/components/app/loading-state';
+import { EmptyState } from '@/components/app/empty-state';
+import { designTokens } from '@/lib/design-tokens';
 
 
 type QuoteStatus = "Draft" | "Sent" | "Accepted" | "Declined";
@@ -298,24 +302,17 @@ export function StoredQuotesList() {
 
     if (loading) {
         return (
-             <Card>
-                <CardContent className="p-6">
-                    <Skeleton className="h-10 w-full mb-4" />
-                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full mb-2" />)}
-                </CardContent>
-            </Card>
+            <LoadingState title="Loading quotes..." description="Please wait while we fetch your stored quotes." />
         )
     }
     
     if (quotes.length === 0) {
         return (
-             <Card>
-                <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                    <FileText className="h-16 w-16 mb-4" />
-                    <h3 className="text-xl font-semibold">{t('noStoredQuotes')}</h3>
-                    <p>{t('createFirstQuoteMessage')}</p>
-                </CardContent>
-            </Card>
+            <EmptyState
+                icon={FileText}
+                title={t('noStoredQuotes')}
+                description={t('createFirstQuoteMessage')}
+            />
         )
     }
 

@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
@@ -18,6 +20,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageLayout } from "@/components/app/page-layout";
+import { StandardCard } from "@/components/app/standard-card";
+import { LoadingState } from "@/components/app/loading-state";
+import { EmptyState } from "@/components/app/empty-state";
+import { AccessDenied } from "@/components/app/access-denied";
+import { designTokens } from "@/lib/design-tokens";
 
 type Category = {
     id: string;
@@ -174,28 +182,21 @@ export default function AdminCategoriesPage() {
     }
 
     if (userRole !== 'admin') {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('accessDenied')}</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
-        );
+        return <AccessDenied 
+            title={t('accessDenied')} 
+            description="This page is for administrators only." 
+        />;
     }
     
     return (
         <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetDialog() }}>
-            <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
-                        <p className="text-muted-foreground">
-                            {t('subtitle')}
-                        </p>
-                    </div>
+            <PageLayout 
+                title={t('title')} 
+                description={t('subtitle')}
+                action={
                     <Button onClick={openAddDialog}><PlusCircle className="mr-2"/> {t('addCategory')}</Button>
-                </div>
+                }
+            >
                  <Card>
                     <CardContent className="p-0">
                         {loading ? (
@@ -280,7 +281,7 @@ export default function AdminCategoriesPage() {
                         <Button onClick={isAdding ? onAddCategory : onUpdateCategory}>Save changes</Button>
                     </DialogFooter>
                 </DialogContent>
-            </div>
+            </PageLayout>
         </Dialog>
     )
 }

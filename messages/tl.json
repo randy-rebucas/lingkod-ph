@@ -126,6 +126,8 @@
     "toggleTheme": "I-toggle ang tema"
   },
   "Dashboard": {
+    "dashboard": "Dashboard",
+    "dashboardDescription": "Overview ng iyong account at mga kamakailang aktibidad",
     "findServiceProvider": "Maghanap ng Service Provider",
     "describeNeed": "Ilarawan kung ano ang kailangan mo, at hahanapin namin ang tamang pro para sa trabaho.",
     "searchPlaceholder": "hal., 'Kailangan ko ng plumber para sa baradong kitchen sink'",
