@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';

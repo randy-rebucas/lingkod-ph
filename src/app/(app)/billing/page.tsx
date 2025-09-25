@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
@@ -95,11 +95,16 @@ export default function BillingPage() {
 
     return (
         <Dialog onOpenChange={(open) => !open && setSelectedInvoice(null)}>
-        <PageLayout 
-            title="Invoice History" 
-            description="View and manage your billing invoices"
-        >
-                <CardContent className="p-0">
+            <PageLayout 
+                title="Invoice History" 
+                description="View and manage your billing invoices"
+            >
+                <Card>
+                    <CardHeader>
+                        <CardTitle>{t('invoiceHistory')}</CardTitle>
+                        <CardDescription>{t('invoiceHistoryDescription')}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-0">
                     <Table>
                         <TableHeader>
                             <TableRow className="border-b border-border/50">
@@ -144,20 +149,19 @@ export default function BillingPage() {
                             )}
                         </TableBody>
                     </Table>
-                </CardContent>
-            </Card>
-            {selectedInvoice && (
-                 <DialogContent className="max-w-4xl shadow-glow border-0 bg-background/95 backdrop-blur-md">
-                    <DialogHeader className="border-b border-border/50 pb-4">
-                        <DialogTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                            {t('invoiceDetails', { invoiceNumber: selectedInvoice.invoiceNumber })}
-                        </DialogTitle>
-                    </DialogHeader>
-                    <InvoicePreview invoice={selectedInvoice as any} />
-                 </DialogContent>
-            )}
-        </div>
+                    </CardContent>
+                </Card>
+                {selectedInvoice && (
+                     <DialogContent className="max-w-4xl shadow-glow border-0 bg-background/95 backdrop-blur-md">
+                        <DialogHeader className="border-b border-border/50 pb-4">
+                            <DialogTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                                {t('invoiceDetails', { invoiceNumber: selectedInvoice.invoiceNumber })}
+                            </DialogTitle>
+                        </DialogHeader>
+                        <InvoicePreview invoice={selectedInvoice as any} />
+                     </DialogContent>
+                )}
+            </PageLayout>
         </Dialog>
-        </PageLayout>
     )
 }

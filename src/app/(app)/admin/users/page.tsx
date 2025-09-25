@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';

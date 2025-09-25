@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/auth-context";
 import { db, storage } from "@/lib/firebase";

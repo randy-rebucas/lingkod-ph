@@ -342,6 +342,7 @@ export default function InvoicesPage() {
           title="Invoices" 
           description="Create and manage invoices for your clients."
       >
+          <div className="flex justify-between items-center mb-6">
               <Button onClick={handleAddInvoice}>
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Create Invoice

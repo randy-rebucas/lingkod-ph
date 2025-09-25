@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import SmartRateClient from "@/components/smart-rate-client";
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';

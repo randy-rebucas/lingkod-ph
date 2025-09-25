@@ -1,6 +1,8 @@
 
 "use client";
 
+import React from "react";
+
 import QuoteBuilderClient from "@/components/quote-builder-client";
 import { StoredQuotesList } from "@/components/stored-quotes-list";
 import { useTranslations } from 'next-intl';
