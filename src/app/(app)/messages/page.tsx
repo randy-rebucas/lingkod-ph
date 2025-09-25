@@ -1,9 +1,7 @@
 
 "use client";
 
-import React from "react";
-
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useSearchParams } from "next/navigation";
@@ -14,18 +12,17 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Send, Search, Paperclip, X, MessageSquare, Loader2 } from "lucide-react";
+import { Send, Search, Paperclip, X, MessageSquare, Loader2, Phone, Video, MoreVertical, Pin, VolumeX, Archive, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { PageLayout } from "@/components/app/page-layout";
 import { StandardCard } from "@/components/app/standard-card";
-import { LoadingState } from "@/components/app/loading-state";
-import { EmptyState } from "@/components/app/empty-state";
-import { designTokens } from "@/lib/design-tokens";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 
 type Conversation = {
@@ -35,11 +32,21 @@ type Conversation = {
         [key: string]: {
             displayName: string;
             photoURL: string;
+            isOnline?: boolean;
+            lastSeen?: any;
         }
     };
     lastMessage: string;
     timestamp: any;
     unread?: number;
+    isPinned?: boolean;
+    isArchived?: boolean;
+    isMuted?: boolean;
+    type?: 'direct' | 'group';
+    title?: string;
+    description?: string;
+    tags?: string[];
+    priority?: 'low' | 'medium' | 'high';
 };
 
 type Message = {
@@ -49,6 +56,19 @@ type Message = {
     imageUrl?: string;
     timestamp: any;
     hint?: string;
+    isEdited?: boolean;
+    editedAt?: any;
+    isDeleted?: boolean;
+    deletedAt?: any;
+    replyTo?: string;
+    reactions?: {
+        [key: string]: string[]; // emoji -> array of user IDs
+    };
+    isPinned?: boolean;
+    messageType?: 'text' | 'image' | 'file' | 'system';
+    fileUrl?: string;
+    fileName?: string;
+    fileSize?: number;
 };
 
 
@@ -103,18 +123,11 @@ export default function MessagesPage() {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isSending, setIsSending] = useState(false);
     
+    const [searchTerm, setSearchTerm] = useState("");
+    
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const conversationId = searchParams.get('conversationId');
-        if (conversationId && conversations.length > 0) {
-            const convoToOpen = conversations.find(c => c.id === conversationId);
-            if (convoToOpen) {
-                setActiveConversation(convoToOpen);
-            }
-        }
-    }, [searchParams, conversations]);
 
     useEffect(() => {
         if (!user) return;
@@ -136,6 +149,24 @@ export default function MessagesPage() {
 
         return () => unsubscribe();
     }, [user, toast, t]);
+
+    // Auto-select first conversation if none is selected and conversations are available
+    useEffect(() => {
+        if (conversations.length > 0 && !activeConversation && !loadingConversations) {
+            // Check if there's a conversation ID in URL params first
+            const conversationId = searchParams.get('conversationId');
+            if (conversationId) {
+                const convoToOpen = conversations.find(c => c.id === conversationId);
+                if (convoToOpen) {
+                    setActiveConversation(convoToOpen);
+                    return;
+                }
+            }
+            // If no URL param or conversation not found, select the first one
+            const firstConversation = conversations[0];
+            setActiveConversation(firstConversation);
+        }
+    }, [conversations, activeConversation, loadingConversations, searchParams]);
     
     useEffect(() => {
         if (!activeConversation) return;
@@ -235,11 +266,23 @@ export default function MessagesPage() {
         if (otherId && convo.participantInfo[otherId]) {
             return {
                 name: convo.participantInfo[otherId].displayName,
-                avatar: convo.participantInfo[otherId].photoURL || ''
+                avatar: convo.participantInfo[otherId].photoURL || '',
+                isOnline: convo.participantInfo[otherId].isOnline || false,
+                lastSeen: convo.participantInfo[otherId].lastSeen
             };
         }
-        return { name: t('unknownUser'), avatar: '' };
+        return { name: t('unknownUser'), avatar: '', isOnline: false };
     }
+
+    // Filter conversations based on search
+    const filteredConversations = conversations.filter(convo => {
+        const { name } = getOtherParticipantInfo(convo);
+        return searchTerm === "" || 
+            name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            convo.lastMessage.toLowerCase().includes(searchTerm.toLowerCase());
+    });
+
+
 
 
     return (
@@ -248,13 +291,24 @@ export default function MessagesPage() {
             description={t('messagesDescription')}
             className="h-full flex flex-col"
         >
-            <StandardCard variant="elevated" className="flex-1 grid grid-cols-1 md:grid-cols-[320px_1fr] overflow-hidden">
-                {/* Conversation List */}
-                <div className="flex flex-col border-r border-border/50 bg-gradient-to-b from-background/50 to-muted/20">
-                    <div className="p-4 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder={t('searchConversations')} className="pl-9 bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft" />
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-4 h-full min-h-0">
+                {/* Message Threads Sidebar */}
+                <StandardCard title="Message Threads" variant="elevated" className="flex flex-col h-full">
+                    <div className="p-4 border-b border-border/50">
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="font-semibold text-sm">All Conversations</h3>
+                            <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                                {filteredConversations.length}
+                            </span>
+                        </div>
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                                placeholder="Search conversations..." 
+                                className="pl-10" 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                         </div>
                     </div>
                     <ScrollArea className="flex-1">
@@ -263,103 +317,159 @@ export default function MessagesPage() {
                                 <div className="p-4 space-y-4">
                                     {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
                                 </div>
-                            ) : conversations.length > 0 ? (
-                                conversations.map((convo) => {
-                                    const { name, avatar } = getOtherParticipantInfo(convo);
+                            ) : filteredConversations.length > 0 ? (
+                                filteredConversations.map((convo) => {
+                                    const { name, avatar, isOnline } = getOtherParticipantInfo(convo);
                                     return (
-                                        <button key={convo.id} className={cn("w-full text-left p-3 rounded-lg transition-all duration-200 group", 
-                                            activeConversation?.id === convo.id ? "bg-primary/10 shadow-soft" : "hover:bg-primary/5 hover:shadow-soft/50")}
-                                            onClick={() => handleSelectConversation(convo)}
-                                        >
+                                        <div key={convo.id} className={cn("w-full p-4 rounded-lg transition-all duration-200 group cursor-pointer border", 
+                                            activeConversation?.id === convo.id ? "bg-primary/10 border-primary/20 shadow-sm" : "hover:bg-muted/50 border-transparent hover:border-border/50")}
+                                            onClick={() => handleSelectConversation(convo)}>
                                             <div className="flex items-start gap-3">
-                                                <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-soft">
-                                                    <AvatarImage src={avatar} alt={name} />
-                                                    <AvatarFallback className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">
-                                                        {getAvatarFallback(name)}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex-1 overflow-hidden">
-                                                    <div className="flex justify-between items-center">
-                                                        <p className="font-semibold truncate text-sm group-hover:text-primary transition-colors">{name}</p>
-                                                        <p className="text-xs text-muted-foreground flex-shrink-0">
-                                                            {convo.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                        </p>
+                                                <div className="relative">
+                                                    <Avatar className="h-12 w-12">
+                                                        <AvatarImage src={avatar} alt={name} />
+                                                        <AvatarFallback className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">
+                                                            {getAvatarFallback(name)}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    {isOnline && (
+                                                        <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 border-2 border-background rounded-full"></div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 overflow-hidden min-w-0">
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <div className="flex items-center gap-2 min-w-0">
+                                                            <p className="font-semibold truncate text-sm">{name}</p>
+                                                            {convo.isPinned && <Pin className="h-3 w-3 text-primary flex-shrink-0" />}
+                                                        </div>
+                                                        <div className="flex items-center gap-1 flex-shrink-0">
+                                                            {convo.unread && convo.unread > 0 && (
+                                                                <Badge variant="destructive" className="h-5 w-5 p-0 flex items-center justify-center text-xs">
+                                                                    {convo.unread > 99 ? '99+' : convo.unread}
+                                                                </Badge>
+                                                            )}
+                                                            <p className="text-xs text-muted-foreground">
+                                                                {convo.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex justify-between items-end mt-1">
-                                                        <p className="text-xs text-muted-foreground truncate max-w-[150px]">{convo.lastMessage}</p>
-                                                        {/* Unread count UI can be added here */}
-                                                    </div>
+                                                    <p className="text-sm text-muted-foreground truncate leading-relaxed">{convo.lastMessage}</p>
                                                 </div>
                                             </div>
-                                        </button>
+                                        </div>
                                     )
                                 })
                             ) : (
                                 <div className="text-center text-muted-foreground p-8">
                                     <MessageSquare className="mx-auto h-12 w-12 mb-4 text-primary opacity-60"/>
-                                    <h3 className="text-lg font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
-                                        {t('noConversationsYet')}
+                                    <h3 className="text-lg font-semibold mb-2">
+                                        {searchTerm ? "No Conversations Found" : t('noConversationsYet')}
                                     </h3>
-                                    <p className="text-sm">Start a conversation with a service provider</p>
+                                    <p className="text-sm">
+                                        {searchTerm ? "Try adjusting your search" : "Start a conversation with a service provider"}
+                                    </p>
                                 </div>
                             )}
                         </div>
                     </ScrollArea>
-                </div>
+                </StandardCard>
 
-                {/* Message View */}
-                <div className="flex flex-col h-full bg-gradient-to-br from-background via-background to-muted/20">
+                {/* Message Conversation View */}
+                <StandardCard title={activeConversation ? getOtherParticipantInfo(activeConversation).name : "Select a conversation"} variant="elevated" className="flex flex-col h-full">
                    {activeConversation ? (
                     <>
-                        <div className="p-4 border-b border-border/50 flex items-center gap-3 bg-gradient-to-r from-background/50 to-muted/20">
-                            <Avatar className="border-2 border-primary/20 shadow-soft">
-                                <AvatarImage src={getOtherParticipantInfo(activeConversation).avatar} alt={getOtherParticipantInfo(activeConversation).name} />
-                                <AvatarFallback className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">
-                                    {getAvatarFallback(getOtherParticipantInfo(activeConversation).name)}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                                    {getOtherParticipantInfo(activeConversation).name}
-                                </p>
-                                {/* Online status would require presence management (e.g., Firestore RTDB) */}
+                        <div className="p-4 border-b border-border/50 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="relative">
+                                    <Avatar>
+                                        <AvatarImage src={getOtherParticipantInfo(activeConversation).avatar} alt={getOtherParticipantInfo(activeConversation).name} />
+                                        <AvatarFallback className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">
+                                            {getAvatarFallback(getOtherParticipantInfo(activeConversation).name)}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    {getOtherParticipantInfo(activeConversation).isOnline && (
+                                        <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 border-2 border-background rounded-full"></div>
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="text-sm text-muted-foreground">
+                                        {getOtherParticipantInfo(activeConversation).isOnline ? 'Online' : 'Last seen recently'}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <Phone className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <Video className="h-4 w-4" />
+                                </Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                                            <MoreVertical className="h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem>
+                                            <Pin className="h-4 w-4 mr-2" />
+                                            {activeConversation.isPinned ? 'Unpin' : 'Pin'} Chat
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem>
+                                            <Archive className="h-4 w-4 mr-2" />
+                                            Archive Chat
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem className="text-destructive">
+                                            <Trash2 className="h-4 w-4 mr-2" />
+                                            Delete Chat
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                         </div>
-                        <ScrollArea className="flex-1 p-4">
+                        <ScrollArea className="flex-1 p-6">
                             {loadingMessages ? (
                                 <div className="flex justify-center items-center h-full">
                                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                                 </div>
                             ) : (
-                                <div className="space-y-4">
+                                <div className="space-y-6">
                                     {messages.map((msg) => {
                                         const isCurrentUser = msg.senderId === user?.uid;
                                         const senderInfo = isCurrentUser ? {avatar: user?.photoURL || '', name: user?.displayName} : getOtherParticipantInfo(activeConversation)
                                         return (
-                                            <div key={msg.id} className={cn("flex items-end gap-2", isCurrentUser ? "justify-end" : "justify-start")}>
+                                            <div key={msg.id} className={cn("flex items-end gap-3", isCurrentUser ? "justify-end" : "justify-start")}>
                                                 {!isCurrentUser && (
-                                                    <Avatar className="h-8 w-8">
+                                                    <Avatar className="h-10 w-10">
                                                         <AvatarImage src={senderInfo.avatar} />
                                                         <AvatarFallback>{getAvatarFallback(senderInfo.name)}</AvatarFallback>
                                                     </Avatar>
                                                 )}
-                                                <div className={cn("max-w-xs md:max-w-md p-1 rounded-2xl shadow-soft", 
-                                                    isCurrentUser ? "bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-none" : "bg-background/80 backdrop-blur-sm border border-border/50 text-card-foreground rounded-bl-none")}>
-                                                    {msg.imageUrl && (
-                                                        <div className="p-2">
-                                                            <Image 
-                                                                src={msg.imageUrl} 
-                                                                alt="Sent image" 
-                                                                width={300} 
-                                                                height={200}
-                                                                data-ai-hint={msg.hint}
-                                                                className="rounded-lg object-cover shadow-soft"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                    {msg.text && (
-                                                        <p className="text-sm px-3 py-2">{msg.text}</p>
-                                                    )}
+                                                <div className={cn("max-w-sm lg:max-w-md", isCurrentUser ? "order-first" : "order-last")}>
+                                                    <div className={cn("p-4 rounded-2xl shadow-sm", 
+                                                        isCurrentUser ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted text-foreground rounded-bl-none")}>
+                                                        {msg.imageUrl && (
+                                                            <div className="mb-3">
+                                                                <Image 
+                                                                    src={msg.imageUrl} 
+                                                                    alt="Sent image" 
+                                                                    width={300} 
+                                                                    height={200}
+                                                                    className="rounded-lg object-cover"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                        {msg.text && (
+                                                            <p className="text-sm leading-relaxed">{msg.text}</p>
+                                                        )}
+                                                        {msg.isEdited && (
+                                                            <p className="text-xs opacity-70 mt-2">(edited)</p>
+                                                        )}
+                                                    </div>
+                                                    <span className="text-xs text-muted-foreground mt-2 block">
+                                                        {msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
                                                 </div>
                                             </div>
                                         )
@@ -368,35 +478,41 @@ export default function MessagesPage() {
                                 </div>
                             )}
                         </ScrollArea>
-                        <div className="p-4 border-t border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <div className="p-6 border-t border-border/50">
                             {previewUrl && (
-                                <div className="relative mb-3 w-24 h-24">
-                                    <Image src={previewUrl} alt="Image preview" fill className="object-cover rounded-lg shadow-soft" />
-                                    <Button size="icon" variant="destructive" className="absolute -top-2 -right-2 h-6 w-6 rounded-full shadow-soft" onClick={() => { setPreviewUrl(null); setSelectedImage(null); if(fileInputRef.current) fileInputRef.current.value = "";}}>
+                                <div className="relative mb-4 w-32 h-32">
+                                    <Image src={previewUrl} alt="Image preview" fill className="object-cover rounded-lg" />
+                                    <Button size="icon" variant="destructive" className="absolute -top-2 -right-2 h-6 w-6 rounded-full" onClick={() => { setPreviewUrl(null); setSelectedImage(null); if(fileInputRef.current) fileInputRef.current.value = "";}}>
                                         <X className="h-3 w-3" />
                                     </Button>
                                 </div>
                             )}
-                            <form className="relative flex items-center gap-2" onSubmit={handleSendMessage}>
-                                <Input 
-                                    placeholder={t('typeMessage')} 
-                                    className="flex-1 bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft"
-                                    value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
-                                    disabled={isSending}
-                                />
-                                 <input
+                            <form className="flex items-end gap-3" onSubmit={handleSendMessage}>
+                                <input
                                     type="file"
                                     ref={fileInputRef}
                                     onChange={handleFileChange}
                                     accept="image/*"
                                     className="hidden"
                                 />
-                                <Button size="icon" variant="ghost" type="button" onClick={() => fileInputRef.current?.click()} disabled={isSending} className="hover:bg-primary/10 transition-colors">
+                                <Button size="icon" variant="ghost" type="button" onClick={() => fileInputRef.current?.click()} disabled={isSending} className="h-10 w-10">
                                     <Paperclip className="h-4 w-4"/>
                                     <span className="sr-only">{t('attachFile')}</span>
                                 </Button>
-                                <Button size="icon" type="submit" disabled={isSending || (!newMessage.trim() && !selectedImage)} className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                                <Textarea 
+                                    placeholder={t('typeMessage')} 
+                                    className="flex-1 min-h-[44px] max-h-32 resize-none"
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    disabled={isSending}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            handleSendMessage(e);
+                                        }
+                                    }}
+                                />
+                                <Button size="icon" type="submit" disabled={isSending || (!newMessage.trim() && !selectedImage)} className="h-10 w-10">
                                     {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4"/>}
                                     <span className="sr-only">{t('sendMessage')}</span>
                                 </Button>
@@ -406,14 +522,14 @@ export default function MessagesPage() {
                    ) : (
                     <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8">
                         <MessageSquare className="h-20 w-20 mb-6 text-primary opacity-60" />
-                        <h3 className="text-2xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-3">
+                        <h3 className="text-2xl font-semibold mb-3">
                             {t('selectConversation')}
                         </h3>
                         <p className="text-lg max-w-md">{t('selectConversationDescription')}</p>
                     </div>
                    )}
-                </div>
-            </StandardCard>
+                </StandardCard>
+            </div>
         </PageLayout>
     );
 }

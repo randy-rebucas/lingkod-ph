@@ -6,7 +6,7 @@ import React from "react";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List, ShieldCheck, Clock, Wallet, Info } from "lucide-react";
+import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List, ShieldCheck, Clock, Wallet, Info, TrendingUp, TrendingDown, Activity, Bell, Settings, Plus, Eye, Filter, Download, RefreshCw, Zap, Target, Award, BarChart3, PieChart } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -88,27 +88,103 @@ const renderStars = (rating: number) => {
     ));
 }
 
-const DashboardCard = ({ title, icon: Icon, value, change, isLoading }: { title: string, icon: React.ElementType, value: string, change?: string, isLoading: boolean }) => {
+const DashboardCard = ({ 
+    title, 
+    icon: Icon, 
+    value, 
+    change, 
+    trend, 
+    trendValue,
+    isLoading, 
+    variant = "default",
+    action
+}: { 
+    title: string, 
+    icon: React.ElementType, 
+    value: string, 
+    change?: string, 
+    trend?: 'up' | 'down' | 'neutral',
+    trendValue?: string,
+    isLoading: boolean,
+    variant?: 'default' | 'success' | 'warning' | 'info',
+    action?: React.ReactNode
+}) => {
+    const getVariantStyles = () => {
+        switch (variant) {
+            case 'success':
+                return 'border-l-4 border-l-green-500 bg-green-50/50 dark:bg-green-950/20';
+            case 'warning':
+                return 'border-l-4 border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-950/20';
+            case 'info':
+                return 'border-l-4 border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20';
+            default:
+                return '';
+        }
+    };
+
+    const getTrendIcon = () => {
+        switch (trend) {
+            case 'up':
+                return <TrendingUp className="h-3 w-3 text-green-500" />;
+            case 'down':
+                return <TrendingDown className="h-3 w-3 text-red-500" />;
+            default:
+                return null;
+        }
+    };
+
     if (isLoading) {
         return (
-            <StandardCard title={title} variant="elevated">
+            <StandardCard title={title} variant="elevated" className={getVariantStyles()}>
                 <Skeleton className="h-8 w-24 mb-2" />
                 <Skeleton className="h-4 w-32" />
             </StandardCard>
         );
     }
+    
     return (
         <StandardCard 
             title={title} 
             variant="elevated"
-            className="group hover:shadow-glow/20 transition-all duration-300"
+            className={`group hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-1 ${getVariantStyles()}`}
         >
             <div className="flex items-center justify-between">
-                <div>
-                    <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{value}</div>
-                    {change && <p className="text-xs text-muted-foreground mt-1">{change}</p>}
+                <div className="flex-1">
+                    <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-1">
+                        {value}
+                    </div>
+                    {change && (
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            {getTrendIcon()}
+                            <span>{change}</span>
+                            {trendValue && (
+                                <span className={`font-medium ${
+                                    trend === 'up' ? 'text-green-600' : 
+                                    trend === 'down' ? 'text-red-600' : 
+                                    'text-muted-foreground'
+                                }`}>
+                                    {trendValue}
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </div>
-                <Icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                <div className="flex items-center gap-2">
+                    <div className={`p-2 rounded-lg ${
+                        variant === 'success' ? 'bg-green-100 dark:bg-green-900/30' :
+                        variant === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
+                        variant === 'info' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                        'bg-primary/10'
+                    }`}>
+                        <Icon className={`h-5 w-5 transition-colors ${
+                            variant === 'success' ? 'text-green-600' :
+                            variant === 'warning' ? 'text-yellow-600' :
+                            variant === 'info' ? 'text-blue-600' :
+                            'text-muted-foreground group-hover:text-primary'
+                        }`} />
+                    </div>
+                    {action}
+                </div>
             </div>
         </StandardCard>
     )
@@ -404,6 +480,8 @@ export default function DashboardPage() {
     const [isSmartSearching, setIsSmartSearching] = useState(false);
     const [favoriteProviderIds, setFavoriteProviderIds] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+    const [dashboardView, setDashboardView] = useState<'overview' | 'analytics' | 'activity'>('overview');
+    const [refreshing, setRefreshing] = useState(false);
 
 
     // For agency dashboard
@@ -628,6 +706,50 @@ export default function DashboardPage() {
     const recentBookings = bookings.slice(0, 5);
     const earningsData = processEarningsData(bookings);
 
+    // Calculate trends and analytics
+    const calculateTrend = (current: number, previous: number) => {
+        if (previous === 0) return current > 0 ? 'up' : 'neutral';
+        const change = ((current - previous) / previous) * 100;
+        return change > 5 ? 'up' : change < -5 ? 'down' : 'neutral';
+    };
+
+    const getTrendValue = (current: number, previous: number) => {
+        if (previous === 0) return current > 0 ? '+100%' : '0%';
+        const change = ((current - previous) / previous) * 100;
+        return `${change > 0 ? '+' : ''}${change.toFixed(1)}%`;
+    };
+
+    // Calculate previous month data for trends
+    const previousMonthEarnings = useMemo(() => {
+        const lastMonth = new Date();
+        lastMonth.setMonth(lastMonth.getMonth() - 1);
+        return bookings
+            .filter(b => b.status === 'Completed' && 
+                b.date.toDate().getMonth() === lastMonth.getMonth() && 
+                b.date.toDate().getFullYear() === lastMonth.getFullYear())
+            .reduce((sum, b) => sum + b.price, 0);
+    }, [bookings]);
+
+    const previousMonthBookings = useMemo(() => {
+        const lastMonth = new Date();
+        lastMonth.setMonth(lastMonth.getMonth() - 1);
+        return bookings.filter(b => 
+            b.date.toDate().getMonth() === lastMonth.getMonth() && 
+            b.date.toDate().getFullYear() === lastMonth.getFullYear()
+        ).length;
+    }, [bookings]);
+
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        // Simulate refresh delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setRefreshing(false);
+        toast({
+            title: "Dashboard Refreshed",
+            description: "All data has been updated successfully.",
+        });
+    };
+
     const handleSmartSearch = async () => {
         if (!searchTerm) {
             setProviders(allProviders); // Reset if search is cleared
@@ -716,9 +838,41 @@ export default function DashboardPage() {
     // If user is a client
     if (userRole === 'client') {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-8 space-y-6">
+            <PageLayout 
+                title="Find Service Providers" 
+                description="Discover and connect with verified professionals in your area"
+                action={
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleRefresh}
+                            disabled={refreshing}
+                            className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                        >
+                            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                            Refresh
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                            asChild
+                        >
+                            <Link href="/favorites">
+                                <Heart className="h-4 w-4 mr-2" />
+                                Favorites ({favoriteProviderIds.length})
+                            </Link>
+                        </Button>
+                    </div>
+                }
+            >
+                <StandardCard 
+                    title="Smart Search" 
+                    description="Describe what you need and we'll find the perfect match"
+                    variant="elevated"
+                >
+                    <div className="space-y-6">
                         <div className="flex flex-col sm:flex-row gap-4">
                             <div className="relative flex-1">
                                 <Input 
@@ -746,12 +900,41 @@ export default function DashboardPage() {
                                 </Button>
                             </div>
                         </div>
-                        {loadingProviders || isSmartSearching ? (
-                            <div className={cn("gap-4", viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-2')}>
-                                {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+
+                        {/* Quick Search Suggestions */}
+                        <div className="space-y-3">
+                            <p className="text-sm font-medium text-muted-foreground">Popular searches:</p>
+                            <div className="flex flex-wrap gap-2">
+                                {['Plumbing', 'Electrical', 'Cleaning', 'Gardening', 'Painting', 'Carpentry'].map((service) => (
+                                    <Button
+                                        key={service}
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                            setSearchTerm(service);
+                                            handleSmartSearch();
+                                        }}
+                                        className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                                    >
+                                        {service}
+                                    </Button>
+                                ))}
                             </div>
-                        ) : (
-                             providers.length > 0 ? (
+                        </div>
+                    </div>
+                </StandardCard>
+
+                <StandardCard 
+                    title="Search Results" 
+                    description={`${providers.length} providers found`}
+                    variant="elevated"
+                >
+                    {loadingProviders || isSmartSearching ? (
+                        <div className={cn("gap-4", viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-2')}>
+                            {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+                        </div>
+                    ) : (
+                         providers.length > 0 ? (
                                 (() => {
                                     const agencies = providers.filter(p => p.role === 'agency');
                                     const serviceProviders = providers.filter(p => p.role === 'provider');
@@ -844,23 +1027,85 @@ export default function DashboardPage() {
                                 </div>
                             )
                         )}
-                    </CardContent>
-                </Card>
-            </div>
+                </StandardCard>
+            </PageLayout>
         )
     }
 
     // Agency Dashboard
     if (userRole === 'agency') {
          return (
-            <div className="max-w-6xl mx-auto space-y-8">
-
+            <PageLayout 
+                title="Agency Dashboard" 
+                description="Manage your providers and track agency performance"
+                action={
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleRefresh}
+                            disabled={refreshing}
+                            className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                        >
+                            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                            Refresh
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                            asChild
+                        >
+                            <Link href="/manage-providers">
+                                <Users2 className="h-4 w-4 mr-2" />
+                                Manage Providers
+                            </Link>
+                        </Button>
+                    </div>
+                }
+            >
                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-                    <DashboardCard isLoading={loadingAgencyData} title="Total Revenue" icon={DollarSign} value={`₱${agencyTotalRevenue.toFixed(2)}`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Completed Bookings" icon={Calendar} value={`${agencyTotalBookings}`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Managed Providers" icon={Users2} value={`${agencyProviderCount}`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Agency Rating" icon={Star} value={`${agencyOverallRating}`} change={`Based on ${agencyProviders.reduce((sum, p) => sum + (p.reviewCount || 0), 0)} reviews`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Pending Payouts" icon={Wallet} value={`₱${agencyPendingPayouts.toFixed(2)}`} />
+                    <DashboardCard 
+                        isLoading={loadingAgencyData} 
+                        title="Total Revenue" 
+                        icon={DollarSign} 
+                        value={`₱${agencyTotalRevenue.toFixed(2)}`}
+                        variant="success"
+                        action={
+                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                                <Download className="h-3 w-3" />
+                            </Button>
+                        }
+                    />
+                    <DashboardCard 
+                        isLoading={loadingAgencyData} 
+                        title="Completed Bookings" 
+                        icon={Calendar} 
+                        value={`${agencyTotalBookings}`}
+                        variant="info"
+                    />
+                    <DashboardCard 
+                        isLoading={loadingAgencyData} 
+                        title="Managed Providers" 
+                        icon={Users2} 
+                        value={`${agencyProviderCount}`}
+                        variant="default"
+                    />
+                    <DashboardCard 
+                        isLoading={loadingAgencyData} 
+                        title="Agency Rating" 
+                        icon={Star} 
+                        value={`${agencyOverallRating}`} 
+                        change={`Based on ${agencyProviders.reduce((sum, p) => sum + (p.reviewCount || 0), 0)} reviews`}
+                        variant={parseFloat(agencyOverallRating) >= 4.5 ? "success" : parseFloat(agencyOverallRating) >= 4.0 ? "default" : "warning"}
+                    />
+                    <DashboardCard 
+                        isLoading={loadingAgencyData} 
+                        title="Pending Payouts" 
+                        icon={Wallet} 
+                        value={`₱${agencyPendingPayouts.toFixed(2)}`}
+                        variant={agencyPendingPayouts > 0 ? "warning" : "default"}
+                    />
                 </div>
                 
                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
@@ -942,7 +1187,7 @@ export default function DashboardPage() {
                         </CardFooter>
                     </Card>
                 </div>
-            </div>
+            </PageLayout>
         )
     }
     
@@ -951,14 +1196,175 @@ export default function DashboardPage() {
         <PageLayout 
             title={t('dashboard')} 
             description={t('dashboardDescription')}
+            action={
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRefresh}
+                        disabled={refreshing}
+                        className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                    >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                        asChild
+                    >
+                        <Link href="/settings">
+                            <Settings className="h-4 w-4 mr-2" />
+                            Settings
+                        </Link>
+                    </Button>
+                </div>
+            }
         >
-            <div className={designTokens.layout.cardGrid4}>
-                <DashboardCard isLoading={loading} title="Total Revenue" icon={DollarSign} value={`₱${totalRevenue.toFixed(2)}`} />
-                <DashboardCard isLoading={loading} title="Pending Payouts" icon={Wallet} value={`₱${pendingPayouts.toFixed(2)}`} />
-                <DashboardCard isLoading={loading} title="Upcoming Bookings" icon={Calendar} value={`${upcomingBookingsCount}`} />
-                <DashboardCard isLoading={loading} title="Total Clients" icon={Users} value={`${totalClientsCount}`} />
-                <DashboardCard isLoading={loading} title="Overall Rating" icon={Star} value={`${overallRating}`} change={`Based on ${reviews.length} reviews`} />
+            {/* Dashboard View Toggle */}
+            <div className="flex items-center gap-2 p-1 bg-muted/50 rounded-lg w-fit">
+                <Button
+                    variant={dashboardView === 'overview' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setDashboardView('overview')}
+                    className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Overview
+                </Button>
+                <Button
+                    variant={dashboardView === 'analytics' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setDashboardView('analytics')}
+                    className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    Analytics
+                </Button>
+                <Button
+                    variant={dashboardView === 'activity' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setDashboardView('activity')}
+                    className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                >
+                    <Activity className="h-4 w-4 mr-2" />
+                    Activity
+                </Button>
             </div>
+
+            <div className={designTokens.layout.cardGrid4}>
+                <DashboardCard 
+                    isLoading={loading} 
+                    title="Total Revenue" 
+                    icon={DollarSign} 
+                    value={`₱${totalRevenue.toFixed(2)}`}
+                    change="vs last month"
+                    trend={calculateTrend(totalRevenue, previousMonthEarnings)}
+                    trendValue={getTrendValue(totalRevenue, previousMonthEarnings)}
+                    variant="success"
+                    action={
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                            <Download className="h-3 w-3" />
+                        </Button>
+                    }
+                />
+                <DashboardCard 
+                    isLoading={loading} 
+                    title="Pending Payouts" 
+                    icon={Wallet} 
+                    value={`₱${pendingPayouts.toFixed(2)}`}
+                    change="Available for withdrawal"
+                    variant={pendingPayouts > 0 ? "warning" : "default"}
+                    action={
+                        pendingPayouts > 0 ? (
+                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                                <Zap className="h-3 w-3" />
+                            </Button>
+                        ) : null
+                    }
+                />
+                <DashboardCard 
+                    isLoading={loading} 
+                    title="Upcoming Bookings" 
+                    icon={Calendar} 
+                    value={`${upcomingBookingsCount}`}
+                    change="This week"
+                    trend={upcomingBookingsCount > 0 ? 'up' : 'neutral'}
+                    variant="info"
+                />
+                <DashboardCard 
+                    isLoading={loading} 
+                    title="Total Clients" 
+                    icon={Users} 
+                    value={`${totalClientsCount}`}
+                    change="Unique clients served"
+                    trend={totalClientsCount > 0 ? 'up' : 'neutral'}
+                />
+                <DashboardCard 
+                    isLoading={loading} 
+                    title="Overall Rating" 
+                    icon={Star} 
+                    value={`${overallRating}`} 
+                    change={`Based on ${reviews.length} reviews`}
+                    variant={parseFloat(overallRating) >= 4.5 ? "success" : parseFloat(overallRating) >= 4.0 ? "default" : "warning"}
+                    action={
+                        <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                            <Award className="h-3 w-3" />
+                        </Button>
+                    }
+                />
+            </div>
+
+            {/* Quick Actions */}
+            <StandardCard 
+                title="Quick Actions" 
+                description="Common tasks and shortcuts"
+                variant="elevated"
+            >
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <Button 
+                        variant="outline" 
+                        className="h-20 flex flex-col items-center justify-center gap-2 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-1"
+                        asChild
+                    >
+                        <Link href="/bookings">
+                            <Calendar className="h-6 w-6" />
+                            <span className="text-sm">New Booking</span>
+                        </Link>
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        className="h-20 flex flex-col items-center justify-center gap-2 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-1"
+                        asChild
+                    >
+                        <Link href="/services">
+                            <Plus className="h-6 w-6" />
+                            <span className="text-sm">Add Service</span>
+                        </Link>
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        className="h-20 flex flex-col items-center justify-center gap-2 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-1"
+                        asChild
+                    >
+                        <Link href="/profile">
+                            <Users className="h-6 w-6" />
+                            <span className="text-sm">View Profile</span>
+                        </Link>
+                    </Button>
+                    <Button 
+                        variant="outline" 
+                        className="h-20 flex flex-col items-center justify-center gap-2 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-1"
+                        asChild
+                    >
+                        <Link href="/billing">
+                            <Wallet className="h-6 w-6" />
+                            <span className="text-sm">Request Payout</span>
+                        </Link>
+                    </Button>
+                </div>
+            </StandardCard>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
                  <StandardCard 
@@ -972,22 +1378,64 @@ export default function DashboardPage() {
                             <Skeleton className="w-full h-full" />
                         </div>
                     ) : (
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={earningsData}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                            <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₱${value >= 1000 ? `${value/1000}k` : value}`} />
-                            <Tooltip
-                                contentStyle={{
-                                    backgroundColor: "hsl(var(--background))",
-                                    border: "1px solid hsl(var(--border))",
-                                    borderRadius: "var(--radius)"
-                                }}
-                                cursor={{ fill: 'hsl(var(--secondary))' }}
-                            />
-                            <Bar dataKey="earnings" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                        </BarChart>
-                    </ResponsiveContainer>
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <div className="h-3 w-3 rounded-full bg-primary"></div>
+                                <span className="text-sm text-muted-foreground">Monthly Earnings</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button size="sm" variant="outline" className="h-7">
+                                    <Filter className="h-3 w-3 mr-1" />
+                                    6M
+                                </Button>
+                                <Button size="sm" variant="outline" className="h-7">
+                                    <Download className="h-3 w-3" />
+                                </Button>
+                            </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={earningsData}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
+                                <XAxis 
+                                    dataKey="month" 
+                                    stroke="hsl(var(--muted-foreground))" 
+                                    fontSize={12} 
+                                    tickLine={false} 
+                                    axisLine={false} 
+                                />
+                                <YAxis 
+                                    stroke="hsl(var(--muted-foreground))" 
+                                    fontSize={12} 
+                                    tickLine={false} 
+                                    axisLine={false} 
+                                    tickFormatter={(value) => `₱${value >= 1000 ? `${value/1000}k` : value}`} 
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: "hsl(var(--background))",
+                                        border: "1px solid hsl(var(--border))",
+                                        borderRadius: "var(--radius)",
+                                        boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)"
+                                    }}
+                                    cursor={{ fill: 'hsl(var(--secondary))', opacity: 0.3 }}
+                                    formatter={(value: any) => [`₱${value.toFixed(2)}`, 'Earnings']}
+                                />
+                                <Bar 
+                                    dataKey="earnings" 
+                                    fill="url(#earningsGradient)" 
+                                    radius={[6, 6, 0, 0]}
+                                    className="hover:opacity-80 transition-opacity"
+                                />
+                                <defs>
+                                    <linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.4}/>
+                                    </linearGradient>
+                                </defs>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
                     )}
                 </StandardCard>
                 <StandardCard 
@@ -1003,29 +1451,124 @@ export default function DashboardPage() {
                             <Skeleton className="h-10 w-full" />
                         </div>
                     ) : (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Time</TableHead>
-                                <TableHead>Client</TableHead>
-                                <TableHead>Service</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {todaysJobs.length > 0 ? todaysJobs.map((booking) => (
-                                <TableRow key={booking.id}>
-                                    <TableCell>{format(booking.date.toDate(), 'p')}</TableCell>
-                                    <TableCell className="font-medium">{booking.clientName}</TableCell>
-                                    <TableCell>{booking.serviceName}</TableCell>
-                                </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="h-24 text-center">No jobs scheduled for today.</TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
+                    <div className="space-y-4">
+                        {todaysJobs.length > 0 ? (
+                            <div className="space-y-3">
+                                {todaysJobs.map((booking) => (
+                                    <div key={booking.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                                        <div className="flex-shrink-0">
+                                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                                <Clock className="h-4 w-4 text-primary" />
+                                            </div>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between">
+                                                <p className="font-medium text-sm truncate">{booking.clientName}</p>
+                                                <Badge variant="outline" className="text-xs">
+                                                    {format(booking.date.toDate(), 'p')}
+                                                </Badge>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground truncate">{booking.serviceName}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8">
+                                <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                                <p className="text-sm text-muted-foreground">No jobs scheduled for today</p>
+                                <Button size="sm" variant="outline" className="mt-3" asChild>
+                                    <Link href="/bookings">View All Bookings</Link>
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                     )}
+                </StandardCard>
+            </div>
+
+            {/* Notifications & Activity Feed */}
+            <div className="grid gap-6 md:grid-cols-2">
+                <StandardCard 
+                    title="Notifications" 
+                    description="Recent updates and alerts"
+                    variant="elevated"
+                >
+                    <div className="space-y-3">
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-950/20 border-l-4 border-l-blue-500">
+                            <Bell className="h-4 w-4 text-blue-600 mt-0.5" />
+                            <div className="flex-1">
+                                <p className="text-sm font-medium">New booking request</p>
+                                <p className="text-xs text-muted-foreground">John Doe requested plumbing service</p>
+                                <p className="text-xs text-muted-foreground mt-1">2 hours ago</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-green-50/50 dark:bg-green-950/20 border-l-4 border-l-green-500">
+                            <Star className="h-4 w-4 text-green-600 mt-0.5" />
+                            <div className="flex-1">
+                                <p className="text-sm font-medium">New 5-star review</p>
+                                <p className="text-xs text-muted-foreground">Sarah Wilson left a great review</p>
+                                <p className="text-xs text-muted-foreground mt-1">4 hours ago</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-yellow-50/50 dark:bg-yellow-950/20 border-l-4 border-l-yellow-500">
+                            <Wallet className="h-4 w-4 text-yellow-600 mt-0.5" />
+                            <div className="flex-1">
+                                <p className="text-sm font-medium">Payout processed</p>
+                                <p className="text-xs text-muted-foreground">₱2,500.00 transferred to your account</p>
+                                <p className="text-xs text-muted-foreground mt-1">1 day ago</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t">
+                        <Button variant="outline" size="sm" className="w-full">
+                            View All Notifications
+                        </Button>
+                    </div>
+                </StandardCard>
+
+                <StandardCard 
+                    title="Recent Activity" 
+                    description="Your latest actions and updates"
+                    variant="elevated"
+                >
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                <Calendar className="h-4 w-4 text-primary" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm font-medium">Completed booking</p>
+                                <p className="text-xs text-muted-foreground">Kitchen sink repair for Maria Santos</p>
+                                <p className="text-xs text-muted-foreground mt-1">3 hours ago</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                            <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                <Plus className="h-4 w-4 text-green-600" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm font-medium">Added new service</p>
+                                <p className="text-xs text-muted-foreground">Emergency plumbing repairs</p>
+                                <p className="text-xs text-muted-foreground mt-1">1 day ago</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                            <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                <Users className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm font-medium">Profile updated</p>
+                                <p className="text-xs text-muted-foreground">Added new profile photo and bio</p>
+                                <p className="text-xs text-muted-foreground mt-1">2 days ago</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t">
+                        <Button variant="outline" size="sm" className="w-full">
+                            View Activity Log
+                        </Button>
+                    </div>
                 </StandardCard>
             </div>
             

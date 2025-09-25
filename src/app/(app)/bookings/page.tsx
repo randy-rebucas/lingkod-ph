@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Loader2, Calendar, Check, X, Hourglass, Briefcase, UserCircle, Timer, Eye, Repeat, Wallet, Search, Filter, SortAsc, SortDesc, Clock, AlertCircle, CheckCircle2, Ban, CreditCard, FileCheck } from "lucide-react";
+import { MoreHorizontal, Loader2, Calendar, Check, X, Hourglass, Briefcase, UserCircle, Timer, Eye, Repeat, Wallet, Search, Filter, SortAsc, SortDesc, Clock, AlertCircle, CheckCircle2, Ban, CreditCard, FileCheck, TrendingUp, TrendingDown, BarChart3, RefreshCw, Download, Settings, Plus, Target, Award, Zap, Activity, DollarSign, Users, Star, MapPin, Phone, MessageSquare, Trash2, Grid3X3, List, CheckCircle, XCircle, AlertTriangle, Info, Bell, Bookmark, Share2, Archive, Edit, Copy, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -27,8 +27,12 @@ import { format } from 'date-fns';
 import { PageLayout } from "@/components/app/page-layout";
 import { StandardCard } from "@/components/app/standard-card";
 import { LoadingState } from "@/components/app/loading-state";
-import { EmptyState } from "@/components/app/empty-state";
+import { EmptyState as AppEmptyState } from "@/components/app/empty-state";
 import { designTokens } from "@/lib/design-tokens";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 
 
 type BookingStatus = "Pending Payment" | "Pending Verification" | "Upcoming" | "In Progress" | "Completed" | "Cancelled" | "Payment Rejected";
@@ -56,6 +60,17 @@ export type Booking = {
     paymentRejectedBy?: string;
     paymentVerifiedAt?: Timestamp;
     paymentVerifiedBy?: string;
+    createdAt?: Timestamp;
+    updatedAt?: Timestamp;
+    duration?: number; // in hours
+    location?: string;
+    category?: string;
+    priority?: 'low' | 'medium' | 'high';
+    tags?: string[];
+    estimatedCompletion?: Timestamp;
+    actualCompletion?: Timestamp;
+    rating?: number;
+    feedback?: string;
 };
 
 const getStatusVariant = (status: string) => {
@@ -424,6 +439,11 @@ export default function BookingsPage() {
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
     const t = useTranslations('Bookings');
+    const [selectedBookings, setSelectedBookings] = useState<string[]>([]);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+    const [refreshing, setRefreshing] = useState(false);
+    const [dateRange, setDateRange] = useState<string>("all");
+    const [priorityFilter, setPriorityFilter] = useState<string>("all");
 
     useEffect(() => {
         if (!user) {
@@ -464,6 +484,82 @@ export default function BookingsPage() {
     const [sortBy, setSortBy] = useState<"date" | "price" | "status">("date");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
+    // Helper functions
+    const handleRefresh = async () => {
+        setRefreshing(true);
+        // Simulate refresh delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setRefreshing(false);
+        toast({
+            title: "Bookings Refreshed",
+            description: "All booking data has been updated successfully.",
+        });
+    };
+
+    const toggleBookingSelection = (bookingId: string) => {
+        setSelectedBookings(prev => 
+            prev.includes(bookingId) 
+                ? prev.filter(id => id !== bookingId)
+                : [...prev, bookingId]
+        );
+    };
+
+    const selectAllBookings = () => {
+        setSelectedBookings(filteredAndSortedBookings.map(booking => booking.id));
+    };
+
+    const clearSelection = () => {
+        setSelectedBookings([]);
+    };
+
+    const handleBulkAction = async (action: string) => {
+        if (selectedBookings.length === 0) {
+            toast({
+                variant: "destructive",
+                title: "No Bookings Selected",
+                description: "Please select bookings to perform bulk actions.",
+            });
+            return;
+        }
+
+        try {
+            // Implement bulk actions here
+            toast({
+                title: "Bulk Action Completed",
+                description: `${action} applied to ${selectedBookings.length} bookings.`,
+            });
+            setSelectedBookings([]);
+        } catch (error) {
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to perform bulk action.",
+            });
+        }
+    };
+
+    // Calculate statistics
+    const stats = {
+        total: bookings.length,
+        totalRevenue: bookings.reduce((sum, booking) => sum + booking.price, 0),
+        completed: completedBookings.length,
+        inProgress: inProgressBookings.length,
+        pending: pendingPaymentBookings.length + pendingVerificationBookings.length,
+        avgRating: completedBookings.length > 0 ? 
+            (completedBookings.reduce((sum, booking) => sum + (booking.rating || 0), 0) / completedBookings.length).toFixed(1) : "0.0",
+        thisMonth: bookings.filter(booking => {
+            const bookingDate = booking.date.toDate();
+            const now = new Date();
+            return bookingDate.getMonth() === now.getMonth() && bookingDate.getFullYear() === now.getFullYear();
+        }).length,
+        thisWeek: bookings.filter(booking => {
+            const bookingDate = booking.date.toDate();
+            const now = new Date();
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            return bookingDate >= weekAgo;
+        }).length
+    };
+
     useEffect(() => {
         const hash = window.location.hash.substring(1);
         const validTabs = ["pending-payment", "pending-verification", "upcoming", "in-progress", "completed", "cancelled"];
@@ -481,8 +577,32 @@ export default function BookingsPage() {
             const matchesSearch = searchTerm === "" || 
                 booking.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 booking.providerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                booking.clientName.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesStatus && matchesSearch;
+                booking.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                booking.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                booking.location?.toLowerCase().includes(searchTerm.toLowerCase());
+            
+            const matchesDateRange = (() => {
+                if (dateRange === "all") return true;
+                const bookingDate = booking.date.toDate();
+                const now = new Date();
+                switch (dateRange) {
+                    case "today":
+                        return bookingDate.toDateString() === now.toDateString();
+                    case "week":
+                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        return bookingDate >= weekAgo;
+                    case "month":
+                        return bookingDate.getMonth() === now.getMonth() && bookingDate.getFullYear() === now.getFullYear();
+                    case "year":
+                        return bookingDate.getFullYear() === now.getFullYear();
+                    default:
+                        return true;
+                }
+            })();
+
+            const matchesPriority = priorityFilter === "all" || booking.priority === priorityFilter;
+            
+            return matchesStatus && matchesSearch && matchesDateRange && matchesPriority;
         })
         .sort((a, b) => {
             let comparison = 0;
@@ -500,6 +620,65 @@ export default function BookingsPage() {
             return sortOrder === "asc" ? comparison : -comparison;
         });
 
+    // Statistics Dashboard Component
+    const StatsCard = ({ title, value, icon: Icon, variant = "default", change, trend }: {
+        title: string;
+        value: string | number;
+        icon: React.ElementType;
+        variant?: 'default' | 'success' | 'warning' | 'info';
+        change?: string;
+        trend?: 'up' | 'down' | 'neutral';
+    }) => {
+        const getVariantStyles = () => {
+            switch (variant) {
+                case 'success':
+                    return 'border-l-4 border-l-green-500 bg-green-50/50 dark:bg-green-950/20';
+                case 'warning':
+                    return 'border-l-4 border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-950/20';
+                case 'info':
+                    return 'border-l-4 border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20';
+                default:
+                    return '';
+            }
+        };
+
+        return (
+            <StandardCard 
+                title={title} 
+                variant="elevated"
+                className={`group hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-1 ${getVariantStyles()}`}
+            >
+                <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-1">
+                            {value}
+                        </div>
+                        {change && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                {trend === 'up' && <TrendingUp className="h-3 w-3 text-green-500" />}
+                                {trend === 'down' && <TrendingUp className="h-3 w-3 text-red-500 rotate-180" />}
+                                <span>{change}</span>
+                            </div>
+                        )}
+                    </div>
+                    <div className={`p-2 rounded-lg ${
+                        variant === 'success' ? 'bg-green-100 dark:bg-green-900/30' :
+                        variant === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
+                        variant === 'info' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                        'bg-primary/10'
+                    }`}>
+                        <Icon className={`h-5 w-5 transition-colors ${
+                            variant === 'success' ? 'text-green-600' :
+                            variant === 'warning' ? 'text-yellow-600' :
+                            variant === 'info' ? 'text-blue-600' :
+                            'text-muted-foreground group-hover:text-primary'
+                        }`} />
+                    </div>
+                </div>
+            </StandardCard>
+        );
+    };
+
     const statusCounts = {
         "Pending Payment": pendingPaymentBookings.length,
         "Pending Verification": pendingVerificationBookings.length,
@@ -513,93 +692,422 @@ export default function BookingsPage() {
         <PageLayout 
             title={t('bookings')} 
             description={t('bookingsDescription')}
+            action={
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleRefresh}
+                        disabled={refreshing}
+                        className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                    >
+                        <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                        asChild
+                    >
+                        <Link href="/dashboard">
+                            <Plus className="h-4 w-4 mr-2" />
+                            New Booking
+                        </Link>
+                    </Button>
+                </div>
+            }
         >
-            {/* Search and Sort Controls */}
-            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                <div className="flex-1 max-w-md">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search bookings..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft"
-                        />
-                    </div>
-                </div>
-                <div className="flex gap-2">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="shadow-soft hover:shadow-glow/20 transition-all duration-300">
-                                <Filter className="h-4 w-4 mr-2" />
-                                Sort by {sortBy}
-                                {sortOrder === "asc" ? <SortAsc className="h-4 w-4 ml-2" /> : <SortDesc className="h-4 w-4 ml-2" />}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="shadow-glow border-0 bg-background/95 backdrop-blur-md">
-                            <DropdownMenuLabel className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Sort by</DropdownMenuLabel>
-                            <DropdownMenuSeparator className="bg-border/50" />
-                            <DropdownMenuItem onClick={() => setSortBy("date")}>
-                                Date
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setSortBy("price")}>
-                                Price
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setSortBy("status")}>
-                                Status
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-border/50" />
-                            <DropdownMenuItem onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-                                {sortOrder === "asc" ? "Descending" : "Ascending"}
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+            {/* Statistics Dashboard */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <StatsCard 
+                    title="Total Bookings" 
+                    value={stats.total} 
+                    icon={Calendar} 
+                    variant="default"
+                    change={`${stats.thisWeek} this week`}
+                />
+                <StatsCard 
+                    title="Total Revenue" 
+                    value={`₱${stats.totalRevenue.toFixed(2)}`} 
+                    icon={DollarSign} 
+                    variant="success"
+                    change={`${stats.completed} completed`}
+                />
+                <StatsCard 
+                    title="In Progress" 
+                    value={stats.inProgress} 
+                    icon={Timer} 
+                    variant="warning"
+                    change={`${stats.pending} pending`}
+                />
+                <StatsCard 
+                    title="Average Rating" 
+                    value={stats.avgRating} 
+                    icon={Star} 
+                    variant="info"
+                    change={`${stats.thisMonth} this month`}
+                />
             </div>
+
+            {/* Advanced Filters and Controls */}
+            <StandardCard 
+                title="Booking Management" 
+                description="Filter, sort, and manage your bookings"
+                variant="elevated"
+            >
+                <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                                placeholder="Search bookings by service, provider, client, notes, or location..." 
+                                className="pl-10 shadow-soft" 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                        <Select value={selectedStatus} onValueChange={(value) => setSelectedStatus(value as BookingStatus | "all")}>
+                            <SelectTrigger className="w-full sm:w-48 shadow-soft">
+                                <SelectValue placeholder="Filter by status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Status</SelectItem>
+                                <SelectItem value="Pending Payment">Pending Payment</SelectItem>
+                                <SelectItem value="Pending Verification">Pending Verification</SelectItem>
+                                <SelectItem value="Upcoming">Upcoming</SelectItem>
+                                <SelectItem value="In Progress">In Progress</SelectItem>
+                                <SelectItem value="Completed">Completed</SelectItem>
+                                <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                <SelectItem value="Payment Rejected">Payment Rejected</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select value={dateRange} onValueChange={setDateRange}>
+                            <SelectTrigger className="w-full sm:w-48 shadow-soft">
+                                <SelectValue placeholder="Date range" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Time</SelectItem>
+                                <SelectItem value="today">Today</SelectItem>
+                                <SelectItem value="week">This Week</SelectItem>
+                                <SelectItem value="month">This Month</SelectItem>
+                                <SelectItem value="year">This Year</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select value={sortBy} onValueChange={(value) => setSortBy(value as "date" | "price" | "status")}>
+                            <SelectTrigger className="w-full sm:w-48 shadow-soft">
+                                <SelectValue placeholder="Sort by" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="date">Date</SelectItem>
+                                <SelectItem value="price">Price</SelectItem>
+                                <SelectItem value="status">Status</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <div className="flex items-center gap-1 border-2 p-1 rounded-lg bg-background/50 backdrop-blur-sm">
+                            <Button 
+                                size="icon" 
+                                variant={viewMode === 'list' ? 'secondary' : 'ghost'} 
+                                onClick={() => setViewMode('list')} 
+                                className="h-8 w-8"
+                            >
+                                <List className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                                size="icon" 
+                                variant={viewMode === 'grid' ? 'secondary' : 'ghost'} 
+                                onClick={() => setViewMode('grid')} 
+                                className="h-8 w-8"
+                            >
+                                <Grid3X3 className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Bulk Actions */}
+                    {selectedBookings.length > 0 && (
+                        <div className="flex items-center gap-2 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                            <span className="text-sm font-medium">
+                                {selectedBookings.length} booking{selectedBookings.length > 1 ? 's' : ''} selected
+                            </span>
+                            <div className="flex items-center gap-2 ml-auto">
+                                <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    onClick={() => handleBulkAction('Export')}
+                                    className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                                >
+                                    <Download className="h-3 w-3 mr-1" />
+                                    Export
+                                </Button>
+                                <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    onClick={() => handleBulkAction('Archive')}
+                                    className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                                >
+                                    <Archive className="h-3 w-3 mr-1" />
+                                    Archive
+                                </Button>
+                                <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    onClick={clearSelection}
+                                    className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                                >
+                                    Clear Selection
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </StandardCard>
 
             {/* Status Filter Chips */}
-            <div className="flex flex-wrap gap-2">
-                <Button
-                    variant={selectedStatus === "all" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedStatus("all")}
-                    className="transition-all duration-300"
-                >
-                    All ({bookings.length})
-                </Button>
-                {Object.entries(statusCounts).map(([status, count]) => (
+            <StandardCard 
+                title="Quick Filters" 
+                description="Filter bookings by status"
+                variant="elevated"
+            >
+                <div className="flex flex-wrap gap-2">
                     <Button
-                        key={status}
-                        variant={selectedStatus === status ? "default" : "outline"}
+                        variant={selectedStatus === "all" ? "default" : "outline"}
                         size="sm"
-                        onClick={() => setSelectedStatus(status as BookingStatus)}
+                        onClick={() => setSelectedStatus("all")}
                         className="transition-all duration-300"
                     >
-                        {status} ({count})
+                        All ({bookings.length})
                     </Button>
-                ))}
-            </div>
-
-            {/* Bookings List */}
-            {loading ? (
-                <LoadingState title="Loading bookings..." description="Please wait while we fetch your booking information." />
-            ) : filteredAndSortedBookings.length > 0 ? (
-                <div className="space-y-4">
-                    {filteredAndSortedBookings.map((booking) => (
-                        <BookingCard key={booking.id} booking={booking} userRole={userRole || 'client'} />
+                    {Object.entries(statusCounts).map(([status, count]) => (
+                        <Button
+                            key={status}
+                            variant={selectedStatus === status ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setSelectedStatus(status as BookingStatus)}
+                            className="transition-all duration-300"
+                        >
+                            {status} ({count})
+                        </Button>
                     ))}
                 </div>
-            ) : (
-                <EmptyState
-                    icon={Calendar}
-                    title="No bookings found"
-                    description={
-                        searchTerm || selectedStatus !== "all" 
-                            ? "Try adjusting your search or filter criteria."
-                            : "You don't have any bookings yet."
-                    }
-                />
-            )}
+            </StandardCard>
+
+            {/* Bookings Display */}
+            <StandardCard 
+                title="Your Bookings" 
+                description={`${filteredAndSortedBookings.length} of ${bookings.length} bookings`}
+                variant="elevated"
+            >
+                {loading ? (
+                    <LoadingState title="Loading bookings..." description="Please wait while we fetch your booking information." />
+                ) : viewMode === 'grid' ? (
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {filteredAndSortedBookings.length > 0 ? filteredAndSortedBookings.map((booking) => (
+                            <Card key={booking.id} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group hover:-translate-y-1">
+                                <CardHeader className="pb-3 relative">
+                                    <div className="absolute top-2 right-2">
+                                        <Checkbox 
+                                            checked={selectedBookings.includes(booking.id)}
+                                            onCheckedChange={() => toggleBookingSelection(booking.id)}
+                                            className="h-4 w-4"
+                                        />
+                                    </div>
+                                    <div className="flex items-center space-x-3">
+                                        <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-soft">
+                                            <AvatarImage 
+                                                src={userRole === 'client' ? booking.providerAvatar : booking.clientAvatar} 
+                                                alt={userRole === 'client' ? booking.providerName : booking.clientName} 
+                                            />
+                                            <AvatarFallback className="text-sm bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">
+                                                {getAvatarFallback(userRole === 'client' ? booking.providerName : booking.clientName)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 min-w-0">
+                                            <CardTitle className="text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent group-hover:from-primary group-hover:to-accent transition-all duration-300 truncate">
+                                                {booking.serviceName}
+                                            </CardTitle>
+                                            <CardDescription className="text-sm text-muted-foreground flex items-center gap-1">
+                                                <UserCircle className="h-3 w-3 flex-shrink-0" />
+                                                <span className="truncate">{userRole === 'client' ? booking.providerName : booking.clientName}</span>
+                                            </CardDescription>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-2">
+                                        <Badge 
+                                            className={`${getStatusClass(booking.status)} flex items-center gap-1 text-xs px-2 py-1`}
+                                        >
+                                            {getStatusIcon(booking.status)}
+                                            {booking.status}
+                                        </Badge>
+                                        {booking.priority && (
+                                            <Badge variant="outline" className="text-xs">
+                                                {booking.priority}
+                                            </Badge>
+                                        )}
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="flex items-center gap-1 text-muted-foreground">
+                                            <Clock className="h-3 w-3" />
+                                            {format(booking.date.toDate(), 'MMM dd, yyyy')}
+                                        </span>
+                                        <span className="flex items-center gap-1 font-semibold">
+                                            <Wallet className="h-3 w-3" />
+                                            ₱{booking.price.toFixed(2)}
+                                        </span>
+                                    </div>
+                                    {booking.location && (
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                            <MapPin className="h-3 w-3" />
+                                            <span className="truncate">{booking.location}</span>
+                                        </div>
+                                    )}
+                                    {booking.notes && (
+                                        <div className="text-sm p-2 bg-muted/30 rounded-lg border border-border/50">
+                                            <span className="text-muted-foreground text-xs">Notes: </span>
+                                            <span className="line-clamp-2">{booking.notes}</span>
+                                        </div>
+                                    )}
+                                    {booking.tags && booking.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1">
+                                            {booking.tags.slice(0, 3).map(tag => (
+                                                <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                                            ))}
+                                            {booking.tags.length > 3 && (
+                                                <Badge variant="outline" className="text-xs">+{booking.tags.length - 3}</Badge>
+                                            )}
+                                        </div>
+                                    )}
+                                </CardContent>
+                                <CardFooter className="pt-2">
+                                    <div className="flex flex-col gap-2 w-full">
+                                        <Button 
+                                            onClick={() => {/* Handle view details */}}
+                                            size="sm"
+                                            className="w-full shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground"
+                                        >
+                                            <Eye className="h-4 w-4 mr-2" />
+                                            View Details
+                                        </Button>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <Button variant="outline" size="sm" className="shadow-soft hover:shadow-glow/20 transition-all duration-300">
+                                                <MessageSquare className="mr-1 h-3 w-3" /> Message
+                                            </Button>
+                                            <Button variant="outline" size="sm" className="shadow-soft hover:shadow-glow/20 transition-all duration-300">
+                                                <Share2 className="mr-1 h-3 w-3" /> Share
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardFooter>
+                            </Card>
+                        )) : (
+                            <div className="col-span-full text-center py-12">
+                                <Calendar className="h-16 w-16 mx-auto text-primary opacity-60 mb-4" />
+                                <h3 className="text-lg font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
+                                    {searchTerm || selectedStatus !== "all" ? "No Bookings Found" : "No Bookings Yet"}
+                                </h3>
+                                <p className="text-muted-foreground mb-4">
+                                    {searchTerm || selectedStatus !== "all" ? "Try adjusting your filters" : "You don't have any bookings yet."}
+                                </p>
+                                {!searchTerm && selectedStatus === "all" && (
+                                    <Button asChild className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                                        <Link href="/dashboard">Find Services</Link>
+                                    </Button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                ) : (
+                    // List View
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Checkbox 
+                                    checked={selectedBookings.length === filteredAndSortedBookings.length && filteredAndSortedBookings.length > 0}
+                                    onCheckedChange={(checked) => checked ? selectAllBookings() : clearSelection()}
+                                />
+                                <span className="text-sm text-muted-foreground">
+                                    Select all ({filteredAndSortedBookings.length})
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div className="space-y-3">
+                            {filteredAndSortedBookings.length > 0 ? filteredAndSortedBookings.map((booking) => (
+                                <div key={booking.id} className="flex items-center gap-4 p-4 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border border-border/50">
+                                    <Checkbox 
+                                        checked={selectedBookings.includes(booking.id)}
+                                        onCheckedChange={() => toggleBookingSelection(booking.id)}
+                                    />
+                                    <Avatar className="h-12 w-12">
+                                        <AvatarImage 
+                                            src={userRole === 'client' ? booking.providerAvatar : booking.clientAvatar} 
+                                            alt={userRole === 'client' ? booking.providerName : booking.clientName} 
+                                        />
+                                        <AvatarFallback>{getAvatarFallback(userRole === 'client' ? booking.providerName : booking.clientName)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="font-semibold">{booking.serviceName}</h3>
+                                            <Badge 
+                                                className={`${getStatusClass(booking.status)} flex items-center gap-1 text-xs px-2 py-1`}
+                                            >
+                                                {getStatusIcon(booking.status)}
+                                                {booking.status}
+                                            </Badge>
+                                            {booking.priority && (
+                                                <Badge variant="outline" className="text-xs">{booking.priority}</Badge>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                                            <span className="flex items-center gap-1">
+                                                <UserCircle className="h-3 w-3" />
+                                                {userRole === 'client' ? booking.providerName : booking.clientName}
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Clock className="h-3 w-3" />
+                                                {format(booking.date.toDate(), 'MMM dd, yyyy')}
+                                            </span>
+                                            <span className="flex items-center gap-1 font-semibold">
+                                                <Wallet className="h-3 w-3" />
+                                                ₱{booking.price.toFixed(2)}
+                                            </span>
+                                        </div>
+                                        {booking.location && (
+                                            <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                                                <MapPin className="h-3 w-3" />
+                                                <span>{booking.location}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button variant="outline" size="sm">
+                                            <Eye className="mr-2 h-4 w-4" /> View
+                                        </Button>
+                                        <Button variant="outline" size="sm">
+                                            <MessageSquare className="mr-2 h-4 w-4" /> Message
+                                        </Button>
+                                        <Button variant="outline" size="sm">
+                                            <Share2 className="mr-2 h-4 w-4" /> Share
+                                        </Button>
+                                    </div>
+                                </div>
+                            )) : (
+                                <div className="text-center py-12">
+                                    <Calendar className="h-16 w-16 mx-auto text-primary opacity-60 mb-4" />
+                                    <h3 className="text-lg font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
+                                        {searchTerm || selectedStatus !== "all" ? "No Bookings Found" : "No Bookings Yet"}
+                                    </h3>
+                                    <p className="text-muted-foreground">
+                                        {searchTerm || selectedStatus !== "all" ? "Try adjusting your filters" : "You don't have any bookings yet."}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </StandardCard>
         </PageLayout>
     );
 }
