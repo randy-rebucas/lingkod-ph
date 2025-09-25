@@ -45,7 +45,7 @@ export default function CalendarPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
-        if (!user) {
+        if (!user || !db) {
             setLoading(false);
             return;
         }

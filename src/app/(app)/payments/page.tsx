@@ -41,7 +41,7 @@ export default function PaymentHistoryPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || !db) return;
 
         const transactionsQuery = query(
             collection(db, "transactions"),
@@ -91,12 +91,12 @@ export default function PaymentHistoryPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Payment History</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payment History</h1>
                     <p className="text-muted-foreground">View all your payment transactions and receipts.</p>
                 </div>
-                <Card>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-6">
                         <Skeleton className="h-64 w-full" />
                     </CardContent>
@@ -106,21 +106,21 @@ export default function PaymentHistoryPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-6xl mx-auto space-y-8">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Payment History</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payment History</h1>
                     <p className="text-muted-foreground">View all your payment transactions and receipts.</p>
                 </div>
-                <Button variant="outline" onClick={() => window.location.reload()}>
+                <Button variant="outline" onClick={() => window.location.reload()} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
                     <RefreshCw className="mr-2 h-4 w-4" />
                     Refresh
                 </Button>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Transaction History</CardTitle>
+            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Transaction History</CardTitle>
                     <CardDescription>
                         {transactions.length} transaction{transactions.length !== 1 ? 's' : ''} found
                     </CardDescription>

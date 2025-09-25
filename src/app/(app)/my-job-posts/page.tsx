@@ -51,7 +51,7 @@ export default function MyJobPostsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!user || (userRole !== 'client' && userRole !== 'agency')) {
+        if (!user || (userRole !== 'client' && userRole !== 'agency') || !db) {
             setLoading(false);
             if (user) router.push('/dashboard'); // Redirect if not a client/agency
             return;
@@ -73,6 +73,7 @@ export default function MyJobPostsPage() {
     }, [user, userRole, router, toast, t]);
     
     const handleUpdateStatus = async (jobId: string, status: JobStatus) => {
+        if (!db) return;
         try {
             const jobRef = doc(db, "jobs", jobId);
             await updateDoc(jobRef, { status });
@@ -83,6 +84,7 @@ export default function MyJobPostsPage() {
     }
 
     const handleDeleteJob = async (jobId: string) => {
+        if (!db) return;
          try {
             await deleteDoc(doc(db, "jobs", jobId));
             toast({ title: t('success'), description: t('jobDeleted') });

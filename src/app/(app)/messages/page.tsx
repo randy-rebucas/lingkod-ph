@@ -55,6 +55,7 @@ const getAvatarFallback = (name: string | null | undefined) => {
 };
 
 const createNotification = async (userId: string, senderName: string, message: string, link: string) => {
+    if (!db) return;
     try {
         const userNotifSettingsRef = doc(db, 'users', userId);
         const docSnap = await getDoc(userNotifSettingsRef);
@@ -110,7 +111,7 @@ export default function MessagesPage() {
     }, [searchParams, conversations]);
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || !db) return;
         setLoadingConversations(true);
         const q = query(collection(db, "conversations"), where("participants", "array-contains", user.uid));
         
@@ -131,7 +132,7 @@ export default function MessagesPage() {
     }, [user, toast, t]);
     
     useEffect(() => {
-        if (!activeConversation) return;
+        if (!activeConversation || !db) return;
 
         setLoadingMessages(true);
         const messagesRef = collection(db, "conversations", activeConversation.id, "messages");
@@ -179,6 +180,7 @@ export default function MessagesPage() {
 
         setIsSending(true);
 
+        if (!storage || !db) return;
         try {
             let imageUrl = '';
             if (selectedImage) {

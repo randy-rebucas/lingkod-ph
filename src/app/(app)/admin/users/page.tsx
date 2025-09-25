@@ -92,7 +92,7 @@ export default function AdminUsersPage() {
 
 
      useEffect(() => {
-        if (userRole !== 'admin') {
+        if (userRole !== 'admin' || !db) {
             setLoading(false);
             return;
         }
@@ -211,23 +211,25 @@ export default function AdminUsersPage() {
 
     if (userRole !== 'admin') {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Access Denied</CardTitle>
-                    <CardDescription>This page is for administrators only.</CardDescription>
-                </CardHeader>
-            </Card>
+            <div className="max-w-6xl mx-auto space-y-8">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                        <CardDescription>This page is for administrators only.</CardDescription>
+                    </CardHeader>
+                </Card>
+            </div>
         );
     }
     
     if (loading) {
         return (
-             <div className="space-y-6">
+             <div className="max-w-6xl mx-auto space-y-8">
                  <div>
-                    <h1 className="text-3xl font-bold font-headline">User Management</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">User Management</h1>
                     <p className="text-muted-foreground">View and manage all users.</p>
                 </div>
-                <Card>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-6">
                         <Skeleton className="h-64 w-full" />
                     </CardContent>
@@ -238,19 +240,19 @@ export default function AdminUsersPage() {
 
     return (
         <>
-            <div className="space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">User Management</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">User Management</h1>
                     <p className="text-muted-foreground">
                         View and manage all users on the platform.
                     </p>
                 </div>
-                <Card>
-                    <CardHeader>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                         <div className="flex flex-col sm:flex-row gap-4">
                             <Input 
                                 placeholder="Search by name or email..."
-                                className="flex-1"
+                                className="flex-1 bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -278,7 +280,7 @@ export default function AdminUsersPage() {
                                     <SelectItem value="suspended">Suspended</SelectItem>
                                 </SelectContent>
                             </Select>
-                             <Button onClick={() => setIsCreateUserOpen(true)}><UserPlus className="mr-2 h-4 w-4" /> Create User</Button>
+                             <Button onClick={() => setIsCreateUserOpen(true)} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground"><UserPlus className="mr-2 h-4 w-4" /> Create User</Button>
                         </div>
                     </CardHeader>
                     <CardContent>

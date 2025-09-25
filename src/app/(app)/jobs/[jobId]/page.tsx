@@ -27,9 +27,9 @@ type Job = {
     description: string;
     categoryName: string;
     budget: {
-      amount: number;
-      type: 'Fixed' | 'Daily' | 'Monthly';
-      negotiable: boolean;
+        amount: number;
+        type: 'Fixed' | 'Daily' | 'Monthly';
+        negotiable: boolean;
     };
     location: string;
     clientName: string;
@@ -61,7 +61,7 @@ export default function JobDetailsPage() {
         const fetchJobDetails = async () => {
             setLoading(true);
             try {
-                const jobRef = doc(db, "jobs", jobId);
+                const jobRef = doc(db!, "jobs", jobId);
                 const jobSnap = await getDoc(jobRef);
 
                 if (jobSnap.exists()) {
@@ -81,30 +81,30 @@ export default function JobDetailsPage() {
         fetchJobDetails();
     }, [jobId, router, toast]);
 
-     const handleApply = async () => {
-        if (!user || !job) return;
+    const handleApply = async () => {
+        if (!user || !job || !db) return;
         try {
-            const jobRef = doc(db, "jobs", job.id);
+            const jobRef = doc(db!, "jobs", job.id);
             await updateDoc(jobRef, {
                 applications: arrayUnion(user.uid)
             });
             // Optimistically update the state
-            setJob(prev => prev ? {...prev, applications: [...(prev.applications || []), user.uid] } : null);
+            setJob(prev => prev ? { ...prev, applications: [...(prev.applications || []), user.uid] } : null);
             toast({ title: 'Success!', description: 'You have successfully applied for the job.' });
         } catch (error) {
             console.error("Error applying for job:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to apply for the job.' });
         }
     };
-    
+
     const handleReportJob = async () => {
-        if (!user || !job || !reportReason) {
+        if (!user || !job || !reportReason || !db) {
             toast({ variant: "destructive", title: "Error", description: "Please provide a reason for your report." });
             return;
         }
         setIsReporting(true);
         try {
-            await addDoc(collection(db, "reports"), {
+            await addDoc(collection(db!, "reports"), {
                 reportedBy: user.uid,
                 reportedItemType: 'job',
                 reportedItemId: job.id,
@@ -114,7 +114,7 @@ export default function JobDetailsPage() {
             });
             toast({ title: 'Report Submitted', description: 'Thank you for your feedback. An admin will review your report shortly.' });
             setReportReason("");
-        } catch(error) {
+        } catch (error) {
             console.error("Error submitting report:", error);
             toast({ variant: "destructive", title: "Error", description: "Failed to submit your report." });
         } finally {
@@ -125,11 +125,11 @@ export default function JobDetailsPage() {
 
     if (loading) {
         return (
-            <div className="space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
                 <Skeleton className="h-10 w-1/3" />
                 <Skeleton className="h-4 w-2/3" />
-                 <Card>
-                    <CardHeader><Skeleton className="h-8 w-3/4" /></CardHeader>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20"><Skeleton className="h-8 w-3/4" /></CardHeader>
                     <CardContent className="space-y-4">
                         <Skeleton className="h-24 w-full" />
                         <Skeleton className="h-10 w-1/4" />
@@ -145,7 +145,7 @@ export default function JobDetailsPage() {
 
 
     return (
-        <div className="space-y-6 max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto space-y-8">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" onClick={() => router.back()}>
@@ -154,13 +154,13 @@ export default function JobDetailsPage() {
                     <div>
                         <h1 className="text-3xl font-bold font-headline">{job.title}</h1>
                         <p className="text-muted-foreground">
-                           Posted by {job.clientName}
+                            Posted by {job.clientName}
                         </p>
                     </div>
                 </div>
-                 <Dialog>
+                <Dialog>
                     <DialogTrigger asChild>
-                         <Button variant="outline" size="sm" className="text-muted-foreground">
+                        <Button variant="outline" size="sm" className="text-muted-foreground">
                             <Flag className="mr-2 h-4 w-4" /> Report Job
                         </Button>
                     </DialogTrigger>
@@ -173,7 +173,7 @@ export default function JobDetailsPage() {
                         </DialogHeader>
                         <div className="space-y-2">
                             <Label htmlFor="report-reason">Reason</Label>
-                            <Textarea 
+                            <Textarea
                                 id="report-reason"
                                 value={reportReason}
                                 onChange={(e) => setReportReason(e.target.value)}
@@ -189,16 +189,16 @@ export default function JobDetailsPage() {
                     </DialogContent>
                 </Dialog>
             </div>
-            
+
             <Card>
                 <CardHeader>
                     <CardTitle>Job Details</CardTitle>
                     <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground pt-2">
-                         <div className="flex items-center gap-2"><Briefcase className="h-4 w-4" /> <Badge variant="secondary">{job.categoryName}</Badge></div>
-                         <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {job.location}</div>
-                         <div className="flex items-center gap-2"><Clock className="h-4 w-4" /> {formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true })}</div>
-                         <div className="flex items-center gap-2"><Users className="h-4 w-4" /> {job.applications?.length || 0} Applicants</div>
-                         {job.clientIsVerified && (
+                        <div className="flex items-center gap-2"><Briefcase className="h-4 w-4" /> <Badge variant="secondary">{job.categoryName}</Badge></div>
+                        <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {job.location}</div>
+                        <div className="flex items-center gap-2"><Clock className="h-4 w-4" /> {formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true })}</div>
+                        <div className="flex items-center gap-2"><Users className="h-4 w-4" /> {job.applications?.length || 0} Applicants</div>
+                        {job.clientIsVerified && (
                             <div className="flex items-center gap-1 text-green-600 font-medium">
                                 <ShieldCheck className="h-4 w-4" /> Verified Client
                             </div>
@@ -216,12 +216,12 @@ export default function JobDetailsPage() {
                         <div>
                             <h3 className="font-semibold mb-2">Additional Details</h3>
                             <div className="space-y-3">
-                            {job.additionalDetails.map((detail, index) => (
-                                <div key={index}>
-                                    <p className="font-medium text-sm">{detail.question}</p>
-                                    <p className="text-muted-foreground text-sm pl-4 border-l-2 ml-2 mt-1">{detail.answer || "No answer provided."}</p>
-                                </div>
-                            ))}
+                                {job.additionalDetails.map((detail, index) => (
+                                    <div key={index}>
+                                        <p className="font-medium text-sm">{detail.question}</p>
+                                        <p className="text-muted-foreground text-sm pl-4 border-l-2 ml-2 mt-1">{detail.answer || "No answer provided."}</p>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}

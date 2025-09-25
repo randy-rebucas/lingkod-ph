@@ -33,6 +33,7 @@ export default function SetupPage() {
 
     useEffect(() => {
         const checkUsers = async () => {
+            if (!db) return;
             const querySnapshot = await getDocs(collection(db, "users"));
             // If users exist, this page is not accessible
             if (!querySnapshot.empty) {

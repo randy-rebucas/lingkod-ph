@@ -174,7 +174,7 @@ export default function ContactUsPage() {
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="container relative">
+        <div className="max-w-6xl mx-auto space-y-8 relative">
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
               <Star className="w-4 h-4 mr-2" />
@@ -215,7 +215,7 @@ export default function ContactUsPage() {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {contactMethods.map((method, index) => (
-                <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-2 relative">
+                <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2 relative">
                   {method.popular && (
                     <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
                       Popular
@@ -300,7 +300,7 @@ export default function ContactUsPage() {
                 </div>
 
                 {/* Business Hours */}
-                <Card className="bg-background/60 backdrop-blur-sm border-0 shadow-soft">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Calendar className="h-5 w-5 text-primary" />
@@ -332,7 +332,7 @@ export default function ContactUsPage() {
               {/* Enhanced Contact Form */}
               <Card className="bg-background/60 backdrop-blur-sm border-0 shadow-soft">
                 <CardHeader>
-                  <CardTitle className="text-2xl font-bold">{t('sendMessage')}</CardTitle>
+                  <CardTitle className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('sendMessage')}</CardTitle>
                   <CardDescription className="text-base">{t('messageDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -422,7 +422,7 @@ export default function ContactUsPage() {
             </div>
             <div className="grid md:grid-cols-2 gap-6">
               {faqData.map((faq, index) => (
-                <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300">
+                <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
                   <CardContent className="p-6">
                     <h3 className="font-semibold text-lg mb-3">{faq.question}</h3>
                     <p className="text-muted-foreground leading-relaxed mb-3">{faq.answer}</p>
@@ -447,7 +447,7 @@ export default function ContactUsPage() {
             </div>
             <div className="grid md:grid-cols-3 gap-6">
               {testimonials.map((testimonial, index) => (
-                <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300">
+                <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-1 mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (

@@ -65,7 +65,7 @@ export default function NotificationsPage() {
     const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
     useEffect(() => {
-        if (!user) {
+        if (!user || !db) {
             setLoading(false);
             return;
         }
@@ -91,7 +91,7 @@ export default function NotificationsPage() {
     }, [user, toast]);
 
     const handleNotificationClick = async (notif: Notification) => {
-        if (!user) return;
+        if (!user || !db) return;
         if (!notif.read) {
             await updateDoc(doc(db, `users/${user.uid}/notifications`, notif.id), { read: true });
         }
@@ -117,7 +117,7 @@ export default function NotificationsPage() {
     };
     
     const handleDeleteNotification = async (notificationId: string) => {
-        if (!user) return;
+        if (!user || !db) return;
         try {
             await deleteDoc(doc(db, `users/${user.uid}/notifications`, notificationId));
             toast({ title: t('success'), description: t('notificationDeleted') });
@@ -127,11 +127,11 @@ export default function NotificationsPage() {
     };
 
     const handleMarkAllAsRead = async () => {
-        if (!user) return;
+        if (!user || !db) return;
         try {
             const unreadNotifications = notifications.filter(n => !n.read);
             const promises = unreadNotifications.map(notif => 
-                updateDoc(doc(db, `users/${user.uid}/notifications`, notif.id), { read: true })
+                updateDoc(doc(db!, `users/${user.uid}/notifications`, notif.id), { read: true })
             );
             await Promise.all(promises);
             toast({ title: t('success'), description: t('allMarkedAsRead') });
@@ -141,11 +141,11 @@ export default function NotificationsPage() {
     };
 
     const handleDeleteAllRead = async () => {
-        if (!user) return;
+        if (!user || !db) return;
         try {
             const readNotifications = notifications.filter(n => n.read);
             const promises = readNotifications.map(notif => 
-                deleteDoc(doc(db, `users/${user.uid}/notifications`, notif.id))
+                deleteDoc(doc(db!, `users/${user.uid}/notifications`, notif.id))
             );
             await Promise.all(promises);
             toast({ title: t('success'), description: t('readNotificationsDeleted') });
@@ -162,7 +162,7 @@ export default function NotificationsPage() {
 
     if (loading) {
         return (
-            <div className="max-w-4xl mx-auto space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
                 <div className="flex items-center justify-between">
                     <div>
                         <Skeleton className="h-8 w-48 mb-2" />
@@ -194,7 +194,7 @@ export default function NotificationsPage() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto space-y-8">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>

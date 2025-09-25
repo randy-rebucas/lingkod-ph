@@ -412,7 +412,7 @@ export default function DashboardPage() {
 
     // Fetch data for provider dashboard
     useEffect(() => {
-        if (!user || userRole !== 'provider') {
+        if (!user || userRole !== 'provider' || !db) {
             setLoading(false);
             return;
         }
@@ -476,9 +476,10 @@ export default function DashboardPage() {
 
     // Fetch data for client dashboard
     useEffect(() => {
-        if (userRole !== 'client') return;
+        if (userRole !== 'client' || !db) return;
         
         const fetchProviders = async () => {
+            if (!db) return;
             setLoadingProviders(true);
             try {
                 // Fetch all reviews first to calculate ratings
@@ -527,7 +528,7 @@ export default function DashboardPage() {
 
     // Fetch client's favorites
     useEffect(() => {
-        if (userRole !== 'client' || !user) return;
+        if (userRole !== 'client' || !user || !db) return;
 
         const favRef = collection(db, 'favorites');
         const q = query(favRef, where('userId', '==', user.uid));
@@ -542,12 +543,13 @@ export default function DashboardPage() {
 
     // Fetch data for agency dashboard
     useEffect(() => {
-        if (userRole !== 'agency' || !user) {
+        if (userRole !== 'agency' || !user || !db) {
              setLoadingAgencyData(false);
             return;
         }
 
         const fetchAgencyData = async () => {
+            if (!db) return;
             setLoadingAgencyData(true);
             try {
                 // 1. Get all providers managed by the agency
@@ -681,7 +683,7 @@ export default function DashboardPage() {
     const topPerformingProviders = [...agencyProviders].sort((a,b) => (b.totalRevenue || 0) - (a.totalRevenue || 0)).slice(0, 5);
 
     const handleToggleFavorite = async (provider: Provider) => {
-        if (!user) return;
+        if (!user || !db) return;
         const favoritesRef = collection(db, 'favorites');
         const isFavorited = favoriteProviderIds.includes(provider.uid);
 

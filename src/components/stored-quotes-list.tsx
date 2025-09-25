@@ -88,7 +88,7 @@ export function StoredQuotesList() {
     const [selectedQuote, setSelectedQuote] = React.useState<Quote | null>(null);
 
     React.useEffect(() => {
-        if (!user) {
+        if (!user || !db) {
             setLoading(false);
             return;
         }

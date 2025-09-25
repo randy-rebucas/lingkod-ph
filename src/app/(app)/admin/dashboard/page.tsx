@@ -54,7 +54,7 @@ const getAvatarFallback = (name: string | null | undefined) => {
 const AdminDashboardCard = ({ title, icon: Icon, value, change, isLoading }: { title: string, icon: React.ElementType, value: string, change?: string, isLoading: boolean }) => {
     if (isLoading) {
         return (
-            <Card>
+            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">{title}</CardTitle>
                     <Icon className="h-4 w-4 text-muted-foreground" />
@@ -67,14 +67,14 @@ const AdminDashboardCard = ({ title, icon: Icon, value, change, isLoading }: { t
         );
     }
     return (
-        <Card>
+        <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{title}</CardTitle>
+                <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold">{value}</div>
-                {change && <p className="text-xs text-muted-foreground">{change}</p>}
+                <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{value}</div>
+                {change && <p className="text-xs text-muted-foreground mt-1">{change}</p>}
             </CardContent>
         </Card>
     )
@@ -89,7 +89,7 @@ export default function AdminDashboardPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (userRole !== 'admin') {
+        if (userRole !== 'admin' || !db) {
             setLoading(false);
             return;
         }
@@ -141,19 +141,21 @@ export default function AdminDashboardPage() {
 
     if (userRole !== 'admin') {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('accessDenied')}</CardTitle>
-                    <CardDescription>{t('adminOnly')}</CardDescription>
-                </CardHeader>
-            </Card>
+            <div className="max-w-6xl mx-auto space-y-8">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('accessDenied')}</CardTitle>
+                        <CardDescription>{t('adminOnly')}</CardDescription>
+                    </CardHeader>
+                </Card>
+            </div>
         );
     }
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-6xl mx-auto space-y-8">
             <div>
-                <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                 <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
 
@@ -165,9 +167,9 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>{t('recentBookings')}</CardTitle>
+                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('recentBookings')}</CardTitle>
                         <CardDescription>The latest bookings made on the platform.</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -201,9 +203,9 @@ export default function AdminDashboardPage() {
                         )}
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('recentUsers')}</CardTitle>
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('recentUsers')}</CardTitle>
                         <CardDescription>The latest users to join the platform.</CardDescription>
                     </CardHeader>
                     <CardContent>

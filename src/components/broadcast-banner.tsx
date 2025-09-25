@@ -22,6 +22,7 @@ export default function BroadcastBanner() {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
+        if (!db) return;
         const broadcastsRef = collection(db, "broadcasts");
         const q = query(broadcastsRef, where("status", "==", "active"), limit(1));
 

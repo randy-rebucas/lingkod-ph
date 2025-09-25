@@ -159,9 +159,9 @@ export default function AnalyticsPage() {
 
     if (!user) {
         return (
-            <div className="space-y-6">
+            <div className="max-w-6xl mx-auto space-y-8">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">
                         {t('subtitle')}
                     </p>
@@ -183,9 +183,9 @@ export default function AnalyticsPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-6xl mx-auto space-y-8">
             <div>
-                <h1 className="text-3xl font-bold font-headline">{t('advancedAnalyticsTitle')}</h1>
+                <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('advancedAnalyticsTitle')}</h1>
                 <p className="text-muted-foreground">
                     {t('deepDiveDescription')}
                 </p>
@@ -197,17 +197,17 @@ export default function AnalyticsPage() {
                 </div>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{t('avgBookingValue')}</CardTitle><DollarSign className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">₱{analyticsData.averageBookingValue.toFixed(2)}</div></CardContent></Card>
-                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{t('cancellationRate')}</CardTitle><Slash className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.cancellationRate.toFixed(1)}%</div></CardContent></Card>
-                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{t('utilizationRate')}</CardTitle><Percent className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.utilizationRate.toFixed(1)}%</div></CardContent></Card>
-                    <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">{t('avgRating')}</CardTitle><Star className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{analyticsData.averageRating.toFixed(2)}</div></CardContent></Card>
+                    <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group"><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20"><CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('avgBookingValue')}</CardTitle><DollarSign className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" /></CardHeader><CardContent><div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{analyticsData.averageBookingValue.toFixed(2)}</div></CardContent></Card>
+                    <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group"><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20"><CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('cancellationRate')}</CardTitle><Slash className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" /></CardHeader><CardContent><div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{analyticsData.cancellationRate.toFixed(1)}%</div></CardContent></Card>
+                    <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group"><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20"><CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('utilizationRate')}</CardTitle><Percent className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" /></CardHeader><CardContent><div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{analyticsData.utilizationRate.toFixed(1)}%</div></CardContent></Card>
+                    <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group"><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20"><CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('avgRating')}</CardTitle><Star className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" /></CardHeader><CardContent><div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{analyticsData.averageRating.toFixed(2)}</div></CardContent></Card>
                 </div>
             )}
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-                <Card className="lg:col-span-3">
-                    <CardHeader>
-                        <CardTitle>{t('bookingTrends')}</CardTitle>
+                <Card className="lg:col-span-3 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('bookingTrends')}</CardTitle>
                         <CardDescription>{t('totalVsCompleted')}</CardDescription>
                     </CardHeader>
                     <CardContent>

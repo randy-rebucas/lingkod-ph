@@ -210,7 +210,7 @@ export default function PartnersPage() {
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="container relative">
+        <div className="max-w-6xl mx-auto space-y-8 relative">
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
               <Star className="w-4 h-4 mr-2" />
@@ -249,7 +249,7 @@ export default function PartnersPage() {
           </div>
           <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-3">
             {partnershipTypes.map((partner, index) => (
-              <Card key={partner.title} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden">
+              <Card key={partner.title} className="group shadow-soft hover:shadow-glow/20 transition-all duration-500 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative p-8">
                   <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
@@ -308,7 +308,7 @@ export default function PartnersPage() {
           </div>
           <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-3">
             {successStories.map((story, index) => (
-              <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-1">
+              <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1">
                 <div className="p-8">
                   <div className="flex items-center gap-4 mb-6">
                     <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -361,7 +361,7 @@ export default function PartnersPage() {
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
               {partnershipProcess.map((step, index) => (
                 <div key={index} className="relative">
-                  <Card className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-1 h-full">
+                  <Card className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1 h-full">
                     <div className="p-6 text-center">
                       <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
                         {step.icon}
@@ -411,7 +411,7 @@ export default function PartnersPage() {
           </div>
           <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-2">
             {partnerTestimonials.map((testimonial, index) => (
-              <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300">
+              <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
                 <div className="p-8">
                   <div className="flex items-center gap-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
@@ -458,7 +458,7 @@ export default function PartnersPage() {
           </div>
           <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-4">
             {achievements.map((achievement, index) => (
-              <Card key={index} className="group bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300 hover:-translate-y-1 text-center">
+              <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1 text-center">
                 <div className="p-6">
                   <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
                     {achievement.icon}
@@ -475,7 +475,7 @@ export default function PartnersPage() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-b from-muted/50 to-background">
         <div className="container">
-          <Card className="max-w-5xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5 border-0 shadow-soft">
+          <Card className="max-w-5xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
             <div className="p-8 lg:p-12">
               <div className="text-center mb-8">
                 <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">

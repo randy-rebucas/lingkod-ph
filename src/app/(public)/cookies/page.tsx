@@ -240,7 +240,7 @@ export default function CookiesPage() {
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="container relative">
+        <div className="max-w-6xl mx-auto space-y-8 relative">
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
               <Cookie className="w-4 h-4 mr-2" />
@@ -277,9 +277,9 @@ export default function CookiesPage() {
           <div className="grid lg:grid-cols-4 gap-8">
             {/* Table of Contents */}
             <div className="lg:col-span-1">
-              <Card className="sticky top-8 bg-background/60 backdrop-blur-sm border-0 shadow-soft">
+              <Card className="sticky top-8 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                     <BookOpen className="h-5 w-5 text-primary" />
                     {t('tableOfContents')}
                   </CardTitle>
@@ -316,7 +316,7 @@ export default function CookiesPage() {
             {/* Main Content */}
             <div className="lg:col-span-3 space-y-8">
               {/* Introduction */}
-              <Card className="bg-background/60 backdrop-blur-sm border-0 shadow-soft">
+              <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardContent className="p-8">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
@@ -334,9 +334,9 @@ export default function CookiesPage() {
               </Card>
 
               {/* Cookie Types Overview */}
-              <Card id="cookie-types" className="bg-gradient-to-br from-primary/5 to-accent/5 border-0 shadow-soft">
+              <Card id="cookie-types" className="bg-gradient-to-br from-primary/5 to-accent/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                     <Cookie className="h-5 w-5 text-primary" />
                     {t('typesOfCookies')}
                   </CardTitle>
@@ -375,9 +375,9 @@ export default function CookiesPage() {
               </Card>
 
               {/* Quick Actions */}
-              <Card className="bg-gradient-to-br from-accent/5 to-primary/5 border-0 shadow-soft">
+              <Card className="bg-gradient-to-br from-accent/5 to-primary/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                     <Settings className="h-5 w-5 text-primary" />
                     {t('managePreferences')}
                   </CardTitle>
@@ -408,7 +408,7 @@ export default function CookiesPage() {
               {/* Policy Sections */}
               <div className="space-y-6">
                 {sections.map((section, index) => (
-                  <Card key={section.id} className="bg-background/60 backdrop-blur-sm border-0 shadow-soft hover:shadow-glow/20 transition-all duration-300">
+                  <Card key={section.id} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-8">
                       <div className="flex items-center gap-3 mb-6">
                         <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
@@ -435,7 +435,7 @@ export default function CookiesPage() {
               </div>
 
               {/* Contact Information */}
-              <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-0 shadow-soft">
+              <Card className="bg-gradient-to-br from-primary/5 to-accent/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardContent className="p-8 text-center">
                   <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
                     <Mail className="h-8 w-8 text-primary" />

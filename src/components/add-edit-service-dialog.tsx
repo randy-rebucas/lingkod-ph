@@ -77,6 +77,7 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
 
     useEffect(() => {
         const fetchCategories = async () => {
+            if (!db) return;
             try {
                 const categoriesRef = collection(db, "categories");
                 const q = query(categoriesRef, orderBy("name"));

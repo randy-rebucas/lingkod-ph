@@ -24,12 +24,12 @@ export default function UnauthorizedPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
+      <Card className="w-full max-w-md shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+        <CardHeader className="text-center border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
             <AlertTriangle className="h-6 w-6 text-destructive" />
           </div>
-          <CardTitle className="text-2xl">Access Denied</CardTitle>
+          <CardTitle className="text-2xl font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
           <CardDescription>
             You don't have permission to access this page.
           </CardDescription>
@@ -43,13 +43,13 @@ export default function UnauthorizedPage() {
           </div>
           
           <div className="flex flex-col gap-2">
-            <Button asChild className="w-full">
+            <Button asChild className="w-full shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
               <Link href="/dashboard">
                 <Home className="mr-2 h-4 w-4" />
                 Go to Dashboard
               </Link>
             </Button>
-            <Button variant="outline" onClick={() => router.back()} className="w-full">
+            <Button variant="outline" onClick={() => router.back()} className="w-full shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Go Back
             </Button>

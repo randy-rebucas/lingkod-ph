@@ -64,6 +64,7 @@ export function AdCarousel() {
 
 
     useEffect(() => {
+        if (!db) return;
         const campaignsQuery = query(collection(db, "adCampaigns"), where("isActive", "==", true));
         const unsubscribe = onSnapshot(campaignsQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AdCampaign));
