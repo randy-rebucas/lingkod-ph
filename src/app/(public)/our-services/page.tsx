@@ -183,7 +183,7 @@ export default function ServicesPage() {
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="max-w-6xl mx-auto space-y-8 relative">
+        <div className="container">
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
               <Star className="w-4 h-4 mr-2" />
@@ -236,9 +236,9 @@ export default function ServicesPage() {
             </p>
           </div>
           
-          <div className="space-y-16">
+          <div className="max-w-6xl mx-auto space-y-16">
             {serviceCategories.map((category, categoryIndex) => (
-              <div key={category.id} className="max-w-6xl mx-auto">
+              <div key={category.id}>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center">
                     {category.icon}
@@ -285,16 +285,18 @@ export default function ServicesPage() {
               Experience the benefits of our comprehensive service platform
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((benefit, index) => (
-              <Card key={index} className="text-center p-6 shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1">
-                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  {benefit.icon}
-                </div>
-                <h3 className="text-xl font-semibold mb-3">{benefit.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{benefit.description}</p>
-              </Card>
-            ))}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {benefits.map((benefit, index) => (
+                <Card key={index} className="text-center p-6 shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1">
+                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    {benefit.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">{benefit.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{benefit.description}</p>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -302,32 +304,34 @@ export default function ServicesPage() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
         <div className="container">
-          <Card className="max-w-4xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-            <CardHeader className="text-center pb-8">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Sparkles className="h-8 w-8 text-primary" />
-              </div>
-              <CardTitle className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Ready to Get Started?</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center pb-8">
-              <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                Whether you need a service or want to offer your expertise, LocalPro is here to connect you with the right people. 
-                Join thousands of satisfied customers and service providers across the Philippines.
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Button asChild size="lg" className="h-12 px-8 shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                  <Link href="/signup">
-                    Book a Service <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="h-12 px-8 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                  <Link href="/providers">
-                    Become a Provider
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="max-w-4xl mx-auto">
+            <Card className="bg-gradient-to-br from-primary/5 to-accent/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+              <CardHeader className="text-center pb-8">
+                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Sparkles className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Ready to Get Started?</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center pb-8">
+                <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+                  Whether you need a service or want to offer your expertise, LocalPro is here to connect you with the right people. 
+                  Join thousands of satisfied customers and service providers across the Philippines.
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                  <Button asChild size="lg" className="h-12 px-8 shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                    <Link href="/signup">
+                      Book a Service <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline" className="h-12 px-8 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                    <Link href="/providers">
+                      Become a Provider
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
     </div>

@@ -210,7 +210,7 @@ export default function PartnersPage() {
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="max-w-6xl mx-auto space-y-8 relative">
+        <div className="container">
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
               <Star className="w-4 h-4 mr-2" />
@@ -247,52 +247,54 @@ export default function PartnersPage() {
               Choose the partnership model that aligns with your organization's goals and create lasting impact
             </p>
           </div>
-          <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-3">
-            {partnershipTypes.map((partner, index) => (
-              <Card key={partner.title} className="group shadow-soft hover:shadow-glow/20 transition-all duration-500 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative p-8">
-                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                    {partner.icon}
-                  </div>
-                  <h3 className="text-2xl font-semibold mb-4">{partner.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed mb-6">{partner.description}</p>
-                  
-                  <div className="mb-6">
-                    <h4 className="font-semibold text-sm text-primary mb-3">KEY BENEFITS</h4>
-                    <ul className="space-y-2">
-                      {partner.benefits.map((benefit, i) => (
-                        <li key={i} className="flex items-center gap-2 text-sm">
-                          <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />
-                          <span>{benefit}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="mb-6">
-                    <h4 className="font-semibold text-sm text-primary mb-3">IDEAL FOR</h4>
-                    <p className="text-sm text-muted-foreground">{partner.idealFor}</p>
-                  </div>
-
-                  <div className="mb-6">
-                    <h4 className="font-semibold text-sm text-primary mb-3">FEATURES</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {partner.features.map((feature, i) => (
-                        <Badge key={i} variant="secondary" className="text-xs">
-                          {feature}
-                        </Badge>
-                      ))}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid gap-8 lg:grid-cols-3">
+              {partnershipTypes.map((partner, index) => (
+                <Card key={partner.title} className="group shadow-soft hover:shadow-glow/20 transition-all duration-500 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="relative p-8">
+                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                      {partner.icon}
                     </div>
-                  </div>
+                    <h3 className="text-2xl font-semibold mb-4">{partner.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed mb-6">{partner.description}</p>
+                    
+                    <div className="mb-6">
+                      <h4 className="font-semibold text-sm text-primary mb-3">KEY BENEFITS</h4>
+                      <ul className="space-y-2">
+                        {partner.benefits.map((benefit, i) => (
+                          <li key={i} className="flex items-center gap-2 text-sm">
+                            <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />
+                            <span>{benefit}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
 
-                  <Button className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
-                    {partner.cta}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </Card>
-            ))}
+                    <div className="mb-6">
+                      <h4 className="font-semibold text-sm text-primary mb-3">IDEAL FOR</h4>
+                      <p className="text-sm text-muted-foreground">{partner.idealFor}</p>
+                    </div>
+
+                    <div className="mb-6">
+                      <h4 className="font-semibold text-sm text-primary mb-3">FEATURES</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {partner.features.map((feature, i) => (
+                          <Badge key={i} variant="secondary" className="text-xs">
+                            {feature}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Button className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                      {partner.cta}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -306,44 +308,46 @@ export default function PartnersPage() {
               See how our partners are transforming their businesses and communities
             </p>
           </div>
-          <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-3">
-            {successStories.map((story, index) => (
-              <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1">
-                <div className="p-8">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                      {story.icon}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid gap-8 lg:grid-cols-3">
+              {successStories.map((story, index) => (
+                <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1">
+                  <div className="p-8">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        {story.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">{story.company}</h3>
+                        <Badge variant="outline" className="text-xs">{story.type}</Badge>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">{story.company}</h3>
-                      <Badge variant="outline" className="text-xs">{story.type}</Badge>
+                    
+                    <div className="mb-4">
+                      <div className="text-2xl font-bold text-primary mb-2">{story.result}</div>
+                      <p className="text-muted-foreground text-sm leading-relaxed">{story.description}</p>
                     </div>
-                  </div>
-                  
-                  <div className="mb-4">
-                    <div className="text-2xl font-bold text-primary mb-2">{story.result}</div>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{story.description}</p>
-                  </div>
 
-                  <div className="mb-6">
-                    <div className="grid grid-cols-1 gap-2">
-                      {story.metrics.map((metric, i) => (
-                        <div key={i} className="flex items-center gap-2 text-sm">
-                          <TrendingUp className="h-4 w-4 text-primary" />
-                          <span className="font-medium">{metric}</span>
-                        </div>
-                      ))}
+                    <div className="mb-6">
+                      <div className="grid grid-cols-1 gap-2">
+                        {story.metrics.map((metric, i) => (
+                          <div key={i} className="flex items-center gap-2 text-sm">
+                            <TrendingUp className="h-4 w-4 text-primary" />
+                            <span className="font-medium">{metric}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="border-t pt-4">
+                      <Quote className="h-5 w-5 text-primary mb-2" />
+                      <p className="text-sm italic text-muted-foreground mb-2">"{story.testimonial}"</p>
+                      <p className="text-xs font-medium">— {story.author}</p>
                     </div>
                   </div>
-
-                  <div className="border-t pt-4">
-                    <Quote className="h-5 w-5 text-primary mb-2" />
-                    <p className="text-sm italic text-muted-foreground mb-2">"{story.testimonial}"</p>
-                    <p className="text-xs font-medium">— {story.author}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -357,7 +361,7 @@ export default function PartnersPage() {
               Our streamlined process makes it easy to get started and succeed as a LocalPro partner
             </p>
           </div>
-          <div className="mx-auto max-w-5xl">
+          <div className="max-w-6xl mx-auto">
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
               {partnershipProcess.map((step, index) => (
                 <div key={index} className="relative">
@@ -409,40 +413,42 @@ export default function PartnersPage() {
               Hear from successful partners who have transformed their businesses with LocalPro
             </p>
           </div>
-          <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-2">
-            {partnerTestimonials.map((testimonial, index) => (
-              <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
-                <div className="p-8">
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  
-                  <Quote className="h-8 w-8 text-primary/30 mb-4" />
-                  <p className="text-muted-foreground leading-relaxed mb-6">"{testimonial.content}"</p>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-semibold text-primary">
-                      {testimonial.avatar}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid gap-8 lg:grid-cols-2">
+              {partnerTestimonials.map((testimonial, index) => (
+                <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
+                  <div className="p-8">
+                    <div className="flex items-center gap-1 mb-4">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                      ))}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-semibold">{testimonial.name}</h4>
-                        {testimonial.verified && (
-                          <Badge variant="secondary" className="text-xs">
-                            <UserCheck className="h-3 w-3 mr-1" />
-                            Verified
-                          </Badge>
-                        )}
+                    
+                    <Quote className="h-8 w-8 text-primary/30 mb-4" />
+                    <p className="text-muted-foreground leading-relaxed mb-6">"{testimonial.content}"</p>
+                    
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-semibold text-primary">
+                        {testimonial.avatar}
                       </div>
-                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                      <p className="text-sm font-medium text-primary">{testimonial.company}</p>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold">{testimonial.name}</h4>
+                          {testimonial.verified && (
+                            <Badge variant="secondary" className="text-xs">
+                              <UserCheck className="h-3 w-3 mr-1" />
+                              Verified
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                        <p className="text-sm font-medium text-primary">{testimonial.company}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -456,18 +462,20 @@ export default function PartnersPage() {
               Our commitment to excellence and social impact has been recognized by industry leaders
             </p>
           </div>
-          <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {achievements.map((achievement, index) => (
-              <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1 text-center">
-                <div className="p-6">
-                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                    {achievement.icon}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {achievements.map((achievement, index) => (
+                <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1 text-center">
+                  <div className="p-6">
+                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                      {achievement.icon}
+                    </div>
+                    <h3 className="font-semibold text-sm mb-2">{achievement.title}</h3>
+                    <p className="text-xs text-muted-foreground">{achievement.organization}</p>
                   </div>
-                  <h3 className="font-semibold text-sm mb-2">{achievement.title}</h3>
-                  <p className="text-xs text-muted-foreground">{achievement.organization}</p>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -475,39 +483,41 @@ export default function PartnersPage() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-b from-muted/50 to-background">
         <div className="container">
-          <Card className="max-w-5xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-            <div className="p-8 lg:p-12">
-              <div className="text-center mb-8">
-                <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Handshake className="h-10 w-10 text-primary" />
+          <div className="max-w-5xl mx-auto">
+            <Card className="bg-gradient-to-br from-primary/5 to-accent/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+              <div className="p-8 lg:p-12">
+                <div className="text-center mb-8">
+                  <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <Handshake className="h-10 w-10 text-primary" />
+                  </div>
+                  <h2 className="text-4xl font-bold font-headline mb-4">Ready to Make an Impact?</h2>
+                  <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                    Join hundreds of successful partners who are transforming communities and growing their businesses with LocalPro. 
+                    Let's create something amazing together.
+                  </p>
                 </div>
-                <h2 className="text-4xl font-bold font-headline mb-4">Ready to Make an Impact?</h2>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                  Join hundreds of successful partners who are transforming communities and growing their businesses with LocalPro. 
-                  Let's create something amazing together.
-                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
+                  <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                    <Link href="/contact-us">
+                      Start Your Partnership <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                    <a href="mailto:admin@localpro.asia">
+                      <Mail className="mr-2 h-5 w-5" />
+                      Contact Sales Team
+                    </a>
+                  </Button>
+                </div>
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">
+                    <Gauge className="inline h-4 w-4 mr-1" />
+                    Average response time: 2 hours
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
-                <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                  <Link href="/contact-us">
-                    Start Your Partnership <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                  <a href="mailto:admin@localpro.asia">
-                    <Mail className="mr-2 h-5 w-5" />
-                    Contact Sales Team
-                  </a>
-                </Button>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">
-                  <Gauge className="inline h-4 w-4 mr-1" />
-                  Average response time: 2 hours
-                </p>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
       </section>
     </div>

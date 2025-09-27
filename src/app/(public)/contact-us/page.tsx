@@ -174,7 +174,7 @@ export default function ContactUsPage() {
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="max-w-6xl mx-auto space-y-8 relative">
+        <div className="container">
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
               <Star className="w-4 h-4 mr-2" />
@@ -213,36 +213,38 @@ export default function ContactUsPage() {
                 We offer multiple ways to get in touch. Pick the method that works best for you.
               </p>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {contactMethods.map((method, index) => (
-                <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2 relative">
-                  {method.popular && (
-                    <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
-                      Popular
-                    </div>
-                  )}
-                  <CardContent className="p-6 text-center">
-                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                      {method.icon}
-                    </div>
-                    <h3 className="font-semibold text-lg mb-2">{method.title}</h3>
-                    <p className="text-muted-foreground text-sm mb-4">{method.description}</p>
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        {method.availability}
+            <div className="max-w-6xl mx-auto">
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {contactMethods.map((method, index) => (
+                  <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2 relative">
+                    {method.popular && (
+                      <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
+                        Popular
                       </div>
-                      <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                        <Zap className="h-3 w-3" />
-                        {method.responseTime}
+                    )}
+                    <CardContent className="p-6 text-center">
+                      <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                        {method.icon}
                       </div>
-                    </div>
-                    <Button size="sm" className="w-full">
-                      {method.action}
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
+                      <h3 className="font-semibold text-lg mb-2">{method.title}</h3>
+                      <p className="text-muted-foreground text-sm mb-4">{method.description}</p>
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          {method.availability}
+                        </div>
+                        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                          <Zap className="h-3 w-3" />
+                          {method.responseTime}
+                        </div>
+                      </div>
+                      <Button size="sm" className="w-full">
+                        {method.action}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -420,20 +422,22 @@ export default function ContactUsPage() {
                 Quick answers to common questions about contacting us and getting support.
               </p>
             </div>
-            <div className="grid md:grid-cols-2 gap-6">
-              {faqData.map((faq, index) => (
-                <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold text-lg mb-3">{faq.question}</h3>
-                    <p className="text-muted-foreground leading-relaxed mb-3">{faq.answer}</p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                        {faq.category}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="max-w-6xl mx-auto">
+              <div className="grid md:grid-cols-2 gap-6">
+                {faqData.map((faq, index) => (
+                  <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
+                    <CardContent className="p-6">
+                      <h3 className="font-semibold text-lg mb-3">{faq.question}</h3>
+                      <p className="text-muted-foreground leading-relaxed mb-3">{faq.answer}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
+                          {faq.category}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </section>
 
@@ -445,28 +449,30 @@ export default function ContactUsPage() {
                 Hear from satisfied customers about their experience with our support team.
               </p>
             </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              {testimonials.map((testimonial, index) => (
-                <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-1 mb-4">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                      ))}
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed mb-4">"{testimonial.content}"</p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-semibold text-primary">
-                        {testimonial.avatar}
+            <div className="max-w-6xl mx-auto">
+              <div className="grid md:grid-cols-3 gap-6">
+                {testimonials.map((testimonial, index) => (
+                  <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-1 mb-4">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                        ))}
                       </div>
-                      <div>
-                        <h4 className="font-semibold text-sm">{testimonial.name}</h4>
-                        <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                      <p className="text-muted-foreground leading-relaxed mb-4">"{testimonial.content}"</p>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-semibold text-primary">
+                          {testimonial.avatar}
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-sm">{testimonial.name}</h4>
+                          <p className="text-xs text-muted-foreground">{testimonial.role}</p>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </section>
         </div>

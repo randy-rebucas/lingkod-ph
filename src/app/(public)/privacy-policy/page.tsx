@@ -245,7 +245,7 @@ export default function PrivacyPolicyPage() {
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="max-w-6xl mx-auto space-y-8 relative">
+        <div className="container">
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
               <Shield className="w-4 h-4 mr-2" />
@@ -347,18 +347,20 @@ export default function PrivacyPolicyPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {quickSummary.map((item, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 bg-background/60 rounded-lg">
-                        <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                          {item.icon}
+                  <div className="max-w-6xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {quickSummary.map((item, index) => (
+                        <div key={index} className="flex items-center gap-3 p-3 bg-background/60 rounded-lg">
+                          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
+                            {item.icon}
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-sm">{item.title}</h4>
+                            <p className="text-xs text-muted-foreground">{item.description}</p>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-semibold text-sm">{item.title}</h4>
-                          <p className="text-xs text-muted-foreground">{item.description}</p>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -402,19 +404,21 @@ export default function PrivacyPolicyPage() {
                   <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
                     {t('contactDescription')}
                   </p>
-                  <div className="grid md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-                    <Button asChild size="lg" className="h-12">
-                      <a href="mailto:admin@localpro.asia">
-                        <Mail className="mr-2 h-5 w-5" />
-                        {t('privacyOfficer')}
-                      </a>
-                    </Button>
-                    <Button asChild size="lg" variant="outline" className="h-12">
-                      <a href="tel:+639179157515">
-                        <Phone className="mr-2 h-5 w-5" />
-                        {t('callSupport')}
-                      </a>
-                    </Button>
+                  <div className="max-w-2xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <Button asChild size="lg" className="h-12">
+                        <a href="mailto:admin@localpro.asia">
+                          <Mail className="mr-2 h-5 w-5" />
+                          {t('privacyOfficer')}
+                        </a>
+                      </Button>
+                      <Button asChild size="lg" variant="outline" className="h-12">
+                        <a href="tel:+639179157515">
+                          <Phone className="mr-2 h-5 w-5" />
+                          {t('callSupport')}
+                        </a>
+                      </Button>
+                    </div>
                   </div>
                   <div className="mt-6 text-sm text-muted-foreground">
                     <p>{t('address')}</p>
