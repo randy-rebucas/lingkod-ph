@@ -421,17 +421,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   )}
-
-                  {userRole === 'agency' && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild isActive={isActive("/reports")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                        <Link href="/reports" className="flex items-center gap-3 px-3 py-2">
-                          <FilePieChart className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                          <span className="font-medium">Reports</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
                 </SidebarMenu>
               </div>
             )}
