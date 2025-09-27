@@ -40,6 +40,26 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  webpack: (config, { isServer }) => {
+    // Suppress webpack warnings for Handlebars require.extensions
+    config.ignoreWarnings = [
+      {
+        module: /node_modules\/handlebars/,
+        message: /require\.extensions is not supported by webpack/,
+      },
+    ];
+
+    // Add fallbacks for Node.js modules that might be used by Genkit
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+      crypto: false,
+    };
+
+    return config;
+  },
 };
 
 export default withNextIntl(nextConfig);

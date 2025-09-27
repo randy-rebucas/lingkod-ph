@@ -23,6 +23,7 @@ const poppins = Poppins({
 
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NODE_ENV === 'production' ? 'https://localpro.asia' : 'http://localhost:9002'),
   title: {
     default: 'LocalPro | Find Trusted Local Service Providers in the Philippines',
     template: '%s | LocalPro',
