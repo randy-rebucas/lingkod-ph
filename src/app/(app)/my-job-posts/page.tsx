@@ -129,20 +129,22 @@ export default function MyJobPostsPage() {
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-48 w-full" />
-                    </CardContent>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-48 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         )
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="container space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="max-w-6xl mx-auto flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold">My Job Posts</h1>
                     <p className="text-muted-foreground">Manage your job posts and track applications</p>
@@ -150,22 +152,24 @@ export default function MyJobPostsPage() {
             </div>
 
             {/* Search */}
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardContent className="p-4">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search jobs..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-10"
-                        />
-                    </div>
-                </CardContent>
-            </Card>
+            <div className="max-w-6xl mx-auto">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardContent className="p-4">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search jobs..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="pl-10"
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* Job Posts Table */}
-
+            <div className="max-w-6xl mx-auto">
                     <Table>
                         <TableHeader>
                             <TableRow className="border-b border-border/50">
@@ -266,6 +270,7 @@ export default function MyJobPostsPage() {
                             )}
                         </TableBody>
                     </Table>
+            </div>
             
         </div>
     );

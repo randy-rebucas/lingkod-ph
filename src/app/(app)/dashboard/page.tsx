@@ -715,7 +715,7 @@ export default function DashboardPage() {
     // If user is a client
     if (userRole === 'client') {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
+             <div className="container space-y-8">
                  <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-8 space-y-6">
                         <div className="flex flex-col sm:flex-row gap-4">
@@ -852,94 +852,98 @@ export default function DashboardPage() {
     // Agency Dashboard
     if (userRole === 'agency') {
          return (
-            <div className="max-w-6xl mx-auto space-y-8">
+            <div className="container space-y-8">
 
-                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-                    <DashboardCard isLoading={loadingAgencyData} title="Total Revenue" icon={DollarSign} value={`₱${agencyTotalRevenue.toFixed(2)}`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Completed Bookings" icon={Calendar} value={`${agencyTotalBookings}`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Managed Providers" icon={Users2} value={`${agencyProviderCount}`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Agency Rating" icon={Star} value={`${agencyOverallRating}`} change={`Based on ${agencyProviders.reduce((sum, p) => sum + (p.reviewCount || 0), 0)} reviews`} />
-                    <DashboardCard isLoading={loadingAgencyData} title="Pending Payouts" icon={Wallet} value={`₱${agencyPendingPayouts.toFixed(2)}`} />
+                 <div className="max-w-6xl mx-auto">
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+                        <DashboardCard isLoading={loadingAgencyData} title="Total Revenue" icon={DollarSign} value={`₱${agencyTotalRevenue.toFixed(2)}`} />
+                        <DashboardCard isLoading={loadingAgencyData} title="Completed Bookings" icon={Calendar} value={`${agencyTotalBookings}`} />
+                        <DashboardCard isLoading={loadingAgencyData} title="Managed Providers" icon={Users2} value={`${agencyProviderCount}`} />
+                        <DashboardCard isLoading={loadingAgencyData} title="Agency Rating" icon={Star} value={`${agencyOverallRating}`} change={`Based on ${agencyProviders.reduce((sum, p) => sum + (p.reviewCount || 0), 0)} reviews`} />
+                        <DashboardCard isLoading={loadingAgencyData} title="Pending Payouts" icon={Wallet} value={`₱${agencyPendingPayouts.toFixed(2)}`} />
+                    </div>
                 </div>
                 
-                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-                    <Card className="lg:col-span-4 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                        <CardHeader>
-                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Recent Bookings</CardTitle>
-                            <CardDescription>The latest bookings across your agency.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                             {loadingAgencyData ? (
-                                <div className="space-y-4">
-                                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
-                                </div>
-                            ) : (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Client</TableHead>
-                                        <TableHead>Provider</TableHead>
-                                        <TableHead>Status</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {agencyRecentBookings.length > 0 ? agencyRecentBookings.map((booking) => (
-                                        <TableRow key={booking.id}>
-                                            <TableCell className="font-medium">{booking.clientName}</TableCell>
-                                            <TableCell>{booking.providerName}</TableCell>
-                                            <TableCell>
-                                                <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
-                                            </TableCell>
-                                        </TableRow>
-                                    )) : (
+                 <div className="max-w-6xl mx-auto">
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+                        <Card className="lg:col-span-4 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                            <CardHeader>
+                                <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Recent Bookings</CardTitle>
+                                <CardDescription>The latest bookings across your agency.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                 {loadingAgencyData ? (
+                                    <div className="space-y-4">
+                                        {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+                                    </div>
+                                ) : (
+                                <Table>
+                                    <TableHeader>
                                         <TableRow>
-                                            <TableCell colSpan={3} className="h-24 text-center">No recent bookings.</TableCell>
+                                            <TableHead>Client</TableHead>
+                                            <TableHead>Provider</TableHead>
+                                            <TableHead>Status</TableHead>
                                         </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                            )}
-                        </CardContent>
-                    </Card>
-                     <Card className="lg:col-span-3 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                        <CardHeader>
-                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Top Performing Providers</CardTitle>
-                            <CardDescription>Your most valuable providers by revenue.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {loadingAgencyData ? (
-                                <div className="space-y-4">
-                                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
-                                </div>
-                            ) : (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Provider</TableHead>
-                                        <TableHead className="text-right">Revenue</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {topPerformingProviders.length > 0 ? topPerformingProviders.map((provider) => (
-                                        <TableRow key={provider.uid}>
-                                            <TableCell className="font-medium">{provider.displayName}</TableCell>
-                                            <TableCell className="text-right">₱{(provider.totalRevenue || 0).toFixed(2)}</TableCell>
-                                        </TableRow>
-                                    )) : (
+                                    </TableHeader>
+                                    <TableBody>
+                                        {agencyRecentBookings.length > 0 ? agencyRecentBookings.map((booking) => (
+                                            <TableRow key={booking.id}>
+                                                <TableCell className="font-medium">{booking.clientName}</TableCell>
+                                                <TableCell>{booking.providerName}</TableCell>
+                                                <TableCell>
+                                                    <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
+                                                </TableCell>
+                                            </TableRow>
+                                        )) : (
+                                            <TableRow>
+                                                <TableCell colSpan={3} className="h-24 text-center">No recent bookings.</TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                                )}
+                            </CardContent>
+                        </Card>
+                         <Card className="lg:col-span-3 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                            <CardHeader>
+                                <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Top Performing Providers</CardTitle>
+                                <CardDescription>Your most valuable providers by revenue.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                {loadingAgencyData ? (
+                                    <div className="space-y-4">
+                                        {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+                                    </div>
+                                ) : (
+                                <Table>
+                                    <TableHeader>
                                         <TableRow>
-                                            <TableCell colSpan={2} className="h-24 text-center">No provider data yet.</TableCell>
+                                            <TableHead>Provider</TableHead>
+                                            <TableHead className="text-right">Revenue</TableHead>
                                         </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                            )}
-                        </CardContent>
-                         <CardFooter className="justify-center">
-                            <Button asChild variant="outline">
-                                <Link href="/manage-providers">Manage All Providers</Link>
-                            </Button>
-                        </CardFooter>
-                    </Card>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {topPerformingProviders.length > 0 ? topPerformingProviders.map((provider) => (
+                                            <TableRow key={provider.uid}>
+                                                <TableCell className="font-medium">{provider.displayName}</TableCell>
+                                                <TableCell className="text-right">₱{(provider.totalRevenue || 0).toFixed(2)}</TableCell>
+                                            </TableRow>
+                                        )) : (
+                                            <TableRow>
+                                                <TableCell colSpan={2} className="h-24 text-center">No provider data yet.</TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                                )}
+                            </CardContent>
+                             <CardFooter className="justify-center">
+                                <Button asChild variant="outline">
+                                    <Link href="/manage-providers">Manage All Providers</Link>
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    </div>
                 </div>
             </div>
         )
@@ -947,135 +951,141 @@ export default function DashboardPage() {
     
     // Provider Dashboard (Default)
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-                <DashboardCard isLoading={loading} title="Total Revenue" icon={DollarSign} value={`₱${totalRevenue.toFixed(2)}`} />
-                <DashboardCard isLoading={loading} title="Pending Payouts" icon={Wallet} value={`₱${pendingPayouts.toFixed(2)}`} />
-                <DashboardCard isLoading={loading} title="Upcoming Bookings" icon={Calendar} value={`${upcomingBookingsCount}`} />
-                <DashboardCard isLoading={loading} title="Total Clients" icon={Users} value={`${totalClientsCount}`} />
-                <DashboardCard isLoading={loading} title="Overall Rating" icon={Star} value={`${overallRating}`} change={`Based on ${reviews.length} reviews`} />
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+                    <DashboardCard isLoading={loading} title="Total Revenue" icon={DollarSign} value={`₱${totalRevenue.toFixed(2)}`} />
+                    <DashboardCard isLoading={loading} title="Pending Payouts" icon={Wallet} value={`₱${pendingPayouts.toFixed(2)}`} />
+                    <DashboardCard isLoading={loading} title="Upcoming Bookings" icon={Calendar} value={`${upcomingBookingsCount}`} />
+                    <DashboardCard isLoading={loading} title="Total Clients" icon={Users} value={`${totalClientsCount}`} />
+                    <DashboardCard isLoading={loading} title="Overall Rating" icon={Star} value={`${overallRating}`} change={`Based on ${reviews.length} reviews`} />
+                </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-                 <Card className="lg:col-span-4 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader>
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Earnings Overview</CardTitle>
-                        <CardDescription>Your earnings for the last 6 months.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pl-2">
-                        {loading ? (
-                             <div className="flex items-center justify-center h-[300px]">
-                                <Skeleton className="w-full h-full" />
-                            </div>
-                        ) : (
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={earningsData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₱${value >= 1000 ? `${value/1000}k` : value}`} />
-                                <Tooltip
-                                    contentStyle={{
-                                        backgroundColor: "hsl(var(--background))",
-                                        border: "1px solid hsl(var(--border))",
-                                        borderRadius: "var(--radius)"
-                                    }}
-                                    cursor={{ fill: 'hsl(var(--secondary))' }}
-                                />
-                                <Bar dataKey="earnings" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                            </BarChart>
-                        </ResponsiveContainer>
-                        )}
-                    </CardContent>
-                </Card>
-                <Card className="lg:col-span-3 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader>
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Today&apos;s Schedule</CardTitle>
-                        <CardDescription>Your upcoming jobs for today.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                         {loading ? (
-                            <div className="space-y-4">
-                                <Skeleton className="h-10 w-full" />
-                                <Skeleton className="h-10 w-full" />
-                                <Skeleton className="h-10 w-full" />
-                            </div>
-                        ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Time</TableHead>
-                                    <TableHead>Client</TableHead>
-                                    <TableHead>Service</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {todaysJobs.length > 0 ? todaysJobs.map((booking) => (
-                                    <TableRow key={booking.id}>
-                                        <TableCell>{format(booking.date.toDate(), 'p')}</TableCell>
-                                        <TableCell className="font-medium">{booking.clientName}</TableCell>
-                                        <TableCell>{booking.serviceName}</TableCell>
-                                    </TableRow>
-                                )) : (
+            <div className="max-w-6xl mx-auto">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+                     <Card className="lg:col-span-4 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader>
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Earnings Overview</CardTitle>
+                            <CardDescription>Your earnings for the last 6 months.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="pl-2">
+                            {loading ? (
+                                 <div className="flex items-center justify-center h-[300px]">
+                                    <Skeleton className="w-full h-full" />
+                                </div>
+                            ) : (
+                            <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={earningsData}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₱${value >= 1000 ? `${value/1000}k` : value}`} />
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: "hsl(var(--background))",
+                                            border: "1px solid hsl(var(--border))",
+                                            borderRadius: "var(--radius)"
+                                        }}
+                                        cursor={{ fill: 'hsl(var(--secondary))' }}
+                                    />
+                                    <Bar dataKey="earnings" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                            )}
+                        </CardContent>
+                    </Card>
+                    <Card className="lg:col-span-3 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader>
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Today&apos;s Schedule</CardTitle>
+                            <CardDescription>Your upcoming jobs for today.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                             {loading ? (
+                                <div className="space-y-4">
+                                    <Skeleton className="h-10 w-full" />
+                                    <Skeleton className="h-10 w-full" />
+                                    <Skeleton className="h-10 w-full" />
+                                </div>
+                            ) : (
+                            <Table>
+                                <TableHeader>
                                     <TableRow>
-                                        <TableCell colSpan={3} className="h-24 text-center">No jobs scheduled for today.</TableCell>
+                                        <TableHead>Time</TableHead>
+                                        <TableHead>Client</TableHead>
+                                        <TableHead>Service</TableHead>
                                     </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {todaysJobs.length > 0 ? todaysJobs.map((booking) => (
+                                        <TableRow key={booking.id}>
+                                            <TableCell>{format(booking.date.toDate(), 'p')}</TableCell>
+                                            <TableCell className="font-medium">{booking.clientName}</TableCell>
+                                            <TableCell>{booking.serviceName}</TableCell>
+                                        </TableRow>
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={3} className="h-24 text-center">No jobs scheduled for today.</TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+            
+            <div className="max-w-6xl mx-auto">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader>
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Recent Reviews</CardTitle>
+                        <CardDescription>What your clients are saying about you.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                         {loading ? (
+                            <div className="space-y-6">
+                               {[...Array(2)].map((_, i) => (
+                                <div key={i} className="flex items-start gap-4">
+                                    <Skeleton className="h-10 w-10 rounded-full" />
+                                    <div className="flex-1 space-y-2">
+                                        <div className="flex justify-between">
+                                            <Skeleton className="h-5 w-24" />
+                                            <Skeleton className="h-5 w-20" />
+                                        </div>
+                                        <Skeleton className="h-4 w-full" />
+                                    </div>
+                                </div>
+                               ))}
+                            </div>
+                        ) : reviews.length > 0 ? (
+                            reviews.map((review) => (
+                                <div key={review.id} className="flex items-start gap-4">
+                                    <Avatar>
+                                        <AvatarImage src={review.clientAvatar} alt={review.clientName} />
+                                        <AvatarFallback>{getAvatarFallback(review.clientName)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <p className="font-semibold">{review.clientName}</p>
+                                            <div className="flex items-center gap-1">
+                                                {renderStars(review.rating)}
+                                            </div>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground mt-1">{review.comment}</p>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center text-muted-foreground p-8">
+                                No reviews yet.
+                            </div>
                         )}
+                        <div className="text-center">
+                            <Button variant="outline" className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">View All Reviews</Button>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
-            
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader>
-                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Recent Reviews</CardTitle>
-                    <CardDescription>What your clients are saying about you.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                     {loading ? (
-                        <div className="space-y-6">
-                           {[...Array(2)].map((_, i) => (
-                            <div key={i} className="flex items-start gap-4">
-                                <Skeleton className="h-10 w-10 rounded-full" />
-                                <div className="flex-1 space-y-2">
-                                    <div className="flex justify-between">
-                                        <Skeleton className="h-5 w-24" />
-                                        <Skeleton className="h-5 w-20" />
-                                    </div>
-                                    <Skeleton className="h-4 w-full" />
-                                </div>
-                            </div>
-                           ))}
-                        </div>
-                    ) : reviews.length > 0 ? (
-                        reviews.map((review) => (
-                            <div key={review.id} className="flex items-start gap-4">
-                                <Avatar>
-                                    <AvatarImage src={review.clientAvatar} alt={review.clientName} />
-                                    <AvatarFallback>{getAvatarFallback(review.clientName)}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between">
-                                        <p className="font-semibold">{review.clientName}</p>
-                                        <div className="flex items-center gap-1">
-                                            {renderStars(review.rating)}
-                                        </div>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground mt-1">{review.comment}</p>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="text-center text-muted-foreground p-8">
-                            No reviews yet.
-                        </div>
-                    )}
-                    <div className="text-center">
-                        <Button variant="outline" className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">View All Reviews</Button>
-                    </div>
-                </CardContent>
-            </Card>
 
         </div>
     );

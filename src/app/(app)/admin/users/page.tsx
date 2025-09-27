@@ -211,185 +211,191 @@ export default function AdminUsersPage() {
 
     if (userRole !== 'admin') {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
-                        <CardDescription>This page is for administrators only.</CardDescription>
-                    </CardHeader>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                            <CardDescription>This page is for administrators only.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
             </div>
         );
     }
     
     if (loading) {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
+             <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">User Management</h1>
                     <p className="text-muted-foreground">View and manage all users.</p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-64 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
              </div>
         )
     }
 
     return (
         <>
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">User Management</h1>
                     <p className="text-muted-foreground">
                         View and manage all users on the platform.
                     </p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <Input 
-                                placeholder="Search by name or email..."
-                                className="flex-1 bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            <Select value={roleFilter} onValueChange={setRoleFilter}>
-                                <SelectTrigger className="w-full sm:w-[180px]">
-                                    <SelectValue placeholder="Filter by role" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Roles</SelectItem>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                    <SelectItem value="agency">Agency</SelectItem>
-                                    <SelectItem value="provider">Provider</SelectItem>
-                                    <SelectItem value="client">Client</SelectItem>
-                                    <SelectItem value="partner">Partner</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                <SelectTrigger className="w-full sm:w-[180px]">
-                                    <SelectValue placeholder="Filter by status" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Statuses</SelectItem>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="pending_approval">Pending</SelectItem>
-                                    <SelectItem value="suspended">Suspended</SelectItem>
-                                </SelectContent>
-                            </Select>
-                             <Button onClick={() => setIsCreateUserOpen(true)} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground"><UserPlus className="mr-2 h-4 w-4" /> Create User</Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>User</TableHead>
-                                    <TableHead>Email</TableHead>
-                                    <TableHead>Role</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Date Joined</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {filteredUsers.length > 0 ? filteredUsers.map(user => (
-                                    <TableRow key={user.uid}>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <Avatar className="h-8 w-8">
-                                                    <AvatarImage src={user.photoURL} />
-                                                    <AvatarFallback>{getAvatarFallback(user.displayName)}</AvatarFallback>
-                                                </Avatar>
-                                                <span className="font-medium">{user.displayName}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>{user.email}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={getRoleVariant(user.role)} className="capitalize">{user.role}</Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant={getStatusVariant(user.accountStatus)} className="capitalize">{user.accountStatus?.replace('_', ' ') || 'Active'}</Badge>
-                                        </TableCell>
-                                        <TableCell className="text-xs text-muted-foreground">
-                                            {user.createdAt ? format(user.createdAt.toDate(), 'PP') : 'N/A'}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <AlertDialog>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                        <DropdownMenuItem onSelect={() => handleOpenEditDialog(user)}>
-                                                            <Edit className="mr-2 h-4 w-4" />Edit User
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onSelect={() => handleOpenEmailDialog(user)}>
-                                                            <Mail className="mr-2 h-4 w-4" />Send Email
-                                                        </DropdownMenuItem>
-                                                        {user.role !== 'client' && (
-                                                            <DropdownMenuItem asChild>
-                                                                <Link href={`/providers/${user.uid}`} target="_blank"><Eye className="mr-2 h-4 w-4" />View Profile</Link>
-                                                            </DropdownMenuItem>
-                                                        )}
-                                                        <DropdownMenuSeparator />
-                                                        {user.accountStatus === 'pending_approval' && (
-                                                            <DropdownMenuItem onSelect={() => onUpdateStatus(user.uid, 'active')}>
-                                                                <CheckCircle className="mr-2 h-4 w-4" />Approve
-                                                            </DropdownMenuItem>
-                                                        )}
-                                                        {user.accountStatus === 'active' && user.role !== 'admin' && (
-                                                            <DropdownMenuItem className="focus:bg-destructive/10" onSelect={() => onUpdateStatus(user.uid, 'suspended')}>
-                                                                <Slash className="mr-2 h-4 w-4 text-destructive" />Suspend
-                                                            </DropdownMenuItem>
-                                                        )}
-                                                        {user.accountStatus === 'suspended' && (
-                                                            <DropdownMenuItem onSelect={() => onUpdateStatus(user.uid, 'active')}>
-                                                                <ShieldAlert className="mr-2 h-4 w-4" />Reactivate
-                                                            </DropdownMenuItem>
-                                                        )}
-                                                        {user.role !== 'admin' && (
-                                                            <>
-                                                                <DropdownMenuSeparator />
-                                                                <AlertDialogTrigger asChild>
-                                                                    <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onSelect={(e) => e.preventDefault()}>
-                                                                        <Trash2 className="mr-2 h-4 w-4" />Delete User
-                                                                    </DropdownMenuItem>
-                                                                </AlertDialogTrigger>
-                                                            </>
-                                                        )}
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>This action cannot be undone. This will permanently delete the user "{user.displayName}" from the database. This does not remove them from Firebase Authentication.</AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction className="bg-destructive hover:bg-destructive/80" onClick={() => onDeleteUser(user.uid)}>
-                                                            Confirm Deletion
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
-                                    </TableRow>
-                                )) : (
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <Input 
+                                    placeholder="Search by name or email..."
+                                    className="flex-1 bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                <Select value={roleFilter} onValueChange={setRoleFilter}>
+                                    <SelectTrigger className="w-full sm:w-[180px]">
+                                        <SelectValue placeholder="Filter by role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Roles</SelectItem>
+                                        <SelectItem value="admin">Admin</SelectItem>
+                                        <SelectItem value="agency">Agency</SelectItem>
+                                        <SelectItem value="provider">Provider</SelectItem>
+                                        <SelectItem value="client">Client</SelectItem>
+                                        <SelectItem value="partner">Partner</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger className="w-full sm:w-[180px]">
+                                        <SelectValue placeholder="Filter by status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Statuses</SelectItem>
+                                        <SelectItem value="active">Active</SelectItem>
+                                        <SelectItem value="pending_approval">Pending</SelectItem>
+                                        <SelectItem value="suspended">Suspended</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                 <Button onClick={() => setIsCreateUserOpen(true)} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground"><UserPlus className="mr-2 h-4 w-4" /> Create User</Button>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
                                     <TableRow>
-                                        <TableCell colSpan={6} className="text-center h-24">
-                                            No users found.
-                                        </TableCell>
+                                        <TableHead>User</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead>Role</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Date Joined</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredUsers.length > 0 ? filteredUsers.map(user => (
+                                        <TableRow key={user.uid}>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <Avatar className="h-8 w-8">
+                                                        <AvatarImage src={user.photoURL} />
+                                                        <AvatarFallback>{getAvatarFallback(user.displayName)}</AvatarFallback>
+                                                    </Avatar>
+                                                    <span className="font-medium">{user.displayName}</span>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{user.email}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={getRoleVariant(user.role)} className="capitalize">{user.role}</Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant={getStatusVariant(user.accountStatus)} className="capitalize">{user.accountStatus?.replace('_', ' ') || 'Active'}</Badge>
+                                            </TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">
+                                                {user.createdAt ? format(user.createdAt.toDate(), 'PP') : 'N/A'}
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <AlertDialog>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                            <DropdownMenuItem onSelect={() => handleOpenEditDialog(user)}>
+                                                                <Edit className="mr-2 h-4 w-4" />Edit User
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onSelect={() => handleOpenEmailDialog(user)}>
+                                                                <Mail className="mr-2 h-4 w-4" />Send Email
+                                                            </DropdownMenuItem>
+                                                            {user.role !== 'client' && (
+                                                                <DropdownMenuItem asChild>
+                                                                    <Link href={`/providers/${user.uid}`} target="_blank"><Eye className="mr-2 h-4 w-4" />View Profile</Link>
+                                                                </DropdownMenuItem>
+                                                            )}
+                                                            <DropdownMenuSeparator />
+                                                            {user.accountStatus === 'pending_approval' && (
+                                                                <DropdownMenuItem onSelect={() => onUpdateStatus(user.uid, 'active')}>
+                                                                    <CheckCircle className="mr-2 h-4 w-4" />Approve
+                                                                </DropdownMenuItem>
+                                                            )}
+                                                            {user.accountStatus === 'active' && user.role !== 'admin' && (
+                                                                <DropdownMenuItem className="focus:bg-destructive/10" onSelect={() => onUpdateStatus(user.uid, 'suspended')}>
+                                                                    <Slash className="mr-2 h-4 w-4 text-destructive" />Suspend
+                                                                </DropdownMenuItem>
+                                                            )}
+                                                            {user.accountStatus === 'suspended' && (
+                                                                <DropdownMenuItem onSelect={() => onUpdateStatus(user.uid, 'active')}>
+                                                                    <ShieldAlert className="mr-2 h-4 w-4" />Reactivate
+                                                                </DropdownMenuItem>
+                                                            )}
+                                                            {user.role !== 'admin' && (
+                                                                <>
+                                                                    <DropdownMenuSeparator />
+                                                                    <AlertDialogTrigger asChild>
+                                                                        <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onSelect={(e) => e.preventDefault()}>
+                                                                            <Trash2 className="mr-2 h-4 w-4" />Delete User
+                                                                        </DropdownMenuItem>
+                                                                    </AlertDialogTrigger>
+                                                                </>
+                                                            )}
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                            <AlertDialogDescription>This action cannot be undone. This will permanently delete the user "{user.displayName}" from the database. This does not remove them from Firebase Authentication.</AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction className="bg-destructive hover:bg-destructive/80" onClick={() => onDeleteUser(user.uid)}>
+                                                                Confirm Deletion
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            </TableCell>
+                                        </TableRow>
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={6} className="text-center h-24">
+                                                No users found.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
             
             {/* Create User Dialog */}

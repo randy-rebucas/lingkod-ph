@@ -126,142 +126,156 @@ export default function AdminReportsPage() {
     
      if (userRole !== 'admin') {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
-                        <CardDescription>This page is for administrators only.</CardDescription>
-                    </CardHeader>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                            <CardDescription>This page is for administrators only.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
             </div>
         );
     }
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Skeleton className="h-10 w-1/3" />
-                <Skeleton className="h-4 w-2/3" />
-                <div className="grid gap-6 md:grid-cols-3">
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Skeleton className="h-10 w-1/3" />
+                    <Skeleton className="h-4 w-2/3" />
                 </div>
-                <Skeleton className="h-64 w-full" />
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid gap-6 md:grid-cols-3">
+                        <Skeleton className="h-28 w-full" />
+                        <Skeleton className="h-28 w-full" />
+                        <Skeleton className="h-28 w-full" />
+                    </div>
+                </div>
+                <div className="max-w-6xl mx-auto">
+                    <Skeleton className="h-64 w-full" />
+                </div>
             </div>
         );
     }
     
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-             <div className="flex items-center justify-between">
+        <div className="container space-y-8">
+             <div className="max-w-6xl mx-auto flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Platform Reports</h1>
                     <p className="text-muted-foreground">Deep dive into the platform's performance with charts and detailed tables.</p>
                 </div>
             </div>
             
-            <div className="grid gap-6 md:grid-cols-3">
-                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Total Revenue</CardTitle>
-                        <DollarSign className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{reportData.totalRevenue.toFixed(2)}</div>
-                    </CardContent>
-                </Card>
-                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Completed Bookings</CardTitle>
-                        <BookCheck className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{reportData.totalCompletedBookings}</div>
-                    </CardContent>
-                </Card>
-                <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Avg. Booking Value</CardTitle>
-                        <Calculator className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{reportData.averageBookingValue.toFixed(2)}</div>
-                    </CardContent>
-                </Card>
+            <div className="max-w-6xl mx-auto">
+                <div className="grid gap-6 md:grid-cols-3">
+                    <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Total Revenue</CardTitle>
+                            <DollarSign className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{reportData.totalRevenue.toFixed(2)}</div>
+                        </CardContent>
+                    </Card>
+                    <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Completed Bookings</CardTitle>
+                            <BookCheck className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{reportData.totalCompletedBookings}</div>
+                        </CardContent>
+                    </Card>
+                    <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Avg. Booking Value</CardTitle>
+                            <Calculator className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{reportData.averageBookingValue.toFixed(2)}</div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
             
-             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-                <Card className="lg:col-span-3">
+            <div className="max-w-6xl mx-auto">
+                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+                    <Card className="lg:col-span-3">
+                        <CardHeader>
+                            <CardTitle>Monthly Revenue</CardTitle>
+                            <CardDescription>Total revenue over the last 12 months.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                             <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={reportData.revenueChartData}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false}/>
+                                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false}/>
+                                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false}/>
+                                    <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
+                                    <Legend />
+                                    <Line type="monotone" dataKey="Revenue" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                    <Card className="lg:col-span-2">
+                        <CardHeader>
+                            <CardTitle>Provider Bookings</CardTitle>
+                            <CardDescription>Number of completed bookings per provider.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                           <ResponsiveContainer width="100%" height={300}>
+                                <BarChart data={reportData.providerChartData} layout="vertical" margin={{ left: 20 }}>
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false}/>
+                                    <XAxis type="number" allowDecimals={false} />
+                                    <YAxis type="category" dataKey="name" width={80} stroke="#888888" fontSize={12}/>
+                                    <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}/>
+                                    <Legend />
+                                    <Bar dataKey="Bookings" fill="hsl(var(--chart-2))" />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+
+            <div className="max-w-6xl mx-auto">
+                <Card>
                     <CardHeader>
-                        <CardTitle>Monthly Revenue</CardTitle>
-                        <CardDescription>Total revenue over the last 12 months.</CardDescription>
+                        <CardTitle>Provider Performance</CardTitle>
+                        <CardDescription>A summary of bookings and revenue by each provider.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                         <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={reportData.revenueChartData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false}/>
-                                <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false}/>
-                                <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} allowDecimals={false}/>
-                                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }} />
-                                <Legend />
-                                <Line type="monotone" dataKey="Revenue" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </CardContent>
-                </Card>
-                <Card className="lg:col-span-2">
-                    <CardHeader>
-                        <CardTitle>Provider Bookings</CardTitle>
-                        <CardDescription>Number of completed bookings per provider.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                       <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={reportData.providerChartData} layout="vertical" margin={{ left: 20 }}>
-                                <CartesianGrid strokeDasharray="3 3" horizontal={false}/>
-                                <XAxis type="number" allowDecimals={false} />
-                                <YAxis type="category" dataKey="name" width={80} stroke="#888888" fontSize={12}/>
-                                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}/>
-                                <Legend />
-                                <Bar dataKey="Bookings" fill="hsl(var(--chart-2))" />
-                            </BarChart>
-                        </ResponsiveContainer>
+                         <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Provider</TableHead>
+                                    <TableHead className="text-center">Completed Bookings</TableHead>
+                                    <TableHead className="text-right">Total Revenue</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {reportData.providerPerformance.length > 0 ? reportData.providerPerformance.map((provider) => (
+                                    <TableRow key={provider.providerId}>
+                                        <TableCell className="font-medium">{provider.providerName}</TableCell>
+                                        <TableCell className="text-center">{provider.completedBookings}</TableCell>
+                                        <TableCell className="text-right">₱{provider.totalRevenue.toFixed(2)}</TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={3} className="h-24 text-center">
+                                            No data to display.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
             </div>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle>Provider Performance</CardTitle>
-                    <CardDescription>A summary of bookings and revenue by each provider.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Provider</TableHead>
-                                <TableHead className="text-center">Completed Bookings</TableHead>
-                                <TableHead className="text-right">Total Revenue</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {reportData.providerPerformance.length > 0 ? reportData.providerPerformance.map((provider) => (
-                                <TableRow key={provider.providerId}>
-                                    <TableCell className="font-medium">{provider.providerName}</TableCell>
-                                    <TableCell className="text-center">{provider.completedBookings}</TableCell>
-                                    <TableCell className="text-right">₱{provider.totalRevenue.toFixed(2)}</TableCell>
-                                </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="h-24 text-center">
-                                        No data to display.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
         </div>
     );
 }

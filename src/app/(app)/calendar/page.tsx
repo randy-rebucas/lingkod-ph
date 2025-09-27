@@ -439,77 +439,81 @@ export default function CalendarPage() {
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-[75vh] w-full" />
-                    </CardContent>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-[75vh] w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         )
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                    <CardTitle className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                        {format(currentDate, 'MMMM yyyy')}
-                    </CardTitle>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="icon" onClick={prevMonth} className="hover:bg-primary/10 transition-colors">
-                            <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" onClick={() => setCurrentDate(new Date())} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
-                            {t('today')}
-                        </Button>
-                        <Button variant="outline" size="icon" onClick={nextMonth} className="hover:bg-primary/10 transition-colors">
-                            <ChevronRight className="h-4 w-4" />
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                    <div className="grid grid-cols-7 text-center font-semibold text-muted-foreground mb-4">
-                        {[t('sun'), t('mon'), t('tue'), t('wed'), t('thu'), t('fri'), t('sat')].map(day => (
-                            <div key={day} className="py-2 text-sm font-medium">{day}</div>
-                        ))}
-                    </div>
-                    <div className="grid grid-cols-7 gap-1">
-                        {calendarGrid.map((day, index) => {
-                             const dayEvents = getEventsForDay(day);
-                             return (
-                                <div 
-                                    key={index}
-                                    className={cn("relative p-2 h-24 flex flex-col group rounded-lg transition-all duration-200", 
-                                        !isSameMonth(day, currentDate) && "bg-muted/20 text-muted-foreground",
-                                        isSameMonth(day, currentDate) && "hover:bg-primary/5",
-                                        dayEvents.length > 0 && "cursor-pointer hover:bg-primary/10 hover:shadow-soft"
-                                    )}
-                                    onClick={() => handleDayClick(day)}
-                                >
-                                    <span className={cn("font-medium text-sm mb-1", 
-                                        isToday(day) && "bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold"
-                                    )}>
-                                        {format(day, 'd')}
-                                    </span>
-                                    <div className="flex-1 space-y-0.5 overflow-hidden">
-                                        {dayEvents.slice(0, 2).map((event, eventIndex) => (
-                                            <div key={eventIndex} className={cn("text-xs text-white rounded px-1 py-0.5 truncate shadow-sm", getStatusClass(event.status))}>
-                                                {event.title}
-                                            </div>
-                                        ))}
-                                        {dayEvents.length > 2 && (
-                                            <div className="text-xs text-muted-foreground font-medium">
-                                                +{dayEvents.length - 2} more
-                                            </div>
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                            {format(currentDate, 'MMMM yyyy')}
+                        </CardTitle>
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="icon" onClick={prevMonth} className="hover:bg-primary/10 transition-colors">
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" onClick={() => setCurrentDate(new Date())} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
+                                {t('today')}
+                            </Button>
+                            <Button variant="outline" size="icon" onClick={nextMonth} className="hover:bg-primary/10 transition-colors">
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                        <div className="grid grid-cols-7 text-center font-semibold text-muted-foreground mb-4">
+                            {[t('sun'), t('mon'), t('tue'), t('wed'), t('thu'), t('fri'), t('sat')].map(day => (
+                                <div key={day} className="py-2 text-sm font-medium">{day}</div>
+                            ))}
+                        </div>
+                        <div className="grid grid-cols-7 gap-1">
+                            {calendarGrid.map((day, index) => {
+                                 const dayEvents = getEventsForDay(day);
+                                 return (
+                                    <div 
+                                        key={index}
+                                        className={cn("relative p-2 h-24 flex flex-col group rounded-lg transition-all duration-200", 
+                                            !isSameMonth(day, currentDate) && "bg-muted/20 text-muted-foreground",
+                                            isSameMonth(day, currentDate) && "hover:bg-primary/5",
+                                            dayEvents.length > 0 && "cursor-pointer hover:bg-primary/10 hover:shadow-soft"
                                         )}
+                                        onClick={() => handleDayClick(day)}
+                                    >
+                                        <span className={cn("font-medium text-sm mb-1", 
+                                            isToday(day) && "bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-full h-6 w-6 flex items-center justify-center text-xs font-bold"
+                                        )}>
+                                            {format(day, 'd')}
+                                        </span>
+                                        <div className="flex-1 space-y-0.5 overflow-hidden">
+                                            {dayEvents.slice(0, 2).map((event, eventIndex) => (
+                                                <div key={eventIndex} className={cn("text-xs text-white rounded px-1 py-0.5 truncate shadow-sm", getStatusClass(event.status))}>
+                                                    {event.title}
+                                                </div>
+                                            ))}
+                                            {dayEvents.length > 2 && (
+                                                <div className="text-xs text-muted-foreground font-medium">
+                                                    +{dayEvents.length - 2} more
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                             )
-                        })}
-                    </div>
-                </CardContent>
-            </Card>
+                                 )
+                            })}
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="shadow-glow border-0 bg-background/95 backdrop-blur-md">

@@ -353,25 +353,27 @@ export default function InvoicesPage() {
     
     if (!user) {
          return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
                   <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                   <p className="text-muted-foreground">
                       {t('subtitle')}
                   </p>
               </div>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('upgradeToProOrElite')}</CardTitle>
-                        <CardDescription>{t('upgradeDescription')}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <FileText className="h-16 w-16 mb-4" />
-                        <p className="mb-4">{t('streamlineBilling')}</p>
-                         <Button asChild>
-                        </Button>
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t('upgradeToProOrElite')}</CardTitle>
+                            <CardDescription>{t('upgradeDescription')}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
+                            <FileText className="h-16 w-16 mb-4" />
+                            <p className="mb-4">{t('streamlineBilling')}</p>
+                             <Button asChild>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         )
     }
@@ -410,8 +412,8 @@ export default function InvoicesPage() {
     }, [invoices]);
 
     return (
-      <div className="max-w-7xl mx-auto space-y-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="container space-y-8">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                   <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Invoices</h1>
                   <p className="text-muted-foreground">
@@ -427,83 +429,86 @@ export default function InvoicesPage() {
           </div>
 
           {/* Quick Stats */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                  <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-full bg-primary/10">
-                              <DollarSign className="h-4 w-4 text-primary" />
+          <div className="max-w-6xl mx-auto">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                      <CardContent className="p-4">
+                          <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-full bg-primary/10">
+                                  <DollarSign className="h-4 w-4 text-primary" />
+                              </div>
+                              <div>
+                                  <p className="text-sm text-muted-foreground">Total Revenue</p>
+                                  <p className="text-xl font-bold">₱{analyticsData.totalRevenue.toLocaleString()}</p>
+                              </div>
                           </div>
-                          <div>
-                              <p className="text-sm text-muted-foreground">Total Revenue</p>
-                              <p className="text-xl font-bold">₱{analyticsData.totalRevenue.toLocaleString()}</p>
+                      </CardContent>
+                  </Card>
+                  
+                  <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                      <CardContent className="p-4">
+                          <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-full bg-green-100 text-green-600">
+                                  <CheckCircle className="h-4 w-4" />
+                              </div>
+                              <div>
+                                  <p className="text-sm text-muted-foreground">Paid Invoices</p>
+                                  <p className="text-xl font-bold">{analyticsData.paidInvoices}</p>
+                              </div>
                           </div>
-                      </div>
-                  </CardContent>
-              </Card>
-              
-              <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                  <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-full bg-green-100 text-green-600">
-                              <CheckCircle className="h-4 w-4" />
+                      </CardContent>
+                  </Card>
+                  
+                  <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                      <CardContent className="p-4">
+                          <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-full bg-yellow-100 text-yellow-600">
+                                  <Clock className="h-4 w-4" />
+                              </div>
+                              <div>
+                                  <p className="text-sm text-muted-foreground">Pending</p>
+                                  <p className="text-xl font-bold">₱{analyticsData.pendingAmount.toLocaleString()}</p>
+                              </div>
                           </div>
-                          <div>
-                              <p className="text-sm text-muted-foreground">Paid Invoices</p>
-                              <p className="text-xl font-bold">{analyticsData.paidInvoices}</p>
+                      </CardContent>
+                  </Card>
+                  
+                  <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                      <CardContent className="p-4">
+                          <div className="flex items-center gap-3">
+                              <div className="p-2 rounded-full bg-red-100 text-red-600">
+                                  <AlertTriangle className="h-4 w-4" />
+                              </div>
+                              <div>
+                                  <p className="text-sm text-muted-foreground">Overdue</p>
+                                  <p className="text-xl font-bold">{analyticsData.overdueInvoices}</p>
+                              </div>
                           </div>
-                      </div>
-                  </CardContent>
-              </Card>
-              
-              <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                  <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-full bg-yellow-100 text-yellow-600">
-                              <Clock className="h-4 w-4" />
-                          </div>
-                          <div>
-                              <p className="text-sm text-muted-foreground">Pending</p>
-                              <p className="text-xl font-bold">₱{analyticsData.pendingAmount.toLocaleString()}</p>
-                          </div>
-                      </div>
-                  </CardContent>
-              </Card>
-              
-              <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                  <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-full bg-red-100 text-red-600">
-                              <AlertTriangle className="h-4 w-4" />
-                          </div>
-                          <div>
-                              <p className="text-sm text-muted-foreground">Overdue</p>
-                              <p className="text-xl font-bold">{analyticsData.overdueInvoices}</p>
-                          </div>
-                      </div>
-                  </CardContent>
-              </Card>
+                      </CardContent>
+                  </Card>
+              </div>
           </div>
 
-          <Tabs defaultValue="invoices" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="invoices" className="flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Invoices
-                  </TabsTrigger>
-                  <TabsTrigger value="analytics" className="flex items-center gap-2">
-                      <BarChart3 className="h-4 w-4" />
-                      Analytics
-                  </TabsTrigger>
-                  <TabsTrigger value="templates" className="flex items-center gap-2">
-                      <Target className="h-4 w-4" />
-                      Templates
-                  </TabsTrigger>
-                  <TabsTrigger value="automation" className="flex items-center gap-2">
-                      <Zap className="h-4 w-4" />
-                      Automation
-                  </TabsTrigger>
-              </TabsList>
+          <div className="max-w-6xl mx-auto">
+              <Tabs defaultValue="invoices" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                      <TabsTrigger value="invoices" className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          Invoices
+                      </TabsTrigger>
+                      <TabsTrigger value="analytics" className="flex items-center gap-2">
+                          <BarChart3 className="h-4 w-4" />
+                          Analytics
+                      </TabsTrigger>
+                      <TabsTrigger value="templates" className="flex items-center gap-2">
+                          <Target className="h-4 w-4" />
+                          Templates
+                      </TabsTrigger>
+                      <TabsTrigger value="automation" className="flex items-center gap-2">
+                          <Zap className="h-4 w-4" />
+                          Automation
+                      </TabsTrigger>
+                  </TabsList>
               
               <TabsContent value="invoices" className="mt-6">
                   <div className="flex items-center justify-between mb-6">
@@ -705,7 +710,8 @@ export default function InvoicesPage() {
               <TabsContent value="automation" className="mt-6">
                   <InvoiceAutomationTab />
               </TabsContent>
-          </Tabs>
+              </Tabs>
+          </div>
           
           <AddEditInvoiceDialog
               isOpen={isDialogOpen}

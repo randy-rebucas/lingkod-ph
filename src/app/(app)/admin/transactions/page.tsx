@@ -162,132 +162,138 @@ export default function AdminPaymentVerificationPage() {
 
     if (userRole !== 'admin') {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
-                        <CardDescription>This page is for administrators only.</CardDescription>
-                    </CardHeader>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                            <CardDescription>This page is for administrators only.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
             </div>
         );
     }
     
     if (loading) {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
+             <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payment Verification</h1>
                     <p className="text-muted-foreground">Review and approve manual payments.</p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-64 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
              </div>
         )
     }
 
     return (
         <Dialog>
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payment Verification</h1>
                     <p className="text-muted-foreground">
                        Review and approve manual payments submitted by users.
                     </p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Date Submitted</TableHead>
-                                    <TableHead>Client Name</TableHead>
-                                    <TableHead>Service</TableHead>
-                                    <TableHead>Amount</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {bookings.length > 0 ? bookings.map(booking => (
-                                    <TableRow key={booking.id}>
-                                        <TableCell className="text-xs text-muted-foreground">
-                                            {booking.createdAt ? format(booking.createdAt.toDate(), 'PPp') : 'N/A'}
-                                        </TableCell>
-                                        <TableCell>{booking.clientName}</TableCell>
-                                        <TableCell className="font-medium">{booking.serviceName}</TableCell>
-                                        <TableCell>₱{booking.price.toFixed(2)}</TableCell>
-                                        <TableCell className="text-right flex justify-end gap-2">
-                                            <DialogTrigger asChild>
-                                                <Button variant="outline" size="sm"><Eye className="mr-2 h-4 w-4"/> View Proof</Button>
-                                            </DialogTrigger>
-                                            <Button size="sm" onClick={() => handleApprovePayment(booking)} disabled={approvingId === booking.id || rejectingId === booking.id}>
-                                                {approvingId === booking.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-                                                Approve
-                                            </Button>
-                                            <AlertDialog>
-                                                <AlertDialogTrigger asChild>
-                                                    <Button variant="destructive" size="sm" disabled={approvingId === booking.id || rejectingId === booking.id}>
-                                                        {rejectingId === booking.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
-                                                        Reject
-                                                    </Button>
-                                                </AlertDialogTrigger>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Reject Payment</AlertDialogTitle>
-                                                        <AlertDialogDescription>
-                                                            Are you sure you want to reject this payment? Please provide a reason for the rejection.
-                                                        </AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <div className="space-y-4">
-                                                        <div>
-                                                            <Label htmlFor="rejection-reason">Rejection Reason</Label>
-                                                            <Textarea
-                                                                id="rejection-reason"
-                                                                placeholder="Please provide a detailed reason for rejecting this payment..."
-                                                                value={rejectionReason}
-                                                                onChange={(e) => setRejectionReason(e.target.value)}
-                                                                className="mt-1"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction
-                                                            onClick={() => handleRejectPayment(booking)}
-                                                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                                        >
-                                                            Reject Payment
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
-                                         <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle>Proof of Payment</DialogTitle>
-                                                <DialogDescription>
-                                                    Client: {booking.clientName} | Booking ID: {booking.id}
-                                                </DialogDescription>
-                                            </DialogHeader>
-                                            <div className="relative aspect-video w-full">
-                                                <Image src={booking.paymentProofUrl || "https://placehold.co/600x400.png"} alt="Proof of payment" layout="fill" className="rounded-md object-contain" />
-                                            </div>
-                                        </DialogContent>
-                                    </TableRow>
-                                )) : (
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center h-24">
-                                            No pending payments to verify.
-                                        </TableCell>
+                                        <TableHead>Date Submitted</TableHead>
+                                        <TableHead>Client Name</TableHead>
+                                        <TableHead>Service</TableHead>
+                                        <TableHead>Amount</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                </TableHeader>
+                                <TableBody>
+                                    {bookings.length > 0 ? bookings.map(booking => (
+                                        <TableRow key={booking.id}>
+                                            <TableCell className="text-xs text-muted-foreground">
+                                                {booking.createdAt ? format(booking.createdAt.toDate(), 'PPp') : 'N/A'}
+                                            </TableCell>
+                                            <TableCell>{booking.clientName}</TableCell>
+                                            <TableCell className="font-medium">{booking.serviceName}</TableCell>
+                                            <TableCell>₱{booking.price.toFixed(2)}</TableCell>
+                                            <TableCell className="text-right flex justify-end gap-2">
+                                                <DialogTrigger asChild>
+                                                    <Button variant="outline" size="sm"><Eye className="mr-2 h-4 w-4"/> View Proof</Button>
+                                                </DialogTrigger>
+                                                <Button size="sm" onClick={() => handleApprovePayment(booking)} disabled={approvingId === booking.id || rejectingId === booking.id}>
+                                                    {approvingId === booking.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+                                                    Approve
+                                                </Button>
+                                                <AlertDialog>
+                                                    <AlertDialogTrigger asChild>
+                                                        <Button variant="destructive" size="sm" disabled={approvingId === booking.id || rejectingId === booking.id}>
+                                                            {rejectingId === booking.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <XCircle className="mr-2 h-4 w-4" />}
+                                                            Reject
+                                                        </Button>
+                                                    </AlertDialogTrigger>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Reject Payment</AlertDialogTitle>
+                                                            <AlertDialogDescription>
+                                                                Are you sure you want to reject this payment? Please provide a reason for the rejection.
+                                                            </AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <div className="space-y-4">
+                                                            <div>
+                                                                <Label htmlFor="rejection-reason">Rejection Reason</Label>
+                                                                <Textarea
+                                                                    id="rejection-reason"
+                                                                    placeholder="Please provide a detailed reason for rejecting this payment..."
+                                                                    value={rejectionReason}
+                                                                    onChange={(e) => setRejectionReason(e.target.value)}
+                                                                    className="mt-1"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction
+                                                                onClick={() => handleRejectPayment(booking)}
+                                                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                                            >
+                                                                Reject Payment
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            </TableCell>
+                                             <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>Proof of Payment</DialogTitle>
+                                                    <DialogDescription>
+                                                        Client: {booking.clientName} | Booking ID: {booking.id}
+                                                    </DialogDescription>
+                                                </DialogHeader>
+                                                <div className="relative aspect-video w-full">
+                                                    <Image src={booking.paymentProofUrl || "https://placehold.co/600x400.png"} alt="Proof of payment" layout="fill" className="rounded-md object-contain" />
+                                                </div>
+                                            </DialogContent>
+                                        </TableRow>
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="text-center h-24">
+                                                No pending payments to verify.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </Dialog>
     )

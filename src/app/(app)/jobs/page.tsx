@@ -78,37 +78,44 @@ export default function JobsPage() {
 
     if (userRole !== 'provider') {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('accessDenied')}</CardTitle>
-                    <CardDescription>{t('providersOnly')}</CardDescription>
-                </CardHeader>
-            </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t('accessDenied')}</CardTitle>
+                            <CardDescription>{t('providersOnly')}</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
+            </div>
         );
     }
     
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
+            <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                     <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-72" />)}
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-72" />)}
+                    </div>
                 </div>
             </div>
         )
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div>
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                 <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
             {jobs.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {jobs.map(job => {
                         const hasApplied = job.applications?.includes(user?.uid || '');
                         return (
@@ -161,15 +168,18 @@ export default function JobsPage() {
                             </Card>
                         )
                     })}
+                    </div>
                 </div>
             ) : (
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <Briefcase className="h-16 w-16 mb-4 text-primary opacity-60" />
-                        <h3 className="text-xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noOpenJobs')}</h3>
-                        <p>{t('noOpenJobsDescription')}</p>
-                    </CardContent>
-                </Card>
+                <div className="max-w-4xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
+                            <Briefcase className="h-16 w-16 mb-4 text-primary opacity-60" />
+                            <h3 className="text-xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noOpenJobs')}</h3>
+                            <p>{t('noOpenJobsDescription')}</p>
+                        </CardContent>
+                    </Card>
+                </div>
             )}
         </div>
     );

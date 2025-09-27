@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useSearchParams } from "next/navigation";
@@ -42,6 +42,7 @@ type Message = {
     imageUrl?: string;
     timestamp: any;
     hint?: string;
+    status?: 'sent' | 'delivered' | 'read';
 };
 
 
@@ -79,6 +80,154 @@ const createNotification = async (userId: string, senderName: string, message: s
 };
 
 
+// Memoized conversation item component
+const ConversationItem = memo(({ 
+    convo, 
+    isActive, 
+    onSelect, 
+    getOtherParticipantInfo, 
+    getAvatarFallback, 
+    t 
+}: {
+    convo: Conversation;
+    isActive: boolean;
+    onSelect: (convo: Conversation) => void;
+    getOtherParticipantInfo: (convo: Conversation) => { name: string; avatar: string };
+    getAvatarFallback: (name: string | null | undefined) => string;
+    t: any;
+}) => {
+    const { name, avatar } = getOtherParticipantInfo(convo);
+    
+    return (
+        <button 
+            className={cn("w-full text-left p-3 rounded-lg transition-all duration-200 group", 
+                isActive ? "bg-primary/10 shadow-soft" : "hover:bg-primary/5 hover:shadow-soft/50")}
+            onClick={() => onSelect(convo)}
+            aria-label={`Open conversation with ${name}`}
+        >
+            <div className="flex items-start gap-3">
+                <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-soft">
+                    <AvatarImage src={avatar} alt={name} />
+                    <AvatarFallback className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">
+                        {getAvatarFallback(name)}
+                    </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 overflow-hidden">
+                    <div className="flex justify-between items-center">
+                        <p className="font-semibold truncate text-sm group-hover:text-primary transition-colors">{name}</p>
+                        <p className="text-xs text-muted-foreground flex-shrink-0">
+                            {convo.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                    </div>
+                    <div className="flex justify-between items-end mt-1">
+                        <p className="text-xs text-muted-foreground truncate max-w-[150px]">{convo.lastMessage}</p>
+                        {convo.unread && convo.unread > 0 && (
+                            <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                                {convo.unread > 99 ? '99+' : convo.unread}
+                            </span>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </button>
+    );
+});
+
+ConversationItem.displayName = 'ConversationItem';
+
+// Memoized message component
+const MessageBubble = memo(({ 
+    msg, 
+    isCurrentUser, 
+    senderInfo, 
+    getAvatarFallback 
+}: {
+    msg: Message;
+    isCurrentUser: boolean;
+    senderInfo: { avatar: string; name: string | null | undefined };
+    getAvatarFallback: (name: string | null | undefined) => string;
+}) => {
+    const getStatusIcon = (status?: string) => {
+        switch (status) {
+            case 'read':
+                return '✓✓';
+            case 'delivered':
+                return '✓✓';
+            case 'sent':
+                return '✓';
+            default:
+                return '✓';
+        }
+    };
+
+    const getStatusColor = (status?: string) => {
+        switch (status) {
+            case 'read':
+                return 'text-blue-500';
+            case 'delivered':
+                return 'text-muted-foreground';
+            case 'sent':
+                return 'text-muted-foreground';
+            default:
+                return 'text-muted-foreground';
+        }
+    };
+
+    return (
+        <div className={cn("flex items-end gap-2", isCurrentUser ? "justify-end" : "justify-start")}>
+            {!isCurrentUser && (
+                <Avatar className="h-8 w-8">
+                    <AvatarImage src={senderInfo.avatar} alt={senderInfo.name || 'User'} />
+                    <AvatarFallback>{getAvatarFallback(senderInfo.name)}</AvatarFallback>
+                </Avatar>
+            )}
+            <div className={cn("max-w-xs md:max-w-md p-1 rounded-2xl shadow-soft", 
+                isCurrentUser ? "bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-none" : "bg-background/80 backdrop-blur-sm border border-border/50 text-card-foreground rounded-bl-none")}>
+                {msg.imageUrl && (
+                    <div className="p-2">
+                        <Image 
+                            src={msg.imageUrl} 
+                            alt="Sent image" 
+                            width={300} 
+                            height={200}
+                            data-ai-hint={msg.hint}
+                            className="rounded-lg object-cover shadow-soft"
+                        />
+                    </div>
+                )}
+                {msg.text && (
+                    <p className="text-sm px-3 py-2">{msg.text}</p>
+                )}
+                {isCurrentUser && (
+                    <div className="flex justify-end items-center px-3 pb-1">
+                        <span className={cn("text-xs", getStatusColor(msg.status))}>
+                            {getStatusIcon(msg.status)}
+                        </span>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+});
+
+MessageBubble.displayName = 'MessageBubble';
+
+// Typing indicator component
+const TypingIndicator = memo(() => (
+    <div className="flex items-end gap-2 justify-start">
+        <div className="h-8 w-8 rounded-full bg-muted animate-pulse" />
+        <div className="bg-background/80 backdrop-blur-sm border border-border/50 text-card-foreground rounded-2xl rounded-bl-none p-3 shadow-soft">
+            <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
+        </div>
+    </div>
+));
+
+TypingIndicator.displayName = 'TypingIndicator';
+
 export default function MessagesPage() {
     const { user } = useAuth();
     const { toast } = useToast();
@@ -96,6 +245,9 @@ export default function MessagesPage() {
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isSending, setIsSending] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isTyping, setIsTyping] = useState(false);
+    const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -160,32 +312,100 @@ export default function MessagesPage() {
     }, [messages]);
 
 
-    const handleSelectConversation = (convo: Conversation) => {
+    // Memoized functions for performance
+    const handleSelectConversation = useCallback((convo: Conversation) => {
         setActiveConversation(convo);
         setSelectedImage(null);
         setPreviewUrl(null);
-    }
+    }, []);
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
             const file = event.target.files[0];
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                toast({
+                    variant: "destructive",
+                    title: t('error'),
+                    description: t('fileTooLarge')
+                });
+                return;
+            }
             setSelectedImage(file);
             setPreviewUrl(URL.createObjectURL(file));
         }
-    };
+    }, [toast, t]);
+
+    // Memoized filtered conversations
+    const filteredConversations = useMemo(() => {
+        if (!searchQuery.trim()) return conversations;
+        return conversations.filter(convo => {
+            const { name } = getOtherParticipantInfo(convo);
+            return name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                   convo.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
+        });
+    }, [conversations, searchQuery, user]);
+
+    // Memoized other participant info function
+    const getOtherParticipantInfo = useCallback((convo: Conversation) => {
+        if (!user) return { name: t('user'), avatar: '' };
+        const otherId = convo.participants.find(p => p !== user.uid);
+        if (otherId && convo.participantInfo[otherId]) {
+            return {
+                name: convo.participantInfo[otherId].displayName,
+                avatar: convo.participantInfo[otherId].photoURL || ''
+            };
+        }
+        return { name: t('unknownUser'), avatar: '' };
+    }, [user, t]);
+
+    // Handle typing indicator
+    const handleTyping = useCallback(() => {
+        setIsTyping(true);
+        
+        if (typingTimeout) {
+            clearTimeout(typingTimeout);
+        }
+        
+        const timeout = setTimeout(() => {
+            setIsTyping(false);
+        }, 1000);
+        
+        setTypingTimeout(timeout);
+    }, [typingTimeout]);
+
+    // Cleanup typing timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
+        };
+    }, [typingTimeout]);
     
-    const handleSendMessage = async (e: React.FormEvent) => {
+    const handleSendMessage = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
         if ((!newMessage.trim() && !selectedImage) || !user || !activeConversation) return;
 
         setIsSending(true);
 
-        if (!storage || !db) return;
+        if (!storage || !db) {
+            toast({
+                variant: "destructive",
+                title: t('error'),
+                description: t('databaseConnectionError')
+            });
+            setIsSending(false);
+            return;
+        }
+
         try {
             let imageUrl = '';
             if (selectedImage) {
-                const storageRef = ref(storage, `chat-images/${activeConversation.id}/${Date.now()}_${selectedImage.name}`);
-                const uploadResult = await uploadBytes(storageRef, selectedImage);
+                // Compress image if it's too large
+                const compressedFile = await compressImage(selectedImage);
+                const storageRef = ref(storage, `chat-images/${activeConversation.id}/${Date.now()}_${compressedFile.name}`);
+                const uploadResult = await uploadBytes(storageRef, compressedFile);
                 imageUrl = await getDownloadURL(uploadResult.ref);
             }
 
@@ -193,6 +413,7 @@ export default function MessagesPage() {
                 senderId: user.uid,
                 text: newMessage,
                 timestamp: serverTimestamp(),
+                status: 'sent',
                 ...(imageUrl && { imageUrl: imageUrl }),
             };
             
@@ -218,34 +439,80 @@ export default function MessagesPage() {
             }
         } catch (error) {
              console.error("Error sending message: ", error);
-             toast({ variant: "destructive", title: t('error'), description: t('failedToSendMessage')})
+             toast({ 
+                 variant: "destructive", 
+                 title: t('error'), 
+                 description: error instanceof Error ? error.message : t('failedToSendMessage')
+             });
         } finally {
             setIsSending(false);
         }
-    };
+    }, [newMessage, selectedImage, user, activeConversation, storage, db, toast, t]);
 
-    const getOtherParticipantInfo = (convo: Conversation) => {
-        if (!user) return { name: t('user'), avatar: '' };
-        const otherId = convo.participants.find(p => p !== user.uid);
-        if (otherId && convo.participantInfo[otherId]) {
-            return {
-                name: convo.participantInfo[otherId].displayName,
-                avatar: convo.participantInfo[otherId].photoURL || ''
+    // Image compression utility
+    const compressImage = useCallback((file: File): Promise<File> => {
+        return new Promise<File>((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new window.Image();
+            
+            img.onload = () => {
+                const maxWidth = 800;
+                const maxHeight = 600;
+                let { width, height } = img;
+                
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = (height * maxWidth) / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = (width * maxHeight) / height;
+                        height = maxHeight;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                ctx?.drawImage(img, 0, 0, width, height);
+                
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const compressedFile = new File([blob], file.name, {
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(compressedFile);
+                    } else {
+                        resolve(file);
+                    }
+                }, 'image/jpeg', 0.8);
             };
-        }
-        return { name: t('unknownUser'), avatar: '' };
-    }
+            
+            img.src = URL.createObjectURL(file);
+        });
+    }, []);
+
 
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 h-full flex flex-col">
-            <Card className="flex-1 grid grid-cols-1 md:grid-cols-[320px_1fr] shadow-soft border-0 bg-background/80 backdrop-blur-sm overflow-hidden">
+        <div className="container space-y-8 h-full flex flex-col">
+            <div className="max-w-6xl mx-auto flex-1">
+                <Card className="h-full grid grid-cols-1 md:grid-cols-[320px_1fr] shadow-soft border-0 bg-background/80 backdrop-blur-sm overflow-hidden">
                 {/* Conversation List */}
                 <div className="flex flex-col border-r border-border/50 bg-gradient-to-b from-background/50 to-muted/20">
                     <div className="p-4 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                          <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input placeholder={t('searchConversations')} className="pl-9 bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft" />
+                            <Input 
+                                placeholder={t('searchConversations')} 
+                                className="pl-9 bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft" 
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                aria-label="Search conversations"
+                            />
                         </div>
                     </div>
                     <ScrollArea className="flex-1">
@@ -254,44 +521,27 @@ export default function MessagesPage() {
                                 <div className="p-4 space-y-4">
                                     {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
                                 </div>
-                            ) : conversations.length > 0 ? (
-                                conversations.map((convo) => {
-                                    const { name, avatar } = getOtherParticipantInfo(convo);
-                                    return (
-                                        <button key={convo.id} className={cn("w-full text-left p-3 rounded-lg transition-all duration-200 group", 
-                                            activeConversation?.id === convo.id ? "bg-primary/10 shadow-soft" : "hover:bg-primary/5 hover:shadow-soft/50")}
-                                            onClick={() => handleSelectConversation(convo)}
-                                        >
-                                            <div className="flex items-start gap-3">
-                                                <Avatar className="h-10 w-10 border-2 border-primary/20 shadow-soft">
-                                                    <AvatarImage src={avatar} alt={name} />
-                                                    <AvatarFallback className="bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">
-                                                        {getAvatarFallback(name)}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex-1 overflow-hidden">
-                                                    <div className="flex justify-between items-center">
-                                                        <p className="font-semibold truncate text-sm group-hover:text-primary transition-colors">{name}</p>
-                                                        <p className="text-xs text-muted-foreground flex-shrink-0">
-                                                            {convo.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                        </p>
-                                                    </div>
-                                                    <div className="flex justify-between items-end mt-1">
-                                                        <p className="text-xs text-muted-foreground truncate max-w-[150px]">{convo.lastMessage}</p>
-                                                        {/* Unread count UI can be added here */}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </button>
-                                    )
-                                })
+                            ) : filteredConversations.length > 0 ? (
+                                filteredConversations.map((convo) => (
+                                    <ConversationItem
+                                        key={convo.id}
+                                        convo={convo}
+                                        isActive={activeConversation?.id === convo.id}
+                                        onSelect={handleSelectConversation}
+                                        getOtherParticipantInfo={getOtherParticipantInfo}
+                                        getAvatarFallback={getAvatarFallback}
+                                        t={t}
+                                    />
+                                ))
                             ) : (
                                 <div className="text-center text-muted-foreground p-8">
                                     <MessageSquare className="mx-auto h-12 w-12 mb-4 text-primary opacity-60"/>
                                     <h3 className="text-lg font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
-                                        {t('noConversationsYet')}
+                                        {searchQuery ? t('noConversationsFound') : t('noConversationsYet')}
                                     </h3>
-                                    <p className="text-sm">Start a conversation with a service provider</p>
+                                    <p className="text-sm">
+                                        {searchQuery ? t('tryDifferentSearch') : t('startConversationWithProvider')}
+                                    </p>
                                 </div>
                             )}
                         </div>
@@ -327,34 +577,16 @@ export default function MessagesPage() {
                                         const isCurrentUser = msg.senderId === user?.uid;
                                         const senderInfo = isCurrentUser ? {avatar: user?.photoURL || '', name: user?.displayName} : getOtherParticipantInfo(activeConversation)
                                         return (
-                                            <div key={msg.id} className={cn("flex items-end gap-2", isCurrentUser ? "justify-end" : "justify-start")}>
-                                                {!isCurrentUser && (
-                                                    <Avatar className="h-8 w-8">
-                                                        <AvatarImage src={senderInfo.avatar} />
-                                                        <AvatarFallback>{getAvatarFallback(senderInfo.name)}</AvatarFallback>
-                                                    </Avatar>
-                                                )}
-                                                <div className={cn("max-w-xs md:max-w-md p-1 rounded-2xl shadow-soft", 
-                                                    isCurrentUser ? "bg-gradient-to-r from-primary to-accent text-primary-foreground rounded-br-none" : "bg-background/80 backdrop-blur-sm border border-border/50 text-card-foreground rounded-bl-none")}>
-                                                    {msg.imageUrl && (
-                                                        <div className="p-2">
-                                                            <Image 
-                                                                src={msg.imageUrl} 
-                                                                alt="Sent image" 
-                                                                width={300} 
-                                                                height={200}
-                                                                data-ai-hint={msg.hint}
-                                                                className="rounded-lg object-cover shadow-soft"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                    {msg.text && (
-                                                        <p className="text-sm px-3 py-2">{msg.text}</p>
-                                                    )}
-                                                </div>
-                                            </div>
+                                            <MessageBubble
+                                                key={msg.id}
+                                                msg={msg}
+                                                isCurrentUser={isCurrentUser}
+                                                senderInfo={senderInfo}
+                                                getAvatarFallback={getAvatarFallback}
+                                            />
                                         )
                                     })}
+                                    {isTyping && <TypingIndicator />}
                                     <div ref={messagesEndRef} />
                                 </div>
                             )}
@@ -373,8 +605,20 @@ export default function MessagesPage() {
                                     placeholder={t('typeMessage')} 
                                     className="flex-1 bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft"
                                     value={newMessage}
-                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onChange={(e) => {
+                                        setNewMessage(e.target.value);
+                                        handleTyping();
+                                    }}
                                     disabled={isSending}
+                                    aria-label="Type your message"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            if (newMessage.trim() || selectedImage) {
+                                                handleSendMessage(e);
+                                            }
+                                        }
+                                    }}
                                 />
                                  <input
                                     type="file"
@@ -382,14 +626,27 @@ export default function MessagesPage() {
                                     onChange={handleFileChange}
                                     accept="image/*"
                                     className="hidden"
+                                    aria-label="Attach image"
                                 />
-                                <Button size="icon" variant="ghost" type="button" onClick={() => fileInputRef.current?.click()} disabled={isSending} className="hover:bg-primary/10 transition-colors">
+                                <Button 
+                                    size="icon" 
+                                    variant="ghost" 
+                                    type="button" 
+                                    onClick={() => fileInputRef.current?.click()} 
+                                    disabled={isSending} 
+                                    className="hover:bg-primary/10 transition-colors"
+                                    aria-label={t('attachFile')}
+                                >
                                     <Paperclip className="h-4 w-4"/>
-                                    <span className="sr-only">{t('attachFile')}</span>
                                 </Button>
-                                <Button size="icon" type="submit" disabled={isSending || (!newMessage.trim() && !selectedImage)} className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                                <Button 
+                                    size="icon" 
+                                    type="submit" 
+                                    disabled={isSending || (!newMessage.trim() && !selectedImage)} 
+                                    className="shadow-glow hover:shadow-glow/50 transition-all duration-300"
+                                    aria-label={t('sendMessage')}
+                                >
                                     {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4"/>}
-                                    <span className="sr-only">{t('sendMessage')}</span>
                                 </Button>
                             </form>
                         </div>
@@ -404,7 +661,8 @@ export default function MessagesPage() {
                     </div>
                    )}
                 </div>
-            </Card>
+                </Card>
+            </div>
         </div>
     );
 }

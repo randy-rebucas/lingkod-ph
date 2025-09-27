@@ -153,20 +153,20 @@ export default function AdminDashboardPage() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div>
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                 <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="max-w-6xl mx-auto grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <AdminDashboardCard isLoading={loading} title={t('totalRevenue')} icon={DollarSign} value={`₱${stats.totalRevenue.toFixed(2)}`} />
                 <AdminDashboardCard isLoading={loading} title={t('totalBookings')} icon={Briefcase} value={`${stats.totalBookings}`} />
                 <AdminDashboardCard isLoading={loading} title={t('totalUsers')} icon={Users} value={`${stats.totalUsers}`} />
                 <AdminDashboardCard isLoading={loading} title={`${t('totalProviders')} & ${t('totalAgencies')}`} icon={Users2} value={`${stats.totalProviders + stats.totalAgencies}`} />
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="max-w-6xl mx-auto grid gap-6 md:grid-cols-2">
                  <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                         <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('recentBookings')}</CardTitle>

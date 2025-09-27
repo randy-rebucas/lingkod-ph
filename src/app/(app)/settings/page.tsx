@@ -196,26 +196,29 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 p-6">
+        <div className="container space-y-8 p-6">
             {/* Header */}
-            <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                    <SettingsIcon className="h-8 w-8 text-primary" />
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                        {t('title')}
-                    </h1>
-                </div>
-                <p className="text-muted-foreground text-lg">{t('subtitle')}</p>
-                {hasUnsavedChanges && (
-                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
-                        <AlertTriangle className="h-4 w-4" />
-                        <span className="text-sm">You have unsaved changes</span>
+            <div className="max-w-6xl mx-auto">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                        <SettingsIcon className="h-8 w-8 text-primary" />
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                            {t('title')}
+                        </h1>
                     </div>
-                )}
+                    <p className="text-muted-foreground text-lg">{t('subtitle')}</p>
+                    {hasUnsavedChanges && (
+                        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                            <AlertTriangle className="h-4 w-4" />
+                            <span className="text-sm">You have unsaved changes</span>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <div className="grid gap-8">
-                {/* Account Settings */}
+            <div className="max-w-6xl mx-auto">
+                <div className="grid gap-8">
+                    {/* Account Settings */}
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                         <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent flex items-center gap-2">
@@ -572,6 +575,7 @@ export default function SettingsPage() {
                         </div>
                     </CardContent>
                 </Card>
+                </div>
             </div>
         </div>
     );

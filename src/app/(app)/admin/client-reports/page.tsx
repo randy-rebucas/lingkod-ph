@@ -121,86 +121,92 @@ export default function ClientReportsPage() {
 
     if (userRole !== 'admin') {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
-                        <CardDescription>This page is for administrators only.</CardDescription>
-                    </CardHeader>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                            <CardDescription>This page is for administrators only.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
             </div>
         );
     }
     
     if (loading) {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
+             <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Client Reports</h1>
                     <p className="text-muted-foreground">Analyze client usage and satisfaction.</p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-64 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
              </div>
         )
     }
 
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div>
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Client Reports</h1>
                 <p className="text-muted-foreground">
                     Analyze client usage, spending habits, and satisfaction scores.
                 </p>
             </div>
-             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                 <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Client Usage Overview</CardTitle>
-                    <CardDescription>All clients on the platform, sorted by total amount spent.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Client</TableHead>
-                                <TableHead>Completed Bookings</TableHead>
-                                <TableHead>Total Spent</TableHead>
-                                <TableHead>Avg. Rating Given</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {clientReports.length > 0 ? clientReports.map(report => (
-                                <TableRow key={report.user.uid}>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Avatar className="h-8 w-8">
-                                                <AvatarImage src={report.user.photoURL} />
-                                                <AvatarFallback>{getAvatarFallback(report.user.displayName)}</AvatarFallback>
-                                            </Avatar>
-                                            <span className="font-medium">{report.user.displayName}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{report.completedBookings}</TableCell>
-                                    <TableCell>₱{report.totalSpent.toFixed(2)}</TableCell>
-                                    <TableCell>
-                                        {report.averageRating > 0 ? renderStars(report.averageRating) : <span className="text-muted-foreground text-xs">No ratings yet</span>}
-                                    </TableCell>
-                                </TableRow>
-                            )) : (
+            <div className="max-w-6xl mx-auto">
+                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Client Usage Overview</CardTitle>
+                        <CardDescription>All clients on the platform, sorted by total amount spent.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center h-24">
-                                        No client data to display.
-                                    </TableCell>
+                                    <TableHead>Client</TableHead>
+                                    <TableHead>Completed Bookings</TableHead>
+                                    <TableHead>Total Spent</TableHead>
+                                    <TableHead>Avg. Rating Given</TableHead>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                            </TableHeader>
+                            <TableBody>
+                                {clientReports.length > 0 ? clientReports.map(report => (
+                                    <TableRow key={report.user.uid}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <Avatar className="h-8 w-8">
+                                                    <AvatarImage src={report.user.photoURL} />
+                                                    <AvatarFallback>{getAvatarFallback(report.user.displayName)}</AvatarFallback>
+                                                </Avatar>
+                                                <span className="font-medium">{report.user.displayName}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{report.completedBookings}</TableCell>
+                                        <TableCell>₱{report.totalSpent.toFixed(2)}</TableCell>
+                                        <TableCell>
+                                            {report.averageRating > 0 ? renderStars(report.averageRating) : <span className="text-muted-foreground text-xs">No ratings yet</span>}
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="text-center h-24">
+                                            No client data to display.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     )
 }

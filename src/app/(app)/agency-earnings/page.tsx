@@ -117,105 +117,115 @@ export default function AgencyEarningsPage() {
     
     if (loading) {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                <Skeleton className="h-10 w-1/3" />
-                <Skeleton className="h-4 w-2/3" />
-                <div className="grid gap-6 md:grid-cols-3">
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
+             <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Skeleton className="h-10 w-1/3" />
+                    <Skeleton className="h-4 w-2/3" />
                 </div>
-                <Skeleton className="h-64 w-full" />
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid gap-6 md:grid-cols-3">
+                        <Skeleton className="h-28 w-full" />
+                        <Skeleton className="h-28 w-full" />
+                        <Skeleton className="h-28 w-full" />
+                    </div>
+                </div>
+                <div className="max-w-6xl mx-auto">
+                    <Skeleton className="h-64 w-full" />
+                </div>
             </div>
         )
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div>
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                 <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-3">
-                 <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('totalAgencyRevenue')}</CardTitle>
-                        <DollarSign className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+            <div className="max-w-6xl mx-auto">
+                <div className="grid gap-6 md:grid-cols-3">
+                     <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('totalAgencyRevenue')}</CardTitle>
+                            <DollarSign className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{stats.totalRevenue.toFixed(2)}</div>
+                            <p className="text-xs text-muted-foreground">{t('fromCompletedJobs', { bookings: bookings.length, providers: providerCount })}</p>
+                        </CardContent>
+                    </Card>
+                     <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('totalPaidOut')}</CardTitle>
+                            <CheckCircle className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{stats.totalPaidOut.toFixed(2)}</div>
+                            <p className="text-xs text-muted-foreground">{t('acrossAllProviders')}</p>
+                        </CardContent>
+                    </Card>
+                     <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('pendingPayouts')}</CardTitle>
+                            <Wallet className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{stats.totalPending.toFixed(2)}</div>
+                             <p className="text-xs text-muted-foreground">{t('awaitingProcessing')}</p>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+
+            <div className="max-w-6xl mx-auto">
+                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('payoutRequests')}</CardTitle>
+                        <CardDescription>{t('managePayoutRequests')}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{stats.totalRevenue.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">{t('fromCompletedJobs', { bookings: bookings.length, providers: providerCount })}</p>
-                    </CardContent>
-                </Card>
-                 <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('totalPaidOut')}</CardTitle>
-                        <CheckCircle className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{stats.totalPaidOut.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">{t('acrossAllProviders')}</p>
-                    </CardContent>
-                </Card>
-                 <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('pendingPayouts')}</CardTitle>
-                        <Wallet className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">₱{stats.totalPending.toFixed(2)}</div>
-                         <p className="text-xs text-muted-foreground">{t('awaitingProcessing')}</p>
+                         <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>{t('provider')}</TableHead>
+                                    <TableHead>{t('dateRequested')}</TableHead>
+                                    <TableHead>{t('amount')}</TableHead>
+                                    <TableHead className="text-center">{t('status')}</TableHead>
+                                    <TableHead className="text-right">{t('action')}</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {payouts.length > 0 ? payouts.map((payout) => (
+                                    <TableRow key={payout.id}>
+                                        <TableCell className="font-medium">{payout.providerName}</TableCell>
+                                        <TableCell>{format(payout.requestedAt.toDate(), 'PPP')}</TableCell>
+                                        <TableCell>₱{payout.amount.toFixed(2)}</TableCell>
+                                        <TableCell className="text-center">
+                                            <Badge variant={getStatusVariant(payout.status)}>{payout.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            {payout.status === 'Pending' ? (
+                                                <Button size="sm" onClick={() => onMarkAsPaid(payout)}>
+                                                    <CheckCircle className="mr-2 h-4 w-4" /> {t('markAsPaid')}
+                                                </Button>
+                                            ) : (
+                                                <span className="text-sm text-muted-foreground">{t('processed')}</span>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="h-24 text-center">
+                                            {t('noPayoutRequests')}
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
                     </CardContent>
                 </Card>
             </div>
-
-             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('payoutRequests')}</CardTitle>
-                    <CardDescription>{t('managePayoutRequests')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>{t('provider')}</TableHead>
-                                <TableHead>{t('dateRequested')}</TableHead>
-                                <TableHead>{t('amount')}</TableHead>
-                                <TableHead className="text-center">{t('status')}</TableHead>
-                                <TableHead className="text-right">{t('action')}</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {payouts.length > 0 ? payouts.map((payout) => (
-                                <TableRow key={payout.id}>
-                                    <TableCell className="font-medium">{payout.providerName}</TableCell>
-                                    <TableCell>{format(payout.requestedAt.toDate(), 'PPP')}</TableCell>
-                                    <TableCell>₱{payout.amount.toFixed(2)}</TableCell>
-                                    <TableCell className="text-center">
-                                        <Badge variant={getStatusVariant(payout.status)}>{payout.status}</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {payout.status === 'Pending' ? (
-                                            <Button size="sm" onClick={() => onMarkAsPaid(payout)}>
-                                                <CheckCircle className="mr-2 h-4 w-4" /> {t('markAsPaid')}
-                                            </Button>
-                                        ) : (
-                                            <span className="text-sm text-muted-foreground">{t('processed')}</span>
-                                        )}
-                                    </TableCell>
-                                </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center">
-                                        {t('noPayoutRequests')}
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
         </div>
     );
 }

@@ -686,36 +686,39 @@ export default function BookingsPage() {
     };
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="container space-y-8">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                        Bookings
-                    </h1>
-                    <p className="text-muted-foreground mt-1">
-                        Manage your bookings and track your service appointments
-                    </p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="flex items-center gap-1">
-                        <Zap className="h-3 w-3" />
-                        Advanced Bookings
-                    </Badge>
+            <div className="max-w-6xl mx-auto">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                            Bookings
+                        </h1>
+                        <p className="text-muted-foreground mt-1">
+                            Manage your bookings and track your service appointments
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="flex items-center gap-1">
+                            <Zap className="h-3 w-3" />
+                            Advanced Bookings
+                        </Badge>
+                    </div>
                 </div>
             </div>
 
             {/* Advanced Filter Controls */}
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Filter className="h-5 w-5" />
-                        Advanced Filters
-                    </CardTitle>
-                    <CardDescription>Customize your booking view with advanced filtering options</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid gap-4 md:grid-cols-6">
+            <div className="max-w-6xl mx-auto">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Filter className="h-5 w-5" />
+                            Advanced Filters
+                        </CardTitle>
+                        <CardDescription>Customize your booking view with advanced filtering options</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid gap-4 md:grid-cols-6">
                         <div className="space-y-2">
                             <Label htmlFor="search">Search Bookings</Label>
                             <div className="relative">
@@ -803,46 +806,49 @@ export default function BookingsPage() {
                         </div>
                     </div>
                 </CardContent>
-            </Card>
+                </Card>
+            </div>
 
             {/* Bookings List */}
-            {loading ? (
-                <div className="space-y-4">
-                    {[...Array(6)].map((_, i) => (
-                        <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                            <CardContent className="p-6">
-                                <div className="flex items-center space-x-4">
-                                    <Skeleton className="h-12 w-12 rounded-full" />
-                                    <div className="space-y-2 flex-1">
-                                        <Skeleton className="h-4 w-3/4" />
-                                        <Skeleton className="h-3 w-1/2" />
+            <div className="max-w-6xl mx-auto">
+                {loading ? (
+                    <div className="space-y-4">
+                        {[...Array(6)].map((_, i) => (
+                            <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                                <CardContent className="p-6">
+                                    <div className="flex items-center space-x-4">
+                                        <Skeleton className="h-12 w-12 rounded-full" />
+                                        <div className="space-y-2 flex-1">
+                                            <Skeleton className="h-4 w-3/4" />
+                                            <Skeleton className="h-3 w-1/2" />
+                                        </div>
+                                        <Skeleton className="h-8 w-20" />
                                     </div>
-                                    <Skeleton className="h-8 w-20" />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            ) : filteredAndSortedBookings.length > 0 ? (
-                <div className="space-y-4">
-                    {filteredAndSortedBookings.map((booking: Booking) => (
-                        <BookingCard key={booking.id} booking={booking} userRole={userRole || 'client'} />
-                    ))}
-                </div>
-            ) : (
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-12 text-center">
-                        <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                        <h3 className="text-lg font-semibold mb-2">No bookings found</h3>
-                        <p className="text-muted-foreground">
-                            {searchTerm || selectedStatus !== "all" 
-                                ? "Try adjusting your search or filter criteria."
-                                : "You don't have any bookings yet."
-                            }
-                        </p>
-                    </CardContent>
-                </Card>
-            )}
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                ) : filteredAndSortedBookings.length > 0 ? (
+                    <div className="space-y-4">
+                        {filteredAndSortedBookings.map((booking: Booking) => (
+                            <BookingCard key={booking.id} booking={booking} userRole={userRole || 'client'} />
+                        ))}
+                    </div>
+                ) : (
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-12 text-center">
+                            <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                            <h3 className="text-lg font-semibold mb-2">No bookings found</h3>
+                            <p className="text-muted-foreground">
+                                {searchTerm || selectedStatus !== "all" 
+                                    ? "Try adjusting your search or filter criteria."
+                                    : "You don't have any bookings yet."
+                                }
+                            </p>
+                        </CardContent>
+                    </Card>
+                )}
+            </div>
         </div>
     );
 }

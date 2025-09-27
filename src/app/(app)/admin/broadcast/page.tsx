@@ -73,84 +73,88 @@ export default function BroadcastPage() {
 
     if (userRole !== 'admin') {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
-                        <CardDescription>This page is for administrators only.</CardDescription>
-                    </CardHeader>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                            <CardDescription>This page is for administrators only.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-             <div>
+        <div className="container space-y-8">
+             <div className="max-w-6xl mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('BroadcastCenterTitle')}</h1>
                 <p className="text-muted-foreground">
                     {t('BroadcastCenterDescription')}
                 </p>
             </div>
-            <Tabs defaultValue="banner">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="banner">{t('SiteBannerTab')}</TabsTrigger>
-                    <TabsTrigger value="email">{t('EmailCampaignTab')}</TabsTrigger>
-                </TabsList>
-                <TabsContent value="banner" className="mt-4">
-                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('CreateBroadcastBannerTitle')}</CardTitle>
-                            <CardDescription>{t('CreateBroadcastBannerDescription')}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <Textarea 
-                                placeholder={t('BannerMessagePlaceholder')}
-                                rows={5}
-                                value={bannerMessage}
-                                onChange={(e) => setBannerMessage(e.target.value)}
-                            />
-                            <Button onClick={handleSendBanner} disabled={isSendingBanner} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
-                                {isSendingBanner ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Radio className="mr-2 h-4 w-4" />}
-                                {isSendingBanner ? t('SendingBanner') : t('SendBanner')}
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                 <TabsContent value="email" className="mt-4">
-                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('CreateEmailCampaignTitle')}</CardTitle>
-                            <CardDescription>{t('CreateEmailCampaignDescription')}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                             <div className="space-y-2">
-                                <Label htmlFor="subject">{t('EmailSubjectLabel')}</Label>
-                                <Input 
-                                    id="subject"
-                                    placeholder={t('EmailSubjectPlaceholder')}
-                                    value={emailSubject}
-                                    onChange={(e) => setEmailSubject(e.target.value)}
-                                />
-                            </div>
-                             <div className="space-y-2">
-                                <Label htmlFor="email-message">{t('EmailMessageLabel')}</Label>
+            <div className="max-w-6xl mx-auto">
+                <Tabs defaultValue="banner">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="banner">{t('SiteBannerTab')}</TabsTrigger>
+                        <TabsTrigger value="email">{t('EmailCampaignTab')}</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="banner" className="mt-4">
+                        <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                            <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                                <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('CreateBroadcastBannerTitle')}</CardTitle>
+                                <CardDescription>{t('CreateBroadcastBannerDescription')}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
                                 <Textarea 
-                                    id="email-message"
-                                    placeholder={t('EmailMessagePlaceholder')}
-                                    rows={8}
-                                    value={emailMessage}
-                                    onChange={(e) => setEmailMessage(e.target.value)}
+                                    placeholder={t('BannerMessagePlaceholder')}
+                                    rows={5}
+                                    value={bannerMessage}
+                                    onChange={(e) => setBannerMessage(e.target.value)}
                                 />
-                            </div>
-                            <Button onClick={handleSendEmail} disabled={isSendingEmail} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
-                                {isSendingEmail ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                                {isSendingEmail ? t('SendingEmail') : t('SendEmailToProviders')}
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+                                <Button onClick={handleSendBanner} disabled={isSendingBanner} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
+                                    {isSendingBanner ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Radio className="mr-2 h-4 w-4" />}
+                                    {isSendingBanner ? t('SendingBanner') : t('SendBanner')}
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                     <TabsContent value="email" className="mt-4">
+                        <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                            <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                                <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('CreateEmailCampaignTitle')}</CardTitle>
+                                <CardDescription>{t('CreateEmailCampaignDescription')}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                 <div className="space-y-2">
+                                    <Label htmlFor="subject">{t('EmailSubjectLabel')}</Label>
+                                    <Input 
+                                        id="subject"
+                                        placeholder={t('EmailSubjectPlaceholder')}
+                                        value={emailSubject}
+                                        onChange={(e) => setEmailSubject(e.target.value)}
+                                    />
+                                </div>
+                                 <div className="space-y-2">
+                                    <Label htmlFor="email-message">{t('EmailMessageLabel')}</Label>
+                                    <Textarea 
+                                        id="email-message"
+                                        placeholder={t('EmailMessagePlaceholder')}
+                                        rows={8}
+                                        value={emailMessage}
+                                        onChange={(e) => setEmailMessage(e.target.value)}
+                                    />
+                                </div>
+                                <Button onClick={handleSendEmail} disabled={isSendingEmail} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
+                                    {isSendingEmail ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                                    {isSendingEmail ? t('SendingEmail') : t('SendEmailToProviders')}
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                </Tabs>
+            </div>
         </div>
     );
 }

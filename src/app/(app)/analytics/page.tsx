@@ -399,84 +399,91 @@ export default function AnalyticsPage() {
 
     if (!user) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">
                         {t('subtitle')}
                     </p>
                 </div>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('upgradeToElite')}</CardTitle>
-                        <CardDescription>{t('eliteExclusive')}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <BarChart2 className="h-16 w-16 mb-4" />
-                        <p className="mb-4">{t('advancedAnalytics')}</p>
-                         <Button asChild>
-                        </Button>
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t('upgradeToElite')}</CardTitle>
+                            <CardDescription>{t('eliteExclusive')}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
+                            <BarChart2 className="h-16 w-16 mb-4" />
+                            <p className="mb-4">{t('advancedAnalytics')}</p>
+                             <Button asChild>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('advancedAnalyticsTitle')}</h1>
-                <p className="text-muted-foreground">
-                    {t('deepDiveDescription')}
-                </p>
-            </div>
-                <div className="flex items-center gap-4">
-                    <Select value={timePeriod} onValueChange={(value: TimePeriod) => setTimePeriod(value)}>
-                        <SelectTrigger className="w-[180px]">
-                            <Calendar className="h-4 w-4 mr-2" />
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="7d">Last 7 days</SelectItem>
-                            <SelectItem value="30d">Last 30 days</SelectItem>
-                            <SelectItem value="90d">Last 90 days</SelectItem>
-                            <SelectItem value="1y">Last year</SelectItem>
-                            <SelectItem value="all">All time</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <Button variant="outline" size="sm" onClick={exportData}>
-                        <Download className="h-4 w-4 mr-2" />
-                        Export
-                    </Button>
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('advancedAnalyticsTitle')}</h1>
+                    <p className="text-muted-foreground">
+                        {t('deepDiveDescription')}
+                    </p>
+                </div>
+                    <div className="flex items-center gap-4">
+                        <Select value={timePeriod} onValueChange={(value: TimePeriod) => setTimePeriod(value)}>
+                            <SelectTrigger className="w-[180px]">
+                                <Calendar className="h-4 w-4 mr-2" />
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="7d">Last 7 days</SelectItem>
+                                <SelectItem value="30d">Last 30 days</SelectItem>
+                                <SelectItem value="90d">Last 90 days</SelectItem>
+                                <SelectItem value="1y">Last year</SelectItem>
+                                <SelectItem value="all">All time</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Button variant="outline" size="sm" onClick={exportData}>
+                            <Download className="h-4 w-4 mr-2" />
+                            Export
+                        </Button>
+                    </div>
                 </div>
             </div>
 
             {/* Performance Alerts */}
-            {!analyticsData.isPerformingWell.revenue && analyticsData.revenueAnalytics.monthlyGrowth < 0 && (
-                <Alert>
-                    <TrendingDown className="h-4 w-4" />
-                    <AlertDescription>
-                        Revenue has decreased by {Math.abs(analyticsData.revenueAnalytics.monthlyGrowth).toFixed(1)}% this month. Consider reviewing your pricing strategy.
-                    </AlertDescription>
-                </Alert>
-            )}
-            
-            {analyticsData.isPerformingWell.revenue && analyticsData.revenueAnalytics.monthlyGrowth > 0 && (
-                <Alert className="border-green-200 bg-green-50">
-                    <TrendingUp className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-800">
-                        Great! Revenue is up {analyticsData.revenueAnalytics.monthlyGrowth.toFixed(1)}% this month.
-                    </AlertDescription>
-                </Alert>
-            )}
+            <div className="max-w-6xl mx-auto">
+                {!analyticsData.isPerformingWell.revenue && analyticsData.revenueAnalytics.monthlyGrowth < 0 && (
+                    <Alert>
+                        <TrendingDown className="h-4 w-4" />
+                        <AlertDescription>
+                            Revenue has decreased by {Math.abs(analyticsData.revenueAnalytics.monthlyGrowth).toFixed(1)}% this month. Consider reviewing your pricing strategy.
+                        </AlertDescription>
+                    </Alert>
+                )}
+                
+                {analyticsData.isPerformingWell.revenue && analyticsData.revenueAnalytics.monthlyGrowth > 0 && (
+                    <Alert className="border-green-200 bg-green-50">
+                        <TrendingUp className="h-4 w-4 text-green-600" />
+                        <AlertDescription className="text-green-800">
+                            Great! Revenue is up {analyticsData.revenueAnalytics.monthlyGrowth.toFixed(1)}% this month.
+                        </AlertDescription>
+                    </Alert>
+                )}
+            </div>
 
-            {loading ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                    {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-32" />)}
-                </div>
-            ) : (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <div className="max-w-6xl mx-auto">
+                {loading ? (
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                        {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-32" />)}
+                    </div>
+                ) : (
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                     <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                             <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Total Revenue</CardTitle>
@@ -549,11 +556,13 @@ export default function AnalyticsPage() {
                             <div className="text-xs text-muted-foreground mt-1">From {analyticsData.filteredReviews.length} reviews</div>
                         </CardContent>
                     </Card>
-                </div>
-            )}
+                    </div>
+                )}
+            </div>
             
             {/* Revenue Analytics */}
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="max-w-6xl mx-auto">
+                <div className="grid gap-6 md:grid-cols-2">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                         <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Revenue Growth</CardTitle>
@@ -615,10 +624,12 @@ export default function AnalyticsPage() {
                         )}
                     </CardContent>
                 </Card>
+                </div>
             </div>
 
             {/* Booking Trends and Service Performance */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+            <div className="max-w-6xl mx-auto">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                 <Card className="lg:col-span-3 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                         <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('bookingTrends')}</CardTitle>
@@ -664,10 +675,12 @@ export default function AnalyticsPage() {
                         )}
                     </CardContent>
                 </Card>
+                </div>
             </div>
             
             {/* Performance Insights */}
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="max-w-6xl mx-auto">
+                <div className="grid gap-6 md:grid-cols-2">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                         <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Performance Insights</CardTitle>
@@ -790,10 +803,12 @@ export default function AnalyticsPage() {
                         )}
                     </CardContent>
                 </Card>
+                </div>
             </div>
 
             {/* Geographic Analytics */}
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="max-w-6xl mx-auto">
+                <div className="grid gap-6 md:grid-cols-2">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                         <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Top Locations</CardTitle>
@@ -850,9 +865,11 @@ export default function AnalyticsPage() {
                         )}
                     </CardContent>
                 </Card>
+                </div>
             </div>
 
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+            <div className="max-w-6xl mx-auto">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                     <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('topPerformingServices')}</CardTitle>
                     <CardDescription>{t('mostProfitableServices')}</CardDescription>
@@ -893,7 +910,8 @@ export default function AnalyticsPage() {
                     </Table>
                     )}
                 </CardContent>
-            </Card>
+                </Card>
+            </div>
 
         </div>
     );

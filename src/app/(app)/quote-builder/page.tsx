@@ -19,117 +19,123 @@ export default function QuoteBuilderPage() {
   const t = useTranslations('QuoteBuilder');
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('quoteBuilderTitle')}</h1>
-          <p className="text-muted-foreground">
-            {t('quoteBuilderDescription')}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="flex items-center gap-1">
-            <Star className="h-3 w-3" />
-            Advanced
-          </Badge>
+    <div className="container space-y-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('quoteBuilderTitle')}</h1>
+            <p className="text-muted-foreground">
+              {t('quoteBuilderDescription')}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="flex items-center gap-1">
+              <Star className="h-3 w-3" />
+              Advanced
+            </Badge>
+          </div>
         </div>
       </div>
 
       {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <FileText className="h-4 w-4 text-primary" />
+      <div className="max-w-6xl mx-auto">
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-primary/10">
+                  <FileText className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Quotes</p>
+                  <p className="text-xl font-bold">--</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Quotes</p>
-                <p className="text-xl font-bold">--</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-green-100 text-green-600">
+                  <Calculator className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Accepted</p>
+                  <p className="text-xl font-bold">--</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-green-100 text-green-600">
-                <Calculator className="h-4 w-4" />
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+                  <BarChart3 className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Conversion Rate</p>
+                  <p className="text-xl font-bold">--%</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Accepted</p>
-                <p className="text-xl font-bold">--</p>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-purple-100 text-purple-600">
+                  <Users className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Active Clients</p>
+                  <p className="text-xl font-bold">--</p>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-blue-100 text-blue-600">
-                <BarChart3 className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Conversion Rate</p>
-                <p className="text-xl font-bold">--%</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-purple-100 text-purple-600">
-                <Users className="h-4 w-4" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Active Clients</p>
-                <p className="text-xl font-bold">--</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
-      <Tabs defaultValue="create" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="create" className="flex items-center gap-2">
-            <Calculator className="h-4 w-4" />
-            {t('createQuote')}
-          </TabsTrigger>
-          <TabsTrigger value="templates" className="flex items-center gap-2">
-            <Star className="h-4 w-4" />
-            Templates
-          </TabsTrigger>
-          <TabsTrigger value="stored" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            {t('storedQuotes')}
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Analytics
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="create" className="mt-6">
-          <QuoteBuilderClient />
-        </TabsContent>
-        
-        <TabsContent value="templates" className="mt-6">
-          <QuoteTemplatesTab />
-        </TabsContent>
-        
-        <TabsContent value="stored" className="mt-6">
-          <StoredQuotesList />
-        </TabsContent>
-        
-        <TabsContent value="analytics" className="mt-6">
-          <QuoteAnalyticsTab />
-        </TabsContent>
-      </Tabs>
+      <div className="max-w-6xl mx-auto">
+        <Tabs defaultValue="create" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="create" className="flex items-center gap-2">
+              <Calculator className="h-4 w-4" />
+              {t('createQuote')}
+            </TabsTrigger>
+            <TabsTrigger value="templates" className="flex items-center gap-2">
+              <Star className="h-4 w-4" />
+              Templates
+            </TabsTrigger>
+            <TabsTrigger value="stored" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              {t('storedQuotes')}
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="create" className="mt-6">
+            <QuoteBuilderClient />
+          </TabsContent>
+          
+          <TabsContent value="templates" className="mt-6">
+            <QuoteTemplatesTab />
+          </TabsContent>
+          
+          <TabsContent value="stored" className="mt-6">
+            <StoredQuotesList />
+          </TabsContent>
+          
+          <TabsContent value="analytics" className="mt-6">
+            <QuoteAnalyticsTab />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

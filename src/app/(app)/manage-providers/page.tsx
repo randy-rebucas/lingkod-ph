@@ -379,8 +379,8 @@ export default function ManageProvidersPage() {
 
     if (userRole !== 'agency') {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
+             <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">{t('agencyOnly')}</p>
                 </div>
@@ -407,8 +407,8 @@ export default function ManageProvidersPage() {
     }, [providers]);
 
     return (
-      <div className="max-w-7xl mx-auto space-y-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="container space-y-8">
+          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                   <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                   <p className="text-muted-foreground">
@@ -459,171 +459,176 @@ export default function ManageProvidersPage() {
           </div>
 
           {/* Advanced Filter Controls */}
-          <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-              <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                      <Filter className="h-5 w-5" />
-                      Advanced Filters
-                  </CardTitle>
-                  <CardDescription>Customize your provider management with advanced filtering options</CardDescription>
-              </CardHeader>
-              <CardContent>
-                  <div className="grid gap-4 md:grid-cols-4">
-                      <div className="space-y-2">
-                          <Label htmlFor="search">Search Providers</Label>
-                          <div className="relative">
-                              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input 
-                                  placeholder="Search by name, email, or skills..."
-                                  className="pl-10"
-                              />
-                          </div>
-                      </div>
-                      <div className="space-y-2">
-                          <Label htmlFor="status">Status</Label>
-                          <Select defaultValue="all">
-                              <SelectTrigger>
-                                  <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                  <SelectItem value="all">All Providers</SelectItem>
-                                  <SelectItem value="active">Active</SelectItem>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="available">Available</SelectItem>
-                                  <SelectItem value="busy">Busy</SelectItem>
-                              </SelectContent>
-                          </Select>
-                      </div>
-                      <div className="space-y-2">
-                          <Label htmlFor="role">Role</Label>
-                          <Select defaultValue="all">
-                              <SelectTrigger>
-                                  <SelectValue placeholder="Select role" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                  <SelectItem value="all">All Roles</SelectItem>
-                                  <SelectItem value="senior">Senior</SelectItem>
-                                  <SelectItem value="junior">Junior</SelectItem>
-                                  <SelectItem value="lead">Lead</SelectItem>
-                                  <SelectItem value="specialist">Specialist</SelectItem>
-                              </SelectContent>
-                          </Select>
-                      </div>
-                      <div className="space-y-2">
-                          <Label htmlFor="export">Export Options</Label>
-                          <div className="flex gap-2">
-                              <Button variant="outline" size="sm">
-                                  <Download className="h-4 w-4 mr-2" />
-                                  PDF
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                  <Download className="h-4 w-4 mr-2" />
-                                  Excel
-                              </Button>
-                          </div>
-                      </div>
-                  </div>
-              </CardContent>
-          </Card>
-
-          {/* Enhanced KPI Cards */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
-                  <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                          <div>
-                              <p className="text-sm text-muted-foreground">Active Providers</p>
-                              <p className="text-2xl font-bold">{analyticsData.activeProviders}</p>
-                              <div className="flex items-center gap-1 mt-1">
-                                  <UserCheck className="h-3 w-3 text-green-600" />
-                                  <span className="text-xs text-green-600">Ready to work</span>
+          <div className="max-w-6xl mx-auto">
+              <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                  <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                          <Filter className="h-5 w-5" />
+                          Advanced Filters
+                      </CardTitle>
+                      <CardDescription>Customize your provider management with advanced filtering options</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      <div className="grid gap-4 md:grid-cols-4">
+                          <div className="space-y-2">
+                              <Label htmlFor="search">Search Providers</Label>
+                              <div className="relative">
+                                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                  <Input 
+                                      placeholder="Search by name, email, or skills..."
+                                      className="pl-10"
+                                  />
                               </div>
                           </div>
-                          <div className="p-3 rounded-full bg-green-100">
-                              <Users className="h-6 w-6 text-green-600" />
+                          <div className="space-y-2">
+                              <Label htmlFor="status">Status</Label>
+                              <Select defaultValue="all">
+                                  <SelectTrigger>
+                                      <SelectValue placeholder="Select status" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      <SelectItem value="all">All Providers</SelectItem>
+                                      <SelectItem value="active">Active</SelectItem>
+                                      <SelectItem value="pending">Pending</SelectItem>
+                                      <SelectItem value="available">Available</SelectItem>
+                                      <SelectItem value="busy">Busy</SelectItem>
+                                  </SelectContent>
+                              </Select>
                           </div>
-                      </div>
-                  </CardContent>
-              </Card>
-              
-              <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
-                  <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                          <div>
-                              <p className="text-sm text-muted-foreground">Total Earnings</p>
-                              <p className="text-2xl font-bold">₱{analyticsData.totalEarnings.toFixed(2)}</p>
-                              <div className="flex items-center gap-1 mt-1">
-                                  <TrendingUp className="h-3 w-3 text-blue-600" />
-                                  <span className="text-xs text-blue-600">+12.5%</span>
+                          <div className="space-y-2">
+                              <Label htmlFor="role">Role</Label>
+                              <Select defaultValue="all">
+                                  <SelectTrigger>
+                                      <SelectValue placeholder="Select role" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      <SelectItem value="all">All Roles</SelectItem>
+                                      <SelectItem value="senior">Senior</SelectItem>
+                                      <SelectItem value="junior">Junior</SelectItem>
+                                      <SelectItem value="lead">Lead</SelectItem>
+                                      <SelectItem value="specialist">Specialist</SelectItem>
+                                  </SelectContent>
+                              </Select>
+                          </div>
+                          <div className="space-y-2">
+                              <Label htmlFor="export">Export Options</Label>
+                              <div className="flex gap-2">
+                                  <Button variant="outline" size="sm">
+                                      <Download className="h-4 w-4 mr-2" />
+                                      PDF
+                                  </Button>
+                                  <Button variant="outline" size="sm">
+                                      <Download className="h-4 w-4 mr-2" />
+                                      Excel
+                                  </Button>
                               </div>
-                          </div>
-                          <div className="p-3 rounded-full bg-blue-100">
-                              <DollarSign className="h-6 w-6 text-blue-600" />
-                          </div>
-                      </div>
-                  </CardContent>
-              </Card>
-              
-              <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
-                  <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                          <div>
-                              <p className="text-sm text-muted-foreground">Completed Jobs</p>
-                              <p className="text-2xl font-bold">{analyticsData.totalJobs}</p>
-                              <div className="flex items-center gap-1 mt-1">
-                                  <BookCheck className="h-3 w-3 text-purple-600" />
-                                  <span className="text-xs text-purple-600">This month</span>
-                              </div>
-                          </div>
-                          <div className="p-3 rounded-full bg-purple-100">
-                              <BookCheck className="h-6 w-6 text-purple-600" />
-                          </div>
-                      </div>
-                  </CardContent>
-              </Card>
-              
-              <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
-                  <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                          <div>
-                              <p className="text-sm text-muted-foreground">Avg. Rating</p>
-                              <p className="text-2xl font-bold">{analyticsData.averageRating.toFixed(1)}</p>
-                              <div className="flex items-center gap-1 mt-1">
-                                  <Star className="h-3 w-3 text-yellow-600" />
-                                  <span className="text-xs text-yellow-600">Out of 5.0</span>
-                              </div>
-                          </div>
-                          <div className="p-3 rounded-full bg-yellow-100">
-                              <Star className="h-6 w-6 text-yellow-600" />
                           </div>
                       </div>
                   </CardContent>
               </Card>
           </div>
 
-          <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="overview" className="flex items-center gap-2">
-                      <BarChart3 className="h-4 w-4" />
-                      Overview
-                  </TabsTrigger>
-                  <TabsTrigger value="providers" className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      Providers
-                  </TabsTrigger>
-                  <TabsTrigger value="performance" className="flex items-center gap-2">
-                      <Target className="h-4 w-4" />
-                      Performance
-                  </TabsTrigger>
-                  <TabsTrigger value="analytics" className="flex items-center gap-2">
-                      <Activity className="h-4 w-4" />
-                      Analytics
-                  </TabsTrigger>
-                  <TabsTrigger value="insights" className="flex items-center gap-2">
-                      <Eye className="h-4 w-4" />
-                      Insights
-                  </TabsTrigger>
-              </TabsList>
+          {/* Enhanced KPI Cards */}
+          <div className="max-w-6xl mx-auto">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
+                      <CardContent className="p-6">
+                          <div className="flex items-center justify-between">
+                              <div>
+                                  <p className="text-sm text-muted-foreground">Active Providers</p>
+                                  <p className="text-2xl font-bold">{analyticsData.activeProviders}</p>
+                                  <div className="flex items-center gap-1 mt-1">
+                                      <UserCheck className="h-3 w-3 text-green-600" />
+                                      <span className="text-xs text-green-600">Ready to work</span>
+                                  </div>
+                              </div>
+                              <div className="p-3 rounded-full bg-green-100">
+                                  <Users className="h-6 w-6 text-green-600" />
+                              </div>
+                          </div>
+                      </CardContent>
+                  </Card>
+                  
+                  <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
+                      <CardContent className="p-6">
+                          <div className="flex items-center justify-between">
+                              <div>
+                                  <p className="text-sm text-muted-foreground">Total Earnings</p>
+                                  <p className="text-2xl font-bold">₱{analyticsData.totalEarnings.toFixed(2)}</p>
+                                  <div className="flex items-center gap-1 mt-1">
+                                      <TrendingUp className="h-3 w-3 text-blue-600" />
+                                      <span className="text-xs text-blue-600">+12.5%</span>
+                                  </div>
+                              </div>
+                              <div className="p-3 rounded-full bg-blue-100">
+                                  <DollarSign className="h-6 w-6 text-blue-600" />
+                              </div>
+                          </div>
+                      </CardContent>
+                  </Card>
+                  
+                  <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
+                      <CardContent className="p-6">
+                          <div className="flex items-center justify-between">
+                              <div>
+                                  <p className="text-sm text-muted-foreground">Completed Jobs</p>
+                                  <p className="text-2xl font-bold">{analyticsData.totalJobs}</p>
+                                  <div className="flex items-center gap-1 mt-1">
+                                      <BookCheck className="h-3 w-3 text-purple-600" />
+                                      <span className="text-xs text-purple-600">This month</span>
+                                  </div>
+                              </div>
+                              <div className="p-3 rounded-full bg-purple-100">
+                                  <BookCheck className="h-6 w-6 text-purple-600" />
+                              </div>
+                          </div>
+                      </CardContent>
+                  </Card>
+                  
+                  <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
+                      <CardContent className="p-6">
+                          <div className="flex items-center justify-between">
+                              <div>
+                                  <p className="text-sm text-muted-foreground">Avg. Rating</p>
+                                  <p className="text-2xl font-bold">{analyticsData.averageRating.toFixed(1)}</p>
+                                  <div className="flex items-center gap-1 mt-1">
+                                      <Star className="h-3 w-3 text-yellow-600" />
+                                      <span className="text-xs text-yellow-600">Out of 5.0</span>
+                                  </div>
+                              </div>
+                              <div className="p-3 rounded-full bg-yellow-100">
+                                  <Star className="h-6 w-6 text-yellow-600" />
+                              </div>
+                          </div>
+                      </CardContent>
+                  </Card>
+              </div>
+          </div>
+
+          <div className="max-w-6xl mx-auto">
+              <Tabs defaultValue="overview" className="w-full">
+                  <TabsList className="grid w-full grid-cols-5">
+                      <TabsTrigger value="overview" className="flex items-center gap-2">
+                          <BarChart3 className="h-4 w-4" />
+                          Overview
+                      </TabsTrigger>
+                      <TabsTrigger value="providers" className="flex items-center gap-2">
+                          <Users className="h-4 w-4" />
+                          Providers
+                      </TabsTrigger>
+                      <TabsTrigger value="performance" className="flex items-center gap-2">
+                          <Target className="h-4 w-4" />
+                          Performance
+                      </TabsTrigger>
+                      <TabsTrigger value="analytics" className="flex items-center gap-2">
+                          <Activity className="h-4 w-4" />
+                          Analytics
+                      </TabsTrigger>
+                      <TabsTrigger value="insights" className="flex items-center gap-2">
+                          <Eye className="h-4 w-4" />
+                          Insights
+                      </TabsTrigger>
+                  </TabsList>
               
               <TabsContent value="overview" className="mt-6">
                   <OverviewTab providers={providers} analyticsData={analyticsData} />
@@ -644,7 +649,8 @@ export default function ManageProvidersPage() {
               <TabsContent value="insights" className="mt-6">
                   <InsightsTab providers={providers} analyticsData={analyticsData} />
               </TabsContent>
-          </Tabs>
+              </Tabs>
+          </div>
       </div>
     );
 }

@@ -98,36 +98,40 @@ export default function AdminBackupPage() {
 
     if (userRole !== 'admin') {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
-                        <CardDescription>This page is for administrators only.</CardDescription>
-                    </CardHeader>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                            <CardDescription>This page is for administrators only.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
             </div>
         );
     }
     
     if (loading) {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
+             <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Data Backup & Recovery</h1>
                     <p className="text-muted-foreground">Manage and download backups of your platform's data.</p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-64 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
              </div>
         )
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div className="flex justify-between items-center">
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Data Backup & Recovery</h1>
                     <p className="text-muted-foreground">
@@ -139,47 +143,49 @@ export default function AdminBackupPage() {
                      {isCreatingBackup ? 'Creating Backup...' : 'Create New Backup'}
                 </Button>
             </div>
-             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Backup History</CardTitle>
-                    <CardDescription>Backups are stored as JSON files in your Firebase Storage.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Date Created</TableHead>
-                                <TableHead>File Name</TableHead>
-                                <TableHead>Document Count</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {backups.length > 0 ? backups.map(backup => (
-                                <TableRow key={backup.id}>
-                                    <TableCell>{backup.createdAt ? format(backup.createdAt.toDate(), 'PPpp') : 'N/A'}</TableCell>
-                                    <TableCell className="font-mono text-xs">{backup.fileName}</TableCell>
-                                    <TableCell>{backup.documentCount.toLocaleString()}</TableCell>
-                                    <TableCell className="text-right">
-                                        <Button asChild variant="outline" size="sm">
-                                            <a href={backup.downloadUrl} target="_blank" rel="noopener noreferrer">
-                                                <Download className="mr-2 h-4 w-4"/> Download
-                                            </a>
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            )) : (
+            <div className="max-w-6xl mx-auto">
+                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Backup History</CardTitle>
+                        <CardDescription>Backups are stored as JSON files in your Firebase Storage.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center h-24">
-                                        <DatabaseBackup className="mx-auto h-12 w-12 text-muted-foreground mb-2"/>
-                                        No backups found.
-                                    </TableCell>
+                                    <TableHead>Date Created</TableHead>
+                                    <TableHead>File Name</TableHead>
+                                    <TableHead>Document Count</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                            </TableHeader>
+                            <TableBody>
+                                {backups.length > 0 ? backups.map(backup => (
+                                    <TableRow key={backup.id}>
+                                        <TableCell>{backup.createdAt ? format(backup.createdAt.toDate(), 'PPpp') : 'N/A'}</TableCell>
+                                        <TableCell className="font-mono text-xs">{backup.fileName}</TableCell>
+                                        <TableCell>{backup.documentCount.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button asChild variant="outline" size="sm">
+                                                <a href={backup.downloadUrl} target="_blank" rel="noopener noreferrer">
+                                                    <Download className="mr-2 h-4 w-4"/> Download
+                                                </a>
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="text-center h-24">
+                                            <DatabaseBackup className="mx-auto h-12 w-12 text-muted-foreground mb-2"/>
+                                            No backups found.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     )
 }

@@ -35,6 +35,7 @@ export default function AdminSettingsPage() {
         }
 
         const fetchSettings = async () => {
+            if (!db) return;
             const settingsRef = doc(db, 'platform', 'settings');
             const docSnap = await getDoc(settingsRef);
             if (docSnap.exists()) {
@@ -101,6 +102,15 @@ export default function AdminSettingsPage() {
         let finalSettings = { ...settings };
         
         if (logoFile) {
+            if (!storage) {
+                toast({ 
+                    variant: 'destructive', 
+                    title: 'Storage Error', 
+                    description: 'Storage service is not available.' 
+                });
+                setIsSaving(false);
+                return;
+            }
             setIsUploadingLogo(true);
             try {
                 const storagePath = `platform/logo/${Date.now()}_${logoFile.name}`;
@@ -184,146 +194,158 @@ export default function AdminSettingsPage() {
 
     if (userRole !== 'admin') {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
-                        <CardDescription>This page is for administrators only.</CardDescription>
-                    </CardHeader>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                            <CardDescription>This page is for administrators only.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
             </div>
         );
     }
     
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Platform Settings</h1>
                     <p className="text-muted-foreground">Manage global settings for the application.</p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm"><CardContent className="p-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
-                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm"><CardContent className="p-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm"><CardContent className="p-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
+                </div>
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm"><CardContent className="p-6"><Skeleton className="h-64 w-full" /></CardContent></Card>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div>
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Platform Settings</h1>
                 <p className="text-muted-foreground">Manage global settings for the application.</p>
             </div>
             
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Branding</CardTitle>
-                    <CardDescription>Customize the look and feel of your application.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid md:grid-cols-2 gap-8">
-                     <div className="space-y-4">
+            <div className="max-w-6xl mx-auto">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Branding</CardTitle>
+                        <CardDescription>Customize the look and feel of your application.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid md:grid-cols-2 gap-8">
+                         <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="appName">App Name</Label>
+                                <Input 
+                                    id="appName"
+                                    value={settings?.appName || ''}
+                                    onChange={(e) => setSettings(s => s ? { ...s, appName: e.target.value } : null)}
+                                />
+                            </div>
+                             <div className="space-y-2">
+                                <Label htmlFor="supportEmail">Support Email</Label>
+                                <Input 
+                                    id="supportEmail"
+                                    type="email"
+                                    value={settings?.supportEmail || ''}
+                                    onChange={(e) => setSettings(s => s ? { ...s, supportEmail: e.target.value } : null)}
+                                />
+                            </div>
+                         </div>
+                         <div className="space-y-2">
+                            <Label>Logo</Label>
+                            <div className="flex items-center gap-4">
+                               {logoPreview ? (
+                                    <Image src={logoPreview} alt="Current logo" width={64} height={64} className="rounded-md bg-muted p-1" />
+                                ) : (
+                                    <div className="h-16 w-16 bg-muted rounded-md flex items-center justify-center text-muted-foreground">
+                                        <span>No Logo</span>
+                                    </div>
+                                )}
+                                <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()} disabled={isUploadingLogo}>
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    {isUploadingLogo ? 'Uploading...' : 'Upload New Logo'}
+                                </Button>
+                                <Input type="file" className="hidden" ref={logoInputRef} onChange={handleLogoFileChange} accept="image/*" />
+                            </div>
+                         </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div className="max-w-6xl mx-auto">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Commission Rates</CardTitle>
+                        <CardDescription>Set the percentage commission taken for different job value tiers.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid md:grid-cols-3 gap-6">
                         <div className="space-y-2">
-                            <Label htmlFor="appName">App Name</Label>
+                            <Label htmlFor="low-ticket">Low-Ticket Rate (%)</Label>
                             <Input 
-                                id="appName"
-                                value={settings?.appName || ''}
-                                onChange={(e) => setSettings(s => s ? { ...s, appName: e.target.value } : null)}
+                                id="low-ticket" 
+                                type="number" 
+                                value={settings?.commissionRates.low || ''}
+                                onChange={(e) => setSettings(s => s ? ({ ...s, commissionRates: { ...s.commissionRates, low: Number(e.target.value) } }) : null)}
                             />
                         </div>
                          <div className="space-y-2">
-                            <Label htmlFor="supportEmail">Support Email</Label>
+                            <Label htmlFor="mid-ticket">Mid-Ticket Rate (%)</Label>
                             <Input 
-                                id="supportEmail"
-                                type="email"
-                                value={settings?.supportEmail || ''}
-                                onChange={(e) => setSettings(s => s ? { ...s, supportEmail: e.target.value } : null)}
+                                id="mid-ticket" 
+                                type="number"
+                                 value={settings?.commissionRates.mid || ''}
+                                onChange={(e) => setSettings(s => s ? ({ ...s, commissionRates: { ...s.commissionRates, mid: Number(e.target.value) } }) : null)}
                             />
                         </div>
-                     </div>
-                     <div className="space-y-2">
-                        <Label>Logo</Label>
-                        <div className="flex items-center gap-4">
-                           {logoPreview ? (
-                                <Image src={logoPreview} alt="Current logo" width={64} height={64} className="rounded-md bg-muted p-1" />
-                            ) : (
-                                <div className="h-16 w-16 bg-muted rounded-md flex items-center justify-center text-muted-foreground">
-                                    <span>No Logo</span>
-                                </div>
-                            )}
-                            <Button type="button" variant="outline" onClick={() => logoInputRef.current?.click()} disabled={isUploadingLogo}>
-                                <Upload className="mr-2 h-4 w-4" />
-                                {isUploadingLogo ? 'Uploading...' : 'Upload New Logo'}
-                            </Button>
-                            <Input type="file" className="hidden" ref={logoInputRef} onChange={handleLogoFileChange} accept="image/*" />
+                         <div className="space-y-2">
+                            <Label htmlFor="high-ticket">High-Ticket Rate (%)</Label>
+                            <Input 
+                                id="high-ticket" 
+                                type="number"
+                                value={settings?.commissionRates.high || ''}
+                                onChange={(e) => setSettings(s => s ? ({ ...s, commissionRates: { ...s.commissionRates, high: Number(e.target.value) } }) : null)}
+                            />
                         </div>
-                     </div>
-                </CardContent>
-            </Card>
-
-             <Card>
-                <CardHeader>
-                    <CardTitle>Commission Rates</CardTitle>
-                    <CardDescription>Set the percentage commission taken for different job value tiers.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="low-ticket">Low-Ticket Rate (%)</Label>
-                        <Input 
-                            id="low-ticket" 
-                            type="number" 
-                            value={settings?.commissionRates.low || ''}
-                            onChange={(e) => setSettings(s => s ? ({ ...s, commissionRates: { ...s.commissionRates, low: Number(e.target.value) } }) : null)}
-                        />
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="mid-ticket">Mid-Ticket Rate (%)</Label>
-                        <Input 
-                            id="mid-ticket" 
-                            type="number"
-                             value={settings?.commissionRates.mid || ''}
-                            onChange={(e) => setSettings(s => s ? ({ ...s, commissionRates: { ...s.commissionRates, mid: Number(e.target.value) } }) : null)}
-                        />
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="high-ticket">High-Ticket Rate (%)</Label>
-                        <Input 
-                            id="high-ticket" 
-                            type="number"
-                            value={settings?.commissionRates.high || ''}
-                            onChange={(e) => setSettings(s => s ? ({ ...s, commissionRates: { ...s.commissionRates, high: Number(e.target.value) } }) : null)}
-                        />
-                    </div>
-                </CardContent>
-            </Card>
+                    </CardContent>
+                </Card>
+            </div>
             
-             <Card>
-                <CardHeader>
-                    <CardTitle>Platform Rules</CardTitle>
-                    <CardDescription>Configure rewards and incentives for users.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="referral-bonus">Referral Bonus (Points)</Label>
-                        <Input 
-                            id="referral-bonus" 
-                            type="number" 
-                            value={settings?.referralBonus || ''}
-                            onChange={(e) => setSettings(s => s ? { ...s, referralBonus: Number(e.target.value) } : null)}
-                        />
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="welcome-bonus">New User Welcome Bonus (Points)</Label>
-                        <Input 
-                            id="welcome-bonus" 
-                            type="number" 
-                            value={settings?.welcomeBonus || ''}
-                            onChange={(e) => setSettings(s => s ? { ...s, welcomeBonus: Number(e.target.value) } : null)}
-                        />
-                    </div>
-                </CardContent>
-            </Card>
+            <div className="max-w-6xl mx-auto">
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Platform Rules</CardTitle>
+                        <CardDescription>Configure rewards and incentives for users.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="referral-bonus">Referral Bonus (Points)</Label>
+                            <Input 
+                                id="referral-bonus" 
+                                type="number" 
+                                value={settings?.referralBonus || ''}
+                                onChange={(e) => setSettings(s => s ? { ...s, referralBonus: Number(e.target.value) } : null)}
+                            />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="welcome-bonus">New User Welcome Bonus (Points)</Label>
+                            <Input 
+                                id="welcome-bonus" 
+                                type="number" 
+                                value={settings?.welcomeBonus || ''}
+                                onChange={(e) => setSettings(s => s ? { ...s, welcomeBonus: Number(e.target.value) } : null)}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
-             <div className="flex justify-end">
+            <div className="max-w-6xl mx-auto flex justify-end">
                 <Button onClick={handleSave} disabled={isSaving}>
                     {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save All Settings

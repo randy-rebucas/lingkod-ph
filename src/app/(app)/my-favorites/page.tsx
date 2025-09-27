@@ -145,18 +145,20 @@ export default function MyFavoritesPage() {
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="container space-y-8">
                 
-                <div className="relative z-10">
+                <div className="max-w-6xl mx-auto relative z-10">
                     <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
                         {t('title')}
                     </h1>
@@ -166,24 +168,28 @@ export default function MyFavoritesPage() {
                 </div>
             
             {providers.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {providers.map(provider => (
-                        <ProviderCard key={provider.uid} provider={provider} />
-                    ))}
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {providers.map(provider => (
+                            <ProviderCard key={provider.uid} provider={provider} />
+                        ))}
+                    </div>
                 </div>
             ) : (
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="flex flex-col items-center justify-center text-center p-12">
-                        <Heart className="h-20 w-20 mb-6 text-primary opacity-60" />
-                        <div className="space-y-3">
-                            <h3 className="text-2xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noFavoritesYet')}</h3>
-                            <p className="text-lg text-muted-foreground max-w-md">{t('noFavoritesDescription')}</p>
-                        </div>
-                        <Button asChild className="mt-6 shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                            <Link href="/dashboard">{t('findProviders')}</Link>
-                        </Button>
-                    </CardContent>
-                </Card>
+                <div className="max-w-4xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="flex flex-col items-center justify-center text-center p-12">
+                            <Heart className="h-20 w-20 mb-6 text-primary opacity-60" />
+                            <div className="space-y-3">
+                                <h3 className="text-2xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noFavoritesYet')}</h3>
+                                <p className="text-lg text-muted-foreground max-w-md">{t('noFavoritesDescription')}</p>
+                            </div>
+                            <Button asChild className="mt-6 shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                                <Link href="/dashboard">{t('findProviders')}</Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
             )}
         </div>
     );
