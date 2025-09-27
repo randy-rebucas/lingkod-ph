@@ -23,8 +23,18 @@ export function QuotePreview({ data }: { data: QuoteFormValues }) {
     const t = useTranslations('QuotePreview');
 
     const subtotal = data.lineItems.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
-    const taxAmount = subtotal * ((Number(data.taxRate) || 0) / 100);
-    const total = subtotal + taxAmount;
+    
+    // Calculate discount
+    let discountAmount = 0;
+    if (data.discountType === 'percentage') {
+        discountAmount = subtotal * ((Number(data.discountValue) || 0) / 100);
+    } else if (data.discountType === 'fixed') {
+        discountAmount = Number(data.discountValue) || 0;
+    }
+    
+    const afterDiscount = subtotal - discountAmount;
+    const taxAmount = afterDiscount * ((Number(data.taxRate) || 0) / 100);
+    const total = afterDiscount + taxAmount;
     
     const issueDate = toDate(data.issueDate);
     const validUntil = toDate(data.validUntil);
@@ -78,6 +88,12 @@ export function QuotePreview({ data }: { data: QuoteFormValues }) {
                         <span className="text-muted-foreground">{t('subtotal')}:</span>
                         <span className="font-medium">₱{subtotal.toFixed(2)}</span>
                     </div>
+                    {discountAmount > 0 && (
+                        <div className="flex justify-between text-green-600">
+                            <span className="text-muted-foreground">Discount:</span>
+                            <span className="font-medium">-₱{discountAmount.toFixed(2)}</span>
+                        </div>
+                    )}
                      <div className="flex justify-between">
                         <span className="text-muted-foreground">{t('tax')} ({data.taxRate}%):</span>
                         <span className="font-medium">₱{taxAmount.toFixed(2)}</span>
@@ -89,6 +105,20 @@ export function QuotePreview({ data }: { data: QuoteFormValues }) {
                     </div>
                 </div>
             </div>
+
+            {data.notes && (
+                <div className="mt-8">
+                    <h3 className="font-bold mb-2">Notes:</h3>
+                    <p className="text-sm text-muted-foreground">{data.notes}</p>
+                </div>
+            )}
+
+            {data.terms && (
+                <div className="mt-6">
+                    <h3 className="font-bold mb-2">Terms & Conditions:</h3>
+                    <p className="text-sm text-muted-foreground">{data.terms}</p>
+                </div>
+            )}
 
             <div className="mt-12 text-center text-xs text-muted-foreground">
                 <p>{t('quoteValidUntil')}: {format(validUntil, "PPP")}</p>

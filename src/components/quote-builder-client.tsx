@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { CalendarIcon, PlusCircle, Sparkles, Trash2, Loader2, Eye, FileDown } from "lucide-react";
+import { CalendarIcon, PlusCircle, Sparkles, Trash2, Loader2, Eye, FileDown, Percent, Users, Copy, Save, Send, Download, Settings, Calculator, TrendingUp, DollarSign } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,8 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { QuotePreview } from "./quote-preview";
 import { useTranslations } from 'next-intl';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 // Define schemas and types outside component for export
 const createLineItemSchema = (t: any) => z.object({
@@ -41,6 +43,10 @@ const createQuoteSchema = (t: any, lineItemSchema: any) => z.object({
     validUntil: z.date({ required_error: t('validUntilRequired') }),
     lineItems: z.array(lineItemSchema).min(1, t('atLeastOneLineItem')),
     taxRate: z.coerce.number().min(0, t('taxRateCannotBeNegative')).optional().default(0),
+    discountType: z.enum(['none', 'percentage', 'fixed']).optional().default('none'),
+    discountValue: z.coerce.number().min(0).optional().default(0),
+    notes: z.string().optional(),
+    terms: z.string().optional(),
 });
 
 // Export type using a basic schema for TypeScript inference
@@ -59,6 +65,10 @@ const baseQuoteSchema = z.object({
     validUntil: z.date(),
     lineItems: z.array(baseLineItemSchema),
     taxRate: z.coerce.number().optional().default(0),
+    discountType: z.enum(['none', 'percentage', 'fixed']).optional().default('none'),
+    discountValue: z.coerce.number().min(0).optional().default(0),
+    notes: z.string().optional(),
+    terms: z.string().optional(),
 });
 
 export type QuoteFormValues = z.infer<typeof baseQuoteSchema>;
@@ -86,6 +96,10 @@ export default function QuoteBuilderClient() {
             validUntil: new Date(new Date().setDate(new Date().getDate() + 30)),
             lineItems: [{ description: "", quantity: 1, price: 0 }],
             taxRate: 12,
+            discountType: 'none',
+            discountValue: 0,
+            notes: "",
+            terms: "Payment terms: 50% upfront, 50% upon completion. Valid for 30 days from issue date.",
         },
     });
 
@@ -97,8 +111,20 @@ export default function QuoteBuilderClient() {
     const watchedLineItems = form.watch("lineItems");
     const subtotal = watchedLineItems.reduce((sum, item) => sum + (item.quantity || 0) * (item.price || 0), 0);
     const taxRate = form.watch("taxRate") || 0;
-    const taxAmount = subtotal * (taxRate / 100);
-    const total = subtotal + taxAmount;
+    const discountType = form.watch("discountType") || 'none';
+    const discountValue = form.watch("discountValue") || 0;
+    
+    // Calculate discount
+    let discountAmount = 0;
+    if (discountType === 'percentage') {
+        discountAmount = subtotal * (discountValue / 100);
+    } else if (discountType === 'fixed') {
+        discountAmount = discountValue;
+    }
+    
+    const afterDiscount = subtotal - discountAmount;
+    const taxAmount = afterDiscount * (taxRate / 100);
+    const total = afterDiscount + taxAmount;
 
     const handleGenerateDescription = async (index: number) => {
         setGeneratingDescriptionIndex(index);
@@ -280,12 +306,63 @@ export default function QuoteBuilderClient() {
 
                         <div className="lg:col-span-2">
                              <Card className="sticky top-20">
-                                <CardHeader><CardTitle>{t('quoteSummary')}</CardTitle></CardHeader>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Calculator className="h-5 w-5" />
+                                        {t('quoteSummary')}
+                                    </CardTitle>
+                                </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="flex justify-between">
                                         <span className="text-muted-foreground">{t('subtotal')}</span>
                                         <span className="font-medium">₱{subtotal.toFixed(2)}</span>
                                     </div>
+                                    
+                                    {/* Discount Section */}
+                                    <div className="space-y-3 p-3 rounded-lg bg-muted/20">
+                                        <div className="flex items-center gap-2">
+                                            <Percent className="h-4 w-4 text-muted-foreground" />
+                                            <span className="text-sm font-medium">Discount</span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <FormField control={form.control} name="discountType" render={({ field }) => (
+                                                <FormItem>
+                                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                        <FormControl>
+                                                            <SelectTrigger className="h-8">
+                                                                <SelectValue placeholder="Type" />
+                                                            </SelectTrigger>
+                                                        </FormControl>
+                                                        <SelectContent>
+                                                            <SelectItem value="none">No Discount</SelectItem>
+                                                            <SelectItem value="percentage">Percentage</SelectItem>
+                                                            <SelectItem value="fixed">Fixed Amount</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </FormItem>
+                                            )} />
+                                            <FormField control={form.control} name="discountValue" render={({ field }) => (
+                                                <FormItem>
+                                                    <FormControl>
+                                                        <Input 
+                                                            type="number" 
+                                                            className="h-8" 
+                                                            placeholder={discountType === 'percentage' ? '%' : '₱'}
+                                                            disabled={discountType === 'none'}
+                                                            {...field} 
+                                                        />
+                                                    </FormControl>
+                                                </FormItem>
+                                            )} />
+                                        </div>
+                                        {discountAmount > 0 && (
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-muted-foreground">Discount Amount</span>
+                                                <span className="font-medium text-green-600">-₱{discountAmount.toFixed(2)}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
                                     <div className="flex items-center justify-between">
                                         <FormField control={form.control} name="taxRate" render={({ field }) => (
                                             <FormItem className="flex items-center gap-2">
@@ -300,18 +377,65 @@ export default function QuoteBuilderClient() {
                                         <span>{t('total')}</span>
                                         <span>₱{total.toFixed(2)}</span>
                                     </div>
+                                    
+                                    {/* Additional Options */}
+                                    <div className="space-y-3 pt-4 border-t">
+                                        <FormField control={form.control} name="notes" render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-sm">Notes</FormLabel>
+                                                <FormControl>
+                                                    <Textarea 
+                                                        placeholder="Additional notes for the client..." 
+                                                        className="bg-background text-sm" 
+                                                        rows={2}
+                                                        {...field} 
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )} />
+                                        
+                                        <FormField control={form.control} name="terms" render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="text-sm">Terms & Conditions</FormLabel>
+                                                <FormControl>
+                                                    <Textarea 
+                                                        placeholder="Payment terms and conditions..." 
+                                                        className="bg-background text-sm" 
+                                                        rows={2}
+                                                        {...field} 
+                                                    />
+                                                </FormControl>
+                                            </FormItem>
+                                        )} />
+                                    </div>
                                 </CardContent>
                                 <CardFooter className="flex flex-col gap-2">
-                                    <Button type="submit" className="w-full" disabled={isSaving}>
-                                        {isSaving ? <Loader2 className="mr-2 animate-spin" /> : <FileDown className="mr-2" />}
-                                        {isSaving ? t('saving') : t('saveQuote')}
-                                    </Button>
-                                    <DialogTrigger asChild>
-                                        <Button type="button" variant="outline" className="w-full" onClick={handlePreview}>
-                                            <Eye className="mr-2" />
-                                            {t('preview')}
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <Button type="submit" className="w-full" disabled={isSaving}>
+                                            {isSaving ? <Loader2 className="mr-2 animate-spin" /> : <Save className="mr-2" />}
+                                            {isSaving ? t('saving') : 'Save Draft'}
                                         </Button>
-                                    </DialogTrigger>
+                                        <Button type="button" variant="outline" className="w-full">
+                                            <Send className="mr-2" />
+                                            Send Quote
+                                        </Button>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <DialogTrigger asChild>
+                                            <Button type="button" variant="outline" className="w-full" onClick={handlePreview}>
+                                                <Eye className="mr-2" />
+                                                {t('preview')}
+                                            </Button>
+                                        </DialogTrigger>
+                                        <Button type="button" variant="outline" className="w-full">
+                                            <Download className="mr-2" />
+                                            Export PDF
+                                        </Button>
+                                    </div>
+                                    <Button type="button" variant="ghost" className="w-full">
+                                        <Copy className="mr-2" />
+                                        Duplicate Quote
+                                    </Button>
                                 </CardFooter>
                             </Card>
                         </div>

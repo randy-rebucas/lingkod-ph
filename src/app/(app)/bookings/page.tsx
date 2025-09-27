@@ -1,12 +1,36 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Loader2, Calendar, Check, X, Hourglass, Briefcase, UserCircle, Timer, Eye, Repeat, Wallet, Search, Filter, SortAsc, SortDesc, Clock, AlertCircle, CheckCircle2, Ban, CreditCard, FileCheck } from "lucide-react";
+import { 
+  MoreHorizontal, 
+  Loader2, 
+  Calendar, 
+  Check, 
+  X, 
+  Hourglass, 
+  Briefcase, 
+  UserCircle, 
+  Timer, 
+  Eye, 
+  Repeat, 
+  Wallet, 
+  Search, 
+  Filter, 
+  SortAsc, 
+  SortDesc, 
+  Clock, 
+  AlertCircle, 
+  CheckCircle2, 
+  Ban, 
+  CreditCard, 
+  FileCheck,
+  Zap
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +46,10 @@ import Link from "next/link";
 import { BookingDialog } from "@/components/booking-dialog";
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 
 type BookingStatus = "Pending Payment" | "Pending Verification" | "Upcoming" | "In Progress" | "Completed" | "Cancelled" | "Payment Rejected";
@@ -49,6 +77,40 @@ export type Booking = {
     paymentRejectedBy?: string;
     paymentVerifiedAt?: Timestamp;
     paymentVerifiedBy?: string;
+    // Enhanced fields
+    location?: string;
+    description?: string;
+    duration?: number;
+    category?: string;
+    priority?: 'low' | 'medium' | 'high' | 'urgent';
+    recurring?: boolean;
+    recurringPattern?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+    tags?: string[];
+    attendees?: string[];
+    reminder?: boolean;
+    reminderTime?: number; // minutes before
+    color?: string;
+    metadata?: {
+        bookingId?: string;
+        clientId?: string;
+        providerId?: string;
+        serviceId?: string;
+        [key: string]: any;
+    };
+    createdAt?: Timestamp;
+    updatedAt?: Timestamp;
+    completedAt?: Timestamp;
+    cancelledAt?: Timestamp;
+    cancellationReason?: string;
+    rating?: number;
+    feedback?: string;
+    workLog?: {
+        startTime?: Timestamp;
+        endTime?: Timestamp;
+        breaks?: number;
+        notes?: string;
+        photos?: string[];
+    };
 };
 
 const getStatusVariant = (status: string) => {
@@ -115,6 +177,7 @@ const BookingCard = ({ booking, userRole }: { booking: Booking; userRole: string
 
 
     const handleStatusUpdate = async (booking: Booking, newStatus: BookingStatus, message?: string) => {
+        if (!db) return;
         try {
             const bookingRef = doc(db, "bookings", booking.id);
             await updateDoc(bookingRef, {
@@ -339,6 +402,7 @@ const BookingCard = ({ booking, userRole }: { booking: Booking; userRole: string
 };
 
 const createNotification = async (userId: string, message: string, link: string) => {
+    if (!db) return;
     try {
         const userNotifSettingsRef = doc(db, 'users', userId);
         const docSnap = await getDoc(userNotifSettingsRef);
@@ -456,6 +520,10 @@ export default function BookingsPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState<"date" | "price" | "status">("date");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+    const [filterCategory, setFilterCategory] = useState<string>('all');
+    const [filterPriority, setFilterPriority] = useState<string>('all');
+    const [dateFilter, setDateFilter] = useState<string>('all');
+    const [showCompleted, setShowCompleted] = useState(true);
 
     useEffect(() => {
         const hash = window.location.hash.substring(1);
@@ -467,17 +535,131 @@ export default function BookingsPage() {
         }
     }, []);
 
-    // Filter and sort bookings
-    const filteredAndSortedBookings = bookings
-        .filter(booking => {
-            const matchesStatus = selectedStatus === "all" || booking.status === selectedStatus;
-            const matchesSearch = searchTerm === "" || 
+    // Calculate analytics data
+    const analyticsData = useMemo(() => {
+        const totalBookings = bookings.length;
+        const totalRevenue = bookings.reduce((sum, booking) => sum + booking.price, 0);
+        const completedBookings = bookings.filter(b => b.status === 'Completed').length;
+        const cancelledBookings = bookings.filter(b => b.status === 'Cancelled').length;
+        const completionRate = totalBookings > 0 ? (completedBookings / totalBookings) * 100 : 0;
+        const cancellationRate = totalBookings > 0 ? (cancelledBookings / totalBookings) * 100 : 0;
+        
+        const todayBookings = bookings.filter(b => {
+            const today = new Date();
+            const bookingDate = b.date.toDate();
+            return bookingDate.toDateString() === today.toDateString();
+        }).length;
+        
+        const thisWeekBookings = bookings.filter(b => {
+            const weekStart = new Date();
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekEnd.getDate() + 6);
+            const bookingDate = b.date.toDate();
+            return bookingDate >= weekStart && bookingDate <= weekEnd;
+        }).length;
+        
+        const categoryBreakdown = bookings.reduce((acc, booking) => {
+            const category = booking.category || 'Other';
+            acc[category] = (acc[category] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        const statusBreakdown = bookings.reduce((acc, booking) => {
+            acc[booking.status] = (acc[booking.status] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        const monthlyGrowth = bookings.filter(b => {
+            const thisMonth = new Date();
+            const bookingMonth = b.date.toDate();
+            return bookingMonth.getMonth() === thisMonth.getMonth() && 
+                   bookingMonth.getFullYear() === thisMonth.getFullYear();
+        }).length;
+
+        const lastMonth = new Date();
+        lastMonth.setMonth(lastMonth.getMonth() - 1);
+        const lastMonthBookings = bookings.filter(b => {
+            const bookingDate = b.date.toDate();
+            return bookingDate.getMonth() === lastMonth.getMonth() && 
+                   bookingDate.getFullYear() === lastMonth.getFullYear();
+        }).length;
+
+        const growthRate = lastMonthBookings > 0 ? ((monthlyGrowth - lastMonthBookings) / lastMonthBookings) * 100 : 0;
+
+        return {
+            totalBookings,
+            totalRevenue,
+            completedBookings,
+            cancelledBookings,
+            completionRate,
+            cancellationRate,
+            todayBookings,
+            thisWeekBookings,
+            categoryBreakdown,
+            statusBreakdown,
+            monthlyGrowth,
+            lastMonthBookings,
+            growthRate
+        };
+    }, [bookings]);
+
+    // Advanced filtering logic
+    const filteredAndSortedBookings = useMemo(() => {
+        let filtered = bookings;
+
+        // Apply status filter
+        if (selectedStatus !== "all") {
+            filtered = filtered.filter(booking => booking.status === selectedStatus);
+        }
+
+        // Apply category filter
+        if (filterCategory !== 'all') {
+            filtered = filtered.filter(booking => (booking.category || 'Other') === filterCategory);
+        }
+
+        // Apply priority filter
+        if (filterPriority !== 'all') {
+            filtered = filtered.filter(booking => (booking.priority || 'medium') === filterPriority);
+        }
+
+        // Apply date filter
+        if (dateFilter !== 'all') {
+            const now = new Date();
+            filtered = filtered.filter(booking => {
+                const bookingDate = booking.date.toDate();
+                switch (dateFilter) {
+                    case 'today':
+                        return bookingDate.toDateString() === now.toDateString();
+                    case 'week':
+                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        return bookingDate >= weekAgo;
+                    case 'month':
+                        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        return bookingDate >= monthAgo;
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        // Apply search filter
+        if (searchTerm) {
+            filtered = filtered.filter(booking => 
                 booking.serviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 booking.providerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                booking.clientName.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesStatus && matchesSearch;
-        })
-        .sort((a, b) => {
+                booking.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (booking.category && booking.category.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+        }
+
+        // Apply completed filter
+        if (!showCompleted) {
+            filtered = filtered.filter(booking => booking.status !== 'Completed');
+        }
+
+        // Sort bookings
+        return filtered.sort((a, b) => {
             let comparison = 0;
             switch (sortBy) {
                 case "date":
@@ -492,6 +674,7 @@ export default function BookingsPage() {
             }
             return sortOrder === "asc" ? comparison : -comparison;
         });
+    }, [bookings, selectedStatus, filterCategory, filterPriority, dateFilter, searchTerm, showCompleted, sortBy, sortOrder]);
 
     const statusCounts = {
         "Pending Payment": pendingPaymentBookings.length,
@@ -503,73 +686,124 @@ export default function BookingsPage() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                        Bookings
+                    </h1>
+                    <p className="text-muted-foreground mt-1">
+                        Manage your bookings and track your service appointments
+                    </p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="flex items-center gap-1">
+                        <Zap className="h-3 w-3" />
+                        Advanced Bookings
+                    </Badge>
+                </div>
+            </div>
 
-            {/* Search and Sort Controls */}
-            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                <div className="flex-1 max-w-md">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search bookings..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft"
-                        />
+            {/* Advanced Filter Controls */}
+            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <Filter className="h-5 w-5" />
+                        Advanced Filters
+                    </CardTitle>
+                    <CardDescription>Customize your booking view with advanced filtering options</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid gap-4 md:grid-cols-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="search">Search Bookings</Label>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input 
+                                    placeholder="Search by service, provider, or client..."
+                                    className="pl-10"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="status">Status</Label>
+                            <Select value={selectedStatus} onValueChange={(value: BookingStatus | "all") => setSelectedStatus(value)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Status</SelectItem>
+                                    <SelectItem value="Pending Payment">Pending Payment</SelectItem>
+                                    <SelectItem value="Pending Verification">Pending Verification</SelectItem>
+                                    <SelectItem value="Upcoming">Upcoming</SelectItem>
+                                    <SelectItem value="In Progress">In Progress</SelectItem>
+                                    <SelectItem value="Completed">Completed</SelectItem>
+                                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="category">Category</Label>
+                            <Select value={filterCategory} onValueChange={setFilterCategory}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Categories</SelectItem>
+                                    {Object.keys(analyticsData.categoryBreakdown).map(category => (
+                                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="priority">Priority</Label>
+                            <Select value={filterPriority} onValueChange={setFilterPriority}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select priority" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Priorities</SelectItem>
+                                    <SelectItem value="urgent">Urgent</SelectItem>
+                                    <SelectItem value="high">High</SelectItem>
+                                    <SelectItem value="medium">Medium</SelectItem>
+                                    <SelectItem value="low">Low</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="date">Date Range</Label>
+                            <Select value={dateFilter} onValueChange={setDateFilter}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select date range" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Time</SelectItem>
+                                    <SelectItem value="today">Today</SelectItem>
+                                    <SelectItem value="week">This Week</SelectItem>
+                                    <SelectItem value="month">This Month</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="completed">Show Completed</Label>
+                            <div className="flex items-center space-x-2">
+                                <Switch 
+                                    id="completed" 
+                                    checked={showCompleted}
+                                    onCheckedChange={setShowCompleted}
+                                />
+                                <Label htmlFor="completed" className="text-sm">
+                                    {showCompleted ? 'Show' : 'Hide'}
+                                </Label>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div className="flex gap-2">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm" className="shadow-soft hover:shadow-glow/20 transition-all duration-300">
-                                <Filter className="h-4 w-4 mr-2" />
-                                Sort by {sortBy}
-                                {sortOrder === "asc" ? <SortAsc className="h-4 w-4 ml-2" /> : <SortDesc className="h-4 w-4 ml-2" />}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="shadow-glow border-0 bg-background/95 backdrop-blur-md">
-                            <DropdownMenuLabel className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Sort by</DropdownMenuLabel>
-                            <DropdownMenuSeparator className="bg-border/50" />
-                            <DropdownMenuItem onClick={() => setSortBy("date")}>
-                                Date
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setSortBy("price")}>
-                                Price
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setSortBy("status")}>
-                                Status
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-border/50" />
-                            <DropdownMenuItem onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-                                {sortOrder === "asc" ? "Descending" : "Ascending"}
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            </div>
-
-            {/* Status Filter Chips */}
-            <div className="flex flex-wrap gap-2">
-                <Button
-                    variant={selectedStatus === "all" ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedStatus("all")}
-                    className="transition-all duration-300"
-                >
-                    All ({bookings.length})
-                </Button>
-                {Object.entries(statusCounts).map(([status, count]) => (
-                    <Button
-                        key={status}
-                        variant={selectedStatus === status ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setSelectedStatus(status as BookingStatus)}
-                        className="transition-all duration-300"
-                    >
-                        {status} ({count})
-                    </Button>
-                ))}
-            </div>
+                </CardContent>
+            </Card>
 
             {/* Bookings List */}
             {loading ? (
@@ -591,7 +825,7 @@ export default function BookingsPage() {
                 </div>
             ) : filteredAndSortedBookings.length > 0 ? (
                 <div className="space-y-4">
-                    {filteredAndSortedBookings.map((booking) => (
+                    {filteredAndSortedBookings.map((booking: Booking) => (
                         <BookingCard key={booking.id} booking={booking} userRole={userRole || 'client'} />
                     ))}
                 </div>
@@ -612,3 +846,4 @@ export default function BookingsPage() {
         </div>
     );
 }
+

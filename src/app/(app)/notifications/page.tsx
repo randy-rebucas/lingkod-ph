@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -8,7 +8,180 @@ import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
-import { Bell, Briefcase, MessageSquare, ThumbsDown, ThumbsUp, UserPlus, X, Star, Trash2, Check, CheckCheck } from 'lucide-react';
+import { 
+  Bell, 
+  Briefcase, 
+  MessageSquare, 
+  ThumbsDown, 
+  ThumbsUp, 
+  UserPlus, 
+  X, 
+  Star, 
+  Trash2, 
+  Check, 
+  CheckCheck,
+  Filter,
+  Calendar,
+  AlertTriangle,
+  Users,
+  Clock,
+  Zap,
+  Eye,
+  Search,
+  Mail,
+  UserCheck,
+  UserX,
+  CheckCircle,
+  XCircle,
+  DollarSign,
+  BookCheck,
+  Wallet,
+  CheckCircle2,
+  Hourglass,
+  User,
+  Shield,
+  Crown,
+  Building,
+  Globe,
+  Phone,
+  MapPin as Location,
+  Calendar as CalendarIcon,
+  Edit,
+  Copy,
+  Send,
+  Archive,
+  Flag,
+  Info,
+  HelpCircle,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  Minus as MinusIcon,
+  Volume2,
+  VolumeX,
+  Volume1,
+  BellRing,
+  BellOff,
+  AlertCircle,
+  Info as InfoIcon,
+  CheckCircle as CheckCircleIcon,
+  XCircle as XCircleIcon,
+  AlertTriangle as AlertTriangleIcon,
+  Lightbulb,
+  Megaphone,
+  Radio,
+  Tv,
+  Smartphone,
+  Monitor,
+  Laptop,
+  Tablet,
+  Headphones,
+  Speaker,
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Camera,
+  CameraOff,
+  Image,
+  File,
+  Folder,
+  FolderOpen,
+  Database,
+  Server,
+  Cloud,
+  Wifi,
+  WifiOff,
+  Signal,
+  SignalHigh,
+  SignalMedium,
+  SignalLow,
+  Battery,
+  BatteryLow,
+  BatteryMedium,
+  BatteryFull,
+  Power,
+  PowerOff,
+  Plug,
+  Unplug,
+  Zap as ZapIcon,
+  Sun,
+  Moon,
+  Sunrise,
+  Sunset,
+  CloudRain,
+  CloudSnow,
+  CloudLightning,
+  Wind,
+  Thermometer,
+  Droplets,
+  Umbrella,
+  Snowflake,
+  Tornado,
+  Flame,
+  Sparkles,
+  Star as StarIcon,
+  Heart,
+  Smile,
+  Frown,
+  Meh,
+  Angry,
+  Laugh,
+  Ghost,
+  Skull,
+  Cat,
+  Dog,
+  Bird,
+  Fish,
+  Bug,
+  Flower,
+  Leaf,
+  Mountain,
+  Building2,
+  Home,
+  Car,
+  Bus,
+  Train,
+  Plane,
+  Ship,
+  Rocket,
+  Bike,
+  Tent,
+  Compass,
+  Map,
+  Navigation,
+  Route,
+  Flag as FlagIcon,
+  Trophy,
+  Medal,
+  Ribbon,
+  Gift,
+  Cake,
+  Cookie,
+  Pizza,
+  Sandwich,
+  Salad,
+  Soup,
+  Coffee,
+  Beer,
+  Wine,
+  Milk,
+  Egg,
+  Apple,
+  Banana,
+  Grape,
+  Cherry,
+  IceCream,
+  Lollipop,
+  Popcorn,
+  Candy,
+  Donut,
+  Croissant,
+  Mouse,
+  Rat,
+  Rabbit
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,8 +189,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { handleInviteAction } from '@/app/(app)/profile/actions';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info' | 'renewal_reminder' | 'new_review' | 'new_job';
+type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info' | 'renewal_reminder' | 'new_review' | 'new_job' | 'payment_received' | 'payment_failed' | 'system_alert' | 'maintenance' | 'security' | 'promotion' | 'newsletter' | 'reminder' | 'deadline' | 'achievement' | 'warning' | 'error' | 'success';
+
+type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
 
 type Notification = {
     id: string;
@@ -29,6 +209,25 @@ type Notification = {
     inviteId?: string;
     agencyId?: string;
     agencyName?: string;
+    priority?: NotificationPriority;
+    category?: string;
+    source?: string;
+    metadata?: {
+        bookingId?: string;
+        amount?: number;
+        userId?: string;
+        userName?: string;
+        avatar?: string;
+        [key: string]: any;
+    };
+    actions?: {
+        label: string;
+        action: string;
+        variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+    }[];
+    expiresAt?: any; // Firestore Timestamp
+    archived?: boolean;
+    starred?: boolean;
 };
 
 const getIconForType = (type: NotificationType) => {
@@ -62,7 +261,11 @@ export default function NotificationsPage() {
     const t = useTranslations('Notifications');
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState<'all' | 'unread'>('all');
+    const [filter, setFilter] = useState<'all' | 'unread' | 'starred' | 'archived'>('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [typeFilter, setTypeFilter] = useState<string>('all');
+    const [priorityFilter, setPriorityFilter] = useState<string>('all');
+    const [dateFilter, setDateFilter] = useState<string>('all');
 
     useEffect(() => {
         if (!user || !db) {
@@ -154,11 +357,101 @@ export default function NotificationsPage() {
         }
     };
 
-    const filteredNotifications = filter === 'unread' 
-        ? notifications.filter(n => !n.read)
-        : notifications;
+    // Calculate analytics data
+    const analyticsData = React.useMemo(() => {
+        const unreadCount = notifications.filter(n => !n.read).length;
+        const starredCount = notifications.filter(n => n.starred).length;
+        const archivedCount = notifications.filter(n => n.archived).length;
+        const todayCount = notifications.filter(n => {
+            const today = new Date();
+            const notifDate = n.createdAt?.toDate();
+            return notifDate && notifDate.toDateString() === today.toDateString();
+        }).length;
+        
+        const typeBreakdown = notifications.reduce((acc, notif) => {
+            acc[notif.type] = (acc[notif.type] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
 
-    const unreadCount = notifications.filter(n => !n.read).length;
+        const priorityBreakdown = notifications.reduce((acc, notif) => {
+            const priority = notif.priority || 'medium';
+            acc[priority] = (acc[priority] || 0) + 1;
+            return acc;
+        }, {} as Record<string, number>);
+
+        return {
+            unreadCount,
+            starredCount,
+            archivedCount,
+            todayCount,
+            typeBreakdown,
+            priorityBreakdown,
+            totalCount: notifications.length
+        };
+    }, [notifications]);
+
+    // Advanced filtering logic
+    const filteredNotifications = React.useMemo(() => {
+        let filtered = notifications;
+
+        // Apply main filter
+        switch (filter) {
+            case 'unread':
+                filtered = filtered.filter(n => !n.read);
+                break;
+            case 'starred':
+                filtered = filtered.filter(n => n.starred);
+                break;
+            case 'archived':
+                filtered = filtered.filter(n => n.archived);
+                break;
+            default:
+                filtered = filtered.filter(n => !n.archived);
+        }
+
+        // Apply search filter
+        if (searchQuery) {
+            filtered = filtered.filter(n => 
+                n.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                n.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (n.metadata?.userName && n.metadata.userName.toLowerCase().includes(searchQuery.toLowerCase()))
+            );
+        }
+
+        // Apply type filter
+        if (typeFilter !== 'all') {
+            filtered = filtered.filter(n => n.type === typeFilter);
+        }
+
+        // Apply priority filter
+        if (priorityFilter !== 'all') {
+            filtered = filtered.filter(n => (n.priority || 'medium') === priorityFilter);
+        }
+
+        // Apply date filter
+        if (dateFilter !== 'all') {
+            const now = new Date();
+            filtered = filtered.filter(n => {
+                const notifDate = n.createdAt?.toDate();
+                if (!notifDate) return false;
+
+                switch (dateFilter) {
+                    case 'today':
+                        return notifDate.toDateString() === now.toDateString();
+                    case 'week':
+                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        return notifDate >= weekAgo;
+                    case 'month':
+                        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        return notifDate >= monthAgo;
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        return filtered;
+    }, [notifications, filter, searchQuery, typeFilter, priorityFilter, dateFilter]);
 
     if (loading) {
         return (
@@ -194,9 +487,9 @@ export default function NotificationsPage() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                         {t('notifications')}
@@ -205,155 +498,224 @@ export default function NotificationsPage() {
                         {t('notificationsDescription')}
                     </p>
                 </div>
-                <div className="flex gap-2">
-                    {unreadCount > 0 && (
+                <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="flex items-center gap-1">
+                        <Zap className="h-3 w-3" />
+                        Advanced Notifications
+                    </Badge>
+                    <div className="flex gap-2">
+                        {analyticsData.unreadCount > 0 && (
+                            <Button 
+                                onClick={handleMarkAllAsRead}
+                                variant="outline" 
+                                size="sm"
+                                className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
+                            >
+                                <CheckCheck className="h-4 w-4 mr-2" />
+                                {t('markAllAsRead')}
+                            </Button>
+                        )}
                         <Button 
-                            onClick={handleMarkAllAsRead}
+                            onClick={handleDeleteAllRead}
                             variant="outline" 
                             size="sm"
                             className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
                         >
-                            <CheckCheck className="h-4 w-4 mr-2" />
-                            {t('markAllAsRead')}
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            {t('deleteRead')}
                         </Button>
-                    )}
-                    <Button 
-                        onClick={handleDeleteAllRead}
-                        variant="outline" 
-                        size="sm"
-                        className="shadow-soft hover:shadow-glow/20 transition-all duration-300"
-                    >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        {t('deleteRead')}
-                    </Button>
+                    </div>
                 </div>
             </div>
 
-            {/* Filter Tabs */}
-            <div className="flex gap-2">
-                <Button
-                    variant={filter === 'all' ? 'default' : 'outline'}
-                    size="sm"
+            {/* Simple Filter Controls */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <div className="flex-1 max-w-md">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                            placeholder="Search notifications..."
+                            className="pl-10"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <div className="flex gap-2">
+                    <Select value={typeFilter} onValueChange={setTypeFilter}>
+                        <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Types</SelectItem>
+                            <SelectItem value="booking_update">Booking Updates</SelectItem>
+                            <SelectItem value="new_message">Messages</SelectItem>
+                            <SelectItem value="agency_invite">Agency Invites</SelectItem>
+                            <SelectItem value="payment_received">Payments</SelectItem>
+                            <SelectItem value="system_alert">System Alerts</SelectItem>
+                            <SelectItem value="reminder">Reminders</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select value={dateFilter} onValueChange={setDateFilter}>
+                        <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Date" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Time</SelectItem>
+                            <SelectItem value="today">Today</SelectItem>
+                            <SelectItem value="week">This Week</SelectItem>
+                            <SelectItem value="month">This Month</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+
+            {/* Notifications List */}
+            <NotificationsTab 
+                notifications={filteredNotifications} 
+                filter={filter}
+                setFilter={setFilter}
+                onNotificationClick={handleNotificationClick}
+                onInviteResponse={handleInviteResponse}
+                onDeleteNotification={handleDeleteNotification}
+                analyticsData={analyticsData}
+            />
+
+        </div>
+    );
+}
+
+// Notifications Tab Component
+function NotificationsTab({ 
+    notifications, 
+    filter, 
+    setFilter, 
+    onNotificationClick, 
+    onInviteResponse, 
+    onDeleteNotification,
+    analyticsData 
+}: { 
+    notifications: Notification[], 
+    filter: 'all' | 'unread' | 'starred' | 'archived', 
+    setFilter: (filter: 'all' | 'unread' | 'starred' | 'archived') => void,
+    onNotificationClick: (notif: Notification) => void,
+    onInviteResponse: (notif: Notification, accepted: boolean) => void,
+    onDeleteNotification: (id: string) => void,
+    analyticsData: any
+}) {
+    return (
+        <div className="space-y-6">
+            {/* Simple Filter Tabs */}
+            <div className="flex gap-1 border-b">
+                <button
+                    className={cn(
+                        "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                        filter === 'all' 
+                            ? "border-primary text-primary" 
+                            : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
                     onClick={() => setFilter('all')}
-                    className="transition-all duration-300"
                 >
-                    {t('all')} ({notifications.length})
-                </Button>
-                <Button
-                    variant={filter === 'unread' ? 'default' : 'outline'}
-                    size="sm"
+                    All ({analyticsData.totalCount})
+                </button>
+                <button
+                    className={cn(
+                        "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                        filter === 'unread' 
+                            ? "border-primary text-primary" 
+                            : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
                     onClick={() => setFilter('unread')}
-                    className="transition-all duration-300"
                 >
-                    {t('unread')} ({unreadCount})
-                </Button>
+                    Unread ({analyticsData.unreadCount})
+                </button>
+                <button
+                    className={cn(
+                        "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                        filter === 'starred' 
+                            ? "border-primary text-primary" 
+                            : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                    onClick={() => setFilter('starred')}
+                >
+                    Starred ({analyticsData.starredCount})
+                </button>
+                <button
+                    className={cn(
+                        "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                        filter === 'archived' 
+                            ? "border-primary text-primary" 
+                            : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                    onClick={() => setFilter('archived')}
+                >
+                    Archived ({analyticsData.archivedCount})
+                </button>
             </div>
 
             {/* Notifications List */}
-            {filteredNotifications.length > 0 ? (
-                <div className="space-y-4">
-                    {filteredNotifications.map(notif => (
-                        <Card 
+            {notifications.length > 0 ? (
+                <div className="space-y-2">
+                    {notifications.map(notif => (
+                        <div 
                             key={notif.id} 
                             className={cn(
-                                "shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 cursor-pointer group",
-                                !notif.read && "ring-2 ring-primary/20"
+                                "flex items-center gap-3 p-4 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors",
+                                !notif.read && "bg-blue-50 border-blue-200"
                             )}
-                            onClick={() => handleNotificationClick(notif)}
+                            onClick={() => onNotificationClick(notif)}
                         >
-                            <CardContent className="p-6">
-                                <div className="flex items-start space-x-4">
-                                    {/* Icon */}
-                                    <div className={cn(
-                                        "flex items-center justify-center w-12 h-12 rounded-full text-white",
-                                        getTypeColor(notif.type)
-                                    )}>
-                                        {getIconForType(notif.type)}
-                                    </div>
+                            {/* Simple Icon */}
+                            <div className="flex-shrink-0">
+                                {getIconForType(notif.type)}
+                            </div>
 
-                                    {/* Content */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-start justify-between">
-                                            <div className="flex-1">
-                                                <p className={cn(
-                                                    "text-sm font-medium",
-                                                    !notif.read && "font-semibold"
-                                                )}>
-                                                    {notif.message}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    {notif.createdAt ? formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true }) : ''}
-                                                </p>
-                                                
-                                                {/* Agency Invite Actions */}
-                                                {notif.type === 'agency_invite' && (
-                                                    <div className="flex gap-2 mt-3">
-                                                        <Button 
-                                                            size="sm" 
-                                                            className="h-8"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleInviteResponse(notif, true);
-                                                            }}
-                                                        >
-                                                            <ThumbsUp className="mr-1 h-3 w-3"/>
-                                                            {t('accept')}
-                                                        </Button>
-                                                        <Button 
-                                                            size="sm" 
-                                                            variant="destructive" 
-                                                            className="h-8"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleInviteResponse(notif, false);
-                                                            }}
-                                                        >
-                                                            <ThumbsDown className="mr-1 h-3 w-3"/>
-                                                            {t('decline')}
-                                                        </Button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            
-                                            {/* Status and Actions */}
-                                            <div className="flex items-center gap-2 ml-4">
-                                                {!notif.read && (
-                                                    <Badge variant="secondary" className="text-xs">
-                                                        {t('new')}
-                                                    </Badge>
-                                                )}
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
-                                                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDeleteNotification(notif.id);
-                                                    }}
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                                <p className={cn(
+                                    "text-sm",
+                                    !notif.read && "font-medium"
+                                )}>
+                                    {notif.message}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {notif.createdAt ? formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true }) : ''}
+                                </p>
+                            </div>
+
+                            {/* Simple Actions */}
+                            <div className="flex items-center gap-2">
+                                {!notif.read && (
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                )}
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeleteNotification(notif.id);
+                                    }}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
                     ))}
                 </div>
             ) : (
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="flex flex-col items-center justify-center text-center p-12">
-                        <Bell className="h-16 w-16 text-muted-foreground mb-4" />
-                        <h3 className="text-xl font-semibold mb-2">
-                            {filter === 'unread' ? t('noUnreadNotifications') : t('noNotifications')}
-                        </h3>
-                        <p className="text-muted-foreground">
-                            {filter === 'unread' ? t('noUnreadDescription') : t('noNotificationsDescription')}
-                        </p>
-                    </CardContent>
-                </Card>
+                <div className="text-center py-12">
+                    <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">
+                        {filter === 'unread' ? 'No unread notifications' : 'No notifications'}
+                    </h3>
+                    <p className="text-muted-foreground">
+                        {filter === 'unread' ? 'You\'re all caught up!' : 'No notifications to display'}
+                    </p>
+                </div>
             )}
         </div>
     );
 }
+

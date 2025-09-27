@@ -12,9 +12,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Eye, Receipt } from "lucide-react";
+import { Eye, Receipt, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { InvoicePreview } from "@/components/invoice-preview";
+import { Input } from "@/components/ui/input";
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
 
@@ -56,6 +57,7 @@ export default function BillingPage() {
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
         if (!user || !db) {
@@ -77,6 +79,17 @@ export default function BillingPage() {
         return () => unsubscribe();
     }, [user]);
 
+    // Simple search filter
+    const filteredInvoices = invoices.filter(invoice => {
+        if (!searchQuery) return true;
+        const query = searchQuery.toLowerCase();
+        return (
+            invoice.invoiceNumber.toLowerCase().includes(query) ||
+            invoice.clientName.toLowerCase().includes(query) ||
+            invoice.clientEmail.toLowerCase().includes(query)
+        );
+    });
+
     const handleViewDetails = (invoice: Invoice) => {
         setSelectedInvoice(invoice);
     };
@@ -96,10 +109,38 @@ export default function BillingPage() {
     return (
         <Dialog onOpenChange={(open) => !open && setSelectedInvoice(null)}>
         <div className="max-w-6xl mx-auto space-y-8">
-             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold">Billing</h1>
+                    <p className="text-muted-foreground">View and manage your invoices</p>
+                </div>
+            </div>
+
+            {/* Search */}
+            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardContent className="p-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search invoices..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pl-10"
+                        />
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Invoice Table */}
+            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                    <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Invoice History</CardTitle>
-                    <CardDescription className="text-base">View and manage your billing invoices</CardDescription>
+                    <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                        Invoice History
+                    </CardTitle>
+                    <CardDescription className="text-base">
+                        View and manage your billing invoices
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
                     <Table>
@@ -114,7 +155,7 @@ export default function BillingPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {invoices.length > 0 ? invoices.map(invoice => (
+                            {filteredInvoices.length > 0 ? filteredInvoices.map(invoice => (
                                 <TableRow key={invoice.id} className="hover:bg-muted/30 transition-colors border-b border-border/30">
                                     <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
                                     <TableCell>{format(invoice.issueDate.toDate(), 'PP')}</TableCell>
