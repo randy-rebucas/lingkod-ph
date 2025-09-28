@@ -335,34 +335,42 @@ export default function AgencyProfilePage() {
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="flex flex-col md:flex-row items-center gap-6 p-6">
-                    <Skeleton className="h-32 w-32 rounded-full" />
-                    <div className="space-y-4 flex-1">
-                        <Skeleton className="h-8 w-48" />
-                        <Skeleton className="h-5 w-32" />
-                        <Skeleton className="h-16 w-full" />
-                    </div>
-                </Card>
-                <Skeleton className="h-64 w-full" />
-                <Skeleton className="h-48 w-full" />
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="flex flex-col md:flex-row items-center gap-6 p-6">
+                        <Skeleton className="h-32 w-32 rounded-full" />
+                        <div className="space-y-4 flex-1">
+                            <Skeleton className="h-8 w-48" />
+                            <Skeleton className="h-5 w-32" />
+                            <Skeleton className="h-16 w-full" />
+                        </div>
+                    </Card>
+                </div>
+                <div className="max-w-6xl mx-auto">
+                    <Skeleton className="h-64 w-full" />
+                </div>
+                <div className="max-w-6xl mx-auto">
+                    <Skeleton className="h-48 w-full" />
+                </div>
             </div>
         )
     }
 
     if (!agency) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                        <Building className="h-16 w-16 mb-4 text-primary opacity-60" />
-                        <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('agencyNotFound')}</h1>
-                        <p className="text-muted-foreground mt-4">{t('agencyNotFoundDescription')}</p>
-                        <Button asChild className="mt-8 shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
-                            <Link href="/dashboard">{t('returnToDashboard')}</Link>
-                        </Button>
-                    </CardContent>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
+                            <Building className="h-16 w-16 mb-4 text-primary opacity-60" />
+                            <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('agencyNotFound')}</h1>
+                            <p className="text-muted-foreground mt-4">{t('agencyNotFoundDescription')}</p>
+                            <Button asChild className="mt-8 shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
+                                <Link href="/dashboard">{t('returnToDashboard')}</Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         )
     }
@@ -372,236 +380,242 @@ export default function AgencyProfilePage() {
 
     return (
         <Dialog>
-            <div className="max-w-6xl mx-auto space-y-8">
+            <div className="container space-y-8">
                 {/* Header Card */}
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-                            <Avatar className="h-32 w-32 border-4 border-primary">
-                                <AvatarImage src={agency.photoURL} alt={agency.displayName} />
-                                <AvatarFallback className="text-5xl">{getAvatarFallback(agency.displayName)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 space-y-2">
-                                <div className="flex items-center justify-center md:justify-start gap-2">
-                                    <CardTitle className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{agency.displayName}</CardTitle>
-                                    {getAvailabilityBadge(agency.availabilityStatus)}
-                                    {agency.isVerified && <Badge variant="default" className="bg-blue-100 text-blue-800 border-blue-200">Verified</Badge>}
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+                                <Avatar className="h-32 w-32 border-4 border-primary">
+                                    <AvatarImage src={agency.photoURL} alt={agency.displayName} />
+                                    <AvatarFallback className="text-5xl">{getAvatarFallback(agency.displayName)}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 space-y-2">
+                                    <div className="flex items-center justify-center md:justify-start gap-2">
+                                        <CardTitle className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{agency.displayName}</CardTitle>
+                                        {getAvailabilityBadge(agency.availabilityStatus)}
+                                        {agency.isVerified && <Badge variant="default" className="bg-blue-100 text-blue-800 border-blue-200">Verified</Badge>}
+                                    </div>
+                                    <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
+                                        {renderStars(overallRating)}
+                                        <span>({reviews.length} {t('reviews')})</span>
+                                        <Badge variant="secondary" className="capitalize"><Building className="mr-1 h-4 w-4"/> {t('agency')}</Badge>
+                                    </div>
+                                    <p className="text-muted-foreground pt-2">{agency.bio || t('noBioYet')}</p>
+                                    
+                                    {/* Agency Stats */}
+                                    <div className="flex flex-wrap gap-4 pt-2 text-sm text-muted-foreground">
+                                        {agency.totalProviders && (
+                                            <div className="flex items-center gap-1">
+                                                <Users className="h-4 w-4" />
+                                                <span>{agency.totalProviders} {t('providers')}</span>
+                                            </div>
+                                        )}
+                                        {agency.totalBookings && (
+                                            <div className="flex items-center gap-1">
+                                                <CalendarPlus className="h-4 w-4" />
+                                                <span>{agency.totalBookings} {t('bookings')}</span>
+                                            </div>
+                                        )}
+                                        {agency.establishedDate && (
+                                            <div className="flex items-center gap-1">
+                                                <Clock className="h-4 w-4" />
+                                                <span>{t('established')} {format(agency.establishedDate.toDate(), "yyyy")}</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground">
-                                    {renderStars(overallRating)}
-                                    <span>({reviews.length} {t('reviews')})</span>
-                                    <Badge variant="secondary" className="capitalize"><Building className="mr-1 h-4 w-4"/> {t('agency')}</Badge>
-                                </div>
-                                <p className="text-muted-foreground pt-2">{agency.bio || t('noBioYet')}</p>
-                                
-                                {/* Agency Stats */}
-                                <div className="flex flex-wrap gap-4 pt-2 text-sm text-muted-foreground">
-                                    {agency.totalProviders && (
-                                        <div className="flex items-center gap-1">
-                                            <Users className="h-4 w-4" />
-                                            <span>{agency.totalProviders} {t('providers')}</span>
-                                        </div>
-                                    )}
-                                    {agency.totalBookings && (
-                                        <div className="flex items-center gap-1">
-                                            <CalendarPlus className="h-4 w-4" />
-                                            <span>{agency.totalBookings} {t('bookings')}</span>
-                                        </div>
-                                    )}
-                                    {agency.establishedDate && (
-                                        <div className="flex items-center gap-1">
-                                            <Clock className="h-4 w-4" />
-                                            <span>{t('established')} {format(agency.establishedDate.toDate(), "yyyy")}</span>
-                                        </div>
-                                    )}
+                                <div className="flex flex-col gap-2 w-full md:w-auto">
+                                    <Button size="lg" onClick={handleBookNow}><CalendarPlus className="mr-2" /> {t('bookNow')}</Button>
+                                    <Button size="lg" variant="outline" onClick={handleSendMessage}><MessageSquare className="mr-2" /> {t('sendMessage')}</Button>
+                                    <Button size="lg" variant="outline" onClick={handleToggleFavorite} disabled={isFavoriteLoading}>
+                                        <Heart className={cn("mr-2", isFavorited && "fill-red-500 text-red-500")} />
+                                        {isFavorited ? t('favorited') : t('favorite')}
+                                    </Button>
                                 </div>
                             </div>
-                            <div className="flex flex-col gap-2 w-full md:w-auto">
-                                <Button size="lg" onClick={handleBookNow}><CalendarPlus className="mr-2" /> {t('bookNow')}</Button>
-                                <Button size="lg" variant="outline" onClick={handleSendMessage}><MessageSquare className="mr-2" /> {t('sendMessage')}</Button>
-                                <Button size="lg" variant="outline" onClick={handleToggleFavorite} disabled={isFavoriteLoading}>
-                                    <Heart className={cn("mr-2", isFavorited && "fill-red-500 text-red-500")} />
-                                    {isFavorited ? t('favorited') : t('favorite')}
+                        </CardContent>
+                        <CardFooter className="bg-secondary/50 p-2 flex justify-end">
+                            <DialogTrigger asChild>
+                                <Button variant="link" size="sm" className="text-xs text-muted-foreground">
+                                    <Flag className="mr-2 h-3 w-3" /> {t('reportThisAgency')}
                                 </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                    <CardFooter className="bg-secondary/50 p-2 flex justify-end">
-                        <DialogTrigger asChild>
-                            <Button variant="link" size="sm" className="text-xs text-muted-foreground">
-                                <Flag className="mr-2 h-3 w-3" /> {t('reportThisAgency')}
-                            </Button>
-                        </DialogTrigger>
-                    </CardFooter>
-                </Card>
+                            </DialogTrigger>
+                        </CardFooter>
+                    </Card>
+                </div>
 
                 {/* Contact Information */}
                 {(agency.businessAddress || agency.phoneNumber || agency.email || agency.website) && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <MapPin className="h-5 w-5" />
-                                {t('contactInformation')}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            {agency.businessAddress && (
-                                <div className="flex items-center gap-2">
-                                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                                    <span>{agency.businessAddress}</span>
-                                </div>
-                            )}
-                            {agency.phoneNumber && (
-                                <div className="flex items-center gap-2">
-                                    <Phone className="h-4 w-4 text-muted-foreground" />
-                                    <span>{agency.phoneNumber}</span>
-                                </div>
-                            )}
-                            {agency.email && (
-                                <div className="flex items-center gap-2">
-                                    <Mail className="h-4 w-4 text-muted-foreground" />
-                                    <span>{agency.email}</span>
-                                </div>
-                            )}
-                            {agency.website && (
-                                <div className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-muted-foreground" />
-                                    <a href={agency.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                                        {agency.website}
-                                    </a>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
+                    <div className="max-w-6xl mx-auto">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <MapPin className="h-5 w-5" />
+                                    {t('contactInformation')}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {agency.businessAddress && (
+                                    <div className="flex items-center gap-2">
+                                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                                        <span>{agency.businessAddress}</span>
+                                    </div>
+                                )}
+                                {agency.phoneNumber && (
+                                    <div className="flex items-center gap-2">
+                                        <Phone className="h-4 w-4 text-muted-foreground" />
+                                        <span>{agency.phoneNumber}</span>
+                                    </div>
+                                )}
+                                {agency.email && (
+                                    <div className="flex items-center gap-2">
+                                        <Mail className="h-4 w-4 text-muted-foreground" />
+                                        <span>{agency.email}</span>
+                                    </div>
+                                )}
+                                {agency.website && (
+                                    <div className="flex items-center gap-2">
+                                        <FileText className="h-4 w-4 text-muted-foreground" />
+                                        <a href={agency.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                                            {agency.website}
+                                        </a>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="md:col-span-2">
-                        {/* Services Section */}
-                        <div ref={servicesRef}>
-                            <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Building /> {t('servicesOffered')}</h2>
-                            <div className="grid gap-6 md:grid-cols-2">
-                                {services.length > 0 ? services.map(service => (
-                                    <Card key={service.id}>
-                                        <CardHeader>
-                                            <CardTitle>{service.name}</CardTitle>
-                                            <CardDescription>{service.category}</CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <p className="text-sm text-muted-foreground h-20 line-clamp-4">{service.description}</p>
-                                        </CardContent>
-                                        <CardFooter className="flex justify-between items-center">
-                                            <p className="text-xl font-bold text-primary">₱{service.price.toFixed(2)}</p>
-                                            <Button onClick={() => handleBookServiceClick(service)}>Book</Button>
-                                        </CardFooter>
-                                    </Card>
-                                )) : (
-                                    <p className="text-muted-foreground col-span-full text-center py-8">{t('noServicesListed')}</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Providers Section */}
-                        {providers.length > 0 && (
-                            <div className="mt-8">
-                                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Users /> {t('ourProviders')}</h2>
-                                <div className="grid gap-4 md:grid-cols-2">
-                                    {providers.slice(0, 6).map(provider => (
-                                        <Card key={provider.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                                            <CardContent className="p-4">
-                                                <div className="flex items-center gap-3">
-                                                    <Avatar className="h-12 w-12">
-                                                        <AvatarImage src={provider.photoURL} alt={provider.displayName} />
-                                                        <AvatarFallback>{getAvatarFallback(provider.displayName)}</AvatarFallback>
-                                                    </Avatar>
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <h3 className="font-semibold">{provider.displayName}</h3>
-                                                            {provider.isVerified && <Badge variant="default" className="text-xs">Verified</Badge>}
-                                                        </div>
-                                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                                            {renderStars(provider.rating)}
-                                                            <span>({provider.totalBookings} bookings)</span>
-                                                        </div>
-                                                        {provider.specialties.length > 0 && (
-                                                            <div className="flex flex-wrap gap-1 mt-1">
-                                                                {provider.specialties.slice(0, 2).map((specialty, index) => (
-                                                                    <Badge key={index} variant="secondary" className="text-xs">
-                                                                        {specialty}
-                                                                    </Badge>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="md:col-span-2">
+                            {/* Services Section */}
+                            <div ref={servicesRef}>
+                                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Building /> {t('servicesOffered')}</h2>
+                                <div className="grid gap-6 md:grid-cols-2">
+                                    {services.length > 0 ? services.map(service => (
+                                        <Card key={service.id}>
+                                            <CardHeader>
+                                                <CardTitle>{service.name}</CardTitle>
+                                                <CardDescription>{service.category}</CardDescription>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <p className="text-sm text-muted-foreground h-20 line-clamp-4">{service.description}</p>
                                             </CardContent>
+                                            <CardFooter className="flex justify-between items-center">
+                                                <p className="text-xl font-bold text-primary">₱{service.price.toFixed(2)}</p>
+                                                <Button onClick={() => handleBookServiceClick(service)}>Book</Button>
+                                            </CardFooter>
                                         </Card>
-                                    ))}
-                                </div>
-                                {providers.length > 6 && (
-                                    <p className="text-center text-muted-foreground mt-4">
-                                        {t('andMoreProviders', { count: providers.length - 6 })}
-                                    </p>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                    <div className="md:col-span-1 space-y-8">
-                        {/* Availability Section */}
-                         <div>
-                            <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Clock /> {t('businessHours')}</h2>
-                             <Card>
-                                 <CardContent className="p-6 space-y-3">
-                                    {agency.availabilitySchedule && agency.availabilitySchedule.length > 0 ? (
-                                        agency.availabilitySchedule.map(schedule => (
-                                            <div key={schedule.day} className={`flex justify-between text-sm ${schedule.day === today ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
-                                                <span>{schedule.day}</span>
-                                                <span>
-                                                    {schedule.enabled ? `${schedule.startTime} - ${schedule.endTime}` : t('closed')}
-                                                </span>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-muted-foreground text-center py-4">{t('availabilityNotSet')}</p>
+                                    )) : (
+                                        <p className="text-muted-foreground col-span-full text-center py-8">{t('noServicesListed')}</p>
                                     )}
-                                </CardContent>
-                            </Card>
-                        </div>
-
-                        {/* Specialties */}
-                        {agency.specialties && agency.specialties.length > 0 && (
-                            <div>
-                                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Building /> {t('specialties')}</h2>
-                                <Card>
-                                    <CardContent className="p-6">
-                                        <div className="flex flex-wrap gap-2">
-                                            {agency.specialties.map((specialty, index) => (
-                                                <Badge key={index} variant="secondary">
-                                                    {specialty}
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                </div>
                             </div>
-                        )}
 
-                        {/* Documents */}
-                          {agency.documents && agency.documents.length > 0 && (
-                            <div>
-                                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><FileText /> {t('documents')}</h2>
-                                <Card>
-                                    <CardContent className="p-6 space-y-3">
-                                        {agency.documents.map((doc, i) => (
-                                            <a key={i} href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline text-primary">
-                                                <FileText className="h-4 w-4" />
-                                                <span>{doc.name}</span>
-                                            </a>
+                            {/* Providers Section */}
+                            {providers.length > 0 && (
+                                <div className="mt-8">
+                                    <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Users /> {t('ourProviders')}</h2>
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        {providers.slice(0, 6).map(provider => (
+                                            <Card key={provider.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                                                <CardContent className="p-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <Avatar className="h-12 w-12">
+                                                            <AvatarImage src={provider.photoURL} alt={provider.displayName} />
+                                                            <AvatarFallback>{getAvatarFallback(provider.displayName)}</AvatarFallback>
+                                                        </Avatar>
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <h3 className="font-semibold">{provider.displayName}</h3>
+                                                                {provider.isVerified && <Badge variant="default" className="text-xs">Verified</Badge>}
+                                                            </div>
+                                                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                                                {renderStars(provider.rating)}
+                                                                <span>({provider.totalBookings} bookings)</span>
+                                                            </div>
+                                                            {provider.specialties.length > 0 && (
+                                                                <div className="flex flex-wrap gap-1 mt-1">
+                                                                    {provider.specialties.slice(0, 2).map((specialty, index) => (
+                                                                        <Badge key={index} variant="secondary" className="text-xs">
+                                                                            {specialty}
+                                                                        </Badge>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
                                         ))}
+                                    </div>
+                                    {providers.length > 6 && (
+                                        <p className="text-center text-muted-foreground mt-4">
+                                            {t('andMoreProviders', { count: providers.length - 6 })}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        <div className="md:col-span-1 space-y-8">
+                            {/* Availability Section */}
+                             <div>
+                                <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Clock /> {t('businessHours')}</h2>
+                                 <Card>
+                                     <CardContent className="p-6 space-y-3">
+                                        {agency.availabilitySchedule && agency.availabilitySchedule.length > 0 ? (
+                                            agency.availabilitySchedule.map(schedule => (
+                                                <div key={schedule.day} className={`flex justify-between text-sm ${schedule.day === today ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
+                                                    <span>{schedule.day}</span>
+                                                    <span>
+                                                        {schedule.enabled ? `${schedule.startTime} - ${schedule.endTime}` : t('closed')}
+                                                    </span>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-muted-foreground text-center py-4">{t('availabilityNotSet')}</p>
+                                        )}
                                     </CardContent>
                                 </Card>
                             </div>
-                        )}
+
+                            {/* Specialties */}
+                            {agency.specialties && agency.specialties.length > 0 && (
+                                <div>
+                                    <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Building /> {t('specialties')}</h2>
+                                    <Card>
+                                        <CardContent className="p-6">
+                                            <div className="flex flex-wrap gap-2">
+                                                {agency.specialties.map((specialty, index) => (
+                                                    <Badge key={index} variant="secondary">
+                                                        {specialty}
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            )}
+
+                            {/* Documents */}
+                              {agency.documents && agency.documents.length > 0 && (
+                                <div>
+                                    <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><FileText /> {t('documents')}</h2>
+                                    <Card>
+                                        <CardContent className="p-6 space-y-3">
+                                            {agency.documents.map((doc, i) => (
+                                                <a key={i} href={doc.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline text-primary">
+                                                    <FileText className="h-4 w-4" />
+                                                    <span>{doc.name}</span>
+                                                </a>
+                                            ))}
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -609,7 +623,7 @@ export default function AgencyProfilePage() {
                 <Separator />
 
                 {/* Reviews Section */}
-                <div>
+                <div className="max-w-6xl mx-auto">
                     <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Star /> {t('clientReviews')}</h2>
                     <Card>
                         <CardContent className="p-6 space-y-6">

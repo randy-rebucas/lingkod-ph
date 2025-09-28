@@ -108,89 +108,95 @@ export default function AdminTicketsPage() {
 
     if (userRole !== 'admin') {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
-                        <CardDescription>This page is for administrators only.</CardDescription>
-                    </CardHeader>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                            <CardDescription>This page is for administrators only.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
             </div>
         );
     }
     
     if (loading) {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
+             <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Support Tickets</h1>
                     <p className="text-muted-foreground">Manage user-submitted support requests.</p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-64 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
              </div>
         )
     }
 
     return (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Support Tickets</h1>
                     <p className="text-muted-foreground">Manage user-submitted support requests.</p>
                 </div>
-                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Last Updated</TableHead>
-                                    <TableHead>User</TableHead>
-                                    <TableHead>Subject</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {tickets.length > 0 ? tickets.map(ticket => (
-                                    <TableRow key={ticket.id}>
-                                        <TableCell className="text-xs text-muted-foreground">
-                                            {formatDistanceToNow(ticket.updatedAt.toDate(), { addSuffix: true })}
-                                        </TableCell>
-                                        <TableCell>{ticket.userName}</TableCell>
-                                        <TableCell className="font-medium">{ticket.subject}</TableCell>
-                                        <TableCell><Badge variant={getStatusVariant(ticket.status)}>{ticket.status}</Badge></TableCell>
-                                         <TableCell className="text-right">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem onSelect={() => openDetailsDialog(ticket)}><Eye className="mr-2 h-4 w-4" />View Details</DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                                                    <DropdownMenuItem onSelect={() => onUpdateStatus(ticket.id, "New")} disabled={ticket.status === 'New'}>New</DropdownMenuItem>
-                                                    <DropdownMenuItem onSelect={() => onUpdateStatus(ticket.id, "In Progress")} disabled={ticket.status === 'In Progress'}>In Progress</DropdownMenuItem>
-                                                    <DropdownMenuItem onSelect={() => onUpdateStatus(ticket.id, "Closed")} disabled={ticket.status === 'Closed'}>Closed</DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
-                                )) : (
+                <div className="max-w-6xl mx-auto">
+                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center h-24">
-                                            No support tickets found.
-                                        </TableCell>
+                                        <TableHead>Last Updated</TableHead>
+                                        <TableHead>User</TableHead>
+                                        <TableHead>Subject</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                </TableHeader>
+                                <TableBody>
+                                    {tickets.length > 0 ? tickets.map(ticket => (
+                                        <TableRow key={ticket.id}>
+                                            <TableCell className="text-xs text-muted-foreground">
+                                                {formatDistanceToNow(ticket.updatedAt.toDate(), { addSuffix: true })}
+                                            </TableCell>
+                                            <TableCell>{ticket.userName}</TableCell>
+                                            <TableCell className="font-medium">{ticket.subject}</TableCell>
+                                            <TableCell><Badge variant={getStatusVariant(ticket.status)}>{ticket.status}</Badge></TableCell>
+                                             <TableCell className="text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                        <DropdownMenuItem onSelect={() => openDetailsDialog(ticket)}><Eye className="mr-2 h-4 w-4" />View Details</DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                                                        <DropdownMenuItem onSelect={() => onUpdateStatus(ticket.id, "New")} disabled={ticket.status === 'New'}>New</DropdownMenuItem>
+                                                        <DropdownMenuItem onSelect={() => onUpdateStatus(ticket.id, "In Progress")} disabled={ticket.status === 'In Progress'}>In Progress</DropdownMenuItem>
+                                                        <DropdownMenuItem onSelect={() => onUpdateStatus(ticket.id, "Closed")} disabled={ticket.status === 'Closed'}>Closed</DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={5} className="text-center h-24">
+                                                No support tickets found.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </div>
                  {selectedTicket && (
                     <DialogContent className="max-w-2xl">
                         <DialogHeader>

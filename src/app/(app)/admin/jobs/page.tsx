@@ -113,114 +113,120 @@ export default function AdminJobsPage() {
 
     if (userRole !== 'admin') {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
-                        <CardDescription>This page is for administrators only.</CardDescription>
-                    </CardHeader>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                            <CardDescription>This page is for administrators only.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
             </div>
         );
     }
     
     if (loading) {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
+             <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Job Post Management</h1>
                     <p className="text-muted-foreground">
                         Monitor and manage all job posts on the platform.
                     </p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-64 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
              </div>
         )
     }
 
     return (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div>
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Job Post Management</h1>
                 <p className="text-muted-foreground">
                      Monitor and manage all job posts on the platform.
                 </p>
             </div>
-             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Date Posted</TableHead>
-                                <TableHead>Job Title</TableHead>
-                                <TableHead>Client</TableHead>
-                                <TableHead>Budget</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {jobs.length > 0 ? jobs.map(job => (
-                                <TableRow key={job.id}>
-                                    <TableCell className="text-xs text-muted-foreground">
-                                        {format(job.createdAt.toDate(), 'PP')}
-                                    </TableCell>
-                                    <TableCell className="font-medium">{job.title}</TableCell>
-                                    <TableCell>{job.clientName}</TableCell>
-                                    <TableCell>{formatBudget(job.budget)}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={getStatusVariant(job.status)}>{job.status}</Badge>
-                                    </TableCell>
-                                     <TableCell className="text-right">
-                                        <AlertDialog>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem onSelect={() => handleViewDetails(job.id)}><Eye className="mr-2 h-4 w-4" />View Job Details</DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem onClick={() => onUpdateStatus(job.id, "Closed")}><CircleSlash className="mr-2 h-4 w-4" />Mark as Closed</DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <AlertDialogTrigger asChild>
-                                                        <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onSelect={(e) => e.preventDefault()}>
-                                                            <Trash2 className="mr-2 h-4 w-4" />Delete Job
-                                                        </DropdownMenuItem>
-                                                    </AlertDialogTrigger>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                    <AlertDialogDescription>This action cannot be undone. This will permanently delete the job post "{job.title}".</AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                    <AlertDialogAction className="bg-destructive hover:bg-destructive/80" onClick={() => onDeleteJob(job.id)}>
-                                                        Confirm Deletion
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
-                                    </TableCell>
-                                </TableRow>
-                            )) : (
+            <div className="max-w-6xl mx-auto">
+                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={6} className="text-center h-24">
-                                        No jobs found.
-                                    </TableCell>
+                                    <TableHead>Date Posted</TableHead>
+                                    <TableHead>Job Title</TableHead>
+                                    <TableHead>Client</TableHead>
+                                    <TableHead>Budget</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                            </TableHeader>
+                            <TableBody>
+                                {jobs.length > 0 ? jobs.map(job => (
+                                    <TableRow key={job.id}>
+                                        <TableCell className="text-xs text-muted-foreground">
+                                            {format(job.createdAt.toDate(), 'PP')}
+                                        </TableCell>
+                                        <TableCell className="font-medium">{job.title}</TableCell>
+                                        <TableCell>{job.clientName}</TableCell>
+                                        <TableCell>{formatBudget(job.budget)}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getStatusVariant(job.status)}>{job.status}</Badge>
+                                        </TableCell>
+                                         <TableCell className="text-right">
+                                            <AlertDialog>
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                        <DropdownMenuItem onSelect={() => handleViewDetails(job.id)}><Eye className="mr-2 h-4 w-4" />View Job Details</DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuItem onClick={() => onUpdateStatus(job.id, "Closed")}><CircleSlash className="mr-2 h-4 w-4" />Mark as Closed</DropdownMenuItem>
+                                                        <DropdownMenuSeparator />
+                                                        <AlertDialogTrigger asChild>
+                                                            <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onSelect={(e) => e.preventDefault()}>
+                                                                <Trash2 className="mr-2 h-4 w-4" />Delete Job
+                                                            </DropdownMenuItem>
+                                                        </AlertDialogTrigger>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                        <AlertDialogDescription>This action cannot be undone. This will permanently delete the job post "{job.title}".</AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction className="bg-destructive hover:bg-destructive/80" onClick={() => onDeleteJob(job.id)}>
+                                                            Confirm Deletion
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="text-center h-24">
+                                            No jobs found.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </div>
              {selectedJob && (
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>

@@ -91,23 +91,25 @@ export default function PaymentHistoryPage() {
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payment History</h1>
                     <p className="text-muted-foreground">View all your payment transactions and receipts.</p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-64 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div className="flex items-center justify-between">
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payment History</h1>
                     <p className="text-muted-foreground">View all your payment transactions and receipts.</p>
@@ -118,128 +120,130 @@ export default function PaymentHistoryPage() {
                 </Button>
             </div>
 
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Transaction History</CardTitle>
-                    <CardDescription>
-                        {transactions.length} transaction{transactions.length !== 1 ? 's' : ''} found
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead>Method</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {transactions.length > 0 ? transactions.map(transaction => (
-                                <TableRow key={transaction.id}>
-                                    <TableCell className="text-sm">
-                                        {format(transaction.createdAt.toDate(), 'PPp')}
-                                    </TableCell>
-                                    <TableCell className="font-medium">
-                                        {getTypeLabel(transaction.type)}
-                                    </TableCell>
-                                    <TableCell>₱{transaction.amount.toFixed(2)}</TableCell>
-                                    <TableCell className="text-sm">
-                                        {transaction.paymentMethod}
-                                    </TableCell>
-                                    <TableCell>
-                                        {getStatusBadge(transaction.status)}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <Button variant="outline" size="sm">
-                                                    <Eye className="mr-2 h-4 w-4" />
-                                                    View Details
-                                                </Button>
-                                            </DialogTrigger>
-                                            <DialogContent className="max-w-2xl">
-                                                <DialogHeader>
-                                                    <DialogTitle>Transaction Details</DialogTitle>
-                                                    <DialogDescription>
-                                                        Transaction ID: {transaction.id}
-                                                    </DialogDescription>
-                                                </DialogHeader>
-                                                <div className="space-y-4">
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <div>
-                                                            <label className="text-sm font-medium text-muted-foreground">Type</label>
-                                                            <p className="text-sm">{getTypeLabel(transaction.type)}</p>
-                                                        </div>
-                                                        <div>
-                                                            <label className="text-sm font-medium text-muted-foreground">Amount</label>
-                                                            <p className="text-sm">₱{transaction.amount.toFixed(2)}</p>
-                                                        </div>
-                                                        <div>
-                                                            <label className="text-sm font-medium text-muted-foreground">Payment Method</label>
-                                                            <p className="text-sm">{transaction.paymentMethod}</p>
-                                                        </div>
-                                                        <div>
-                                                            <label className="text-sm font-medium text-muted-foreground">Status</label>
-                                                            <div className="mt-1">{getStatusBadge(transaction.status)}</div>
-                                                        </div>
-                                                        <div>
-                                                            <label className="text-sm font-medium text-muted-foreground">Date</label>
-                                                            <p className="text-sm">{format(transaction.createdAt.toDate(), 'PPp')}</p>
-                                                        </div>
-                                                        {transaction.verifiedAt && (
+            <div className="max-w-6xl mx-auto">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Transaction History</CardTitle>
+                        <CardDescription>
+                            {transactions.length} transaction{transactions.length !== 1 ? 's' : ''} found
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead>Method</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {transactions.length > 0 ? transactions.map(transaction => (
+                                    <TableRow key={transaction.id}>
+                                        <TableCell className="text-sm">
+                                            {format(transaction.createdAt.toDate(), 'PPp')}
+                                        </TableCell>
+                                        <TableCell className="font-medium">
+                                            {getTypeLabel(transaction.type)}
+                                        </TableCell>
+                                        <TableCell>₱{transaction.amount.toFixed(2)}</TableCell>
+                                        <TableCell className="text-sm">
+                                            {transaction.paymentMethod}
+                                        </TableCell>
+                                        <TableCell>
+                                            {getStatusBadge(transaction.status)}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button variant="outline" size="sm">
+                                                        <Eye className="mr-2 h-4 w-4" />
+                                                        View Details
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="max-w-2xl">
+                                                    <DialogHeader>
+                                                        <DialogTitle>Transaction Details</DialogTitle>
+                                                        <DialogDescription>
+                                                            Transaction ID: {transaction.id}
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <div className="space-y-4">
+                                                        <div className="grid grid-cols-2 gap-4">
                                                             <div>
-                                                                <label className="text-sm font-medium text-muted-foreground">Verified At</label>
-                                                                <p className="text-sm">{format(transaction.verifiedAt.toDate(), 'PPp')}</p>
+                                                                <label className="text-sm font-medium text-muted-foreground">Type</label>
+                                                                <p className="text-sm">{getTypeLabel(transaction.type)}</p>
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-sm font-medium text-muted-foreground">Amount</label>
+                                                                <p className="text-sm">₱{transaction.amount.toFixed(2)}</p>
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-sm font-medium text-muted-foreground">Payment Method</label>
+                                                                <p className="text-sm">{transaction.paymentMethod}</p>
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-sm font-medium text-muted-foreground">Status</label>
+                                                                <div className="mt-1">{getStatusBadge(transaction.status)}</div>
+                                                            </div>
+                                                            <div>
+                                                                <label className="text-sm font-medium text-muted-foreground">Date</label>
+                                                                <p className="text-sm">{format(transaction.createdAt.toDate(), 'PPp')}</p>
+                                                            </div>
+                                                            {transaction.verifiedAt && (
+                                                                <div>
+                                                                    <label className="text-sm font-medium text-muted-foreground">Verified At</label>
+                                                                    <p className="text-sm">{format(transaction.verifiedAt.toDate(), 'PPp')}</p>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        {transaction.rejectionReason && (
+                                                            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                                                                <label className="text-sm font-medium text-red-800">Rejection Reason</label>
+                                                                <p className="text-sm text-red-800 mt-1">{transaction.rejectionReason}</p>
+                                                            </div>
+                                                        )}
+
+                                                        {transaction.paypalOrderId && (
+                                                            <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                                                                <label className="text-sm font-medium text-blue-800">PayPal Order ID</label>
+                                                                <p className="text-sm text-blue-800 mt-1 font-mono">{transaction.paypalOrderId}</p>
+                                                                {transaction.payerEmail && (
+                                                                    <>
+                                                                        <label className="text-sm font-medium text-blue-800 mt-2 block">Payer Email</label>
+                                                                        <p className="text-sm text-blue-800 mt-1">{transaction.payerEmail}</p>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                        {transaction.bookingId && (
+                                                            <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
+                                                                <label className="text-sm font-medium text-gray-800">Booking ID</label>
+                                                                <p className="text-sm text-gray-800 mt-1 font-mono">{transaction.bookingId}</p>
                                                             </div>
                                                         )}
                                                     </div>
-                                                    
-                                                    {transaction.rejectionReason && (
-                                                        <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                                                            <label className="text-sm font-medium text-red-800">Rejection Reason</label>
-                                                            <p className="text-sm text-red-800 mt-1">{transaction.rejectionReason}</p>
-                                                        </div>
-                                                    )}
-
-                                                    {transaction.paypalOrderId && (
-                                                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                                                            <label className="text-sm font-medium text-blue-800">PayPal Order ID</label>
-                                                            <p className="text-sm text-blue-800 mt-1 font-mono">{transaction.paypalOrderId}</p>
-                                                            {transaction.payerEmail && (
-                                                                <>
-                                                                    <label className="text-sm font-medium text-blue-800 mt-2 block">Payer Email</label>
-                                                                    <p className="text-sm text-blue-800 mt-1">{transaction.payerEmail}</p>
-                                                                </>
-                                                            )}
-                                                        </div>
-                                                    )}
-
-                                                    {transaction.bookingId && (
-                                                        <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
-                                                            <label className="text-sm font-medium text-gray-800">Booking ID</label>
-                                                            <p className="text-sm text-gray-800 mt-1 font-mono">{transaction.bookingId}</p>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </DialogContent>
-                                        </Dialog>
-                                    </TableCell>
-                                </TableRow>
-                            )) : (
-                                <TableRow>
-                                    <TableCell colSpan={6} className="text-center h-24">
-                                        No payment transactions found.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="text-center h-24">
+                                            No payment transactions found.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }

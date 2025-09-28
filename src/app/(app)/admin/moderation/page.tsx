@@ -78,31 +78,35 @@ export default function AdminModerationPage() {
 
     if (userRole !== 'admin') {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
-                        <CardDescription>This page is for administrators only.</CardDescription>
-                    </CardHeader>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                            <CardDescription>This page is for administrators only.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
             </div>
         );
     }
     
     if (loading) {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
+             <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Content Moderation</h1>
                     <p className="text-muted-foreground">
                         Review and manage user-submitted reports.
                     </p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-64 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
              </div>
         )
     }
@@ -163,33 +167,35 @@ export default function AdminModerationPage() {
     );
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div>
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Content Moderation</h1>
                 <p className="text-muted-foreground">
                      Review and manage user-submitted reports.
                 </p>
             </div>
-             <Tabs defaultValue="new">
-                <TabsList>
-                    <TabsTrigger value="new">New Reports</TabsTrigger>
-                    <TabsTrigger value="resolved">Resolved Reports</TabsTrigger>
-                </TabsList>
-                <TabsContent value="new">
-                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                        <CardContent>
-                            <ReportsTable data={newReports} />
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-                 <TabsContent value="resolved">
-                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                        <CardContent>
-                            <ReportsTable data={resolvedReports} />
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-             </Tabs>
+            <div className="max-w-6xl mx-auto">
+                 <Tabs defaultValue="new">
+                    <TabsList>
+                        <TabsTrigger value="new">New Reports</TabsTrigger>
+                        <TabsTrigger value="resolved">Resolved Reports</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="new">
+                         <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                            <CardContent>
+                                <ReportsTable data={newReports} />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                     <TabsContent value="resolved">
+                         <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                            <CardContent>
+                                <ReportsTable data={resolvedReports} />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                 </Tabs>
+            </div>
         </div>
     )
 }

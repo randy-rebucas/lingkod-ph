@@ -337,6 +337,9 @@ const CreateTicketDialog = () => {
     }
     setIsSubmitting(true);
     try {
+      if (!db) {
+        throw new Error('Database not initialized');
+      }
       await addDoc(collection(db, 'tickets'), {
         userId: user.uid,
         userName: user.displayName,
@@ -424,7 +427,7 @@ export default function HelpCenterPage() {
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="max-w-6xl mx-auto space-y-8 relative">
+        <div className="container">
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
               <Star className="w-4 h-4 mr-2" />
@@ -479,105 +482,112 @@ export default function HelpCenterPage() {
             {/* Quick Help Resources */}
             <section>
               <h2 className="text-3xl font-bold font-headline mb-8 text-center">Quick Help Resources</h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {quickHelpResources.map((resource, index) => (
-                  <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2">
-                    <CardContent className="p-6 text-center">
-                      <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                        {resource.icon}
-                      </div>
-                      <h3 className="font-semibold text-lg mb-2">{resource.title}</h3>
-                      <p className="text-muted-foreground text-sm mb-4">{resource.description}</p>
-                      <Button variant="outline" size="sm" className="w-full">
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        {resource.category}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+              <div className="max-w-6xl mx-auto">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {quickHelpResources.map((resource, index) => (
+                    <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2">
+                      <CardContent className="p-6 text-center">
+                        <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                          {resource.icon}
+                        </div>
+                        <h3 className="font-semibold text-lg mb-2">{resource.title}</h3>
+                        <p className="text-muted-foreground text-sm mb-4">{resource.description}</p>
+                        <Button variant="outline" size="sm" className="w-full">
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          {resource.category}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </section>
 
             {/* Popular Topics */}
             <section>
               <h2 className="text-3xl font-bold font-headline mb-8 text-center">Popular Topics</h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {popularTopics.map((topic, index) => (
-                  <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1 cursor-pointer">
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <Star className="h-5 w-5 text-primary flex-shrink-0" />
-                        <div>
-                          <h4 className="font-medium text-sm">{topic.title}</h4>
-                          <p className="text-xs text-muted-foreground">{topic.category}</p>
+              <div className="max-w-6xl mx-auto">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {popularTopics.map((topic, index) => (
+                    <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1 cursor-pointer">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <Star className="h-5 w-5 text-primary flex-shrink-0" />
+                          <div>
+                            <h4 className="font-medium text-sm">{topic.title}</h4>
+                            <p className="text-xs text-muted-foreground">{topic.category}</p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto" />
                         </div>
-                        <ChevronRight className="h-4 w-4 text-muted-foreground ml-auto" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </section>
 
             {/* Contact Options */}
             <section>
               <h2 className="text-3xl font-bold font-headline mb-8 text-center">Get in Touch</h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {contactOptions.map((option, index) => (
-                  <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2">
-                    <CardContent className="p-6 text-center">
-                      <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                        {option.icon}
-                      </div>
-                      <h3 className="font-semibold text-lg mb-2">{option.title}</h3>
-                      <p className="text-muted-foreground text-sm mb-4">{option.description}</p>
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {option.availability}
+              <div className="max-w-6xl mx-auto">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {contactOptions.map((option, index) => (
+                    <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2">
+                      <CardContent className="p-6 text-center">
+                        <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
+                          {option.icon}
                         </div>
-                        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                          <Zap className="h-3 w-3" />
-                          {option.responseTime}
+                        <h3 className="font-semibold text-lg mb-2">{option.title}</h3>
+                        <p className="text-muted-foreground text-sm mb-4">{option.description}</p>
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            {option.availability}
+                          </div>
+                          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                            <Zap className="h-3 w-3" />
+                            {option.responseTime}
+                          </div>
                         </div>
-                      </div>
-                      <Button size="sm" className="w-full">
-                        {option.action}
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+                        <Button size="sm" className="w-full">
+                          {option.action}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </section>
 
             {/* FAQ Filters */}
             <section>
-              <div className="flex flex-col md:flex-row gap-4 mb-8">
-                <div className="flex-1">
-                  <h2 className="text-3xl font-bold font-headline mb-4">Frequently Asked Questions</h2>
+              <div className="max-w-6xl mx-auto">
+                <div className="flex flex-col md:flex-row gap-4 mb-8">
+                  <div className="flex-1">
+                    <h2 className="text-3xl font-bold font-headline mb-4">Frequently Asked Questions</h2>
+                  </div>
+                  <div className="flex gap-4">
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="px-4 py-2 rounded-lg border border-border bg-background text-sm"
+                    >
+                      {categories.map(category => (
+                        <option key={category} value={category}>
+                          {category === "all" ? "All Categories" : category}
+                        </option>
+                      ))}
+                    </select>
+                    <Button
+                      variant={showPopularOnly ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setShowPopularOnly(!showPopularOnly)}
+                    >
+                      <Star className="mr-2 h-4 w-4" />
+                      Popular Only
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-4">
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="px-4 py-2 rounded-lg border border-border bg-background text-sm"
-                  >
-                    {categories.map(category => (
-                      <option key={category} value={category}>
-                        {category === "all" ? "All Categories" : category}
-                      </option>
-                    ))}
-                  </select>
-                  <Button
-                    variant={showPopularOnly ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setShowPopularOnly(!showPopularOnly)}
-                  >
-                    <Star className="mr-2 h-4 w-4" />
-                    Popular Only
-                  </Button>
-                </div>
-              </div>
 
               {/* FAQ Sections */}
               <div className="space-y-12">
@@ -631,6 +641,7 @@ export default function HelpCenterPage() {
                   </Accordion>
                 </div>
               </div>
+              </div>
             </section>
           </div>
         </div>
@@ -638,37 +649,39 @@ export default function HelpCenterPage() {
         {/* Enhanced Support CTA */}
         <section className="py-20 bg-gradient-to-b from-muted/50 to-background">
           <div className="container">
-            <Card className="max-w-5xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-              <CardHeader className="text-center pb-8">
-                <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                  <Bot className="h-10 w-10 text-primary" />
-                </div>
-                <CardTitle className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Still Need Help?</CardTitle>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                  Our AI assistant is available 24/7 to answer your questions instantly. 
-                  For more complex issues, our human support team is ready to help.
-                </p>
-              </CardHeader>
-              <CardContent className="flex flex-col sm:flex-row justify-center gap-4 pb-8">
-                <DialogTrigger asChild>
-                  <Button size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                    <Bot className="mr-2 h-5 w-5" />
-                    Ask AI Assistant <ArrowRight className="ml-2 h-5 w-5" />
+            <div className="max-w-5xl mx-auto">
+              <Card className="bg-gradient-to-br from-primary/5 to-accent/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardHeader className="text-center pb-8">
+                  <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <Bot className="h-10 w-10 text-primary" />
+                  </div>
+                  <CardTitle className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Still Need Help?</CardTitle>
+                  <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                    Our AI assistant is available 24/7 to answer your questions instantly. 
+                    For more complex issues, our human support team is ready to help.
+                  </p>
+                </CardHeader>
+                <CardContent className="flex flex-col sm:flex-row justify-center gap-4 pb-8">
+                  <DialogTrigger asChild>
+                    <Button size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                      <Bot className="mr-2 h-5 w-5" />
+                      Ask AI Assistant <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </DialogTrigger>
+                  <CreateTicketDialog />
+                  <Button size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                    <Phone className="mr-2 h-5 w-5" />
+                    Call Support
                   </Button>
-                </DialogTrigger>
-                <CreateTicketDialog />
-                <Button size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                  <Phone className="mr-2 h-5 w-5" />
-                  Call Support
-                </Button>
-              </CardContent>
-              <div className="text-center pb-8">
-                <p className="text-sm text-muted-foreground">
-                  <Shield className="inline h-4 w-4 mr-1" />
-                  All conversations are secure and confidential
-                </p>
-              </div>
-            </Card>
+                </CardContent>
+                <div className="text-center pb-8">
+                  <p className="text-sm text-muted-foreground">
+                    <Shield className="inline h-4 w-4 mr-1" />
+                    All conversations are secure and confidential
+                  </p>
+                </div>
+              </Card>
+            </div>
           </div>
         </section>
       </div>

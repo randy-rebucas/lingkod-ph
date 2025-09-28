@@ -248,12 +248,13 @@ export default function ReportsPage() {
 
      if (!isAgency) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
-                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
-                    <p className="text-muted-foreground">{t('subtitle')}</p>
-                </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+            <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
+                    <div>
+                        <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
+                        <p className="text-muted-foreground">{t('subtitle')}</p>
+                    </div>
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                         <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('upgradeTitle')}</CardTitle>
                         <CardDescription>{t('upgradeDescription')}</CardDescription>
@@ -264,14 +265,15 @@ export default function ReportsPage() {
                          <Button asChild className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
                         </Button>
                     </CardContent>
-                </Card>
+                    </Card>
+                </div>
             </div>
         )
     }
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
+            <div className="container space-y-8">
                 <Skeleton className="h-10 w-1/3" />
                 <Skeleton className="h-4 w-2/3" />
                 <div className="grid gap-6 md:grid-cols-3">
@@ -290,22 +292,25 @@ export default function ReportsPage() {
         : t('basicDescription');
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8">
-             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{pageTitle}</h1>
-                    <p className="text-muted-foreground">{pageDescription}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="flex items-center gap-1">
-                        <Zap className="h-3 w-3" />
-                        Advanced Analytics
-                    </Badge>
+        <div className="container space-y-8">
+             <div className="max-w-6xl mx-auto">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{pageTitle}</h1>
+                        <p className="text-muted-foreground">{pageDescription}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="flex items-center gap-1">
+                            <Zap className="h-3 w-3" />
+                            Advanced Analytics
+                        </Badge>
+                    </div>
                 </div>
             </div>
             
             {/* Advanced Filter Controls */}
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+            <div className="max-w-6xl mx-auto">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Filter className="h-5 w-5" />
@@ -376,10 +381,12 @@ export default function ReportsPage() {
                         </div>
                     </div>
                 </CardContent>
-            </Card>
+                </Card>
+            </div>
 
             {/* Enhanced KPI Cards */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="max-w-6xl mx-auto">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between">
@@ -451,9 +458,11 @@ export default function ReportsPage() {
                         </div>
                     </CardContent>
                 </Card>
+                </div>
             </div>
 
-            <Tabs defaultValue="overview" className="w-full">
+            <div className="max-w-6xl mx-auto">
+                <Tabs defaultValue="overview" className="w-full">
                 <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="overview" className="flex items-center gap-2">
                         <BarChart3 className="h-4 w-4" />
@@ -496,7 +505,8 @@ export default function ReportsPage() {
                 <TabsContent value="insights" className="mt-6">
                     <InsightsTab reportData={reportData} />
                 </TabsContent>
-            </Tabs>
+                </Tabs>
+            </div>
         </div>
     );
 }

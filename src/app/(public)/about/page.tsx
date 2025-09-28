@@ -90,7 +90,7 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-        <div className="max-w-6xl mx-auto space-y-8 relative">
+        <div className="container">
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
               <Star className="w-4 h-4 mr-2" />
@@ -135,7 +135,7 @@ export default function AboutPage() {
       {/* Mission Section */}
       <section className="py-20">
         <div className="container">
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto max-w-6xl">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
@@ -178,7 +178,7 @@ export default function AboutPage() {
       {/* Story Section */}
       <section className="py-20 bg-muted/30">
         <div className="container">
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto max-w-6xl">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="relative order-2 lg:order-1">
                 <div className="aspect-square bg-gradient-to-br from-accent/10 to-primary/10 rounded-3xl flex items-center justify-center">
@@ -213,16 +213,18 @@ export default function AboutPage() {
               The principles that guide everything we do at LocalPro
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => (
-              <Card key={index} className="text-center p-6 shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group hover:-translate-y-1">
-                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  {value.icon}
-                </div>
-                <h3 className="text-xl font-semibold mb-3">{value.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{value.description}</p>
-              </Card>
-            ))}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {values.map((value, index) => (
+                <Card key={index} className="text-center p-6 shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group hover:-translate-y-1">
+                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    {value.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">{value.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{value.description}</p>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -236,16 +238,18 @@ export default function AboutPage() {
               Discover what makes LocalPro the trusted choice for service providers and customers alike
             </p>
           </div>
-          <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-3">
-            {whyChooseUs.map((item) => (
-              <Card key={item.titleKey} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2 text-center p-8">
-                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
-                  {item.icon}
-                </div>
-                <h3 className="text-xl font-semibold mb-4">{t(item.titleKey)}</h3>
-                <p className="text-muted-foreground leading-relaxed">{t(item.descriptionKey)}</p>
-              </Card>
-            ))}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid gap-8 lg:grid-cols-3">
+              {whyChooseUs.map((item) => (
+                <Card key={item.titleKey} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2 text-center p-8">
+                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-4">{t(item.titleKey)}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{t(item.descriptionKey)}</p>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -259,22 +263,24 @@ export default function AboutPage() {
               Real stories from real people who trust LocalPro
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="p-6 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <div className="flex items-center gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <Quote className="h-8 w-8 text-primary/30 mb-4" />
-                <p className="text-muted-foreground mb-6 leading-relaxed">"{testimonial.content}"</p>
-                <div>
-                  <div className="font-semibold">{testimonial.name}</div>
-                  <div className="text-sm text-muted-foreground">{testimonial.role}</div>
-                </div>
-              </Card>
-            ))}
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8">
+              {testimonials.map((testimonial, index) => (
+                <Card key={index} className="p-6 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                  <div className="flex items-center gap-1 mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <Quote className="h-8 w-8 text-primary/30 mb-4" />
+                  <p className="text-muted-foreground mb-6 leading-relaxed">"{testimonial.content}"</p>
+                  <div>
+                    <div className="font-semibold">{testimonial.name}</div>
+                    <div className="text-sm text-muted-foreground">{testimonial.role}</div>
+                  </div>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -282,31 +288,33 @@ export default function AboutPage() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-primary/5 to-accent/5">
         <div className="container">
-          <Card className="max-w-4xl mx-auto bg-gradient-to-br from-primary/5 to-accent/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-            <CardHeader className="text-center pb-8">
-              <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <Heart className="h-8 w-8 text-primary" />
-              </div>
-              <CardTitle className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('joinMission')}</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center pb-8">
-              <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                {t('joinMissionDesc')}
-              </p>
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Button asChild size="lg" className="h-12 px-8 shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                  <Link href="/careers">
-                    {t('viewCareers')} <ArrowRight className="ml-2 h-5 w-5" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="h-12 px-8 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                  <Link href="/partners">
-                    {t('partnerWithUs')}
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="max-w-4xl mx-auto">
+            <Card className="bg-gradient-to-br from-primary/5 to-accent/5 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+              <CardHeader className="text-center pb-8">
+                <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                  <Heart className="h-8 w-8 text-primary" />
+                </div>
+                <CardTitle className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('joinMission')}</CardTitle>
+              </CardHeader>
+              <CardContent className="text-center pb-8">
+                <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+                  {t('joinMissionDesc')}
+                </p>
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                  <Button asChild size="lg" className="h-12 px-8 shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                    <Link href="/careers">
+                      {t('viewCareers')} <ArrowRight className="ml-2 h-5 w-5" />
+                    </Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline" className="h-12 px-8 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
+                    <Link href="/partners">
+                      {t('partnerWithUs')}
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
     </div>

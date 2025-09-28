@@ -216,50 +216,51 @@ export default function PostAJobPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div>
+    <div className="container space-y-8">
+      <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{pageTitle}</h1>
         <p className="text-muted-foreground">{pageDescription}</p>
       </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            
-          <Card>
-            <CardHeader className="flex flex-row items-start gap-4">
-              <div className="bg-primary/10 text-primary p-3 rounded-full">
-                <PenLine className="h-6 w-6" />
-              </div>
-              <div>
-                <CardTitle>{t('step1Title')}</CardTitle>
-                <CardDescription>{t('step1Description')}</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>{t('jobTitle')}</FormLabel>
-                        <FormControl><Input placeholder={t('jobTitlePlaceholder')} {...field} /></FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>{t('jobDescription')}</FormLabel>
-                        <FormControl><Textarea placeholder={t('jobDescriptionPlaceholder')} rows={5} {...field} /></FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-            </CardContent>
-          </Card>
+      <div className="max-w-6xl mx-auto">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              
+            <Card>
+              <CardHeader className="flex flex-row items-start gap-4">
+                <div className="bg-primary/10 text-primary p-3 rounded-full">
+                  <PenLine className="h-6 w-6" />
+                </div>
+                <div>
+                  <CardTitle>{t('step1Title')}</CardTitle>
+                  <CardDescription>{t('step1Description')}</CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                  <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                      <FormItem>
+                          <FormLabel>{t('jobTitle')}</FormLabel>
+                          <FormControl><Input placeholder={t('jobTitlePlaceholder')} {...field} /></FormControl>
+                          <FormMessage />
+                      </FormItem>
+                      )}
+                  />
+                  <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                      <FormItem>
+                          <FormLabel>{t('jobDescription')}</FormLabel>
+                          <FormControl><Textarea placeholder={t('jobDescriptionPlaceholder')} rows={5} {...field} /></FormControl>
+                          <FormMessage />
+                      </FormItem>
+                      )}
+                  />
+              </CardContent>
+            </Card>
           
           <Card>
             <CardHeader className="flex flex-row items-start gap-4">
@@ -401,9 +402,10 @@ export default function PostAJobPage() {
                     )}
                 </Button>
             </CardFooter>
-          </Card>
-        </form>
-      </Form>
+            </Card>
+          </form>
+        </Form>
+      </div>
     </div>
   );
 }

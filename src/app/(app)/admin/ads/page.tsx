@@ -210,37 +210,41 @@ export default function AdminAdsPage() {
 
     if (userRole !== 'admin') {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
-                        <CardDescription>This page is for administrators only.</CardDescription>
-                    </CardHeader>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                            <CardDescription>This page is for administrators only.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
             </div>
         );
     }
     
     if (loading) {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
+             <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Ad Management</h1>
                     <p className="text-muted-foreground">Manage promotional campaigns for providers.</p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-64 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
              </div>
         )
     }
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={closeDialog}>
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div className="flex justify-between items-center">
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto flex justify-between items-center">
                     <div>
                         <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Ad Management</h1>
                         <p className="text-muted-foreground">
@@ -249,85 +253,87 @@ export default function AdminAdsPage() {
                     </div>
                     <Button onClick={openAddDialog} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground"><PlusCircle className="mr-2"/> Add Campaign</Button>
                 </div>
-                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Image</TableHead>
-                                    <TableHead>Campaign Name</TableHead>
-                                    <TableHead>Price</TableHead>
-                                    <TableHead>Duration (Days)</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {campaigns.length > 0 ? campaigns.map(campaign => (
-                                    <TableRow key={campaign.id}>
-                                        <TableCell>
-                                            {campaign.imageUrl ? (
-                                                <Image src={campaign.imageUrl} alt={campaign.name} width={40} height={40} className="rounded-md object-cover"/>
-                                            ) : (
-                                                <div className="w-10 h-10 bg-secondary rounded-md flex items-center justify-center">
-                                                    <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                                                </div>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="font-medium">{campaign.name}</TableCell>
-                                        <TableCell>₱{campaign.price.toFixed(2)}</TableCell>
-                                        <TableCell>{campaign.durationDays}</TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-2">
-                                                <Badge variant={campaign.isActive ? "default" : "secondary"}>
-                                                    {campaign.isActive ? 'Active' : 'Inactive'}
-                                                </Badge>
-                                                {isExpiringSoon(campaign) && (
-                                                    <Badge variant="outline" className="border-yellow-400 text-yellow-600">Expiring Soon</Badge>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                         <TableCell className="text-right">
-                                            <AlertDialog>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem onSelect={() => openEditDialog(campaign)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
-                                                        <AlertDialogTrigger asChild>
-                                                            <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onSelect={(e) => e.preventDefault()}>
-                                                                <Trash2 className="mr-2 h-4 w-4" />Delete
-                                                            </DropdownMenuItem>
-                                                        </AlertDialogTrigger>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                                <AlertDialogContent>
-                                                    <AlertDialogHeader>
-                                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>This action cannot be undone. This will permanently delete the campaign "{campaign.name}".</AlertDialogDescription>
-                                                    </AlertDialogHeader>
-                                                    <AlertDialogFooter>
-                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                        <AlertDialogAction className="bg-destructive hover:bg-destructive/80" onClick={() => onDeleteCampaign(campaign.id)}>
-                                                            Confirm Deletion
-                                                        </AlertDialogAction>
-                                                    </AlertDialogFooter>
-                                                </AlertDialogContent>
-                                            </AlertDialog>
-                                        </TableCell>
-                                    </TableRow>
-                                )) : (
+                <div className="max-w-6xl mx-auto">
+                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
                                     <TableRow>
-                                        <TableCell colSpan={6} className="text-center h-24">
-                                            No ad campaigns found.
-                                        </TableCell>
+                                        <TableHead>Image</TableHead>
+                                        <TableHead>Campaign Name</TableHead>
+                                        <TableHead>Price</TableHead>
+                                        <TableHead>Duration (Days)</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                </TableHeader>
+                                <TableBody>
+                                    {campaigns.length > 0 ? campaigns.map(campaign => (
+                                        <TableRow key={campaign.id}>
+                                            <TableCell>
+                                                {campaign.imageUrl ? (
+                                                    <Image src={campaign.imageUrl} alt={campaign.name} width={40} height={40} className="rounded-md object-cover"/>
+                                                ) : (
+                                                    <div className="w-10 h-10 bg-secondary rounded-md flex items-center justify-center">
+                                                        <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                                                    </div>
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="font-medium">{campaign.name}</TableCell>
+                                            <TableCell>₱{campaign.price.toFixed(2)}</TableCell>
+                                            <TableCell>{campaign.durationDays}</TableCell>
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge variant={campaign.isActive ? "default" : "secondary"}>
+                                                        {campaign.isActive ? 'Active' : 'Inactive'}
+                                                    </Badge>
+                                                    {isExpiringSoon(campaign) && (
+                                                        <Badge variant="outline" className="border-yellow-400 text-yellow-600">Expiring Soon</Badge>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                             <TableCell className="text-right">
+                                                <AlertDialog>
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem onSelect={() => openEditDialog(campaign)}><Edit className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
+                                                            <AlertDialogTrigger asChild>
+                                                                <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onSelect={(e) => e.preventDefault()}>
+                                                                    <Trash2 className="mr-2 h-4 w-4" />Delete
+                                                                </DropdownMenuItem>
+                                                            </AlertDialogTrigger>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                    <AlertDialogContent>
+                                                        <AlertDialogHeader>
+                                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                                            <AlertDialogDescription>This action cannot be undone. This will permanently delete the campaign "{campaign.name}".</AlertDialogDescription>
+                                                        </AlertDialogHeader>
+                                                        <AlertDialogFooter>
+                                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                            <AlertDialogAction className="bg-destructive hover:bg-destructive/80" onClick={() => onDeleteCampaign(campaign.id)}>
+                                                                Confirm Deletion
+                                                            </AlertDialogAction>
+                                                        </AlertDialogFooter>
+                                                    </AlertDialogContent>
+                                                </AlertDialog>
+                                            </TableCell>
+                                        </TableRow>
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={6} className="text-center h-24">
+                                                No ad campaigns found.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </div>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
                         <DialogTitle>{isAdding ? "Add New Ad Campaign" : "Edit Ad Campaign"}</DialogTitle>

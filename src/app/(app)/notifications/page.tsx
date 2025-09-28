@@ -455,41 +455,45 @@ export default function NotificationsPage() {
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <Skeleton className="h-8 w-48 mb-2" />
-                        <Skeleton className="h-4 w-64" />
-                    </div>
-                    <div className="flex gap-2">
-                        <Skeleton className="h-10 w-32" />
-                        <Skeleton className="h-10 w-32" />
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <Skeleton className="h-8 w-48 mb-2" />
+                            <Skeleton className="h-4 w-64" />
+                        </div>
+                        <div className="flex gap-2">
+                            <Skeleton className="h-10 w-32" />
+                            <Skeleton className="h-10 w-32" />
+                        </div>
                     </div>
                 </div>
-                <div className="space-y-4">
-                    {[...Array(5)].map((_, i) => (
-                        <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                            <CardContent className="p-6">
-                                <div className="flex items-start space-x-4">
-                                    <Skeleton className="h-12 w-12 rounded-full" />
-                                    <div className="space-y-2 flex-1">
-                                        <Skeleton className="h-4 w-3/4" />
-                                        <Skeleton className="h-3 w-1/2" />
+                <div className="max-w-6xl mx-auto">
+                    <div className="space-y-4">
+                        {[...Array(5)].map((_, i) => (
+                            <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                                <CardContent className="p-6">
+                                    <div className="flex items-start space-x-4">
+                                        <Skeleton className="h-12 w-12 rounded-full" />
+                                        <div className="space-y-2 flex-1">
+                                            <Skeleton className="h-4 w-3/4" />
+                                            <Skeleton className="h-3 w-1/2" />
+                                        </div>
+                                        <Skeleton className="h-8 w-8" />
                                     </div>
-                                    <Skeleton className="h-8 w-8" />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="container space-y-8">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                         {t('notifications')}
@@ -529,58 +533,62 @@ export default function NotificationsPage() {
             </div>
 
             {/* Simple Filter Controls */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                <div className="flex-1 max-w-md">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                            placeholder="Search notifications..."
-                            className="pl-10"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                        />
+            <div className="max-w-6xl mx-auto">
+                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                    <div className="flex-1 max-w-md">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                                placeholder="Search notifications..."
+                                className="pl-10"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
                     </div>
-                </div>
-                <div className="flex gap-2">
-                    <Select value={typeFilter} onValueChange={setTypeFilter}>
-                        <SelectTrigger className="w-40">
-                            <SelectValue placeholder="Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Types</SelectItem>
-                            <SelectItem value="booking_update">Booking Updates</SelectItem>
-                            <SelectItem value="new_message">Messages</SelectItem>
-                            <SelectItem value="agency_invite">Agency Invites</SelectItem>
-                            <SelectItem value="payment_received">Payments</SelectItem>
-                            <SelectItem value="system_alert">System Alerts</SelectItem>
-                            <SelectItem value="reminder">Reminders</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <Select value={dateFilter} onValueChange={setDateFilter}>
-                        <SelectTrigger className="w-32">
-                            <SelectValue placeholder="Date" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="all">All Time</SelectItem>
-                            <SelectItem value="today">Today</SelectItem>
-                            <SelectItem value="week">This Week</SelectItem>
-                            <SelectItem value="month">This Month</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <div className="flex gap-2">
+                        <Select value={typeFilter} onValueChange={setTypeFilter}>
+                            <SelectTrigger className="w-40">
+                                <SelectValue placeholder="Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Types</SelectItem>
+                                <SelectItem value="booking_update">Booking Updates</SelectItem>
+                                <SelectItem value="new_message">Messages</SelectItem>
+                                <SelectItem value="agency_invite">Agency Invites</SelectItem>
+                                <SelectItem value="payment_received">Payments</SelectItem>
+                                <SelectItem value="system_alert">System Alerts</SelectItem>
+                                <SelectItem value="reminder">Reminders</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Select value={dateFilter} onValueChange={setDateFilter}>
+                            <SelectTrigger className="w-32">
+                                <SelectValue placeholder="Date" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Time</SelectItem>
+                                <SelectItem value="today">Today</SelectItem>
+                                <SelectItem value="week">This Week</SelectItem>
+                                <SelectItem value="month">This Month</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
             </div>
 
 
             {/* Notifications List */}
-            <NotificationsTab 
-                notifications={filteredNotifications} 
-                filter={filter}
-                setFilter={setFilter}
-                onNotificationClick={handleNotificationClick}
-                onInviteResponse={handleInviteResponse}
-                onDeleteNotification={handleDeleteNotification}
-                analyticsData={analyticsData}
-            />
+            <div className="max-w-6xl mx-auto">
+                <NotificationsTab 
+                    notifications={filteredNotifications} 
+                    filter={filter}
+                    setFilter={setFilter}
+                    onNotificationClick={handleNotificationClick}
+                    onInviteResponse={handleInviteResponse}
+                    onDeleteNotification={handleDeleteNotification}
+                    analyticsData={analyticsData}
+                />
+            </div>
 
         </div>
     );

@@ -296,7 +296,7 @@ export default function ProviderProfilePage() {
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
+            <div className="container space-y-8">
                 <Card className="flex flex-col md:flex-row items-center gap-6 p-6">
                     <Skeleton className="h-32 w-32 rounded-full" />
                     <div className="space-y-4 flex-1">
@@ -313,7 +313,7 @@ export default function ProviderProfilePage() {
 
     if (!provider) {
         return (
-            <div className="container mx-auto text-center py-20">
+            <div className="container text-center py-20">
                 <h1 className="text-4xl font-bold">{t('providerNotFound')}</h1>
                 <p className="text-muted-foreground mt-4">{t('providerNotFoundDescription')}</p>
                 <Button asChild className="mt-8">
@@ -329,7 +329,7 @@ export default function ProviderProfilePage() {
 
     return (
         <Dialog>
-            <div className="max-w-6xl mx-auto space-y-8">
+            <div className="container space-y-8">
                 {/* Header Card */}
                 <Card className="shadow-lg">
                     <CardContent className="p-6">

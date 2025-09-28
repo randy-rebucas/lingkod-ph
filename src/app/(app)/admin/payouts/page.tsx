@@ -101,31 +101,35 @@ export default function AdminPayoutsPage() {
 
     if (userRole !== 'admin') {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
-                        <CardDescription>This page is for administrators only.</CardDescription>
-                    </CardHeader>
-                </Card>
+            <div className="container space-y-8">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
+                            <CardDescription>This page is for administrators only.</CardDescription>
+                        </CardHeader>
+                    </Card>
+                </div>
             </div>
         );
     }
     
     if (loading) {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
-                 <div>
+             <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payout Requests</h1>
                     <p className="text-muted-foreground">
                         Review and process provider payout requests.
                     </p>
                 </div>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-6">
-                        <Skeleton className="h-64 w-full" />
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-64 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
              </div>
         )
     }
@@ -134,94 +138,98 @@ export default function AdminPayoutsPage() {
     const paidPayouts = payouts.filter(p => p.status === 'Paid');
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div>
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payout Requests</h1>
                 <p className="text-muted-foreground">
                      Review and process provider payout requests.
                 </p>
             </div>
-             <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Pending Payouts</CardTitle>
-                    <CardDescription>These requests need to be processed.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Date Requested</TableHead>
-                                <TableHead>Provider</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead>Details</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {pendingPayouts.length > 0 ? pendingPayouts.map(payout => (
-                                <TableRow key={payout.id}>
-                                    <TableCell className="text-xs text-muted-foreground">
-                                        {format(payout.requestedAt.toDate(), 'PP')}
-                                    </TableCell>
-                                    <TableCell>{payout.providerName}</TableCell>
-                                    <TableCell className="font-medium">₱{payout.amount.toFixed(2)}</TableCell>
-                                    <TableCell>
-                                        <PayoutDetails payout={payout} />
-                                    </TableCell>
-                                     <TableCell className="text-right">
-                                        <Button size="sm" onClick={() => onMarkAsPaid(payout)}>
-                                            <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            )) : (
+            <div className="max-w-6xl mx-auto">
+                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Pending Payouts</CardTitle>
+                        <CardDescription>These requests need to be processed.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center h-24">
-                                        <Wallet className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
-                                        No pending payouts.
-                                    </TableCell>
+                                    <TableHead>Date Requested</TableHead>
+                                    <TableHead>Provider</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead>Details</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                    <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Completed Payouts</CardTitle>
-                    <CardDescription>History of all processed payouts.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Date Processed</TableHead>
-                                <TableHead>Provider</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead>Status</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                             {paidPayouts.length > 0 ? paidPayouts.map(payout => (
-                                <TableRow key={payout.id}>
-                                    <TableCell className="text-xs text-muted-foreground">
-                                        {payout.processedAt ? format(payout.processedAt.toDate(), 'PP') : 'N/A'}
-                                    </TableCell>
-                                    <TableCell>{payout.providerName}</TableCell>
-                                    <TableCell>₱{payout.amount.toFixed(2)}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={getStatusVariant(payout.status)}>{payout.status}</Badge>
-                                    </TableCell>
-                                </TableRow>
-                             )) : (
+                            </TableHeader>
+                            <TableBody>
+                                {pendingPayouts.length > 0 ? pendingPayouts.map(payout => (
+                                    <TableRow key={payout.id}>
+                                        <TableCell className="text-xs text-muted-foreground">
+                                            {format(payout.requestedAt.toDate(), 'PP')}
+                                        </TableCell>
+                                        <TableCell>{payout.providerName}</TableCell>
+                                        <TableCell className="font-medium">₱{payout.amount.toFixed(2)}</TableCell>
+                                        <TableCell>
+                                            <PayoutDetails payout={payout} />
+                                        </TableCell>
+                                         <TableCell className="text-right">
+                                            <Button size="sm" onClick={() => onMarkAsPaid(payout)}>
+                                                <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={5} className="text-center h-24">
+                                            <Wallet className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                                            No pending payouts.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </div>
+            <div className="max-w-6xl mx-auto">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Completed Payouts</CardTitle>
+                        <CardDescription>History of all processed payouts.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">No completed payouts found.</TableCell>
+                                    <TableHead>Date Processed</TableHead>
+                                    <TableHead>Provider</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead>Status</TableHead>
                                 </TableRow>
-                             )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                            </TableHeader>
+                            <TableBody>
+                                 {paidPayouts.length > 0 ? paidPayouts.map(payout => (
+                                    <TableRow key={payout.id}>
+                                        <TableCell className="text-xs text-muted-foreground">
+                                            {payout.processedAt ? format(payout.processedAt.toDate(), 'PP') : 'N/A'}
+                                        </TableCell>
+                                        <TableCell>{payout.providerName}</TableCell>
+                                        <TableCell>₱{payout.amount.toFixed(2)}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={getStatusVariant(payout.status)}>{payout.status}</Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                 )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">No completed payouts found.</TableCell>
+                                    </TableRow>
+                                 )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     )
 }

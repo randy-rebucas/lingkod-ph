@@ -667,10 +667,11 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="container space-y-8">
 
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                <CardHeader className="flex-row items-center gap-6 space-y-0 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20 p-6">
+            <div className="max-w-6xl mx-auto">
+                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="flex-row items-center gap-6 space-y-0 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20 p-6">
                     <div className="relative">
                         <Avatar className="h-24 w-24 border-2 border-primary/20 shadow-soft">
                             <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
@@ -711,36 +712,40 @@ export default function ProfilePage() {
                         )}
                     </div>
                 </CardHeader>
-            </Card>
+                </Card>
+            </div>
             
             {userRole === 'provider' && invites.length > 0 && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>{t('agencyInvitations')}</CardTitle>
-                        <CardDescription>{t('agencyInvitationsDescription')}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                        {invites.map(invite => (
-                             <form action={formAction} key={invite.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                <p>{t('invitationFrom', { agencyName: invite.agencyName })}</p>
-                                <input type="hidden" name="inviteId" value={invite.id} />
-                                <div className="flex gap-2">
-                                    <Button size="sm" variant="outline" type="submit" name="accepted" value="true" disabled={isPending}>
-                                        <ThumbsUp className="mr-2 h-4 w-4"/> {t('accept')}
-                                    </Button>
-                                    <Button size="sm" variant="destructive" type="submit" name="accepted" value="false" disabled={isPending}>
-                                        <ThumbsDown className="mr-2 h-4 w-4"/> {t('decline')}
-                                    </Button>
-                                </div>
-                            </form>
-                        ))}
-                    </CardContent>
-                </Card>
+                <div className="max-w-6xl mx-auto">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>{t('agencyInvitations')}</CardTitle>
+                            <CardDescription>{t('agencyInvitationsDescription')}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            {invites.map(invite => (
+                                 <form action={formAction} key={invite.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                    <p>{t('invitationFrom', { agencyName: invite.agencyName })}</p>
+                                    <input type="hidden" name="inviteId" value={invite.id} />
+                                    <div className="flex gap-2">
+                                        <Button size="sm" variant="outline" type="submit" name="accepted" value="true" disabled={isPending}>
+                                            <ThumbsUp className="mr-2 h-4 w-4"/> {t('accept')}
+                                        </Button>
+                                        <Button size="sm" variant="destructive" type="submit" name="accepted" value="false" disabled={isPending}>
+                                            <ThumbsDown className="mr-2 h-4 w-4"/> {t('decline')}
+                                        </Button>
+                                    </div>
+                                </form>
+                            ))}
+                        </CardContent>
+                    </Card>
+                </div>
             )}
 
 
-            <Tabs defaultValue="public-profile" className="w-full">
-                 <TabsList className="w-full h-auto justify-start overflow-x-auto bg-background/80 backdrop-blur-sm shadow-soft border-0">
+            <div className="max-w-6xl mx-auto">
+                <Tabs defaultValue="public-profile" className="w-full">
+                     <TabsList className="w-full h-auto justify-start overflow-x-auto bg-background/80 backdrop-blur-sm shadow-soft border-0">
                     <TabsTrigger value="public-profile" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"><User className="mr-2 h-4 w-4"/> {t('publicProfile')}</TabsTrigger>
                     {isProvider && <TabsTrigger value="provider-settings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"><Briefcase className="mr-2 h-4 w-4"/> {t('provider')}</TabsTrigger>}
                     {isAgency && <TabsTrigger value="business-settings" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"><Building className="mr-2 h-4 w-4"/> {t('business')}</TabsTrigger>}
@@ -1462,7 +1467,8 @@ export default function ProfilePage() {
                     </Card>
                 </TabsContent>
                 
-            </Tabs>
+                </Tabs>
+            </div>
         </div>
     );
 }

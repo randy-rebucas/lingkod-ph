@@ -93,24 +93,27 @@ export default function ServicesPage() {
     };
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
-                    <p className="text-muted-foreground">
-                        {t('subtitle')}
-                    </p>
-                </div>
-                 <div className="flex items-center gap-2">
-                    <Button onClick={handleAddService} className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                        <PlusCircle className="mr-2" />
-                        {t('addNewService')}
-                    </Button>
+        <div className="container space-y-8">
+            <div className="max-w-6xl mx-auto">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
+                        <p className="text-muted-foreground">
+                            {t('subtitle')}
+                        </p>
+                    </div>
+                     <div className="flex items-center gap-2">
+                        <Button onClick={handleAddService} className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                            <PlusCircle className="mr-2" />
+                            {t('addNewService')}
+                        </Button>
+                    </div>
                 </div>
             </div>
             
             {loading ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {[...Array(3)].map((_, i) => (
                         <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                             <CardHeader>
@@ -125,9 +128,11 @@ export default function ServicesPage() {
                             </CardFooter>
                         </Card>
                     ))}
+                    </div>
                 </div>
             ) : services.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {services.map((service) => (
                         <Card key={service.id} className="flex flex-col shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
                             <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
@@ -179,15 +184,18 @@ export default function ServicesPage() {
                             </CardFooter>
                         </Card>
                     ))}
+                    </div>
                 </div>
             ) : (
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <div className="max-w-6xl mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                          <BriefcaseBusiness className="h-16 w-16 mb-4 text-primary opacity-60" />
                         <h3 className="text-xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noServicesFound')}</h3>
                         <p>{t('noServicesDescription')}</p>
                     </CardContent>
-                </Card>
+                    </Card>
+                </div>
             )}
 
             <AddEditServiceDialog
