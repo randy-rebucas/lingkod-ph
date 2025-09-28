@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   MoreHorizontal, 
   Loader2, 
@@ -152,7 +153,7 @@ const getStatusClass = (status: BookingStatus) => {
     }
 }
 
-const BookingCard = ({ booking, userRole }: { booking: Booking; userRole: string | null }) => {
+const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: string | null }) => {
     const { toast } = useToast();
     const t = useTranslations('Bookings');
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -174,7 +175,6 @@ const BookingCard = ({ booking, userRole }: { booking: Booking; userRole: string
         setSelectedBooking(booking);
         setIsCompleteOpen(true);
     };
-
 
     const handleStatusUpdate = async (booking: Booking, newStatus: BookingStatus, message?: string) => {
         if (!db) return;
@@ -206,173 +206,362 @@ const BookingCard = ({ booking, userRole }: { booking: Booking; userRole: string
 
     return (
         <>
-            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
-                <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                        {/* Avatar */}
-                        <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-soft">
+            <TableRow className="hover:bg-muted/50 transition-colors">
+                {/* Service & Contact */}
+                <TableCell className="font-medium">
+                    <div className="flex items-center space-x-3">
+                        <Avatar className="h-8 w-8 border border-primary/20">
                             <AvatarImage 
                                 src={userRole === 'client' ? booking.providerAvatar : booking.clientAvatar} 
                                 alt={userRole === 'client' ? booking.providerName : booking.clientName} 
                             />
-                            <AvatarFallback className="text-sm bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">
+                            <AvatarFallback className="text-xs bg-gradient-to-r from-primary to-accent text-primary-foreground">
                                 {getAvatarFallback(userRole === 'client' ? booking.providerName : booking.clientName)}
                             </AvatarFallback>
                         </Avatar>
-
-                        {/* Main Content */}
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between">
-                                <div className="flex-1 min-w-0">
-                                    <CardTitle className="text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent group-hover:from-primary group-hover:to-accent transition-all duration-300 truncate">
-                                        {booking.serviceName}
-                                    </CardTitle>
-                                    <CardDescription className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
-                                        <UserCircle className="h-3 w-3 flex-shrink-0" />
-                                        <span className="truncate">{userRole === 'client' ? booking.providerName : booking.clientName}</span>
-                                    </CardDescription>
-                                </div>
-                                <Badge 
-                                    className={`${getStatusClass(booking.status)} flex items-center gap-1 text-xs px-2 py-1 ml-2`}
-                                >
-                                    {getStatusIcon(booking.status)}
-                                    {booking.status}
-                                </Badge>
+                        <div className="min-w-0">
+                            <div className="font-medium truncate">{booking.serviceName}</div>
+                            <div className="text-sm text-muted-foreground truncate">
+                                {userRole === 'client' ? booking.providerName : booking.clientName}
                             </div>
+                        </div>
+                    </div>
+                </TableCell>
 
-                            {/* Details Row */}
-                            <div className="flex items-center justify-between mt-3 text-sm">
-                                <div className="flex items-center gap-4 text-muted-foreground">
-                                    <span className="flex items-center gap-1">
-                                        <Clock className="h-3 w-3" />
-                                        {format(booking.date.toDate(), 'MMM dd, yyyy')}
-                                    </span>
-                                    <span className="flex items-center gap-1">
-                                        <Wallet className="h-3 w-3" />
-                                        ₱{booking.price.toFixed(2)}
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Button 
-                                        onClick={() => handleViewDetails(booking)}
-                                        size="sm"
-                                        className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground"
-                                    >
-                                        <Eye className="h-4 w-4 mr-2" />
-                                        View Details
-                                    </Button>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="outline" size="sm" className="h-8 w-8 p-0 hover:bg-primary/10 transition-colors">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent className="shadow-glow border-0 bg-background/95 backdrop-blur-md">
-                                            <DropdownMenuLabel className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Actions</DropdownMenuLabel>
-                                            <DropdownMenuSeparator className="bg-border/50" />
-                                            
-                                            {/* Payment Actions */}
-                                            {booking.status === "Pending Payment" && userRole === "client" && (
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/bookings/${booking.id}/payment`} className="flex items-center">
-                                                        <Wallet className="h-4 w-4 mr-2" />
-                                                        Proceed to Payment
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                            )}
-                                            
-                                            {/* Work Log Actions */}
-                                            {booking.status === "In Progress" && userRole === "provider" && (
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/bookings/${booking.id}/work-log`} className="flex items-center">
-                                                        <Timer className="h-4 w-4 mr-2" />
-                                                        View Work Log
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                            )}
-                                            
-                                            {/* Re-book Actions */}
-                                            {booking.status === "Completed" && userRole === "client" && (
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/providers/${booking.providerId}`} className="flex items-center">
-                                                        <Repeat className="h-4 w-4 mr-2" />
-                                                        Re-book Service
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                            )}
-                                            
-                                            {/* Review Actions */}
-                                            {booking.status === "Completed" && !booking.reviewId && userRole === "client" && (
-                                                <DropdownMenuItem onClick={() => handleOpenReview(booking)}>
-                                                    <Check className="h-4 w-4 mr-2" />
-                                                    Leave Review
-                                                </DropdownMenuItem>
-                                            )}
-                                            
-                                            {/* Complete Booking Actions */}
-                                            {booking.status === "In Progress" && userRole === "provider" && (
-                                                <DropdownMenuItem onClick={() => handleOpenComplete(booking)}>
-                                                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                                                    Mark Complete
-                                                </DropdownMenuItem>
-                                            )}
-                                            
-                                            {/* Cancel Actions */}
-                                            {(booking.status === "Upcoming" || booking.status === "Pending Payment") && (
-                                                <DropdownMenuItem 
-                                                    onClick={() => handleStatusUpdate(booking, "Cancelled", "Booking has been cancelled")}
-                                                    className="text-destructive focus:text-destructive"
-                                                >
-                                                    <X className="h-4 w-4 mr-2" />
-                                                    Cancel Booking
-                                                </DropdownMenuItem>
-                                            )}
-                                            
-                                            {/* Payment Rejection Actions */}
-                                            {booking.status === "Payment Rejected" && userRole === "client" && (
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/bookings/${booking.id}/payment`} className="flex items-center">
-                                                        <CreditCard className="h-4 w-4 mr-2" />
-                                                        Retry Payment
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                            )}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                            </div>
+                {/* Date */}
+                <TableCell>
+                    <div className="flex items-center gap-1 text-sm">
+                        <Calendar className="h-3 w-3" />
+                        {format(booking.date.toDate(), 'MMM dd, yyyy')}
+                    </div>
+                </TableCell>
 
-                            {/* Notes Section */}
-                            {booking.notes && (
-                                <div className="mt-3 text-sm p-2 bg-muted/30 rounded-lg border border-border/50">
-                                    <span className="text-muted-foreground text-xs">Notes: </span>
-                                    <span className="line-clamp-1">{booking.notes}</span>
-                                </div>
-                            )}
+                {/* Status */}
+                <TableCell>
+                    <Badge 
+                        className={`${getStatusClass(booking.status)} flex items-center gap-1 text-xs px-2 py-1 w-fit`}
+                    >
+                        {getStatusIcon(booking.status)}
+                        {booking.status}
+                    </Badge>
+                </TableCell>
 
-                            {/* Quick Action Buttons */}
-                            <div className="mt-3 flex gap-2">
+                {/* Price */}
+                <TableCell className="font-medium">
+                    <div className="flex items-center gap-1">
+                        <Wallet className="h-3 w-3" />
+                        ₱{booking.price.toFixed(2)}
+                    </div>
+                </TableCell>
+
+                {/* Category */}
+                <TableCell>
+                    <span className="text-sm text-muted-foreground">
+                        {booking.category || 'Other'}
+                    </span>
+                </TableCell>
+
+                {/* Actions */}
+                <TableCell>
+                    <div className="flex items-center gap-2">
+                        <Button 
+                            onClick={() => handleViewDetails(booking)}
+                            size="sm"
+                            variant="outline"
+                            className="h-8 px-3"
+                        >
+                            <Eye className="h-3 w-3 mr-1" />
+                            View
+                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
                                 
+                                {/* Payment Actions */}
+                                {booking.status === "Pending Payment" && userRole === "client" && (
+                                    <DropdownMenuItem asChild>
+                                        <Link href={`/bookings/${booking.id}/payment`} className="flex items-center">
+                                            <Wallet className="h-4 w-4 mr-2" />
+                                            Proceed to Payment
+                                        </Link>
+                                    </DropdownMenuItem>
+                                )}
+                                
+                                {/* Work Log Actions */}
                                 {booking.status === "In Progress" && userRole === "provider" && (
-                                    <Button asChild size="sm" className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
-                                        <Link href={`/bookings/${booking.id}/work-log`}>
+                                    <DropdownMenuItem asChild>
+                                        <Link href={`/bookings/${booking.id}/work-log`} className="flex items-center">
                                             <Timer className="h-4 w-4 mr-2" />
                                             View Work Log
                                         </Link>
-                                    </Button>
+                                    </DropdownMenuItem>
                                 )}
                                 
+                                {/* Re-book Actions */}
+                                {booking.status === "Completed" && userRole === "client" && (
+                                    <DropdownMenuItem asChild>
+                                        <Link href={`/providers/${booking.providerId}`} className="flex items-center">
+                                            <Repeat className="h-4 w-4 mr-2" />
+                                            Re-book Service
+                                        </Link>
+                                    </DropdownMenuItem>
+                                )}
+                                
+                                {/* Review Actions */}
                                 {booking.status === "Completed" && !booking.reviewId && userRole === "client" && (
-                                    <Button 
-                                        onClick={() => handleOpenReview(booking)}
-                                        size="sm"
-                                        className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground"
-                                    >
+                                    <DropdownMenuItem onClick={() => handleOpenReview(booking)}>
                                         <Check className="h-4 w-4 mr-2" />
                                         Leave Review
-                                    </Button>
+                                    </DropdownMenuItem>
                                 )}
+                                
+                                {/* Complete Booking Actions */}
+                                {booking.status === "In Progress" && userRole === "provider" && (
+                                    <DropdownMenuItem onClick={() => handleOpenComplete(booking)}>
+                                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                                        Mark Complete
+                                    </DropdownMenuItem>
+                                )}
+                                
+                                {/* Cancel Actions */}
+                                {(booking.status === "Upcoming" || booking.status === "Pending Payment") && (
+                                    <DropdownMenuItem 
+                                        onClick={() => handleStatusUpdate(booking, "Cancelled", "Booking has been cancelled")}
+                                        className="text-destructive focus:text-destructive"
+                                    >
+                                        <X className="h-4 w-4 mr-2" />
+                                        Cancel Booking
+                                    </DropdownMenuItem>
+                                )}
+                                
+                                {/* Payment Rejection Actions */}
+                                {booking.status === "Payment Rejected" && userRole === "client" && (
+                                    <DropdownMenuItem asChild>
+                                        <Link href={`/bookings/${booking.id}/payment`} className="flex items-center">
+                                            <CreditCard className="h-4 w-4 mr-2" />
+                                            Retry Payment
+                                        </Link>
+                                    </DropdownMenuItem>
+                                )}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </TableCell>
+            </TableRow>
+
+            {selectedBooking && (
+                <>
+                    <BookingDetailsDialog
+                        booking={selectedBooking}
+                        isOpen={isDetailsOpen}
+                        setIsOpen={setIsDetailsOpen}
+                    />
+                    <LeaveReviewDialog
+                        booking={selectedBooking}
+                        isOpen={isReviewOpen}
+                        setIsOpen={setIsReviewOpen}
+                    />
+                    <CompleteBookingDialog
+                        booking={selectedBooking}
+                        isOpen={isCompleteOpen}
+                        setIsOpen={setIsCompleteOpen}
+                    />
+                </>
+            )}
+        </>
+    );
+};
+
+const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: string | null }) => {
+    const { toast } = useToast();
+    const t = useTranslations('Bookings');
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const [isReviewOpen, setIsReviewOpen] = useState(false);
+    const [isCompleteOpen, setIsCompleteOpen] = useState(false);
+
+    const handleViewDetails = (booking: Booking) => {
+        setSelectedBooking(booking);
+        setIsDetailsOpen(true);
+    };
+
+    const handleOpenReview = (booking: Booking) => {
+        setSelectedBooking(booking);
+        setIsReviewOpen(true);
+    };
+
+    const handleOpenComplete = (booking: Booking) => {
+        setSelectedBooking(booking);
+        setIsCompleteOpen(true);
+    };
+
+    const handleStatusUpdate = async (booking: Booking, newStatus: BookingStatus, message?: string) => {
+        if (!db) return;
+        try {
+            const bookingRef = doc(db, "bookings", booking.id);
+            await updateDoc(bookingRef, {
+                status: newStatus,
+                updatedAt: serverTimestamp()
+            });
+
+            // Create notification for the other party
+            const otherUserId = userRole === 'client' ? booking.providerId : booking.clientId;
+            const notificationMessage = message || `Booking status updated to ${newStatus}`;
+            await createNotification(otherUserId, notificationMessage, `/bookings/${booking.id}`);
+
+            toast({
+                title: "Success",
+                description: `Booking ${newStatus.toLowerCase()} successfully.`
+            });
+        } catch (error) {
+            console.error("Error updating booking status:", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to update booking status."
+            });
+        }
+    };
+
+    return (
+        <>
+            <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-3 flex-1 min-w-0">
+                            <Avatar className="h-10 w-10 border border-primary/20">
+                                <AvatarImage 
+                                    src={userRole === 'client' ? booking.providerAvatar : booking.clientAvatar} 
+                                    alt={userRole === 'client' ? booking.providerName : booking.clientName} 
+                                />
+                                <AvatarFallback className="text-xs bg-gradient-to-r from-primary to-accent text-primary-foreground">
+                                    {getAvatarFallback(userRole === 'client' ? booking.providerName : booking.clientName)}
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0 flex-1">
+                                <h3 className="font-medium truncate">{booking.serviceName}</h3>
+                                <p className="text-sm text-muted-foreground truncate">
+                                    {userRole === 'client' ? booking.providerName : booking.clientName}
+                                </p>
                             </div>
+                        </div>
+                        <Badge 
+                            className={`${getStatusClass(booking.status)} flex items-center gap-1 text-xs px-2 py-1`}
+                        >
+                            {getStatusIcon(booking.status)}
+                            <span className="hidden sm:inline">{booking.status}</span>
+                        </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 text-sm mb-3">
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                            <Calendar className="h-3 w-3" />
+                            {format(booking.date.toDate(), 'MMM dd')}
+                        </div>
+                        <div className="flex items-center gap-1 font-medium">
+                            <Wallet className="h-3 w-3" />
+                            ₱{booking.price.toFixed(2)}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">
+                            {booking.category || 'Other'}
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <Button 
+                                onClick={() => handleViewDetails(booking)}
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-3 text-xs"
+                            >
+                                <Eye className="h-3 w-3 mr-1" />
+                                View
+                            </Button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    
+                                    {/* Payment Actions */}
+                                    {booking.status === "Pending Payment" && userRole === "client" && (
+                                        <DropdownMenuItem asChild>
+                                            <Link href={`/bookings/${booking.id}/payment`} className="flex items-center">
+                                                <Wallet className="h-4 w-4 mr-2" />
+                                                Proceed to Payment
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    )}
+                                    
+                                    {/* Work Log Actions */}
+                                    {booking.status === "In Progress" && userRole === "provider" && (
+                                        <DropdownMenuItem asChild>
+                                            <Link href={`/bookings/${booking.id}/work-log`} className="flex items-center">
+                                                <Timer className="h-4 w-4 mr-2" />
+                                                View Work Log
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    )}
+                                    
+                                    {/* Re-book Actions */}
+                                    {booking.status === "Completed" && userRole === "client" && (
+                                        <DropdownMenuItem asChild>
+                                            <Link href={`/providers/${booking.providerId}`} className="flex items-center">
+                                                <Repeat className="h-4 w-4 mr-2" />
+                                                Re-book Service
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    )}
+                                    
+                                    {/* Review Actions */}
+                                    {booking.status === "Completed" && !booking.reviewId && userRole === "client" && (
+                                        <DropdownMenuItem onClick={() => handleOpenReview(booking)}>
+                                            <Check className="h-4 w-4 mr-2" />
+                                            Leave Review
+                                        </DropdownMenuItem>
+                                    )}
+                                    
+                                    {/* Complete Booking Actions */}
+                                    {booking.status === "In Progress" && userRole === "provider" && (
+                                        <DropdownMenuItem onClick={() => handleOpenComplete(booking)}>
+                                            <CheckCircle2 className="h-4 w-4 mr-2" />
+                                            Mark Complete
+                                        </DropdownMenuItem>
+                                    )}
+                                    
+                                    {/* Cancel Actions */}
+                                    {(booking.status === "Upcoming" || booking.status === "Pending Payment") && (
+                                        <DropdownMenuItem 
+                                            onClick={() => handleStatusUpdate(booking, "Cancelled", "Booking has been cancelled")}
+                                            className="text-destructive focus:text-destructive"
+                                        >
+                                            <X className="h-4 w-4 mr-2" />
+                                            Cancel Booking
+                                        </DropdownMenuItem>
+                                    )}
+                                    
+                                    {/* Payment Rejection Actions */}
+                                    {booking.status === "Payment Rejected" && userRole === "client" && (
+                                        <DropdownMenuItem asChild>
+                                            <Link href={`/bookings/${booking.id}/payment`} className="flex items-center">
+                                                <CreditCard className="h-4 w-4 mr-2" />
+                                                Retry Payment
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    )}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     </div>
                 </CardContent>
@@ -518,12 +707,21 @@ export default function BookingsPage() {
     const [activeTab, setActiveTab] = useState("pending-payment");
     const [selectedStatus, setSelectedStatus] = useState<BookingStatus | "all">("all");
     const [searchTerm, setSearchTerm] = useState("");
-    const [sortBy, setSortBy] = useState<"date" | "price" | "status">("date");
+    const [sortBy, setSortBy] = useState<"date" | "price" | "status" | "service">("date");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
     const [filterCategory, setFilterCategory] = useState<string>('all');
     const [filterPriority, setFilterPriority] = useState<string>('all');
     const [dateFilter, setDateFilter] = useState<string>('all');
     const [showCompleted, setShowCompleted] = useState(true);
+
+    const handleSort = (column: "date" | "price" | "status" | "service") => {
+        if (sortBy === column) {
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+        } else {
+            setSortBy(column);
+            setSortOrder("asc");
+        }
+    };
 
     useEffect(() => {
         const hash = window.location.hash.substring(1);
@@ -671,6 +869,9 @@ export default function BookingsPage() {
                 case "status":
                     comparison = a.status.localeCompare(b.status);
                     break;
+                case "service":
+                    comparison = a.serviceName.localeCompare(b.serviceName);
+                    break;
             }
             return sortOrder === "asc" ? comparison : -comparison;
         });
@@ -809,31 +1010,102 @@ export default function BookingsPage() {
                 </Card>
             </div>
 
-            {/* Bookings List */}
+            {/* Bookings Table */}
             <div className="max-w-6xl mx-auto">
                 {loading ? (
-                    <div className="space-y-4">
-                        {[...Array(6)].map((_, i) => (
-                            <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                                <CardContent className="p-6">
-                                    <div className="flex items-center space-x-4">
-                                        <Skeleton className="h-12 w-12 rounded-full" />
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <div className="space-y-4">
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} className="flex items-center space-x-4">
+                                        <Skeleton className="h-8 w-8 rounded-full" />
                                         <div className="space-y-2 flex-1">
                                             <Skeleton className="h-4 w-3/4" />
                                             <Skeleton className="h-3 w-1/2" />
                                         </div>
-                                        <Skeleton className="h-8 w-20" />
+                                        <Skeleton className="h-6 w-20" />
+                                        <Skeleton className="h-6 w-16" />
+                                        <Skeleton className="h-6 w-12" />
+                                        <Skeleton className="h-8 w-16" />
                                     </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
                 ) : filteredAndSortedBookings.length > 0 ? (
-                    <div className="space-y-4">
-                        {filteredAndSortedBookings.map((booking: Booking) => (
-                            <BookingCard key={booking.id} booking={booking} userRole={userRole || 'client'} />
-                        ))}
-                    </div>
+                    <>
+                        {/* Desktop Table View */}
+                        <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hidden lg:block">
+                            <CardContent className="p-0">
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead 
+                                                    className="font-semibold cursor-pointer hover:bg-muted/50 transition-colors"
+                                                    onClick={() => handleSort("service")}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        Service & Contact
+                                                        {sortBy === "service" && (
+                                                            sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
+                                                        )}
+                                                    </div>
+                                                </TableHead>
+                                                <TableHead 
+                                                    className="font-semibold cursor-pointer hover:bg-muted/50 transition-colors"
+                                                    onClick={() => handleSort("date")}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        Date
+                                                        {sortBy === "date" && (
+                                                            sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
+                                                        )}
+                                                    </div>
+                                                </TableHead>
+                                                <TableHead 
+                                                    className="font-semibold cursor-pointer hover:bg-muted/50 transition-colors"
+                                                    onClick={() => handleSort("status")}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        Status
+                                                        {sortBy === "status" && (
+                                                            sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
+                                                        )}
+                                                    </div>
+                                                </TableHead>
+                                                <TableHead 
+                                                    className="font-semibold cursor-pointer hover:bg-muted/50 transition-colors"
+                                                    onClick={() => handleSort("price")}
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        Price
+                                                        {sortBy === "price" && (
+                                                            sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
+                                                        )}
+                                                    </div>
+                                                </TableHead>
+                                                <TableHead className="font-semibold">Category</TableHead>
+                                                <TableHead className="font-semibold text-right">Actions</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {filteredAndSortedBookings.map((booking: Booking) => (
+                                                <BookingTableRow key={booking.id} booking={booking} userRole={userRole || 'client'} />
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Mobile Card View */}
+                        <div className="space-y-4 lg:hidden">
+                            {filteredAndSortedBookings.map((booking: Booking) => (
+                                <BookingMobileCard key={booking.id} booking={booking} userRole={userRole || 'client'} />
+                            ))}
+                        </div>
+                    </>
                 ) : (
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-12 text-center">

@@ -1181,7 +1181,18 @@
     "noJobsYet": "Hindi ka pa nag-post ng mga trabaho.",
     "noJobsFound": "Walang nahanap na trabaho",
     "noJobsMatchSearch": "Walang trabaho na tumugma sa iyong search criteria",
-    "postAJob": "Mag-post ng Trabaho"
+    "postAJob": "Mag-post ng Trabaho",
+    "na": "N/A",
+    "view": "Tingnan",
+    "edit": "I-edit",
+    "close": "Isara",
+    "reopen": "Buksan ulit",
+    "deleteJobPost": "Tanggalin ang Job Post",
+    "error": "Error",
+    "success": "Tagumpay",
+    "jobStatusUpdated": "Matagumpay na na-update ang status ng trabaho",
+    "couldNotUpdateJob": "Hindi ma-update ang status ng trabaho",
+    "couldNotDeleteJob": "Hindi ma-delete ang job post"
   },
   "MyFavorites": {
     "title": "Aking Mga Favorite Provider",
@@ -1237,6 +1248,7 @@
   "Jobs": {
     "title": "Maghanap ng Trabaho",
     "subtitle": "Browse at mag-apply para sa available na mga trabaho.",
+    "jobs": "mga trabaho",
     "accessDenied": "Access Denied",
     "providersOnly": "Ang page na ito ay available lamang sa mga service provider.",
     "couldNotFetchJobs": "Hindi makuha ang job listings.",

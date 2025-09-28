@@ -1150,7 +1150,18 @@
     "noJobsYet": "You haven't posted any jobs yet.",
     "noJobsFound": "No jobs found",
     "noJobsMatchSearch": "No jobs match your search criteria",
-    "postAJob": "Post a Job"
+    "postAJob": "Post a Job",
+    "na": "N/A",
+    "view": "View",
+    "edit": "Edit",
+    "close": "Close",
+    "reopen": "Reopen",
+    "deleteJobPost": "Delete Job Post",
+    "error": "Error",
+    "success": "Success",
+    "jobStatusUpdated": "Job status updated successfully",
+    "couldNotUpdateJob": "Could not update job status",
+    "couldNotDeleteJob": "Could not delete job post"
   },
   "MyFavorites": {
     "title": "My Favorite Providers",
@@ -1206,6 +1217,7 @@
   "Jobs": {
     "title": "Find Work",
     "subtitle": "Browse and apply for available jobs.",
+    "jobs": "jobs",
     "accessDenied": "Access Denied",
     "providersOnly": "This page is only available to service providers.",
     "couldNotFetchJobs": "Could not fetch job listings.",

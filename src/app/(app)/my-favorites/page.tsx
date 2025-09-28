@@ -56,9 +56,9 @@ const getAvailabilityBadge = (status: Provider['availabilityStatus'], t: any) =>
 const ProviderCard = ({ provider }: { provider: Provider }) => {
     const t = useTranslations('MyFavorites');
     return (
-        <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
+        <Card className="shadow-elevated border border-border/50 bg-background/90 backdrop-blur-sm hover:shadow-floating hover:shadow-primary/10 hover:border-primary/30 hover:-translate-y-1 transition-all duration-500 group cursor-pointer">
             <CardHeader className="text-center pb-3">
-                <Avatar className="h-16 w-16 mx-auto mb-3 border-2 border-primary/20 shadow-soft">
+                <Avatar className="h-16 w-16 mx-auto mb-3 border-2 border-primary/20 shadow-elevated group-hover:shadow-primary-glow transition-all duration-300">
                     <AvatarImage src={provider.photoURL} alt={provider.displayName} />
                     <AvatarFallback className="text-lg bg-gradient-to-r from-primary to-accent text-primary-foreground font-medium">{getAvatarFallback(provider.displayName)}</AvatarFallback>
                 </Avatar>
@@ -77,7 +77,7 @@ const ProviderCard = ({ provider }: { provider: Provider }) => {
                 <p className="text-sm text-muted-foreground line-clamp-2">{provider.bio || t('noBioAvailable')}</p>
             </CardContent>
             <CardFooter className="pt-2 px-4 pb-4">
-                <Button className="w-full shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground" asChild>
+                <Button className="w-full shadow-elevated hover:shadow-primary-glow transition-all duration-300 border-2 border-primary/20 hover:border-primary hover:bg-primary hover:text-primary-foreground group-hover:scale-105" asChild>
                     <Link href={`/providers/${provider.uid}`}>{t('viewProfile')}</Link>
                 </Button>
             </CardFooter>
@@ -173,15 +173,14 @@ export default function MyFavoritesPage() {
                     </div>
 
                 ) : (
-
-                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                  <Card className="shadow-elevated border border-border/50 bg-background/90 backdrop-blur-sm hover:shadow-floating hover:border-primary/30 transition-all duration-300">
                         <CardContent className="flex flex-col items-center justify-center text-center p-12">
                             <Heart className="h-20 w-20 mb-6 text-primary opacity-60" />
                             <div className="space-y-3">
                                 <h3 className="text-2xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noFavoritesYet')}</h3>
                                 <p className="text-lg text-muted-foreground max-w-md">{t('noFavoritesDescription')}</p>
                             </div>
-                            <Button asChild className="mt-6 shadow-glow hover:shadow-glow/50 transition-all duration-300">
+                            <Button asChild className="mt-6 shadow-elevated hover:shadow-primary-glow transition-all duration-300 border-2 border-primary/20 hover:border-primary">
                                 <Link href="/dashboard">{t('findProviders')}</Link>
                             </Button>
                         </CardContent>
