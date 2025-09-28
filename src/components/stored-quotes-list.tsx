@@ -46,6 +46,7 @@ import { useAuth } from "@/context/auth-context";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, Timestamp, orderBy } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
+import { useErrorHandler } from "@/hooks/use-error-handler";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { QuoteFormValues } from "./quote-builder-client";
@@ -78,6 +79,7 @@ const getStatusVariant = (status: QuoteStatus) => {
 export function StoredQuotesList() {
     const { user } = useAuth();
     const { toast } = useToast();
+    const { handleError } = useErrorHandler();
     const t = useTranslations('StoredQuotesList');
     const [quotes, setQuotes] = React.useState<Quote[]>([]);
     const [loading, setLoading] = React.useState(true);
@@ -104,38 +106,37 @@ export function StoredQuotesList() {
             setQuotes(quotesData);
             setLoading(false);
         }, (error) => {
-            console.error("Error fetching quotes:", error);
-            toast({ variant: 'destructive', title: t('error'), description: t('failedToFetchQuotes') });
+            handleError(error, 'fetch quotes');
             setLoading(false);
         });
 
         return () => unsubscribe();
     }, [user, toast]);
 
-    const handleStatusUpdate = async (quoteId: string, status: QuoteStatus) => {
+    const handleStatusUpdate = React.useCallback(async (quoteId: string, status: QuoteStatus) => {
         const quoteRef = doc(db, "quotes", quoteId);
         try {
             await updateDoc(quoteRef, { status });
             toast({ title: t('success'), description: t('quoteMarkedAs', { status: status.toLowerCase() }) });
         } catch (error) {
-            toast({ variant: 'destructive', title: t('error'), description: t('failedToUpdateQuoteStatus') });
+            handleError(error, 'update quote status');
         }
-    };
+    }, [toast, t, handleError]);
     
-    const handleDeleteQuote = async (quoteId: string) => {
+    const handleDeleteQuote = React.useCallback(async (quoteId: string) => {
         try {
             await deleteDoc(doc(db, "quotes", quoteId));
             toast({ title: t('success'), description: t('quoteDeletedSuccessfully') });
         } catch (error) {
-            toast({ variant: 'destructive', title: t('error'), description: t('failedToDeleteQuote') });
+            handleError(error, 'delete quote');
         }
-    };
+    }, [toast, t, handleError]);
     
-    const calculateTotal = (quote: QuoteFormValues) => {
+    const calculateTotal = React.useCallback((quote: QuoteFormValues) => {
         const subtotal = quote.lineItems.reduce((acc: number, item: any) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
         const taxAmount = subtotal * ((Number(quote.taxRate) || 0) / 100);
         return subtotal + taxAmount;
-    }
+    }, []);
 
     const columns: ColumnDef<Quote>[] = [
       {

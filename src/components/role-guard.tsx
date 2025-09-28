@@ -1,23 +1,26 @@
 "use client";
 
 import { useAuth } from "@/context/auth-context";
-import { ReactNode } from "react";
+import { ReactNode, memo } from "react";
+import { Skeleton } from "./ui/skeleton";
 
 interface RoleGuardProps {
   children: ReactNode;
   allowedRoles: string[];
   fallback?: ReactNode;
+  loadingFallback?: ReactNode;
 }
 
-export function RoleGuard({ 
+export const RoleGuard = memo(function RoleGuard({ 
   children, 
   allowedRoles, 
-  fallback = null
+  fallback = null,
+  loadingFallback
 }: RoleGuardProps) {
   const { userRole, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>;
+    return loadingFallback || <Skeleton className="h-8 w-full" />;
   }
 
   // Check role
@@ -26,38 +29,38 @@ export function RoleGuard({
   }
 
   return <>{children}</>;
-}
+});
 
 // Convenience components for common use cases
-export function AdminOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export const AdminOnly = memo(function AdminOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
   return (
     <RoleGuard allowedRoles={['admin']} fallback={fallback}>
       {children}
     </RoleGuard>
   );
-}
+});
 
-export function ProviderOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export const ProviderOnly = memo(function ProviderOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
   return (
     <RoleGuard allowedRoles={['provider']} fallback={fallback}>
       {children}
     </RoleGuard>
   );
-}
+});
 
-export function ClientOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export const ClientOnly = memo(function ClientOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
   return (
     <RoleGuard allowedRoles={['client']} fallback={fallback}>
       {children}
     </RoleGuard>
   );
-}
+});
 
-export function AgencyOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
+export const AgencyOnly = memo(function AgencyOnly({ children, fallback }: { children: ReactNode; fallback?: ReactNode }) {
   return (
     <RoleGuard allowedRoles={['agency']} fallback={fallback}>
       {children}
     </RoleGuard>
   );
-}
+});
 

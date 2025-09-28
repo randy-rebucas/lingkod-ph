@@ -1,11 +1,12 @@
 
 "use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { doc, onSnapshot, collection, addDoc, serverTimestamp, getDocs, query, where, limit } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/use-error-handler';
 
 type UserRole = 'client' | 'provider' | 'agency' | 'admin' | 'partner' | null;
 
@@ -66,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus | null>(null);
   const { toast } = useToast();
+  const { handleError } = useErrorHandler();
 
   const handleSignOut = useCallback(() => {
     signOut(auth);
@@ -79,10 +81,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       return await user.getIdToken();
     } catch (error) {
-      console.error('Error getting ID token:', error);
+      handleError(error, 'get ID token');
       return null;
     }
-  }, [user]);
+  }, [user, handleError]);
 
   useEffect(() => {
     if (!auth || !db) {
@@ -122,8 +124,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribeAuth();
   }, [toast, handleSignOut, auth, db]);
 
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    user,
+    loading,
+    userRole,
+    verificationStatus,
+    getIdToken
+  }), [user, loading, userRole, verificationStatus, getIdToken]);
+
   return (
-    <AuthContext.Provider value={{ user, loading, userRole, verificationStatus, getIdToken }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useRef } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
 import { useAuth } from "@/context/auth-context";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
@@ -26,14 +26,18 @@ export function InvoicePreview({ invoice }: { invoice: Invoice }) {
     const t = useTranslations('InvoicePreview');
     const invoiceRef = useRef<HTMLDivElement>(null);
 
-    const subtotal = invoice.lineItems.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
-    const taxAmount = subtotal * ((Number(invoice.taxRate) || 0) / 100);
-    const total = subtotal + taxAmount;
-    
-    const issueDate = toDate(invoice.issueDate);
-    const dueDate = toDate(invoice.dueDate);
+    // Memoize calculations
+    const { subtotal, taxAmount, total, issueDate, dueDate } = useMemo(() => {
+        const subtotal = invoice.lineItems.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
+        const taxAmount = subtotal * ((Number(invoice.taxRate) || 0) / 100);
+        const total = subtotal + taxAmount;
+        const issueDate = toDate(invoice.issueDate);
+        const dueDate = toDate(invoice.dueDate);
+        
+        return { subtotal, taxAmount, total, issueDate, dueDate };
+    }, [invoice.lineItems, invoice.taxRate, invoice.issueDate, invoice.dueDate]);
 
-    const handleDownload = () => {
+    const handleDownload = useCallback(() => {
         const input = invoiceRef.current;
         if (!input) return;
 
@@ -52,7 +56,7 @@ export function InvoicePreview({ invoice }: { invoice: Invoice }) {
             pdf.addImage(imgData, 'PNG', 0, 0, width, height > pdfHeight ? pdfHeight : height);
             pdf.save(`Invoice-${invoice.invoiceNumber}.pdf`);
         });
-    };
+    }, [invoice.invoiceNumber]);
 
     return (
         <div>

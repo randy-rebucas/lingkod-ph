@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import Image from "next/image";
@@ -21,6 +21,7 @@ import { Badge } from "./ui/badge";
 import Link from "next/link";
 import { Megaphone, ArrowRight, Star, ExternalLink } from "lucide-react";
 import { useTranslations } from 'next-intl';
+import { useErrorHandler } from '@/hooks/use-error-handler';
 
 
 type AdCampaign = {
@@ -39,6 +40,7 @@ export function AdCarousel() {
     const [count, setCount] = useState(0)
     const Autoplay = useRef<any>(null);
     const t = useTranslations('AdCarousel');
+    const { handleError } = useErrorHandler();
 
     useEffect(() => {
         import("embla-carousel-autoplay").then((plugin) => {
@@ -71,12 +73,12 @@ export function AdCarousel() {
             setCampaigns(data);
             setLoading(false);
         }, (error) => {
-            console.error("Error fetching active ad campaigns:", error);
+            handleError(error, 'fetch ad campaigns');
             setLoading(false);
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [handleError]);
 
     if (loading) {
         return <Skeleton className="h-48 w-full rounded-lg" />;
@@ -86,7 +88,7 @@ export function AdCarousel() {
         return null; 
     }
 
-    const AdCard = ({ campaign }: { campaign: AdCampaign }) => {
+    const AdCard = useCallback(({ campaign }: { campaign: AdCampaign }) => {
         const cardContent = (
             <Card className="overflow-hidden h-full flex group bg-background/80 backdrop-blur-sm border border-border/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 relative">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -134,7 +136,7 @@ export function AdCarousel() {
             )
         }
         return cardContent;
-    };
+    }, []);
 
 
     return (

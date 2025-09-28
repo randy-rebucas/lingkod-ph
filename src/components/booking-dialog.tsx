@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -48,6 +48,7 @@ type BookingDialogProps = {
     onBookingConfirmed: () => void;
 };
 
+// Memoized time slots generation
 const generateTimeSlots = () => {
     const slots = [];
     for (let i = 8; i <= 17; i++) {
@@ -63,8 +64,10 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
     const { toast } = useToast();
     const router = useRouter();
     const [isSaving, setIsSaving] = useState(false);
-    const timeSlots = generateTimeSlots();
     const t = useTranslations('BookingDialog');
+    
+    // Memoize time slots to prevent regeneration on every render
+    const timeSlots = useMemo(() => generateTimeSlots(), []);
 
     const form = useForm<BookingFormValues>({
         resolver: zodResolver(bookingSchema),
@@ -79,19 +82,21 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
         form.reset();
     }, [isOpen, form]);
 
-    const onSubmit = async (data: BookingFormValues) => {
+    // Memoize the submit handler to prevent unnecessary re-renders
+    const onSubmit = useCallback(async (data: BookingFormValues) => {
         if (!user) {
             toast({ variant: 'destructive', title: t('error'), description: t('mustBeLoggedIn') });
             return;
         }
+        
         setIsSaving(true);
         try {
             const timeParts = data.time.match(/(\d+):(\d+)\s(AM|PM)/);
             if (!timeParts) {
                 toast({ variant: 'destructive', title: t('error'), description: t('invalidTimeFormat') });
-                setIsSaving(false);
                 return;
             }
+            
             let hours = parseInt(timeParts[1], 10);
             const minutes = parseInt(timeParts[2], 10);
             const ampm = timeParts[3];
@@ -118,17 +123,22 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
                 createdAt: serverTimestamp(),
             };
 
-            const newBookingRef = await addDoc(collection(db, 'bookings'), bookingData);
+            if (!db) {
+                throw new Error('Database not initialized. Please check your Firebase configuration.');
+            }
+            
+            const newBookingRef = await addDoc(collection(db!, 'bookings'), bookingData);
             onBookingConfirmed();
             router.push(`/bookings/${newBookingRef.id}/payment`);
 
         } catch (error) {
             console.error("Error creating booking:", error);
-            toast({ variant: 'destructive', title: t('error'), description: t('failedToCreateBooking') });
+            const errorMessage = error instanceof Error ? error.message : t('failedToCreateBooking');
+            toast({ variant: 'destructive', title: t('error'), description: errorMessage });
         } finally {
             setIsSaving(false);
         }
-    };
+    }, [user, provider, service, onBookingConfirmed, router, toast, t]);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

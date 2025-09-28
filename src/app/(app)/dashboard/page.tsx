@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback, memo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List, ShieldCheck, Clock, Wallet, Info } from "lucide-react";
@@ -17,6 +17,7 @@ import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDoc
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useErrorHandler } from "@/hooks/use-error-handler";
 import { cn } from "@/lib/utils";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { findMatchingProviders } from "@/ai/flows/find-matching-providers";
@@ -382,9 +383,10 @@ const AgencyRow = ({ agency, isFavorite, onToggleFavorite }: { agency: Provider;
 }
 
 
-export default function DashboardPage() {
+const DashboardPage = memo(function DashboardPage() {
     const { user, userRole } = useAuth();
     const { toast } = useToast();
+    const { handleError } = useErrorHandler();
     const t = useTranslations('Dashboard');
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [reviews, setReviews] = useState<Review[]>([]);
@@ -1089,4 +1091,6 @@ export default function DashboardPage() {
 
         </div>
     );
-}
+});
+
+export default DashboardPage;

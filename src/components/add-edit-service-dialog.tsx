@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/use-error-handler';
 import { Loader2, Sparkles } from 'lucide-react';
 import { generateServiceDescription } from '@/ai/flows/generate-service-description';
 import { useTranslations } from 'next-intl';
@@ -53,6 +54,7 @@ type AddEditServiceDialogProps = {
 export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSaved }: AddEditServiceDialogProps) {
     const { user } = useAuth();
     const { toast } = useToast();
+    const { handleError } = useErrorHandler();
     const t = useTranslations('Components');
     const [isSaving, setIsSaving] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -75,26 +77,24 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
         },
     });
 
-    useEffect(() => {
-        const fetchCategories = async () => {
-            if (!db) return;
-            try {
-                const categoriesRef = collection(db, "categories");
-                const q = query(categoriesRef, orderBy("name"));
-                const querySnapshot = await getDocs(q);
-                const fetchedCategories = querySnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
-                setCategories(fetchedCategories);
-            } catch (error) {
-                console.error("Error fetching categories: ", error);
-                toast({ variant: 'destructive', title: t('error'), description: t('couldNotFetchCategories') });
-            }
-        };
+    const fetchCategories = useCallback(async () => {
+        if (!db) return;
+        try {
+            const categoriesRef = collection(db, "categories");
+            const q = query(categoriesRef, orderBy("name"));
+            const querySnapshot = await getDocs(q);
+            const fetchedCategories = querySnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+            setCategories(fetchedCategories);
+        } catch (error) {
+            handleError(error, 'fetch categories');
+        }
+    }, [handleError]);
 
+    useEffect(() => {
         if (isOpen) {
             fetchCategories();
         }
-
-    }, [isOpen, toast]);
+    }, [isOpen, fetchCategories]);
 
     useEffect(() => {
         if (service) {
@@ -110,7 +110,7 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
         }
     }, [service, form, isOpen]);
 
-    const handleGenerateDescription = async () => {
+    const handleGenerateDescription = useCallback(async () => {
         const serviceName = form.getValues('name');
         if (!serviceName || serviceName.trim().length < 3) {
             toast({
@@ -132,18 +132,13 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
                 });
             }
         } catch (error) {
-            console.error('Error generating description:', error);
-            toast({
-                variant: 'destructive',
-                title: t('aiError'),
-                description: t('couldNotGenerate'),
-            });
+            handleError(error, 'generate service description');
         } finally {
             setIsGenerating(false);
         }
-    };
+    }, [form, toast, t, handleError]);
 
-    const onSubmit = async (data: Service) => {
+    const onSubmit = useCallback(async (data: Service) => {
         if (!user) {
             toast({ variant: 'destructive', title: t('error'), description: t('mustBeLoggedIn') });
             return;
@@ -166,12 +161,11 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
             }
             onServiceSaved();
         } catch (error) {
-            console.error("Error saving service:", error);
-            toast({ variant: 'destructive', title: t('error'), description: t('failedToSave') });
+            handleError(error, 'save service');
         } finally {
             setIsSaving(false);
         }
-    };
+    }, [user, service, onServiceSaved, toast, t, handleError]);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

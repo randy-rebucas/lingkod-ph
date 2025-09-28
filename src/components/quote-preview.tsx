@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useMemo } from 'react';
 import { useAuth } from "@/context/auth-context";
 import { QuoteFormValues } from "./quote-builder-client";
 import { format } from "date-fns";
@@ -22,22 +23,26 @@ export function QuotePreview({ data }: { data: QuoteFormValues }) {
     const { user } = useAuth();
     const t = useTranslations('QuotePreview');
 
-    const subtotal = data.lineItems.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
-    
-    // Calculate discount
-    let discountAmount = 0;
-    if (data.discountType === 'percentage') {
-        discountAmount = subtotal * ((Number(data.discountValue) || 0) / 100);
-    } else if (data.discountType === 'fixed') {
-        discountAmount = Number(data.discountValue) || 0;
-    }
-    
-    const afterDiscount = subtotal - discountAmount;
-    const taxAmount = afterDiscount * ((Number(data.taxRate) || 0) / 100);
-    const total = afterDiscount + taxAmount;
-    
-    const issueDate = toDate(data.issueDate);
-    const validUntil = toDate(data.validUntil);
+    // Memoize all calculations
+    const { subtotal, discountAmount, afterDiscount, taxAmount, total, issueDate, validUntil } = useMemo(() => {
+        const subtotal = data.lineItems.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
+        
+        // Calculate discount
+        let discountAmount = 0;
+        if (data.discountType === 'percentage') {
+            discountAmount = subtotal * ((Number(data.discountValue) || 0) / 100);
+        } else if (data.discountType === 'fixed') {
+            discountAmount = Number(data.discountValue) || 0;
+        }
+        
+        const afterDiscount = subtotal - discountAmount;
+        const taxAmount = afterDiscount * ((Number(data.taxRate) || 0) / 100);
+        const total = afterDiscount + taxAmount;
+        const issueDate = toDate(data.issueDate);
+        const validUntil = toDate(data.validUntil);
+        
+        return { subtotal, discountAmount, afterDiscount, taxAmount, total, issueDate, validUntil };
+    }, [data.lineItems, data.discountType, data.discountValue, data.taxRate, data.issueDate, data.validUntil]);
 
     return (
         <div className="p-8 bg-background text-foreground text-sm max-h-[80vh] overflow-y-auto">

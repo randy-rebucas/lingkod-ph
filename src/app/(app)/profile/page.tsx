@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback, memo } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,7 @@ import { ref, uploadBytesResumable, getDownloadURL, deleteObject, uploadBytes } 
 import { updateProfile } from "firebase/auth";
 import { doc, updateDoc, getDoc, Timestamp, collection, onSnapshot, query, orderBy, runTransaction, serverTimestamp, where, addDoc, getDocs, arrayUnion, arrayRemove } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
+import { useErrorHandler } from "@/hooks/use-error-handler";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -101,9 +102,10 @@ const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
     return `${formattedHours}:${String(minutes).padStart(2, '0')} ${ampm}`;
 });
 
-export default function ProfilePage() {
+const ProfilePage = memo(function ProfilePage() {
     const { user, userRole, loading, verificationStatus } = useAuth();
     const { toast } = useToast();
+    const { handleError } = useErrorHandler();
     const t = useTranslations('Profile');
     
     // States for form fields
@@ -1471,4 +1473,6 @@ export default function ProfilePage() {
             </div>
         </div>
     );
-}
+});
+
+export default ProfilePage;

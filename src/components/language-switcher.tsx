@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,42 +17,46 @@ const languages = [
   { code: 'tl', name: 'Filipino', flag: '🇵🇭' },
 ];
 
-export function LanguageSwitcher() {
+export const LanguageSwitcher = memo(function LanguageSwitcher() {
   const t = useTranslations('Common');
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [currentLocale, setCurrentLocale] = useState('en');
 
-  useEffect(() => {
-    // Get current locale from cookie
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
-      return null;
-    };
-    
-    const locale = getCookie('locale') || 'en';
-    setCurrentLocale(locale);
+  // Memoize cookie getter function
+  const getCookie = useCallback((name: string) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift();
+    return null;
   }, []);
 
-  const handleLanguageChange = async (locale: string) => {
+  useEffect(() => {
+    const locale = getCookie('locale') || 'en';
+    setCurrentLocale(locale);
+  }, [getCookie]);
+
+  const handleLanguageChange = useCallback(async (locale: string) => {
     // Set cookie for the selected language
     document.cookie = `locale=${locale}; path=/; max-age=31536000`; // 1 year
     
     // Reload the page to apply the new language
     window.location.reload();
-  };
+  }, []);
 
-  const currentLanguage = languages.find(lang => lang.code === currentLocale) || languages[0];
+  // Memoize current language lookup
+  const currentLanguage = useMemo(() => 
+    languages.find(lang => lang.code === currentLocale) || languages[0],
+    [currentLocale]
+  );
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 px-2 gap-1">
-          <Globe className="h-4 w-4" />
+        <Button variant="ghost" size="sm" className="h-8 px-2 gap-1" aria-label="Select language">
+          <Globe className="h-4 w-4" aria-hidden="true" />
           <span className="text-sm font-medium">{currentLanguage.flag}</span>
-          <ChevronDown className="h-3 w-3" />
+          <ChevronDown className="h-3 w-3" aria-hidden="true" />
           <span className="sr-only">Toggle language</span>
         </Button>
       </DropdownMenuTrigger>
@@ -62,12 +66,13 @@ export function LanguageSwitcher() {
             key={language.code}
             onClick={() => handleLanguageChange(language.code)}
             className="cursor-pointer"
+            aria-label={`Switch to ${language.name}`}
           >
-            <span className="mr-2">{language.flag}</span>
+            <span className="mr-2" aria-hidden="true">{language.flag}</span>
             {language.name}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+});

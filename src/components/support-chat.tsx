@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Button } from './ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Bot, Loader2, Send, User, MessageSquare } from 'lucide-react';
@@ -26,7 +26,7 @@ export function SupportChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
 
@@ -46,16 +46,17 @@ export function SupportChat() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [input, t]);
   
-   const getAvatarFallback = (name: string | null | undefined) => {
+  // Memoize avatar fallback generation
+  const getAvatarFallback = useCallback((name: string | null | undefined) => {
     if (!name) return "U";
     const parts = name.split(" ");
     if (parts.length > 1 && parts[0] && parts[1]) {
       return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
-  };
+  }, []);
 
 
   return (

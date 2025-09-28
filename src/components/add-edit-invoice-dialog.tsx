@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/use-error-handler';
 import { CalendarIcon, Loader2, PlusCircle, Trash2, Wand2 } from 'lucide-react';
 import { Invoice } from '@/app/(app)/invoices/page';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -54,6 +55,7 @@ type AddEditInvoiceDialogProps = {
 export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSaved }: AddEditInvoiceDialogProps) {
     const { user } = useAuth();
     const { toast } = useToast();
+    const { handleError } = useErrorHandler();
     const t = useTranslations('Components');
     const [isSaving, setIsSaving] = useState(false);
     const [generatingIndex, setGeneratingIndex] = useState<number | null>(null);
@@ -116,11 +118,16 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
 
     const watchedLineItems = form.watch("lineItems");
     const watchedTaxRate = form.watch("taxRate");
-    const subtotal = watchedLineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
-    const taxAmount = subtotal * ((watchedTaxRate || 0) / 100);
-    const total = subtotal + taxAmount;
+    
+    // Memoize calculations to prevent unnecessary recalculations
+    const { subtotal, taxAmount, total } = useMemo(() => {
+        const subtotal = watchedLineItems.reduce((acc, item) => acc + (item.quantity || 0) * (item.price || 0), 0);
+        const taxAmount = subtotal * ((watchedTaxRate || 0) / 100);
+        const total = subtotal + taxAmount;
+        return { subtotal, taxAmount, total };
+    }, [watchedLineItems, watchedTaxRate]);
 
-    const handleGenerateDescription = async (index: number) => {
+    const handleGenerateDescription = useCallback(async (index: number) => {
         setGeneratingIndex(index);
         const itemName = form.getValues(`lineItems.${index}.description`);
         if (!itemName || itemName.trim().length < 3) {
@@ -143,19 +150,14 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
                 });
             }
         } catch (error) {
-            console.error("Error generating description:", error);
-            toast({
-                variant: 'destructive',
-                title: t('aiError'),
-                description: t('couldNotGenerate'),
-            });
+            handleError(error, 'generate invoice description');
         } finally {
             setGeneratingIndex(null);
         }
-    };
+    }, [form, toast, t, handleError]);
 
 
-    const onSubmit = async (data: InvoiceFormValues) => {
+    const onSubmit = useCallback(async (data: InvoiceFormValues) => {
         if (!user) {
             toast({ variant: 'destructive', title: t('error'), description: t('mustBeLoggedIn') });
             return;
@@ -183,12 +185,11 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
             }
             onInvoiceSaved();
         } catch (error) {
-            console.error("Error saving invoice:", error);
-            toast({ variant: 'destructive', title: t('error'), description: t('failedToSaveInvoice') });
+            handleError(error, 'save invoice');
         } finally {
             setIsSaving(false);
         }
-    };
+    }, [user, total, invoice, onInvoiceSaved, toast, t, handleError]);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
