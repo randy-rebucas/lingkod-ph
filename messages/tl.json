@@ -1134,6 +1134,9 @@
     "subtitle": "Makipag-communicate sa mga kliyente at service provider.",
     "searchConversations": "Hanapin ang mga conversation...",
     "noConversationsYet": "Wala pang mga conversation.",
+    "noConversationsFound": "Walang nahanap na mga conversation",
+    "tryDifferentSearch": "Subukan ang ibang search term",
+    "startConversationWithProvider": "Magsimula ng conversation sa isang service provider",
     "selectConversation": "Pumili ng conversation",
     "selectConversationDescription": "Pumili ng conversation mula sa kaliwang panel para makapagsimula ng chat.",
     "typeMessage": "I-type ang iyong mensahe...",
@@ -1147,14 +1150,19 @@
     "error": "Error",
     "couldNotFetchConversations": "Hindi makuha ang mga conversation.",
     "couldNotFetchMessages": "Hindi makuha ang mga mensahe.",
-    "failedToSendMessage": "Hindi maipadala ang mensahe."
+    "failedToSendMessage": "Hindi maipadala ang mensahe.",
+    "fileTooLarge": "Ang laki ng file ay dapat mas mababa sa 5MB",
+    "databaseConnectionError": "Error sa database connection. Pakisubukan ulit."
   },
   "MyJobPosts": {
     "title": "Aking Mga Job Post",
     "subtitle": "Tingnan at pamahalaan ang lahat ng iyong mga na-post na trabaho dito.",
+    "searchJobs": "Maghanap ng trabaho...",
     "titleColumn": "Pamagat",
+    "category": "Kategorya",
     "status": "Status",
     "applicants": "Mga Applicant",
+    "applications": "Mga Aplikasyon",
     "budget": "Budget",
     "actions": "Mga Aksyon",
     "toggleMenu": "I-toggle ang menu",
@@ -1171,6 +1179,8 @@
     "failedToDeleteJob": "Hindi ma-delete ang job post.",
     "couldNotFetchJobs": "Hindi makuha ang iyong mga job post.",
     "noJobsYet": "Hindi ka pa nag-post ng mga trabaho.",
+    "noJobsFound": "Walang nahanap na trabaho",
+    "noJobsMatchSearch": "Walang trabaho na tumugma sa iyong search criteria",
     "postAJob": "Mag-post ng Trabaho"
   },
   "MyFavorites": {
@@ -1285,6 +1295,9 @@
   "Calendar": {
     "title": "Kalendaryo",
     "subtitle": "Tingnan ang iyong mga upcoming at past bookings.",
+    "calendarTitle": "Kalendaryo",
+    "calendarDescription": "Tingnan at pamahalaan ang iyong mga appointment",
+    "newEvent": "Bagong Event",
     "loadingSchedule": "Loading ang iyong schedule...",
     "today": "Ngayon",
     "sun": "Ling",
@@ -1359,6 +1372,9 @@
   "Billing": {
     "title": "Billing & Invoices",
     "subtitle": "Tingnan at pamahalaan ang iyong mga invoice mula sa service providers.",
+    "searchInvoices": "Maghanap ng invoices...",
+    "invoiceHistory": "Kasaysayan ng Invoice",
+    "invoiceHistoryDescription": "Isang record ng lahat ng iyong mga invoice transactions.",
     "invoiceNumber": "Invoice #",
     "dateIssued": "Date Issued",
     "dueDate": "Due Date",
