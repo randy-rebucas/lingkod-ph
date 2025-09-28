@@ -1,13 +1,14 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { db } from "@/lib/firebase";
 import { collection, query, where, onSnapshot, limit } from "firebase/firestore";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Megaphone, X } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTranslations } from 'next-intl';
+import { useErrorHandler } from '@/hooks/use-error-handler';
 
 type Broadcast = {
     id: string;
@@ -18,6 +19,7 @@ type Broadcast = {
 
 export default function BroadcastBanner() {
     const t = useTranslations('BroadcastBanner');
+    const { handleError } = useErrorHandler();
     const [broadcast, setBroadcast] = useState<Broadcast | null>(null);
     const [isVisible, setIsVisible] = useState(false);
 
@@ -46,12 +48,12 @@ export default function BroadcastBanner() {
         return () => unsubscribe();
     }, []);
 
-    const handleDismiss = () => {
+    const handleDismiss = useCallback(() => {
         if (broadcast) {
             localStorage.setItem(`broadcast_${broadcast.id}`, "true");
         }
         setIsVisible(false);
-    };
+    }, [broadcast]);
 
     if (!broadcast || !isVisible) {
         return null;

@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useErrorHandler } from '@/hooks/use-error-handler';
 
 import { 
   Bell, 
@@ -254,10 +255,144 @@ const getTypeColor = (type: NotificationType) => {
     }
 };
 
-export default function NotificationsPage() {
+// Notifications Tab Component
+const NotificationsTab = memo(function NotificationsTab({ 
+    notifications, 
+    filter, 
+    setFilter, 
+    onNotificationClick, 
+    onInviteResponse, 
+    onDeleteNotification,
+    analyticsData 
+}: { 
+    notifications: Notification[], 
+    filter: 'all' | 'unread' | 'starred' | 'archived', 
+    setFilter: (filter: 'all' | 'unread' | 'starred' | 'archived') => void,
+    onNotificationClick: (notif: Notification) => void,
+    onInviteResponse: (notif: Notification, accepted: boolean) => void,
+    onDeleteNotification: (id: string) => void,
+    analyticsData: any
+}) {
+    return (
+        <div className="space-y-6">
+            {/* Simple Filter Tabs */}
+            <div className="flex gap-1 border-b">
+                <button
+                    className={cn(
+                        "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                        filter === 'all' 
+                            ? "border-primary text-primary" 
+                            : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                    onClick={() => setFilter('all')}
+                >
+                    All ({analyticsData.totalCount})
+                </button>
+                <button
+                    className={cn(
+                        "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                        filter === 'unread' 
+                            ? "border-primary text-primary" 
+                            : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                    onClick={() => setFilter('unread')}
+                >
+                    Unread ({analyticsData.unreadCount})
+                </button>
+                <button
+                    className={cn(
+                        "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                        filter === 'starred' 
+                            ? "border-primary text-primary" 
+                            : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                    onClick={() => setFilter('starred')}
+                >
+                    Starred ({analyticsData.starredCount})
+                </button>
+                <button
+                    className={cn(
+                        "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                        filter === 'archived' 
+                            ? "border-primary text-primary" 
+                            : "border-transparent text-muted-foreground hover:text-foreground"
+                    )}
+                    onClick={() => setFilter('archived')}
+                >
+                    Archived ({analyticsData.archivedCount})
+                </button>
+            </div>
+
+            {/* Notifications List */}
+            {notifications.length > 0 ? (
+                <div className="space-y-2">
+                    {notifications.map(notif => (
+                        <div 
+                            key={notif.id} 
+                            className={cn(
+                                "flex items-center gap-3 p-4 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors",
+                                !notif.read && "bg-blue-50 border-blue-200"
+                            )}
+                            onClick={() => onNotificationClick(notif)}
+                        >
+                            {/* Simple Icon */}
+                            <div className="flex-shrink-0">
+                                {getIconForType(notif.type)}
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                                <p className={cn(
+                                    "text-sm",
+                                    !notif.read && "font-medium"
+                                )}>
+                                    {notif.message}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {notif.createdAt ? formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true }) : ''}
+                                </p>
+                            </div>
+
+                            {/* Simple Actions */}
+                            <div className="flex items-center gap-2">
+                                {!notif.read && (
+                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                )}
+                                <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeleteNotification(notif.id);
+                                    }}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="text-center py-12">
+                    <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">
+                        {filter === 'unread' ? 'No unread notifications' : 'No notifications'}
+                    </h3>
+                    <p className="text-muted-foreground">
+                        {filter === 'unread' ? 'You\'re all caught up!' : 'No notifications to display'}
+                    </p>
+                </div>
+            )}
+        </div>
+    );
+});
+
+const NotificationsPage = memo(function NotificationsPage() {
     const { user } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
+    const { handleError } = useErrorHandler();
     const t = useTranslations('Notifications');
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
@@ -592,138 +727,7 @@ export default function NotificationsPage() {
 
         </div>
     );
-}
+});
 
-// Notifications Tab Component
-function NotificationsTab({ 
-    notifications, 
-    filter, 
-    setFilter, 
-    onNotificationClick, 
-    onInviteResponse, 
-    onDeleteNotification,
-    analyticsData 
-}: { 
-    notifications: Notification[], 
-    filter: 'all' | 'unread' | 'starred' | 'archived', 
-    setFilter: (filter: 'all' | 'unread' | 'starred' | 'archived') => void,
-    onNotificationClick: (notif: Notification) => void,
-    onInviteResponse: (notif: Notification, accepted: boolean) => void,
-    onDeleteNotification: (id: string) => void,
-    analyticsData: any
-}) {
-    return (
-        <div className="space-y-6">
-            {/* Simple Filter Tabs */}
-            <div className="flex gap-1 border-b">
-                <button
-                    className={cn(
-                        "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
-                        filter === 'all' 
-                            ? "border-primary text-primary" 
-                            : "border-transparent text-muted-foreground hover:text-foreground"
-                    )}
-                    onClick={() => setFilter('all')}
-                >
-                    All ({analyticsData.totalCount})
-                </button>
-                <button
-                    className={cn(
-                        "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
-                        filter === 'unread' 
-                            ? "border-primary text-primary" 
-                            : "border-transparent text-muted-foreground hover:text-foreground"
-                    )}
-                    onClick={() => setFilter('unread')}
-                >
-                    Unread ({analyticsData.unreadCount})
-                </button>
-                <button
-                    className={cn(
-                        "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
-                        filter === 'starred' 
-                            ? "border-primary text-primary" 
-                            : "border-transparent text-muted-foreground hover:text-foreground"
-                    )}
-                    onClick={() => setFilter('starred')}
-                >
-                    Starred ({analyticsData.starredCount})
-                </button>
-                <button
-                    className={cn(
-                        "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
-                        filter === 'archived' 
-                            ? "border-primary text-primary" 
-                            : "border-transparent text-muted-foreground hover:text-foreground"
-                    )}
-                    onClick={() => setFilter('archived')}
-                >
-                    Archived ({analyticsData.archivedCount})
-                </button>
-            </div>
-
-            {/* Notifications List */}
-            {notifications.length > 0 ? (
-                <div className="space-y-2">
-                    {notifications.map(notif => (
-                        <div 
-                            key={notif.id} 
-                            className={cn(
-                                "flex items-center gap-3 p-4 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors",
-                                !notif.read && "bg-blue-50 border-blue-200"
-                            )}
-                            onClick={() => onNotificationClick(notif)}
-                        >
-                            {/* Simple Icon */}
-                            <div className="flex-shrink-0">
-                                {getIconForType(notif.type)}
-                            </div>
-
-                            {/* Content */}
-                            <div className="flex-1 min-w-0">
-                                <p className={cn(
-                                    "text-sm",
-                                    !notif.read && "font-medium"
-                                )}>
-                                    {notif.message}
-                                </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {notif.createdAt ? formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true }) : ''}
-                                </p>
-                            </div>
-
-                            {/* Simple Actions */}
-                            <div className="flex items-center gap-2">
-                                {!notif.read && (
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                )}
-                                <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="h-8 w-8 p-0"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onDeleteNotification(notif.id);
-                                    }}
-                                >
-                                    <X className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <div className="text-center py-12">
-                    <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">
-                        {filter === 'unread' ? 'No unread notifications' : 'No notifications'}
-                    </h3>
-                    <p className="text-muted-foreground">
-                        {filter === 'unread' ? 'You\'re all caught up!' : 'No notifications to display'}
-                    </p>
-                </div>
-            )}
-        </div>
-    );
-}
+export default NotificationsPage;
 

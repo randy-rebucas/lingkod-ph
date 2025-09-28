@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Smartphone, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/use-error-handler';
 import { useAuth } from '@/context/auth-context';
 import { PaymentRetryService } from '@/lib/payment-retry-service';
 
@@ -34,9 +35,11 @@ export function GCashPaymentButton({
   
   const router = useRouter();
   const { toast } = useToast();
+  const { handleError } = useErrorHandler();
   const { getIdToken } = useAuth();
 
-  const handleGCashPayment = async () => {
+  // Memoize the payment handler to prevent unnecessary re-renders
+  const handleGCashPayment = useCallback(async () => {
     try {
       setIsProcessing(true);
       setPaymentStatus('processing');
@@ -111,39 +114,14 @@ export function GCashPaymentButton({
         });
       }
     } catch (error) {
-      console.error('GCash payment error:', error);
       setPaymentStatus('error');
-      
-      let errorMessage = 'An unexpected error occurred';
-      let toastMessage = 'An unexpected error occurred while processing your payment.';
-      
-      if (error instanceof Error) {
-        if (error.message.includes('Authentication required')) {
-          errorMessage = 'Please log in to continue';
-          toastMessage = 'You need to be logged in to make a payment.';
-        } else if (error.message.includes('fetch') || error.message.includes('HTTP')) {
-          errorMessage = 'Network error. Please check your connection.';
-          toastMessage = 'Unable to connect to payment service. Please check your internet connection.';
-        } else if (error.message.includes('Adyen')) {
-          errorMessage = 'Payment service temporarily unavailable';
-          toastMessage = 'The payment service is temporarily unavailable. Please try again later.';
-        } else {
-          errorMessage = error.message;
-          toastMessage = error.message;
-        }
-      }
-      
+      const errorMessage = handleError(error, 'GCash payment');
       setErrorMessage(errorMessage);
       onPaymentError?.(errorMessage);
-      toast({
-        variant: 'destructive',
-        title: 'Payment Error',
-        description: toastMessage,
-      });
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [bookingId, getIdToken, onPaymentStart, onPaymentSuccess, onPaymentError, toast, router, handleError]);
 
   const handlePaymentResult = async (pspReference: string) => {
     try {
@@ -191,32 +169,10 @@ export function GCashPaymentButton({
         });
       }
     } catch (error) {
-      console.error('Payment result handling error:', error);
       setPaymentStatus('error');
-      
-      let errorMessage = 'Failed to verify payment';
-      let toastMessage = 'Unable to verify your payment. Please contact support.';
-      
-      if (error instanceof Error) {
-        if (error.message.includes('Authentication required')) {
-          errorMessage = 'Please log in to continue';
-          toastMessage = 'You need to be logged in to verify your payment.';
-        } else if (error.message.includes('fetch')) {
-          errorMessage = 'Network error. Please check your connection.';
-          toastMessage = 'Unable to connect to payment service. Please check your internet connection.';
-        } else {
-          errorMessage = error.message;
-          toastMessage = error.message;
-        }
-      }
-      
+      const errorMessage = handleError(error, 'payment verification');
       setErrorMessage(errorMessage);
       onPaymentError?.(errorMessage);
-      toast({
-        variant: 'destructive',
-        title: 'Verification Failed',
-        description: toastMessage,
-      });
     } finally {
       setIsProcessing(false);
     }
@@ -239,11 +195,12 @@ export function GCashPaymentButton({
     }
   }, []);
 
-  const renderPaymentButton = () => {
+  // Memoize the payment button render to prevent unnecessary re-renders
+  const renderPaymentButton = useMemo(() => {
     switch (paymentStatus) {
       case 'processing':
         return (
-          <Button disabled className="w-full">
+          <Button disabled className="w-full" aria-label="Processing payment">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Processing Payment...
           </Button>
@@ -251,7 +208,7 @@ export function GCashPaymentButton({
       
       case 'success':
         return (
-          <Button disabled className="w-full bg-green-600 hover:bg-green-700">
+          <Button disabled className="w-full bg-green-600 hover:bg-green-700" aria-label="Payment successful">
             <CheckCircle className="mr-2 h-4 w-4" />
             Payment Successful!
           </Button>
@@ -264,11 +221,12 @@ export function GCashPaymentButton({
               onClick={handleGCashPayment}
               className="w-full"
               disabled={isProcessing}
+              aria-label="Retry payment"
             >
               <Smartphone className="mr-2 h-4 w-4" />
               Try Again
             </Button>
-            <Alert variant="destructive">
+            <Alert variant="destructive" role="alert">
               <XCircle className="h-4 w-4" />
               <AlertDescription>
                 {errorMessage}
@@ -283,13 +241,14 @@ export function GCashPaymentButton({
             onClick={handleGCashPayment}
             className="w-full"
             disabled={isProcessing}
+            aria-label="Pay with GCash"
           >
             <Smartphone className="mr-2 h-4 w-4" />
             Pay with GCash
           </Button>
         );
     }
-  };
+  }, [paymentStatus, isProcessing, errorMessage, handleGCashPayment]);
 
   return (
     <Card>
@@ -308,7 +267,7 @@ export function GCashPaymentButton({
           <div className="text-sm text-muted-foreground">{serviceName}</div>
         </div>
         
-        {renderPaymentButton()}
+        {renderPaymentButton}
         
         {redirectUrl && (
           <Alert>

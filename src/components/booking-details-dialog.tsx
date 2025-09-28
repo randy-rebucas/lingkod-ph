@@ -1,6 +1,7 @@
 
 "use client";
 
+import { memo, useMemo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,11 +28,15 @@ const getStatusVariant = (status: string) => {
     }
 }
 
-export function BookingDetailsDialog({ isOpen, setIsOpen, booking }: BookingDetailsDialogProps) {
+export const BookingDetailsDialog = memo(function BookingDetailsDialog({ isOpen, setIsOpen, booking }: BookingDetailsDialogProps) {
     const { userRole } = useAuth();
     const t = useTranslations('BookingDetailsDialog');
-    const displayUserLabel = userRole === 'client' ? t('provider') : t('client');
-    const displayUserName = userRole === 'client' ? booking.providerName : booking.clientName;
+    
+    // Memoize user display logic
+    const { displayUserLabel, displayUserName } = useMemo(() => ({
+        displayUserLabel: userRole === 'client' ? t('provider') : t('client'),
+        displayUserName: userRole === 'client' ? booking.providerName : booking.clientName
+    }), [userRole, booking.providerName, booking.clientName, t]);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -98,4 +103,4 @@ export function BookingDetailsDialog({ isOpen, setIsOpen, booking }: BookingDeta
             </DialogContent>
         </Dialog>
     );
-}
+});

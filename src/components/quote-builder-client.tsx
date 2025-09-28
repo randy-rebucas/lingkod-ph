@@ -15,7 +15,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useErrorHandler } from "@/hooks/use-error-handler";
+import { useState, useCallback, useMemo } from "react";
 import { generateQuoteDescription } from "@/ai/flows/generate-quote-description";
 import { Separator } from "./ui/separator";
 import { useAuth } from "@/context/auth-context";
@@ -77,6 +78,7 @@ export type LineItem = z.infer<typeof baseLineItemSchema>;
 export default function QuoteBuilderClient() {
     const { user } = useAuth();
     const { toast } = useToast();
+    const { handleError } = useErrorHandler();
     const t = useTranslations('QuoteBuilder');
     const [generatingDescriptionIndex, setGeneratingDescriptionIndex] = useState<number | null>(null);
     const [isSaving, setIsSaving] = useState(false);
@@ -126,25 +128,25 @@ export default function QuoteBuilderClient() {
     const taxAmount = afterDiscount * (taxRate / 100);
     const total = afterDiscount + taxAmount;
 
-    const handleGenerateDescription = async (index: number) => {
+    const handleGenerateDescription = useCallback(async (index: number) => {
         setGeneratingDescriptionIndex(index);
         try {
             const result = await generateQuoteDescription({ itemName: "Service Item" });
             form.setValue(`lineItems.${index}.description`, result.description);
             toast({ title: t('success'), description: t('descriptionGenerated') });
         } catch (error) {
-            toast({ variant: "destructive", title: t('error'), description: t('descriptionGenerationFailed') });
+            handleError(error, 'generate quote description');
         } finally {
             setGeneratingDescriptionIndex(null);
         }
-    };
+    }, [form, toast, t, handleError]);
 
-    const handlePreview = () => {
+    const handlePreview = useCallback(() => {
         const formData = form.getValues();
         setPreviewData(formData);
-    };
+    }, [form]);
 
-    const onSubmit = async (data: QuoteFormValues) => {
+    const onSubmit = useCallback(async (data: QuoteFormValues) => {
         if (!user) return;
         
         setIsSaving(true);
@@ -160,11 +162,11 @@ export default function QuoteBuilderClient() {
             toast({ title: t('success'), description: t('quoteSaved') });
             form.reset();
         } catch (error) {
-            toast({ variant: "destructive", title: t('error'), description: t('quoteSaveFailed') });
+            handleError(error, 'save quote');
         } finally {
             setIsSaving(false);
         }
-    };
+    }, [user, toast, t, form, handleError]);
 
     return (
         <Dialog>

@@ -1,13 +1,14 @@
 
 "use client";
 
+import { memo } from 'react';
 import QuoteBuilderClient from "@/components/quote-builder-client";
 import { StoredQuotesList } from "@/components/stored-quotes-list";
 import { useTranslations } from 'next-intl';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calculator, FileText } from "lucide-react";
 
-export default function QuoteBuilderPage() {
+const QuoteBuilderPage = memo(function QuoteBuilderPage() {
   const t = useTranslations('QuoteBuilder');
 
   return (
@@ -43,5 +44,7 @@ export default function QuoteBuilderPage() {
       </div>
     </div>
   );
-}
+});
+
+export default QuoteBuilderPage;
 

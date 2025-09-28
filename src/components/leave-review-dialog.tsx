@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/use-error-handler';
 import { Loader2, Star } from 'lucide-react';
 import { Booking } from '@/app/(app)/bookings/page';
 import { cn } from '@/lib/utils';
@@ -34,6 +35,7 @@ type LeaveReviewDialogProps = {
 export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDialogProps) {
     const { user } = useAuth();
     const { toast } = useToast();
+    const { handleError } = useErrorHandler();
     const [isSaving, setIsSaving] = useState(false);
     const [hoverRating, setHoverRating] = useState(0);
     const t = useTranslations('ReviewDialog');
@@ -49,7 +51,7 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
         },
     });
 
-    const onSubmit = async (data: ReviewFormValues) => {
+    const onSubmit = useCallback(async (data: ReviewFormValues) => {
         if (!user) {
             toast({ variant: 'destructive', title: t('error'), description: t('mustBeLoggedIn') });
             return;
@@ -88,12 +90,11 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
             toast({ title: t('success'), description: t('reviewSubmitted') });
             setIsOpen(false);
         } catch (error) {
-            console.error("Error submitting review:", error);
-            toast({ variant: 'destructive', title: t('error'), description: t('failedToSubmitReview') });
+            handleError(error, 'submit review');
         } finally {
             setIsSaving(false);
         }
-    };
+    }, [user, booking, toast, t, handleError, setIsOpen]);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

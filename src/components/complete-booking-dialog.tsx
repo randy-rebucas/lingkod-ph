@@ -1,13 +1,14 @@
 
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/use-error-handler';
 import { Loader2, Camera, Upload } from 'lucide-react';
 import { Booking } from '@/app/(app)/bookings/page';
 import Image from 'next/image';
@@ -23,13 +24,14 @@ type CompleteBookingDialogProps = {
 export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBookingDialogProps) {
     const { user } = useAuth();
     const { toast } = useToast();
+    const { handleError } = useErrorHandler();
     const t = useTranslations('CompleteBookingDialog');
     const [isSaving, setIsSaving] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
             const file = event.target.files[0];
             setImageFile(file);
@@ -39,9 +41,9 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
             };
             reader.readAsDataURL(file);
         }
-    };
+    }, []);
 
-    const handleConfirmCompletion = async () => {
+    const handleConfirmCompletion = useCallback(async () => {
         if (!user || !imageFile || !previewUrl) {
             toast({ variant: 'destructive', title: t('error'), description: t('uploadProof') });
             return;
@@ -70,14 +72,13 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
             setIsOpen(false);
 
         } catch (error: any) {
-            console.error("Error completing booking:", error);
-            toast({ variant: "destructive", title: t('error'), description: t('failedToComplete') });
+            handleError(error, 'complete booking');
         } finally {
             setIsSaving(false);
             setPreviewUrl(null);
             setImageFile(null);
         }
-    };
+    }, [user, imageFile, previewUrl, booking, toast, t, handleError, setIsOpen]);
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => {

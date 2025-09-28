@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { db, storage } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
@@ -11,6 +11,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Progress } from './ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/use-error-handler';
 import { Upload, Loader2, CheckCircle, AlertCircle, Clock, ShieldCheck, User, CreditCard } from 'lucide-react';
 import { Badge } from './ui/badge';
 import Image from 'next/image';
@@ -48,6 +49,7 @@ const StatusInfo = {
 export default function IdentityVerification() {
     const { user, verificationStatus } = useAuth();
     const { toast } = useToast();
+    const { handleError } = useErrorHandler();
     const t = useTranslations('IdentityVerification');
     const [selfie, setSelfie] = useState<File | null>(null);
     const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
@@ -62,7 +64,7 @@ export default function IdentityVerification() {
     const govIdInputRef = useRef<HTMLInputElement>(null);
 
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: 'selfie' | 'govId') => {
+    const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>, type: 'selfie' | 'govId') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -77,9 +79,9 @@ export default function IdentityVerification() {
             }
         };
         reader.readAsDataURL(file);
-    };
+    }, []);
 
-    const uploadFile = (file: File, path: string, setProgress: (p: number) => void) => {
+    const uploadFile = useCallback((file: File, path: string, setProgress: (p: number) => void) => {
         return new Promise<string>((resolve, reject) => {
             const storageRef = ref(storage, path);
             const uploadTask = uploadBytesResumable(storageRef, file);
@@ -93,9 +95,9 @@ export default function IdentityVerification() {
                 }
             );
         });
-    };
+    }, []);
 
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
         if (!user || !selfie || !govId) {
             toast({ variant: 'destructive', title: t('missingFiles'), description: t('uploadBothFiles') });
             return;
@@ -124,13 +126,13 @@ export default function IdentityVerification() {
             setGovIdPreview(null);
 
         } catch (error: any) {
-            toast({ variant: 'destructive', title: t('submissionFailed'), description: error.message });
+            handleError(error, 'submit verification documents');
         } finally {
             setIsSubmitting(false);
             setSelfieProgress(null);
             setIdProgress(null);
         }
-    };
+    }, [user, selfie, govId, uploadFile, toast, t, handleError]);
 
     const currentStatusInfo = StatusInfo[verificationStatus || 'Unverified'];
 

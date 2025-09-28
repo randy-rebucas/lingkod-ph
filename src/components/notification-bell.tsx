@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { db } from '@/lib/firebase';
@@ -32,15 +32,16 @@ type Notification = {
     agencyName?: string;
 };
 
+// Memoized icon mapping for better performance
 const getIconForType = (type: NotificationType) => {
     switch (type) {
-        case 'booking_update': return <Briefcase className="h-4 w-4" />;
-        case 'new_message': return <MessageSquare className="h-4 w-4" />;
-        case 'agency_invite': return <UserPlus className="h-4 w-4" />;
-        case 'renewal_reminder': return <Star className="h-4 w-4 text-yellow-500" />;
-        case 'new_review': return <Star className="h-4 w-4 text-yellow-500" />;
-        case 'new_job': return <Briefcase className="h-4 w-4 text-blue-500" />;
-        default: return <Bell className="h-4 w-4" />;
+        case 'booking_update': return <Briefcase className="h-4 w-4" aria-hidden="true" />;
+        case 'new_message': return <MessageSquare className="h-4 w-4" aria-hidden="true" />;
+        case 'agency_invite': return <UserPlus className="h-4 w-4" aria-hidden="true" />;
+        case 'renewal_reminder': return <Star className="h-4 w-4 text-yellow-500" aria-hidden="true" />;
+        case 'new_review': return <Star className="h-4 w-4 text-yellow-500" aria-hidden="true" />;
+        case 'new_job': return <Briefcase className="h-4 w-4 text-blue-500" aria-hidden="true" />;
+        default: return <Bell className="h-4 w-4" aria-hidden="true" />;
     }
 };
 
@@ -70,7 +71,7 @@ export function NotificationBell() {
         return () => unsubscribe();
     }, [user]);
 
-    const handleNotificationClick = async (notif: Notification) => {
+    const handleNotificationClick = useCallback(async (notif: Notification) => {
         if (!user) return;
         if (!notif.read) {
             await updateDoc(doc(db, `users/${user.uid}/notifications`, notif.id), { read: true });
@@ -78,9 +79,9 @@ export function NotificationBell() {
         if (notif.type !== 'agency_invite') {
             router.push(notif.link);
         }
-    };
+    }, [user, router]);
 
-    const handleInviteResponse = async (event: React.MouseEvent, notif: Notification, accepted: boolean) => {
+    const handleInviteResponse = useCallback(async (event: React.MouseEvent, notif: Notification, accepted: boolean) => {
         event.stopPropagation(); // Prevent dropdown from closing
         if (!user || !notif.inviteId) return;
 
@@ -96,13 +97,13 @@ export function NotificationBell() {
             toast({ title: t('success'), description: result.message });
             // The notification will disappear as the invite status changes.
         }
-    };
+    }, [user, toast, t]);
     
-    const handleDeleteNotification = async (event: React.MouseEvent, notificationId: string) => {
+    const handleDeleteNotification = useCallback(async (event: React.MouseEvent, notificationId: string) => {
         event.stopPropagation();
         if (!user) return;
         await deleteDoc(doc(db, `users/${user.uid}/notifications`, notificationId));
-    };
+    }, [user]);
 
 
     return (
