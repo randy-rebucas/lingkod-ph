@@ -6,7 +6,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/context/auth-context';
-import { db } from '@/lib/firebase';
+import { getDb } from '@/lib/firebase';
 import { collection, addDoc, doc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -173,11 +173,11 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
             };
 
             if (invoice?.id) {
-                const invoiceRef = doc(db, 'invoices', invoice.id);
+                const invoiceRef = doc(getDb(), 'invoices', invoice.id);
                 await updateDoc(invoiceRef, finalData);
                 toast({ title: t('success'), description: t('invoiceUpdated') });
             } else {
-                await addDoc(collection(db, 'invoices'), {
+                await addDoc(collection(getDb(), 'invoices'), {
                     ...finalData,
                     createdAt: serverTimestamp(),
                 });

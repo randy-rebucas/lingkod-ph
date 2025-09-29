@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -59,12 +59,12 @@ export default function AppliedJobsPage() {
     const [filterStatus, setFilterStatus] = useState('all');
 
     useEffect(() => {
-        if (!user || userRole !== 'provider' || !db) {
+        if (!user || userRole !== 'provider' || !getDb()) {
             setLoading(false);
             return;
         }
 
-        const jobsQuery = query(collection(db, "jobs"), where("applications", "array-contains", user.uid));
+        const jobsQuery = query(collection(getDb(), "jobs"), where("applications", "array-contains", user.uid));
         
         const unsubscribe = onSnapshot(jobsQuery, (snapshot) => {
             const jobsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));

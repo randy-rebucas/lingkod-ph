@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/auth-context";
-import { db, storage } from "@/lib/firebase";
+import { getDb, getStorageInstance   } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,12 +60,12 @@ export default function AdminAdsPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (userRole !== 'admin' || !db) {
+        if (userRole !== 'admin' || !getDb()) {
             setLoading(false);
             return;
         }
 
-        const campaignsQuery = query(collection(db, "adCampaigns"), orderBy("createdAt", "desc"));
+        const campaignsQuery = query(collection(getDb(), "adCampaigns"), orderBy("createdAt", "desc"));
         
         const unsubscribe = onSnapshot(campaignsQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AdCampaign));
@@ -158,7 +158,7 @@ export default function AdminAdsPage() {
             setIsUploading(true);
             try {
                 const storagePath = `ad-campaign-images/${Date.now()}_${imageFile.name}`;
-                const storageRef = ref(storage, storagePath);
+                const storageRef = ref(getStorageInstance(), storagePath);
                 const uploadTask = await uploadBytesResumable(storageRef, imageFile);
                 finalImageUrl = await getDownloadURL(uploadTask.ref);
             } catch (error) {

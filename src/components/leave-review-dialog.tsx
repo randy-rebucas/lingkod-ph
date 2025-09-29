@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/context/auth-context';
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, writeBatch, doc } from 'firebase/firestore';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -57,10 +57,10 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
             return;
         }
         setIsSaving(true);
-        const batch = writeBatch(db);
+        const batch = writeBatch(getDb());
 
         try {
-            const reviewRef = doc(collection(db, 'reviews'));
+            const reviewRef = doc(collection(getDb(), 'reviews'));
             batch.set(reviewRef, {
                 providerId: booking.providerId,
                 clientId: user.uid,
@@ -72,11 +72,11 @@ export function LeaveReviewDialog({ isOpen, setIsOpen, booking }: LeaveReviewDia
                 createdAt: serverTimestamp(),
             });
 
-            const bookingRef = doc(db, 'bookings', booking.id);
+            const bookingRef = doc(getDb(), 'bookings', booking.id);
             batch.update(bookingRef, { reviewId: reviewRef.id });
             
             // Create notification for the provider
-            const providerNotifRef = doc(collection(db, `users/${booking.providerId}/notifications`));
+            const providerNotifRef = doc(collection(getDb(), `users/${booking.providerId}/notifications`));
             batch.set(providerNotifRef, {
                 type: 'new_review',
                 message: `${user.displayName} left you a ${data.rating}-star review for "${booking.serviceName}".`,

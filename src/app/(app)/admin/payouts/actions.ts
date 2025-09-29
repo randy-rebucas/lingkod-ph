@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import {
   doc,
   updateDoc,
@@ -24,14 +24,14 @@ export async function handleMarkAsPaid(
   actor: Actor
 ) {
   try {
-    const payoutRef = doc(db, 'payouts', payoutId);
+    const payoutRef = doc(getDb(), 'payouts', payoutId);
     await updateDoc(payoutRef, {
       status: 'Paid',
       processedAt: serverTimestamp(),
     });
 
     // Notify the provider that their payment has been received
-    const notifRef = collection(db, `users/${providerId}/notifications`);
+    const notifRef = collection(getDb(), `users/${providerId}/notifications`);
     await addDoc(notifRef, {
       type: 'info',
       message: `Your payout of ₱${amount.toFixed(2)} has been processed and sent.`,

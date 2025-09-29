@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -153,16 +153,16 @@ export default function ReportsPage() {
     const isAgency = userRole === 'agency';
     
     useEffect(() => {
-        if (!user || !isAgency || !db) {
+        if (!user || !isAgency || !getDb()) {
             setLoading(false);
             return;
         }
 
         const fetchAgencyData = async () => {
-            if (!db) return;
+            if (!getDb()) return;
             setLoading(true);
             try {
-                const providersQuery = query(collection(db, "users"), where("agencyId", "==", user.uid));
+                const providersQuery = query(collection(getDb(), "users"), where("agencyId", "==", user.uid));
                 const providersSnapshot = await getDocs(providersQuery);
                 const providerIds = providersSnapshot.docs.map(doc => doc.id);
 
@@ -173,13 +173,13 @@ export default function ReportsPage() {
                     return;
                 }
 
-                const bookingsQuery = query(collection(db, "bookings"), where("providerId", "in", providerIds));
+                const bookingsQuery = query(collection(getDb(), "bookings"), where("providerId", "in", providerIds));
                 const unsubBookings = onSnapshot(bookingsQuery, (snapshot) => {
                     const fetchedBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
                     setBookings(fetchedBookings);
                 });
 
-                const payoutsQuery = query(collection(db, "payouts"), where("agencyId", "==", user.uid));
+                const payoutsQuery = query(collection(getDb(), "payouts"), where("agencyId", "==", user.uid));
                 const unsubPayouts = onSnapshot(payoutsQuery, (snapshot) => {
                     const fetchedPayouts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PayoutRequest));
                     setPayouts(fetchedPayouts.sort((a,b) => b.requestedAt.toMillis() - a.requestedAt.toMillis()));

@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { collection, addDoc, serverTimestamp, query, where, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
 
 export interface AgencyAuditLogEntry {
@@ -77,7 +77,7 @@ export class AgencyAuditLogger {
         category: options.category || this.getDefaultCategory(action),
       };
 
-      await addDoc(collection(db, 'agencyAuditLogs'), logEntry);
+      await addDoc(collection(getDb(), 'agencyAuditLogs'), logEntry);
     } catch (error) {
       console.error('Failed to log agency action:', error);
       // Don't throw error to avoid breaking the main operation
@@ -171,7 +171,7 @@ export class AgencyAuditLogger {
   ): Promise<AgencyAuditLogEntry[]> {
     try {
       let q = query(
-        collection(db, 'agencyAuditLogs'),
+        collection(getDb(), 'agencyAuditLogs'),
         where('agencyId', '==', this.agencyId),
         orderBy('timestamp', 'desc')
       );

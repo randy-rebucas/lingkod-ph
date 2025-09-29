@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -33,12 +33,12 @@ export default function SecurityLogsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (userRole !== 'admin' || !db) {
+        if (userRole !== 'admin' || !getDb()) {
             setLoading(false);
             return;
         }
 
-        const logsQuery = query(collection(db, "auditLogs"), orderBy("timestamp", "desc"));
+        const logsQuery = query(collection(getDb(), "auditLogs"), orderBy("timestamp", "desc"));
         
         const unsubscribe = onSnapshot(logsQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AuditLog));

@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,12 +57,12 @@ export default function AdminConversationsPage() {
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (userRole !== 'admin' || !db) {
+        if (userRole !== 'admin' || !getDb()) {
             setLoadingConversations(false);
             return;
         }
         
-        const q = query(collection(db, "conversations"), orderBy("timestamp", "desc"));
+        const q = query(collection(getDb(), "conversations"), orderBy("timestamp", "desc"));
         
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const convos = querySnapshot.docs.map(doc => ({
@@ -81,10 +81,10 @@ export default function AdminConversationsPage() {
     }, [userRole, toast]);
     
     useEffect(() => {
-        if (!activeConversation || !db) return;
+        if (!activeConversation || !getDb()) return;
 
         setLoadingMessages(true);
-        const messagesRef = collection(db, "conversations", activeConversation.id, "messages");
+        const messagesRef = collection(getDb(), "conversations", activeConversation.id, "messages");
         const q = query(messagesRef, orderBy("timestamp", "asc"));
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {

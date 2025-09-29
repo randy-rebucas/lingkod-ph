@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { doc, setDoc, getDoc, collection, query, where, orderBy, limit, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { sendEmail } from './email-service';
 
@@ -103,7 +103,7 @@ export class AdminSecurityNotifications {
         resolved: false
       };
 
-      await setDoc(doc(db, this.COLLECTION, eventId), fullEvent);
+      await setDoc(doc(getDb(), this.COLLECTION, eventId), fullEvent);
 
       // Check if notification should be sent
       await this.checkAndSendNotification(fullEvent);
@@ -145,7 +145,7 @@ export class AdminSecurityNotifications {
     resolution: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      await setDoc(doc(db, this.COLLECTION, eventId), {
+      await setDoc(doc(getDb(), this.COLLECTION, eventId), {
         resolved: true,
         resolvedAt: serverTimestamp() as Timestamp,
         resolvedBy,
@@ -453,7 +453,7 @@ ${JSON.stringify(event.details, null, 2)}
     try {
       const notificationId = `notification_${event.id}_${Date.now()}`;
       
-      await setDoc(doc(db, this.NOTIFICATIONS_COLLECTION, notificationId), {
+      await setDoc(doc(getDb(), this.NOTIFICATIONS_COLLECTION, notificationId), {
         eventId: event.id,
         eventType: event.eventType,
         severity: event.severity,

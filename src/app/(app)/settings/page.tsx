@@ -29,7 +29,7 @@ import {
 } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
-import { db } from "@/lib/firebase"
+import { getDb  } from '@/lib/firebase';
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslations } from "next-intl"
@@ -100,8 +100,8 @@ export default function SettingsPage() {
 
     useEffect(() => {
         const fetchSettings = async () => {
-            if (user && db) {
-                const userDocRef = doc(db, 'users', user.uid);
+            if (user && getDb()) {
+                const userDocRef = doc(getDb(), 'users', user.uid);
                 const userDoc = await getDoc(userDocRef);
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
@@ -173,13 +173,13 @@ export default function SettingsPage() {
     };
 
     const handleSaveChanges = async () => {
-        if (!user || !db) {
+        if (!user || !getDb()) {
             toast({ variant: "destructive", title: t('error'), description: t('mustBeLoggedIn') });
             return;
         }
         setIsSaving(true);
         try {
-            const userDocRef = doc(db, 'users', user.uid);
+            const userDocRef = doc(getDb(), 'users', user.uid);
             await updateDoc(userDocRef, {
                 notificationSettings: settings.notificationSettings,
                 privacySettings: settings.privacySettings,

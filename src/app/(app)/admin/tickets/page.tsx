@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -60,12 +60,12 @@ export default function AdminTicketsPage() {
     const [newNote, setNewNote] = useState("");
 
     useEffect(() => {
-        if (userRole !== 'admin' || !db) {
+        if (userRole !== 'admin' || !getDb()) {
             setLoading(false);
             return;
         }
 
-        const ticketsQuery = query(collection(db, "tickets"), orderBy("updatedAt", "desc"));
+        const ticketsQuery = query(collection(getDb(), "tickets"), orderBy("updatedAt", "desc"));
         
         const unsubscribe = onSnapshot(ticketsQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Ticket));

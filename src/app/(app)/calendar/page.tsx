@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, or, Timestamp, addDoc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -56,12 +56,12 @@ export default function CalendarPage() {
     });
 
     useEffect(() => {
-        if (!user || !db) {
+        if (!user || !getDb()) {
             setLoading(false);
             return;
         }
 
-        const bookingsRef = collection(db, "bookings");
+        const bookingsRef = collection(getDb(), "bookings");
         const q = query(bookingsRef,
             or(where("clientId", "==", user.uid), where("providerId", "==", user.uid))
         );
@@ -143,7 +143,7 @@ export default function CalendarPage() {
         serviceName: string;
     }) => {
         try {
-            if (!user || !db) return;
+            if (!user || !getDb()) return;
 
             const eventToSave = {
                 title: eventData.title,
@@ -160,7 +160,7 @@ export default function CalendarPage() {
                 updatedAt: Timestamp.now()
             };
 
-            await addDoc(collection(db, "bookings"), eventToSave);
+            await addDoc(collection(getDb(), "bookings"), eventToSave);
             setIsCreateEventOpen(false);
         } catch (error) {
             console.error('Error creating event:', error);

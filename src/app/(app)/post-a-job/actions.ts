@@ -2,7 +2,7 @@
 "use server";
 
 import { z } from "zod";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, Timestamp, updateDoc, query, where, getDocs, writeBatch } from "firebase/firestore";
 
 const postJobSchema = z.object({
@@ -42,7 +42,7 @@ export async function postJobAction(
   }
 
   try {
-    const categoryDocRef = doc(db, "categories", categoryId);
+    const categoryDocRef = doc(getDb(), "categories", categoryId);
     const categoryDoc = await getDoc(categoryDocRef);
      if (!categoryDoc.exists()) {
         throw new Error("Category document not found.");
@@ -80,7 +80,7 @@ export async function postJobAction(
     
     if (jobId) {
         // Update existing job
-        const jobRef = doc(db, "jobs", jobId);
+        const jobRef = doc(getDb(), "jobs", jobId);
         // Security check: ensure the user owns this job
         const jobSnap = await getDoc(jobRef);
         if (!jobSnap.exists() || jobSnap.data().clientId !== userId) {
@@ -91,7 +91,7 @@ export async function postJobAction(
 
     } else {
         // Create new job
-        const userDocRef = doc(db, "users", userId);
+        const userDocRef = doc(getDb(), "users", userId);
         const userDoc = await getDoc(userDocRef);
         if (!userDoc.exists()) {
             throw new Error("User document not found.");
@@ -99,7 +99,7 @@ export async function postJobAction(
         const userData = userDoc.data();
         const clientIsVerified = userData.verification?.status === 'Verified';
 
-        const newJobRef = doc(collection(db, "jobs"));
+        const newJobRef = doc(collection(getDb(), "jobs"));
         const newJobData = {
             ...jobData,
             clientId: userId,
@@ -110,12 +110,12 @@ export async function postJobAction(
             applications: [],
         };
         
-        const batch = writeBatch(db);
+        const batch = writeBatch(getDb());
         batch.set(newJobRef, newJobData);
 
         // Notify matching providers
         const providersQuery = query(
-            collection(db, "users"), 
+            collection(getDb(), "users"), 
             where("role", "==", "provider"),
             where("keyServices", "array-contains", categoryName)
         );
@@ -125,7 +125,7 @@ export async function postJobAction(
             const providerData = providerDoc.data();
             const notifSettings = providerData.notificationSettings;
             if (notifSettings?.newJobAlerts !== false) {
-                 const notificationRef = doc(collection(db, `users/${providerDoc.id}/notifications`));
+                 const notificationRef = doc(collection(getDb(), `users/${providerDoc.id}/notifications`));
                  batch.set(notificationRef, {
                     type: 'new_job',
                     message: `A new job in '${categoryName}' has been posted.`,

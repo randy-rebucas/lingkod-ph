@@ -1,4 +1,4 @@
-import { db, storage } from './firebase';
+import { getDb, storage  } from './firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { ref, getDownloadURL, getMetadata } from 'firebase/storage';
 import { sendEmail } from './email-service';
@@ -90,7 +90,7 @@ export class AdminBackupVerifier {
       const startTime = Date.now();
       
       // Get backup information
-      const backupDoc = await getDoc(doc(db, 'backups', backupId));
+      const backupDoc = await getDoc(doc(getDb(), 'backups', backupId));
       if (!backupDoc.exists()) {
         return { success: false, error: 'Backup not found' };
       }
@@ -135,7 +135,7 @@ export class AdminBackupVerifier {
       };
 
       // Save verification result
-      await setDoc(doc(db, this.COLLECTION, verificationId), finalResult);
+      await setDoc(doc(getDb(), this.COLLECTION, verificationId), finalResult);
 
       // Update verification history
       await this.updateVerificationHistory(backupId, finalResult);
@@ -373,7 +373,7 @@ export class AdminBackupVerifier {
    */
   private static async updateVerificationHistory(backupId: string, result: BackupVerificationResult): Promise<void> {
     try {
-      const historyRef = doc(db, this.HISTORY_COLLECTION, backupId);
+      const historyRef = doc(getDb(), this.HISTORY_COLLECTION, backupId);
       const historyDoc = await getDoc(historyRef);
 
       if (historyDoc.exists()) {
@@ -478,7 +478,7 @@ export class AdminBackupVerifier {
    */
   static async getVerificationHistory(backupId: string): Promise<BackupVerificationHistory | null> {
     try {
-      const historyDoc = await getDoc(doc(db, this.HISTORY_COLLECTION, backupId));
+      const historyDoc = await getDoc(doc(getDb(), this.HISTORY_COLLECTION, backupId));
       
       if (historyDoc.exists()) {
         return historyDoc.data() as BackupVerificationHistory;

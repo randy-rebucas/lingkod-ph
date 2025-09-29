@@ -26,7 +26,7 @@ import {
 } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useState, useEffect, useMemo } from "react";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
@@ -317,14 +317,14 @@ export default function AnalyticsPage() {
 
 
     useEffect(() => {
-        if (!user || !db) {
+        if (!user || !getDb()) {
             setLoading(false);
             return;
         };
 
         setLoading(true);
-        const bookingsQuery = query(collection(db, "bookings"), where("providerId", "==", user.uid));
-        const reviewsQuery = query(collection(db, "reviews"), where("providerId", "==", user.uid));
+        const bookingsQuery = query(collection(getDb(), "bookings"), where("providerId", "==", user.uid));
+        const reviewsQuery = query(collection(getDb(), "reviews"), where("providerId", "==", user.uid));
         
         const unsubBookings = onSnapshot(bookingsQuery, (snapshot) => {
             const bookingsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
@@ -344,7 +344,7 @@ export default function AnalyticsPage() {
             unsubBookings();
             unsubReviews();
         };
-    }, [user, db]);
+    }, [user, getDb]);
 
     const analyticsData = useMemo(() => {
         const { bookings: filteredBookings, reviews: filteredReviews } = filterDataByTimePeriod(bookings, reviews, timePeriod);

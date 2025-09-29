@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import {
   doc,
   updateDoc,
@@ -37,7 +37,7 @@ export async function handleUserStatusUpdate(
   actor: Actor
 ) {
   try {
-    const userRef = doc(db, 'users', userId);
+    const userRef = doc(getDb(), 'users', userId);
     await updateDoc(userRef, { accountStatus: status });
 
     await AuditLogger.getInstance().logAction(
@@ -59,7 +59,7 @@ export async function handleUserStatusUpdate(
 
 export async function handleDeleteUser(userId: string, actor: Actor) {
     try {
-        const userRef = doc(db, 'users', userId);
+        const userRef = doc(getDb(), 'users', userId);
         await deleteDoc(userRef);
 
          await AuditLogger.getInstance().logAction(
@@ -112,7 +112,7 @@ export async function handleCreateUser(data: z.infer<typeof createUserSchema>, a
         const newReferralCode = generateReferralCode(userRecord.uid);
 
         // Create user document in Firestore
-        await setDoc(doc(db, 'users', userRecord.uid), {
+        await setDoc(doc(getDb(), 'users', userRecord.uid), {
             uid: userRecord.uid,
             email: email,
             displayName: name,
@@ -181,7 +181,7 @@ export async function handleUpdateUser(userId: string, data: z.infer<typeof upda
     }
 
     try {
-        const userRef = doc(db, 'users', userId);
+        const userRef = doc(getDb(), 'users', userId);
         const updateData = {
             displayName: validatedFields.data.name,
             role: validatedFields.data.role,
@@ -219,7 +219,7 @@ export async function handleSendDirectEmail(targetUserId: string, subject: strin
     }
 
     try {
-        const userRef = doc(db, 'users', targetUserId);
+        const userRef = doc(getDb(), 'users', targetUserId);
         const userSnap = await getDoc(userRef);
 
         if (!userSnap.exists()) {

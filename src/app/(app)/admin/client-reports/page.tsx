@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -68,7 +68,7 @@ export default function ClientReportsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (userRole !== 'admin' || !db) {
+        if (userRole !== 'admin' || !getDb()) {
             setLoading(false);
             return;
         }
@@ -77,17 +77,17 @@ export default function ClientReportsPage() {
             setLoading(true);
             try {
                 // Fetch all clients
-                const clientsQuery = query(collection(db, "users"), where("role", "==", "client"));
+                const clientsQuery = query(collection(getDb(), "users"), where("role", "==", "client"));
                 const clientsSnap = await getDocs(clientsQuery);
                 setClients(clientsSnap.docs.map(doc => ({ uid: doc.id, ...doc.data() } as User)));
 
                 // Fetch all completed bookings
-                const bookingsQuery = query(collection(db, "bookings"), where("status", "==", "Completed"));
+                const bookingsQuery = query(collection(getDb(), "bookings"), where("status", "==", "Completed"));
                 const bookingsSnap = await getDocs(bookingsQuery);
                 setBookings(bookingsSnap.docs.map(doc => doc.data() as Booking));
                 
                 // Fetch all reviews
-                const reviewsSnap = await getDocs(collection(db, "reviews"));
+                const reviewsSnap = await getDocs(collection(getDb(), "reviews"));
                 setReviews(reviewsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review)));
 
             } catch (error) {

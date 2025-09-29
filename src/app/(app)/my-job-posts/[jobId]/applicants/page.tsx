@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb } from '@/lib/firebase';
 import { doc, getDoc, collection, getDocs, where, query, serverTimestamp, addDoc, updateDoc, arrayUnion, writeBatch, Timestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -59,13 +59,13 @@ export default function ApplicantsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!jobId || !user || !db) return;
+        if (!jobId || !user || !getDb()) return;
 
         const fetchJobAndApplicants = async () => {
             setLoading(true);
             try {
                 // Fetch job details
-                const jobRef = doc(db!, "jobs", jobId);
+                const jobRef = doc(getDb(), "jobs", jobId);
                 const jobSnap = await getDoc(jobRef);
 
                 if (!jobSnap.exists() || jobSnap.data().clientId !== user.uid) {
@@ -78,13 +78,13 @@ export default function ApplicantsPage() {
 
                 // Fetch applicants if any
                 if (jobData.applications && jobData.applications.length > 0) {
-                    const applicantsQuery = query(collection(db!, "users"), where("uid", "in", jobData.applications));
+                    const applicantsQuery = query(collection(getDb(), "users"), where("uid", "in", jobData.applications));
                     const applicantsSnap = await getDocs(applicantsQuery);
 
                     // Fetch all reviews to calculate ratings
-                    const reviewsSnapshot = await getDocs(collection(db!, "reviews"));
+                    const reviewsSnapshot = await getDocs(collection(getDb(), "reviews"));
                     const allReviews = reviewsSnapshot.docs.map(doc => doc.data());
-                    
+
                     const providerRatings: { [key: string]: { totalRating: number, count: number } } = {};
                     allReviews.forEach((review: any) => {
                         if (!providerRatings[review.providerId]) {
@@ -93,10 +93,10 @@ export default function ApplicantsPage() {
                         providerRatings[review.providerId].totalRating += review.rating;
                         providerRatings[review.providerId].count++;
                     });
-                    
+
                     const applicantsData = applicantsSnap.docs.map(doc => {
-                         const data = doc.data();
-                         const ratingInfo = providerRatings[data.uid];
+                        const data = doc.data();
+                        const ratingInfo = providerRatings[data.uid];
                         return {
                             ...data,
                             uid: doc.id,
@@ -120,13 +120,13 @@ export default function ApplicantsPage() {
 
     const handleAwardJob = async (provider: Provider) => {
         if (!job || !user) return;
-        
+
         try {
-            if (!db) return;
-            const batch = writeBatch(db);
-            
+            if (!getDb()) return;
+            const batch = writeBatch(getDb());
+
             // 1. Create a booking document
-            const bookingRef = doc(collection(db!, 'bookings'));
+            const bookingRef = doc(collection(getDb(), 'bookings'));
             batch.set(bookingRef, {
                 jobId: job.id,
                 providerId: provider.uid,
@@ -145,25 +145,25 @@ export default function ApplicantsPage() {
             });
 
             // 2. Update job status to 'In Progress'
-            const jobRef = doc(db!, "jobs", jobId);
+            const jobRef = doc(getDb(), "jobs", jobId);
             batch.update(jobRef, { status: "In Progress" });
 
             await batch.commit();
 
-            toast({ title: "Success!", description: `${provider.displayName} has been awarded the job. A new booking has been created.`});
+            toast({ title: "Success!", description: `${provider.displayName} has been awarded the job. A new booking has been created.` });
             router.push("/bookings");
-            
-        } catch(error) {
-             console.error("Error awarding job:", error);
-             toast({ variant: "destructive", title: "Error", description: "Failed to award the job." });
+
+        } catch (error) {
+            console.error("Error awarding job:", error);
+            toast({ variant: "destructive", title: "Error", description: "Failed to award the job." });
         }
     };
-    
+
     const handleSendMessage = async (provider: Provider) => {
-         if (!user || !provider) return;
+        if (!user || !provider) return;
         try {
-            if (!db) return;
-            const conversationsRef = collection(db, "conversations");
+            if (!getDb()) return;
+            const conversationsRef = collection(getDb(), "conversations");
             const q = query(conversationsRef, where("participants", "array-contains", user.uid));
             const querySnapshot = await getDocs(q);
             let existingConvoId: string | null = null;
@@ -198,7 +198,7 @@ export default function ApplicantsPage() {
         return (
             <div className="max-w-6xl mx-auto space-y-8">
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                     {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+                    {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
                 </div>
             </div>
         )
@@ -207,22 +207,22 @@ export default function ApplicantsPage() {
 
     return (
         <div className="max-w-6xl mx-auto space-y-8">
-                <div className="relative z-10 flex items-center gap-4">
-                    <Button variant="outline" size="icon" onClick={() => router.back()} className="hover:bg-primary/10 transition-colors">
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <div>
-                        <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
-                            Applicants for "{job?.title}"
-                        </h1>
-                        <p className="text-xl text-muted-foreground leading-relaxed">
-                            Review the providers who have applied for your job.
-                        </p>
-                    </div>
+            <div className="relative z-10 flex items-center gap-4">
+                <Button variant="outline" size="icon" onClick={() => router.back()} className="hover:bg-primary/10 transition-colors">
+                    <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div>
+                    <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
+                        Applicants for "{job?.title}"
+                    </h1>
+                    <p className="text-xl text-muted-foreground leading-relaxed">
+                        Review the providers who have applied for your job.
+                    </p>
                 </div>
-            
+            </div>
+
             {applicants.length > 0 ? (
-                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {applicants.map(applicant => (
                         <Card key={applicant.uid} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group flex flex-col">
                             <CardHeader className="text-center pb-3">
@@ -232,14 +232,14 @@ export default function ApplicantsPage() {
                                 </Avatar>
                                 <CardTitle className="text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent group-hover:from-primary group-hover:to-accent transition-all duration-300">{applicant.displayName}</CardTitle>
                                 {applicant.reviewCount > 0 && (
-                                     <div className="flex items-center justify-center gap-1 mt-1 text-muted-foreground">
+                                    <div className="flex items-center justify-center gap-1 mt-1 text-muted-foreground">
                                         {renderStars(applicant.rating)}
                                         <span className="text-sm">({applicant.reviewCount})</span>
                                     </div>
                                 )}
                             </CardHeader>
                             <CardContent className="flex-1 space-y-3 px-4">
-                               {applicant.keyServices && applicant.keyServices.length > 0 && (
+                                {applicant.keyServices && applicant.keyServices.length > 0 && (
                                     <div>
                                         <h4 className="font-semibold flex items-center gap-2 mb-2 text-sm"><Briefcase className="h-4 w-4" /> Key Services</h4>
                                         <div className="flex flex-wrap gap-1">
@@ -254,8 +254,8 @@ export default function ApplicantsPage() {
                                 )}
                                 <p className="text-sm text-muted-foreground line-clamp-2">{applicant.bio || 'No bio available.'}</p>
                             </CardContent>
-                             <CardFooter className="flex flex-col gap-2 pt-2 px-4 pb-4">
-                                 <AlertDialog>
+                            <CardFooter className="flex flex-col gap-2 pt-2 px-4 pb-4">
+                                <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <Button className="w-full shadow-glow hover:shadow-glow/50 transition-all duration-300" disabled={job?.status !== 'Open'}>
                                             <Award className="mr-2 h-4 w-4" /> Award Job
@@ -285,7 +285,7 @@ export default function ApplicantsPage() {
                             </CardFooter>
                         </Card>
                     ))}
-                 </div>
+                </div>
             ) : (
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="flex flex-col items-center justify-center text-center p-12">
@@ -302,4 +302,3 @@ export default function ApplicantsPage() {
     );
 }
 
-    

@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, getDocs, doc, deleteDoc, Timestamp } from 'firebase/firestore';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,10 +38,10 @@ export default function ServicesPage() {
     const [selectedService, setSelectedService] = useState<Service | null>(null);
 
     const fetchServices = async () => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         setLoading(true);
         try {
-            const q = query(collection(db, "services"), where("userId", "==", user.uid));
+            const q = query(collection(getDb(), "services"), where("userId", "==", user.uid));
             const querySnapshot = await getDocs(q);
             const servicesData = querySnapshot.docs.map(doc => {
                 const data = doc.data();
@@ -76,9 +76,9 @@ export default function ServicesPage() {
     };
     
     const handleDeleteService = async (serviceId: string) => {
-        if (!db) return;
+        if (!getDb()) return;
         try {
-            await deleteDoc(doc(db, 'services', serviceId));
+            await deleteDoc(doc(getDb(), 'services', serviceId));
             toast({ title: t('success'), description: t('serviceDeletedSuccessfully') });
             fetchServices(); // Refresh list
         } catch (error) {

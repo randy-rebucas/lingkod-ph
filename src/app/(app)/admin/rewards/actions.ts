@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import {
   doc,
   updateDoc,
@@ -23,7 +23,7 @@ export async function handleUpdateReward(
   actor: Actor
 ) {
   try {
-    const rewardRef = doc(db, 'loyaltyRewards', rewardId);
+    const rewardRef = doc(getDb(), 'loyaltyRewards', rewardId);
     await updateDoc(rewardRef, data);
 
     await AuditLogger.getInstance().logAction(
@@ -48,7 +48,7 @@ export async function handleAddReward(data: { title: string, description: string
         return { error: 'Invalid data provided.', message: 'Validation failed.' };
     }
     try {
-        const newDoc = await addDoc(collection(db, 'loyaltyRewards'), { ...data, createdAt: serverTimestamp() });
+        const newDoc = await addDoc(collection(getDb(), 'loyaltyRewards'), { ...data, createdAt: serverTimestamp() });
         
         await AuditLogger.getInstance().logAction(
             'REWARD_CREATED',
@@ -69,7 +69,7 @@ export async function handleAddReward(data: { title: string, description: string
 
 export async function handleDeleteReward(rewardId: string, actor: Actor) {
   try {
-    const rewardRef = doc(db, 'loyaltyRewards', rewardId);
+    const rewardRef = doc(getDb(), 'loyaltyRewards', rewardId);
     await deleteDoc(rewardRef);
 
      await AuditLogger.getInstance().logAction(

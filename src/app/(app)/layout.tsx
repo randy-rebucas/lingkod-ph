@@ -85,7 +85,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/auth-context";
 import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { getAuthInstance } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationBell } from "@/components/notification-bell";
 import { useTheme } from "next-themes";
@@ -202,7 +202,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await signOut(getAuthInstance());
       toast({ title: t('success'), description: t('loggedOutSuccessfully') });
       window.location.href = '/login'; // Force a full page reload to avoid fetch errors
     } catch (error: any) {

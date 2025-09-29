@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { z } from 'zod';
 import { AuditLogger } from '@/lib/audit-logger';
@@ -36,7 +36,7 @@ export async function handleUpdatePlatformSettings(
         return { error: 'Invalid settings format.', message: 'Validation failed.' };
     }
 
-    const settingsRef = doc(db, 'platform', 'settings');
+    const settingsRef = doc(getDb(), 'platform', 'settings');
     await setDoc(settingsRef, validatedSettings.data, { merge: true });
 
     await AuditLogger.getInstance().logAction(

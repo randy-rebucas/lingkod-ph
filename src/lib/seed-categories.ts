@@ -1,6 +1,6 @@
 
 import { collection, addDoc, getDocs, query, where, writeBatch, doc } from "firebase/firestore";
-import { db } from "./firebase";
+import { getDb  } from './firebase';
 
 const categories = [
   // Construction & Building Trades
@@ -55,18 +55,18 @@ const categories = [
 ];
 
 export async function seedCategories() {
-    if (!db) {
+    if (!getDb()) {
         console.warn('Firebase not initialized, skipping category seeding');
         return;
     }
-    const categoriesRef = collection(db, "categories");
+    const categoriesRef = collection(getDb(), "categories");
     let count = 0;
 
     // Fetch existing categories to avoid duplicates
     const existingCategoriesSnapshot = await getDocs(categoriesRef);
     const existingCategoryNames = new Set(existingCategoriesSnapshot.docs.map(doc => doc.data().name));
 
-    const batch = writeBatch(db);
+    const batch = writeBatch(getDb());
 
     categories.forEach(categoryName => {
         if (!existingCategoryNames.has(categoryName)) {

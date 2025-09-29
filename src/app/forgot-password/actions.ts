@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { auth } from "@/lib/firebase";
+import { getAuthInstance  } from '@/lib/firebase';
 import { sendPasswordResetEmail } from "firebase/auth";
 
 const forgotPasswordSchema = z.object({
@@ -31,7 +31,7 @@ export async function forgotPasswordAction(
   const { email } = validatedFields.data;
 
   try {
-    await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(getAuthInstance(), email);
     return {
       error: null,
       message: "If an account with that email exists, a password reset link has been sent.",

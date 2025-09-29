@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { collection, doc, writeBatch, query, where, getDocs, serverTimestamp, addDoc } from 'firebase/firestore';
 import { AuditLogger } from '@/lib/audit-logger';
 import { z } from 'zod';
@@ -19,8 +19,8 @@ export async function sendBroadcastAction(message: string, actor: Actor): Promis
     }
 
     try {
-        const batch = writeBatch(db);
-        const broadcastsRef = collection(db, "broadcasts");
+        const batch = writeBatch(getDb());
+        const broadcastsRef = collection(getDb(), "broadcasts");
 
         // 1. Deactivate all existing active broadcasts
         const q = query(broadcastsRef, where("status", "==", "active"));
@@ -30,7 +30,7 @@ export async function sendBroadcastAction(message: string, actor: Actor): Promis
         });
 
         // 2. Add the new broadcast as active
-        const newBroadcastRef = doc(collection(db, "broadcasts"));
+        const newBroadcastRef = doc(collection(getDb(), "broadcasts"));
         batch.set(newBroadcastRef, {
             message,
             status: 'active',
@@ -70,7 +70,7 @@ export async function sendCampaignEmailAction(data: z.infer<typeof campaignEmail
 
     try {
         const resend = new Resend(process.env.RESEND_API_KEY);
-        const providersQuery = query(collection(db, "users"), where("role", "==", "provider"));
+        const providersQuery = query(collection(getDb(), "users"), where("role", "==", "provider"));
         const providersSnapshot = await getDocs(providersQuery);
 
         if (providersSnapshot.empty) {

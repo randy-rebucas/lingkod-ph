@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import {
   doc,
   updateDoc,
@@ -19,7 +19,7 @@ export async function handleUpdateBookingStatus(
   actor: Actor,
 ) {
   try {
-    const bookingRef = doc(db, 'bookings', bookingId);
+    const bookingRef = doc(getDb(), 'bookings', bookingId);
     await updateDoc(bookingRef, { status });
 
     await AuditLogger.getInstance().logAction(

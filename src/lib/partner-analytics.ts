@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { 
   collection, 
   query, 
@@ -88,7 +88,7 @@ export class PartnerAnalyticsService {
   static async getPartnerAnalytics(partnerId: string): Promise<PartnerAnalytics | null> {
     try {
       // Get partner document
-      const partnerDoc = await getDoc(doc(db, this.PARTNERS_COLLECTION, partnerId));
+      const partnerDoc = await getDoc(doc(getDb(), this.PARTNERS_COLLECTION, partnerId));
       if (!partnerDoc.exists()) {
         return null;
       }
@@ -97,7 +97,7 @@ export class PartnerAnalyticsService {
       
       // Get referrals data
       const referralsQuery = query(
-        collection(db, this.REFERRALS_COLLECTION),
+        collection(getDb(), this.REFERRALS_COLLECTION),
         where('partnerId', '==', partnerId)
       );
       const referralsSnapshot = await getDocs(referralsQuery);
@@ -105,7 +105,7 @@ export class PartnerAnalyticsService {
 
       // Get commissions data
       const commissionsQuery = query(
-        collection(db, this.COMMISSIONS_COLLECTION),
+        collection(getDb(), this.COMMISSIONS_COLLECTION),
         where('partnerId', '==', partnerId)
       );
       const commissionsSnapshot = await getDocs(commissionsQuery);
@@ -171,7 +171,7 @@ export class PartnerAnalyticsService {
   ): Promise<ReferralData[]> {
     try {
       const referralsQuery = query(
-        collection(db, this.REFERRALS_COLLECTION),
+        collection(getDb(), this.REFERRALS_COLLECTION),
         where('partnerId', '==', partnerId),
         orderBy('referralDate', 'desc'),
         limit(limitCount)
@@ -195,7 +195,7 @@ export class PartnerAnalyticsService {
   ): Promise<PartnerCommission[]> {
     try {
       let commissionsQuery = query(
-        collection(db, this.COMMISSIONS_COLLECTION),
+        collection(getDb(), this.COMMISSIONS_COLLECTION),
         where('partnerId', '==', partnerId),
         orderBy('createdAt', 'desc'),
         limit(limitCount)
@@ -203,7 +203,7 @@ export class PartnerAnalyticsService {
 
       if (status) {
         commissionsQuery = query(
-          collection(db, this.COMMISSIONS_COLLECTION),
+          collection(getDb(), this.COMMISSIONS_COLLECTION),
           where('partnerId', '==', partnerId),
           where('status', '==', status),
           orderBy('createdAt', 'desc'),
@@ -247,7 +247,7 @@ export class PartnerAnalyticsService {
         lastActivity: serverTimestamp() as Timestamp
       };
 
-      const docRef = await addDoc(collection(db, this.REFERRALS_COLLECTION), referralData);
+      const docRef = await addDoc(collection(getDb(), this.REFERRALS_COLLECTION), referralData);
       
       return { success: true, referralId: docRef.id };
     } catch (error) {
@@ -264,7 +264,7 @@ export class PartnerAnalyticsService {
     status: 'pending' | 'active' | 'completed' | 'cancelled'
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      await updateDoc(doc(db, this.REFERRALS_COLLECTION, referralId), {
+      await updateDoc(doc(getDb(), this.REFERRALS_COLLECTION, referralId), {
         status,
         lastActivity: serverTimestamp() as Timestamp
       });
@@ -302,7 +302,7 @@ export class PartnerAnalyticsService {
         createdAt: serverTimestamp() as Timestamp
       };
 
-      const docRef = await addDoc(collection(db, this.COMMISSIONS_COLLECTION), commissionData);
+      const docRef = await addDoc(collection(getDb(), this.COMMISSIONS_COLLECTION), commissionData);
       
       return { success: true, commissionId: docRef.id };
     } catch (error) {
@@ -319,7 +319,7 @@ export class PartnerAnalyticsService {
     paymentMethod: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      await updateDoc(doc(db, this.COMMISSIONS_COLLECTION, commissionId), {
+      await updateDoc(doc(getDb(), this.COMMISSIONS_COLLECTION, commissionId), {
         status: 'paid',
         paidAt: serverTimestamp() as Timestamp,
         paymentMethod
@@ -455,7 +455,7 @@ export class PartnerAnalyticsService {
    */
   private static async cacheAnalytics(analytics: PartnerAnalytics): Promise<void> {
     try {
-      await setDoc(doc(db, this.ANALYTICS_COLLECTION, analytics.partnerId), analytics);
+      await setDoc(doc(getDb(), this.ANALYTICS_COLLECTION, analytics.partnerId), analytics);
     } catch (error) {
       console.error('Error caching analytics:', error);
     }

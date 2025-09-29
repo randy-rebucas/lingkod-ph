@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, arrayUnion, Timestamp, orderBy } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,12 +55,12 @@ export default function JobsPage() {
 
 
     useEffect(() => {
-        if (userRole !== 'provider' || !db) {
+        if (userRole !== 'provider' || !getDb()) {
             setLoading(false);
             return;
         }
 
-        const jobsQuery = query(collection(db, "jobs"), where("status", "==", "Open"), orderBy("createdAt", "desc"));
+        const jobsQuery = query(collection(getDb(), "jobs"), where("status", "==", "Open"), orderBy("createdAt", "desc"));
         const unsubscribe = onSnapshot(jobsQuery, (snapshot) => {
             const jobsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
             setJobs(jobsData);
@@ -75,9 +75,9 @@ export default function JobsPage() {
     }, [userRole, toast, t]);
 
     const handleApply = async (jobId: string, providerId: string) => {
-        if (!db) return;
+        if (!getDb()) return;
         try {
-            const jobRef = doc(db, "jobs", jobId);
+            const jobRef = doc(getDb(), "jobs", jobId);
             await updateDoc(jobRef, {
                 applications: arrayUnion(providerId)
             });

@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { db, storage } from "@/lib/firebase";
+import { getDb, getStorageInstance } from '@/lib/firebase';
 import { doc, onSnapshot, updateDoc, Timestamp, addDoc, collection, serverTimestamp, query, where, getDocs } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Booking } from "../../page";
-import {QRCode} from "@/components/qrcode-svg";
+import { QRCode } from "@/components/qrcode-svg";
 import { PaymentConfig } from "@/lib/payment-config";
 import { PaymentRetryService } from "@/lib/payment-retry-service";
 import { GCashPaymentButton } from "@/components/gcash-payment-button";
@@ -39,9 +39,9 @@ export default function PaymentPage() {
     const [copied, setCopied] = useState(false);
 
     useEffect(() => {
-        if (!bookingId || !user || !db) return;
+        if (!bookingId || !user || !getDb()) return;
 
-        const bookingRef = doc(db, "bookings", bookingId as string);
+        const bookingRef = doc(getDb(), "bookings", bookingId as string);
         const unsubscribe = onSnapshot(bookingRef, (docSnap) => {
             if (docSnap.exists() && docSnap.data().clientId === user.uid) {
                 setBooking({ id: docSnap.id, ...docSnap.data() } as Booking);
@@ -60,22 +60,22 @@ export default function PaymentPage() {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
     }
-    
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            
+
             // Validate file using PaymentConfig
             const validation = PaymentConfig.validateFileUpload(file);
             if (!validation.valid) {
-                toast({ 
-                    variant: "destructive", 
-                    title: "Invalid File", 
-                    description: validation.error 
+                toast({
+                    variant: "destructive",
+                    title: "Invalid File",
+                    description: validation.error
                 });
                 return;
             }
-            
+
             setPaymentProofFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
@@ -88,23 +88,23 @@ export default function PaymentPage() {
     const handleUploadProof = async () => {
         if (!paymentProofFile || !booking || !user) return;
         setIsUploading(true);
-        
+
         try {
             // Basic client-side validation
             if (paymentProofFile.size > 5 * 1024 * 1024) { // 5MB limit
-                toast({ 
-                    variant: "destructive", 
-                    title: "File Too Large", 
-                    description: "Payment proof file must be less than 5MB" 
+                toast({
+                    variant: "destructive",
+                    title: "File Too Large",
+                    description: "Payment proof file must be less than 5MB"
                 });
                 return;
             }
 
             if (!paymentProofFile.type.startsWith('image/')) {
-                toast({ 
-                    variant: "destructive", 
-                    title: "Invalid File Type", 
-                    description: "Please upload an image file" 
+                toast({
+                    variant: "destructive",
+                    title: "Invalid File Type",
+                    description: "Please upload an image file"
                 });
                 return;
             }
@@ -113,7 +113,7 @@ export default function PaymentPage() {
             // Use retry service for file upload
             const uploadResult = await PaymentRetryService.retryFileUpload(async () => {
                 const storagePath = `payment-proofs/${booking.id}/${Date.now()}_${paymentProofFile.name}`;
-                const storageRef = ref(storage!, storagePath);
+                const storageRef = ref(getStorageInstance(), storagePath);
                 const uploadResult = await uploadBytes(storageRef, paymentProofFile);
                 return await getDownloadURL(uploadResult.ref);
             });
@@ -126,7 +126,7 @@ export default function PaymentPage() {
 
             // Use retry service for database operations
             const dbResult = await PaymentRetryService.retryDatabaseOperation(async () => {
-                const bookingRef = doc(db!, "bookings", booking.id);
+                const bookingRef = doc(getDb(), "bookings", booking.id);
                 await updateDoc(bookingRef, {
                     paymentProofUrl: url,
                     status: "Pending Verification",
@@ -140,13 +140,13 @@ export default function PaymentPage() {
             if (!dbResult.success) {
                 throw new Error(dbResult.error || 'Database update failed');
             }
-            
+
             // Notify Admin
-            const adminQuery = query(collection(db!, 'users'), where('role', '==', 'admin'));
+            const adminQuery = query(collection(getDb(), 'users'), where('role', '==', 'admin'));
             const adminSnapshot = await getDocs(adminQuery);
             if (!adminSnapshot.empty) {
                 const adminId = adminSnapshot.docs[0].id;
-                await addDoc(collection(db!, `users/${adminId}/notifications`), {
+                await addDoc(collection(getDb(), `users/${adminId}/notifications`), {
                     type: 'info',
                     message: `A payment for booking #${booking.id.slice(0, 6)} has been uploaded and requires verification.`,
                     link: '/admin/transactions',
@@ -166,7 +166,7 @@ export default function PaymentPage() {
         } catch (error) {
             console.error("Error uploading proof:", error);
             let errorMessage = "Could not upload your proof of payment.";
-            
+
             if (error instanceof Error) {
                 if (error.message.includes('storage/unauthorized')) {
                     errorMessage = "You don't have permission to upload files. Please contact support.";
@@ -180,11 +180,11 @@ export default function PaymentPage() {
                     errorMessage = error.message;
                 }
             }
-            
-            toast({ 
-                variant: "destructive", 
-                title: "Upload Failed", 
-                description: errorMessage 
+
+            toast({
+                variant: "destructive",
+                title: "Upload Failed",
+                description: errorMessage
             });
         } finally {
             setIsUploading(false);
@@ -203,7 +203,7 @@ export default function PaymentPage() {
     }
 
     if (!booking) return null;
-    
+
     const isPaymentUploaded = booking.status === 'Pending Verification' || booking.status === 'Upcoming' || booking.status === 'Completed';
     const isPaymentRejected = booking.status === 'Payment Rejected';
 
@@ -231,24 +231,24 @@ export default function PaymentPage() {
                     </CardHeader>
                     <CardContent className="space-y-6 p-6">
                         <div className="p-6 rounded-xl bg-gradient-to-r from-muted/50 to-muted/30 text-center space-y-3 border border-border/50 shadow-soft">
-                             <p className="text-sm text-muted-foreground font-medium">Total Amount Due</p>
-                             <p className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">₱{booking.price.toFixed(2)}</p>
-                             <div className="flex items-center justify-center gap-2 pt-3">
+                            <p className="text-sm text-muted-foreground font-medium">Total Amount Due</p>
+                            <p className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">₱{booking.price.toFixed(2)}</p>
+                            <div className="flex items-center justify-center gap-2 pt-3">
                                 <p className="text-sm text-muted-foreground">Booking ID:</p>
                                 <code className="font-mono text-sm p-2 rounded-lg bg-background/80 border border-border/50 shadow-soft">{booking.id}</code>
                                 <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-primary/10 transition-colors" onClick={() => handleCopy(booking.id)}>
                                     {copied ? <Check className="h-4 w-4 text-green-500" /> : <ClipboardCopy className="h-4 w-4" />}
                                 </Button>
-                             </div>
-                             <p className="text-xs text-muted-foreground">Use your Booking ID as the reference number for your payment.</p>
+                            </div>
+                            <p className="text-xs text-muted-foreground">Use your Booking ID as the reference number for your payment.</p>
                         </div>
-                        
+
                         <div className="space-y-4">
-                             <div className="flex items-center gap-3">
-                                 <Wallet className="h-6 w-6 text-blue-500"/>
+                            <div className="flex items-center gap-3">
+                                <Wallet className="h-6 w-6 text-blue-500" />
                                 <h3 className="font-semibold text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">GCash Payment</h3>
                             </div>
-                            
+
                             <Tabs defaultValue="automated" className="w-full">
                                 <TabsList className="grid w-full grid-cols-2 bg-background/80 backdrop-blur-sm shadow-soft border-0">
                                     <TabsTrigger value="automated" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300">
@@ -260,7 +260,7 @@ export default function PaymentPage() {
                                         Manual
                                     </TabsTrigger>
                                 </TabsList>
-                                
+
                                 <TabsContent value="automated" className="mt-4">
                                     <GCashPaymentButton
                                         bookingId={booking.id}
@@ -275,13 +275,13 @@ export default function PaymentPage() {
                                         }}
                                     />
                                 </TabsContent>
-                                
+
                                 <TabsContent value="manual" className="mt-6">
                                     <div className="p-4 rounded-lg bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
                                         <div className="text-sm space-y-2">
                                             <p><strong>Account Name:</strong> {PaymentConfig.GCASH.accountName}</p>
                                             <p><strong>Account Number:</strong> {PaymentConfig.GCASH.accountNumber}</p>
-                                            <div className="w-32 h-32 mt-3 mx-auto"><QRCode/></div>
+                                            <div className="w-32 h-32 mt-3 mx-auto"><QRCode /></div>
                                             <p className="text-xs text-muted-foreground mt-3 text-center">
                                                 After payment, upload proof for manual verification
                                             </p>
@@ -290,10 +290,10 @@ export default function PaymentPage() {
                                 </TabsContent>
                             </Tabs>
                         </div>
-                         <Separator className="bg-border/50" />
-                         <div className="space-y-4">
+                        <Separator className="bg-border/50" />
+                        <div className="space-y-4">
                             <div className="flex items-center gap-3">
-                                <Landmark className="h-6 w-6 text-indigo-700"/>
+                                <Landmark className="h-6 w-6 text-indigo-700" />
                                 <h3 className="font-semibold text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Bank Transfer (BPI)</h3>
                             </div>
                             <div className="p-4 rounded-lg bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
@@ -313,17 +313,17 @@ export default function PaymentPage() {
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                         <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Upload Proof of Payment</CardTitle>
                         <CardDescription className="text-base">
-                            {isPaymentUploaded 
+                            {isPaymentUploaded
                                 ? "Your payment proof has been submitted."
                                 : "After paying, please upload a screenshot or photo of your receipt."
                             }
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4 p-6">
-                         {isPaymentRejected ? (
-                             <div className="space-y-4 text-center">
-                                 <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-border/50 shadow-soft">
-                                    <Image src={booking.paymentProofUrl || "https://placehold.co/600x400.png"} alt="Payment proof" layout="fill" className="object-contain"/>
+                        {isPaymentRejected ? (
+                            <div className="space-y-4 text-center">
+                                <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-border/50 shadow-soft">
+                                    <Image src={booking.paymentProofUrl || "https://placehold.co/600x400.png"} alt="Payment proof" layout="fill" className="object-contain" />
                                 </div>
                                 <Badge variant="destructive" className="shadow-soft">Status: {booking.status}</Badge>
                                 {booking.paymentRejectionReason && (
@@ -339,42 +339,42 @@ export default function PaymentPage() {
                                 }} className="w-full shadow-glow hover:shadow-glow/50 transition-all duration-300">
                                     Upload New Payment Proof
                                 </Button>
-                             </div>
-                         ) : isPaymentUploaded && booking.paymentProofUrl ? (
-                             <div className="space-y-4 text-center">
-                                 <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-border/50 shadow-soft">
-                                    <Image src={booking.paymentProofUrl} alt="Payment proof" layout="fill" className="object-contain"/>
+                            </div>
+                        ) : isPaymentUploaded && booking.paymentProofUrl ? (
+                            <div className="space-y-4 text-center">
+                                <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-border/50 shadow-soft">
+                                    <Image src={booking.paymentProofUrl} alt="Payment proof" layout="fill" className="object-contain" />
                                 </div>
                                 <Badge className="shadow-soft">Status: {booking.status}</Badge>
                                 <p className="text-sm text-muted-foreground">An admin will verify your payment shortly.</p>
-                             </div>
-                         ) : (
+                            </div>
+                        ) : (
                             <div className="space-y-4">
                                 <div className="aspect-video w-full rounded-lg border-2 border-dashed border-border/50 flex items-center justify-center bg-gradient-to-r from-muted/30 to-muted/20 overflow-hidden shadow-soft">
-                                     {paymentProofPreview ? (
-                                        <Image src={paymentProofPreview} alt="Payment proof preview" layout="fill" className="object-contain"/>
+                                    {paymentProofPreview ? (
+                                        <Image src={paymentProofPreview} alt="Payment proof preview" layout="fill" className="object-contain" />
                                     ) : (
                                         <div className="text-center text-muted-foreground p-6">
-                                            <Upload className="h-12 w-12 mx-auto mb-3 text-primary opacity-60"/>
+                                            <Upload className="h-12 w-12 mx-auto mb-3 text-primary opacity-60" />
                                             <p className="text-lg font-medium">Select a file to upload</p>
                                             <p className="text-sm mt-1">Screenshot or photo of your payment receipt</p>
                                         </div>
                                     )}
                                 </div>
                                 <Input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="text-sm bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft" />
-                                 <Button className="w-full shadow-glow hover:shadow-glow/50 transition-all duration-300" onClick={handleUploadProof} disabled={isUploading || !paymentProofFile}>
-                                    {isUploading ? <Loader2 className="mr-2 animate-spin"/> : <Upload className="mr-2"/>}
+                                <Button className="w-full shadow-glow hover:shadow-glow/50 transition-all duration-300" onClick={handleUploadProof} disabled={isUploading || !paymentProofFile}>
+                                    {isUploading ? <Loader2 className="mr-2 animate-spin" /> : <Upload className="mr-2" />}
                                     {isUploading ? 'Uploading...' : 'Submit Proof of Payment'}
                                 </Button>
                             </div>
-                         )}
-                         <Alert variant="default" className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 text-blue-800 shadow-soft">
-                            <Info className="h-4 w-4 !text-blue-700"/>
+                        )}
+                        <Alert variant="default" className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200 text-blue-800 shadow-soft">
+                            <Info className="h-4 w-4 !text-blue-700" />
                             <AlertTitle className="font-headline">Important</AlertTitle>
                             <AlertDescription>
                                 Your booking will only be confirmed and scheduled once an administrator has verified your payment. You will receive a notification upon confirmation.
                             </AlertDescription>
-                         </Alert>
+                        </Alert>
                     </CardContent>
                 </Card>
             </div>

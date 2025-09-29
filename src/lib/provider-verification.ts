@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { doc, updateDoc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import { financialAuditLogger } from './financial-audit-logger';
 
@@ -48,7 +48,7 @@ export class ProviderVerificationService {
       }
 
       // Get current verification status
-      const userDoc = await getDoc(doc(db, 'users', providerId));
+      const userDoc = await getDoc(doc(getDb(), 'users', providerId));
       if (!userDoc.exists()) {
         return { success: false, message: 'User not found' };
       }
@@ -82,7 +82,7 @@ export class ProviderVerificationService {
       // Update verification status
       const verificationStatus = this.calculateVerificationStatus(updatedDocuments);
 
-      await updateDoc(doc(db, 'users', providerId), {
+      await updateDoc(doc(getDb(), 'users', providerId), {
         verification: {
           ...currentVerification,
           documents: updatedDocuments,
@@ -115,7 +115,7 @@ export class ProviderVerificationService {
   ): Promise<{ success: boolean; message: string }> {
     try {
       // Get current verification status
-      const userDoc = await getDoc(doc(db, 'users', providerId));
+      const userDoc = await getDoc(doc(getDb(), 'users', providerId));
       if (!userDoc.exists()) {
         return { success: false, message: 'User not found' };
       }
@@ -141,7 +141,7 @@ export class ProviderVerificationService {
       const verificationStatus = this.calculateVerificationStatus(updatedDocuments);
 
       // Update user document
-      await updateDoc(doc(db, 'users', providerId), {
+      await updateDoc(doc(getDb(), 'users', providerId), {
         verification: {
           ...currentVerification,
           documents: updatedDocuments,
@@ -174,7 +174,7 @@ export class ProviderVerificationService {
 
   async getVerificationStatus(providerId: string): Promise<VerificationStatus | null> {
     try {
-      const userDoc = await getDoc(doc(db, 'users', providerId));
+      const userDoc = await getDoc(doc(getDb(), 'users', providerId));
       if (!userDoc.exists()) {
         return null;
       }
@@ -212,7 +212,7 @@ export class ProviderVerificationService {
       // complex queries on nested array objects. Consider using a separate collection
       // for pending verifications in production.
       const usersQuery = query(
-        collection(db, 'users'),
+        collection(getDb(), 'users'),
         where('role', '==', 'provider')
       );
 
@@ -299,7 +299,7 @@ export class ProviderVerificationService {
       const rankingScore = this.calculateRankingScore(verificationStatus, performanceMetrics);
 
       // Update provider ranking
-      await updateDoc(doc(db, 'users', providerId), {
+      await updateDoc(doc(getDb(), 'users', providerId), {
         ranking: {
           score: rankingScore,
           level: this.getRankingLevel(rankingScore),
@@ -315,11 +315,11 @@ export class ProviderVerificationService {
   private async getProviderPerformanceMetrics(providerId: string): Promise<any> {
     // Get bookings, reviews, and other performance data
     const bookingsQuery = query(
-      collection(db, 'bookings'),
+      collection(getDb(), 'bookings'),
       where('providerId', '==', providerId)
     );
     const reviewsQuery = query(
-      collection(db, 'reviews'),
+      collection(getDb(), 'reviews'),
       where('providerId', '==', providerId)
     );
 

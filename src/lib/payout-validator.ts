@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { doc, getDoc, collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { financialAuditLogger } from './financial-audit-logger';
 
@@ -69,7 +69,7 @@ export class PayoutValidator {
       }
 
       // 3. Check user payout details
-      const userDoc = await getDoc(doc(db, 'users', providerId));
+      const userDoc = await getDoc(doc(getDb(), 'users', providerId));
       if (!userDoc.exists()) {
         errors.push('User not found');
         canRequest = false;
@@ -194,7 +194,7 @@ export class PayoutValidator {
   private async calculateAvailableEarnings(providerId: string): Promise<{ available: number; total: number; paid: number; pending: number }> {
     // Get completed bookings
     const bookingsQuery = query(
-      collection(db, 'bookings'),
+      collection(getDb(), 'bookings'),
       where('providerId', '==', providerId),
       where('status', '==', 'Completed')
     );
@@ -208,7 +208,7 @@ export class PayoutValidator {
 
     // Get payout history
     const payoutsQuery = query(
-      collection(db, 'payouts'),
+      collection(getDb(), 'payouts'),
       where('providerId', '==', providerId)
     );
     const payoutsSnapshot = await getDocs(payoutsQuery);
@@ -236,7 +236,7 @@ export class PayoutValidator {
 
   private async getRecentPayoutRequests(providerId: string): Promise<any[]> {
     const payoutsQuery = query(
-      collection(db, 'payouts'),
+      collection(getDb(), 'payouts'),
       where('providerId', '==', providerId)
     );
     const payoutsSnapshot = await getDocs(payoutsQuery);
@@ -272,7 +272,7 @@ export class PayoutValidator {
   }
 
   private async checkAccountStatus(providerId: string): Promise<{ isActive: boolean; isSuspended: boolean }> {
-    const userDoc = await getDoc(doc(db, 'users', providerId));
+    const userDoc = await getDoc(doc(getDb(), 'users', providerId));
     if (!userDoc.exists()) {
       return { isActive: false, isSuspended: true };
     }

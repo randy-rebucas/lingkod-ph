@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, User, getAdditionalUserInfo } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
+import { getAuthInstance, getDb   } from '@/lib/firebase';
 import { doc, setDoc, serverTimestamp, runTransaction, getDocs, query, where, collection, writeBatch, limit, getDoc, updateDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ const generateReferralCode = (userId: string): string => {
 const handleReferral = async (referralCode: string, newUser: { uid: string; email: string | null }) => {
     if (!referralCode) return;
 
-    const usersRef = collection(db, 'users');
+    const usersRef = collection(getDb(), 'users');
     const q = query(usersRef, where('referralCode', '==', referralCode.toUpperCase()), limit(1));
     
     try {
@@ -54,7 +54,7 @@ const handleReferral = async (referralCode: string, newUser: { uid: string; emai
         const referrerRef = referrerDoc.ref;
         const pointsToAward = 250; // Referral bonus
         
-        await runTransaction(db, async (transaction) => {
+        await runTransaction(getDb(), async (transaction) => {
             const freshReferrerDoc = await transaction.get(referrerRef);
             if (!freshReferrerDoc.exists()) {
                 throw new Error("Referrer document does not exist!");
@@ -75,7 +75,7 @@ const handleReferral = async (referralCode: string, newUser: { uid: string; emai
             });
             
             // Add referral record
-            const referralRecordRef = doc(collection(db, 'referrals'));
+            const referralRecordRef = doc(collection(getDb(), 'referrals'));
             transaction.set(referralRecordRef, {
                 referrerId: referrerDoc.id,
                 referredId: newUser.uid,
@@ -85,7 +85,7 @@ const handleReferral = async (referralCode: string, newUser: { uid: string; emai
             });
             
             // Mark the new user as referred and give them bonus points
-            const newUserRef = doc(db, 'users', newUser.uid);
+            const newUserRef = doc(getDb(), 'users', newUser.uid);
             transaction.update(newUserRef, { 
                 referredBy: referrerDoc.id,
                 loyaltyPoints: 100 // Welcome bonus for being referred
@@ -133,14 +133,14 @@ const SignupFormContainer = () => {
     setLoading(true);
     
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(getAuthInstance(), email, password);
       const user = userCredential.user;
       
       await updateProfile(user, { displayName: name });
 
       const newReferralCode = generateReferralCode(user.uid);
       
-      await setDoc(doc(db, "users", user.uid), {
+      await setDoc(doc(getDb(), "users", user.uid), {
         uid: user.uid,
         email: user.email,
         displayName: name,
@@ -178,10 +178,10 @@ const SignupFormContainer = () => {
     setLoading(true);
     const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(getAuthInstance(), provider);
       const user = result.user;
       
-      const userRef = doc(db, "users", user.uid);
+      const userRef = doc(getDb(), "users", user.uid);
       const userDoc = await getDoc(userRef);
 
       if (!userDoc.exists()) {

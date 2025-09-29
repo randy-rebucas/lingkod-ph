@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/auth-context";
-import { db, storage } from "@/lib/firebase";
+import { getDb, getStorageInstance   } from '@/lib/firebase';
 import { doc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -29,14 +29,14 @@ export default function AdminSettingsPage() {
     const logoInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (userRole !== 'admin' || !db) {
+        if (userRole !== 'admin' || !getDb()) {
             setLoading(false);
             return;
         }
 
         const fetchSettings = async () => {
-            if (!db) return;
-            const settingsRef = doc(db, 'platform', 'settings');
+            if (!getDb()) return;
+            const settingsRef = doc(getDb(), 'platform', 'settings');
             const docSnap = await getDoc(settingsRef);
             if (docSnap.exists()) {
                 const data = docSnap.data() as PlatformSettings;
@@ -102,7 +102,7 @@ export default function AdminSettingsPage() {
         let finalSettings = { ...settings };
         
         if (logoFile) {
-            if (!storage) {
+            if (!getStorageInstance()) {
                 toast({ 
                     variant: 'destructive', 
                     title: 'Storage Error', 
@@ -114,7 +114,7 @@ export default function AdminSettingsPage() {
             setIsUploadingLogo(true);
             try {
                 const storagePath = `platform/logo/${Date.now()}_${logoFile.name}`;
-                const storageRef = ref(storage, storagePath);
+                const storageRef = ref(getStorageInstance(), storagePath);
                 
                 console.log('Uploading logo to:', storagePath);
                 const uploadResult = await uploadBytes(storageRef, logoFile);

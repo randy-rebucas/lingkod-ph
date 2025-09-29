@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy, Timestamp, getDoc, doc } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -60,12 +60,12 @@ export default function AdminJobsPage() {
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
      useEffect(() => {
-        if (userRole !== 'admin' || !db) {
+        if (userRole !== 'admin' || !getDb()) {
             setLoading(false);
             return;
         }
 
-        const jobsQuery = query(collection(db, "jobs"), orderBy("createdAt", "desc"));
+        const jobsQuery = query(collection(getDb(), "jobs"), orderBy("createdAt", "desc"));
         
         const unsubscribe = onSnapshot(jobsQuery, (snapshot) => {
             const jobsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
@@ -100,7 +100,7 @@ export default function AdminJobsPage() {
     }
 
     const handleViewDetails = async (jobId: string) => {
-        const jobRef = doc(db, 'jobs', jobId);
+        const jobRef = doc(getDb(), 'jobs', jobId);
         const jobSnap = await getDoc(jobRef);
         if (jobSnap.exists()) {
             setSelectedJob({ id: jobSnap.id, ...jobSnap.data()} as Job);

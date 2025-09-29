@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/context/auth-context';
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { collection, addDoc, doc, updateDoc, serverTimestamp, getDocs, query, orderBy } from 'firebase/firestore';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -78,9 +78,9 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
     });
 
     const fetchCategories = useCallback(async () => {
-        if (!db) return;
+        if (!getDb()) return;
         try {
-            const categoriesRef = collection(db, "categories");
+            const categoriesRef = collection(getDb(), "categories");
             const q = query(categoriesRef, orderBy("name"));
             const querySnapshot = await getDocs(q);
             const fetchedCategories = querySnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
@@ -147,12 +147,12 @@ export function AddEditServiceDialog({ isOpen, setIsOpen, service, onServiceSave
         try {
             if (service?.id) {
                 // Update existing service
-                const serviceRef = doc(db, 'services', service.id);
+                const serviceRef = doc(getDb(), 'services', service.id);
                 await updateDoc(serviceRef, data);
                 toast({ title: t('success'), description: t('serviceUpdated') });
             } else {
                 // Add new service
-                await addDoc(collection(db, 'services'), {
+                await addDoc(collection(getDb(), 'services'), {
                     ...data,
                     userId: user.uid,
                     createdAt: serverTimestamp(),

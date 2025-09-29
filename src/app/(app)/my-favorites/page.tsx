@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, getDocs, onSnapshot, query, where } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -93,12 +93,12 @@ export default function MyFavoritesPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!user || !db) {
+        if (!user || !getDb()) {
             setLoading(false);
             return;
         }
 
-        const favoritesRef = collection(db, 'favorites');
+        const favoritesRef = collection(getDb(), 'favorites');
         const q = query(favoritesRef, where('userId', '==', user.uid));
 
         const unsubscribe = onSnapshot(q, async (snapshot) => {
@@ -111,10 +111,10 @@ export default function MyFavoritesPage() {
                 return;
             }
 
-            const providersQuery = query(collection(db!, "users"), where("uid", "in", favoriteProviderIds));
+            const providersQuery = query(collection(getDb(), "users"), where("uid", "in", favoriteProviderIds));
             const providersSnap = await getDocs(providersQuery);
 
-            const reviewsSnapshot = await getDocs(collection(db!, "reviews"));
+            const reviewsSnapshot = await getDocs(collection(getDb(), "reviews"));
             const allReviews = reviewsSnapshot.docs.map(doc => doc.data());
 
             const providerRatings: { [key: string]: { totalRating: number, count: number } } = {};
