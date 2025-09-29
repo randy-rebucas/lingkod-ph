@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { getDocs, collection } from "firebase/firestore";
 import { Logo } from "@/components/logo";
 
@@ -33,8 +33,8 @@ export default function SetupPage() {
 
     useEffect(() => {
         const checkUsers = async () => {
-            if (!db) return;
-            const querySnapshot = await getDocs(collection(db, "users"));
+            if (!getDb()) return;
+            const querySnapshot = await getDocs(collection(getDb(), "users"));
             // If users exist, this page is not accessible
             if (!querySnapshot.empty) {
                 router.push('/login');

@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp, deleteDoc, setDoc, onSnapshot, orderBy } from "firebase/firestore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -133,13 +133,13 @@ export default function AgencyProfilePage() {
     const [isReporting, setIsReporting] = useState(false);
 
     useEffect(() => {
-        if (!agencyId || !db) return;
+        if (!agencyId || !getDb()) return;
 
         const fetchAgencyData = async () => {
             setLoading(true);
             try {
                 // Fetch agency details
-                const agencyDocRef = doc(db, "users", agencyId);
+                const agencyDocRef = doc(getDb(), "users", agencyId);
                 const agencyDoc = await getDoc(agencyDocRef);
                 if (agencyDoc.exists()) {
                     const agencyData = { uid: agencyDoc.id, ...agencyDoc.data() } as Agency;
@@ -150,19 +150,19 @@ export default function AgencyProfilePage() {
                 }
 
                 // Fetch services
-                const servicesQuery = query(collection(db, "services"), where("userId", "==", agencyId), where("status", "==", "Active"));
+                const servicesQuery = query(collection(getDb(), "services"), where("userId", "==", agencyId), where("status", "==", "Active"));
                 const servicesSnapshot = await getDocs(servicesQuery);
                 const servicesData = servicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
                 setServices(servicesData);
 
                 // Fetch reviews
-                const reviewsQuery = query(collection(db, "reviews"), where("providerId", "==", agencyId), orderBy("createdAt", "desc"));
+                const reviewsQuery = query(collection(getDb(), "reviews"), where("providerId", "==", agencyId), orderBy("createdAt", "desc"));
                 const reviewsSnapshot = await getDocs(reviewsQuery);
                 const reviewsData = reviewsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
                 setReviews(reviewsData);
 
                 // Fetch agency providers
-                const providersQuery = query(collection(db, "users"), where("role", "==", "provider"), where("agencyId", "==", agencyId));
+                const providersQuery = query(collection(getDb(), "users"), where("role", "==", "provider"), where("agencyId", "==", agencyId));
                 const providersSnapshot = await getDocs(providersQuery);
                 const providersData = providersSnapshot.docs.map(doc => {
                     const data = doc.data();
@@ -189,13 +189,13 @@ export default function AgencyProfilePage() {
     }, [agencyId]);
     
     useEffect(() => {
-        if (!user || !agencyId || !db) {
+        if (!user || !agencyId || !getDb()) {
             setIsFavoriteLoading(false);
             return;
         }
         setIsFavoriteLoading(true);
         const favQuery = query(
-            collection(db, 'favorites'),
+            collection(getDb(), 'favorites'),
             where('userId', '==', user.uid),
             where('providerId', '==', agencyId)
         );
@@ -214,7 +214,7 @@ export default function AgencyProfilePage() {
             return;
         }
         setIsFavoriteLoading(true);
-        const favoritesRef = collection(db, 'favorites');
+        const favoritesRef = collection(getDb(), 'favorites');
         
         try {
             if (isFavorited) {
@@ -253,7 +253,7 @@ export default function AgencyProfilePage() {
 
         try {
             // Check if a conversation already exists
-            const conversationsRef = collection(db, "conversations");
+            const conversationsRef = collection(getDb(), "conversations");
             const q = query(conversationsRef, where("participants", "array-contains", user.uid));
             const querySnapshot = await getDocs(q);
             
@@ -269,7 +269,7 @@ export default function AgencyProfilePage() {
                 router.push(`/messages?conversationId=${existingConvoId}`);
             } else {
                 // Create a new conversation
-                const newConvoRef = await addDoc(collection(db, "conversations"), {
+                const newConvoRef = await addDoc(collection(getDb(), "conversations"), {
                     participants: [user.uid, agency.uid],
                     participantInfo: {
                         [user.uid]: {
@@ -299,7 +299,7 @@ export default function AgencyProfilePage() {
         }
         setIsReporting(true);
         try {
-            await addDoc(collection(db, "reports"), {
+            await addDoc(collection(getDb(), "reports"), {
                 reportedBy: user.uid,
                 reportedItemType: 'user',
                 reportedItemId: agency.uid,

@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { db, storage } from "@/lib/firebase";
+import { getDb, getStorageInstance   } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, addDoc, serverTimestamp, orderBy, updateDoc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -56,16 +56,16 @@ const getAvatarFallback = (name: string | null | undefined) => {
 };
 
 const createNotification = async (userId: string, senderName: string, message: string, link: string) => {
-    if (!db) return;
+    if (!getDb()) return;
     try {
-        const userNotifSettingsRef = doc(db, 'users', userId);
+        const userNotifSettingsRef = doc(getDb(), 'users', userId);
         const docSnap = await getDoc(userNotifSettingsRef);
 
         if (docSnap.exists() && docSnap.data().notificationSettings?.newMessages === false) {
             return;
         }
 
-        const notificationsRef = collection(db, `users/${userId}/notifications`);
+        const notificationsRef = collection(getDb(), `users/${userId}/notifications`);
         await addDoc(notificationsRef, {
             userId,
             message: `${senderName}: ${message}`,
@@ -263,9 +263,9 @@ export default function MessagesPage() {
     }, [searchParams, conversations]);
 
     useEffect(() => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         setLoadingConversations(true);
-        const q = query(collection(db, "conversations"), where("participants", "array-contains", user.uid));
+        const q = query(collection(getDb(), "conversations"), where("participants", "array-contains", user.uid));
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const convos = querySnapshot.docs.map(doc => ({
@@ -284,10 +284,10 @@ export default function MessagesPage() {
     }, [user, toast, t]);
 
     useEffect(() => {
-        if (!activeConversation || !db) return;
+        if (!activeConversation || !getDb()) return;
 
         setLoadingMessages(true);
-        const messagesRef = collection(db, "conversations", activeConversation.id, "messages");
+        const messagesRef = collection(getDb(), "conversations", activeConversation.id, "messages");
         const q = query(messagesRef, orderBy("timestamp", "asc"));
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -389,7 +389,7 @@ export default function MessagesPage() {
 
         setIsSending(true);
 
-        if (!storage || !db) {
+        if (!getStorageInstance() || !getDb()) {
             toast({
                 variant: "destructive",
                 title: t('error'),
@@ -404,7 +404,7 @@ export default function MessagesPage() {
             if (selectedImage) {
                 // Compress image if it's too large
                 const compressedFile = await compressImage(selectedImage);
-                const storageRef = ref(storage, `chat-images/${activeConversation.id}/${Date.now()}_${compressedFile.name}`);
+                const storageRef = ref(getStorageInstance(), `chat-images/${activeConversation.id}/${Date.now()}_${compressedFile.name}`);
                 const uploadResult = await uploadBytes(storageRef, compressedFile);
                 imageUrl = await getDownloadURL(uploadResult.ref);
             }
@@ -417,10 +417,10 @@ export default function MessagesPage() {
                 ...(imageUrl && { imageUrl: imageUrl }),
             };
 
-            const messagesRef = collection(db, "conversations", activeConversation.id, "messages");
+            const messagesRef = collection(getDb(), "conversations", activeConversation.id, "messages");
             await addDoc(messagesRef, messageData);
 
-            const conversationRef = doc(db, "conversations", activeConversation.id);
+            const conversationRef = doc(getDb(), "conversations", activeConversation.id);
             await updateDoc(conversationRef, {
                 lastMessage: newMessage || t('imageSent'),
                 timestamp: serverTimestamp()
@@ -447,7 +447,7 @@ export default function MessagesPage() {
         } finally {
             setIsSending(false);
         }
-    }, [newMessage, selectedImage, user, activeConversation, storage, db, toast, t]);
+    }, [newMessage, selectedImage, user, activeConversation, getStorageInstance(), getDb(), toast, t]);
 
     // Image compression utility
     const compressImage = useCallback((file: File): Promise<File> => {

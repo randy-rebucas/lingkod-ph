@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, getDocs, query, orderBy, getDoc, doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -89,9 +89,9 @@ export default function PostAJobPage() {
 
    useEffect(() => {
         const fetchCategories = async () => {
-            if (!db) return;
+            if (!getDb()) return;
             try {
-                const categoriesRef = collection(db, "categories");
+                const categoriesRef = collection(getDb(), "categories");
                 const q = query(categoriesRef, orderBy("name"));
                 const querySnapshot = await getDocs(q);
                 const fetchedCategories = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
@@ -105,9 +105,9 @@ export default function PostAJobPage() {
     
      useEffect(() => {
         const fetchJobData = async () => {
-            if (!editJobId || !user || !db) return;
+            if (!editJobId || !user || !getDb()) return;
             setIsLoadingJob(true);
-            const jobRef = doc(db, "jobs", editJobId);
+            const jobRef = doc(getDb(), "jobs", editJobId);
             const jobSnap = await getDoc(jobRef);
             if (jobSnap.exists() && jobSnap.data().clientId === user.uid) {
                 const jobData = jobSnap.data();

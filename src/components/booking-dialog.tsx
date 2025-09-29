@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/context/auth-context';
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
@@ -123,11 +123,11 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
                 createdAt: serverTimestamp(),
             };
 
-            if (!db) {
+            if (!getDb()) {
                 throw new Error('Database not initialized. Please check your Firebase configuration.');
             }
             
-            const newBookingRef = await addDoc(collection(db!, 'bookings'), bookingData);
+            const newBookingRef = await addDoc(collection(getDb(), 'bookings'), bookingData);
             onBookingConfirmed();
             router.push(`/bookings/${newBookingRef.id}/payment`);
 

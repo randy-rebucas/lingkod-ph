@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import {
   doc,
   updateDoc,
@@ -23,7 +23,7 @@ export async function handleUpdateAdCampaign(
   actor: Actor
 ) {
   try {
-    const campaignRef = doc(db, 'adCampaigns', campaignId);
+    const campaignRef = doc(getDb(), 'adCampaigns', campaignId);
     await updateDoc(campaignRef, data);
 
 
@@ -49,7 +49,7 @@ export async function handleAddAdCampaign(data: any, actor: Actor) {
         return { error: 'Invalid data provided.', message: 'Validation failed.' };
     }
     try {
-        const newDoc = await addDoc(collection(db, 'adCampaigns'), { ...data, createdAt: serverTimestamp() });
+        const newDoc = await addDoc(collection(getDb(), 'adCampaigns'), { ...data, createdAt: serverTimestamp() });
         
         await AuditLogger.getInstance().logAction(
             'AD_CAMPAIGN_CREATED',
@@ -70,7 +70,7 @@ export async function handleAddAdCampaign(data: any, actor: Actor) {
 
 export async function handleDeleteAdCampaign(campaignId: string, actor: Actor) {
   try {
-    const campaignRef = doc(db, 'adCampaigns', campaignId);
+    const campaignRef = doc(getDb(), 'adCampaigns', campaignId);
     await deleteDoc(campaignRef);
 
     await AuditLogger.getInstance().logAction(

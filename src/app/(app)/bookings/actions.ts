@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db, storage } from '@/lib/firebase';
+import { getDb, getStorageInstance   } from '@/lib/firebase';
 import { doc, runTransaction, collection, serverTimestamp, writeBatch, getDoc, addDoc } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { z } from 'zod';
@@ -20,7 +20,7 @@ type CompleteBookingInput = z.infer<typeof completeBookingSchema>;
 
 const createNotification = async (userId: string, message: string, link: string) => {
     try {
-        const notificationsRef = collection(db, `users/${userId}/notifications`);
+        const notificationsRef = collection(getDb(), `users/${userId}/notifications`);
         await addDoc(notificationsRef, {
             userId, message, link,
             type: 'booking_update',
@@ -43,15 +43,15 @@ export async function completeBookingAction(input: CompleteBookingInput): Promis
 
     try {
         const storagePath = `completion-photos/${bookingId}/${Date.now()}_${fileName}`;
-        const storageRef = ref(storage, storagePath);
+        const storageRef = ref(getStorageInstance(), storagePath);
         
         // Upload the base64 string
         const uploadResult = await uploadString(storageRef, photoDataUrl, 'data_url');
         const completionPhotoURL = await getDownloadURL(uploadResult.ref);
         
-        await runTransaction(db, async (transaction) => {
-            const bookingRef = doc(db, "bookings", bookingId);
-            const clientRef = doc(db, "users", clientId);
+        await runTransaction(getDb(), async (transaction) => {
+            const bookingRef = doc(getDb(), "bookings", bookingId);
+            const clientRef = doc(getDb(), "users", clientId);
 
             const clientDoc = await transaction.get(clientRef);
             if (!clientDoc.exists()) {
@@ -65,7 +65,7 @@ export async function completeBookingAction(input: CompleteBookingInput): Promis
             const newTotalPoints = currentPoints + pointsToAward;
             transaction.update(clientRef, { loyaltyPoints: newTotalPoints });
 
-            const loyaltyTxRef = doc(collection(db, `users/${clientId}/loyaltyTransactions`));
+            const loyaltyTxRef = doc(collection(getDb(), `users/${clientId}/loyaltyTransactions`));
             transaction.set(loyaltyTxRef, {
                 points: pointsToAward, type: 'earn',
                 description: `Points for completing service: ${serviceName}`,
@@ -73,7 +73,7 @@ export async function completeBookingAction(input: CompleteBookingInput): Promis
             });
             
             if (jobId) {
-                const jobRef = doc(db, "jobs", jobId);
+                const jobRef = doc(getDb(), "jobs", jobId);
                 transaction.update(jobRef, { status: "Completed" });
             }
         });

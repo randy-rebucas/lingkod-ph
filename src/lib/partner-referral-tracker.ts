@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { 
   collection, 
   query, 
@@ -109,7 +109,7 @@ export class PartnerReferralTracker {
   ): Promise<{ success: boolean; referralCode?: ReferralCode; error?: string }> {
     try {
       // Get partner data
-      const partnerDoc = await getDoc(doc(db, this.USERS_COLLECTION, partnerId));
+      const partnerDoc = await getDoc(doc(getDb(), this.USERS_COLLECTION, partnerId));
       if (!partnerDoc.exists()) {
         return { success: false, error: 'Partner not found' };
       }
@@ -133,7 +133,7 @@ export class PartnerReferralTracker {
         discountAmount: options.discountAmount
       };
 
-      const docRef = await addDoc(collection(db, this.REFERRAL_CODES_COLLECTION), referralCodeData);
+      const docRef = await addDoc(collection(getDb(), this.REFERRAL_CODES_COLLECTION), referralCodeData);
       
       const referralCode: ReferralCode = {
         id: docRef.id,
@@ -153,7 +153,7 @@ export class PartnerReferralTracker {
   static async getPartnerReferralCodes(partnerId: string): Promise<ReferralCode[]> {
     try {
       const codesQuery = query(
-        collection(db, this.REFERRAL_CODES_COLLECTION),
+        collection(getDb(), this.REFERRAL_CODES_COLLECTION),
         where('partnerId', '==', partnerId),
         orderBy('createdAt', 'desc')
       );
@@ -189,7 +189,7 @@ export class PartnerReferralTracker {
     try {
       // Verify referral code
       const codeQuery = query(
-        collection(db, this.REFERRAL_CODES_COLLECTION),
+        collection(getDb(), this.REFERRAL_CODES_COLLECTION),
         where('code', '==', referralCode),
         where('isActive', '==', true)
       );
@@ -213,7 +213,7 @@ export class PartnerReferralTracker {
       }
 
       // Get partner data
-      const partnerDoc = await getDoc(doc(db, this.USERS_COLLECTION, partnerId));
+      const partnerDoc = await getDoc(doc(getDb(), this.USERS_COLLECTION, partnerId));
       if (!partnerDoc.exists()) {
         return { success: false, error: 'Partner not found' };
       }
@@ -241,10 +241,10 @@ export class PartnerReferralTracker {
         metadata
       };
 
-      const docRef = await addDoc(collection(db, this.REFERRALS_COLLECTION), referralData);
+      const docRef = await addDoc(collection(getDb(), this.REFERRALS_COLLECTION), referralData);
 
       // Update referral code usage count
-      await updateDoc(doc(db, this.REFERRAL_CODES_COLLECTION, codeDoc.id), {
+      await updateDoc(doc(getDb(), this.REFERRAL_CODES_COLLECTION, codeDoc.id), {
         usageCount: codeData.usageCount + 1
       });
 
@@ -263,7 +263,7 @@ export class PartnerReferralTracker {
     status: 'pending' | 'active' | 'completed' | 'cancelled'
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      await updateDoc(doc(db, this.REFERRALS_COLLECTION, referralId), {
+      await updateDoc(doc(getDb(), this.REFERRALS_COLLECTION, referralId), {
         status,
         lastActivity: serverTimestamp()
       });
@@ -288,7 +288,7 @@ export class PartnerReferralTracker {
     }
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      const referralDoc = await getDoc(doc(db, this.REFERRALS_COLLECTION, referralId));
+      const referralDoc = await getDoc(doc(getDb(), this.REFERRALS_COLLECTION, referralId));
       if (!referralDoc.exists()) {
         return { success: false, error: 'Referral not found' };
       }
@@ -317,7 +317,7 @@ export class PartnerReferralTracker {
           break;
       }
 
-      await updateDoc(doc(db, this.REFERRALS_COLLECTION, referralId), updates);
+      await updateDoc(doc(getDb(), this.REFERRALS_COLLECTION, referralId), updates);
 
       return { success: true };
     } catch (error) {
@@ -341,7 +341,7 @@ export class PartnerReferralTracker {
   }> {
     try {
       const referralsQuery = query(
-        collection(db, this.REFERRALS_COLLECTION),
+        collection(getDb(), this.REFERRALS_COLLECTION),
         where('partnerId', '==', partnerId)
       );
 
@@ -434,7 +434,7 @@ export class PartnerReferralTracker {
         totalCommission: 0
       };
 
-      const docRef = await addDoc(collection(db, this.REFERRAL_CAMPAIGNS_COLLECTION), campaign);
+      const docRef = await addDoc(collection(getDb(), this.REFERRAL_CAMPAIGNS_COLLECTION), campaign);
       
       return { success: true, campaignId: docRef.id };
     } catch (error) {
@@ -449,7 +449,7 @@ export class PartnerReferralTracker {
   static async getPartnerCampaigns(partnerId: string): Promise<ReferralCampaign[]> {
     try {
       const campaignsQuery = query(
-        collection(db, this.REFERRAL_CAMPAIGNS_COLLECTION),
+        collection(getDb(), this.REFERRAL_CAMPAIGNS_COLLECTION),
         where('partnerId', '==', partnerId),
         orderBy('startDate', 'desc')
       );
@@ -472,7 +472,7 @@ export class PartnerReferralTracker {
   }> {
     try {
       const codeQuery = query(
-        collection(db, this.REFERRAL_CODES_COLLECTION),
+        collection(getDb(), this.REFERRAL_CODES_COLLECTION),
         where('code', '==', code),
         where('isActive', '==', true)
       );

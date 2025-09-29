@@ -1,6 +1,6 @@
 
 import { collection, addDoc, getDocs, writeBatch, doc, serverTimestamp } from "firebase/firestore";
-import { db } from "./firebase";
+import { getDb  } from './firebase';
 
 const rewards = [
     { 
@@ -38,17 +38,17 @@ const rewards = [
 ];
 
 export async function seedRewards() {
-    if (!db) {
+    if (!getDb()) {
         console.warn('Firebase not initialized, skipping rewards seeding');
         return;
     }
-    const rewardsRef = collection(db, "loyaltyRewards");
+    const rewardsRef = collection(getDb(), "loyaltyRewards");
     let count = 0;
 
     const existingRewardsSnapshot = await getDocs(rewardsRef);
     const existingRewardTitles = new Set(existingRewardsSnapshot.docs.map(doc => doc.data().title));
 
-    const batch = writeBatch(db);
+    const batch = writeBatch(getDb());
 
     rewards.forEach(reward => {
         if (!existingRewardTitles.has(reward.title)) {

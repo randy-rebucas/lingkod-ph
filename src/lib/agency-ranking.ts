@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { 
   collection, 
   query, 
@@ -395,7 +395,7 @@ export class AgencyRankingService {
   private async getAgencyData(startDate: Date, endDate: Date): Promise<any> {
     // Get providers
     const providersQuery = query(
-      collection(db, 'users'),
+      collection(getDb(), 'users'),
       where('agencyId', '==', this.agencyId),
       where('role', '==', 'provider')
     );
@@ -405,7 +405,7 @@ export class AgencyRankingService {
 
     // Get bookings
     const bookingsQuery = query(
-      collection(db, 'bookings'),
+      collection(getDb(), 'bookings'),
       where('providerId', 'in', providerIds),
       where('createdAt', '>=', startDate),
       where('createdAt', '<=', endDate)
@@ -448,7 +448,7 @@ export class AgencyRankingService {
   private async getAllAgenciesData(startDate: Date, endDate: Date): Promise<any[]> {
     // Get all agencies
     const agenciesQuery = query(
-      collection(db, 'users'),
+      collection(getDb(), 'users'),
       where('role', '==', 'agency')
     );
     const agenciesSnapshot = await getDocs(agenciesQuery);

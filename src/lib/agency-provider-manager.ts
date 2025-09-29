@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { 
   collection, 
   query, 
@@ -150,7 +150,7 @@ export class AgencyProviderManager {
     try {
       // Check if provider exists
       const userQuery = query(
-        collection(db, 'users'),
+        collection(getDb(), 'users'),
         where('email', '==', providerEmail)
       );
       const userSnapshot = await getDocs(userQuery);
@@ -183,7 +183,7 @@ export class AgencyProviderManager {
 
       // Check for existing pending invitation
       const existingInviteQuery = query(
-        collection(db, 'providerInvitations'),
+        collection(getDb(), 'providerInvitations'),
         where('providerEmail', '==', providerEmail),
         where('status', '==', 'pending')
       );
@@ -210,7 +210,7 @@ export class AgencyProviderManager {
       };
 
       const invitationRef = await addDoc(
-        collection(db, 'providerInvitations'),
+        collection(getDb(), 'providerInvitations'),
         invitationData
       );
 
@@ -229,7 +229,7 @@ export class AgencyProviderManager {
       };
 
       await addDoc(
-        collection(db, `users/${providerDoc.id}/notifications`),
+        collection(getDb(), `users/${providerDoc.id}/notifications`),
         notificationData
       );
 
@@ -267,8 +267,8 @@ export class AgencyProviderManager {
     } = {}
   ): Promise<{ success: boolean; message: string }> {
     try {
-      const invitationRef = doc(db, 'providerInvitations', invitationId);
-      const invitationDoc = await getDoc(doc(db, 'providerInvitations', invitationId));
+      const invitationRef = doc(getDb(), 'providerInvitations', invitationId);
+      const invitationDoc = await getDoc(doc(getDb(), 'providerInvitations', invitationId));
 
       if (!invitationDoc.exists()) {
         return {
@@ -295,10 +295,10 @@ export class AgencyProviderManager {
       }
 
       // Update provider's agency information
-      const batch = writeBatch(db);
+      const batch = writeBatch(getDb());
       
       // Update provider document
-      const providerRef = doc(db, 'users', invitation.providerId);
+      const providerRef = doc(getDb(), 'users', invitation.providerId);
       batch.update(providerRef, {
         agencyId: this.agencyId,
         agencyName: this.agencyName,
@@ -348,7 +348,7 @@ export class AgencyProviderManager {
   ): Promise<{ success: boolean; message: string }> {
     try {
       // Get provider information
-      const providerDoc = await getDoc(doc(db, 'users', providerId));
+      const providerDoc = await getDoc(doc(getDb(), 'users', providerId));
 
       if (!providerDoc.exists()) {
         return {
@@ -360,9 +360,9 @@ export class AgencyProviderManager {
       const providerData = providerDoc.data();
 
       // Update provider document
-      const batch = writeBatch(db);
+      const batch = writeBatch(getDb());
       
-      const providerRef = doc(db, 'users', providerId);
+      const providerRef = doc(getDb(), 'users', providerId);
       batch.update(providerRef, {
         agencyId: null,
         agencyName: null,
@@ -372,7 +372,7 @@ export class AgencyProviderManager {
 
       // Cancel any pending bookings
       const bookingsQuery = query(
-        collection(db, 'bookings'),
+        collection(getDb(), 'bookings'),
         where('providerId', '==', providerId),
         where('status', 'in', ['Upcoming', 'In Progress'])
       );
@@ -423,7 +423,7 @@ export class AgencyProviderManager {
     } = {}
   ): Promise<{ success: boolean; message: string }> {
     try {
-      const providerRef = doc(db, 'users', providerId);
+      const providerRef = doc(getDb(), 'users', providerId);
       await updateDoc(providerRef, {
         status,
         statusUpdatedAt: serverTimestamp(),
@@ -458,7 +458,7 @@ export class AgencyProviderManager {
   async getAgencyProviders(): Promise<ProviderProfile[]> {
     try {
       const providersQuery = query(
-        collection(db, 'users'),
+        collection(getDb(), 'users'),
         where('agencyId', '==', this.agencyId),
         where('role', '==', 'provider')
       );
@@ -484,7 +484,7 @@ export class AgencyProviderManager {
   ): Promise<ProviderPerformanceReport | null> {
     try {
       // Get provider information
-      const providerDoc = await getDoc(doc(db, 'users', providerId));
+      const providerDoc = await getDoc(doc(getDb(), 'users', providerId));
 
       if (!providerDoc.exists()) {
         return null;
@@ -494,7 +494,7 @@ export class AgencyProviderManager {
 
       // Get bookings for the period
       const bookingsQuery = query(
-        collection(db, 'bookings'),
+        collection(getDb(), 'bookings'),
         where('providerId', '==', providerId),
         where('createdAt', '>=', startDate),
         where('createdAt', '<=', endDate)
@@ -554,7 +554,7 @@ export class AgencyProviderManager {
   async getProviderInvitations(): Promise<ProviderInvitation[]> {
     try {
       const invitationsQuery = query(
-        collection(db, 'providerInvitations'),
+        collection(getDb(), 'providerInvitations'),
         where('agencyId', '==', this.agencyId)
       );
       const snapshot = await getDocs(invitationsQuery);
@@ -591,7 +591,7 @@ export class AgencyProviderManager {
     callback: (providers: ProviderProfile[]) => void
   ): () => void {
     const providersQuery = query(
-      collection(db, 'users'),
+      collection(getDb(), 'users'),
       where('agencyId', '==', this.agencyId),
       where('role', '==', 'provider')
     );

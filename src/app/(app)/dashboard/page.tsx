@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs, getDoc, doc, addDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -414,7 +414,7 @@ const DashboardPage = memo(function DashboardPage() {
 
     // Fetch data for provider dashboard
     useEffect(() => {
-        if (!user || userRole !== 'provider' || !db) {
+        if (!user || userRole !== 'provider' || !getDb()) {
             setLoading(false);
             return;
         }
@@ -424,13 +424,13 @@ const DashboardPage = memo(function DashboardPage() {
         const todayEnd = endOfDay(new Date());
 
         const bookingsQuery = query(
-            collection(db, "bookings"),
+            collection(getDb(), "bookings"),
             where("providerId", "==", user.uid),
             orderBy("date", "desc")
         );
         
         const todaysJobsQuery = query(
-            collection(db, "bookings"),
+            collection(getDb(), "bookings"),
             where("providerId", "==", user.uid),
             where("date", ">=", todayStart),
             where("date", "<=", todayEnd),
@@ -438,13 +438,13 @@ const DashboardPage = memo(function DashboardPage() {
         );
 
         const reviewsQuery = query(
-            collection(db, "reviews"),
+            collection(getDb(), "reviews"),
             where("providerId", "==", user.uid),
             orderBy("createdAt", "desc"),
             limit(5)
         );
         
-         const payoutsQuery = query(collection(db, "payouts"), where("providerId", "==", user.uid));
+         const payoutsQuery = query(collection(getDb(), "payouts"), where("providerId", "==", user.uid));
 
         const unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
             const bookingsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
@@ -478,14 +478,14 @@ const DashboardPage = memo(function DashboardPage() {
 
     // Fetch data for client dashboard
     useEffect(() => {
-        if (userRole !== 'client' || !db) return;
+        if (userRole !== 'client' || !getDb()) return;
         
         const fetchProviders = async () => {
-            if (!db) return;
+            if (!getDb()) return;
             setLoadingProviders(true);
             try {
                 // Fetch all reviews first to calculate ratings
-                const reviewsSnapshot = await getDocs(collection(db, "reviews"));
+                const reviewsSnapshot = await getDocs(collection(getDb(), "reviews"));
                 const allReviews = reviewsSnapshot.docs.map(doc => doc.data() as Review);
                 
                 const providerRatings: { [key: string]: { totalRating: number, count: number } } = {};
@@ -498,7 +498,7 @@ const DashboardPage = memo(function DashboardPage() {
                 });
 
                 // Fetch all providers and agencies
-                const q = query(collection(db, "users"), where("role", "in", ["provider", "agency"]));
+                const q = query(collection(getDb(), "users"), where("role", "in", ["provider", "agency"]));
                 const querySnapshot = await getDocs(q);
                 const providersData = querySnapshot.docs.map(doc => {
                     const data = doc.data();
@@ -530,9 +530,9 @@ const DashboardPage = memo(function DashboardPage() {
 
     // Fetch client's favorites
     useEffect(() => {
-        if (userRole !== 'client' || !user || !db) return;
+        if (userRole !== 'client' || !user || !getDb()) return;
 
-        const favRef = collection(db, 'favorites');
+        const favRef = collection(getDb(), 'favorites');
         const q = query(favRef, where('userId', '==', user.uid));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -545,17 +545,17 @@ const DashboardPage = memo(function DashboardPage() {
 
     // Fetch data for agency dashboard
     useEffect(() => {
-        if (userRole !== 'agency' || !user || !db) {
+        if (userRole !== 'agency' || !user || !getDb()) {
              setLoadingAgencyData(false);
             return;
         }
 
         const fetchAgencyData = async () => {
-            if (!db) return;
+            if (!getDb()) return;
             setLoadingAgencyData(true);
             try {
                 // 1. Get all providers managed by the agency
-                const providersQuery = query(collection(db, "users"), where("agencyId", "==", user.uid));
+                const providersQuery = query(collection(getDb(), "users"), where("agencyId", "==", user.uid));
                 const providersSnapshot = await getDocs(providersQuery);
                 const providerIds = providersSnapshot.docs.map(doc => doc.id);
                  const fetchedProviders = providersSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as Provider));
@@ -569,13 +569,13 @@ const DashboardPage = memo(function DashboardPage() {
                 }
                 
                 // 2. Get all bookings for these providers
-                const bookingsQuery = query(collection(db, "bookings"), where("providerId", "in", providerIds));
+                const bookingsQuery = query(collection(getDb(), "bookings"), where("providerId", "in", providerIds));
                 const bookingsSnapshot = await getDocs(bookingsQuery);
                 const fetchedBookings = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
                 setAgencyBookings(fetchedBookings);
                 
                  // 3. Get all reviews for these providers to calculate ratings and revenue
-                const reviewsQuery = query(collection(db, 'reviews'), where('providerId', 'in', providerIds));
+                const reviewsQuery = query(collection(getDb(), 'reviews'), where('providerId', 'in', providerIds));
                 const reviewsSnapshot = await getDocs(reviewsQuery);
                 const allReviews = reviewsSnapshot.docs.map(doc => doc.data() as Review);
 
@@ -591,7 +591,7 @@ const DashboardPage = memo(function DashboardPage() {
                 setAgencyProviders(providerStats);
                 
                 // 4. Get all payout requests for the agency
-                const payoutsQuery = query(collection(db, 'payouts'), where('agencyId', '==', user.uid));
+                const payoutsQuery = query(collection(getDb(), 'payouts'), where('agencyId', '==', user.uid));
                 const payoutsSnapshot = await getDocs(payoutsQuery);
                 const fetchedPayouts = payoutsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
                 setAgencyPayouts(fetchedPayouts);
@@ -685,8 +685,8 @@ const DashboardPage = memo(function DashboardPage() {
     const topPerformingProviders = [...agencyProviders].sort((a,b) => (b.totalRevenue || 0) - (a.totalRevenue || 0)).slice(0, 5);
 
     const handleToggleFavorite = async (provider: Provider) => {
-        if (!user || !db) return;
-        const favoritesRef = collection(db, 'favorites');
+        if (!user || !getDb()) return;
+        const favoritesRef = collection(getDb(), 'favorites');
         const isFavorited = favoriteProviderIds.includes(provider.uid);
 
         try {
@@ -695,7 +695,7 @@ const DashboardPage = memo(function DashboardPage() {
                 const snapshot = await getDocs(q);
                 if (!snapshot.empty) {
                     const docId = snapshot.docs[0].id;
-                    await deleteDoc(doc(db, 'favorites', docId));
+                    await deleteDoc(doc(getDb(), 'favorites', docId));
                 }
                 toast({ title: t('removedFromFavorites') });
             } else {

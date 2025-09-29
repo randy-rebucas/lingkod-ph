@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { doc, writeBatch, serverTimestamp, getDoc, collection, addDoc } from "firebase/firestore";
 import { z } from "zod";
 
@@ -29,8 +29,8 @@ export async function handleInviteAction(
     }
     
     const { inviteId, accepted } = validatedFields.data;
-    const batch = writeBatch(db);
-    const inviteRef = doc(db, 'invites', inviteId);
+    const batch = writeBatch(getDb());
+    const inviteRef = doc(getDb(), 'invites', inviteId);
 
     try {
         const inviteDoc = await getDoc(inviteRef);
@@ -39,14 +39,14 @@ export async function handleInviteAction(
         }
 
         const inviteData = inviteDoc.data();
-        const providerRef = doc(db, 'users', inviteData.providerId);
-        const agencyRef = doc(db, 'users', inviteData.agencyId);
+        const providerRef = doc(getDb(), 'users', inviteData.providerId);
+        const agencyRef = doc(getDb(), 'users', inviteData.agencyId);
 
         if (accepted) {
             batch.update(providerRef, { agencyId: inviteData.agencyId });
             batch.update(inviteRef, { status: 'accepted' });
 
-            const agencyNotificationRef = doc(collection(db, `users/${inviteData.agencyId}/notifications`));
+            const agencyNotificationRef = doc(collection(getDb(), `users/${inviteData.agencyId}/notifications`));
             const providerDoc = await getDoc(providerRef);
             batch.set(agencyNotificationRef, {
                 type: 'info',
@@ -58,7 +58,7 @@ export async function handleInviteAction(
 
         } else {
             batch.update(inviteRef, { status: 'declined' });
-             const agencyNotificationRef = doc(collection(db, `users/${inviteData.agencyId}/notifications`));
+             const agencyNotificationRef = doc(collection(getDb(), `users/${inviteData.agencyId}/notifications`));
             const providerDoc = await getDoc(providerRef);
             batch.set(agencyNotificationRef, {
                 type: 'info',

@@ -4,7 +4,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { doc, onSnapshot, collection, addDoc, serverTimestamp, getDocs, query, where, limit } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
+import { getAuthInstance, getDb   } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/use-error-handler';
 
@@ -29,13 +29,13 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 const createSingletonNotification = async (userId: string, type: string, message: string, link: string) => {
-    if (!db) {
+    if (!getDb()) {
         console.warn('Firebase not initialized, skipping notification creation');
         return;
     }
     
     try {
-        const notificationsRef = collection(db, `users/${userId}/notifications`);
+        const notificationsRef = collection(getDb(), `users/${userId}/notifications`);
         // Check if a similar notification already exists to avoid duplicates
         const q = query(notificationsRef, 
             where("type", "==", type),
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { handleError } = useErrorHandler();
 
   const handleSignOut = useCallback(() => {
-    signOut(auth);
+    signOut(getAuthInstance());
     setUser(null);
     setUserRole(null);
     setVerificationStatus(null);
@@ -87,15 +87,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [user, handleError]);
 
   useEffect(() => {
-    if (!auth || !db) {
+    if (!auth || !getDb()) {
       setLoading(false);
       return;
     }
 
-    const unsubscribeAuth = onAuthStateChanged(auth, (authUser) => {
+    const unsubscribeAuth = onAuthStateChanged(getAuthInstance(), (authUser) => {
       if (authUser) {
         setUser(authUser);
-        const userDocRef = doc(db, 'users', authUser.uid);
+        const userDocRef = doc(getDb(), 'users', authUser.uid);
         
         const unsubscribeDoc = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribeAuth();
-  }, [toast, handleSignOut, auth, db]);
+  }, [toast, handleSignOut, getAuthInstance(), db]);
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({

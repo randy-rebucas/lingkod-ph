@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, limit, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -54,9 +54,9 @@ export function NotificationBell() {
     const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
 
-        const notifsRef = collection(db, `users/${user.uid}/notifications`);
+        const notifsRef = collection(getDb(), `users/${user.uid}/notifications`);
         const q = query(notifsRef, orderBy('createdAt', 'desc'), limit(10));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -74,7 +74,7 @@ export function NotificationBell() {
     const handleNotificationClick = useCallback(async (notif: Notification) => {
         if (!user) return;
         if (!notif.read) {
-            await updateDoc(doc(db, `users/${user.uid}/notifications`, notif.id), { read: true });
+            await updateDoc(doc(getDb(), `users/${user.uid}/notifications`, notif.id), { read: true });
         }
         if (notif.type !== 'agency_invite') {
             router.push(notif.link);
@@ -102,7 +102,7 @@ export function NotificationBell() {
     const handleDeleteNotification = useCallback(async (event: React.MouseEvent, notificationId: string) => {
         event.stopPropagation();
         if (!user) return;
-        await deleteDoc(doc(db, `users/${user.uid}/notifications`, notificationId));
+        await deleteDoc(doc(getDb(), `users/${user.uid}/notifications`, notificationId));
     }, [user]);
 
 

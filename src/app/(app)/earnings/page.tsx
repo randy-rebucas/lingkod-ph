@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -104,13 +104,13 @@ export default function EarningsPage() {
     const isSaturday = new Date().getDay() === 6;
 
     useEffect(() => {
-        if (!user || userRole !== 'provider' || !db) {
+        if (!user || userRole !== 'provider' || !getDb()) {
             setLoading(false);
             return;
         }
 
         const bookingsQuery = query(
-            collection(db, "bookings"),
+            collection(getDb(), "bookings"),
             where("providerId", "==", user.uid),
             where("status", "==", "Completed")
         );
@@ -125,7 +125,7 @@ export default function EarningsPage() {
             setLoading(false);
         });
         
-        const payoutsQuery = query(collection(db, "payouts"), where("providerId", "==", user.uid), orderBy("requestedAt", "desc"));
+        const payoutsQuery = query(collection(getDb(), "payouts"), where("providerId", "==", user.uid), orderBy("requestedAt", "desc"));
         const unsubscribePayouts = onSnapshot(payoutsQuery, (snapshot) => {
             const payoutsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
             setPayouts(payoutsData);
@@ -135,7 +135,7 @@ export default function EarningsPage() {
             unsubscribeBookings();
             unsubscribePayouts();
         };
-    }, [user, userRole, db]);
+    }, [user, userRole, getDb]);
 
     const totalRevenue = bookings.reduce((sum, b) => sum + b.price, 0);
     const totalPaidOut = payouts.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);
@@ -146,10 +146,10 @@ export default function EarningsPage() {
     const chartData = processChartData(bookings);
 
     const handlePayoutRequest = async () => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         
         // Final check for payout details before proceeding
-        const userDocRef = doc(db, 'users', user.uid);
+        const userDocRef = doc(getDb(), 'users', user.uid);
         const userDoc = await getDoc(userDocRef);
         if (!userDoc.exists() || !userDoc.data()?.payoutDetails?.method) {
             toast({

@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { doc, setDoc, getDoc, collection, query, where, orderBy, limit, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { sendEmail } from './email-service';
 
@@ -116,7 +116,7 @@ export class AdminActivityMonitor {
         timestamp: serverTimestamp() as Timestamp
       };
 
-      await setDoc(doc(db, this.COLLECTION, activityId), fullActivity);
+      await setDoc(doc(getDb(), this.COLLECTION, activityId), fullActivity);
 
       // Check for alerts
       await this.checkAlerts(fullActivity);
@@ -216,7 +216,7 @@ export class AdminActivityMonitor {
         updatedAt: serverTimestamp() as Timestamp
       };
 
-      await setDoc(doc(db, this.ALERTS_COLLECTION, alertId), fullAlert);
+      await setDoc(doc(getDb(), this.ALERTS_COLLECTION, alertId), fullAlert);
 
       return { success: true, alertId };
     } catch (error) {
@@ -247,7 +247,7 @@ export class AdminActivityMonitor {
     error?: string;
   }> {
     try {
-      await setDoc(doc(db, this.ALERTS_COLLECTION, alertId), {
+      await setDoc(doc(getDb(), this.ALERTS_COLLECTION, alertId), {
         ...updates,
         updatedAt: serverTimestamp()
       }, { merge: true });
@@ -265,7 +265,7 @@ export class AdminActivityMonitor {
   static async deleteAlert(alertId: string): Promise<{ success: boolean; error?: string }> {
     try {
       // In production, you'd use deleteDoc
-      // await deleteDoc(doc(db, this.ALERTS_COLLECTION, alertId));
+      // await deleteDoc(doc(getDb(), this.ALERTS_COLLECTION, alertId));
       return { success: true };
     } catch (error) {
       console.error('Error deleting activity alert:', error);

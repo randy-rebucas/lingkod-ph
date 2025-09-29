@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
@@ -403,13 +403,13 @@ const NotificationsPage = memo(function NotificationsPage() {
     const [dateFilter, setDateFilter] = useState<string>('all');
 
     useEffect(() => {
-        if (!user || !db) {
+        if (!user || !getDb()) {
             setLoading(false);
             return;
         }
 
         setLoading(true);
-        const notifsRef = collection(db, `users/${user.uid}/notifications`);
+        const notifsRef = collection(getDb(), `users/${user.uid}/notifications`);
         const q = query(notifsRef, orderBy('createdAt', 'desc'));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -429,9 +429,9 @@ const NotificationsPage = memo(function NotificationsPage() {
     }, [user, toast]);
 
     const handleNotificationClick = async (notif: Notification) => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         if (!notif.read) {
-            await updateDoc(doc(db, `users/${user.uid}/notifications`, notif.id), { read: true });
+            await updateDoc(doc(getDb(), `users/${user.uid}/notifications`, notif.id), { read: true });
         }
         if (notif.type !== 'agency_invite' && notif.link) {
             router.push(notif.link);
@@ -455,9 +455,9 @@ const NotificationsPage = memo(function NotificationsPage() {
     };
     
     const handleDeleteNotification = async (notificationId: string) => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         try {
-            await deleteDoc(doc(db, `users/${user.uid}/notifications`, notificationId));
+            await deleteDoc(doc(getDb(), `users/${user.uid}/notifications`, notificationId));
             toast({ title: t('success'), description: t('notificationDeleted') });
         } catch (error) {
             toast({ variant: 'destructive', title: t('error'), description: t('deleteFailed') });
@@ -465,11 +465,11 @@ const NotificationsPage = memo(function NotificationsPage() {
     };
 
     const handleMarkAllAsRead = async () => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         try {
             const unreadNotifications = notifications.filter(n => !n.read);
             const promises = unreadNotifications.map(notif => 
-                updateDoc(doc(db!, `users/${user.uid}/notifications`, notif.id), { read: true })
+                updateDoc(doc(getDb(), `users/${user.uid}/notifications`, notif.id), { read: true })
             );
             await Promise.all(promises);
             toast({ title: t('success'), description: t('allMarkedAsRead') });
@@ -479,11 +479,11 @@ const NotificationsPage = memo(function NotificationsPage() {
     };
 
     const handleDeleteAllRead = async () => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         try {
             const readNotifications = notifications.filter(n => n.read);
             const promises = readNotifications.map(notif => 
-                deleteDoc(doc(db!, `users/${user.uid}/notifications`, notif.id))
+                deleteDoc(doc(getDb(), `users/${user.uid}/notifications`, notif.id))
             );
             await Promise.all(promises);
             toast({ title: t('success'), description: t('readNotificationsDeleted') });

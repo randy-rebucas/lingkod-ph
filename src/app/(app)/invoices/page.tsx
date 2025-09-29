@@ -52,7 +52,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -117,13 +117,13 @@ export default function InvoicesPage() {
 
 
     const fetchInvoices = React.useCallback(() => {
-        if (!user || !db) {
+        if (!user || !getDb()) {
             setLoading(false);
             return;
         }
 
         setLoading(true);
-        const q = query(collection(db, "invoices"), where("providerId", "==", user.uid));
+        const q = query(collection(getDb(), "invoices"), where("providerId", "==", user.uid));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const invoicesData = snapshot.docs.map(doc => ({
@@ -147,8 +147,8 @@ export default function InvoicesPage() {
     }, [fetchInvoices]);
 
     const handleStatusUpdate = async (invoiceId: string, status: InvoiceStatus) => {
-        if (!db) return;
-        const invoiceRef = doc(db, "invoices", invoiceId);
+        if (!getDb()) return;
+        const invoiceRef = doc(getDb(), "invoices", invoiceId);
         try {
             await updateDoc(invoiceRef, { status });
             toast({ title: "Success", description: `Invoice marked as ${status.toLowerCase()}.` });
@@ -158,9 +158,9 @@ export default function InvoicesPage() {
     };
     
     const handleDeleteInvoice = async (invoiceId: string) => {
-        if (!db) return;
+        if (!getDb()) return;
         try {
-            await deleteDoc(doc(db, "invoices", invoiceId));
+            await deleteDoc(doc(getDb(), "invoices", invoiceId));
             toast({ title: "Success", description: "Invoice deleted successfully." });
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete invoice.' });

@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { 
   collection, 
   query, 
@@ -215,7 +215,7 @@ export class AgencyAdvancedReportingService {
   private async generateFinancialSummaryData(startDate: Date, endDate: Date): Promise<any> {
     // Get providers
     const providersQuery = query(
-      collection(db, 'users'),
+      collection(getDb(), 'users'),
       where('agencyId', '==', this.agencyId),
       where('role', '==', 'provider')
     );
@@ -224,7 +224,7 @@ export class AgencyAdvancedReportingService {
 
     // Get bookings
     const bookingsQuery = query(
-      collection(db, 'bookings'),
+      collection(getDb(), 'bookings'),
       where('providerId', 'in', providerIds),
       where('createdAt', '>=', startDate),
       where('createdAt', '<=', endDate)
@@ -234,7 +234,7 @@ export class AgencyAdvancedReportingService {
 
     // Get payouts
     const payoutsQuery = query(
-      collection(db, 'payouts'),
+      collection(getDb(), 'payouts'),
       where('agencyId', '==', this.agencyId),
       where('requestedAt', '>=', startDate),
       where('requestedAt', '<=', endDate)
@@ -275,7 +275,7 @@ export class AgencyAdvancedReportingService {
   private async generateProviderPerformanceData(startDate: Date, endDate: Date): Promise<any> {
     // Get providers
     const providersQuery = query(
-      collection(db, 'users'),
+      collection(getDb(), 'users'),
       where('agencyId', '==', this.agencyId),
       where('role', '==', 'provider')
     );
@@ -286,7 +286,7 @@ export class AgencyAdvancedReportingService {
     const providerPerformance = [];
     for (const provider of providers) {
       const bookingsQuery = query(
-        collection(db, 'bookings'),
+        collection(getDb(), 'bookings'),
         where('providerId', '==', provider.id),
         where('createdAt', '>=', startDate),
         where('createdAt', '<=', endDate)
@@ -318,7 +318,7 @@ export class AgencyAdvancedReportingService {
   private async generateCustomerAnalysisData(startDate: Date, endDate: Date): Promise<any> {
     // Get providers
     const providersQuery = query(
-      collection(db, 'users'),
+      collection(getDb(), 'users'),
       where('agencyId', '==', this.agencyId),
       where('role', '==', 'provider')
     );
@@ -327,7 +327,7 @@ export class AgencyAdvancedReportingService {
 
     // Get bookings
     const bookingsQuery = query(
-      collection(db, 'bookings'),
+      collection(getDb(), 'bookings'),
       where('providerId', 'in', providerIds),
       where('createdAt', '>=', startDate),
       where('createdAt', '<=', endDate)
@@ -363,7 +363,7 @@ export class AgencyAdvancedReportingService {
   private async generateOperationalEfficiencyData(startDate: Date, endDate: Date): Promise<any> {
     // Get providers
     const providersQuery = query(
-      collection(db, 'users'),
+      collection(getDb(), 'users'),
       where('agencyId', '==', this.agencyId),
       where('role', '==', 'provider')
     );
@@ -372,7 +372,7 @@ export class AgencyAdvancedReportingService {
 
     // Get bookings
     const bookingsQuery = query(
-      collection(db, 'bookings'),
+      collection(getDb(), 'bookings'),
       where('providerId', 'in', providerIds),
       where('createdAt', '>=', startDate),
       where('createdAt', '<=', endDate)
@@ -486,7 +486,7 @@ export class AgencyAdvancedReportingService {
   private async generateComplianceReportData(startDate: Date, endDate: Date): Promise<any> {
     // Get audit logs
     const auditLogsQuery = query(
-      collection(db, 'agencyAuditLogs'),
+      collection(getDb(), 'agencyAuditLogs'),
       where('agencyId', '==', this.agencyId),
       where('timestamp', '>=', startDate),
       where('timestamp', '<=', endDate)

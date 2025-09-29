@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimiters, createRateLimitResponse, addRateLimitHeaders } from '@/lib/rate-limiter';
 import { auditLogger, extractRequestMetadata } from '@/lib/audit-logger';
 import { verifyUserRole } from '@/lib/auth-utils';
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 
 export async function POST(request: NextRequest) {
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if job exists and is open
-    const jobRef = doc(db, 'jobs', jobId);
+    const jobRef = doc(getDb(), 'jobs', jobId);
     const jobDoc = await getDoc(jobRef);
     
     if (!jobDoc.exists()) {

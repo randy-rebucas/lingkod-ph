@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { collection, query, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -73,12 +73,12 @@ export default function AdminReportsPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (userRole !== 'admin' || !db) {
+        if (userRole !== 'admin' || !getDb()) {
             setLoading(false);
             return;
         }
 
-        const bookingsQuery = query(collection(db, "bookings"));
+        const bookingsQuery = query(collection(getDb(), "bookings"));
         const unsubBookings = onSnapshot(bookingsQuery, (snapshot) => {
             const fetchedBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
             setBookings(fetchedBookings);

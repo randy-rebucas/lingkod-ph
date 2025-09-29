@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -66,8 +66,8 @@ export function AdCarousel() {
 
 
     useEffect(() => {
-        if (!db) return;
-        const campaignsQuery = query(collection(db, "adCampaigns"), where("isActive", "==", true));
+        if (!getDb()) return;
+        const campaignsQuery = query(collection(getDb(), "adCampaigns"), where("isActive", "==", true));
         const unsubscribe = onSnapshot(campaignsQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AdCampaign));
             setCampaigns(data);

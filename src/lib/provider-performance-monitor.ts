@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { collection, query, where, getDocs, doc, updateDoc, addDoc, serverTimestamp, orderBy, limit, Timestamp } from 'firebase/firestore';
 import { financialAuditLogger } from './financial-audit-logger';
 
@@ -127,12 +127,12 @@ export class ProviderPerformanceMonitor {
     limitCount: number = 12
   ): Promise<PerformanceMetrics[]> {
     try {
-      if (!db) {
+      if (!getDb()) {
         console.warn('Firebase not initialized, returning empty performance history');
         return [];
       }
       const metricsQuery = query(
-        collection(db, 'performanceMetrics'),
+        collection(getDb(), 'performanceMetrics'),
         where('providerId', '==', providerId),
         where('period', '==', period),
         orderBy('date', 'desc'),
@@ -153,12 +153,12 @@ export class ProviderPerformanceMonitor {
 
   async getPerformanceAlerts(providerId: string): Promise<PerformanceAlert[]> {
     try {
-      if (!db) {
+      if (!getDb()) {
         console.warn('Firebase not initialized, returning empty performance alerts');
         return [];
       }
       const alertsQuery = query(
-        collection(db, 'performanceAlerts'),
+        collection(getDb(), 'performanceAlerts'),
         where('providerId', '==', providerId),
         where('resolved', '==', false),
         orderBy('timestamp', 'desc')
@@ -180,11 +180,11 @@ export class ProviderPerformanceMonitor {
 
   async resolveAlert(alertId: string, resolvedBy: string): Promise<void> {
     try {
-      if (!db) {
+      if (!getDb()) {
         console.warn('Firebase not initialized, skipping alert resolution');
         return;
       }
-      await updateDoc(doc(db, 'performanceAlerts', alertId), {
+      await updateDoc(doc(getDb(), 'performanceAlerts', alertId), {
         resolved: true,
         resolvedAt: serverTimestamp(),
         resolvedBy
@@ -195,12 +195,12 @@ export class ProviderPerformanceMonitor {
   }
 
   private async getBookings(providerId: string, startDate: Date, endDate: Date): Promise<any[]> {
-    if (!db) {
+    if (!getDb()) {
       console.warn('Firebase not initialized, returning empty bookings');
       return [];
     }
     const bookingsQuery = query(
-      collection(db, 'bookings'),
+      collection(getDb(), 'bookings'),
       where('providerId', '==', providerId)
     );
 
@@ -214,12 +214,12 @@ export class ProviderPerformanceMonitor {
   }
 
   private async getReviews(providerId: string, startDate: Date, endDate: Date): Promise<any[]> {
-    if (!db) {
+    if (!getDb()) {
       console.warn('Firebase not initialized, returning empty reviews');
       return [];
     }
     const reviewsQuery = query(
-      collection(db, 'reviews'),
+      collection(getDb(), 'reviews'),
       where('providerId', '==', providerId)
     );
 
@@ -233,13 +233,13 @@ export class ProviderPerformanceMonitor {
   }
 
   private async getMessages(providerId: string, startDate: Date, endDate: Date): Promise<any[]> {
-    if (!db) {
+    if (!getDb()) {
       console.warn('Firebase not initialized, returning empty messages');
       return [];
     }
     // Get conversations where provider is a participant
     const conversationsQuery = query(
-      collection(db, 'conversations'),
+      collection(getDb(), 'conversations'),
       where('participants', 'array-contains', providerId)
     );
 
@@ -250,7 +250,7 @@ export class ProviderPerformanceMonitor {
     const allMessages: any[] = [];
     for (const conversationId of conversationIds) {
       const messagesQuery = query(
-        collection(db, 'conversations', conversationId, 'messages'),
+        collection(getDb(), 'conversations', conversationId, 'messages'),
         where('senderId', '==', providerId)
       );
 
@@ -269,12 +269,12 @@ export class ProviderPerformanceMonitor {
   }
 
   private async getServices(providerId: string): Promise<any[]> {
-    if (!db) {
+    if (!getDb()) {
       console.warn('Firebase not initialized, returning empty services');
       return [];
     }
     const servicesQuery = query(
-      collection(db, 'services'),
+      collection(getDb(), 'services'),
       where('userId', '==', providerId)
     );
 
@@ -283,7 +283,7 @@ export class ProviderPerformanceMonitor {
   }
 
   private async getJobApplications(providerId: string, startDate: Date, endDate: Date): Promise<any[]> {
-    if (!db) {
+    if (!getDb()) {
       console.warn('Firebase not initialized, returning empty job applications');
       return [];
     }
@@ -291,7 +291,7 @@ export class ProviderPerformanceMonitor {
     // to track application timestamps separately, as the current structure doesn't
     // support filtering by application date.
     const jobsQuery = query(
-      collection(db, 'jobs'),
+      collection(getDb(), 'jobs'),
       where('applications', 'array-contains', providerId)
     );
 
@@ -422,7 +422,7 @@ export class ProviderPerformanceMonitor {
   private async getPreviousPeriodMetrics(providerId: string, period: string): Promise<any> {
     try {
       const metricsQuery = query(
-        collection(db, 'performanceMetrics'),
+        collection(getDb(), 'performanceMetrics'),
         where('providerId', '==', providerId),
         where('period', '==', period),
         orderBy('date', 'desc'),
@@ -440,11 +440,11 @@ export class ProviderPerformanceMonitor {
 
   private async storePerformanceMetrics(metrics: PerformanceMetrics): Promise<void> {
     try {
-      if (!db) {
+      if (!getDb()) {
         console.warn('Firebase not initialized, skipping performance metrics storage');
         return;
       }
-      await addDoc(collection(db, 'performanceMetrics'), {
+      await addDoc(collection(getDb(), 'performanceMetrics'), {
         ...metrics,
         date: serverTimestamp() as Timestamp
       });
@@ -512,12 +512,12 @@ export class ProviderPerformanceMonitor {
     }
 
     // Store alerts
-    if (!db) {
+    if (!getDb()) {
       console.warn('Firebase not initialized, skipping performance alerts storage');
       return;
     }
     for (const alert of alerts) {
-      await addDoc(collection(db, 'performanceAlerts'), {
+      await addDoc(collection(getDb(), 'performanceAlerts'), {
         ...alert,
         timestamp: serverTimestamp() as Timestamp
       });

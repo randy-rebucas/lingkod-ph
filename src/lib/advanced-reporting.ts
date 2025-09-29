@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { collection, query, where, getDocs, doc, getDoc, addDoc, updateDoc, serverTimestamp, orderBy, limit } from 'firebase/firestore';
 
 export interface ReportConfig {
@@ -81,7 +81,7 @@ export class AdvancedReportingService {
         createdAt: new Date()
       };
 
-      await addDoc(collection(db, 'reportConfigs'), {
+      await addDoc(collection(getDb(), 'reportConfigs'), {
         ...reportConfig,
         createdAt: serverTimestamp()
       });
@@ -98,7 +98,7 @@ export class AdvancedReportingService {
     try {
       // Get report configuration
       const configDoc = await getDocs(query(
-        collection(db, 'reportConfigs'),
+        collection(getDb(), 'reportConfigs'),
         where('id', '==', reportConfigId)
       ));
 
@@ -125,7 +125,7 @@ export class AdvancedReportingService {
         status: 'generating'
       };
 
-      await addDoc(collection(db, 'reportData'), {
+      await addDoc(collection(getDb(), 'reportData'), {
         ...reportData,
         generatedAt: serverTimestamp()
       });
@@ -138,7 +138,7 @@ export class AdvancedReportingService {
       reportData.summary = this.generateSummary(data, config);
       reportData.status = 'completed';
 
-      await updateDoc(doc(db, 'reportData', reportData.id), {
+      await updateDoc(doc(getDb(), 'reportData', reportData.id), {
         data: reportData.data,
         summary: reportData.summary,
         status: reportData.status
@@ -155,7 +155,7 @@ export class AdvancedReportingService {
   async getReportHistory(providerId: string, limitCount: number = 20): Promise<ReportData[]> {
     try {
       const reportsQuery = query(
-        collection(db, 'reportData'),
+        collection(getDb(), 'reportData'),
         where('providerId', '==', providerId),
         orderBy('generatedAt', 'desc'),
         limit(limitCount)
@@ -177,7 +177,7 @@ export class AdvancedReportingService {
     try {
       const dashboardId = `dashboard_${Date.now()}`;
       
-      await addDoc(collection(db, 'dashboards'), {
+      await addDoc(collection(getDb(), 'dashboards'), {
         id: dashboardId,
         providerId,
         widgets,
@@ -196,7 +196,7 @@ export class AdvancedReportingService {
   async getDashboard(providerId: string): Promise<DashboardWidget[]> {
     try {
       const dashboardQuery = query(
-        collection(db, 'dashboards'),
+        collection(getDb(), 'dashboards'),
         where('providerId', '==', providerId),
         orderBy('lastUpdated', 'desc'),
         limit(1)
@@ -219,7 +219,7 @@ export class AdvancedReportingService {
   async updateDashboard(providerId: string, widgets: DashboardWidget[]): Promise<void> {
     try {
       const dashboardQuery = query(
-        collection(db, 'dashboards'),
+        collection(getDb(), 'dashboards'),
         where('providerId', '==', providerId),
         orderBy('lastUpdated', 'desc'),
         limit(1)
@@ -481,7 +481,7 @@ export class AdvancedReportingService {
   // Helper methods for data retrieval and analysis
   private async getBookings(providerId: string, dateRange: { start: Date; end: Date }): Promise<any[]> {
     const bookingsQuery = query(
-      collection(db, 'bookings'),
+      collection(getDb(), 'bookings'),
       where('providerId', '==', providerId)
     );
 
@@ -496,7 +496,7 @@ export class AdvancedReportingService {
 
   private async getReviews(providerId: string, dateRange: { start: Date; end: Date }): Promise<any[]> {
     const reviewsQuery = query(
-      collection(db, 'reviews'),
+      collection(getDb(), 'reviews'),
       where('providerId', '==', providerId)
     );
 
@@ -511,7 +511,7 @@ export class AdvancedReportingService {
 
   private async getServices(providerId: string): Promise<any[]> {
     const servicesQuery = query(
-      collection(db, 'services'),
+      collection(getDb(), 'services'),
       where('userId', '==', providerId)
     );
 
@@ -531,7 +531,7 @@ export class AdvancedReportingService {
 
   private async getPayouts(providerId: string, dateRange: { start: Date; end: Date }): Promise<any> {
     const payoutsQuery = query(
-      collection(db, 'payouts'),
+      collection(getDb(), 'payouts'),
       where('providerId', '==', providerId)
     );
 

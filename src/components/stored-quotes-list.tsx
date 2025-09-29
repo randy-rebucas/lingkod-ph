@@ -43,7 +43,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, Timestamp, orderBy } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/use-error-handler";
@@ -90,13 +90,13 @@ export function StoredQuotesList() {
     const [selectedQuote, setSelectedQuote] = React.useState<Quote | null>(null);
 
     React.useEffect(() => {
-        if (!user || !db) {
+        if (!user || !getDb()) {
             setLoading(false);
             return;
         }
 
         setLoading(true);
-        const q = query(collection(db, "quotes"), where("providerId", "==", user.uid), orderBy("createdAt", "desc"));
+        const q = query(collection(getDb(), "quotes"), where("providerId", "==", user.uid), orderBy("createdAt", "desc"));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const quotesData = snapshot.docs.map(doc => ({
@@ -114,7 +114,7 @@ export function StoredQuotesList() {
     }, [user, toast]);
 
     const handleStatusUpdate = React.useCallback(async (quoteId: string, status: QuoteStatus) => {
-        const quoteRef = doc(db, "quotes", quoteId);
+        const quoteRef = doc(getDb(), "quotes", quoteId);
         try {
             await updateDoc(quoteRef, { status });
             toast({ title: t('success'), description: t('quoteMarkedAs', { status: status.toLowerCase() }) });
@@ -125,7 +125,7 @@ export function StoredQuotesList() {
     
     const handleDeleteQuote = React.useCallback(async (quoteId: string) => {
         try {
-            await deleteDoc(doc(db, "quotes", quoteId));
+            await deleteDoc(doc(getDb(), "quotes", quoteId));
             toast({ title: t('success'), description: t('quoteDeletedSuccessfully') });
         } catch (error) {
             handleError(error, 'delete quote');

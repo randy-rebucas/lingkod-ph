@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
+import { getAuthInstance, getDb   } from '@/lib/firebase';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,13 +41,13 @@ export default function LoginPage() {
     // This check runs only once on component mount
     const checkUserCount = async () => {
         // No need to check if a user session is being restored or already exists
-        if (auth.currentUser) {
+        if (getAuthInstance().currentUser) {
             setIsSetupRequired(false);
             return;
         }; 
         try {
-            if (!db) return;
-            const usersRef = collection(db, "users");
+            if (!getDb()) return;
+            const usersRef = collection(getDb(), "users");
             const q = query(usersRef, limit(1));
             const snapshot = await getDocs(q);
             const setupRequired = snapshot.empty;
@@ -73,7 +73,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(getAuthInstance(), email, password);
       toast({ title: t('success'), description: t('loggedInSuccess') });
       router.push('/dashboard');
     } catch (error: any) {
@@ -91,10 +91,10 @@ export default function LoginPage() {
     setLoading(true);
     const provider = new GoogleAuthProvider();
     try {
-        const result = await signInWithPopup(auth, provider);
+        const result = await signInWithPopup(getAuthInstance(), provider);
         const user = result.user;
         
-        const userDocRef = doc(db, 'users', user.uid);
+        const userDocRef = doc(getDb(), 'users', user.uid);
         const userDoc = await getDoc(userDocRef);
         
         // If it's a new user, create a document for them

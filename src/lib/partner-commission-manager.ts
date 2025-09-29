@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { 
   collection, 
   query, 
@@ -124,7 +124,7 @@ export class PartnerCommissionManager {
   ): Promise<CommissionTier | null> {
     try {
       const tiersQuery = query(
-        collection(db, this.COMMISSION_TIERS_COLLECTION),
+        collection(getDb(), this.COMMISSION_TIERS_COLLECTION),
         where('partnerId', '==', partnerId),
         where('isActive', '==', true),
         where('minReferrals', '<=', totalReferrals),
@@ -182,7 +182,7 @@ export class PartnerCommissionManager {
   ): Promise<{ success: boolean; commissionId?: string; error?: string }> {
     try {
       // Get partner data
-      const partnerDoc = await getDoc(doc(db, this.USERS_COLLECTION, partnerId));
+      const partnerDoc = await getDoc(doc(getDb(), this.USERS_COLLECTION, partnerId));
       if (!partnerDoc.exists()) {
         return { success: false, error: 'Partner not found' };
       }
@@ -223,7 +223,7 @@ export class PartnerCommissionManager {
         }
       };
 
-      const docRef = await addDoc(collection(db, this.COMMISSIONS_COLLECTION), commissionData);
+      const docRef = await addDoc(collection(getDb(), this.COMMISSIONS_COLLECTION), commissionData);
       
       return { success: true, commissionId: docRef.id };
     } catch (error) {
@@ -246,14 +246,14 @@ export class PartnerCommissionManager {
   ): Promise<PartnerCommission[]> {
     try {
       let commissionsQuery = query(
-        collection(db, this.COMMISSIONS_COLLECTION),
+        collection(getDb(), this.COMMISSIONS_COLLECTION),
         where('partnerId', '==', partnerId),
         orderBy('createdAt', 'desc')
       );
 
       if (filters.status) {
         commissionsQuery = query(
-          collection(db, this.COMMISSIONS_COLLECTION),
+          collection(getDb(), this.COMMISSIONS_COLLECTION),
           where('partnerId', '==', partnerId),
           where('status', '==', filters.status),
           orderBy('createdAt', 'desc')
@@ -305,7 +305,7 @@ export class PartnerCommissionManager {
         updates.notes = notes;
       }
 
-      await updateDoc(doc(db, this.COMMISSIONS_COLLECTION, commissionId), updates);
+      await updateDoc(doc(getDb(), this.COMMISSIONS_COLLECTION, commissionId), updates);
 
       return { success: true };
     } catch (error) {
@@ -339,7 +339,7 @@ export class PartnerCommissionManager {
     try {
       // Get commissions to be paid
       const commissions = await Promise.all(
-        commissionIds.map(id => getDoc(doc(db, this.COMMISSIONS_COLLECTION, id)))
+        commissionIds.map(id => getDoc(doc(getDb(), this.COMMISSIONS_COLLECTION, id)))
       );
 
       const validCommissions = commissions
@@ -366,12 +366,12 @@ export class PartnerCommissionManager {
         notes: paymentData.notes
       };
 
-      const paymentDocRef = await addDoc(collection(db, this.COMMISSION_PAYMENTS_COLLECTION), paymentData_record);
+      const paymentDocRef = await addDoc(collection(getDb(), this.COMMISSION_PAYMENTS_COLLECTION), paymentData_record);
 
       // Update commission statuses
-      const batch = writeBatch(db);
+      const batch = writeBatch(getDb());
       validCommissions.forEach(commission => {
-        const commissionRef = doc(db, this.COMMISSIONS_COLLECTION, commission.id);
+        const commissionRef = doc(getDb(), this.COMMISSIONS_COLLECTION, commission.id);
         batch.update(commissionRef, {
           status: 'paid',
           paidAt: serverTimestamp() as Timestamp,
@@ -395,7 +395,7 @@ export class PartnerCommissionManager {
   static async getCommissionSummary(partnerId: string): Promise<CommissionSummary> {
     try {
       const commissionsQuery = query(
-        collection(db, this.COMMISSIONS_COLLECTION),
+        collection(getDb(), this.COMMISSIONS_COLLECTION),
         where('partnerId', '==', partnerId)
       );
 
@@ -497,7 +497,7 @@ export class PartnerCommissionManager {
         expiryDate: tierData.expiryDate ? Timestamp.fromDate(tierData.expiryDate) : undefined
       };
 
-      const docRef = await addDoc(collection(db, this.COMMISSION_TIERS_COLLECTION), tier);
+      const docRef = await addDoc(collection(getDb(), this.COMMISSION_TIERS_COLLECTION), tier);
       
       return { success: true, tierId: docRef.id };
     } catch (error) {
@@ -512,7 +512,7 @@ export class PartnerCommissionManager {
   static async getPartnerCommissionTiers(partnerId: string): Promise<CommissionTier[]> {
     try {
       const tiersQuery = query(
-        collection(db, this.COMMISSION_TIERS_COLLECTION),
+        collection(getDb(), this.COMMISSION_TIERS_COLLECTION),
         where('partnerId', '==', partnerId),
         orderBy('minReferrals', 'asc')
       );
@@ -534,7 +534,7 @@ export class PartnerCommissionManager {
   ): Promise<CommissionPayment[]> {
     try {
       const paymentsQuery = query(
-        collection(db, this.COMMISSION_PAYMENTS_COLLECTION),
+        collection(getDb(), this.COMMISSION_PAYMENTS_COLLECTION),
         where('partnerId', '==', partnerId),
         orderBy('paymentDate', 'desc'),
         limit(limitCount)
@@ -556,7 +556,7 @@ export class PartnerCommissionManager {
     reason: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      await updateDoc(doc(db, this.COMMISSIONS_COLLECTION, commissionId), {
+      await updateDoc(doc(getDb(), this.COMMISSIONS_COLLECTION, commissionId), {
         status: 'disputed',
         notes: reason
       });

@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Resend } from 'resend';
 
@@ -26,11 +26,11 @@ export class ProviderNotificationService {
 
   async sendJobApplicationConfirmation(providerId: string, jobTitle: string, clientName: string) {
     try {
-      if (!db) {
+      if (!getDb()) {
         console.warn('Firebase not initialized, skipping job application confirmation');
         return;
       }
-      const userDoc = await getDoc(doc(db, 'users', providerId));
+      const userDoc = await getDoc(doc(getDb(), 'users', providerId));
       if (!userDoc.exists()) return;
 
       const userData = userDoc.data();
@@ -61,11 +61,11 @@ export class ProviderNotificationService {
 
   async sendBookingConfirmation(providerId: string, bookingDetails: any) {
     try {
-      if (!db) {
+      if (!getDb()) {
         console.warn('Firebase not initialized, skipping booking confirmation');
         return;
       }
-      const userDoc = await getDoc(doc(db, 'users', providerId));
+      const userDoc = await getDoc(doc(getDb(), 'users', providerId));
       if (!userDoc.exists()) return;
 
       const userData = userDoc.data();
@@ -97,11 +97,11 @@ export class ProviderNotificationService {
 
   async sendPayoutRequestConfirmation(providerId: string, payoutDetails: any) {
     try {
-      if (!db) {
+      if (!getDb()) {
         console.warn('Firebase not initialized, skipping payout request confirmation');
         return;
       }
-      const userDoc = await getDoc(doc(db, 'users', providerId));
+      const userDoc = await getDoc(doc(getDb(), 'users', providerId));
       if (!userDoc.exists()) return;
 
       const userData = userDoc.data();
@@ -132,11 +132,11 @@ export class ProviderNotificationService {
 
   async sendPayoutProcessedNotification(providerId: string, payoutDetails: any) {
     try {
-      if (!db) {
+      if (!getDb()) {
         console.warn('Firebase not initialized, skipping payout processed notification');
         return;
       }
-      const userDoc = await getDoc(doc(db, 'users', providerId));
+      const userDoc = await getDoc(doc(getDb(), 'users', providerId));
       if (!userDoc.exists()) return;
 
       const userData = userDoc.data();
@@ -169,11 +169,11 @@ export class ProviderNotificationService {
 
   async sendNewReviewNotification(providerId: string, reviewDetails: any) {
     try {
-      if (!db) {
+      if (!getDb()) {
         console.warn('Firebase not initialized, skipping new review notification');
         return;
       }
-      const userDoc = await getDoc(doc(db, 'users', providerId));
+      const userDoc = await getDoc(doc(getDb(), 'users', providerId));
       if (!userDoc.exists()) return;
 
       const userData = userDoc.data();
@@ -325,11 +325,11 @@ export class ProviderNotificationService {
 
   private async logNotification(providerId: string, type: string, details: any) {
     try {
-      if (!db) {
+      if (!getDb()) {
         console.warn('Firebase not initialized, skipping notification logging');
         return;
       }
-      await addDoc(collection(db, 'notifications'), {
+      await addDoc(collection(getDb(), 'notifications'), {
         userId: providerId,
         type,
         details,

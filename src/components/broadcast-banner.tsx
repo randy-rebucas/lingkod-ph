@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, limit } from "firebase/firestore";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Megaphone, X } from "lucide-react";
@@ -24,8 +24,8 @@ export default function BroadcastBanner() {
     const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
-        if (!db) return;
-        const broadcastsRef = collection(db, "broadcasts");
+        if (!getDb()) return;
+        const broadcastsRef = collection(getDb(), "broadcasts");
         const q = query(broadcastsRef, where("status", "==", "active"), limit(1));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {

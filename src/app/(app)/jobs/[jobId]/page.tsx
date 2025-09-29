@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, arrayUnion, Timestamp, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -61,7 +61,7 @@ export default function JobDetailsPage() {
         const fetchJobDetails = async () => {
             setLoading(true);
             try {
-                const jobRef = doc(db!, "jobs", jobId);
+                const jobRef = doc(getDb(), "jobs", jobId);
                 const jobSnap = await getDoc(jobRef);
 
                 if (jobSnap.exists()) {
@@ -82,9 +82,9 @@ export default function JobDetailsPage() {
     }, [jobId, router, toast]);
 
     const handleApply = async () => {
-        if (!user || !job || !db) return;
+        if (!user || !job || !getDb()) return;
         try {
-            const jobRef = doc(db!, "jobs", job.id);
+            const jobRef = doc(getDb(), "jobs", job.id);
             await updateDoc(jobRef, {
                 applications: arrayUnion(user.uid)
             });
@@ -98,13 +98,13 @@ export default function JobDetailsPage() {
     };
 
     const handleReportJob = async () => {
-        if (!user || !job || !reportReason || !db) {
+        if (!user || !job || !reportReason || !getDb()) {
             toast({ variant: "destructive", title: "Error", description: "Please provide a reason for your report." });
             return;
         }
         setIsReporting(true);
         try {
-            await addDoc(collection(db!, "reports"), {
+            await addDoc(collection(getDb(), "reports"), {
                 reportedBy: user.uid,
                 reportedItemType: 'job',
                 reportedItemId: job.id,

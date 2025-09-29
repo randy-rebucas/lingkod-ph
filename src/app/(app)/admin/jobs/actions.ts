@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import {
   doc,
   updateDoc,
@@ -20,7 +20,7 @@ export async function handleUpdateJobStatus(
   actor: Actor,
 ) {
   try {
-    const jobRef = doc(db, 'jobs', jobId);
+    const jobRef = doc(getDb(), 'jobs', jobId);
     await updateDoc(jobRef, { status });
 
     await AuditLogger.getInstance().logAction(
@@ -42,7 +42,7 @@ export async function handleUpdateJobStatus(
 
 export async function handleDeleteJob(jobId: string, actor: Actor) {
   try {
-    const jobRef = doc(db, 'jobs', jobId);
+    const jobRef = doc(getDb(), 'jobs', jobId);
     await deleteDoc(jobRef);
 
     await AuditLogger.getInstance().logAction(

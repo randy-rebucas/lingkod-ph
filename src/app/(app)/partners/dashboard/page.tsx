@@ -10,7 +10,7 @@ import { PartnerAnalyticsService } from "@/lib/partner-analytics";
 import { PartnerReferralTracker } from "@/lib/partner-referral-tracker";
 import { PartnerCommissionManager } from "@/lib/partner-commission-manager";
 import { Skeleton } from "@/components/ui/skeleton";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 
 interface PartnerDashboardData {
     totalReferrals: number;
@@ -32,7 +32,7 @@ export default function PartnersDashboardPage() {
 
     useEffect(() => {
         const loadDashboardData = async () => {
-            if (user && userRole === 'partner' && db) {
+            if (user && userRole === 'partner' && getDb()) {
                 try {
                     // Get performance metrics
                     const performanceMetrics = await PartnerAnalyticsService.getPartnerPerformanceMetrics(user.uid);

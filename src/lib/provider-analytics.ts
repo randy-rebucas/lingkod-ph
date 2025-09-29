@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { collection, query, where, getDocs, doc, getDoc, addDoc, serverTimestamp, orderBy, limit, Timestamp } from 'firebase/firestore';
 
 export interface ProviderAnalytics {
@@ -154,7 +154,7 @@ export class ProviderAnalyticsService {
   ): Promise<ProviderAnalytics[]> {
     try {
       const analyticsQuery = query(
-        collection(db, 'providerAnalytics'),
+        collection(getDb(), 'providerAnalytics'),
         where('providerId', '==', providerId),
         where('period', '==', period),
         orderBy('date', 'desc'),
@@ -176,7 +176,7 @@ export class ProviderAnalyticsService {
   async getPlatformOptimizations(providerId: string): Promise<PlatformOptimization[]> {
     try {
       const optimizationsQuery = query(
-        collection(db, 'platformOptimizations'),
+        collection(getDb(), 'platformOptimizations'),
         where('providerId', '==', providerId),
         orderBy('priority', 'desc')
       );
@@ -194,7 +194,7 @@ export class ProviderAnalyticsService {
     try {
       // Get market data for insights
       const marketQuery = query(
-        collection(db, 'marketData'),
+        collection(getDb(), 'marketData'),
         where('category', '==', category)
       );
 
@@ -213,13 +213,13 @@ export class ProviderAnalyticsService {
   }
 
   private async getProviderData(providerId: string): Promise<any> {
-    const userDoc = await getDoc(doc(db, 'users', providerId));
+    const userDoc = await getDoc(doc(getDb(), 'users', providerId));
     return userDoc.exists() ? userDoc.data() : null;
   }
 
   private async getBookings(providerId: string, startDate: Date, endDate: Date): Promise<any[]> {
     const bookingsQuery = query(
-      collection(db, 'bookings'),
+      collection(getDb(), 'bookings'),
       where('providerId', '==', providerId)
     );
 
@@ -234,7 +234,7 @@ export class ProviderAnalyticsService {
 
   private async getReviews(providerId: string, startDate: Date, endDate: Date): Promise<any[]> {
     const reviewsQuery = query(
-      collection(db, 'reviews'),
+      collection(getDb(), 'reviews'),
       where('providerId', '==', providerId)
     );
 
@@ -249,7 +249,7 @@ export class ProviderAnalyticsService {
 
   private async getServices(providerId: string): Promise<any[]> {
     const servicesQuery = query(
-      collection(db, 'services'),
+      collection(getDb(), 'services'),
       where('userId', '==', providerId)
     );
 
@@ -265,7 +265,7 @@ export class ProviderAnalyticsService {
     const categories = providerData.services.map((s: any) => s.category);
     
     const competitorsQuery = query(
-      collection(db, 'services'),
+      collection(getDb(), 'services'),
       where('category', 'in', categories)
     );
 
@@ -278,7 +278,7 @@ export class ProviderAnalyticsService {
   private async getMarketData(startDate: Date, endDate: Date): Promise<any[]> {
     // Get market data for the period
     const marketQuery = query(
-      collection(db, 'marketData'),
+      collection(getDb(), 'marketData'),
       where('date', '>=', startDate),
       where('date', '<=', endDate)
     );
@@ -535,7 +535,7 @@ export class ProviderAnalyticsService {
 
   private async storeAnalytics(analytics: ProviderAnalytics): Promise<void> {
     try {
-      await addDoc(collection(db, 'providerAnalytics'), {
+      await addDoc(collection(getDb(), 'providerAnalytics'), {
         ...analytics,
         date: serverTimestamp() as Timestamp
       });
@@ -581,7 +581,7 @@ export class ProviderAnalyticsService {
 
     // Store optimizations
     for (const optimization of optimizations) {
-      await addDoc(collection(db, 'platformOptimizations'), {
+      await addDoc(collection(getDb(), 'platformOptimizations'), {
         ...optimization,
         createdAt: serverTimestamp() as Timestamp
       });

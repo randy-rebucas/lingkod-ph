@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -60,12 +60,12 @@ export default function BillingPage() {
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        if (!user || !db) {
+        if (!user || !getDb()) {
             setLoading(false);
             return;
         }
 
-        const invoicesQuery = query(collection(db, "invoices"), where("clientEmail", "==", user.email), orderBy("issueDate", "desc"));
+        const invoicesQuery = query(collection(getDb(), "invoices"), where("clientEmail", "==", user.email), orderBy("issueDate", "desc"));
 
         const unsubscribe = onSnapshot(invoicesQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));

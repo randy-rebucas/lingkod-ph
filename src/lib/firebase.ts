@@ -35,4 +35,28 @@ try {
   storage = null;
 }
 
+// Helper function to ensure database is available
+export function getDb(): Firestore {
+  if (!db) {
+    throw new Error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
+  }
+  return db;
+}
+
+// Helper function to ensure auth is available
+export function getAuthInstance(): Auth {
+  if (!auth) {
+    throw new Error('Firebase Auth is not initialized. Please check your Firebase configuration.');
+  }
+  return auth;
+}
+
+// Helper function to ensure storage is available
+export function getStorageInstance(): FirebaseStorage {
+  if (!storage) {
+    throw new Error('Firebase Storage is not initialized. Please check your Firebase configuration.');
+  }
+  return storage;
+}
+
 export { app, auth, db, storage };

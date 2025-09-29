@@ -1,11 +1,11 @@
 'use server';
 
-import { auth, db } from './firebase';
+import { auth, getDb } from './firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
 export async function verifyAdminRole(userId: string): Promise<boolean> {
   try {
-    const userDoc = await getDoc(doc(db, 'users', userId));
+    const userDoc = await getDoc(doc(getDb(), 'users', userId));
     if (!userDoc.exists()) return false;
     
     const userData = userDoc.data();
@@ -18,7 +18,7 @@ export async function verifyAdminRole(userId: string): Promise<boolean> {
 
 export async function verifyUserRole(userId: string, allowedRoles: string[]): Promise<boolean> {
   try {
-    const userDoc = await getDoc(doc(db, 'users', userId));
+    const userDoc = await getDoc(doc(getDb(), 'users', userId));
     if (!userDoc.exists()) return false;
     
     const userData = userDoc.data();

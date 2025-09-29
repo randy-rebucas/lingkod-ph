@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import {
   doc,
   updateDoc,
@@ -22,7 +22,7 @@ export async function handleUpdateCategory(
   actor: Actor,
 ) {
   try {
-    const categoryRef = doc(db, 'categories', categoryId);
+    const categoryRef = doc(getDb(), 'categories', categoryId);
     await updateDoc(categoryRef, { name });
 
     await AuditLogger.getInstance().logAction(
@@ -45,7 +45,7 @@ export async function handleUpdateCategory(
 export async function handleAddCategory(name: string, actor: Actor) {
   if (!name) return { error: 'Category name is required.', message: 'Validation failed.' };
   try {
-    const newDoc = await addDoc(collection(db, 'categories'), { name });
+    const newDoc = await addDoc(collection(getDb(), 'categories'), { name });
 
     await AuditLogger.getInstance().logAction(
       actor.id,
@@ -66,7 +66,7 @@ export async function handleAddCategory(name: string, actor: Actor) {
 
 export async function handleDeleteCategory(categoryId: string, actor: Actor) {
   try {
-    const categoryRef = doc(db, 'categories', categoryId);
+    const categoryRef = doc(getDb(), 'categories', categoryId);
     await deleteDoc(categoryRef);
 
     await AuditLogger.getInstance().logAction(

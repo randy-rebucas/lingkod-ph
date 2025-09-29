@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase';
+import { getDb  } from '@/lib/firebase';
 import { doc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
 import { AuditLogger } from '@/lib/audit-logger';
 
@@ -16,7 +16,7 @@ export async function handleUpdateTicketStatus(
     actor: Actor
 ) {
     try {
-        const ticketRef = doc(db, 'tickets', ticketId);
+        const ticketRef = doc(getDb(), 'tickets', ticketId);
         await updateDoc(ticketRef, { 
             status,
             updatedAt: serverTimestamp() 
@@ -46,7 +46,7 @@ export async function handleAddTicketNote(
         return { error: 'Note cannot be empty.', message: 'Validation failed.' };
     }
     try {
-        const ticketRef = doc(db, 'tickets', ticketId);
+        const ticketRef = doc(getDb(), 'tickets', ticketId);
         await updateDoc(ticketRef, {
             notes: arrayUnion({
                 text: note,

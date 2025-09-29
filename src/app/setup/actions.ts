@@ -2,7 +2,7 @@
 "use server";
 
 import { z } from "zod";
-import { db, auth } from "@/lib/firebase";
+import { getDb, getAuthInstance   } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, setDoc, getDocs, query, limit } from "firebase/firestore";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 
@@ -43,7 +43,7 @@ export async function createAdminAction(
   }
   
   // Security check: ensure the users collection is still empty
-  const usersRef = collection(db, "users");
+  const usersRef = collection(getDb(), "users");
   const q = query(usersRef, limit(1));
   const snapshot = await getDocs(q);
   if (!snapshot.empty) {
@@ -56,14 +56,14 @@ export async function createAdminAction(
   const { name, email, password } = validatedFields.data;
 
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(getAuthInstance(), email, password);
     const user = userCredential.user;
 
     await updateProfile(user, { displayName: name });
     
     const newReferralCode = generateReferralCode(user.uid);
 
-    await setDoc(doc(db, "users", user.uid), {
+    await setDoc(doc(getDb(), "users", user.uid), {
         uid: user.uid,
         email: user.email,
         displayName: name,
@@ -75,7 +75,7 @@ export async function createAdminAction(
     });
     
     // Sign in the user automatically after creating the account
-    await signInWithEmailAndPassword(auth, email, password);
+    await signInWithEmailAndPassword(getAuthInstance(), email, password);
     
     return {
       error: null,

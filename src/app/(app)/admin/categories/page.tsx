@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy, limit, getDocs, startAfter, QueryDocumentSnapshot } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -46,7 +46,7 @@ export default function AdminCategoriesPage() {
     const fetchCategories = useCallback(async (page: number) => {
         setLoading(true);
         try {
-            const categoriesRef = collection(db, "categories");
+            const categoriesRef = collection(getDb(), "categories");
             let q;
 
             if (page === 1) {
@@ -92,7 +92,7 @@ export default function AdminCategoriesPage() {
     }, [toast, currentPage]);
 
     useEffect(() => {
-        if (userRole !== 'admin' || !db) {
+        if (userRole !== 'admin' || !getDb()) {
             setLoading(false);
             return;
         }

@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { db, storage } from '@/lib/firebase';
+import { getDb, getStorageInstance   } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -83,7 +83,7 @@ export default function IdentityVerification() {
 
     const uploadFile = useCallback((file: File, path: string, setProgress: (p: number) => void) => {
         return new Promise<string>((resolve, reject) => {
-            const storageRef = ref(storage, path);
+            const storageRef = ref(getStorageInstance(), path);
             const uploadTask = uploadBytesResumable(storageRef, file);
 
             uploadTask.on('state_changed',
@@ -108,7 +108,7 @@ export default function IdentityVerification() {
             const selfieURL = await uploadFile(selfie, `verification/${user.uid}/selfie.jpg`, setSelfieProgress);
             const govIdURL = await uploadFile(govId, `verification/${user.uid}/gov_id.jpg`, setIdProgress);
             
-            const userDocRef = doc(db, 'users', user.uid);
+            const userDocRef = doc(getDb(), 'users', user.uid);
             await updateDoc(userDocRef, {
                 verification: {
                     status: 'Pending',

@@ -20,7 +20,7 @@ import { useState, useCallback, useMemo } from "react";
 import { generateQuoteDescription } from "@/ai/flows/generate-quote-description";
 import { Separator } from "./ui/separator";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { QuotePreview } from "./quote-preview";
@@ -151,7 +151,7 @@ export default function QuoteBuilderClient() {
         
         setIsSaving(true);
         try {
-            await addDoc(collection(db, "quotes"), {
+            await addDoc(collection(getDb(), "quotes"), {
                 ...data,
                 userId: user.uid,
                 createdAt: serverTimestamp(),

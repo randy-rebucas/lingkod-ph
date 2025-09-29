@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit, Wallet, Building, FileText, Trash2, ArrowRight } from "lucide-react";
-import { storage, db } from "@/lib/firebase";
+import { getStorageInstance, getDb   } from '@/lib/firebase';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject, uploadBytes } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
 import { doc, updateDoc, getDoc, Timestamp, collection, onSnapshot, query, orderBy, runTransaction, serverTimestamp, where, addDoc, getDocs, arrayUnion, arrayRemove } from "firebase/firestore";
@@ -203,9 +203,9 @@ const ProfilePage = memo(function ProfilePage() {
     }, [state, toast, t]);
 
     useEffect(() => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         
-        const userDocRef = doc(db, "users", user.uid);
+        const userDocRef = doc(getDb(), "users", user.uid);
         const unsubscribeUser = onSnapshot(userDocRef, (doc) => {
             if (doc.exists()) {
                 const data = doc.data();
@@ -252,9 +252,9 @@ const ProfilePage = memo(function ProfilePage() {
         });
 
         const fetchCategories = async () => {
-            if (!db) return;
+            if (!getDb()) return;
             try {
-                const categoriesRef = collection(db, "categories");
+                const categoriesRef = collection(getDb(), "categories");
                 const q = query(categoriesRef, orderBy("name"));
                 const querySnapshot = await getDocs(q);
                 const fetchedCategories = querySnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
@@ -269,7 +269,7 @@ const ProfilePage = memo(function ProfilePage() {
         }
 
         // Fetch loyalty rewards
-        const rewardsRef = collection(db, "loyaltyRewards");
+        const rewardsRef = collection(getDb(), "loyaltyRewards");
         const qRewards = query(rewardsRef, where("isActive", "==", true), orderBy("pointsRequired"));
         const unsubscribeRewards = onSnapshot(qRewards, (snapshot) => {
             const rewardsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reward));
@@ -277,7 +277,7 @@ const ProfilePage = memo(function ProfilePage() {
         });
 
         // Fetch loyalty transactions
-        const transactionsRef = collection(db, `users/${user.uid}/loyaltyTransactions`);
+        const transactionsRef = collection(getDb(), `users/${user.uid}/loyaltyTransactions`);
         const qTransactions = query(transactionsRef, orderBy("createdAt", "desc"));
         const unsubscribeTransactions = onSnapshot(qTransactions, (snapshot) => {
             const transData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LoyaltyTransaction));
@@ -285,7 +285,7 @@ const ProfilePage = memo(function ProfilePage() {
         });
 
         // Fetch referrals
-        const referralsRef = collection(db, 'referrals');
+        const referralsRef = collection(getDb(), 'referrals');
         const qReferrals = query(referralsRef, where("referrerId", "==", user.uid), orderBy("createdAt", "desc"));
         const unsubscribeReferrals = onSnapshot(qReferrals, (snapshot) => {
             const referralsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data()} as Referral));
@@ -293,7 +293,7 @@ const ProfilePage = memo(function ProfilePage() {
         });
 
         // Fetch Agency Invites
-        const invitesRef = collection(db, "invites");
+        const invitesRef = collection(getDb(), "invites");
         const qInvites = query(invitesRef, where("providerId", "==", user.uid), where("status", "==", "pending"));
         const unsubscribeInvites = onSnapshot(qInvites, (snapshot) => {
             const invitesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invite));
@@ -317,16 +317,16 @@ const ProfilePage = memo(function ProfilePage() {
     };
 
     const handleRedeemReward = async (reward: Reward) => {
-        if (!user || !db || loyaltyPoints < reward.pointsRequired) {
+        if (!user || !getDb() || loyaltyPoints < reward.pointsRequired) {
             toast({ variant: "destructive", title: t('error'), description: t('notEnoughPoints') });
             return;
         }
 
         setIsRedeeming(reward.id);
-        const userRef = doc(db, "users", user.uid);
+        const userRef = doc(getDb(), "users", user.uid);
 
         try {
-            await runTransaction(db, async (transaction) => {
+            await runTransaction(getDb(), async (transaction) => {
                 const userDoc = await transaction.get(userRef);
                 if (!userDoc.exists()) throw "User document does not exist!";
 
@@ -336,7 +336,7 @@ const ProfilePage = memo(function ProfilePage() {
                 const newTotalPoints = currentPoints - reward.pointsRequired;
                 transaction.update(userRef, { loyaltyPoints: newTotalPoints });
 
-                const loyaltyTxRef = doc(collection(db!, `users/${user.uid}/loyaltyTransactions`));
+                const loyaltyTxRef = doc(collection(getDb(), `users/${user.uid}/loyaltyTransactions`));
                 transaction.set(loyaltyTxRef, {
                     points: reward.pointsRequired, type: 'redeem',
                     description: `Redeemed: ${reward.title}`,
@@ -370,10 +370,10 @@ const ProfilePage = memo(function ProfilePage() {
     };
 
     const handlePublicProfileUpdate = async () => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         setIsSavingPublic(true);
         try {
-            const userDocRef = doc(db, "users", user.uid);
+            const userDocRef = doc(getDb(), "users", user.uid);
             const updates: { [key: string]: any } = {
                 displayName: name,
                 bio: bio,
@@ -393,10 +393,10 @@ const ProfilePage = memo(function ProfilePage() {
     }
 
     const handlePersonalDetailsUpdate = async () => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         setIsSavingPersonal(true);
         try {
-            const userDocRef = doc(db, "users", user.uid);
+            const userDocRef = doc(getDb(), "users", user.uid);
             const updates: { [key: string]: any } = {
                 phone: phone,
                 gender: gender,
@@ -422,10 +422,10 @@ const ProfilePage = memo(function ProfilePage() {
     }
     
     const handleProviderDetailsUpdate = async () => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         setIsSavingProvider(true);
          try {
-            const userDocRef = doc(db, "users", user.uid);
+            const userDocRef = doc(getDb(), "users", user.uid);
             const updates: { [key: string]: any } = {
                 availabilityStatus: availabilityStatus,
                 yearsOfExperience: Number(yearsOfExperience),
@@ -450,10 +450,10 @@ const ProfilePage = memo(function ProfilePage() {
     }
 
     const handlePayoutDetailsUpdate = async () => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         setIsSavingPayout(true);
         try {
-            const userDocRef = doc(db, "users", user.uid);
+            const userDocRef = doc(getDb(), "users", user.uid);
             const payoutDetails: any = { method: payoutMethod };
             if (payoutMethod === 'gcash') {
                 payoutDetails.gCashNumber = gCashNumber;
@@ -472,13 +472,13 @@ const ProfilePage = memo(function ProfilePage() {
     };
     
     const handleUpload = async () => {
-        if (!imageFile || !user || !storage) return;
+        if (!imageFile || !user || !getStorageInstance()) return;
 
         setIsUploading(true);
         setUploadProgress(0);
 
         const storagePath = `profile-pictures/${user.uid}/${imageFile.name}`;
-        const storageRef = ref(storage, storagePath);
+        const storageRef = ref(getStorageInstance(), storagePath);
         const uploadTask = uploadBytesResumable(storageRef, imageFile);
 
         uploadTask.on(
@@ -498,8 +498,8 @@ const ProfilePage = memo(function ProfilePage() {
                 try {
                     const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
                     await updateProfile(user, { photoURL: downloadURL });
-                    if (db) {
-                        const userDocRef = doc(db, "users", user.uid);
+                    if (getDb()) {
+                        const userDocRef = doc(getDb(), "users", user.uid);
                         await updateDoc(userDocRef, { photoURL: downloadURL });
                     }
                     toast({ title: t('success'), description: t('profilePictureUpdated') });
@@ -515,14 +515,14 @@ const ProfilePage = memo(function ProfilePage() {
     };
 
     const handleUploadDocument = async () => {
-        if (!user || !newDocFile || !newDocName || !storage || !db) {
+        if (!user || !newDocFile || !newDocName || !getStorageInstance() || !getDb()) {
             toast({ variant: 'destructive', title: t('missingInfo'), description: t('pleaseProvideDocumentInfo') });
             return;
         }
         setIsUploadingDoc(true);
         try {
             const storagePath = `provider-documents/${user.uid}/${Date.now()}_${newDocFile.name}`;
-            const storageRef = ref(storage, storagePath);
+            const storageRef = ref(getStorageInstance(), storagePath);
             const uploadResult = await uploadBytes(storageRef, newDocFile);
             const url = await getDownloadURL(uploadResult.ref);
 
@@ -532,7 +532,7 @@ const ProfilePage = memo(function ProfilePage() {
                 uploadedAt: Timestamp.now()
             };
 
-            await updateDoc(doc(db, "users", user.uid), {
+            await updateDoc(doc(getDb(), "users", user.uid), {
                 documents: arrayUnion(newDocument)
             });
 
@@ -550,14 +550,14 @@ const ProfilePage = memo(function ProfilePage() {
     };
 
     const handleDeleteDocument = async (docToDelete: Document) => {
-        if (!user || !storage || !db) return;
+        if (!user || !getStorageInstance() || !getDb()) return;
         try {
             // Delete from Storage
-            const fileRef = ref(storage, docToDelete.url);
+            const fileRef = ref(getStorageInstance(), docToDelete.url);
             await deleteObject(fileRef);
 
             // Delete from Firestore
-            const userRef = doc(db, "users", user.uid);
+            const userRef = doc(getDb(), "users", user.uid);
             await updateDoc(userRef, {
                 documents: arrayRemove(docToDelete)
             });

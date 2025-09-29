@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -67,13 +67,13 @@ export default function MyJobPostsPage() {
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        if (!user || (userRole !== 'client' && userRole !== 'agency') || !db) {
+        if (!user || (userRole !== 'client' && userRole !== 'agency') || !getDb()) {
             setLoading(false);
             if (user) router.push('/dashboard'); // Redirect if not a client/agency
             return;
         };
 
-        const jobsQuery = query(collection(db, "jobs"), where("clientId", "==", user.uid));
+        const jobsQuery = query(collection(getDb(), "jobs"), where("clientId", "==", user.uid));
 
         const unsubscribe = onSnapshot(jobsQuery, (snapshot) => {
             const jobsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
@@ -101,10 +101,10 @@ export default function MyJobPostsPage() {
     });
 
     const handleUpdateStatus = async (jobId: string, newStatus: JobStatus) => {
-        if (!db) return;
+        if (!getDb()) return;
 
         try {
-            await updateDoc(doc(db, "jobs", jobId), {
+            await updateDoc(doc(getDb(), "jobs", jobId), {
                 status: newStatus,
                 updatedAt: new Date()
             });
@@ -116,10 +116,10 @@ export default function MyJobPostsPage() {
     };
 
     const handleDeleteJob = async (jobId: string) => {
-        if (!db) return;
+        if (!getDb()) return;
 
         try {
-            await deleteDoc(doc(db, "jobs", jobId));
+            await deleteDoc(doc(getDb(), "jobs", jobId));
             toast({ title: t('success'), description: t('jobDeleted') });
         } catch (error) {
             console.error("Error deleting job:", error);

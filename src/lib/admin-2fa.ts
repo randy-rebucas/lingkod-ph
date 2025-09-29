@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { sendEmail } from './email-service';
 
@@ -95,7 +95,7 @@ export class Admin2FAManager {
         updatedAt: serverTimestamp() as Timestamp
       };
 
-      await setDoc(doc(db, this.COLLECTION, adminId), twoFAData);
+      await setDoc(doc(getDb(), this.COLLECTION, adminId), twoFAData);
 
       return {
         success: true,
@@ -120,7 +120,7 @@ export class Admin2FAManager {
       const expiresAt = new Date(Date.now() + ADMIN_2FA_CONFIG.CODE_EXPIRY);
 
       // Store the code temporarily (in production, use a secure storage)
-      await setDoc(doc(db, `admin2FA/${adminId}/codes`, 'email'), {
+      await setDoc(doc(getDb(), `admin2FA/${adminId}/codes`, 'email'), {
         code,
         expiresAt: Timestamp.fromDate(expiresAt),
         attempts: 0,
@@ -200,7 +200,7 @@ export class Admin2FAManager {
 
       if (isValid) {
         // Reset failed attempts and update last used
-        await updateDoc(doc(db, this.COLLECTION, adminId), {
+        await updateDoc(doc(getDb(), this.COLLECTION, adminId), {
           failedAttempts: 0,
           lastUsed: serverTimestamp(),
           lockedUntil: null,
@@ -222,7 +222,7 @@ export class Admin2FAManager {
           updates.lockedUntil = Timestamp.fromDate(lockUntil);
         }
 
-        await updateDoc(doc(db, this.COLLECTION, adminId), updates);
+        await updateDoc(doc(getDb(), this.COLLECTION, adminId), updates);
 
         return { 
           success: false, 
@@ -241,7 +241,7 @@ export class Admin2FAManager {
    */
   static async enable2FA(adminId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      await updateDoc(doc(db, this.COLLECTION, adminId), {
+      await updateDoc(doc(getDb(), this.COLLECTION, adminId), {
         isEnabled: true,
         emailVerified: true,
         updatedAt: serverTimestamp()
@@ -259,7 +259,7 @@ export class Admin2FAManager {
    */
   static async disable2FA(adminId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      await updateDoc(doc(db, this.COLLECTION, adminId), {
+      await updateDoc(doc(getDb(), this.COLLECTION, adminId), {
         isEnabled: false,
         emailVerified: false,
         phoneVerified: false,
@@ -295,7 +295,7 @@ export class Admin2FAManager {
    */
   static async get2FAData(adminId: string): Promise<Admin2FAData | null> {
     try {
-      const docRef = doc(db, this.COLLECTION, adminId);
+      const docRef = doc(getDb(), this.COLLECTION, adminId);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
@@ -320,7 +320,7 @@ export class Admin2FAManager {
     try {
       const backupCodes = this.generateBackupCodes();
       
-      await updateDoc(doc(db, this.COLLECTION, adminId), {
+      await updateDoc(doc(getDb(), this.COLLECTION, adminId), {
         backupCodes,
         usedBackupCodes: [],
         updatedAt: serverTimestamp()
@@ -363,7 +363,7 @@ export class Admin2FAManager {
 
   private static async verifyEmailCode(adminId: string, code: string): Promise<boolean> {
     try {
-      const codeDoc = await getDoc(doc(db, `admin2FA/${adminId}/codes`, 'email'));
+      const codeDoc = await getDoc(doc(getDb(), `admin2FA/${adminId}/codes`, 'email'));
       
       if (!codeDoc.exists()) {
         return false;
@@ -398,7 +398,7 @@ export class Admin2FAManager {
 
       if (isValidCode && isNotUsed) {
         // Mark code as used
-        await updateDoc(doc(db, this.COLLECTION, adminId), {
+        await updateDoc(doc(getDb(), this.COLLECTION, adminId), {
           usedBackupCodes: [...twoFAData.usedBackupCodes, code.toUpperCase()],
           updatedAt: serverTimestamp()
         });
@@ -439,7 +439,7 @@ export class Admin2FAManager {
         userAgent
       };
 
-      await setDoc(doc(db, this.ATTEMPTS_COLLECTION, `${adminId}_${Date.now()}`), attempt);
+      await setDoc(doc(getDb(), this.ATTEMPTS_COLLECTION, `${adminId}_${Date.now()}`), attempt);
     } catch (error) {
       console.error('Error logging 2FA attempt:', error);
     }

@@ -1,6 +1,6 @@
 'use server';
 
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { collection, query, where, getDocs, doc, getDoc, updateDoc, setDoc, orderBy, limit, serverTimestamp } from 'firebase/firestore';
 import { providerVerificationService } from './provider-verification';
 import { providerPerformanceMonitor } from './provider-performance-monitor';
@@ -167,7 +167,7 @@ export class ProviderRankingService {
 
   async getProviderRankings(criteria: RankingCriteria): Promise<ProviderRanking[]> {
     try {
-      let rankingsQuery = query(collection(db, 'providerRankings'));
+      let rankingsQuery = query(collection(getDb(), 'providerRankings'));
 
       // Apply filters
       if (criteria.category) {
@@ -213,7 +213,7 @@ export class ProviderRankingService {
   async getProviderRanking(providerId: string): Promise<ProviderRanking | null> {
     try {
       const rankingQuery = query(
-        collection(db, 'providerRankings'),
+        collection(getDb(), 'providerRankings'),
         where('providerId', '==', providerId)
       );
 
@@ -236,7 +236,7 @@ export class ProviderRankingService {
   async updateAllRankings(): Promise<void> {
     try {
       // Get all providers
-      const providersQuery = query(collection(db, 'users'), where('role', '==', 'provider'));
+      const providersQuery = query(collection(getDb(), 'users'), where('role', '==', 'provider'));
       const providersSnapshot = await getDocs(providersQuery);
 
       // Calculate rankings for all providers
@@ -269,7 +269,7 @@ export class ProviderRankingService {
   }
 
   private async getProviderData(providerId: string): Promise<any> {
-    const userDoc = await getDoc(doc(db, 'users', providerId));
+    const userDoc = await getDoc(doc(getDb(), 'users', providerId));
     return userDoc.exists() ? userDoc.data() : null;
   }
 
@@ -488,7 +488,7 @@ export class ProviderRankingService {
   private async getPreviousRanking(providerId: string): Promise<any> {
     // Get previous ranking from history
     const historyQuery = query(
-      collection(db, 'rankingHistory'),
+      collection(getDb(), 'rankingHistory'),
       where('providerId', '==', providerId),
       orderBy('date', 'desc'),
       limit(1)
@@ -500,7 +500,7 @@ export class ProviderRankingService {
 
   private async updateProviderRanking(ranking: ProviderRanking): Promise<void> {
     try {
-      await updateDoc(doc(db, 'users', ranking.providerId), {
+      await updateDoc(doc(getDb(), 'users', ranking.providerId), {
         ranking: {
           score: ranking.score,
           level: ranking.level,
@@ -509,13 +509,13 @@ export class ProviderRankingService {
       });
 
       // Store in rankings collection
-      await setDoc(doc(db, 'providerRankings', ranking.providerId), {
+      await setDoc(doc(getDb(), 'providerRankings', ranking.providerId), {
         ...ranking,
         lastUpdated: serverTimestamp()
       });
 
       // Store in history
-      await setDoc(doc(db, 'rankingHistory', `${ranking.providerId}_${Date.now()}`), {
+      await setDoc(doc(getDb(), 'rankingHistory', `${ranking.providerId}_${Date.now()}`), {
         ...ranking,
         date: new Date()
       });
@@ -529,7 +529,7 @@ export class ProviderRankingService {
     try {
       // Get all rankings and update ranks
       const rankingsQuery = query(
-        collection(db, 'providerRankings'),
+        collection(getDb(), 'providerRankings'),
         orderBy('score', 'desc')
       );
 

@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb } from './firebase';
 import { collection, addDoc, serverTimestamp, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 
 export interface AuditLogEntry {
@@ -44,7 +44,7 @@ export class AuditLogger {
         timestamp: serverTimestamp()
       };
 
-      await addDoc(collection(db, 'auditLogs'), auditEntry);
+      await addDoc(collection(getDb(), 'auditLogs'), auditEntry);
     } catch (error) {
       console.error('Failed to write audit log:', error);
       // Fallback to console logging
@@ -225,7 +225,7 @@ export class AuditLogger {
     } = {}
   ): Promise<AuditLogEntry[]> {
     try {
-      let q = query(collection(db, 'auditLogs'), orderBy('timestamp', 'desc'));
+      let q = query(collection(getDb(), 'auditLogs'), orderBy('timestamp', 'desc'));
 
       if (filters.userId) {
         q = query(q, where('userId', '==', filters.userId));

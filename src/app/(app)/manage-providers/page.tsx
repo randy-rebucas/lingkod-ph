@@ -101,7 +101,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, addDoc, serverTimestamp, writeBatch, getDocs, getDoc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -173,8 +173,8 @@ export default function ManageProvidersPage() {
             return;
         }
 
-        const providersQuery = query(collection(db!, "users"), where("agencyId", "==", user.uid));
-        const invitesQuery = query(collection(db!, "invites"), where("agencyId", "==", user.uid), where("status", "==", "pending"));
+        const providersQuery = query(collection(getDb(), "users"), where("agencyId", "==", user.uid));
+        const invitesQuery = query(collection(getDb(), "invites"), where("agencyId", "==", user.uid), where("status", "==", "pending"));
 
         const unsubscribeProviders = onSnapshot(providersQuery, (snapshot) => {
             const activeProviders = snapshot.docs.map(doc => ({
@@ -212,11 +212,11 @@ export default function ManageProvidersPage() {
     }, [user, userRole]);
     
     const handleInviteProvider = async () => {
-        if (!user || !inviteEmail || !db) return;
+        if (!user || !inviteEmail || !getDb()) return;
 
         setIsInviting(true);
         try {
-            const userQuery = query(collection(db!, "users"), where("email", "==", inviteEmail));
+            const userQuery = query(collection(getDb(), "users"), where("email", "==", inviteEmail));
             const userSnapshot = await getDocs(userQuery);
 
             if (userSnapshot.empty) {
@@ -240,7 +240,7 @@ export default function ManageProvidersPage() {
                 return;
             }
 
-            const existingInviteQuery = query(collection(db!, "invites"), where("email", "==", inviteEmail), where("status", "==", "pending"));
+            const existingInviteQuery = query(collection(getDb(), "invites"), where("email", "==", inviteEmail), where("status", "==", "pending"));
             const inviteSnapshot = await getDocs(existingInviteQuery);
 
              if (!inviteSnapshot.empty) {
@@ -249,8 +249,8 @@ export default function ManageProvidersPage() {
                 return;
             }
 
-            const batch = writeBatch(db);
-            const inviteRef = doc(collection(db!, "invites"));
+            const batch = writeBatch(getDb());
+            const inviteRef = doc(collection(getDb(), "invites"));
             batch.set(inviteRef, {
                 agencyId: user.uid,
                 agencyName: user.displayName,
@@ -262,7 +262,7 @@ export default function ManageProvidersPage() {
 
             const providerNotifSettings = providerData.notificationSettings;
             if (providerNotifSettings?.agencyInvites !== false) {
-                 const notificationRef = doc(collection(db!, `users/${providerDoc.id}/notifications`));
+                 const notificationRef = doc(collection(getDb(), `users/${providerDoc.id}/notifications`));
                 batch.set(notificationRef, {
                     type: 'agency_invite',
                     message: `You have been invited to join ${user.displayName}.`,
@@ -289,14 +289,14 @@ export default function ManageProvidersPage() {
     };
 
     const handleRemoveProvider = async (providerId: string, status: Provider['status']) => {
-        if (!user || !db) return;
+        if (!user || !getDb()) return;
         try {
-            const batch = writeBatch(db!);
+            const batch = writeBatch(getDb());
             if (status === 'Active') {
-                const providerRef = doc(db!, "users", providerId);
+                const providerRef = doc(getDb(), "users", providerId);
                 batch.update(providerRef, { agencyId: null });
             } else { // Pending
-                const inviteRef = doc(db!, "invites", providerId);
+                const inviteRef = doc(getDb(), "invites", providerId);
                 batch.delete(inviteRef);
             }
             await batch.commit();

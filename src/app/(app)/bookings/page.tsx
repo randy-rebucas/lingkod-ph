@@ -36,7 +36,7 @@ import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or, runTransaction, serverTimestamp, orderBy, addDoc, getDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
@@ -177,9 +177,9 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
     };
 
     const handleStatusUpdate = async (booking: Booking, newStatus: BookingStatus, message?: string) => {
-        if (!db) return;
+        if (!getDb()) return;
         try {
-            const bookingRef = doc(db, "bookings", booking.id);
+            const bookingRef = doc(getDb(), "bookings", booking.id);
             await updateDoc(bookingRef, {
                 status: newStatus,
                 updatedAt: serverTimestamp()
@@ -402,9 +402,9 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
     };
 
     const handleStatusUpdate = async (booking: Booking, newStatus: BookingStatus, message?: string) => {
-        if (!db) return;
+        if (!getDb()) return;
         try {
-            const bookingRef = doc(db, "bookings", booking.id);
+            const bookingRef = doc(getDb(), "bookings", booking.id);
             await updateDoc(bookingRef, {
                 status: newStatus,
                 updatedAt: serverTimestamp()
@@ -591,9 +591,9 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
 };
 
 const createNotification = async (userId: string, message: string, link: string) => {
-    if (!db) return;
+    if (!getDb()) return;
     try {
-        const userNotifSettingsRef = doc(db, 'users', userId);
+        const userNotifSettingsRef = doc(getDb(), 'users', userId);
         const docSnap = await getDoc(userNotifSettingsRef);
 
         if (docSnap.exists() && docSnap.data().notificationSettings?.bookingUpdates === false) {
@@ -601,7 +601,7 @@ const createNotification = async (userId: string, message: string, link: string)
              return; // User has disabled this type of notification
         }
 
-        const notificationsRef = collection(db, `users/${userId}/notifications`);
+        const notificationsRef = collection(getDb(), `users/${userId}/notifications`);
         await addDoc(notificationsRef, {
             userId,
             message,
@@ -672,13 +672,13 @@ export default function BookingsPage() {
     const t = useTranslations('Bookings');
 
     useEffect(() => {
-        if (!user || !db) {
+        if (!user || !getDb()) {
             setLoading(false);
             return;
         };
 
         setLoading(true);
-        const bookingsRef = collection(db, "bookings");
+        const bookingsRef = collection(getDb(), "bookings");
         const q = query(bookingsRef, 
             or(where("clientId", "==", user.uid), where("providerId", "==", user.uid)),
             orderBy("date", "desc")

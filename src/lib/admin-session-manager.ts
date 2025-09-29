@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { doc, setDoc, getDoc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 
 /**
@@ -78,7 +78,7 @@ export class AdminSessionManager {
       requiresReauth: false
     };
 
-    await setDoc(doc(db, this.COLLECTION, sessionId), session);
+    await setDoc(doc(getDb(), this.COLLECTION, sessionId), session);
     return session;
   }
 
@@ -91,7 +91,7 @@ export class AdminSessionManager {
     extendSession: boolean = false
   ): Promise<{ success: boolean; session?: AdminSession; warning?: boolean }> {
     try {
-      const sessionRef = doc(db, this.COLLECTION, sessionId);
+      const sessionRef = doc(getDb(), this.COLLECTION, sessionId);
       const sessionDoc = await getDoc(sessionRef);
 
       if (!sessionDoc.exists()) {
@@ -160,7 +160,7 @@ export class AdminSessionManager {
     reason?: string;
   }> {
     try {
-      const sessionRef = doc(db, this.COLLECTION, sessionId);
+      const sessionRef = doc(getDb(), this.COLLECTION, sessionId);
       const sessionDoc = await getDoc(sessionRef);
 
       if (!sessionDoc.exists()) {
@@ -200,7 +200,7 @@ export class AdminSessionManager {
    */
   static async invalidateSession(sessionId: string): Promise<boolean> {
     try {
-      const sessionRef = doc(db, this.COLLECTION, sessionId);
+      const sessionRef = doc(getDb(), this.COLLECTION, sessionId);
       await updateDoc(sessionRef, {
         isActive: false,
         lastActivity: serverTimestamp() as Timestamp
@@ -233,7 +233,7 @@ export class AdminSessionManager {
    */
   static async requireReauth(sessionId: string): Promise<boolean> {
     try {
-      const sessionRef = doc(db, this.COLLECTION, sessionId);
+      const sessionRef = doc(getDb(), this.COLLECTION, sessionId);
       await updateDoc(sessionRef, {
         requiresReauth: true,
         lastActivity: serverTimestamp() as Timestamp
@@ -250,7 +250,7 @@ export class AdminSessionManager {
    */
   static async clearReauthRequirement(sessionId: string): Promise<boolean> {
     try {
-      const sessionRef = doc(db, this.COLLECTION, sessionId);
+      const sessionRef = doc(getDb(), this.COLLECTION, sessionId);
       await updateDoc(sessionRef, {
         requiresReauth: false,
         criticalOperationsCount: 0,
@@ -285,7 +285,7 @@ export class AdminSessionManager {
    */
   static async extendSession(sessionId: string): Promise<boolean> {
     try {
-      const sessionRef = doc(db, this.COLLECTION, sessionId);
+      const sessionRef = doc(getDb(), this.COLLECTION, sessionId);
       const now = new Date();
       const newExpiresAt = new Date(now.getTime() + ADMIN_SESSION_CONFIG.SESSION_TIMEOUT);
 

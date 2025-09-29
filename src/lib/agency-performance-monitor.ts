@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { getDb  } from './firebase';
 import { collection, query, where, onSnapshot, getDocs, Timestamp, orderBy, limit } from 'firebase/firestore';
 
 export interface AgencyPerformanceMetrics {
@@ -86,7 +86,7 @@ export class AgencyPerformanceMonitor {
     try {
       // Get all providers for this agency
       const providersQuery = query(
-        collection(db, 'users'),
+        collection(getDb(), 'users'),
         where('agencyId', '==', this.agencyId),
         where('role', '==', 'provider')
       );
@@ -96,7 +96,7 @@ export class AgencyPerformanceMonitor {
 
       // Get bookings for the period
       const bookingsQuery = query(
-        collection(db, 'bookings'),
+        collection(getDb(), 'bookings'),
         where('providerId', 'in', providerIds),
         where('createdAt', '>=', startDate),
         where('createdAt', '<=', endDate)
@@ -106,7 +106,7 @@ export class AgencyPerformanceMonitor {
 
       // Get jobs posted by agency
       const jobsQuery = query(
-        collection(db, 'jobs'),
+        collection(getDb(), 'jobs'),
         where('agencyId', '==', this.agencyId),
         where('createdAt', '>=', startDate),
         where('createdAt', '<=', endDate)
@@ -116,7 +116,7 @@ export class AgencyPerformanceMonitor {
 
       // Get payouts for the period
       const payoutsQuery = query(
-        collection(db, 'payouts'),
+        collection(getDb(), 'payouts'),
         where('agencyId', '==', this.agencyId),
         where('requestedAt', '>=', startDate),
         where('requestedAt', '<=', endDate)

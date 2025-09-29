@@ -24,7 +24,7 @@ import { useAuth } from "@/context/auth-context";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { useTranslations } from 'next-intl';
 
 
@@ -337,10 +337,10 @@ const CreateTicketDialog = () => {
     }
     setIsSubmitting(true);
     try {
-      if (!db) {
+      if (!getDb()) {
         throw new Error('Database not initialized');
       }
-      await addDoc(collection(db, 'tickets'), {
+      await addDoc(collection(getDb(), 'tickets'), {
         userId: user.uid,
         userName: user.displayName,
         userEmail: user.email,

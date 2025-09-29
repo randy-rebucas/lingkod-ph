@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp, deleteDoc, setDoc, onSnapshot, orderBy } from "firebase/firestore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -113,27 +113,27 @@ export default function ProviderProfilePage() {
     const [isReporting, setIsReporting] = useState(false);
 
     useEffect(() => {
-        if (!providerId || !db) return;
+        if (!providerId || !getDb()) return;
 
         const fetchProviderData = async () => {
-            if (!db) return;
+            if (!getDb()) return;
             setLoading(true);
             try {
                 // Fetch provider details
-                const providerDocRef = doc(db, "users", providerId);
+                const providerDocRef = doc(getDb(), "users", providerId);
                 const providerDoc = await getDoc(providerDocRef);
                 if (providerDoc.exists()) {
                     setProvider({ uid: providerDoc.id, ...providerDoc.data() } as Provider);
                 }
 
                 // Fetch services
-                const servicesQuery = query(collection(db, "services"), where("userId", "==", providerId), where("status", "==", "Active"));
+                const servicesQuery = query(collection(getDb(), "services"), where("userId", "==", providerId), where("status", "==", "Active"));
                 const servicesSnapshot = await getDocs(servicesQuery);
                 const servicesData = servicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
                 setServices(servicesData);
 
                 // Fetch reviews
-                const reviewsQuery = query(collection(db, "reviews"), where("providerId", "==", providerId), orderBy("createdAt", "desc"));
+                const reviewsQuery = query(collection(getDb(), "reviews"), where("providerId", "==", providerId), orderBy("createdAt", "desc"));
                 const reviewsSnapshot = await getDocs(reviewsQuery);
                 const reviewsData = reviewsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
                 setReviews(reviewsData);
@@ -149,13 +149,13 @@ export default function ProviderProfilePage() {
     }, [providerId]);
     
     useEffect(() => {
-        if (!user || !providerId || !db) {
+        if (!user || !providerId || !getDb()) {
             setIsFavoriteLoading(false);
             return;
         }
         setIsFavoriteLoading(true);
         const favQuery = query(
-            collection(db, 'favorites'),
+            collection(getDb(), 'favorites'),
             where('userId', '==', user.uid),
             where('providerId', '==', providerId)
         );
@@ -170,12 +170,12 @@ export default function ProviderProfilePage() {
 
 
     const handleToggleFavorite = async () => {
-        if (!user || !provider || !db) {
+        if (!user || !provider || !getDb()) {
             toast({ variant: "destructive", title: t('error'), description: t('mustBeLoggedInToFavorite') });
             return;
         }
         setIsFavoriteLoading(true);
-        const favoritesRef = collection(db, 'favorites');
+        const favoritesRef = collection(getDb(), 'favorites');
         
         try {
             if (isFavorited) {
@@ -202,7 +202,7 @@ export default function ProviderProfilePage() {
     };
     
     const handleSendMessage = async () => {
-        if (!user || !provider || !db) {
+        if (!user || !provider || !getDb()) {
             toast({ variant: "destructive", title: t('error'), description: t('mustBeLoggedInToMessage') });
             return;
         }
@@ -214,7 +214,7 @@ export default function ProviderProfilePage() {
 
         try {
             // Check if a conversation already exists
-            const conversationsRef = collection(db, "conversations");
+            const conversationsRef = collection(getDb(), "conversations");
             const q = query(conversationsRef, where("participants", "array-contains", user.uid));
             const querySnapshot = await getDocs(q);
             
@@ -230,7 +230,7 @@ export default function ProviderProfilePage() {
                 router.push(`/messages?conversationId=${existingConvoId}`);
             } else {
                 // Create a new conversation
-                const newConvoRef = await addDoc(collection(db, "conversations"), {
+                const newConvoRef = await addDoc(collection(getDb(), "conversations"), {
                     participants: [user.uid, provider.uid],
                     participantInfo: {
                         [user.uid]: {
@@ -254,13 +254,13 @@ export default function ProviderProfilePage() {
     };
 
     const handleReportProvider = async () => {
-        if (!user || !provider || !reportReason || !db) {
+        if (!user || !provider || !reportReason || !getDb()) {
             toast({ variant: "destructive", title: t('error'), description: t('pleaseProvideReason') });
             return;
         }
         setIsReporting(true);
         try {
-            await addDoc(collection(db, "reports"), {
+            await addDoc(collection(getDb(), "reports"), {
                 reportedBy: user.uid,
                 reportedItemType: 'user',
                 reportedItemId: provider.uid,

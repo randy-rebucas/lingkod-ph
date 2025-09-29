@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
-import { db } from "@/lib/firebase";
+import { getDb  } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy, Timestamp, updateDoc, doc, addDoc, serverTimestamp, where } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -35,12 +35,12 @@ export default function AdminPaymentVerificationPage() {
     const [rejectionReason, setRejectionReason] = useState<string>("");
 
      useEffect(() => {
-        if (userRole !== 'admin' || !db) {
+        if (userRole !== 'admin' || !getDb()) {
             setLoading(false);
             return;
         }
 
-        const bookingsQuery = query(collection(db, "bookings"), where("status", "==", "Pending Verification"), orderBy("createdAt", "desc"));
+        const bookingsQuery = query(collection(getDb(), "bookings"), where("status", "==", "Pending Verification"), orderBy("createdAt", "desc"));
         
         const unsubscribe = onSnapshot(bookingsQuery, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PaymentVerificationBooking));
@@ -61,7 +61,7 @@ export default function AdminPaymentVerificationPage() {
         }
         setApprovingId(booking.id);
         try {
-            const bookingRef = doc(db, 'bookings', booking.id);
+            const bookingRef = doc(getDb(), 'bookings', booking.id);
             await updateDoc(bookingRef, { 
                 status: 'Upcoming',
                 paymentVerifiedAt: serverTimestamp(),
@@ -69,7 +69,7 @@ export default function AdminPaymentVerificationPage() {
             });
 
             // Create payment record
-            await addDoc(collection(db, 'transactions'), {
+            await addDoc(collection(getDb(), 'transactions'), {
                 bookingId: booking.id,
                 clientId: booking.clientId,
                 providerId: booking.providerId,
@@ -83,7 +83,7 @@ export default function AdminPaymentVerificationPage() {
             });
 
             // Notify client
-            await addDoc(collection(db, `users/${booking.clientId}/notifications`), {
+            await addDoc(collection(getDb(), `users/${booking.clientId}/notifications`), {
                 type: 'booking_update',
                 message: `Your payment for "${booking.serviceName}" has been confirmed! Your booking is now scheduled.`,
                 link: '/bookings',
@@ -92,7 +92,7 @@ export default function AdminPaymentVerificationPage() {
             });
 
              // Notify provider
-            await addDoc(collection(db, `users/${booking.providerId}/notifications`), {
+            await addDoc(collection(getDb(), `users/${booking.providerId}/notifications`), {
                 type: 'booking_update',
                 message: `You have a new confirmed booking from ${booking.clientName} for "${booking.serviceName}".`,
                 link: '/bookings',
@@ -117,7 +117,7 @@ export default function AdminPaymentVerificationPage() {
         }
         setRejectingId(booking.id);
         try {
-            const bookingRef = doc(db, 'bookings', booking.id);
+            const bookingRef = doc(getDb(), 'bookings', booking.id);
             await updateDoc(bookingRef, { 
                 status: 'Payment Rejected',
                 paymentRejectionReason: rejectionReason,
@@ -126,7 +126,7 @@ export default function AdminPaymentVerificationPage() {
             });
 
             // Notify client
-            await addDoc(collection(db, `users/${booking.clientId}/notifications`), {
+            await addDoc(collection(getDb(), `users/${booking.clientId}/notifications`), {
                 type: 'booking_update',
                 message: `Your payment for "${booking.serviceName}" was rejected. Reason: ${rejectionReason}. Please contact support or try again.`,
                 link: '/bookings',
@@ -135,7 +135,7 @@ export default function AdminPaymentVerificationPage() {
             });
 
             // Create payment record for tracking
-            await addDoc(collection(db, 'transactions'), {
+            await addDoc(collection(getDb(), 'transactions'), {
                 bookingId: booking.id,
                 clientId: booking.clientId,
                 providerId: booking.providerId,
