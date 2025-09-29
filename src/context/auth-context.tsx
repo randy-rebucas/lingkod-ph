@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [user, handleError]);
 
   useEffect(() => {
-    if (!auth || !getDb()) {
+    if (!getAuthInstance() || !getDb()) {
       setLoading(false);
       return;
     }
@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribeAuth();
-  }, [toast, handleSignOut, getAuthInstance(), db]);
+  }, [toast, handleSignOut, getAuthInstance(), getDb()]);
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({
