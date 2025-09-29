@@ -55,6 +55,8 @@ import {
   Target,
   Activity,
   TrendingDown,
+  ShoppingCart,
+  Package,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -421,6 +423,41 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   )}
+                </SidebarMenu>
+              </div>
+            )}
+
+            {/* Marketplace */}
+            {(userRole === 'provider' || userRole === 'agency') && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  Marketplace
+                </h3>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/marketplace")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/marketplace" className="flex items-center gap-3 px-3 py-2">
+                        <ShoppingCart className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Marketplace</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/marketplace/orders")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/marketplace/orders" className="flex items-center gap-3 px-3 py-2">
+                        <Package className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">My Orders</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/marketplace/wallet")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/marketplace/wallet" className="flex items-center gap-3 px-3 py-2">
+                        <Wallet className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Wallet</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </div>
             )}

@@ -136,5 +136,72 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
+    
+    // Marketplace Collections
+    
+    // Products Collection
+    match /products/{productId} {
+      // Anyone can read products (for browsing)
+      allow read: if true;
+      // Only admins can create, update, or delete products
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Product Categories Collection
+    match /productCategories/{categoryId} {
+      // Anyone can read categories
+      allow read: if true;
+      // Only admins can manage categories
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Suppliers Collection
+    match /suppliers/{supplierId} {
+      // Authenticated users can read suppliers
+      allow read: if isAuthenticated();
+      // Only admins can manage suppliers
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Subscription Kits Collection
+    match /subscriptionKits/{kitId} {
+      // Anyone can read subscription kits
+      allow read: if true;
+      // Only admins can manage subscription kits
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Orders Collection
+    match /orders/{orderId} {
+      // Users can read, create, and update their own orders
+      allow read, create, update: if isAuthenticated() && isOwner(resource.data.userId);
+      // Admins can read all orders
+      allow read: if isAdmin();
+      // Only admins can delete orders
+      allow delete: if isAdmin();
+    }
+    
+    // Order Tracking Collection
+    match /orderTracking/{trackingId} {
+      // Users can read tracking for their own orders
+      allow read: if isAuthenticated() && 
+        get(/databases/$(database)/documents/orders/$(resource.data.orderId)).data.userId == request.auth.uid;
+      // Only admins can create and update tracking
+      allow create, update: if isAdmin();
+    }
+    
+    // User Wallets Collection
+    match /userWallets/{userId} {
+      // Users can read and update their own wallet
+      allow read, update: if isAuthenticated() && isOwner(userId);
+      // Users can create their own wallet
+      allow create: if isAuthenticated();
+    }
+    
+    // Shopping Cart Collection (user-specific)
+    match /users/{userId}/cart/{cartItemId} {
+      // Users can manage their own cart
+      allow read, create, update, delete: if isAuthenticated() && isOwner(userId);
+    }
   }
 }
