@@ -18,18 +18,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { Logo } from "@/components/logo";
 import { useTranslations } from 'next-intl';
-
-
-// Function to generate a unique referral code
-const generateReferralCode = (userId: string): string => {
-    // Create a more unique and readable referral code
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const uidPart = userId.substring(0, 4).toUpperCase();
-    const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
-    
-    // Format: LP-XXXX-YYY-ZZZ (where XXXX is uid part, YYY is timestamp part, ZZZ is random part)
-    return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
-};
+import { generateReferralCode } from '@/lib/referral-code-generator';
 
 const handleReferral = async (referralCode: string, newUser: { uid: string; email: string | null }) => {
     if (!referralCode) return;
