@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/use-error-handler";
+import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { findMatchingProviders } from "@/ai/flows/find-matching-providers";
@@ -87,7 +88,7 @@ const renderStars = (rating: number) => {
     ));
 }
 
-const DashboardCard = ({ title, icon: Icon, value, change, isLoading }: { title: string, icon: React.ElementType, value: string, change?: string, isLoading: boolean }) => {
+const DashboardCard = memo(({ title, icon: Icon, value, change, isLoading }: { title: string, icon: React.ElementType, value: string, change?: string, isLoading: boolean }) => {
     if (isLoading) {
         return (
             <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
@@ -114,7 +115,7 @@ const DashboardCard = ({ title, icon: Icon, value, change, isLoading }: { title:
             </CardContent>
         </Card>
     )
-}
+});
 
 // Function to process bookings for the earnings chart
 const processEarningsData = (bookings: Booking[]) => {
@@ -416,12 +417,14 @@ const DashboardPage = memo(function DashboardPage() {
     const [allProviders, setAllProviders] = useState<Provider[]>([]);
     const [loadingProviders, setLoadingProviders] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
     const [isSmartSearching, setIsSmartSearching] = useState(false);
     const [favoriteProviderIds, setFavoriteProviderIds] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
     const [showNearbyProviders, setShowNearbyProviders] = useState(false);
     const [isLoadingNearby, setIsLoadingNearby] = useState(false);
     const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+    const [searchCache, setSearchCache] = useState<Map<string, Provider[]>>(new Map());
 
 
     // For agency dashboard
@@ -494,6 +497,8 @@ const DashboardPage = memo(function DashboardPage() {
         };
 
     }, [user, userRole]);
+
+    // Handle debounced search - moved after handleSmartSearch definition
 
     // Fetch data for client dashboard
     useEffect(() => {
@@ -648,14 +653,22 @@ const DashboardPage = memo(function DashboardPage() {
     const recentBookings = bookings.slice(0, 5);
     const earningsData = processEarningsData(bookings);
 
-    const handleSmartSearch = async () => {
-        if (!searchTerm) {
-            setProviders(allProviders); // Reset if search is cleared
+    const handleSmartSearch = useCallback(async (query: string) => {
+        if (!query.trim()) {
+            setProviders(allProviders);
             return;
         }
+
+        // Check cache first
+        const cacheKey = query.toLowerCase().trim();
+        if (searchCache.has(cacheKey)) {
+            setProviders(searchCache.get(cacheKey)!);
+            return;
+        }
+
         setIsSmartSearching(true);
         try {
-            const result = await findMatchingProviders({ query: searchTerm });
+            const result = await findMatchingProviders({ query });
             if (result.providers.length > 0) {
                 const rankedProviderIds = result.providers.reduce((acc, p) => {
                     acc[p.providerId] = { rank: p.rank, reasoning: p.reasoning };
@@ -668,20 +681,24 @@ const DashboardPage = memo(function DashboardPage() {
                     searchReasoning: rankedProviderIds[p.uid].reasoning
                 })).sort((a,b) => (a.searchRank || 99) - (b.searchRank || 99));
 
+                // Cache the results
+                setSearchCache(prev => new Map(prev).set(cacheKey, matchedProviders));
                 setProviders(matchedProviders);
+                
                 toast({
                     title: t('smartSearchComplete'),
                     description: `Found and ranked ${matchedProviders.length} providers for you.`,
                 });
             } else {
                 setProviders([]);
-                 toast({
+                toast({
                     title: t('noResults'),
                     description: `Could not find any providers for your search. Try a broader term.`,
                 });
             }
         } catch (error) {
             console.error("Smart search failed:", error);
+            handleError(error);
             toast({
                 title: t('smartSearchFailed'),
                 description: "There was an error finding providers. Please try a different search.",
@@ -690,7 +707,13 @@ const DashboardPage = memo(function DashboardPage() {
         } finally {
             setIsSmartSearching(false);
         }
-    };
+    }, [allProviders, searchCache, t, handleError]);
+
+    // Handle debounced search
+    useEffect(() => {
+        if (debouncedSearchTerm !== searchTerm) return;
+        handleSmartSearch(debouncedSearchTerm);
+    }, [debouncedSearchTerm, searchTerm, handleSmartSearch]);
 
     const handleNearbyProviders = async () => {
         setIsLoadingNearby(true);
@@ -759,7 +782,7 @@ const DashboardPage = memo(function DashboardPage() {
     const agencyRecentBookings = agencyBookings.sort((a,b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5);
     const topPerformingProviders = [...agencyProviders].sort((a,b) => (b.totalRevenue || 0) - (a.totalRevenue || 0)).slice(0, 5);
 
-    const handleToggleFavorite = async (provider: Provider) => {
+    const handleToggleFavorite = useCallback(async (provider: Provider) => {
         if (!user || !getDb()) return;
         const favoritesRef = collection(getDb(), 'favorites');
         const isFavorited = favoriteProviderIds.includes(provider.uid);
@@ -783,11 +806,21 @@ const DashboardPage = memo(function DashboardPage() {
             }
         } catch (error) {
             console.error("Error toggling favorite:", error);
-            toast({ variant: "destructive", title: "Error", description: t('couldNotUpdateFavorites') });
+            handleError(error);
+            toast({ 
+                variant: "destructive", 
+                title: "Error", 
+                description: t('couldNotUpdateFavorites') 
+            });
         }
-    };
+    }, [user, favoriteProviderIds, t, handleError]);
 
-
+    // Memoized provider filtering
+    const { agencies, serviceProviders } = useMemo(() => {
+        const agencies = providers.filter(p => p.role === 'agency');
+        const serviceProviders = providers.filter(p => p.role === 'provider');
+        return { agencies, serviceProviders };
+    }, [providers]);
 
     // If user is a client
     if (userRole === 'client') {
@@ -814,29 +847,36 @@ const DashboardPage = memo(function DashboardPage() {
                         <div className="relative">
                             <Input 
                                 placeholder="Search for services (e.g., house cleaning, web design, tutoring)..." 
-                                className="w-full h-12 text-base pl-4 pr-32 border-2 focus:border-primary transition-colors" 
+                                className="w-full h-12 text-base pl-4 pr-20 sm:pr-32 border-2 focus:border-primary transition-colors" 
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSmartSearch()}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSmartSearch(searchTerm)}
+                                aria-label="Search for service providers"
+                                aria-describedby="search-help"
                             />
                             <Button 
-                                className="absolute right-2 top-1/2 -translate-y-1/2 h-8"
-                                onClick={handleSmartSearch}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 sm:px-3 px-2"
+                                onClick={() => handleSmartSearch(searchTerm)}
                                 disabled={isSmartSearching}
+                                aria-label={isSmartSearching ? 'Searching for providers' : 'Search providers'}
                             >
-                                {isSmartSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-                                {isSmartSearching ? 'Searching...' : 'Search'}
+                                {isSmartSearching ? <Loader2 className="mr-1 sm:mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-1 sm:mr-2 h-4 w-4" />}
+                                <span className="hidden sm:inline">{isSmartSearching ? 'Searching...' : 'Search'}</span>
                             </Button>
                         </div>
+                        <p id="search-help" className="text-xs text-muted-foreground">
+                            Use AI-powered search to find the best providers for your needs. Try searching for specific services or use the quick filters below.
+                        </p>
                         
                         {/* Quick Filter Buttons */}
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 sm:gap-3" role="group" aria-label="Quick service filters">
                             <Button 
                                 variant="default" 
                                 size="sm"
                                 onClick={handleNearbyProviders}
                                 disabled={isLoadingNearby}
                                 className="text-xs bg-primary hover:bg-primary/90"
+                                aria-label="Find providers near your location"
                             >
                                 {isLoadingNearby ? (
                                     <>
@@ -854,6 +894,7 @@ const DashboardPage = memo(function DashboardPage() {
                                 size="sm"
                                 onClick={() => setSearchTerm('house cleaning')}
                                 className="text-xs"
+                                aria-label="Search for house cleaning services"
                             >
                                 🏠 House Cleaning
                             </Button>
@@ -862,6 +903,7 @@ const DashboardPage = memo(function DashboardPage() {
                                 size="sm"
                                 onClick={() => setSearchTerm('web design')}
                                 className="text-xs"
+                                aria-label="Search for web design services"
                             >
                                 💻 Web Design
                             </Button>
@@ -870,6 +912,7 @@ const DashboardPage = memo(function DashboardPage() {
                                 size="sm"
                                 onClick={() => setSearchTerm('tutoring')}
                                 className="text-xs"
+                                aria-label="Search for tutoring services"
                             >
                                 📚 Tutoring
                             </Button>
@@ -878,6 +921,7 @@ const DashboardPage = memo(function DashboardPage() {
                                 size="sm"
                                 onClick={() => setSearchTerm('photography')}
                                 className="text-xs"
+                                aria-label="Search for photography services"
                             >
                                 📸 Photography
                             </Button>
@@ -886,21 +930,24 @@ const DashboardPage = memo(function DashboardPage() {
                                 size="sm"
                                 onClick={() => setSearchTerm('plumbing')}
                                 className="text-xs"
+                                aria-label="Search for plumbing services"
                             >
                                 🔧 Plumbing
                             </Button>
                         </div>
                         {loadingProviders || isSmartSearching || isLoadingNearby ? (
-                            <div className="space-y-4">
+                            <div className="space-y-4" role="status" aria-live="polite">
                                 <div className="flex items-center justify-center py-8">
                                     <div className="flex items-center gap-3">
-                                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                        <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
                                         <span className="text-muted-foreground">
-                                            {isLoadingNearby ? 'Finding nearby providers...' : 'Finding the best providers for you...'}
+                                            {isLoadingNearby ? 'Finding nearby providers...' : 
+                                             isSmartSearching ? 'Searching with AI...' : 
+                                             'Loading providers...'}
                                         </span>
                                     </div>
                                 </div>
-                                <div className={cn("gap-4", viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-2')}>
+                                <div className={cn("gap-4", viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-2')}>
                                     {[...Array(6)].map((_, i) => (
                                         <Skeleton key={i} className={cn("w-full", viewMode === 'grid' ? 'h-64' : 'h-20')} />
                                     ))}
@@ -909,9 +956,6 @@ const DashboardPage = memo(function DashboardPage() {
                         ) : (
                              providers.length > 0 ? (
                                 (() => {
-                                    const agencies = providers.filter(p => p.role === 'agency');
-                                    const serviceProviders = providers.filter(p => p.role === 'provider');
-                                    
                                     return (
                                         <div className="space-y-8">
                                             {/* Results Summary */}
@@ -957,7 +1001,7 @@ const DashboardPage = memo(function DashboardPage() {
                                                         </h2>
                                                     </div>
                                                     {viewMode === 'grid' ? (
-                                                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                                             {agencies.map(agency => (
                                                                 <AgencyCard 
                                                                     key={agency.uid} 
@@ -995,7 +1039,7 @@ const DashboardPage = memo(function DashboardPage() {
                                                         </h2>
                                                     </div>
                                                     {viewMode === 'grid' ? (
-                                                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                                        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                                                             {serviceProviders.map(provider => (
                                                                 <ProviderCard 
                                                                     key={provider.uid} 
