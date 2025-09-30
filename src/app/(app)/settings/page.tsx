@@ -29,7 +29,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
-import { useRouter } from "next/navigation"
+// import { useRouter } from "next/navigation"
 
 type NotificationSettings = {
     bookingUpdates: boolean;

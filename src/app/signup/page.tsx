@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
-import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, User, getAdditionalUserInfo } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { getAuthInstance, getDb   } from '@/lib/firebase';
-import { doc, setDoc, serverTimestamp, runTransaction, getDocs, query, where, collection, writeBatch, limit, getDoc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, runTransaction, getDocs, query, where, collection, limit, getDoc } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

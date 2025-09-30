@@ -38,10 +38,10 @@ export default function PartnersDashboardPage() {
                     const performanceMetrics = await PartnerAnalyticsService.getPartnerPerformanceMetrics(user.uid);
                     
                     // Get referral statistics
-                    const referralStats = await PartnerReferralTracker.getReferralStatistics(user.uid);
+                    const _referralStats = await PartnerReferralTracker.getReferralStatistics(user.uid);
                     
                     // Get commission summary
-                    const commissionSummary = await PartnerCommissionManager.getCommissionSummary(user.uid);
+                    const _commissionSummary = await PartnerCommissionManager.getCommissionSummary(user.uid);
 
                     setDashboardData({
                         totalReferrals: performanceMetrics.totalReferrals,

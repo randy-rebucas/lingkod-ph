@@ -161,7 +161,7 @@ export default function AdminAdsPage() {
                 const storageRef = ref(getStorageInstance(), storagePath);
                 const uploadTask = await uploadBytesResumable(storageRef, imageFile);
                 finalImageUrl = await getDownloadURL(uploadTask.ref);
-            } catch (error) {
+            } catch {
                  toast({
                     title: 'Upload Error',
                     description: "Failed to upload image. Please try again.",

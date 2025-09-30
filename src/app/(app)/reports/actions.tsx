@@ -25,6 +25,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+// import { useTranslations } from 'next-intl';
 
 
 type Booking = {
@@ -398,5 +399,5 @@ export default function ReportsPage() {
                 </CardContent>
             </Card>
         </div>
-    )}
+    );
 }

@@ -151,7 +151,7 @@ export class AdminActivityMonitor {
   /**
    * Get activity metrics for dashboard
    */
-  static async getActivityMetrics(timeRange: '24h' | '7d' | '30d' = '24h'): Promise<{
+  static async getActivityMetrics(_timeRange: '24h' | '7d' | '30d' = '24h'): Promise<{
     totalActivities: number;
     activitiesByType: Record<AdminActivityType, number>;
     activitiesBySeverity: Record<AdminActivitySeverity, number>;

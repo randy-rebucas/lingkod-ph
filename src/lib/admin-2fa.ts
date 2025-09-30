@@ -413,7 +413,7 @@ export class Admin2FAManager {
     }
   }
 
-  private static async verifyTOTPCode(adminId: string, code: string): Promise<boolean> {
+  private static async verifyTOTPCode(_adminId: string, _code: string): Promise<boolean> {
     // TODO: Implement TOTP verification
     // TOTP verification would be implemented here using a library like 'otplib'
     // For now, return false as TOTP is not fully implemented

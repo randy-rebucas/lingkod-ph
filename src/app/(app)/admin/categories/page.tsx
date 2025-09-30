@@ -39,7 +39,7 @@ export default function AdminCategoriesPage() {
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const [lastVisible, setLastVisible] = useState<QueryDocumentSnapshot | null>(null);
+    const [_lastVisible, setLastVisible] = useState<QueryDocumentSnapshot | null>(null);
     const [pageHistory, setPageHistory] = useState<(QueryDocumentSnapshot | null)[]>([null]); // History of lastVisible for each page
     const [isNextPageAvailable, setIsNextPageAvailable] = useState(false);
 

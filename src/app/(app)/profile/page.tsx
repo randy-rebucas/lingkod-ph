@@ -17,7 +17,7 @@ import { ref, uploadBytesResumable, getDownloadURL, deleteObject, uploadBytes } 
 import { updateProfile } from "firebase/auth";
 import { doc, updateDoc, Timestamp, collection, onSnapshot, query, orderBy, runTransaction, serverTimestamp, where, getDocs, arrayUnion, arrayRemove } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { useErrorHandler } from "@/hooks/use-error-handler";
+// import { useErrorHandler } from "@/hooks/use-error-handler";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

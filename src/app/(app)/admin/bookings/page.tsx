@@ -18,7 +18,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { handleUpdateBookingStatus } from "./actions";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+// import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const getStatusVariant = (status: string) => {
     switch (status) {
@@ -147,24 +147,22 @@ export default function AdminBookingsPage() {
                                             <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <AlertDialog>
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                        <DropdownMenuItem onSelect={() => handleViewDetails(booking)}><Eye className="mr-2 h-4 w-4" />View Details</DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                                                        <DropdownMenuItem onClick={() => onUpdateStatus(booking.id, "Completed")} disabled={booking.status === 'Completed'}>Mark as Completed</DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => onUpdateStatus(booking.id, "Cancelled")} disabled={booking.status === 'Cancelled'}>Mark as Cancelled</DropdownMenuItem>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem asChild><Link href={`/admin/users?search=${booking.clientId}`}><User className="mr-2 h-4 w-4" />View Client</Link></DropdownMenuItem>
-                                                        <DropdownMenuItem asChild><Link href={`/admin/users?search=${booking.providerId}`}><User className="mr-2 h-4 w-4" />View Provider</Link></DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </AlertDialog>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon"><MoreHorizontal /></Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <DropdownMenuItem onSelect={() => handleViewDetails(booking)}><Eye className="mr-2 h-4 w-4" />View Details</DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                                                    <DropdownMenuItem onClick={() => onUpdateStatus(booking.id, "Completed")} disabled={booking.status === 'Completed'}>Mark as Completed</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => onUpdateStatus(booking.id, "Cancelled")} disabled={booking.status === 'Cancelled'}>Mark as Cancelled</DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem asChild><Link href={`/admin/users?search=${booking.clientId}`}><User className="mr-2 h-4 w-4" />View Client</Link></DropdownMenuItem>
+                                                    <DropdownMenuItem asChild><Link href={`/admin/users?search=${booking.providerId}`}><User className="mr-2 h-4 w-4" />View Provider</Link></DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </TableCell>
                                     </TableRow>
                                 )) : (

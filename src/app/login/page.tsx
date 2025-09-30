@@ -55,7 +55,7 @@ export default function LoginPage() {
             if (setupRequired) {
                 router.push('/setup');
             }
-        } catch (error) {
+            } catch (error) {
             console.error("Error checking user count:", error);
             setIsSetupRequired(false); // Default to not required on error
         }

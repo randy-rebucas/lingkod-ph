@@ -32,7 +32,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import {
-  LineChart,
+  // LineChart,
   Line,
   XAxis,
   YAxis,
@@ -292,9 +292,7 @@ export default function ReportsPage() {
     }
     
     const pageTitle = t('advancedReports');
-    const pageDescription = true 
-        ? t('advancedDescription')
-        : t('basicDescription');
+    const pageDescription = t('advancedDescription');
 
     return (
         <div className="container space-y-8">
@@ -517,7 +515,7 @@ export default function ReportsPage() {
 }
 
 // Overview Tab Component
-function OverviewTab({ reportData, payouts, onMarkAsPaid }: { reportData: ReportData, payouts: PayoutRequest[], onMarkAsPaid: (payout: PayoutRequest) => void }) {
+function OverviewTab({ reportData, payouts, onMarkAsPaid }: { reportData: ReportData, payouts: PayoutRequest[], onMarkAsPaid: (_payout: PayoutRequest) => void }) {
     return (
         <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">

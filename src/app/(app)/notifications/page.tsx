@@ -31,9 +31,9 @@ import { handleInviteAction } from '@/app/(app)/profile/actions';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+// import { Label } from "@/components/ui/label";
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info' | 'renewal_reminder' | 'new_review' | 'new_job' | 'payment_received' | 'payment_failed' | 'system_alert' | 'maintenance' | 'security' | 'promotion' | 'newsletter' | 'reminder' | 'deadline' | 'achievement' | 'warning' | 'error' | 'success';
 
@@ -82,7 +82,7 @@ const getIconForType = (type: NotificationType) => {
     }
 };
 
-const getTypeColor = (type: NotificationType) => {
+    const _getTypeColor = (type: NotificationType) => {
     switch (type) {
         case 'booking_update': return 'bg-blue-500';
         case 'new_message': return 'bg-green-500';
@@ -231,14 +231,14 @@ const NotificationsPage = memo(function NotificationsPage() {
     const { user } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
-    const { handleError } = useErrorHandler();
+    const { handleError: _handleError } = useErrorHandler();
     const t = useTranslations('Notifications');
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'unread' | 'starred' | 'archived'>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [typeFilter, setTypeFilter] = useState<string>('all');
-    const [priorityFilter, setPriorityFilter] = useState<string>('all');
+    const [priorityFilter, _setPriorityFilter] = useState<string>('all');
     const [dateFilter, setDateFilter] = useState<string>('all');
 
     useEffect(() => {
@@ -298,7 +298,7 @@ const NotificationsPage = memo(function NotificationsPage() {
         try {
             await deleteDoc(doc(getDb(), `users/${user.uid}/notifications`, notificationId));
             toast({ title: t('success'), description: t('notificationDeleted') });
-        } catch (error) {
+            } catch {
             toast({ variant: 'destructive', title: t('error'), description: t('deleteFailed') });
         }
     };
@@ -312,7 +312,7 @@ const NotificationsPage = memo(function NotificationsPage() {
             );
             await Promise.all(promises);
             toast({ title: t('success'), description: t('allMarkedAsRead') });
-        } catch (error) {
+            } catch {
             toast({ variant: 'destructive', title: t('error'), description: t('markAsReadFailed') });
         }
     };
@@ -326,7 +326,7 @@ const NotificationsPage = memo(function NotificationsPage() {
             );
             await Promise.all(promises);
             toast({ title: t('success'), description: t('readNotificationsDeleted') });
-        } catch (error) {
+            } catch {
             toast({ variant: 'destructive', title: t('error'), description: t('deleteFailed') });
         }
     };

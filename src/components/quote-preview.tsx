@@ -35,7 +35,7 @@ export function QuotePreview({ data }: { data: QuoteFormValues }) {
             discountAmount = Number(data.discountValue) || 0;
         }
         
-        const afterDiscount = subtotal - discountAmount;
+        const _afterDiscount = subtotal - discountAmount;
         const taxAmount = afterDiscount * ((Number(data.taxRate) || 0) / 100);
         const total = afterDiscount + taxAmount;
         const issueDate = toDate(data.issueDate);

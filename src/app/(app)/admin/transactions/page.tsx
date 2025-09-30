@@ -8,10 +8,10 @@ import { collection, query, onSnapshot, orderBy, Timestamp, updateDoc, doc, addD
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
+// import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Loader2, Eye, XCircle, AlertTriangle } from "lucide-react";
+import { CheckCircle, Loader2, Eye, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { Booking } from "@/app/(app)/bookings/page";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";

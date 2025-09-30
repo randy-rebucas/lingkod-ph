@@ -56,7 +56,7 @@ const createBackupFlow = ai.defineFlow(
     }),
     outputSchema: BackupResultSchema,
   },
-  async ({ actor }) => {
+  async ({ actor: _actor }) => {
     try {
         const backupData: Record<string, any[]> = {};
         let totalDocuments = 0;

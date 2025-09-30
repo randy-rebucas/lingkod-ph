@@ -56,7 +56,7 @@ const baseLineItemSchema = z.object({
     price: z.coerce.number(),
 });
 
-const baseQuoteSchema = z.object({
+const _baseQuoteSchema = z.object({
     clientName: z.string(),
     clientEmail: z.string(),
     clientAddress: z.string(),

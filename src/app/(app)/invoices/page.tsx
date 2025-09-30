@@ -16,7 +16,7 @@ import {
   Edit,
   Trash2,
   Send,
-  Calendar
+  // Calendar
 } from "lucide-react";
 import {
   ColumnDef,
@@ -152,7 +152,7 @@ export default function InvoicesPage() {
         try {
             await updateDoc(invoiceRef, { status });
             toast({ title: "Success", description: `Invoice marked as ${status.toLowerCase()}.` });
-        } catch (error) {
+            } catch {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to update invoice status.' });
         }
     };
@@ -162,7 +162,7 @@ export default function InvoicesPage() {
         try {
             await deleteDoc(doc(getDb(), "invoices", invoiceId));
             toast({ title: "Success", description: "Invoice deleted successfully." });
-        } catch (error) {
+            } catch {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete invoice.' });
         }
     };

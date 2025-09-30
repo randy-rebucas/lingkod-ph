@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, Send, Mail, Phone, MapPin, MessageCircle, Star, CheckCircle, ArrowRight, Zap, Heart, Award, UserCheck, Building, Briefcase, Clock, Calendar } from "lucide-react";
+import { Loader2, Send, Mail, Phone, MapPin, MessageCircle, Star, ArrowRight, Zap, Clock, Calendar } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 
 

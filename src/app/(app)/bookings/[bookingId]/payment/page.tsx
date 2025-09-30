@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import { getDb, getStorageInstance } from '@/lib/firebase';
-import { doc, onSnapshot, updateDoc, Timestamp, addDoc, collection, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc, addDoc, collection, serverTimestamp, query, where, getDocs } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";

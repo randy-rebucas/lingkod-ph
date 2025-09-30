@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { onAuthStateChanged, User, signOut } from 'firebase/auth';
-import { doc, onSnapshot, collection, addDoc, serverTimestamp, getDocs, query, where, limit } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { getAuthInstance, getDb   } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/use-error-handler';

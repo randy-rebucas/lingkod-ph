@@ -17,7 +17,7 @@ import { Badge } from './ui/badge';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
-type VerificationStatus = 'Unverified' | 'Pending' | 'Verified' | 'Rejected';
+type _VerificationStatus = 'Unverified' | 'Pending' | 'Verified' | 'Rejected';
 
 const StatusInfo = {
     Unverified: {

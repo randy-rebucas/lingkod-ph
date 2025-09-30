@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -36,7 +36,7 @@ type Category = {
     name: string;
 };
 
-const serviceSchema = z.object({
+const _serviceSchema = z.object({
     name: z.string().min(3, { message: "Service name must be at least 3 characters." }),
     category: z.string().min(1, { message: "Please select a category." }),
     price: z.coerce.number().positive({ message: "Price must be a positive number." }),

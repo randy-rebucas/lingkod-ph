@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Collaborate with LocalPro to empower local businesses and build stronger communities. Explore our partnership opportunities for corporations, LGUs, and suppliers.',
 };
 
-const partnerStats = [
+const _partnerStats = [
   { number: "500+", label: "Active Partners", icon: <Users className="h-6 w-6" /> },
   { number: "50+", label: "Cities Covered", icon: <MapPin className="h-6 w-6" /> },
   { number: "₱10M+", label: "Partner Revenue", icon: <DollarSign className="h-6 w-6" /> },

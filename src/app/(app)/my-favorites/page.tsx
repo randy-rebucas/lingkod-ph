@@ -7,10 +7,10 @@ import { useAuth } from "@/context/auth-context";
 import { getDb  } from '@/lib/firebase';
 import { collection, getDocs, onSnapshot, query, where } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Star, Users, Heart } from "lucide-react";
+import { Star, Heart } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 

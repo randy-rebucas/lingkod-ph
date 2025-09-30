@@ -46,7 +46,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { useTranslations } from 'next-intl';
+// import { useTranslations } from 'next-intl';
 
 export const metadata: Metadata = {
   title: 'Our Services - LocalPro',
