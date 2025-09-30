@@ -4,10 +4,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { getDb  } from '@/lib/firebase';
-import { collection, query, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, onSnapshot, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DollarSign, BookCheck, Calculator, FilePieChart, CheckCircle } from "lucide-react";
+import { DollarSign, BookCheck, Calculator } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   LineChart,
@@ -165,7 +165,7 @@ export default function AdminReportsPage() {
              <div className="max-w-6xl mx-auto flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Platform Reports</h1>
-                    <p className="text-muted-foreground">Deep dive into the platform's performance with charts and detailed tables.</p>
+                    <p className="text-muted-foreground">Deep dive into the platform&apos;s performance with charts and detailed tables.</p>
                 </div>
             </div>
             

@@ -71,7 +71,7 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
             });
             setIsOpen(false);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             handleError(error, 'complete booking');
         } finally {
             setIsSaving(false);
@@ -92,7 +92,7 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
                 <DialogHeader>
                     <DialogTitle>{t('completeBooking')}</DialogTitle>
                     <DialogDescription>
-                        {t('uploadProof')} "{booking.serviceName}".
+                        {t('uploadProof')} &quot;{booking.serviceName}&quot;.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="py-4 space-y-4">

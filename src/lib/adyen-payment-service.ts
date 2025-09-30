@@ -67,7 +67,7 @@ export class AdyenPaymentService {
         },
         reference: paymentRequest.reference,
         paymentMethod: {
-          type: 'gcash',
+          type: 'gcash' as any,
         },
         returnUrl: paymentRequest.returnUrl,
         merchantAccount: this.config.merchantAccount,
@@ -81,7 +81,7 @@ export class AdyenPaymentService {
         },
       };
 
-      const response = await (this.checkout as any).payments(paymentData);
+      const response = await this.checkout.PaymentsApi.payments(paymentData);
 
       if (response.resultCode === 'RedirectShopper') {
         // Store payment session in database
@@ -92,13 +92,13 @@ export class AdyenPaymentService {
           status: 'pending',
           paymentMethod: 'gcash',
           createdAt: new Date(),
-          redirectUrl: response.redirect?.url,
+          redirectUrl: (response as any).redirect?.url,
         });
 
         return {
           success: true,
           paymentId: response.pspReference,
-          redirectUrl: response.redirect?.url,
+          redirectUrl: (response as any).redirect?.url,
           pspReference: response.pspReference,
         };
       } else if (response.resultCode === 'Authorised') {
@@ -142,10 +142,10 @@ export class AdyenPaymentService {
         };
       }
       // Get payment details from Adyen
-      const paymentDetails = await (this.checkout as any).getPaymentDetails({
-        pspReference,
+      const paymentDetails = await this.checkout.PaymentsApi.paymentsDetails({
+        pspReference: pspReference as any,
         merchantAccount: this.config.merchantAccount,
-      });
+      } as any);
 
       if (paymentDetails.resultCode === 'Authorised') {
         await this.handleSuccessfulPayment(bookingId, pspReference);
@@ -174,7 +174,7 @@ export class AdyenPaymentService {
   /**
    * Store payment session in database
    */
-  private async storePaymentSession(bookingId: string, sessionData: any) {
+  private async storePaymentSession(bookingId: string, sessionData: Record<string, unknown>) {
     try {
       await db.collection('paymentSessions').doc(bookingId).set({
         ...sessionData,

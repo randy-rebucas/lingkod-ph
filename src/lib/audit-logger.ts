@@ -8,10 +8,10 @@ export interface AuditLogEntry {
   action: string;
   resource: string;
   resourceId?: string;
-  details: Record<string, any>;
+  details: Record<string, unknown>;
   ipAddress?: string;
   userAgent?: string;
-  timestamp: any;
+  timestamp: Date;
   severity: 'low' | 'medium' | 'high' | 'critical';
   success: boolean;
   errorMessage?: string;
@@ -41,7 +41,7 @@ export class AuditLogger {
     try {
       const auditEntry: AuditLogEntry = {
         ...entry,
-        timestamp: serverTimestamp()
+        timestamp: serverTimestamp() as any
       };
 
       await addDoc(collection(getDb(), 'auditLogs'), auditEntry);
@@ -53,10 +53,10 @@ export class AuditLogger {
   }
 
   // Add missing logAction method for compatibility
-  async logAction(action: string, userId: string, resource: string, details: any = {}) {
+  async logAction(action: string, userId: string, resource: string, details: Record<string, unknown> = {}) {
     await this.log({
       userId,
-      userRole: details.userRole || 'unknown',
+      userRole: (details.userRole as string) || 'unknown',
       action,
       resource,
       details,

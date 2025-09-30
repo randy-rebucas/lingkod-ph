@@ -1,5 +1,5 @@
 
-import { collection, addDoc, getDocs, query, where, writeBatch, doc } from "firebase/firestore";
+import { collection, getDocs, writeBatch, doc } from "firebase/firestore";
 import { getDb  } from './firebase';
 
 const categories = [

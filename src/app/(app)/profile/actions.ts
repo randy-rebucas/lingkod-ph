@@ -2,7 +2,7 @@
 'use server';
 
 import { getDb  } from '@/lib/firebase';
-import { doc, writeBatch, serverTimestamp, getDoc, collection, addDoc } from "firebase/firestore";
+import { doc, writeBatch, serverTimestamp, getDoc, collection } from "firebase/firestore";
 import { z } from "zod";
 
 const InviteActionSchema = z.object({
@@ -40,7 +40,6 @@ export async function handleInviteAction(
 
         const inviteData = inviteDoc.data();
         const providerRef = doc(getDb(), 'users', inviteData.providerId);
-        const agencyRef = doc(getDb(), 'users', inviteData.agencyId);
 
         if (accepted) {
             batch.update(providerRef, { agencyId: inviteData.agencyId });

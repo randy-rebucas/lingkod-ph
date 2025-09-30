@@ -2,7 +2,7 @@
 "use client";
 
 import { memo, useMemo } from "react";
-import { Wallet, Landmark, Store, QrCode } from "lucide-react";
+import { Wallet, Landmark, Store } from "lucide-react";
 
 type PaymentMethodIconProps = {
     method: string;

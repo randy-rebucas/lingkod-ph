@@ -1,19 +1,16 @@
 "use client";
 
-import { useActionState, useEffect, useState, useMemo } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { handleSuggestSmartRate, type FormState } from "./smart-rate-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, Bot, DollarSign, Lightbulb, TrendingUp, MapPin, Clock, Users, Target, BarChart3, Calculator, Zap, Award, Star } from "lucide-react";
+import { Sparkles, Bot, DollarSign, Lightbulb, TrendingUp, MapPin, Target, BarChart3, Zap, Award } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslations } from 'next-intl';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 
 const initialState: FormState = {
   data: null,

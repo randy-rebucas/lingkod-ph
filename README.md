@@ -332,7 +332,16 @@ LocalPro includes comprehensive documentation covering all aspects of the platfo
 
 #### **API & Development**
 - **[API Documentation](./docs/api-documentation.md)** - Complete API reference for developers
+- **[API Endpoints Documentation](./docs/api-endpoints-documentation.md)** - Detailed API endpoint documentation with examples
+- **[Component Documentation](./docs/component-documentation.md)** - Comprehensive React component documentation
+- **[Utility Functions Documentation](./docs/utility-functions-documentation.md)** - Hooks, utilities, and helper functions
 - **[Internationalization](./docs/internationalization.md)** - Multi-language support implementation
+
+#### **AI & Automation**
+- **[AI Flows Documentation](./docs/ai-flows-documentation.md)** - AI-powered features and flows using Google AI (Genkit)
+
+#### **Communication & Notifications**
+- **[Email Templates Documentation](./docs/email-templates-documentation.md)** - Email templates and notification system
 
 #### **Payment System**
 - **[Payment System Documentation](./docs/payment-system-documentation.md)** - Complete payment system guide
@@ -387,12 +396,16 @@ LocalPro includes comprehensive documentation covering all aspects of the platfo
 
 ### 📊 Documentation Statistics
 
-- **Total Documents**: 28 comprehensive guides
+- **Total Documents**: 33 comprehensive guides
 - **Security Audits**: 3 detailed security assessments
 - **Implementation Guides**: 8 step-by-step implementation documents
-- **API Documentation**: Complete REST API reference
+- **API Documentation**: Complete REST API reference with endpoint details
 - **User Guides**: 5 role-specific user journey guides
 - **Payment Documentation**: 10 payment system guides
+- **Technical Documentation**: 5 comprehensive technical guides
+- **AI Documentation**: Complete AI flows and automation documentation
+- **Component Documentation**: Detailed React component documentation
+- **Email System**: Complete email templates and notification documentation
 
 ### 🔄 Documentation Updates
 

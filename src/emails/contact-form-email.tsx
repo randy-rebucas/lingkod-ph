@@ -29,7 +29,7 @@ export const ContactFormEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Heading style={heading}>New Contact Form Submission</Heading>
-        <Text style={paragraph}>You received the following message from your website's contact form:</Text>
+        <Text style={paragraph}>You received the following message from your website&apos;s contact form:</Text>
         <Section style={infoSection}>
           <Text>
             <strong>From:</strong> {name}

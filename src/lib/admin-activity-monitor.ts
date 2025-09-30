@@ -1,5 +1,5 @@
 import { getDb  } from './firebase';
-import { doc, setDoc, getDoc, collection, query, where, orderBy, limit, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { sendEmail } from './email-service';
 
 /**
@@ -142,15 +142,10 @@ export class AdminActivityMonitor {
     endDate?: Date;
     limit?: number;
   }): Promise<AdminActivity[]> {
-    try {
-      // This would typically use Firestore queries with proper filtering
-      // For now, we'll return an empty array as a placeholder
-      // In production, implement proper querying based on filters
-      return [];
-    } catch (error) {
-      console.error('Error getting admin activities:', error);
-      return [];
-    }
+    // This would typically use Firestore queries with proper filtering
+    // For now, we'll return an empty array as a placeholder
+    // In production, implement proper querying based on filters
+    return [];
   }
 
   /**
@@ -229,14 +224,9 @@ export class AdminActivityMonitor {
    * Get activity alerts
    */
   static async getAlerts(): Promise<AdminActivityAlert[]> {
-    try {
-      // This would typically query the alerts collection
-      // For now, return empty array
-      return [];
-    } catch (error) {
-      console.error('Error getting activity alerts:', error);
-      return [];
-    }
+    // This would typically query the alerts collection
+    // For now, return empty array
+    return [];
   }
 
   /**
@@ -263,14 +253,9 @@ export class AdminActivityMonitor {
    * Delete activity alert
    */
   static async deleteAlert(alertId: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      // In production, you'd use deleteDoc
-      // await deleteDoc(doc(getDb(), this.ALERTS_COLLECTION, alertId));
-      return { success: true };
-    } catch (error) {
-      console.error('Error deleting activity alert:', error);
-      return { success: false, error: 'Failed to delete alert' };
-    }
+    // In production, you'd use deleteDoc
+    // await deleteDoc(doc(getDb(), this.ALERTS_COLLECTION, alertId));
+    return { success: true };
   }
 
   /**

@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
 import { getDb  } from '@/lib/firebase';
-import { collection, query, onSnapshot, orderBy, limit, getDocs, startAfter, QueryDocumentSnapshot } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, startAfter, QueryDocumentSnapshot } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -239,7 +239,7 @@ export default function AdminCategoriesPage() {
                                                     <AlertDialogContent>
                                                         <AlertDialogHeader>
                                                             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                            <AlertDialogDescription>This action cannot be undone. This will permanently delete the category "{category.name}".</AlertDialogDescription>
+                                                            <AlertDialogDescription>This action cannot be undone. This will permanently delete the category &quot;{category.name}&quot;.</AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
                                                             <AlertDialogCancel>Cancel</AlertDialogCancel>

@@ -4,14 +4,13 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import { getDb  } from '@/lib/firebase';
-import { collection, query, onSnapshot, orderBy, Timestamp, doc } from "firebase/firestore";
+import { collection, query, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, CheckCircle, Wallet } from "lucide-react";
+import { CheckCircle, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { handleMarkAsPaid } from "./actions";

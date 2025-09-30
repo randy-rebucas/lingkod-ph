@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { AdminRateLimiter, AdminOperation } from '@/lib/admin-rate-limiter';
 import { AdminSessionManager, validateAdminSession } from '@/lib/admin-session-manager';
-import { Admin2FAManager, requireAdmin2FA } from '@/lib/admin-2fa';
+import { requireAdmin2FA } from '@/lib/admin-2fa';
 import { AdminActivityLogger } from '@/lib/admin-activity-monitor';
 import { SecurityEventLogger } from '@/lib/admin-security-notifications';
 import { adminDb as db } from '@/lib/firebase-admin';
@@ -211,10 +211,10 @@ export async function POST(request: NextRequest) {
  */
 async function handleUserManagement(
   operation: string,
-  data: any,
-  adminId: string,
-  adminName: string
-): Promise<{ success: boolean; message: string; data?: any }> {
+  _data: unknown,
+  _adminId: string,
+  _adminName: string
+): Promise<{ success: boolean; message: string; data?: unknown }> {
   try {
     switch (operation) {
       case 'create_user':
@@ -247,10 +247,10 @@ async function handleUserManagement(
  */
 async function handleFinancialOperation(
   operation: string,
-  data: any,
-  adminId: string,
-  adminName: string
-): Promise<{ success: boolean; message: string; data?: any }> {
+  _data: unknown,
+  _adminId: string,
+  _adminName: string
+): Promise<{ success: boolean; message: string; data?: unknown }> {
   try {
     switch (operation) {
       case 'process_payout':
@@ -262,7 +262,7 @@ async function handleFinancialOperation(
         return { success: true, message: 'Payment verified successfully' };
       
       case 'refund_transaction':
-        return await handleRefundTransaction(data, adminId, adminName);
+        return await handleRefundTransaction(_data, _adminId, _adminName);
       
       default:
         return { success: false, message: 'Unknown financial operation' };
@@ -277,12 +277,12 @@ async function handleFinancialOperation(
  * Handle refund transaction
  */
 async function handleRefundTransaction(
-  data: any,
-  adminId: string,
-  adminName: string
-): Promise<{ success: boolean; message: string; data?: any }> {
+  data: unknown,
+  _adminId: string,
+  _adminName: string
+): Promise<{ success: boolean; message: string; data?: unknown }> {
   try {
-    const { transactionId, reason, amount } = data;
+    const { transactionId, reason, amount } = data as any;
     
     if (!transactionId || !reason) {
       return { success: false, message: 'Transaction ID and reason are required' };
@@ -307,7 +307,7 @@ async function handleRefundTransaction(
       status: 'refunded',
       refundReason: reason,
       refundAmount: amount || transaction.amount,
-      refundedBy: adminId,
+      refundedBy: _adminId,
       refundedAt: new Date()
     });
 
@@ -318,7 +318,7 @@ async function handleRefundTransaction(
         status: 'Cancelled',
         cancellationReason: `Refunded: ${reason}`,
         cancelledAt: new Date(),
-        cancelledBy: adminId
+        cancelledBy: _adminId
       });
     }
 
@@ -334,14 +334,14 @@ async function handleRefundTransaction(
     // Log the refund action
     await AuditLogger.getInstance().logAction(
       'REFUND_PROCESSED',
-      adminId,
+      _adminId,
       'transactions',
       { 
         transactionId, 
         clientId: transaction.clientId, 
         amount: amount || transaction.amount, 
         reason,
-        adminName 
+        adminName: _adminName 
       }
     );
 
@@ -357,10 +357,10 @@ async function handleRefundTransaction(
  */
 async function handleSystemConfiguration(
   operation: string,
-  data: any,
-  adminId: string,
-  adminName: string
-): Promise<{ success: boolean; message: string; data?: any }> {
+  _data: unknown,
+  _adminId: string,
+  _adminName: string
+): Promise<{ success: boolean; message: string; data?: unknown }> {
   try {
     switch (operation) {
       case 'update_settings':
@@ -386,10 +386,10 @@ async function handleSystemConfiguration(
  */
 async function handleContentManagement(
   operation: string,
-  data: any,
-  adminId: string,
-  adminName: string
-): Promise<{ success: boolean; message: string; data?: any }> {
+  _data: unknown,
+  _adminId: string,
+  _adminName: string
+): Promise<{ success: boolean; message: string; data?: unknown }> {
   try {
     switch (operation) {
       case 'manage_categories':

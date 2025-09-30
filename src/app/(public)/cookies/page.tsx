@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { 
   Cookie, 
   Shield, 
@@ -23,16 +22,9 @@ import {
   BookOpen,
   CheckCircle,
   AlertTriangle,
-  Info,
-  ChevronRight,
-  ExternalLink,
   Heart,
-  Star,
   ArrowRight,
-  Trash2,
   Edit,
-  Download,
-  Upload
 } from "lucide-react";
 import { useState } from "react";
 
@@ -287,7 +279,7 @@ export default function CookiesPage() {
                 <CardContent>
                   <ScrollArea className="h-[600px]">
                     <div className="space-y-2">
-                      {sections.map((section, index) => (
+                      {sections.map((section) => (
                         <Button
                           key={section.id}
                           variant={activeSection === section.id ? "default" : "ghost"}
@@ -344,8 +336,8 @@ export default function CookiesPage() {
                 <CardContent>
                   <div className="max-w-6xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-4">
-                      {cookieTypes.map((type, index) => (
-                        <div key={index} className="p-4 bg-background/60 rounded-lg border">
+                      {cookieTypes.map((type) => (
+                        <div key={type.name} className="p-4 bg-background/60 rounded-lg border">
                           <div className="flex items-center gap-3 mb-3">
                             <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                               {type.icon}
@@ -387,9 +379,9 @@ export default function CookiesPage() {
                 <CardContent>
                   <div className="max-w-6xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-4">
-                      {quickActions.map((action, index) => (
+                      {quickActions.map((action) => (
                         <Button
-                          key={index}
+                          key={action.title}
                           variant="outline"
                           className="h-auto p-4 justify-start text-left hover:bg-primary/10"
                         >

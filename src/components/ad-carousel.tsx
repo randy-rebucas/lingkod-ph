@@ -1,11 +1,11 @@
 
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 import Image from "next/image";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -14,7 +14,6 @@ import {
   CarouselPrevious,
   type CarouselApi,
 } from "@/components/ui/carousel";
-import type { UseEmblaCarouselType } from "embla-carousel-react";
 import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
 import { Badge } from "./ui/badge";
@@ -38,7 +37,7 @@ export function AdCarousel() {
     const [api, setApi] = useState<CarouselApi>()
     const [current, setCurrent] = useState(0)
     const [count, setCount] = useState(0)
-    const Autoplay = useRef<any>(null);
+    const Autoplay = useRef<typeof import("embla-carousel-autoplay").default | null>(null);
     const t = useTranslations('AdCarousel');
     const { handleError } = useErrorHandler();
 
@@ -64,7 +63,6 @@ export function AdCarousel() {
         })
     }, [api]);
 
-
     useEffect(() => {
         if (!getDb()) return;
         const campaignsQuery = query(collection(getDb(), "adCampaigns"), where("isActive", "==", true));
@@ -79,14 +77,6 @@ export function AdCarousel() {
 
         return () => unsubscribe();
     }, [handleError]);
-
-    if (loading) {
-        return <Skeleton className="h-48 w-full rounded-lg" />;
-    }
-
-    if (campaigns.length === 0) {
-        return null; 
-    }
 
     const AdCard = useCallback(({ campaign }: { campaign: AdCampaign }) => {
         const cardContent = (
@@ -138,6 +128,13 @@ export function AdCarousel() {
         return cardContent;
     }, []);
 
+    if (loading) {
+        return <Skeleton className="h-48 w-full rounded-lg" />;
+    }
+
+    if (campaigns.length === 0) {
+        return null; 
+    }
 
     return (
         <div className="relative">

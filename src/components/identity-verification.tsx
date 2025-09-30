@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { getDb, getStorageInstance   } from '@/lib/firebase';
-import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -12,7 +12,7 @@ import { Input } from './ui/input';
 import { Progress } from './ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/use-error-handler';
-import { Upload, Loader2, CheckCircle, AlertCircle, Clock, ShieldCheck, User, CreditCard } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, Clock, ShieldCheck, User, CreditCard } from 'lucide-react';
 import { Badge } from './ui/badge';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -125,7 +125,7 @@ export default function IdentityVerification() {
             setGovId(null);
             setGovIdPreview(null);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             handleError(error, 'submit verification documents');
         } finally {
             setIsSubmitting(false);
@@ -192,7 +192,7 @@ export default function IdentityVerification() {
                                         <Image src={govIdPreview} alt="ID preview" width={200} height={200} className="object-cover h-full w-full" />
                                     ) : (
                                         <div className="text-center text-muted-foreground p-4">
-                                            <p>Upload a clear photo of your valid ID (e.g., Driver's License, Passport).</p>
+                                            <p>Upload a clear photo of your valid ID (e.g., Driver&apos;s License, Passport).</p>
                                         </div>
                                     )}
                                 </div>

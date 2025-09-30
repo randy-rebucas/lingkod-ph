@@ -2,14 +2,12 @@
 "use client";
 
 import { memo } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 
 // Using a placeholder value for the QR code.
 // In a real implementation, you would generate a unique payment request
 // from your payment provider (e.g., PayMongo, Xendit) and encode that URL here.
-const placeholderPaymentUrl = "https://localpro.ph/pay?tx=12345&amount=100";
 
 export const QRCode = memo(function QRCode() {
   const t = useTranslations('QRCode');

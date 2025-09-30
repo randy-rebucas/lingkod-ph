@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { getDb  } from '@/lib/firebase';
@@ -26,7 +26,7 @@ type Notification = {
     message: string;
     link: string;
     read: boolean;
-    createdAt: any; // Firestore Timestamp
+    createdAt: unknown; // Firestore Timestamp
     inviteId?: string;
     agencyId?: string;
     agencyName?: string;
@@ -127,7 +127,7 @@ export function NotificationBell() {
                                 <div className="flex-1">
                                     <p className="text-sm">{notif.message}</p>
                                     <p className="text-xs text-muted-foreground">
-                                        {notif.createdAt ? formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true }) : ''}
+                                        {notif.createdAt ? formatDistanceToNow((notif.createdAt as any).toDate ? (notif.createdAt as any).toDate() : new Date(notif.createdAt as any), { addSuffix: true }) : ''}
                                     </p>
                                      {notif.type === 'agency_invite' && (
                                         <div className="flex gap-2 mt-2">

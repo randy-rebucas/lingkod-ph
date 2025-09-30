@@ -28,38 +28,38 @@ const AuthContext = createContext<AuthContextType>({
   getIdToken: async () => null,
 });
 
-const createSingletonNotification = async (userId: string, type: string, message: string, link: string) => {
-    if (!getDb()) {
-        console.warn('Firebase not initialized, skipping notification creation');
-        return;
-    }
-    
-    try {
-        const notificationsRef = collection(getDb(), `users/${userId}/notifications`);
-        // Check if a similar notification already exists to avoid duplicates
-        const q = query(notificationsRef, 
-            where("type", "==", type),
-            where("message", "==", message),
-            limit(1)
-        );
+// const createSingletonNotification = async (userId: string, type: string, message: string, link: string) => {
+//     if (!getDb()) {
+//         console.warn('Firebase not initialized, skipping notification creation');
+//         return;
+//     }
+//     
+//     try {
+//         const notificationsRef = collection(getDb(), `users/${userId}/notifications`);
+//         // Check if a similar notification already exists to avoid duplicates
+//         const q = query(notificationsRef, 
+//             where("type", "==", type),
+//             where("message", "==", message),
+//             limit(1)
+//         );
 
-        const existingNotifs = await getDocs(q);
-        if (!existingNotifs.empty) {
-            return; // Notification already exists
-        }
+//         const existingNotifs = await getDocs(q);
+//         if (!existingNotifs.empty) {
+//             return; // Notification already exists
+//         }
 
-        await addDoc(notificationsRef, {
-            userId,
-            message,
-            link,
-            type,
-            read: false,
-            createdAt: serverTimestamp(),
-        });
-    } catch (error) {
-        console.error(`Error creating ${type} notification: `, error);
-    }
-};
+//         await addDoc(notificationsRef, {
+//             userId,
+//             message,
+//             link,
+//             type,
+//             read: false,
+//             createdAt: serverTimestamp(),
+//         });
+//     } catch (error) {
+//         console.error(`Error creating ${type} notification: `, error);
+//     }
+// };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -122,7 +122,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribeAuth();
-  }, [toast, handleSignOut, getAuthInstance(), getDb()]);
+  }, [toast, handleSignOut]);
 
   // Memoize context value to prevent unnecessary re-renders
   const contextValue = useMemo(() => ({

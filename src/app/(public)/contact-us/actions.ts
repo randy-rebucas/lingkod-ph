@@ -6,7 +6,7 @@ import { Resend } from "resend";
 import ContactFormEmail from "@/emails/contact-form-email";
 import { getTranslations } from 'next-intl/server';
 
-const createContactSchema = (t: any) => z.object({
+const createContactSchema = (t: unknown) => z.object({
   name: z.string().min(2),
   email: z.string().email(),
   subject: z.string().min(5),

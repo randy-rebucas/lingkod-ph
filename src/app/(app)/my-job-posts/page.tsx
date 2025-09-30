@@ -234,7 +234,7 @@ export default function MyJobPostsPage() {
                                                     <AlertDialogHeader>
                                                         <AlertDialogTitle>{t('deleteJobPost')}</AlertDialogTitle>
                                                         <AlertDialogDescription>
-                                                            Are you sure you want to delete "{job.title}"? This action cannot be undone.
+                                                            Are you sure you want to delete &quot;{job.title}&quot;? This action cannot be undone.
                                                         </AlertDialogDescription>
                                                     </AlertDialogHeader>
                                                     <AlertDialogFooter>

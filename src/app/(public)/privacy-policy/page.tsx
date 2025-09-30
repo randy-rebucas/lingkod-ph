@@ -19,7 +19,6 @@ import {
   AlertTriangle,
   Info,
   Heart,
-  Star,
   ArrowRight,
   Users,
   Database,
@@ -292,7 +291,7 @@ export default function PrivacyPolicyPage() {
                 <CardContent>
                   <ScrollArea className="h-[600px]">
                     <div className="space-y-2">
-                      {sections.map((section, index) => (
+                      {sections.map((section) => (
                         <Button
                           key={section.id}
                           variant={activeSection === section.id ? "default" : "ghost"}
@@ -349,8 +348,8 @@ export default function PrivacyPolicyPage() {
                 <CardContent>
                   <div className="max-w-6xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-4">
-                      {quickSummary.map((item, index) => (
-                        <div key={index} className="flex items-center gap-3 p-3 bg-background/60 rounded-lg">
+                      {quickSummary.map((item) => (
+                        <div key={item.title} className="flex items-center gap-3 p-3 bg-background/60 rounded-lg">
                           <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                             {item.icon}
                           </div>

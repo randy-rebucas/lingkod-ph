@@ -88,7 +88,7 @@ export default function AppliedJobsPage() {
     };
 
     const filteredAndSortedJobs = useMemo(() => {
-        let filtered = appliedJobs.filter(job => {
+        const filtered = appliedJobs.filter(job => {
             const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                 job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                 job.clientName.toLowerCase().includes(searchTerm.toLowerCase());

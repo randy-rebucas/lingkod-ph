@@ -207,7 +207,7 @@ export default function AdminRewardsPage() {
                                                     <AlertDialogContent>
                                                         <AlertDialogHeader>
                                                             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                            <AlertDialogDescription>This action cannot be undone. This will permanently delete the reward "{reward.title}".</AlertDialogDescription>
+                                                            <AlertDialogDescription>This action cannot be undone. This will permanently delete the reward &quot;{reward.title}&quot;.</AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
                                                             <AlertDialogCancel>Cancel</AlertDialogCancel>

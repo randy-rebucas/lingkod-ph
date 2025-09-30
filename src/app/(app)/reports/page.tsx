@@ -17,31 +17,20 @@ import {
   TrendingUp,
   TrendingDown,
   BarChart3,
-  PieChart,
   Download,
   Filter,
-  Calendar,
   Target,
-  AlertTriangle,
   Users,
-  Clock,
-  Award,
   Zap,
   Eye,
-  Settings,
-  RefreshCw,
-  Share2,
-  Bell,
   Activity,
   MapPin,
   Star,
   ArrowUpRight,
-  ArrowDownRight,
   Minus
 } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import {
   LineChart,
   Line,
@@ -60,9 +49,7 @@ import {
   Cell,
   ComposedChart,
   ScatterChart,
-  Scatter,
-  RadialBarChart,
-  RadialBar
+  Scatter
 } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
@@ -71,9 +58,7 @@ import { handleMarkAsPaid } from '@/app/(app)/admin/payouts/actions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 
@@ -101,6 +86,26 @@ type PayoutRequest = {
     amount: number;
     status: "Pending" | "Paid";
     requestedAt: Timestamp;
+};
+
+type ReportData = {
+    totalRevenue: number;
+    totalCompletedBookings: number;
+    averageBookingValue: number;
+    providerPerformance: Array<{
+        providerId: string;
+        providerName: string;
+        completedBookings: number;
+        totalRevenue: number;
+    }>;
+    revenueChartData: Array<{
+        name: string;
+        Revenue: number;
+    }>;
+    providerChartData: Array<{
+        name: string;
+        Bookings: number;
+    }>;
 };
 
 const processRevenueChartData = (bookings: Booking[]) => {
@@ -512,7 +517,7 @@ export default function ReportsPage() {
 }
 
 // Overview Tab Component
-function OverviewTab({ reportData, payouts, onMarkAsPaid }: { reportData: any, payouts: PayoutRequest[], onMarkAsPaid: (payout: PayoutRequest) => void }) {
+function OverviewTab({ reportData, payouts, onMarkAsPaid }: { reportData: ReportData, payouts: PayoutRequest[], onMarkAsPaid: (payout: PayoutRequest) => void }) {
     return (
         <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
@@ -607,7 +612,7 @@ function OverviewTab({ reportData, payouts, onMarkAsPaid }: { reportData: any, p
 }
 
 // Financial Tab Component
-function FinancialTab({ reportData }: { reportData: any }) {
+function FinancialTab({ reportData }: { reportData: ReportData }) {
     const financialData = [
         { name: 'Revenue', value: reportData.totalRevenue, color: '#8884d8' },
         { name: 'Expenses', value: reportData.totalRevenue * 0.3, color: '#82ca9d' },
@@ -682,7 +687,7 @@ function FinancialTab({ reportData }: { reportData: any }) {
 }
 
 // Performance Tab Component
-function PerformanceTab({ reportData }: { reportData: any }) {
+function PerformanceTab({ reportData }: { reportData: ReportData }) {
     return (
         <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
@@ -702,7 +707,7 @@ function PerformanceTab({ reportData }: { reportData: any }) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                                {reportData.providerPerformance.map((provider: any) => (
+                                {reportData.providerPerformance.map((provider) => (
                                 <TableRow key={provider.providerId}>
                                     <TableCell className="font-medium">{provider.providerName}</TableCell>
                                     <TableCell className="text-center">{provider.completedBookings}</TableCell>
@@ -772,7 +777,7 @@ function PerformanceTab({ reportData }: { reportData: any }) {
 }
 
 // Analytics Tab Component
-function AnalyticsTab({ reportData }: { reportData: any }) {
+function AnalyticsTab({ reportData }: { reportData: ReportData }) {
     return (
         <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
@@ -803,7 +808,7 @@ function AnalyticsTab({ reportData }: { reportData: any }) {
                     </CardHeader>
                     <CardContent>
                         <ResponsiveContainer width="100%" height={300}>
-                            <ScatterChart data={reportData.providerPerformance.map((p: any) => ({
+                            <ScatterChart data={reportData.providerPerformance.map((p) => ({
                                 x: p.completedBookings,
                                 y: p.totalRevenue,
                                 name: p.providerName
@@ -823,7 +828,7 @@ function AnalyticsTab({ reportData }: { reportData: any }) {
 }
 
 // Insights Tab Component
-function InsightsTab({ reportData }: { reportData: any }) {
+function InsightsTab({ reportData }: { reportData: ReportData }) {
     return (
         <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">

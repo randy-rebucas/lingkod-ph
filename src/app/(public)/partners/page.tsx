@@ -1,18 +1,17 @@
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Building2, Handshake, Users, Wrench, Star, Award, TrendingUp, Globe, CheckCircle, Quote, Target, Zap, Shield, BarChart3, Mail, Calendar, MapPin, Briefcase, Play, ChevronRight, ExternalLink, Clock, DollarSign, UserCheck, Lightbulb, Heart, Rocket, Gauge } from "lucide-react";
+import { ArrowRight, Building2, Handshake, Users, Wrench, Star, Award, CheckCircle, Quote, Target, Zap, Mail, MapPin, Briefcase, Clock, DollarSign, UserCheck, Lightbulb, Heart, Gauge, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { useTranslations } from 'next-intl';
 
 export const metadata: Metadata = {
   title: 'Partnerships',
   description: 'Collaborate with LocalPro to empower local businesses and build stronger communities. Explore our partnership opportunities for corporations, LGUs, and suppliers.',
 };
 
-const partnershipStats = [
+const partnerStats = [
   { number: "500+", label: "Active Partners", icon: <Users className="h-6 w-6" /> },
   { number: "50+", label: "Cities Covered", icon: <MapPin className="h-6 w-6" /> },
   { number: "₱10M+", label: "Partner Revenue", icon: <DollarSign className="h-6 w-6" /> },
@@ -25,7 +24,7 @@ const partnershipTypes = [
   {
     icon: <Building2 className="h-12 w-12 text-primary" />,
     title: "Corporate Partners",
-    description: "Offer LocalPro's trusted services as a perk to your employees or integrate our network into your business offerings. Enhance your value proposition and support local professionals.",
+    description: "Offer LocalPro&apos;s trusted services as a perk to your employees or integrate our network into your business offerings. Enhance your value proposition and support local professionals.",
     benefits: [
       "Employee Benefits Program",
       "B2B Service Integration", 
@@ -97,7 +96,7 @@ const successStories = [
     company: "ToolMaster Supply",
     type: "Supply Partnership",
     result: "200% growth in B2B sales",
-    description: "Became the preferred supplier for LocalPro's network of contractors, expanding their market reach and increasing sales dramatically.",
+    description: "Became the preferred supplier for LocalPro&apos;s network of contractors, expanding their market reach and increasing sales dramatically.",
     icon: <Wrench className="h-8 w-8 text-primary" />,
     metrics: ["₱5M New Revenue", "1,200+ New Customers", "40% Market Share Growth"],
     testimonial: "LocalPro opened doors we never knew existed. Our business has never been stronger.",
@@ -119,7 +118,7 @@ const partnerTestimonials = [
     name: "Juan Dela Cruz",
     role: "Mayor",
     company: "Quezon City LGU",
-    content: "The partnership with LocalPro has created hundreds of jobs in our community. It's been a game-changer for local employment and economic development. Highly recommended for any LGU.",
+    content: "The partnership with LocalPro has created hundreds of jobs in our community. It&apos;s been a game-changer for local employment and economic development. Highly recommended for any LGU.",
     rating: 5,
     avatar: "JD",
     verified: true
@@ -128,7 +127,7 @@ const partnerTestimonials = [
     name: "Ana Rodriguez",
     role: "CEO",
     company: "BuildSupply Co.",
-    content: "Being a LocalPro partner has opened up new markets we never thought possible. The growth has been incredible, and the support team is outstanding. Best business decision we've made.",
+    content: "Being a LocalPro partner has opened up new markets we never thought possible. The growth has been incredible, and the support team is outstanding. Best business decision we&apos;ve made.",
     rating: 5,
     avatar: "AR",
     verified: true
@@ -148,7 +147,7 @@ const partnershipProcess = [
   {
     step: "1",
     title: "Initial Discussion",
-    description: "Let's discuss your goals, challenges, and how we can work together to achieve mutual success",
+    description: "Let&apos;s discuss your goals, challenges, and how we can work together to achieve mutual success",
     icon: <Mail className="h-6 w-6" />,
     duration: "1-2 days",
     details: ["Discovery call", "Needs assessment", "Goal alignment"]
@@ -156,7 +155,7 @@ const partnershipProcess = [
   {
     step: "2",
     title: "Partnership Proposal",
-    description: "We'll create a customized partnership proposal tailored to your organization's specific needs and objectives",
+    description: "We&apos;ll create a customized partnership proposal tailored to your organization&apos;s specific needs and objectives",
     icon: <Target className="h-6 w-6" />,
     duration: "3-5 days",
     details: ["Custom proposal", "Pricing structure", "Implementation plan"]
@@ -203,7 +202,6 @@ const achievements = [
 ];
 
 export default function PartnersPage() {
-  const t = useTranslations('Partners');
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -244,12 +242,12 @@ export default function PartnersPage() {
           <div className="mx-auto mb-16 max-w-3xl text-center">
             <h2 className="font-headline text-4xl font-bold md:text-5xl mb-6">Partnership Opportunities</h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Choose the partnership model that aligns with your organization's goals and create lasting impact
+              Choose the partnership model that aligns with your organization&apos;s goals and create lasting impact
             </p>
           </div>
           <div className="max-w-6xl mx-auto">
             <div className="grid gap-8 lg:grid-cols-3">
-              {partnershipTypes.map((partner, index) => (
+              {partnershipTypes.map((partner) => (
                 <Card key={partner.title} className="group shadow-soft hover:shadow-glow/20 transition-all duration-500 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-2 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div className="relative p-8">
@@ -310,8 +308,8 @@ export default function PartnersPage() {
           </div>
           <div className="max-w-6xl mx-auto">
             <div className="grid gap-8 lg:grid-cols-3">
-              {successStories.map((story, index) => (
-                <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1">
+              {successStories.map((story) => (
+                <Card key={story.company} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1">
                   <div className="p-8">
                     <div className="flex items-center gap-4 mb-6">
                       <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -341,7 +339,7 @@ export default function PartnersPage() {
 
                     <div className="border-t pt-4">
                       <Quote className="h-5 w-5 text-primary mb-2" />
-                      <p className="text-sm italic text-muted-foreground mb-2">"{story.testimonial}"</p>
+                      <p className="text-sm italic text-muted-foreground mb-2">&quot;{story.testimonial}&quot;</p>
                       <p className="text-xs font-medium">— {story.author}</p>
                     </div>
                   </div>
@@ -364,7 +362,7 @@ export default function PartnersPage() {
           <div className="max-w-6xl mx-auto">
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
               {partnershipProcess.map((step, index) => (
-                <div key={index} className="relative">
+                <div key={step.title} className="relative">
                   <Card className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1 h-full">
                     <div className="p-6 text-center">
                       <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
@@ -415,8 +413,8 @@ export default function PartnersPage() {
           </div>
           <div className="max-w-6xl mx-auto">
             <div className="grid gap-8 lg:grid-cols-2">
-              {partnerTestimonials.map((testimonial, index) => (
-                <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
+              {partnerTestimonials.map((testimonial) => (
+                <Card key={testimonial.name} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
                   <div className="p-8">
                     <div className="flex items-center gap-1 mb-4">
                       {[...Array(testimonial.rating)].map((_, i) => (
@@ -425,7 +423,7 @@ export default function PartnersPage() {
                     </div>
                     
                     <Quote className="h-8 w-8 text-primary/30 mb-4" />
-                    <p className="text-muted-foreground leading-relaxed mb-6">"{testimonial.content}"</p>
+                    <p className="text-muted-foreground leading-relaxed mb-6">&quot;{testimonial.content}&quot;</p>
                     
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center font-semibold text-primary">
@@ -464,8 +462,8 @@ export default function PartnersPage() {
           </div>
           <div className="max-w-6xl mx-auto">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {achievements.map((achievement, index) => (
-                <Card key={index} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1 text-center">
+              {achievements.map((achievement) => (
+                <Card key={achievement.title} className="group shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm hover:-translate-y-1 text-center">
                   <div className="p-6">
                     <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
                       {achievement.icon}
@@ -493,7 +491,7 @@ export default function PartnersPage() {
                   <h2 className="text-4xl font-bold font-headline mb-4">Ready to Make an Impact?</h2>
                   <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
                     Join hundreds of successful partners who are transforming communities and growing their businesses with LocalPro. 
-                    Let's create something amazing together.
+                    Let&apos;s create something amazing together.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">

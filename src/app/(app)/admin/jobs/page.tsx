@@ -203,7 +203,7 @@ export default function AdminJobsPage() {
                                                 <AlertDialogContent>
                                                     <AlertDialogHeader>
                                                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                        <AlertDialogDescription>This action cannot be undone. This will permanently delete the job post "{job.title}".</AlertDialogDescription>
+                                                        <AlertDialogDescription>This action cannot be undone. This will permanently delete the job post &quot;{job.title}&quot;.</AlertDialogDescription>
                                                     </AlertDialogHeader>
                                                     <AlertDialogFooter>
                                                         <AlertDialogCancel>Cancel</AlertDialogCancel>

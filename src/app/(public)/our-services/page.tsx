@@ -6,7 +6,6 @@ import {
   Sparkles, 
   Star, 
   ArrowRight, 
-  CheckCircle, 
   Users, 
   Shield, 
   Clock,
@@ -16,7 +15,6 @@ import {
   Zap,
   Paintbrush,
   Hammer,
-  Scissors,
   Bug,
   TreePine,
   Building,
@@ -176,7 +174,6 @@ const benefits = [
 ];
 
 export default function ServicesPage() {
-  const t = useTranslations('Services');
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -237,7 +234,7 @@ export default function ServicesPage() {
           </div>
           
           <div className="max-w-6xl mx-auto space-y-16">
-            {serviceCategories.map((category, categoryIndex) => (
+            {serviceCategories.map((category) => (
               <div key={category.id}>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center">

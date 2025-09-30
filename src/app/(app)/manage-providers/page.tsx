@@ -7,24 +7,16 @@ import {
   MoreHorizontal,
   UserPlus,
   Users,
-  AlertCircle,
   Loader2,
   Trash2,
   TrendingUp,
-  TrendingDown,
   BarChart3,
-  PieChart,
   Download,
   Filter,
-  Calendar,
   Target,
   Award,
   Zap,
   Eye,
-  Settings,
-  RefreshCw,
-  Share2,
-  Bell,
   Activity,
   MapPin,
   Star,
@@ -377,17 +369,6 @@ export default function ManageProvidersPage() {
         getCoreRowModel: getCoreRowModel(),
     });
 
-    if (userRole !== 'agency') {
-        return (
-             <div className="container space-y-8">
-                 <div className="max-w-6xl mx-auto">
-                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
-                    <p className="text-muted-foreground">{t('agencyOnly')}</p>
-                </div>
-            </div>
-        )
-    }
-
     // Calculate analytics data
     const analyticsData = React.useMemo(() => {
         const activeProviders = providers.filter(p => p.status === 'Active').length;
@@ -405,6 +386,17 @@ export default function ManageProvidersPage() {
             averageRating
         };
     }, [providers]);
+
+    if (userRole !== 'agency') {
+        return (
+             <div className="container space-y-8">
+                 <div className="max-w-6xl mx-auto">
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('agencyOnly')}</p>
+                </div>
+            </div>
+        )
+    }
 
     return (
       <div className="container space-y-8">

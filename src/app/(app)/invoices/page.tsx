@@ -359,6 +359,35 @@ export default function InvoicesPage() {
             rowSelection,
         },
     });
+
+    // Calculate analytics data
+    const analyticsData = React.useMemo(() => {
+        const totalInvoices = invoices.length;
+        const paidInvoices = invoices.filter(inv => inv.status === 'Paid').length;
+        const overdueInvoices = invoices.filter(inv => inv.status === 'Overdue').length;
+        const draftInvoices = invoices.filter(inv => inv.status === 'Draft').length;
+        
+        const totalRevenue = invoices
+            .filter(inv => inv.status === 'Paid')
+            .reduce((sum, inv) => sum + inv.amount, 0);
+        
+        const averageInvoiceValue = totalInvoices > 0 ? totalRevenue / totalInvoices : 0;
+        
+        const pendingAmount = invoices
+            .filter(inv => inv.status === 'Sent')
+            .reduce((sum, inv) => sum + inv.amount, 0);
+        
+        return {
+            totalInvoices,
+            paidInvoices,
+            overdueInvoices,
+            draftInvoices,
+            totalRevenue,
+            averageInvoiceValue,
+            paymentRate: totalInvoices > 0 ? (paidInvoices / totalInvoices) * 100 : 0,
+            pendingAmount
+        };
+    }, [invoices]);
     
     if (!user) {
          return (
@@ -386,39 +415,6 @@ export default function InvoicesPage() {
             </div>
         )
     }
-
-    // Calculate analytics data
-    const analyticsData = React.useMemo(() => {
-        const totalInvoices = invoices.length;
-        const paidInvoices = invoices.filter(inv => inv.status === 'Paid').length;
-        const overdueInvoices = invoices.filter(inv => inv.status === 'Overdue').length;
-        const draftInvoices = invoices.filter(inv => inv.status === 'Draft').length;
-        
-        const totalRevenue = invoices
-            .filter(inv => inv.status === 'Paid')
-            .reduce((sum, inv) => sum + inv.amount, 0);
-        
-        const pendingAmount = invoices
-            .filter(inv => inv.status === 'Sent' || inv.status === 'Overdue')
-            .reduce((sum, inv) => sum + inv.amount, 0);
-        
-        const overdueAmount = invoices
-            .filter(inv => inv.status === 'Overdue')
-            .reduce((sum, inv) => sum + inv.amount, 0);
-        
-        const collectionRate = totalInvoices > 0 ? (paidInvoices / totalInvoices) * 100 : 0;
-        
-        return {
-            totalInvoices,
-            paidInvoices,
-            overdueInvoices,
-            draftInvoices,
-            totalRevenue,
-            pendingAmount,
-            overdueAmount,
-            collectionRate
-        };
-    }, [invoices]);
 
     return (
       <div className="container space-y-8">

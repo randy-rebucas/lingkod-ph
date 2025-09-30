@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Zap, Users, Heart, Lightbulb, Target, BookOpen, ShieldCheck, Star, Award, TrendingUp, Globe, CheckCircle, Quote } from "lucide-react";
+import { ArrowRight, Zap, Users, Heart, Target, BookOpen, ShieldCheck, Star, Award, TrendingUp, Globe, CheckCircle, Quote } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { useTranslations } from 'next-intl';
@@ -273,7 +273,7 @@ export default function AboutPage() {
                     ))}
                   </div>
                   <Quote className="h-8 w-8 text-primary/30 mb-4" />
-                  <p className="text-muted-foreground mb-6 leading-relaxed">"{testimonial.content}"</p>
+                  <p className="text-muted-foreground mb-6 leading-relaxed">&quot;{testimonial.content}&quot;</p>
                   <div>
                     <div className="font-semibold">{testimonial.name}</div>
                     <div className="text-sm text-muted-foreground">{testimonial.role}</div>

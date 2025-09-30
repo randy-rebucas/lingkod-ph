@@ -1,7 +1,7 @@
 'use server';
 
 import { getDb  } from './firebase';
-import { doc, getDoc, collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { financialAuditLogger } from './financial-audit-logger';
 
 export interface PayoutValidationResult {

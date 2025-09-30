@@ -4,7 +4,6 @@
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, userRole } = useAuth();

@@ -7,7 +7,6 @@ import * as z from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { sendContactForm, FormState } from "./actions";
 import { useActionState, useEffect } from "react";
-import type { Metadata } from "next";
 import { useTranslations } from 'next-intl';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, Send, Mail, Phone, MapPin, Clock, MessageCircle, Users, Star, CheckCircle, ArrowRight, Globe, Calendar, Zap, Shield, Heart, Award, TrendingUp, UserCheck, Building, Briefcase } from "lucide-react";
+import { Loader2, Send, Mail, Phone, MapPin, MessageCircle, Star, CheckCircle, ArrowRight, Zap, Heart, Award, UserCheck, Building, Briefcase, Clock, Calendar } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 
 
@@ -35,7 +34,7 @@ const initialState: FormState = {
 const contactMethods = [
   {
     title: "Email Support",
-    description: "Send us a detailed message and we'll respond within 2 hours",
+    description: "Send us a detailed message and we&apos;ll respond within 2 hours",
     icon: <Mail className="h-6 w-6" />,
     contact: "admin@localpro.asia",
     availability: "24/7 Available",
@@ -88,13 +87,13 @@ const faqData = [
     category: "Response Time"
   },
   {
-    question: "What's the best way to reach you?",
+    question: "What&apos;s the best way to reach you?",
     answer: "For urgent matters, call us directly. For detailed inquiries, email is best. For quick questions, try our live chat feature.",
     category: "Contact Methods"
   },
   {
     question: "Do you offer support in Filipino?",
-    answer: "Yes! Our team is fluent in both English and Filipino. We're happy to assist you in your preferred language.",
+    answer: "Yes! Our team is fluent in both English and Filipino. We&apos;re happy to assist you in your preferred language.",
     category: "Language Support"
   },
   {
@@ -104,7 +103,7 @@ const faqData = [
   },
   {
     question: "What if I have a technical issue?",
-    answer: "For technical problems, please contact our support team with as much detail as possible. We'll escalate to our technical team if needed.",
+    answer: "For technical problems, please contact our support team with as much detail as possible. We&apos;ll escalate to our technical team if needed.",
     category: "Technical Support"
   },
   {
@@ -125,7 +124,7 @@ const testimonials = [
   {
     name: "Juan Dela Cruz",
     role: "Service Provider",
-    content: "LocalPro's support team helped me set up my provider account and answered all my questions. Great service!",
+    content: "LocalPro&apos;s support team helped me set up my provider account and answered all my questions. Great service!",
     rating: 5,
     avatar: "JD"
   },
@@ -178,14 +177,14 @@ export default function ContactUsPage() {
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
               <Star className="w-4 h-4 mr-2" />
-              We're Here to Help
+              We&apos;re Here to Help
             </Badge>
             <h1 className="text-5xl lg:text-7xl font-bold font-headline mb-8 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
               Contact Us
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12">
               Get in touch with our friendly support team. Whether you have questions, need help, or want to share feedback,
-              we're here to make your LocalPro experience exceptional.
+              we&apos;re here to make your LocalPro experience exceptional.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
@@ -256,7 +255,7 @@ export default function ContactUsPage() {
                 <div>
                   <h2 className="text-3xl font-bold font-headline mb-6">Get in Touch</h2>
                   <p className="text-muted-foreground leading-relaxed mb-8">
-                    We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+                    We&apos;d love to hear from you. Send us a message and we&apos;ll respond as soon as possible.
                   </p>
                 </div>
                 
@@ -459,7 +458,7 @@ export default function ContactUsPage() {
                           <Star key={i} className="h-4 w-4 fill-primary text-primary" />
                         ))}
                       </div>
-                      <p className="text-muted-foreground leading-relaxed mb-4">"{testimonial.content}"</p>
+                      <p className="text-muted-foreground leading-relaxed mb-4">&quot;{testimonial.content}&quot;</p>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center font-semibold text-primary">
                           {testimonial.avatar}

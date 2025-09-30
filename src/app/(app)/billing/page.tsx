@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
 import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -191,7 +191,7 @@ export default function BillingPage() {
                                 {t('invoiceDetails', { invoiceNumber: selectedInvoice.invoiceNumber })}
                             </DialogTitle>
                         </DialogHeader>
-                        <InvoicePreview invoice={selectedInvoice as any} />
+                        <InvoicePreview invoice={selectedInvoice} />
                     </DialogContent>
                 )}
             </div>

@@ -6,12 +6,12 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 import { getDb } from '@/lib/firebase';
-import { doc, getDoc, collection, getDocs, where, query, serverTimestamp, addDoc, updateDoc, arrayUnion, writeBatch, Timestamp } from "firebase/firestore";
+import { doc, getDoc, collection, getDocs, where, query, serverTimestamp, addDoc, writeBatch, Timestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Star, MessageSquare, Award, User, Briefcase, Mail, ArrowLeft, Users } from "lucide-react";
+import { Star, MessageSquare, Award, User, Briefcase, ArrowLeft, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import type { Job as JobType } from "@/app/(app)/my-job-posts/page";
@@ -213,7 +213,7 @@ export default function ApplicantsPage() {
                 </Button>
                 <div>
                     <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
-                        Applicants for "{job?.title}"
+                        Applicants for &quot;{job?.title}&quot;
                     </h1>
                     <p className="text-xl text-muted-foreground leading-relaxed">
                         Review the providers who have applied for your job.
@@ -265,7 +265,7 @@ export default function ApplicantsPage() {
                                         <AlertDialogHeader>
                                             <AlertDialogTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Award Job to {applicant.displayName}?</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                This will create a new booking with this provider and change the job status to "In Progress". Are you sure you want to proceed?
+                                                This will create a new booking with this provider and change the job status to &quot;In Progress&quot;. Are you sure you want to proceed?
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
