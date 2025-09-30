@@ -92,6 +92,7 @@ import { useTheme } from "next-themes";
 import BroadcastBanner from "@/components/broadcast-banner";
 import { Logo } from "@/components/logo";
 import { SupportChat } from "@/components/support-chat";
+import { ProviderEngagementCard } from "@/components/provider-engagement-card";
 
 
 const SidebarSupportChat = () => {
@@ -769,6 +770,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarContent>
         <SidebarFooter className="border-t border-border/50 bg-gradient-to-r from-background/50 to-muted/20 p-4">
           <SidebarMenu>
+            {/* Provider Engagement Card - Only for clients */}
+            {userRole === 'client' && (
+              <SidebarMenuItem>
+                <div className="px-3 py-2">
+                  <ProviderEngagementCard className="text-xs" />
+                </div>
+              </SidebarMenuItem>
+            )}
+            
             {userRole !== 'admin' && (
               <SidebarMenuItem>
                 <SidebarSupportChat />

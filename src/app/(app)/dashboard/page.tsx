@@ -23,6 +23,8 @@ import { format, startOfDay, endOfDay } from "date-fns";
 import { findMatchingProviders } from "@/ai/flows/find-matching-providers";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AdCarousel } from "@/components/ad-carousel";
+import { LocationBasedProviderService } from "@/lib/location-based-provider-service";
+import { getCurrentLocation } from "@/lib/geolocation-utils";
 
 
 type Booking = {
@@ -61,6 +63,8 @@ type Provider = {
     searchRank?: number;
     searchReasoning?: string;
     role?: 'provider' | 'agency';
+    distance?: number;
+    distanceFormatted?: string;
 };
 
 type Payout = {
@@ -216,6 +220,12 @@ const ProviderCard = ({ provider, isFavorite, onToggleFavorite, t }: { provider:
                         <span className="truncate">{provider.address}</span>
                     </div>
                 )}
+                {provider.distanceFormatted && (
+                    <div className="flex items-center gap-2 text-xs text-primary font-medium">
+                        <MapPin className="h-3 w-3" />
+                        <span>{provider.distanceFormatted} away</span>
+                    </div>
+                )}
 
                 {provider.keyServices && provider.keyServices.length > 0 && (
                     <div>
@@ -286,6 +296,12 @@ const AgencyCard = ({ agency, isFavorite, onToggleFavorite, t }: { agency: Provi
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <MapPin className="h-3 w-3" />
                         <span className="truncate">{agency.address}</span>
+                    </div>
+                )}
+                {agency.distanceFormatted && (
+                    <div className="flex items-center gap-2 text-xs text-purple-600 font-medium">
+                        <MapPin className="h-3 w-3" />
+                        <span>{agency.distanceFormatted} away</span>
                     </div>
                 )}
 
@@ -403,6 +419,9 @@ const DashboardPage = memo(function DashboardPage() {
     const [isSmartSearching, setIsSmartSearching] = useState(false);
     const [favoriteProviderIds, setFavoriteProviderIds] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+    const [showNearbyProviders, setShowNearbyProviders] = useState(false);
+    const [isLoadingNearby, setIsLoadingNearby] = useState(false);
+    const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
 
 
     // For agency dashboard
@@ -673,6 +692,62 @@ const DashboardPage = memo(function DashboardPage() {
         }
     };
 
+    const handleNearbyProviders = async () => {
+        setIsLoadingNearby(true);
+        setShowNearbyProviders(true);
+        
+        try {
+            // Get user's current location
+            const location = await getCurrentLocation();
+            
+            if (!location) {
+                toast({
+                    title: "Location Access Required",
+                    description: "Please enable location services to find nearby providers.",
+                    variant: "destructive",
+                });
+                setShowNearbyProviders(false);
+                return;
+            }
+
+            setUserLocation(location);
+
+            // Get nearby providers
+            const locationService = LocationBasedProviderService.getInstance();
+            const nearbyProviders = await locationService.getNearbyProvidersFromCoordinates(location, {
+                maxDistance: 50, // 50km radius
+                limit: 20,
+                includeUnavailable: false,
+                minRating: 0
+            });
+
+            setProviders(nearbyProviders);
+            
+            toast({
+                title: "Nearby Providers Found",
+                description: `Found ${nearbyProviders.length} providers within 50km of your location.`,
+            });
+
+        } catch (error) {
+            console.error("Error finding nearby providers:", error);
+            toast({
+                title: "Error Finding Nearby Providers",
+                description: "There was an error finding providers near you. Please try again.",
+                variant: "destructive",
+            });
+            setShowNearbyProviders(false);
+        } finally {
+            setIsLoadingNearby(false);
+        }
+    };
+
+    const handleClearLocationSearch = () => {
+        setShowNearbyProviders(false);
+        setUserLocation(null);
+        setProviders(allProviders);
+        setSearchTerm("");
+    };
+
     // Derived stats for agency
     const agencyTotalRevenue = agencyBookings.filter(b => b.status === 'Completed').reduce((sum, b) => sum + b.price, 0);
     const agencyTotalBookings = agencyBookings.filter(b => b.status === 'Completed').length;
@@ -718,38 +793,118 @@ const DashboardPage = memo(function DashboardPage() {
     if (userRole === 'client') {
         return (
              <div className="container space-y-8">
-                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="p-8 space-y-6">
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <div className="relative flex-1">
-                                <Input 
-                                    placeholder={t('searchPlaceholder')} 
-                                    className="w-full h-14 text-base pl-4 pr-36 border-2 focus:border-primary transition-colors shadow-soft" 
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSmartSearch()}
-                                />
-                                <Button 
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10 shadow-glow hover:shadow-glow/50 transition-all duration-300"
-                                    onClick={handleSmartSearch}
-                                    disabled={isSmartSearching}
-                                >
-                                    {isSmartSearching ? <Loader2 className="mr-2 animate-spin" /> : <Search className="mr-2" />}
-                                    {isSmartSearching ? t('searching') : t('search')}
-                                </Button>
+                 <Card className="border-0 bg-background/80 backdrop-blur-sm">
+                    <CardHeader className="pb-4">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-2xl font-bold">Find Service Providers</h2>
+                                <p className="text-muted-foreground">Discover trusted professionals in your area</p>
                             </div>
-                            <div className="flex items-center gap-1 border-2 p-1 rounded-lg bg-background/50 backdrop-blur-sm h-14">
-                                <Button size="icon" variant={viewMode === 'grid' ? 'secondary' : 'ghost'} onClick={() => setViewMode('grid')} className="h-10 w-10">
-                                    <LayoutGrid className="h-5 w-5" />
+                            <div className="flex items-center gap-1 border rounded-lg p-1 bg-background/50">
+                                <Button size="icon" variant={viewMode === 'grid' ? 'secondary' : 'ghost'} onClick={() => setViewMode('grid')} className="h-8 w-8">
+                                    <LayoutGrid className="h-4 w-4" />
                                 </Button>
-                                 <Button size="icon" variant={viewMode === 'list' ? 'secondary' : 'ghost'} onClick={() => setViewMode('list')} className="h-10 w-10">
-                                    <List className="h-5 w-5" />
+                                <Button size="icon" variant={viewMode === 'list' ? 'secondary' : 'ghost'} onClick={() => setViewMode('list')} className="h-8 w-8">
+                                    <List className="h-4 w-4" />
                                 </Button>
                             </div>
                         </div>
-                        {loadingProviders || isSmartSearching ? (
-                            <div className={cn("gap-4", viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-2')}>
-                                {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="relative">
+                            <Input 
+                                placeholder="Search for services (e.g., house cleaning, web design, tutoring)..." 
+                                className="w-full h-12 text-base pl-4 pr-32 border-2 focus:border-primary transition-colors" 
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyDown={(e) => e.key === 'Enter' && handleSmartSearch()}
+                            />
+                            <Button 
+                                className="absolute right-2 top-1/2 -translate-y-1/2 h-8"
+                                onClick={handleSmartSearch}
+                                disabled={isSmartSearching}
+                            >
+                                {isSmartSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+                                {isSmartSearching ? 'Searching...' : 'Search'}
+                            </Button>
+                        </div>
+                        
+                        {/* Quick Filter Buttons */}
+                        <div className="flex flex-wrap gap-2">
+                            <Button 
+                                variant="default" 
+                                size="sm"
+                                onClick={handleNearbyProviders}
+                                disabled={isLoadingNearby}
+                                className="text-xs bg-primary hover:bg-primary/90"
+                            >
+                                {isLoadingNearby ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                                        Finding...
+                                    </>
+                                ) : (
+                                    <>
+                                        📍 Find Nearby Providers
+                                    </>
+                                )}
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setSearchTerm('house cleaning')}
+                                className="text-xs"
+                            >
+                                🏠 House Cleaning
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setSearchTerm('web design')}
+                                className="text-xs"
+                            >
+                                💻 Web Design
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setSearchTerm('tutoring')}
+                                className="text-xs"
+                            >
+                                📚 Tutoring
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setSearchTerm('photography')}
+                                className="text-xs"
+                            >
+                                📸 Photography
+                            </Button>
+                            <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setSearchTerm('plumbing')}
+                                className="text-xs"
+                            >
+                                🔧 Plumbing
+                            </Button>
+                        </div>
+                        {loadingProviders || isSmartSearching || isLoadingNearby ? (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-center py-8">
+                                    <div className="flex items-center gap-3">
+                                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                        <span className="text-muted-foreground">
+                                            {isLoadingNearby ? 'Finding nearby providers...' : 'Finding the best providers for you...'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className={cn("gap-4", viewMode === 'grid' ? 'grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-2')}>
+                                    {[...Array(6)].map((_, i) => (
+                                        <Skeleton key={i} className={cn("w-full", viewMode === 'grid' ? 'h-64' : 'h-20')} />
+                                    ))}
+                                </div>
                             </div>
                         ) : (
                              providers.length > 0 ? (
@@ -759,12 +914,45 @@ const DashboardPage = memo(function DashboardPage() {
                                     
                                     return (
                                         <div className="space-y-8">
+                                            {/* Results Summary */}
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Users className="h-5 w-5 text-primary" />
+                                                    <span className="text-sm text-muted-foreground">
+                                                        {showNearbyProviders ? (
+                                                            <>
+                                                                {providers.length} nearby provider{providers.length !== 1 ? 's' : ''} found
+                                                                {userLocation && (
+                                                                    <span className="text-xs text-primary ml-2">
+                                                                        (within 50km)
+                                                                    </span>
+                                                                )}
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                {providers.length} provider{providers.length !== 1 ? 's' : ''} found
+                                                            </>
+                                                        )}
+                                                    </span>
+                                                </div>
+                                                {(searchTerm || showNearbyProviders) && (
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm"
+                                                        onClick={showNearbyProviders ? handleClearLocationSearch : () => setSearchTerm('')}
+                                                        className="text-xs"
+                                                    >
+                                                        Clear {showNearbyProviders ? 'location search' : 'search'}
+                                                    </Button>
+                                                )}
+                                            </div>
+                                            
                                             {/* Agencies Section */}
                                             {agencies.length > 0 && (
                                                 <div>
                                                     <div className="flex items-center gap-2 mb-4">
                                                         <Users2 className="h-5 w-5 text-purple-600" />
-                                                        <h2 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                                                        <h2 className="text-xl font-semibold">
                                                             Agencies ({agencies.length})
                                                         </h2>
                                                     </div>
@@ -838,10 +1026,33 @@ const DashboardPage = memo(function DashboardPage() {
                                     );
                                 })()
                             ) : (
-                                <div className="col-span-full text-center text-muted-foreground p-12">
-                                    <Users className="h-16 w-16 mx-auto mb-4" />
-                                    <h3 className="text-xl font-semibold">No Providers Found</h3>
-                                    <p>No providers match your search term. Try another search.</p>
+                                <div className="text-center py-16">
+                                    <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
+                                        <Search className="h-12 w-12 text-muted-foreground" />
+                                    </div>
+                                    <h3 className="text-xl font-semibold mb-2">No providers found</h3>
+                                    <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                                        {searchTerm ? 
+                                            `No providers match "${searchTerm}". Try a different search term or browse our quick filters above.` :
+                                            "Start by searching for a service or use the quick filters above to find providers."
+                                        }
+                                    </p>
+                                    <div className="flex flex-wrap justify-center gap-2">
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm"
+                                            onClick={() => setSearchTerm('')}
+                                        >
+                                            Clear Search
+                                        </Button>
+                                        <Button 
+                                            variant="outline" 
+                                            size="sm"
+                                            onClick={() => setSearchTerm('house cleaning')}
+                                        >
+                                            Try House Cleaning
+                                        </Button>
+                                    </div>
                                 </div>
                             )
                         )}
