@@ -1,0 +1,35 @@
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { useAuth } from '@/context/auth-context';
+import AppliedJobsPage from '../page';
+
+jest.mock('@/context/auth-context');
+const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
+
+describe('AppliedJobsPage', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders for provider users', () => {
+    mockUseAuth.mockReturnValue({
+      user: { uid: 'provider-id' },
+      userRole: 'provider',
+      loading: false,
+    } as any);
+
+    render(<AppliedJobsPage />);
+    expect(screen.getByText(/applied jobs/i)).toBeInTheDocument();
+  });
+
+  it('shows access denied for non-provider users', () => {
+    mockUseAuth.mockReturnValue({
+      user: { uid: 'client-id' },
+      userRole: 'client',
+      loading: false,
+    } as any);
+
+    render(<AppliedJobsPage />);
+    expect(screen.getByText(/access denied/i)).toBeInTheDocument();
+  });
+});
