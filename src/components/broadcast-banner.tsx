@@ -19,7 +19,7 @@ type Broadcast = {
 
 export default function BroadcastBanner() {
     const t = useTranslations('BroadcastBanner');
-    const { handleError } = useErrorHandler();
+    const { handleError: _handleError } = useErrorHandler();
     const [broadcast, setBroadcast] = useState<Broadcast | null>(null);
     const [isVisible, setIsVisible] = useState(false);
 

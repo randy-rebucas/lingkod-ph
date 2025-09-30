@@ -3,7 +3,7 @@
 
 import { z } from "zod";
 import { getDb  } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, doc, getDoc, Timestamp, updateDoc, query, where, getDocs, writeBatch } from "firebase/firestore";
+import { collection, serverTimestamp, doc, getDoc, Timestamp, updateDoc, query, where, getDocs, writeBatch } from "firebase/firestore";
 
 const postJobSchema = z.object({
   title: z.string().min(10, "Job title must be at least 10 characters."),
@@ -73,7 +73,7 @@ export async function postJobAction(
     if (additionalDetails) {
         try {
             jobData.additionalDetails = JSON.parse(additionalDetails);
-        } catch (e) {
+        } catch {
             console.warn("Invalid JSON for additional details");
         }
     }

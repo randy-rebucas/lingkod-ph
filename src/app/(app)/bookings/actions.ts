@@ -2,7 +2,7 @@
 'use server';
 
 import { getDb, getStorageInstance   } from '@/lib/firebase';
-import { doc, runTransaction, collection, serverTimestamp, writeBatch, getDoc, addDoc } from 'firebase/firestore';
+import { doc, runTransaction, collection, serverTimestamp, addDoc } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { z } from 'zod';
 
@@ -81,8 +81,8 @@ export async function completeBookingAction(input: CompleteBookingInput): Promis
         await createNotification(clientId, `Your booking for "${serviceName}" has been marked as completed.`, '/bookings');
         
         return {};
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Error completing booking:", error);
-        return { error: error.message || "Could not complete the booking." };
+        return { error: error instanceof Error ? error.message : "Could not complete the booking." };
     }
 }

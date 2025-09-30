@@ -61,7 +61,7 @@ export const PayoutRequestEmail = ({
         <Hr style={hr} />
 
         <Text style={footer}>
-          Please process this payment and update the provider's records accordingly.
+          Please process this payment and update the provider&apos;s records accordingly.
         </Text>
       </Container>
     </Body>

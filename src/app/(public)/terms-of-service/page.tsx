@@ -1,13 +1,12 @@
 
 "use client";
 
-import { useTranslations } from 'next-intl';
+// import { useTranslations } from 'next-intl';
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { 
   FileText, 
   Shield, 
@@ -22,8 +21,6 @@ import {
   BookOpen,
   Scale,
   Eye,
-  ChevronRight,
-  ExternalLink,
   Info,
   Lock,
   Globe,
@@ -34,7 +31,6 @@ import {
 import { useState } from "react";
 
 export default function TermsOfServicePage() {
-  const t = useTranslations('TermsOfService');
   const [activeSection, setActiveSection] = useState<string | null>(null);
   
   const sections = [
@@ -186,7 +182,7 @@ export default function TermsOfServicePage() {
       icon: <Info className="h-5 w-5" />,
       content: [
         "LocalPro acts only as a marketplace connecting Clients with Providers and is not responsible for the conduct, performance, or services of Providers.",
-        "The Platform is provided \"as is\" and \"as available.\" We do not guarantee uninterrupted, secure, or error-free service.",
+        "The Platform is provided &quot;as is&quot; and &quot;as available.&quot; We do not guarantee uninterrupted, secure, or error-free service.",
         "We make no warranties about the accuracy, reliability, or completeness of any information on the Platform.",
         "We are not responsible for any damages or losses resulting from your use of the Platform or any services obtained through it.",
       ],
@@ -328,7 +324,7 @@ export default function TermsOfServicePage() {
                 <CardContent>
                   <ScrollArea className="h-[600px]">
                     <div className="space-y-2">
-                      {sections.map((section, index) => (
+                      {sections.map((section) => (
                         <Button
                           key={section.id}
                           variant={activeSection === section.id ? "default" : "ghost"}
@@ -369,7 +365,7 @@ export default function TermsOfServicePage() {
                     </div>
                   </div>
                   <p className="text-lg text-muted-foreground leading-relaxed">
-                    These Terms of Service ("Terms") govern your use of our platform, which connects service providers with clients through our website and mobile applications (collectively, the "Platform"). By accessing or using LocalPro, you agree to be bound by these Terms.
+                    These Terms of Service (&quot;Terms&quot;) govern your use of our platform, which connects service providers with clients through our website and mobile applications (collectively, the &quot;Platform&quot;). By accessing or using LocalPro, you agree to be bound by these Terms.
                   </p>
                 </CardContent>
               </Card>
@@ -385,8 +381,8 @@ export default function TermsOfServicePage() {
                 <CardContent>
                   <div className="max-w-6xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-4">
-                      {quickSummary.map((item, index) => (
-                        <div key={index} className="flex items-center gap-3 p-3 bg-background/60 rounded-lg">
+                      {quickSummary.map((item) => (
+                        <div key={item.title} className="flex items-center gap-3 p-3 bg-background/60 rounded-lg">
                           <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                             {item.icon}
                           </div>
@@ -403,7 +399,7 @@ export default function TermsOfServicePage() {
 
               {/* Terms Sections */}
               <div className="space-y-6">
-                {sections.map((section, index) => (
+                        {sections.map((section, _index) => (
                   <Card key={section.id} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-8">
                       <div className="flex items-center gap-3 mb-6">
@@ -438,7 +434,7 @@ export default function TermsOfServicePage() {
                   </div>
                   <h3 className="text-3xl font-bold font-headline mb-4">Questions About These Terms?</h3>
                   <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                    If you have any questions or concerns about these Terms of Service, please don't hesitate to contact our legal team.
+                    If you have any questions or concerns about these Terms of Service, please don&apos;t hesitate to contact our legal team.
                   </p>
                   <div className="max-w-2xl mx-auto">
                     <div className="grid md:grid-cols-2 gap-4">

@@ -4,18 +4,15 @@
 import { useState, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   MoreHorizontal, 
-  Loader2, 
   Calendar, 
   Check, 
   X, 
-  Hourglass, 
   Briefcase, 
-  UserCircle, 
   Timer, 
   Eye, 
   Repeat, 
@@ -24,7 +21,6 @@ import {
   Filter, 
   SortAsc, 
   SortDesc, 
-  Clock, 
   AlertCircle, 
   CheckCircle2, 
   Ban, 
@@ -33,21 +29,21 @@ import {
   Zap
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+// import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or, runTransaction, serverTimestamp, orderBy, addDoc, getDoc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or, serverTimestamp, orderBy, addDoc, getDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
 import { LeaveReviewDialog } from "@/components/leave-review-dialog";
 import { CompleteBookingDialog } from "@/components/complete-booking-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { BookingDialog } from "@/components/booking-dialog";
+// import { BookingDialog } from "@/components/booking-dialog";
 import { useTranslations } from 'next-intl';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+// import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -114,7 +110,7 @@ export type Booking = {
     };
 };
 
-const getStatusVariant = (status: string) => {
+const _getStatusVariant = (status: string) => {
     switch (status) {
         case "Upcoming": return "default";
         case "In Progress": return "secondary";
@@ -704,7 +700,7 @@ export default function BookingsPage() {
     const completedBookings = bookings.filter(b => b.status === 'Completed');
     const cancelledBookings = bookings.filter(b => b.status === 'Cancelled');
     
-    const [activeTab, setActiveTab] = useState("pending-payment");
+    const [_activeTab, setActiveTab] = useState("pending-payment");
     const [selectedStatus, setSelectedStatus] = useState<BookingStatus | "all">("all");
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState<"date" | "price" | "status" | "service">("date");
@@ -877,7 +873,7 @@ export default function BookingsPage() {
         });
     }, [bookings, selectedStatus, filterCategory, filterPriority, dateFilter, searchTerm, showCompleted, sortBy, sortOrder]);
 
-    const statusCounts = {
+    const _statusCounts = {
         "Pending Payment": pendingPaymentBookings.length,
         "Pending Verification": pendingVerificationBookings.length,
         "Upcoming": upcomingBookings.length,

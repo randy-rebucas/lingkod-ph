@@ -12,7 +12,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getDb } from '@/lib/firebase';
 
 // Schema for a single provider's details used in the prompt
 const ProviderInfoSchema = z.object({
@@ -57,6 +57,7 @@ const getAllProvidersTool = ai.defineTool(
     outputSchema: z.array(ProviderInfoSchema),
   },
   async () => {
+    const db = getDb();
     const providersRef = collection(db, 'users');
     const q = query(providersRef, where('role', '==', 'provider'));
     const snapshot = await getDocs(q);

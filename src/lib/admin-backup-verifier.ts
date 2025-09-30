@@ -1,4 +1,4 @@
-import { getDb, storage  } from './firebase';
+import { getDb  } from './firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { ref, getDownloadURL, getMetadata } from 'firebase/storage';
 import { sendEmail } from './email-service';
@@ -495,14 +495,9 @@ export class AdminBackupVerifier {
    * Get all verification results
    */
   static async getAllVerificationResults(limit: number = 50): Promise<BackupVerificationResult[]> {
-    try {
-      // This would typically use a query with orderBy and limit
-      // For now, return empty array as placeholder
-      return [];
-    } catch (error) {
-      console.error('Error getting verification results:', error);
-      return [];
-    }
+    // This would typically use a query with orderBy and limit
+    // For now, return empty array as placeholder
+    return [];
   }
 
   /**

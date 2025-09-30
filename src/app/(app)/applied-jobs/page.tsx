@@ -12,9 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { Briefcase, CheckSquare, Search, Filter, SortAsc, SortDesc, MapPin, Clock, Users, ShieldCheck, Eye } from "lucide-react";
+import { CheckSquare, Search, Filter, MapPin, Clock, ShieldCheck, Eye } from "lucide-react";
 import { formatBudget } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
@@ -78,7 +78,7 @@ export default function AppliedJobsPage() {
         return () => unsubscribe();
     }, [user, userRole]);
 
-    const handleSort = (field: string) => {
+    const _handleSort = (field: string) => {
         if (sortBy === field) {
             setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
         } else {
@@ -88,7 +88,7 @@ export default function AppliedJobsPage() {
     };
 
     const filteredAndSortedJobs = useMemo(() => {
-        let filtered = appliedJobs.filter(job => {
+        const filtered = appliedJobs.filter(job => {
             const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                 job.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                 job.clientName.toLowerCase().includes(searchTerm.toLowerCase());
@@ -125,7 +125,7 @@ export default function AppliedJobsPage() {
         });
     }, [appliedJobs, searchTerm, sortBy, sortOrder, filterStatus]);
 
-    const getAvatarFallback = (name: string) => {
+    const _getAvatarFallback = (name: string) => {
         return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     };
 

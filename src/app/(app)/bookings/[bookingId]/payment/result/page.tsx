@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
@@ -23,7 +23,7 @@ export default function PaymentResultPage() {
     const handlePaymentResult = async () => {
       try {
         const pspReference = searchParams.get('pspReference');
-        const resultCode = searchParams.get('resultCode');
+        const _resultCode = searchParams.get('resultCode');
         
         if (!pspReference) {
           setStatus('error');

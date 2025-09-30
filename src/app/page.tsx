@@ -314,7 +314,7 @@ export default function HomePage() {
                             Trusted by Leading Businesses
                         </h2>
                         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                            Discover our featured partners and see how they're growing their business with LocalPro
+                            Discover our featured partners and see how they&apos;re growing their business with LocalPro
                         </p>
                     </div>
                     <AdCarousel />
@@ -529,9 +529,9 @@ export default function HomePage() {
                                             </div>
                                         </div>
                                         <blockquote className="text-muted-foreground leading-relaxed text-lg italic relative">
-                                            <div className="absolute -top-2 -left-2 text-4xl text-primary/20 font-serif">"</div>
+                                            <div className="absolute -top-2 -left-2 text-4xl text-primary/20 font-serif">&ldquo;</div>
                                             {testimonial.comment}
-                                            <div className="absolute -bottom-4 -right-2 text-4xl text-primary/20 font-serif">"</div>
+                                            <div className="absolute -bottom-4 -right-2 text-4xl text-primary/20 font-serif">&rdquo;</div>
                                         </blockquote>
                                     </CardContent>
                                 </Card>

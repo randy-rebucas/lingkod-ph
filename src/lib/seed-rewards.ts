@@ -1,5 +1,5 @@
 
-import { collection, addDoc, getDocs, writeBatch, doc, serverTimestamp } from "firebase/firestore";
+import { collection, getDocs, writeBatch, doc, serverTimestamp } from "firebase/firestore";
 import { getDb  } from './firebase';
 
 const rewards = [

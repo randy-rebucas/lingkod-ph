@@ -5,14 +5,14 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { DollarSign, Calendar, Star, Users, Loader2, Users2, Briefcase, UserPlus } from "lucide-react";
+import { DollarSign, Users, Users2, Briefcase } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getDb  } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy, limit, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDistanceToNow } from "date-fns";
+// import { formatDistanceToNow } from "date-fns";
 
 type Booking = {
     id: string;

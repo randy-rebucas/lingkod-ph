@@ -3,12 +3,10 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
     Bell,
@@ -20,11 +18,8 @@ import {
     User,
     Shield,
     Palette,
-    Globe,
     Eye,
     EyeOff,
-    Settings as SettingsIcon,
-    Check,
     AlertTriangle
 } from "lucide-react"
 import { useAuth } from "@/context/auth-context"
@@ -34,7 +29,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
-import { useRouter } from "next/navigation"
+// import { useRouter } from "next/navigation"
 
 type NotificationSettings = {
     bookingUpdates: boolean;
@@ -69,8 +64,7 @@ export default function SettingsPage() {
     const { user, userRole } = useAuth();
     const { toast } = useToast();
     const t = useTranslations('Settings');
-    const { theme, setTheme } = useTheme();
-    const router = useRouter();
+    const { setTheme } = useTheme();
 
     const [settings, setSettings] = useState<UserSettings>({
         notificationSettings: {
@@ -142,7 +136,7 @@ export default function SettingsPage() {
         setHasUnsavedChanges(true);
     };
 
-    const handlePrivacyChange = (key: keyof PrivacySettings, value: any) => {
+    const handlePrivacyChange = (key: keyof PrivacySettings, value: string | boolean) => {
         setSettings(prev => ({
             ...prev,
             privacySettings: { ...prev.privacySettings, [key]: value }
@@ -189,8 +183,9 @@ export default function SettingsPage() {
             });
             setHasUnsavedChanges(false);
             toast({ title: t('success'), description: t('preferencesSaved') });
-        } catch (error: any) {
-            toast({ variant: "destructive", title: t('saveFailed'), description: error.message });
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+            toast({ variant: "destructive", title: t('saveFailed'), description: errorMessage });
         } finally {
             setIsSaving(false);
         }
@@ -456,7 +451,7 @@ export default function SettingsPage() {
                                                 <Eye className="h-5 w-5 text-primary" />
                                                 <div>
                                                     <Label htmlFor="show-online-status" className="font-semibold text-base">Show Online Status</Label>
-                                                    <p className="text-sm text-muted-foreground">Let others see when you're online</p>
+                                                    <p className="text-sm text-muted-foreground">Let others see when you&apos;re online</p>
                                                 </div>
                                             </div>
                                             <Switch

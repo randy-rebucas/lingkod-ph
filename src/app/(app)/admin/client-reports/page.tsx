@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from '@/components/ui/skeleton';
@@ -44,7 +44,7 @@ const getAvatarFallback = (name: string | null | undefined) => {
 const renderStars = (rating: number) => {
     const fullStars = Math.floor(rating);
     const halfStar = rating % 1 !== 0;
-    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+    const _emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
     
     return (
         <div className="flex items-center gap-1">

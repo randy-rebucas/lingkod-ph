@@ -276,7 +276,7 @@ export default function WorkLogPage() {
 
     const completedTasks = booking.checklist?.filter(item => item.completed).length || 0;
     const totalTasks = booking.checklist?.length || 0;
-    const progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+    const _progressPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
 
     return (

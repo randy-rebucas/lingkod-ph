@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo, useCallback, memo } from "react";
+import { useEffect, useState, useRef, useMemo, memo } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
 import { Button } from "@/components/ui/button";
@@ -11,13 +11,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Upload, Loader2, Star, User, Settings, Briefcase, Award, Users, Copy, Share2, LinkIcon, Gift, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Edit, Wallet, Building, FileText, Trash2, ArrowRight } from "lucide-react";
+import { Camera, Upload, Loader2, User, Settings, Briefcase, Award, Users, Copy, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Wallet, Building, FileText, Trash2 } from "lucide-react";
 import { getStorageInstance, getDb   } from '@/lib/firebase';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject, uploadBytes } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
-import { doc, updateDoc, getDoc, Timestamp, collection, onSnapshot, query, orderBy, runTransaction, serverTimestamp, where, addDoc, getDocs, arrayUnion, arrayRemove } from "firebase/firestore";
+import { doc, updateDoc, Timestamp, collection, onSnapshot, query, orderBy, runTransaction, serverTimestamp, where, getDocs, arrayUnion, arrayRemove } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { useErrorHandler } from "@/hooks/use-error-handler";
+// import { useErrorHandler } from "@/hooks/use-error-handler";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,7 +32,6 @@ import { handleInviteAction } from "./actions";
 import { useLoadScript, Autocomplete } from "@react-google-maps/api";
 import { Separator } from "@/components/ui/separator";
 import { useActionState } from "react";
-import Link from 'next/link';
 
 
 type Reward = {
@@ -105,7 +104,6 @@ const timeSlots = Array.from({ length: 24 * 2 }, (_, i) => {
 const ProfilePage = memo(function ProfilePage() {
     const { user, userRole, loading, verificationStatus } = useAuth();
     const { toast } = useToast();
-    const { handleError } = useErrorHandler();
     const t = useTranslations('Profile');
     
     // States for form fields
@@ -374,7 +372,7 @@ const ProfilePage = memo(function ProfilePage() {
         setIsSavingPublic(true);
         try {
             const userDocRef = doc(getDb(), "users", user.uid);
-            const updates: { [key: string]: any } = {
+            const updates: Record<string, unknown> = {
                 displayName: name,
                 bio: bio,
             };
@@ -383,10 +381,11 @@ const ProfilePage = memo(function ProfilePage() {
                 await updateProfile(user, { displayName: name });
             }
             
-            await updateDoc(userDocRef, updates);
+            await updateDoc(userDocRef, updates as any);
             toast({ title: t('success'), description: t('publicProfileUpdated') });
-        } catch (error: any) {
-            toast({ variant: "destructive", title: t('updateFailed'), description: error.message });
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+            toast({ variant: "destructive", title: t('updateFailed'), description: errorMessage });
         } finally {
             setIsSavingPublic(false);
         }
@@ -397,7 +396,7 @@ const ProfilePage = memo(function ProfilePage() {
         setIsSavingPersonal(true);
         try {
             const userDocRef = doc(getDb(), "users", user.uid);
-            const updates: { [key: string]: any } = {
+            const updates: Record<string, unknown> = {
                 phone: phone,
                 gender: gender,
                 address: address,
@@ -412,10 +411,11 @@ const ProfilePage = memo(function ProfilePage() {
                 updates.birthdate = Timestamp.fromDate(new Date(year, month, day));
             }
 
-            await updateDoc(userDocRef, updates);
+            await updateDoc(userDocRef, updates as any);
             toast({ title: t('success'), description: t('personalDetailsUpdated') });
-        } catch (error: any) {
-            toast({ variant: "destructive", title: t('updateFailed'), description: error.message });
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+            toast({ variant: "destructive", title: t('updateFailed'), description: errorMessage });
         } finally {
             setIsSavingPersonal(false);
         }
@@ -426,7 +426,7 @@ const ProfilePage = memo(function ProfilePage() {
         setIsSavingProvider(true);
          try {
             const userDocRef = doc(getDb(), "users", user.uid);
-            const updates: { [key: string]: any } = {
+            const updates: Record<string, unknown> = {
                 availabilityStatus: availabilityStatus,
                 yearsOfExperience: Number(yearsOfExperience),
                 keyServices: keyServices,
@@ -440,10 +440,11 @@ const ProfilePage = memo(function ProfilePage() {
                 availabilitySchedule: availabilitySchedule,
             };
             
-            await updateDoc(userDocRef, updates);
+            await updateDoc(userDocRef, updates as any);
             toast({ title: t('success'), description: t('detailsUpdated') });
-        } catch (error: any) {
-            toast({ variant: "destructive", title: t('updateFailed'), description: error.message });
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+            toast({ variant: "destructive", title: t('updateFailed'), description: errorMessage });
         } finally {
             setIsSavingProvider(false);
         }
@@ -454,7 +455,7 @@ const ProfilePage = memo(function ProfilePage() {
         setIsSavingPayout(true);
         try {
             const userDocRef = doc(getDb(), "users", user.uid);
-            const payoutDetails: any = { method: payoutMethod };
+            const payoutDetails: Record<string, unknown> = { method: payoutMethod };
             if (payoutMethod === 'gcash') {
                 payoutDetails.gCashNumber = gCashNumber;
             } else if (payoutMethod === 'bank') {
@@ -464,8 +465,9 @@ const ProfilePage = memo(function ProfilePage() {
             }
             await updateDoc(userDocRef, { payoutDetails });
             toast({ title: t('success'), description: t('payoutDetailsUpdated') });
-        } catch (error: any) {
-            toast({ variant: "destructive", title: t('updateFailed'), description: error.message });
+        } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+            toast({ variant: "destructive", title: t('updateFailed'), description: errorMessage });
         } finally {
             setIsSavingPayout(false);
         }
@@ -503,7 +505,7 @@ const ProfilePage = memo(function ProfilePage() {
                         await updateDoc(userDocRef, { photoURL: downloadURL });
                     }
                     toast({ title: t('success'), description: t('profilePictureUpdated') });
-                } catch (error: any) {
+                } catch (error: unknown) {
                      toast({ variant: "destructive", title: t('updateFailed'), description: t('failedToUpdateProfilePicture') });
                 } finally {
                     setIsUploading(false);
@@ -592,7 +594,6 @@ const ProfilePage = memo(function ProfilePage() {
         return <p>{t('pleaseLoginToViewProfile')}</p>;
     }
     
-    const totalReferralPoints = referrals.reduce((sum, ref) => sum + ref.rewardPointsGranted, 0);
     
     const referralLink = typeof window !== 'undefined' ? `${window.location.origin}/signup?ref=${referralCode}` : '';
 
@@ -614,7 +615,7 @@ const ProfilePage = memo(function ProfilePage() {
         setKeyServices(keyServices.filter(s => s !== serviceToRemove));
     }
 
-    const handleAvailabilityChange = (day: string, field: keyof Availability, value: any) => {
+    const handleAvailabilityChange = (day: string, field: keyof Availability, value: string | boolean) => {
         setAvailabilitySchedule(prev => 
             prev.map(item => item.day === day ? { ...item, [field]: value } : item)
         );
@@ -623,7 +624,6 @@ const ProfilePage = memo(function ProfilePage() {
 
     const isProvider = userRole === 'provider';
     const isAgency = userRole === 'agency';
-    const isClient = userRole === 'client';
 
 
     const handleCurrentLocation = () => {
@@ -950,7 +950,7 @@ const ProfilePage = memo(function ProfilePage() {
                                                 <AlertDialogHeader>
                                                     <AlertDialogTitle>Confirm Redemption</AlertDialogTitle>
                                                     <AlertDialogDescription>
-                                                        Are you sure you want to redeem "{reward.title}" for {reward.pointsRequired.toLocaleString()} points? This action cannot be undone.
+                                                        Are you sure you want to redeem &quot;{reward.title}&quot; for {reward.pointsRequired.toLocaleString()} points? This action cannot be undone.
                                                     </AlertDialogDescription>
                                                 </AlertDialogHeader>
                                                 <AlertDialogFooter>
@@ -1179,7 +1179,7 @@ const ProfilePage = memo(function ProfilePage() {
                                 <CardDescription>Set your standard working hours for each day.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                {availabilitySchedule.map((item, index) => (
+                                {availabilitySchedule.map((item) => (
                                     <div key={item.day} className="grid grid-cols-4 items-center gap-4">
                                         <div className="col-span-1 flex items-center gap-2">
                                              <Switch 
@@ -1276,7 +1276,7 @@ const ProfilePage = memo(function ProfilePage() {
                          <Card>
                             <CardHeader>
                                 <CardTitle>Business Details</CardTitle>
-                                <CardDescription>Settings related to your agency's business profile.</CardDescription>
+                                <CardDescription>Settings related to your agency&apos;s business profile.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1349,7 +1349,7 @@ const ProfilePage = memo(function ProfilePage() {
                                                     <AlertDialogHeader>
                                                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                                         <AlertDialogDescription>
-                                                            This will permanently delete the document "{doc.name}". This action cannot be undone.
+                                                            This will permanently delete the document &quot;{doc.name}&quot;. This action cannot be undone.
                                                         </AlertDialogDescription>
                                                     </AlertDialogHeader>
                                                     <AlertDialogFooter>
@@ -1375,7 +1375,7 @@ const ProfilePage = memo(function ProfilePage() {
                                 <CardDescription>Set your standard business hours for each day.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                {availabilitySchedule.map((item, index) => (
+                                {availabilitySchedule.map((item) => (
                                     <div key={item.day} className="grid grid-cols-4 items-center gap-4">
                                         <div className="col-span-1 flex items-center gap-2">
                                              <Switch 

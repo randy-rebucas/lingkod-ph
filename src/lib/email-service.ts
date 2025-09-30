@@ -7,6 +7,11 @@ export interface EmailOptions {
   from?: string;
 }
 
+export interface EmailResult {
+  success: boolean;
+  error?: string;
+}
+
 export async function sendEmail(options: EmailOptions): Promise<{ success: boolean; error?: string }> {
   try {
     // For development/testing - just log the email
@@ -27,7 +32,7 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
   }
 }
 
-export async function sendBulkEmail(emails: EmailOptions[]): Promise<{ success: boolean; results: any[] }> {
+export async function sendBulkEmail(emails: EmailOptions[]): Promise<{ success: boolean; results: PromiseSettledResult<EmailResult>[] }> {
   try {
     const results = await Promise.allSettled(
       emails.map(email => sendEmail(email))
@@ -39,9 +44,7 @@ export async function sendBulkEmail(emails: EmailOptions[]): Promise<{ success: 
 
     return {
       success: successful === emails.length,
-      results: results.map(result => 
-        result.status === 'fulfilled' ? result.value : { success: false, error: 'Failed' }
-      )
+      results: results as PromiseSettledResult<EmailResult>[]
     };
   } catch (error) {
     console.error('Bulk email error:', error);

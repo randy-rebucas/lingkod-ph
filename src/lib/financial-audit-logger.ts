@@ -13,7 +13,7 @@ export interface FinancialTransaction {
   status: 'pending' | 'completed' | 'failed' | 'cancelled';
   paymentMethod?: string;
   transactionId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class FinancialAuditLogger {
@@ -29,10 +29,10 @@ export class FinancialAuditLogger {
   }
 
   // Add missing logSecurityEvent method for compatibility
-  async logSecurityEvent(event: string, details: any = {}) {
+  async logSecurityEvent(event: string, details: Record<string, unknown> = {}) {
     await auditLogger.log({
-      userId: details.userId || 'system',
-      userRole: details.userRole || 'system',
+      userId: (details.userId as string) || 'system',
+      userRole: (details.userRole as string) || 'system',
       action: 'security_event',
       resource: 'financial',
       details: { event, ...details },

@@ -4,7 +4,7 @@ import { suggestSmartRate, type SuggestSmartRateOutput } from "@/ai/flows/smart-
 import { z } from "zod";
 import { getTranslations } from 'next-intl/server';
 
-const createSuggestionSchema = (t: any) => z.object({
+const createSuggestionSchema = (t: (key: string) => string) => z.object({
   servicesOffered: z.string().min(10, { message: t('servicesDescriptionRequired') }),
   location: z.string().min(3, { message: t('locationRequired') }),
 });
@@ -28,7 +28,7 @@ export async function handleSuggestSmartRate(
   });
 
   if (!validatedFields.success) {
-    const errorMessage = validatedFields.error.errors.map((e: any) => e.message).join(", ");
+    const errorMessage = validatedFields.error.errors.map((e: { message: string }) => e.message).join(", ");
     return {
       data: null,
       error: errorMessage,

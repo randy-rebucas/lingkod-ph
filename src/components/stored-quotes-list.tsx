@@ -111,7 +111,7 @@ export function StoredQuotesList() {
         });
 
         return () => unsubscribe();
-    }, [user, toast]);
+    }, [user, toast, handleError]);
 
     const handleStatusUpdate = React.useCallback(async (quoteId: string, status: QuoteStatus) => {
         const quoteRef = doc(getDb(), "quotes", quoteId);
@@ -133,7 +133,7 @@ export function StoredQuotesList() {
     }, [toast, t, handleError]);
     
     const calculateTotal = React.useCallback((quote: QuoteFormValues) => {
-        const subtotal = quote.lineItems.reduce((acc: number, item: any) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
+        const subtotal = quote.lineItems.reduce((acc: number, item: { quantity: number; price: number }) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
         const taxAmount = subtotal * ((Number(quote.taxRate) || 0) / 100);
         return subtotal + taxAmount;
     }, []);

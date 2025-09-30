@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, Download, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import Image from "next/image";
+// import Image from "next/image";
 
 type PaymentTransaction = {
     id: string;
@@ -38,7 +38,7 @@ export default function PaymentHistoryPage() {
     const { user } = useAuth();
     const [transactions, setTransactions] = useState<PaymentTransaction[]>([]);
     const [loading, setLoading] = useState(true);
-    const { toast } = useToast();
+    const { toast: _toast } = useToast();
 
     useEffect(() => {
         if (!user || !getDb()) return;

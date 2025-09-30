@@ -193,7 +193,7 @@ export function GCashPaymentButton({
         onPaymentError?.('Payment was not successful');
       }
     }
-  }, []);
+  }, [handlePaymentResult, onPaymentError]);
 
   // Memoize the payment button render to prevent unnecessary re-renders
   const renderPaymentButton = useMemo(() => {
@@ -280,7 +280,7 @@ export function GCashPaymentButton({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Click here if you're not redirected automatically.
+                Click here if you&apos;re not redirected automatically.
               </a>
             </AlertDescription>
           </Alert>

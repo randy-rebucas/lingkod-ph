@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, Trash2, Edit, PlusCircle, Megaphone, Upload, Image as ImageIcon, Loader2, Link as LinkIcon } from "lucide-react";
+import { MoreHorizontal, Trash2, Edit, PlusCircle, Upload, Image as ImageIcon, Loader2, Link as LinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { handleUpdateAdCampaign, handleDeleteAdCampaign, handleAddAdCampaign } from "./actions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -161,7 +161,7 @@ export default function AdminAdsPage() {
                 const storageRef = ref(getStorageInstance(), storagePath);
                 const uploadTask = await uploadBytesResumable(storageRef, imageFile);
                 finalImageUrl = await getDownloadURL(uploadTask.ref);
-            } catch (error) {
+            } catch {
                  toast({
                     title: 'Upload Error',
                     description: "Failed to upload image. Please try again.",
@@ -310,7 +310,7 @@ export default function AdminAdsPage() {
                                                     <AlertDialogContent>
                                                         <AlertDialogHeader>
                                                             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                            <AlertDialogDescription>This action cannot be undone. This will permanently delete the campaign "{campaign.name}".</AlertDialogDescription>
+                                                            <AlertDialogDescription>This action cannot be undone. This will permanently delete the campaign &quot;{campaign.name}&quot;.</AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
                                                             <AlertDialogCancel>Cancel</AlertDialogCancel>

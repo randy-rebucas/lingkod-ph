@@ -10,7 +10,7 @@ import {
   serverTimestamp,
   getDoc,
 } from 'firebase/firestore';
-import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+// import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { adminAuth } from '@/lib/firebase-admin';
 import { z } from 'zod';
 import { AuditLogger } from '@/lib/audit-logger';
@@ -209,7 +209,7 @@ const sendDirectEmailSchema = z.object({
     message: z.string().min(10, "Message must be at least 10 characters."),
 });
 
-export async function handleSendDirectEmail(targetUserId: string, subject: string, message: string, actor: Actor) {
+export async function handleSendDirectEmail(targetUserId: string, subject: string, message: string, _actor: Actor) {
     const validatedFields = sendDirectEmailSchema.safeParse({ targetUserId, subject, message });
     if (!validatedFields.success) {
         return {

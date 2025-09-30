@@ -372,7 +372,7 @@ export default function AdminUsersPage() {
                                                     <AlertDialogContent>
                                                         <AlertDialogHeader>
                                                             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                                            <AlertDialogDescription>This action cannot be undone. This will permanently delete the user "{user.displayName}" from the database. This does not remove them from Firebase Authentication.</AlertDialogDescription>
+                                                            <AlertDialogDescription>This action cannot be undone. This will permanently delete the user &quot;{user.displayName}&quot; from the database. This does not remove them from Firebase Authentication.</AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
                                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -438,7 +438,7 @@ export default function AdminUsersPage() {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Edit User: {selectedUser?.displayName}</DialogTitle>
-                        <CardDescription>Update the user's details below.</CardDescription>
+                        <CardDescription>Update the user&apos;s details below.</CardDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="space-y-2"><Label htmlFor="edit-name">Full Name</Label><Input id="edit-name" value={editForm.name} onChange={e => setEditForm(f => ({...f, name: e.target.value}))} /></div>

@@ -3,14 +3,14 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
+// import Link from "next/link";
 import { useAuth } from "@/context/auth-context";
 import { getDb  } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, arrayUnion, Timestamp, addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Star, ArrowLeft, MapPin, UserCircle, Briefcase, DollarSign, Clock, ShieldCheck, Users, Flag } from "lucide-react";
+import { ArrowLeft, MapPin, Briefcase, Clock, ShieldCheck, Users, Flag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -44,7 +44,7 @@ type Job = {
 export default function JobDetailsPage() {
     const params = useParams();
     const router = useRouter();
-    const { user, userRole } = useAuth();
+    const { user, userRole: _userRole } = useAuth();
     const { toast } = useToast();
     const jobId = params.jobId as string;
 

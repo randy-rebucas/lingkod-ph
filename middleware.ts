@@ -66,9 +66,10 @@ async function verifyTokenAndGetRole(token: string): Promise<{ uid: string; role
     const decodedToken = await auth.verifyIdToken(token);
     
     // Get user role from Firestore
-    const { db } = await import('@/lib/firebase');
+    const { getDb } = await import('@/lib/firebase');
     const { doc, getDoc } = await import('firebase/firestore');
     
+    const db = getDb();
     const userDoc = await getDoc(doc(db, 'users', decodedToken.uid));
     if (!userDoc.exists()) {
       return null;

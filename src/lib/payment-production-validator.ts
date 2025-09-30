@@ -316,7 +316,7 @@ export class PaymentProductionValidator {
    */
   private static async validateApiEndpoints(): Promise<ValidationCheck> {
     const details: string[] = [];
-    let status: 'pass' | 'warning' | 'fail' = 'pass';
+    const status: 'pass' | 'warning' | 'fail' = 'pass';
 
     const requiredEndpoints = [
       '/api/payments/gcash/create',

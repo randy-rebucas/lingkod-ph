@@ -8,7 +8,7 @@ import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, getDocs, Timestamp, orderBy  } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DollarSign, BookCheck, Wallet, CheckCircle } from "lucide-react";
+import { DollarSign, Wallet, CheckCircle } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';

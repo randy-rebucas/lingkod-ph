@@ -1,7 +1,7 @@
 'use server';
 
 import { getDb  } from './firebase';
-import { doc, updateDoc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { financialAuditLogger } from './financial-audit-logger';
 
 export interface VerificationDocument {
@@ -38,7 +38,7 @@ export class ProviderVerificationService {
     providerId: string,
     documentType: string,
     documentUrl: string,
-    requestMetadata: any
+    requestMetadata: Record<string, unknown>
   ): Promise<{ success: boolean; message: string }> {
     try {
       // Validate document type
@@ -67,7 +67,7 @@ export class ProviderVerificationService {
 
       // Add new document
       const newDocument: VerificationDocument = {
-        type: documentType as any,
+        type: documentType as VerificationDocument['type'],
         url: documentUrl,
         status: 'pending',
         uploadedAt: new Date()
@@ -111,7 +111,7 @@ export class ProviderVerificationService {
     status: 'approved' | 'rejected',
     reviewerId: string,
     rejectionReason?: string,
-    requestMetadata?: any
+    requestMetadata?: Record<string, unknown>
   ): Promise<{ success: boolean; message: string }> {
     try {
       // Get current verification status
@@ -205,7 +205,7 @@ export class ProviderVerificationService {
     return requirements[verificationLevel as keyof typeof requirements] || [];
   }
 
-  async getPendingVerifications(): Promise<any[]> {
+  async getPendingVerifications(): Promise<Array<{ id: string; data: Record<string, unknown> }>> {
     try {
       // Get all users with verification data and filter client-side
       // Note: This is not ideal for large datasets, but Firestore doesn't support
@@ -217,7 +217,7 @@ export class ProviderVerificationService {
       );
 
       const usersSnapshot = await getDocs(usersQuery);
-      const pendingVerifications: any[] = [];
+      const pendingVerifications: Array<{ id: string; data: Record<string, unknown> }> = [];
 
       usersSnapshot.docs.forEach(doc => {
         const userData = doc.data();
@@ -228,10 +228,12 @@ export class ProviderVerificationService {
           
           if (pendingDocs.length > 0) {
             pendingVerifications.push({
-              providerId: doc.id,
-              providerName: userData.displayName || userData.name,
-              email: userData.email,
-              pendingDocuments: pendingDocs
+              id: doc.id,
+              data: {
+                providerName: userData.displayName || userData.name,
+                email: userData.email,
+                pendingDocuments: pendingDocs
+              }
             });
           }
         }
@@ -312,7 +314,7 @@ export class ProviderVerificationService {
     }
   }
 
-  private async getProviderPerformanceMetrics(providerId: string): Promise<any> {
+  private async getProviderPerformanceMetrics(providerId: string): Promise<Record<string, unknown>> {
     // Get bookings, reviews, and other performance data
     const bookingsQuery = query(
       collection(getDb(), 'bookings'),
@@ -345,7 +347,7 @@ export class ProviderVerificationService {
     };
   }
 
-  private calculateRankingScore(verificationStatus: VerificationStatus, performanceMetrics: any): number {
+  private calculateRankingScore(verificationStatus: VerificationStatus, performanceMetrics: Record<string, unknown>): number {
     let score = 0;
 
     // Verification score (40% weight)
@@ -353,10 +355,10 @@ export class ProviderVerificationService {
 
     // Performance score (60% weight)
     const performanceScore = (
-      performanceMetrics.completionRate * 30 +
-      performanceMetrics.averageRating * 20 +
-      Math.min(performanceMetrics.totalReviews * 2, 20) +
-      Math.min(performanceMetrics.completedBookings * 0.5, 30)
+      (performanceMetrics.completionRate as number) * 30 +
+      (performanceMetrics.averageRating as number) * 20 +
+      Math.min((performanceMetrics.totalReviews as number) * 2, 20) +
+      Math.min((performanceMetrics.completedBookings as number) * 0.5, 30)
     );
     score += performanceScore * 0.6;
 

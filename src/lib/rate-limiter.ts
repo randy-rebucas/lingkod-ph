@@ -1,4 +1,5 @@
-import { NextRequest } from 'next/server';
+
+import type { NextRequest } from 'next/server';
 
 interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
@@ -46,7 +47,6 @@ export class RateLimiter {
       : this.getDefaultKey(request);
 
     const now = Date.now();
-    const windowStart = now - this.config.windowMs;
     
     // Get or create rate limit entry
     let entry = rateLimitStore.get(key);
@@ -109,7 +109,7 @@ export class RateLimiter {
   }
 
   // Add missing methods for admin rate limiter compatibility
-  async checkLimitByKey(key: string, request?: NextRequest): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
+  async checkLimitByKey(key: string): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
     return this.check(key);
   }
 

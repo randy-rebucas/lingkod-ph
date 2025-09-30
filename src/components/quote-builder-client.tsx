@@ -9,14 +9,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { CalendarIcon, PlusCircle, Sparkles, Trash2, Loader2, Eye, FileDown, Percent, Users, Copy, Save, Send, Download, Settings, Calculator, TrendingUp, DollarSign } from "lucide-react";
+import { CalendarIcon, PlusCircle, Sparkles, Trash2, Loader2, Eye, Percent, Copy, Save, Send, Download, Calculator } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/use-error-handler";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { generateQuoteDescription } from "@/ai/flows/generate-quote-description";
 import { Separator } from "./ui/separator";
 import { useAuth } from "@/context/auth-context";
@@ -26,16 +26,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { QuotePreview } from "./quote-preview";
 import { useTranslations } from 'next-intl';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 
 // Define schemas and types outside component for export
-const createLineItemSchema = (t: any) => z.object({
+const createLineItemSchema = (t: (key: string) => string) => z.object({
     description: z.string().min(1, t('descriptionRequired')),
     quantity: z.coerce.number().min(0.1, t('quantityMin')),
     price: z.coerce.number().min(0, t('priceCannotBeNegative')),
 });
 
-const createQuoteSchema = (t: any, lineItemSchema: any) => z.object({
+const createQuoteSchema = (t: (key: string) => string, lineItemSchema: z.ZodSchema) => z.object({
     clientName: z.string().min(1, t('clientNameRequired')),
     clientEmail: z.string().email(t('invalidEmail')),
     clientAddress: z.string().min(1, t('clientAddressRequired')),
@@ -57,7 +56,7 @@ const baseLineItemSchema = z.object({
     price: z.coerce.number(),
 });
 
-const baseQuoteSchema = z.object({
+const _baseQuoteSchema = z.object({
     clientName: z.string(),
     clientEmail: z.string(),
     clientAddress: z.string(),

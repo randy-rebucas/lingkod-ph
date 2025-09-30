@@ -10,7 +10,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DollarSign, BookCheck, Calculator, FilePieChart, CheckCircle } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import {
   LineChart,
   Line,
@@ -26,7 +25,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { handleMarkAsPaid } from '@/app/(app)/admin/payouts/actions';
+// import { useTranslations } from 'next-intl';
 
 
 type Booking = {
@@ -185,7 +184,7 @@ export default function ReportsPage() {
         };
     }, [bookings]);
     
-    const onMarkAsPaid = async (payout: PayoutRequest) => {
+    const onMarkAsPaid = async (_payout: PayoutRequest) => {
         if (!user) return;
         // TODO: Implement adminHandleMarkAsPaid function
         toast({
@@ -210,7 +209,7 @@ export default function ReportsPage() {
                     </CardHeader>
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                         <FilePieChart className="h-16 w-16 mb-4" />
-                        <p className="mb-4">Get insights into your agency's performance.</p>
+                        <p className="mb-4">Get insights into your agency&apos;s performance.</p>
                          <Button asChild>
                         </Button>
                     </CardContent>
@@ -235,9 +234,7 @@ export default function ReportsPage() {
     }
     
     const pageTitle = "Advanced Reports";
-    const pageDescription = true 
-        ? "Deep dive into your agency's performance with charts and detailed tables." 
-        : "An overview of your agency's performance.";
+    const pageDescription = "Deep dive into your agency's performance with charts and detailed tables.";
 
     return (
         <div className="space-y-6">
@@ -328,7 +325,7 @@ export default function ReportsPage() {
             </Card>
 
 
-            {true && (
+            {(
                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                     <Card className="lg:col-span-3">
                         <CardHeader>

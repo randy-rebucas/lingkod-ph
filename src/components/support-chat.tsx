@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from './ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Bot, Loader2, Send, User, MessageSquare } from 'lucide-react';
+import { Bot, Loader2, Send, MessageSquare } from 'lucide-react';
 import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';

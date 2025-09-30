@@ -6,7 +6,7 @@ import { useAuth } from "@/context/auth-context";
 import { getDb, getStorageInstance   } from '@/lib/firebase';
 import { doc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -99,7 +99,7 @@ export default function AdminSettingsPage() {
         if (!settings || !user) return;
         setIsSaving(true);
         
-        let finalSettings = { ...settings };
+        const finalSettings = { ...settings };
         
         if (logoFile) {
             if (!getStorageInstance()) {

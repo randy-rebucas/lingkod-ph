@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, MessageCircle, ArrowRight, Bot, Loader2, User, FilePenLine, UserCheck, Building, Phone, Mail, Clock, HelpCircle, BookOpen, Video, Download, ExternalLink, ChevronRight, Star, Zap, Shield, CreditCard, Calendar, MapPin, Settings, Users, TrendingUp } from "lucide-react";
+import { Search, MessageCircle, ArrowRight, Bot, Loader2, User, FilePenLine, UserCheck, Building, Phone, Mail, Clock, BookOpen, Video, Download, ExternalLink, ChevronRight, Star, Zap, Shield, Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -354,7 +354,7 @@ const CreateTicketDialog = () => {
       setSubject("");
       setMessage("");
       setIsOpen(false);
-    } catch (error) {
+    } catch {
       toast({ variant: 'destructive', title: t('error'), description: t('failedToSubmit') });
     } finally {
       setIsSubmitting(false);
@@ -397,7 +397,6 @@ const CreateTicketDialog = () => {
 }
 
 export default function HelpCenterPage() {
-  const t = useTranslations('HelpCenter');
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [showPopularOnly, setShowPopularOnly] = useState(false);

@@ -3,11 +3,9 @@
 
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
-import { BarChart2, TrendingUp, Users, DollarSign, CheckCircle, PieChart, Loader2, Slash, Star, Percent, Calendar, Download, Target, MapPin, AlertCircle, TrendingDown, Activity, Clock, Award } from "lucide-react";
+import { BarChart2, TrendingUp, Users, DollarSign, PieChart, Calendar, Download, Target, MapPin, TrendingDown, Activity, Award, Star } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -20,16 +18,15 @@ import {
   Area,
   BarChart,
   Bar,
-  ScatterChart,
-  Scatter,
-  ComposedChart
+  ComposedChart,
+  Line
 } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useState, useEffect, useMemo } from "react";
 import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
+// import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";

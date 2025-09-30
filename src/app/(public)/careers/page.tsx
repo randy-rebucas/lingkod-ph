@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Zap, Users, Heart, Lightbulb, Star, Award, TrendingUp, Globe, CheckCircle, Quote, MapPin, Clock, DollarSign, Briefcase, GraduationCap, Coffee, Calendar, Mail } from "lucide-react";
+import { ArrowRight, Zap, Users, Heart, Lightbulb, Star, Award, Globe, CheckCircle, Quote, MapPin, DollarSign, Briefcase, GraduationCap, Coffee, Mail } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { useTranslations } from 'next-intl';
@@ -82,13 +82,13 @@ const employeeTestimonials = [
   {
     name: "Miguel Santos",
     role: "Product Manager",
-    content: "The collaborative culture here is amazing. Everyone's ideas are valued, and we're all working toward the same mission.",
+    content: "The collaborative culture here is amazing. Everyone&apos;s ideas are valued, and we&apos;re all working toward the same mission.",
     rating: 5,
   },
   {
     name: "Lisa Rodriguez",
     role: "UX Designer",
-    content: "I love how we're encouraged to think creatively and push boundaries. The impact of our work is visible and meaningful.",
+    content: "I love how we&apos;re encouraged to think creatively and push boundaries. The impact of our work is visible and meaningful.",
     rating: 5,
   },
 ];
@@ -157,7 +157,7 @@ export default function CareersPage() {
               Build the Future with Us
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12">
-              Join LocalPro and help us revolutionize the service industry in the Philippines. Be part of a mission-driven team that's making a real difference in local communities.
+              Join LocalPro and help us revolutionize the service industry in the Philippines. Be part of a mission-driven team that&apos;s making a real difference in local communities.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
@@ -181,7 +181,7 @@ export default function CareersPage() {
           <div className="mx-auto mb-16 max-w-3xl text-center">
             <h2 className="font-headline text-4xl font-bold md:text-5xl mb-6">Why Join LocalPro?</h2>
             <p className="text-lg text-muted-foreground">
-              Be part of a team that's transforming how services are delivered across the Philippines
+              Be part of a team that&apos;s transforming how services are delivered across the Philippines
             </p>
           </div>
           <div className="max-w-6xl mx-auto">
@@ -283,7 +283,7 @@ export default function CareersPage() {
                     ))}
                   </div>
                   <Quote className="h-8 w-8 text-primary/30 mb-4" />
-                  <p className="text-muted-foreground mb-6 leading-relaxed">"{testimonial.content}"</p>
+                  <p className="text-muted-foreground mb-6 leading-relaxed">&quot;{testimonial.content}&quot;</p>
                   <div>
                     <div className="font-semibold">{testimonial.name}</div>
                     <div className="text-sm text-muted-foreground">{testimonial.role}</div>
@@ -387,7 +387,7 @@ export default function CareersPage() {
               </CardHeader>
               <CardContent className="text-center pb-8">
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                  Don't see a position that fits? We're always looking for talented individuals who share our vision. Send us your resume and tell us how you'd like to contribute.
+                  Don&apos;t see a position that fits? We&apos;re always looking for talented individuals who share our vision. Send us your resume and tell us how you&apos;d like to contribute.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
                   <Button asChild size="lg" className="h-12 px-8 shadow-glow hover:shadow-glow/50 transition-all duration-300">

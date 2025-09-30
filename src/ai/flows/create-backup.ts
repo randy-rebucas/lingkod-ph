@@ -8,7 +8,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getDb } from '@/lib/firebase';
 import { adminStorage } from '@/lib/firebase-admin';
 
 const BackupResultSchema = z.object({
@@ -56,11 +56,12 @@ const createBackupFlow = ai.defineFlow(
     }),
     outputSchema: BackupResultSchema,
   },
-  async ({ actor }) => {
+  async ({ actor: _actor }) => {
     try {
         const backupData: Record<string, any[]> = {};
         let totalDocuments = 0;
 
+        const db = getDb();
         for (const collectionName of COLLECTIONS_TO_BACKUP) {
             const snapshot = await getDocs(collection(db, collectionName));
             backupData[collectionName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));

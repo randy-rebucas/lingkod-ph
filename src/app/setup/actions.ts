@@ -3,7 +3,7 @@
 
 import { z } from "zod";
 import { getDb, getAuthInstance   } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, doc, setDoc, getDocs, query, limit } from "firebase/firestore";
+import { collection, serverTimestamp, doc, setDoc, getDocs, query, limit } from "firebase/firestore";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 const setupSchema = z.object({

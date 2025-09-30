@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Loader2, Download, DatabaseBackup, ListTree } from "lucide-react";
+import { PlusCircle, Loader2, Download, DatabaseBackup } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { createBackup } from "@/ai/flows/create-backup";
@@ -84,11 +84,11 @@ export default function AdminBackupPage() {
                     variant: 'destructive',
                 });
             }
-        } catch (e: any) {
+        } catch (e: unknown) {
             console.error('Error creating backup: ', e);
             toast({
                 title: 'Backup Failed',
-                description: e.message,
+                description: e instanceof Error ? e.message : 'An unknown error occurred',
                 variant: 'destructive',
             });
         } finally {
@@ -116,7 +116,7 @@ export default function AdminBackupPage() {
              <div className="container space-y-8">
                  <div className="max-w-6xl mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Data Backup & Recovery</h1>
-                    <p className="text-muted-foreground">Manage and download backups of your platform's data.</p>
+                    <p className="text-muted-foreground">Manage and download backups of your platform&apos;s data.</p>
                 </div>
                 <div className="max-w-6xl mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
@@ -135,7 +135,7 @@ export default function AdminBackupPage() {
                 <div>
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Data Backup & Recovery</h1>
                     <p className="text-muted-foreground">
-                        Manage and download backups of your platform's data.
+                        Manage and download backups of your platform&apos;s data.
                     </p>
                 </div>
                 <Button onClick={handleCreateBackup} disabled={isCreatingBackup} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">

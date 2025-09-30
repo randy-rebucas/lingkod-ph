@@ -7,7 +7,7 @@ import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
@@ -234,7 +234,7 @@ export default function MyJobPostsPage() {
                                                     <AlertDialogHeader>
                                                         <AlertDialogTitle>{t('deleteJobPost')}</AlertDialogTitle>
                                                         <AlertDialogDescription>
-                                                            Are you sure you want to delete "{job.title}"? This action cannot be undone.
+                                                            Are you sure you want to delete &quot;{job.title}&quot;? This action cannot be undone.
                                                         </AlertDialogDescription>
                                                     </AlertDialogHeader>
                                                     <AlertDialogFooter>

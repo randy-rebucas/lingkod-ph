@@ -126,14 +126,9 @@ export class AdminSecurityNotifications {
     endDate?: Date;
     limit?: number;
   }): Promise<SecurityEvent[]> {
-    try {
-      // This would typically use Firestore queries with proper filtering
-      // For now, return empty array as placeholder
-      return [];
-    } catch (error) {
-      console.error('Error getting security events:', error);
-      return [];
-    }
+    // This would typically use Firestore queries with proper filtering
+    // For now, return empty array as placeholder
+    return [];
   }
 
   /**
@@ -470,28 +465,18 @@ ${JSON.stringify(event.details, null, 2)}
    * Get recent notifications count
    */
   private static async getRecentNotifications(eventType: SecurityEventType): Promise<number> {
-    try {
-      // This would typically query the notifications collection
-      // For now, return 0 as placeholder
-      return 0;
-    } catch (error) {
-      console.error('Error getting recent notifications:', error);
-      return 0;
-    }
+    // This would typically query the notifications collection
+    // For now, return 0 as placeholder
+    return 0;
   }
 
   /**
    * Get recent events count
    */
   private static async getRecentEvents(eventType: SecurityEventType, severity: SecurityEventSeverity): Promise<number> {
-    try {
-      // This would typically query the events collection
-      // For now, return 0 as placeholder
-      return 0;
-    } catch (error) {
-      console.error('Error getting recent events:', error);
-      return 0;
-    }
+    // This would typically query the events collection
+    // For now, return 0 as placeholder
+    return 0;
   }
 
   /**

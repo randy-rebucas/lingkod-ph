@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Briefcase, MapPin, Users, Star, ShieldCheck, Clock, Search, Filter, SortAsc, SortDesc, Grid3X3, List, Eye } from "lucide-react";
+import { Briefcase, MapPin, Users, ShieldCheck, Clock, Search, Filter, Grid3X3, List, Eye } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
@@ -18,7 +18,7 @@ import { formatBudget } from '@/lib/utils';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 
 
@@ -88,7 +88,7 @@ export default function JobsPage() {
         }
     };
 
-    const handleSort = (column: 'date' | 'budget' | 'applicants' | 'title') => {
+    const _handleSort = (column: 'date' | 'budget' | 'applicants' | 'title') => {
         if (sortBy === column) {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
         } else {

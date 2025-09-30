@@ -11,7 +11,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { db } from '@/lib/firebase';
+import { getDb } from '@/lib/firebase';
 import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Resend } from 'resend';
 import PayoutRequestEmail from '@/emails/payout-request-email';
@@ -33,6 +33,7 @@ const requestPayoutFlow = ai.defineFlow(
     outputSchema: z.void(),
   },
   async ({ providerId, amount }) => {
+    const db = getDb();
     const providerRef = doc(db, 'users', providerId);
     const providerDoc = await getDoc(providerRef);
 

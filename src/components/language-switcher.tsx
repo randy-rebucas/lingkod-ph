@@ -1,7 +1,5 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,8 +16,6 @@ const languages = [
 ];
 
 export const LanguageSwitcher = memo(function LanguageSwitcher() {
-  const t = useTranslations('Common');
-  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [currentLocale, setCurrentLocale] = useState('en');
 

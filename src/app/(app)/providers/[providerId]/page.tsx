@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getDb  } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp, deleteDoc, setDoc, onSnapshot, orderBy } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp, deleteDoc, onSnapshot, orderBy } from "firebase/firestore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -324,7 +324,6 @@ export default function ProviderProfilePage() {
     }
 
     const today = new Date().toLocaleString('en-us', { weekday: 'long' });
-    const todaySchedule = provider.availabilitySchedule?.find(s => s.day === today);
     const ProfileIcon = provider.role === 'agency' ? Building : BriefcaseBusiness;
 
     return (

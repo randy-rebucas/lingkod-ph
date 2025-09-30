@@ -63,7 +63,7 @@ export default function ServicesPage() {
 
     useEffect(() => {
         fetchServices();
-    }, [user]);
+    }, [user, fetchServices]);
 
     const handleAddService = () => {
         setSelectedService(null);

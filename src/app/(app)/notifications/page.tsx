@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { getDb  } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
@@ -13,178 +13,17 @@ import {
   Bell, 
   Briefcase, 
   MessageSquare, 
-  ThumbsDown, 
-  ThumbsUp, 
   UserPlus, 
   X, 
   Star, 
   Trash2, 
   Check, 
   CheckCheck,
-  Filter,
-  Calendar,
-  AlertTriangle,
-  Users,
-  Clock,
-  Zap,
-  Eye,
   Search,
-  Mail,
-  UserCheck,
-  UserX,
-  CheckCircle,
-  XCircle,
-  DollarSign,
-  BookCheck,
-  Wallet,
-  CheckCircle2,
-  Hourglass,
-  User,
-  Shield,
-  Crown,
-  Building,
-  Globe,
-  Phone,
-  MapPin as Location,
-  Calendar as CalendarIcon,
-  Edit,
-  Copy,
-  Send,
-  Archive,
-  Flag,
-  Info,
-  HelpCircle,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-  Plus,
-  Minus as MinusIcon,
-  Volume2,
-  VolumeX,
-  Volume1,
-  BellRing,
-  BellOff,
-  AlertCircle,
-  Info as InfoIcon,
-  CheckCircle as CheckCircleIcon,
-  XCircle as XCircleIcon,
-  AlertTriangle as AlertTriangleIcon,
-  Lightbulb,
-  Megaphone,
-  Radio,
-  Tv,
-  Smartphone,
-  Monitor,
-  Laptop,
-  Tablet,
-  Headphones,
-  Speaker,
-  Mic,
-  MicOff,
-  Video,
-  VideoOff,
-  Camera,
-  CameraOff,
-  Image,
-  File,
-  Folder,
-  FolderOpen,
-  Database,
-  Server,
-  Cloud,
-  Wifi,
-  WifiOff,
-  Signal,
-  SignalHigh,
-  SignalMedium,
-  SignalLow,
-  Battery,
-  BatteryLow,
-  BatteryMedium,
-  BatteryFull,
-  Power,
-  PowerOff,
-  Plug,
-  Unplug,
-  Zap as ZapIcon,
-  Sun,
-  Moon,
-  Sunrise,
-  Sunset,
-  CloudRain,
-  CloudSnow,
-  CloudLightning,
-  Wind,
-  Thermometer,
-  Droplets,
-  Umbrella,
-  Snowflake,
-  Tornado,
-  Flame,
-  Sparkles,
-  Star as StarIcon,
-  Heart,
-  Smile,
-  Frown,
-  Meh,
-  Angry,
-  Laugh,
-  Ghost,
-  Skull,
-  Cat,
-  Dog,
-  Bird,
-  Fish,
-  Bug,
-  Flower,
-  Leaf,
-  Mountain,
-  Building2,
-  Home,
-  Car,
-  Bus,
-  Train,
-  Plane,
-  Ship,
-  Rocket,
-  Bike,
-  Tent,
-  Compass,
-  Map,
-  Navigation,
-  Route,
-  Flag as FlagIcon,
-  Trophy,
-  Medal,
-  Ribbon,
-  Gift,
-  Cake,
-  Cookie,
-  Pizza,
-  Sandwich,
-  Salad,
-  Soup,
-  Coffee,
-  Beer,
-  Wine,
-  Milk,
-  Egg,
-  Apple,
-  Banana,
-  Grape,
-  Cherry,
-  IceCream,
-  Lollipop,
-  Popcorn,
-  Candy,
-  Donut,
-  Croissant,
-  Mouse,
-  Rat,
-  Rabbit
+  Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
@@ -192,9 +31,9 @@ import { handleInviteAction } from '@/app/(app)/profile/actions';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+// import { Label } from "@/components/ui/label";
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+// import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info' | 'renewal_reminder' | 'new_review' | 'new_job' | 'payment_received' | 'payment_failed' | 'system_alert' | 'maintenance' | 'security' | 'promotion' | 'newsletter' | 'reminder' | 'deadline' | 'achievement' | 'warning' | 'error' | 'success';
 
@@ -243,7 +82,7 @@ const getIconForType = (type: NotificationType) => {
     }
 };
 
-const getTypeColor = (type: NotificationType) => {
+    const _getTypeColor = (type: NotificationType) => {
     switch (type) {
         case 'booking_update': return 'bg-blue-500';
         case 'new_message': return 'bg-green-500';
@@ -392,14 +231,14 @@ const NotificationsPage = memo(function NotificationsPage() {
     const { user } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
-    const { handleError } = useErrorHandler();
+    const { handleError: _handleError } = useErrorHandler();
     const t = useTranslations('Notifications');
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'unread' | 'starred' | 'archived'>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [typeFilter, setTypeFilter] = useState<string>('all');
-    const [priorityFilter, setPriorityFilter] = useState<string>('all');
+    const [priorityFilter, _setPriorityFilter] = useState<string>('all');
     const [dateFilter, setDateFilter] = useState<string>('all');
 
     useEffect(() => {
@@ -459,7 +298,7 @@ const NotificationsPage = memo(function NotificationsPage() {
         try {
             await deleteDoc(doc(getDb(), `users/${user.uid}/notifications`, notificationId));
             toast({ title: t('success'), description: t('notificationDeleted') });
-        } catch (error) {
+            } catch {
             toast({ variant: 'destructive', title: t('error'), description: t('deleteFailed') });
         }
     };
@@ -473,7 +312,7 @@ const NotificationsPage = memo(function NotificationsPage() {
             );
             await Promise.all(promises);
             toast({ title: t('success'), description: t('allMarkedAsRead') });
-        } catch (error) {
+            } catch {
             toast({ variant: 'destructive', title: t('error'), description: t('markAsReadFailed') });
         }
     };
@@ -487,7 +326,7 @@ const NotificationsPage = memo(function NotificationsPage() {
             );
             await Promise.all(promises);
             toast({ title: t('success'), description: t('readNotificationsDeleted') });
-        } catch (error) {
+            } catch {
             toast({ variant: 'destructive', title: t('error'), description: t('deleteFailed') });
         }
     };

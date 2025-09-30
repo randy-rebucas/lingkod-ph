@@ -32,7 +32,7 @@ export default function UnauthorizedPage() {
           </div>
           <CardTitle className="text-2xl font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
           <CardDescription>
-            You don't have permission to access this page.
+            You don&apos;t have permission to access this page.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

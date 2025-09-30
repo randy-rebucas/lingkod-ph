@@ -1,6 +1,6 @@
 'use server';
 
-import { auth, getDb } from './firebase';
+import { getDb } from './firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
 export async function verifyAdminRole(userId: string): Promise<boolean> {

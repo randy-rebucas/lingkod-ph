@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, getAdditionalUserInfo } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { getAuthInstance, getDb   } from '@/lib/firebase';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,7 +55,7 @@ export default function LoginPage() {
             if (setupRequired) {
                 router.push('/setup');
             }
-        } catch (error) {
+            } catch (error) {
             console.error("Error checking user count:", error);
             setIsSetupRequired(false); // Default to not required on error
         }
@@ -76,7 +76,7 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(getAuthInstance(), email, password);
       toast({ title: t('success'), description: t('loggedInSuccess') });
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: "destructive",
         title: t('loginFailed'),
@@ -116,11 +116,11 @@ export default function LoginPage() {
         }
         
         router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error: unknown) {
         toast({
             variant: "destructive",
             title: t('googleLoginFailed'),
-            description: error.message,
+            description: error instanceof Error ? error.message : 'An error occurred',
         });
     } finally {
         setLoading(false);
