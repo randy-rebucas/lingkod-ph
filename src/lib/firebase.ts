@@ -36,25 +36,28 @@ try {
 }
 
 // Helper function to ensure database is available
-export function getDb(): Firestore {
+export function getDb(): Firestore | null {
   if (!db) {
-    throw new Error('Firebase Firestore is not initialized. Please check your Firebase configuration.');
+    console.warn('Firebase Firestore is not initialized. Please check your Firebase configuration.');
+    return null;
   }
   return db;
 }
 
 // Helper function to ensure auth is available
-export function getAuthInstance(): Auth {
+export function getAuthInstance(): Auth | null {
   if (!auth) {
-    throw new Error('Firebase Auth is not initialized. Please check your Firebase configuration.');
+    console.warn('Firebase Auth is not initialized. Please check your Firebase configuration.');
+    return null;
   }
   return auth;
 }
 
 // Helper function to ensure storage is available
-export function getStorageInstance(): FirebaseStorage {
+export function getStorageInstance(): FirebaseStorage | null {
   if (!storage) {
-    throw new Error('Firebase Storage is not initialized. Please check your Firebase configuration.');
+    console.warn('Firebase Storage is not initialized. Please check your Firebase configuration.');
+    return null;
   }
   return storage;
 }

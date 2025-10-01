@@ -7,6 +7,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { getAuthInstance, getDb   } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/use-error-handler';
+import { isDevMode, DEV_CONFIG } from '@/lib/dev-config';
 
 type UserRole = 'client' | 'provider' | 'agency' | 'admin' | 'partner' | null;
 
@@ -17,6 +18,7 @@ interface AuthContextType {
   loading: boolean;
   userRole: UserRole;
   verificationStatus: VerificationStatus | null;
+  partnerStatus: string | null;
   getIdToken: () => Promise<string | null>;
 }
 
@@ -25,6 +27,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   userRole: null,
   verificationStatus: null,
+  partnerStatus: null,
   getIdToken: async () => null,
 });
 
@@ -66,6 +69,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus | null>(null);
+  const [partnerStatus, setPartnerStatus] = useState<string | null>(null);
+  const [hasRedirected, setHasRedirected] = useState(false);
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
 
@@ -74,9 +79,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setUser(null);
     setUserRole(null);
     setVerificationStatus(null);
+    setPartnerStatus(null);
+    setHasRedirected(false);
   }, []);
 
   const getIdToken = useCallback(async (): Promise<string | null> => {
+    if (isDevMode()) {
+      return 'dev-token-123';
+    }
     if (!user) return null;
     try {
       return await user.getIdToken();
@@ -87,15 +97,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [user, handleError]);
 
   useEffect(() => {
-    if (!getAuthInstance() || !getDb()) {
+    // Check if we're in development mode without Firebase
+    if (isDevMode()) {
+      console.log('Running in development mode without Firebase');
       setLoading(false);
       return;
     }
 
-    const unsubscribeAuth = onAuthStateChanged(getAuthInstance(), (authUser) => {
+    const authInstance = getAuthInstance();
+    const dbInstance = getDb();
+    
+    if (!authInstance || !dbInstance) {
+      console.warn('Firebase not initialized, skipping auth state listener');
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribeAuth = onAuthStateChanged(authInstance, (authUser) => {
       if (authUser) {
         setUser(authUser);
-        const userDocRef = doc(getDb(), 'users', authUser.uid);
+        const userDocRef = doc(dbInstance, 'users', authUser.uid);
         
         const unsubscribeDoc = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
@@ -105,6 +126,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 toast({ variant: 'destructive', title: 'Account Suspended', description: 'Your account has been suspended. Please contact support.' });
                 handleSignOut();
                 return;
+            }
+
+            // Check partner status for partners
+            if (data.role === 'partner') {
+              const partnerStatus = data.accountStatus || 'pending_approval';
+              setPartnerStatus(partnerStatus);
+              
+              // Only redirect if not already on the unauthorized page and not in a loading state
+              if (partnerStatus === 'pending_approval' && 
+                  !hasRedirected &&
+                  typeof window !== 'undefined' && 
+                  !window.location.pathname.includes('/partners/unauthorized') &&
+                  !window.location.pathname.includes('/partners/apply')) {
+                setHasRedirected(true);
+                // Use setTimeout to avoid redirect during initial load
+                setTimeout(() => {
+                  if (typeof window !== 'undefined' && !window.location.pathname.includes('/partners/unauthorized')) {
+                    window.location.href = '/partners/unauthorized';
+                  }
+                }, 100);
+                return;
+              }
+            } else {
+              setPartnerStatus(null);
+              setHasRedirected(false);
             }
 
             setUserRole(data.role || null);
@@ -130,8 +176,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loading,
     userRole,
     verificationStatus,
+    partnerStatus,
     getIdToken
-  }), [user, loading, userRole, verificationStatus, getIdToken]);
+  }), [user, loading, userRole, verificationStatus, partnerStatus, getIdToken]);
 
   return (
     <AuthContext.Provider value={contextValue}>

@@ -2,17 +2,23 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { isDevMode } from '@/lib/dev-config';
 
 // Initialize Firebase Admin SDK
 if (!getApps().length) {
   try {
-    initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      }),
-    });
+    // Only initialize if we have the required environment variables
+    if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+      initializeApp({
+        credential: cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        }),
+      });
+    } else {
+      console.warn('Firebase Admin SDK not initialized: Missing environment variables');
+    }
   } catch (error) {
     console.error('Failed to initialize Firebase Admin:', error);
   }
@@ -63,6 +69,10 @@ const publicRoutes = [
 async function verifyTokenAndGetRole(token: string): Promise<{ uid: string; role: string } | null> {
   try {
     const auth = getAuth();
+    if (!auth) {
+      console.warn('Firebase Admin Auth not initialized, skipping token verification');
+      return null;
+    }
     const decodedToken = await auth.verifyIdToken(token);
     
     // Get user role from Firestore
@@ -70,6 +80,11 @@ async function verifyTokenAndGetRole(token: string): Promise<{ uid: string; role
     const { doc, getDoc } = await import('firebase/firestore');
     
     const db = getDb();
+    if (!db) {
+      console.warn('Firebase not initialized, skipping role verification');
+      return { uid: decodedToken.uid, role: 'client' }; // Default role
+    }
+    
     const userDoc = await getDoc(doc(db, 'users', decodedToken.uid));
     if (!userDoc.exists()) {
       return null;
@@ -102,6 +117,12 @@ export async function middleware(request: NextRequest) {
   
   // Skip middleware for public routes
   if (publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))) {
+    return NextResponse.next();
+  }
+
+  // Skip authentication in development mode
+  if (isDevMode()) {
+    console.log('Development mode: Skipping authentication middleware');
     return NextResponse.next();
   }
   

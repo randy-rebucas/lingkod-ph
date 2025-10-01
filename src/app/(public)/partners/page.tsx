@@ -222,13 +222,13 @@ export default function PartnersPage() {
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                <Link href="#partnership-types">
-                  Explore Partnerships <ArrowRight className="ml-2 h-5 w-5" />
+                <Link href="/partners/apply">
+                  Apply to Become a Partner <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                <Link href="/contact-us">
-                  Contact Us
+                <Link href="#partnership-types">
+                  Explore Partnerships
                 </Link>
               </Button>
             </div>
@@ -496,14 +496,14 @@ export default function PartnersPage() {
                 </div>
                 <div className="flex flex-col sm:flex-row justify-center gap-4 mb-8">
                   <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                    <Link href="/contact-us">
-                      Start Your Partnership <ArrowRight className="ml-2 h-5 w-5" />
+                    <Link href="/partners/apply">
+                      Apply to Become a Partner <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
                   <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                    <a href="mailto:admin@localpro.asia">
+                    <a href="mailto:partners@localpro.asia">
                       <Mail className="mr-2 h-5 w-5" />
-                      Contact Sales Team
+                      Contact Partnership Team
                     </a>
                   </Button>
                 </div>

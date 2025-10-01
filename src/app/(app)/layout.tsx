@@ -84,7 +84,7 @@ import {
 } from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/context/auth-context";
-import { signOut } from "firebase/auth";
+import { signOut, Auth } from "firebase/auth";
 import { getAuthInstance } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationBell } from "@/components/notification-bell";
@@ -203,7 +203,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     try {
-      await signOut(getAuthInstance());
+      await signOut(getAuthInstance() as Auth);
       toast({ title: t('success'), description: t('loggedOutSuccessfully') });
       window.location.href = '/login'; // Force a full page reload to avoid fetch errors
     } catch (error: any) {
@@ -521,6 +521,57 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </h3>
                 <SidebarMenu>
                   <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/partners/referral-tracking")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/partners/referral-tracking" className="flex items-center gap-3 px-3 py-2">
+                        <LinkIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Referral Tracking</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/partners/referral-codes")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/partners/referral-codes" className="flex items-center gap-3 px-3 py-2">
+                        <Tag className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Referral Codes</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/partners/marketing-materials")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/partners/marketing-materials" className="flex items-center gap-3 px-3 py-2">
+                        <Megaphone className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Marketing Materials</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/partners/payment-settings")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/partners/payment-settings" className="flex items-center gap-3 px-3 py-2">
+                        <CreditCard className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Payment Settings</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/partners/goals")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/partners/goals" className="flex items-center gap-3 px-3 py-2">
+                        <Target className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Goals Management</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </div>
+            )}
+
+            {/* Partner Analytics & Reports */}
+            {userRole === 'partner' && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  Analytics & Reports
+                </h3>
+                <SidebarMenu>
+                  <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive("/partners/analytics")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                       <Link href="/partners/analytics" className="flex items-center gap-3 px-3 py-2">
                         <BarChart2 className="h-5 w-5 group-hover:scale-110 transition-transform" />
@@ -537,17 +588,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
-                    <SidebarMenuButton asChild isActive={isActive("/partners/referral-tracking")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
-                      <Link href="/partners/referral-tracking" className="flex items-center gap-3 px-3 py-2">
-                        <LinkIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
-                        <span className="font-medium">Referral Tracking</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive("/partners/performance-metrics")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                       <Link href="/partners/performance-metrics" className="flex items-center gap-3 px-3 py-2">
-                        <Target className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <Activity className="h-5 w-5 group-hover:scale-110 transition-transform" />
                         <span className="font-medium">Performance Metrics</span>
                       </Link>
                     </SidebarMenuButton>
@@ -555,7 +598,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive("/partners/conversion-analytics")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                       <Link href="/partners/conversion-analytics" className="flex items-center gap-3 px-3 py-2">
-                        <Activity className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <TrendingUp className="h-5 w-5 group-hover:scale-110 transition-transform" />
                         <span className="font-medium">Conversion Analytics</span>
                       </Link>
                     </SidebarMenuButton>
@@ -563,7 +606,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild isActive={isActive("/partners/monthly-statistics")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                       <Link href="/partners/monthly-statistics" className="flex items-center gap-3 px-3 py-2">
-                        <TrendingDown className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <Calendar className="h-5 w-5 group-hover:scale-110 transition-transform" />
                         <span className="font-medium">Monthly Statistics</span>
                       </Link>
                     </SidebarMenuButton>
@@ -624,6 +667,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <Link href="/admin/payouts" className="flex items-center gap-3 px-3 py-2">
                         <Wallet className="h-5 w-5 group-hover:scale-110 transition-transform" />
                         <span className="font-medium">Payouts</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/partners")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/partners" className="flex items-center gap-3 px-3 py-2">
+                        <Handshake className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Partners</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/partner-applications")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/partner-applications" className="flex items-center gap-3 px-3 py-2">
+                        <FileText className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Partner Applications</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

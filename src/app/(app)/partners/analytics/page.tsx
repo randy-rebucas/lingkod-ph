@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
+import { PartnerAccessGuard } from "@/components/partner-access-guard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -211,16 +212,6 @@ export default function PartnerAnalyticsPage() {
     return ((current.revenue - previous.revenue) / previous.revenue) * 100;
   };
 
-  if (userRole !== 'partner') {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h1>
-          <p className="text-muted-foreground">You don't have permission to access partner analytics.</p>
-        </div>
-      </div>
-    );
-  }
 
   if (data.loading) {
     return (
@@ -308,7 +299,8 @@ export default function PartnerAnalyticsPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <PartnerAccessGuard>
+      <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="space-y-2">
@@ -1053,6 +1045,7 @@ export default function PartnerAnalyticsPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </PartnerAccessGuard>
   );
 }

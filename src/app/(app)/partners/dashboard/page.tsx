@@ -3,6 +3,7 @@
 
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
+import { PartnerAccessGuard } from "@/components/partner-access-guard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Handshake, Users, Briefcase, BarChart2, DollarSign, TrendingUp, Target, Award } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -65,20 +66,6 @@ export default function PartnersDashboardPage() {
         loadDashboardData();
     }, [user, userRole]);
 
-    if (userRole !== 'partner') {
-        return (
-            <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{t('accessDenied')}</CardTitle>
-                            <CardDescription>{t('partnersOnly')}</CardDescription>
-                        </CardHeader>
-                    </Card>
-                </div>
-            </div>
-        );
-    }
 
     if (loading) {
         return (
@@ -108,7 +95,8 @@ export default function PartnersDashboardPage() {
     }
 
     return (
-        <div className="container space-y-8">
+        <PartnerAccessGuard>
+            <div className="container space-y-8">
             <div className="max-w-6xl mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('dashboardTitle', { name: user?.displayName || 'User' })}</h1>
                 <p className="text-muted-foreground">{t('dashboardSubtitle')}</p>
@@ -227,6 +215,7 @@ export default function PartnersDashboardPage() {
                     </Card>
                 </div>
             </div>
-        </div>
+            </div>
+        </PartnerAccessGuard>
     );
 }

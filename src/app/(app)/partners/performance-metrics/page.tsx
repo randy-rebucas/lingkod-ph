@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
+import { PartnerAccessGuard } from "@/components/partner-access-guard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -168,16 +169,6 @@ export default function PerformanceMetricsPage() {
     return Math.min(100, efficiency * 10);
   };
 
-  if (userRole !== 'partner') {
-    return (
-      <div className="container mx-auto p-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h1>
-          <p className="text-muted-foreground">You don't have permission to access performance metrics.</p>
-        </div>
-      </div>
-    );
-  }
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-PH', {
@@ -234,7 +225,8 @@ export default function PerformanceMetricsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <PartnerAccessGuard>
+      <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Performance Metrics</h1>
@@ -636,6 +628,7 @@ export default function PerformanceMetricsPage() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </PartnerAccessGuard>
   );
 }
