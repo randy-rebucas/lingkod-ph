@@ -14,6 +14,7 @@ import {
   orderBy,
   limit
 } from 'firebase/firestore';
+import { generatePartnerReferralCode } from './referral-code-generator';
 
 /**
  * Referral tracking data structures
@@ -87,11 +88,7 @@ export class PartnerReferralTracker {
    * Generate unique referral code
    */
   static generateReferralCode(partnerId: string, partnerName: string): string {
-    const timestamp = Date.now().toString(36);
-    // Note: In production, consider using a cryptographically secure random generator
-    const random = Math.random().toString(36).substr(2, 5);
-    const nameCode = partnerName.replace(/\s+/g, '').substr(0, 3).toUpperCase();
-    return `${nameCode}${timestamp}${random}`.toUpperCase();
+    return generatePartnerReferralCode(partnerId, partnerName);
   }
 
   /**

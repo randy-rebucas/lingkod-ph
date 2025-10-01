@@ -17,14 +17,7 @@ import { doc, getDoc, setDoc, serverTimestamp, getDocs, collection, query, limit
 import { Loader2 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { useTranslations } from 'next-intl';
-
-// Function to generate a unique referral code
-const generateReferralCode = (userId: string): string => {
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const uidPart = userId.substring(0, 4).toUpperCase();
-    const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
-    return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
-};
+import { generateReferralCode } from '@/lib/referral-code-generator';
 
 
 export default function LoginPage() {

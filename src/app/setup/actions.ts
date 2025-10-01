@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getDb, getAuthInstance   } from '@/lib/firebase';
 import { collection, serverTimestamp, doc, setDoc, getDocs, query, limit } from "firebase/firestore";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { generateReferralCode } from '@/lib/referral-code-generator';
 
 const setupSchema = z.object({
   name: z.string().min(2, "Name is required."),
@@ -17,12 +18,6 @@ export interface FormState {
   message: string;
 }
 
-const generateReferralCode = (userId: string): string => {
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const uidPart = userId.substring(0, 4).toUpperCase();
-    const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
-    return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
-};
 
 export async function createAdminAction(
   prevState: FormState,

@@ -16,6 +16,7 @@ import { z } from 'zod';
 import { AuditLogger } from '@/lib/audit-logger';
 import { Resend } from 'resend';
 import DirectMessageEmail from '@/emails/direct-message-email';
+import { generateReferralCode } from '@/lib/referral-code-generator';
 
 type UserStatus = 'active' | 'pending_approval' | 'suspended';
 type Actor = {
@@ -24,12 +25,6 @@ type Actor = {
     role: string;
 };
 
-const generateReferralCode = (userId: string): string => {
-    const timestamp = Date.now().toString(36).toUpperCase();
-    const uidPart = userId.substring(0, 4).toUpperCase();
-    const randomPart = Math.random().toString(36).substring(2, 5).toUpperCase();
-    return `LP-${uidPart}-${timestamp.slice(-3)}-${randomPart}`;
-};
 
 export async function handleUserStatusUpdate(
   userId: string,
