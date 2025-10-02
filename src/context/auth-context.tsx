@@ -13,12 +13,38 @@ type UserRole = 'client' | 'provider' | 'agency' | 'admin' | 'partner' | null;
 
 type VerificationStatus = 'Unverified' | 'Pending' | 'Verified' | 'Rejected';
 
+interface PartnerData {
+  company: string;
+  position: string;
+  businessType: string;
+  businessSize: string;
+  website: string;
+  location: string;
+  description: string;
+  partnershipType: string;
+  targetAudience: string[];
+  expectedReferrals: string;
+  marketingChannels: string[];
+  experience: string;
+  motivation: string;
+  goals: string;
+  additionalInfo: string;
+  status: 'active' | 'inactive' | 'suspended';
+  totalReferrals?: number;
+  totalCommission?: number;
+  approvedAt?: any;
+  approvedBy?: string;
+  statusUpdatedAt?: any;
+  statusUpdatedBy?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   userRole: UserRole;
   verificationStatus: VerificationStatus | null;
   partnerStatus: string | null;
+  partnerData: PartnerData | null;
   getIdToken: () => Promise<string | null>;
 }
 
@@ -28,6 +54,7 @@ const AuthContext = createContext<AuthContextType>({
   userRole: null,
   verificationStatus: null,
   partnerStatus: null,
+  partnerData: null,
   getIdToken: async () => null,
 });
 
@@ -70,16 +97,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userRole, setUserRole] = useState<UserRole>(null);
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus | null>(null);
   const [partnerStatus, setPartnerStatus] = useState<string | null>(null);
+  const [partnerData, setPartnerData] = useState<PartnerData | null>(null);
   const [hasRedirected, setHasRedirected] = useState(false);
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
 
   const handleSignOut = useCallback(() => {
-    signOut(getAuthInstance());
+    const authInstance = getAuthInstance();
+    if (authInstance) {
+      signOut(authInstance);
+    }
     setUser(null);
     setUserRole(null);
     setVerificationStatus(null);
     setPartnerStatus(null);
+    setPartnerData(null);
     setHasRedirected(false);
   }, []);
 
@@ -132,6 +164,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (data.role === 'partner') {
               const partnerStatus = data.accountStatus || 'pending_approval';
               setPartnerStatus(partnerStatus);
+              setPartnerData(data.partnerData || null);
               
               // Only redirect if not already on the unauthorized page and not in a loading state
               if (partnerStatus === 'pending_approval' && 
@@ -150,6 +183,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               }
             } else {
               setPartnerStatus(null);
+              setPartnerData(null);
               setHasRedirected(false);
             }
 
@@ -177,8 +211,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     userRole,
     verificationStatus,
     partnerStatus,
+    partnerData,
     getIdToken
-  }), [user, loading, userRole, verificationStatus, partnerStatus, getIdToken]);
+  }), [user, loading, userRole, verificationStatus, partnerStatus, partnerData, getIdToken]);
 
   return (
     <AuthContext.Provider value={contextValue}>

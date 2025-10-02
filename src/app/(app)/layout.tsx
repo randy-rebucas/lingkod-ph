@@ -55,6 +55,11 @@ import {
   Target,
   Activity,
   TrendingDown,
+  ClipboardList,
+  Package,
+  Utensils,
+  Wrench,
+  Truck,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -196,7 +201,7 @@ const EmergencyHotlineButton = () => {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, userRole } = useAuth();
+  const { user, loading, userRole, partnerData } = useAuth();
   const { toast } = useToast();
   const { setTheme } = useTheme();
   const t = useTranslations('AppLayout');
@@ -560,6 +565,126 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
+                </SidebarMenu>
+              </div>
+            )}
+
+            {/* Business-Specific Partner Menus */}
+            {userRole === 'partner' && partnerData && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  Business Operations
+                </h3>
+                <SidebarMenu>
+                  {/* Laundry & Dry Cleaning */}
+                  {partnerData.businessType === 'Laundry & Dry Cleaning' && (
+                    <>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/partners/bookings")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/partners/bookings" className="flex items-center gap-3 px-3 py-2">
+                            <Calendar className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Service Bookings</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/partners/laundry-services")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/partners/laundry-services" className="flex items-center gap-3 px-3 py-2">
+                            <Star className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Laundry Services</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </>
+                  )}
+
+                  {/* Food & Catering */}
+                  {partnerData.businessType === 'Food & Catering (restaurants, catering services)' && (
+                    <>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/partners/orders")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/partners/orders" className="flex items-center gap-3 px-3 py-2">
+                            <Package className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Product Orders</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/partners/food-products")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/partners/food-products" className="flex items-center gap-3 px-3 py-2">
+                            <Utensils className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Food Products</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </>
+                  )}
+
+                  {/* Logistics */}
+                  {partnerData.businessType === 'Logistics (transport, delivery, moving services)' && (
+                    <>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/partners/deliveries")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/partners/deliveries" className="flex items-center gap-3 px-3 py-2">
+                            <Truck className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Delivery Management</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/partners/vehicles")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/partners/vehicles" className="flex items-center gap-3 px-3 py-2">
+                            <Truck className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Vehicle Fleet</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </>
+                  )}
+
+                  {/* Wellness */}
+                  {partnerData.businessType === 'Wellness (salons, spas, massage)' && (
+                    <>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/partners/bookings")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/partners/bookings" className="flex items-center gap-3 px-3 py-2">
+                            <Calendar className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Service Bookings</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/partners/wellness-services")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/partners/wellness-services" className="flex items-center gap-3 px-3 py-2">
+                            <Star className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Wellness Services</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </>
+                  )}
+
+                  {/* Supplies & Hardware */}
+                  {partnerData.businessType === 'Supplies & Hardware' && (
+                    <>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/partners/orders")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/partners/orders" className="flex items-center gap-3 px-3 py-2">
+                            <Package className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Product Orders</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/partners/supplies-products")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/partners/supplies-products" className="flex items-center gap-3 px-3 py-2">
+                            <Wrench className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Supplies Products</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </>
+                  )}
                 </SidebarMenu>
               </div>
             )}
