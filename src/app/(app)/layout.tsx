@@ -20,6 +20,7 @@ import {
   FileText,
   Calculator,
   BarChart2,
+  BarChart3,
   Users2,
   Moon,
   Sun,
@@ -252,7 +253,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   
-  const dashboardPath = userRole === 'admin' ? '/admin/dashboard' : userRole === 'partner' ? '/partners/dashboard' : '/dashboard';
+  const dashboardPath = userRole === 'admin' ? '/admin/dashboard' : 
+                        userRole === 'partner' ? '/partners/dashboard' : 
+                        (userRole as string) === 'driver' ? '/drivers/dashboard' : 
+                        '/dashboard';
 
   const getPageTitle = (path: string) => {
     const parts = path.split('/').filter(Boolean);
@@ -624,6 +628,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   {partnerData.businessType === 'Logistics (transport, delivery, moving services)' && (
                     <>
                       <SidebarMenuItem>
+                        <SidebarMenuButton asChild isActive={isActive("/partners/fleet-dashboard")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                          <Link href="/partners/fleet-dashboard" className="flex items-center gap-3 px-3 py-2">
+                            <BarChart3 className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                            <span className="font-medium">Fleet Dashboard</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
                         <SidebarMenuButton asChild isActive={isActive("/partners/deliveries")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
                           <Link href="/partners/deliveries" className="flex items-center gap-3 px-3 py-2">
                             <Truck className="h-5 w-5 group-hover:scale-110 transition-transform" />
@@ -685,6 +697,41 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       </SidebarMenuItem>
                     </>
                   )}
+                </SidebarMenu>
+              </div>
+            )}
+
+            {/* Driver Panel */}
+            {(userRole as string) === 'driver' && (
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3">
+                  Driver Operations
+                </h3>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/drivers/tasks")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/drivers/tasks" className="flex items-center gap-3 px-3 py-2">
+                        <Truck className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Delivery Tasks</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/drivers/earnings")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/drivers/earnings" className="flex items-center gap-3 px-3 py-2">
+                        <DollarSign className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Earnings</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/drivers/profile")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/drivers/profile" className="flex items-center gap-3 px-3 py-2">
+                        <User className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Profile</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </div>
             )}

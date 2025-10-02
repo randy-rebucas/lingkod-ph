@@ -38,6 +38,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
 import { LeaveReviewDialog } from "@/components/leave-review-dialog";
 import { CompleteBookingDialog } from "@/components/complete-booking-dialog";
+import { EnhancedBookingDialog } from "@/components/enhanced-booking-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 // import { BookingDialog } from "@/components/booking-dialog";

@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/use-error-handler';
 import { isDevMode, DEV_CONFIG } from '@/lib/dev-config';
 
-type UserRole = 'client' | 'provider' | 'agency' | 'admin' | 'partner' | null;
+type UserRole = 'client' | 'provider' | 'agency' | 'admin' | 'partner' | 'driver' | null;
 
 type VerificationStatus = 'Unverified' | 'Pending' | 'Verified' | 'Rejected';
 

@@ -169,7 +169,14 @@ const ProfilePage = memo(function ProfilePage() {
     const { isLoaded } = useLoadScript({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
         libraries: ["places"],
+        language: "en", // Language preference for better performance
     });
+    
+    // Session token for cost optimization (as recommended by Google)
+    const sessionToken = useRef<google.maps.places.AutocompleteSessionToken | null>(null);
+    
+    // Performance monitoring
+    const [requestCount, setRequestCount] = useState(0);
 
     const years = useMemo(() => {
         const currentYear = new Date().getFullYear();
@@ -668,6 +675,46 @@ const ProfilePage = memo(function ProfilePage() {
         }
     };
 
+    // Fallback strategy for when users don't select from autocomplete
+    const handleAddressFallback = async (address: string) => {
+        if (!window.google?.maps?.Geocoder) {
+            console.warn('Google Maps Geocoder not available for fallback');
+            return;
+        }
+
+        try {
+            const geocoder = new google.maps.Geocoder();
+            const result = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
+                geocoder.geocode(
+                    { 
+                        address: address,
+                        componentRestrictions: { country: 'ph' } // Restrict to Philippines
+                    },
+                    (results, status) => {
+                        if (status === 'OK' && results) {
+                            resolve(results);
+                        } else {
+                            reject(new Error(`Geocoding failed: ${status}`));
+                        }
+                    }
+                );
+            });
+
+            if (result && result[0]) {
+                const place = result[0];
+                console.log('Address geocoded successfully:', place.formatted_address);
+                setAddress(place.formatted_address);
+                
+                if (place.geometry?.location) {
+                    setLatitude(place.geometry.location.lat());
+                    setLongitude(place.geometry.location.lng());
+                }
+            }
+        } catch (error) {
+            console.error('Geocoding fallback failed:', error);
+        }
+    };
+
     return (
         <div className="container space-y-8">
 
@@ -830,6 +877,16 @@ const ProfilePage = memo(function ProfilePage() {
                                             onLoad={onLoad}
                                             onPlaceChanged={onPlaceChanged}
                                             className="w-full"
+                                            options={{
+                                                componentRestrictions: { country: 'ph' }, // Country restriction for performance
+                                                fields: ['formatted_address', 'place_id', 'geometry', 'address_components'], // Only request needed fields
+                                                types: ['address', 'establishment'], // Restrict to relevant types
+                                                bounds: new google.maps.LatLngBounds(
+                                                    new google.maps.LatLng(4.0, 114.0), // Southwest corner of Philippines
+                                                    new google.maps.LatLng(21.0, 127.0)  // Northeast corner of Philippines
+                                                ),
+                                                strictBounds: false, // Allow results outside bounds if more relevant
+                                            }}
                                         >
                                             <Input 
                                                 id="address" 
