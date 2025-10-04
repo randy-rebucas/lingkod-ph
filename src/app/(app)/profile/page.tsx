@@ -764,8 +764,8 @@ const ProfilePage = memo(function ProfilePage() {
                 <TabsContent value="public-profile" className="mt-8">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                            <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Public Profile Information</CardTitle>
-                            <CardDescription className="text-base">This information will be displayed on your public profile.</CardDescription>
+                            <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('publicProfileInformation')}</CardTitle>
+                            <CardDescription className="text-base">{t('publicProfileDescription')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6 p-6">
                             <div className="space-y-2">
@@ -776,7 +776,7 @@ const ProfilePage = memo(function ProfilePage() {
                                 <Label htmlFor="bio" className="text-sm font-medium">Bio / About</Label>
                                 <Textarea 
                                     id="bio"
-                                    placeholder="Tell us a little about yourself or your business..."
+                                    placeholder={t('tellUsAboutYourself')}
                                     value={bio}
                                     onChange={(e) => setBio(e.target.value)}
                                     rows={5}
@@ -796,28 +796,28 @@ const ProfilePage = memo(function ProfilePage() {
                 <TabsContent value="account-settings" className="mt-8 space-y-6">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                            <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Personal Details</CardTitle>
-                            <CardDescription className="text-base">This information is private and will not be shown on your profile.</CardDescription>
+                            <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('personalDetails')}</CardTitle>
+                            <CardDescription className="text-base">{t('personalDetailsDescription')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6 p-6">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+                                <Label htmlFor="email" className="text-sm font-medium">{t('emailAddress')}</Label>
                                 <Input id="email" type="email" value={user.email || ''} disabled className="bg-muted/50 border-2 shadow-soft" />
                             </div>
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="phone" className="text-sm font-medium">Mobile Number</Label>
-                                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., 09123456789" className="bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft" />
+                                    <Label htmlFor="phone" className="text-sm font-medium">{t('mobileNumber')}</Label>
+                                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={t('phonePlaceholder')} className="bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="gender">Gender</Label>
+                                    <Label htmlFor="gender">{t('gender')}</Label>
                                     <Select value={gender} onValueChange={setGender}>
-                                        <SelectTrigger id="gender"><SelectValue placeholder="Select gender" /></SelectTrigger>
+                                        <SelectTrigger id="gender"><SelectValue placeholder={t('selectGender')} /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="male">Male</SelectItem>
-                                            <SelectItem value="female">Female</SelectItem>
-                                            <SelectItem value="other">Other</SelectItem>
-                                            <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                                            <SelectItem value="male">{t('male')}</SelectItem>
+                                            <SelectItem value="female">{t('female')}</SelectItem>
+                                            <SelectItem value="other">{t('other')}</SelectItem>
+                                            <SelectItem value="prefer-not-to-say">{t('preferNotToSay')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -835,7 +835,7 @@ const ProfilePage = memo(function ProfilePage() {
                                                 id="address" 
                                                 value={address} 
                                                 onChange={(e) => setAddress(e.target.value)} 
-                                                placeholder="e.g., Quezon City, Metro Manila"
+                                                placeholder={t('addressPlaceholder')}
                                                 className="w-full"
                                             />
                                         </Autocomplete>
@@ -852,14 +852,14 @@ const ProfilePage = memo(function ProfilePage() {
                                 </div>
                             )}
                             <div className="space-y-2">
-                                <Label>Birthdate</Label>
+                                <Label>{t('birthdate')}</Label>
                                 <div className="grid grid-cols-3 gap-2">
                                     <Select value={birthMonth} onValueChange={setBirthMonth}>
-                                        <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
+                                        <SelectTrigger><SelectValue placeholder={t('month')} /></SelectTrigger>
                                         <SelectContent>{months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent>
                                     </Select>
                                     <Select value={birthDay} onValueChange={setBirthDay}>
-                                        <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
+                                        <SelectTrigger><SelectValue placeholder={t('day')} /></SelectTrigger>
                                         <SelectContent>
                                             {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => (
                                                 <SelectItem key={d} value={String(d)}>{d}</SelectItem>
@@ -867,7 +867,7 @@ const ProfilePage = memo(function ProfilePage() {
                                         </SelectContent>
                                     </Select>
                                     <Select value={birthYear} onValueChange={setBirthYear}>
-                                        <SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger>
+                                        <SelectTrigger><SelectValue placeholder={t('year')} /></SelectTrigger>
                                         <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
                                     </Select>
                                 </div>
@@ -883,25 +883,25 @@ const ProfilePage = memo(function ProfilePage() {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Password & Security</CardTitle>
-                            <CardDescription>Manage your password and account security settings.</CardDescription>
+                            <CardTitle>{t('passwordAndSecurity')}</CardTitle>
+                            <CardDescription>{t('passwordAndSecurityDescription')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="current-password">Current Password</Label>
+                                <Label htmlFor="current-password">{t('currentPassword')}</Label>
                                 <Input id="current-password" type="password" />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="new-password">New Password</Label>
+                                <Label htmlFor="new-password">{t('newPassword')}</Label>
                                 <Input id="new-password" type="password" />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                                <Label htmlFor="confirm-password">{t('confirmNewPassword')}</Label>
                                 <Input id="confirm-password" type="password" />
                             </div>
                         </CardContent>
                         <CardFooter>
-                            <Button variant="outline" className="w-full sm:w-auto" disabled>Change Password</Button>
+                            <Button variant="outline" className="w-full sm:w-auto" disabled>{t('changePassword')}</Button>
                         </CardFooter>
                     </Card>
                     
@@ -910,7 +910,7 @@ const ProfilePage = memo(function ProfilePage() {
 
                 <TabsContent value="loyalty" className="mt-6 space-y-6">
                     <div>
-                         <h2 className="text-2xl font-bold">Loyalty Program</h2>
+                         <h2 className="text-2xl font-bold">{t('loyaltyProgram')}</h2>
                          <p className="text-muted-foreground">Earn points for completed bookings and redeem them for exclusive rewards.</p>
                     </div>
 
@@ -1115,13 +1115,13 @@ const ProfilePage = memo(function ProfilePage() {
                             <CardContent className="space-y-4">
                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="yearsOfExperience">Years of Experience</Label>
-                                        <Input id="yearsOfExperience" type="number" value={yearsOfExperience} onChange={(e) => setYearsOfExperience(e.target.value)} placeholder="e.g., 5" />
+                                        <Label htmlFor="yearsOfExperience">{t('yearsOfExperience')}</Label>
+                                        <Input id="yearsOfExperience" type="number" value={yearsOfExperience} onChange={(e) => setYearsOfExperience(e.target.value)} placeholder={t('yearsOfExperiencePlaceholder')} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="availabilityStatus">Availability Status</Label>
                                         <Select value={availabilityStatus} onValueChange={setAvailabilityStatus}>
-                                            <SelectTrigger id="availabilityStatus"><SelectValue placeholder="Select status" /></SelectTrigger>
+                                            <SelectTrigger id="availabilityStatus"><SelectValue placeholder={t('selectStatus')} /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="available">Available for Bookings</SelectItem>
                                                 <SelectItem value="limited">Limited Availability</SelectItem>
@@ -1136,7 +1136,7 @@ const ProfilePage = memo(function ProfilePage() {
                                     <div className="flex gap-2">
                                         <Select onValueChange={setCurrentKeyService} value={currentKeyService}>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a key service" /></SelectTrigger>
+                                                <SelectValue placeholder={t('selectKeyService')} /></SelectTrigger>
                                             <SelectContent>
                                                 {categories
                                                     .filter(cat => !keyServices.includes(cat.name))
@@ -1237,7 +1237,7 @@ const ProfilePage = memo(function ProfilePage() {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                              <div className="space-y-2">
                                                 <Label htmlFor="licenseType">License/Certification Type</Label>
-                                                <Input id="licenseType" value={licenseType} onChange={e => setLicenseType(e.target.value)} placeholder="e.g., TESDA NC II" />
+                                                <Input id="licenseType" value={licenseType} onChange={e => setLicenseType(e.target.value)} placeholder={t('licenseTypePlaceholder')} />
                                             </div>
                                              <div className="space-y-2">
                                                 <Label htmlFor="licenseNumber">License Number</Label>
@@ -1251,11 +1251,11 @@ const ProfilePage = memo(function ProfilePage() {
                                             </div>
                                              <div className="space-y-2">
                                                 <Label htmlFor="licenseIssuingState">Issuing State/Region</Label>
-                                                <Input id="licenseIssuingState" value={licenseIssuingState} onChange={e => setLicenseIssuingState(e.target.value)} placeholder="e.g., NCR" />
+                                                <Input id="licenseIssuingState" value={licenseIssuingState} onChange={e => setLicenseIssuingState(e.target.value)} placeholder={t('licenseIssuingStatePlaceholder')} />
                                             </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="licenseIssuingCountry">Issuing Country</Label>
-                                                <Input id="licenseIssuingCountry" value={licenseIssuingCountry} onChange={e => setLicenseIssuingCountry(e.target.value)} placeholder="e.g., Philippines" />
+                                                <Input id="licenseIssuingCountry" value={licenseIssuingCountry} onChange={e => setLicenseIssuingCountry(e.target.value)} placeholder={t('licenseIssuingCountryPlaceholder')} />
                                             </div>
                                         </div>
                                     </div>
@@ -1283,7 +1283,7 @@ const ProfilePage = memo(function ProfilePage() {
                                     <div className="space-y-2">
                                         <Label htmlFor="availabilityStatus">Availability Status</Label>
                                         <Select value={availabilityStatus} onValueChange={setAvailabilityStatus}>
-                                            <SelectTrigger id="availabilityStatus"><SelectValue placeholder="Select status" /></SelectTrigger>
+                                            <SelectTrigger id="availabilityStatus"><SelectValue placeholder={t('selectStatus')} /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="available">Available for Bookings</SelectItem>
                                                 <SelectItem value="limited">Limited Availability</SelectItem>
@@ -1430,7 +1430,7 @@ const ProfilePage = memo(function ProfilePage() {
                                 <div className="space-y-2">
                                 <Label>Payout Method</Label>
                                 <Select value={payoutMethod} onValueChange={setPayoutMethod}>
-                                    <SelectTrigger><SelectValue placeholder="Select a method" /></SelectTrigger>
+                                    <SelectTrigger><SelectValue placeholder={t('selectMethod')} /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="gcash">GCash</SelectItem>
                                         <SelectItem value="bank">Bank Transfer</SelectItem>

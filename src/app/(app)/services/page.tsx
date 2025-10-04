@@ -31,7 +31,7 @@ const getStatusVariant = (status: string) => {
 export default function ServicesPage() {
     const { user } = useAuth();
     const { toast } = useToast();
-    const t = useTranslations('Services');
+    const t = useTranslations('MyServices');
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);

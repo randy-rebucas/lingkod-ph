@@ -45,7 +45,7 @@ interface PerformanceMetrics {
 
 export default function PerformanceMetricsPage() {
   const { user, userRole } = useAuth();
-  const _t = useTranslations('Partners');
+  const _t = useTranslations('PartnersDashboard');
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const [analytics, setAnalytics] = useState<PartnerAnalytics | null>(null);
   const [loading, setLoading] = useState(true);

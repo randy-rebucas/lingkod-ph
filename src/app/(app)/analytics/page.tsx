@@ -438,16 +438,16 @@ export default function AnalyticsPage() {
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="7d">Last 7 days</SelectItem>
-                                <SelectItem value="30d">Last 30 days</SelectItem>
-                                <SelectItem value="90d">Last 90 days</SelectItem>
-                                <SelectItem value="1y">Last year</SelectItem>
-                                <SelectItem value="all">All time</SelectItem>
+                                <SelectItem value="7d">{t('last7Days')}</SelectItem>
+                                <SelectItem value="30d">{t('last30Days')}</SelectItem>
+                                <SelectItem value="90d">{t('last90Days')}</SelectItem>
+                                <SelectItem value="1y">{t('lastYear')}</SelectItem>
+                                <SelectItem value="all">{t('allTime')}</SelectItem>
                             </SelectContent>
                         </Select>
                         <Button variant="outline" size="sm" onClick={exportData}>
                             <Download className="h-4 w-4 mr-2" />
-                            Export
+                            {t('export')}
                         </Button>
                     </div>
                 </div>
@@ -459,7 +459,7 @@ export default function AnalyticsPage() {
                     <Alert>
                         <TrendingDown className="h-4 w-4" />
                         <AlertDescription>
-                            Revenue has decreased by {Math.abs(analyticsData.revenueAnalytics.monthlyGrowth).toFixed(1)}% this month. Consider reviewing your pricing strategy.
+                            Revenue has decreased by {Math.abs(analyticsData.revenueAnalytics.monthlyGrowth).toFixed(1)}% {t('thisMonth')}. Consider reviewing your pricing strategy.
                         </AlertDescription>
                     </Alert>
                 )}
@@ -468,7 +468,7 @@ export default function AnalyticsPage() {
                     <Alert className="border-green-200 bg-green-50">
                         <TrendingUp className="h-4 w-4 text-green-600" />
                         <AlertDescription className="text-green-800">
-                            Great! Revenue is up {analyticsData.revenueAnalytics.monthlyGrowth.toFixed(1)}% this month.
+                            Great! Revenue is up {analyticsData.revenueAnalytics.monthlyGrowth.toFixed(1)}% {t('thisMonth')}.
                         </AlertDescription>
                     </Alert>
                 )}
@@ -483,7 +483,7 @@ export default function AnalyticsPage() {
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                     <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                            <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Total Revenue</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('totalRevenue')}</CardTitle>
                             <DollarSign className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         </CardHeader>
                         <CardContent>
@@ -517,13 +517,13 @@ export default function AnalyticsPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{analyticsData.clientAnalytics.newClients}</div>
-                            <div className="text-xs text-muted-foreground mt-1">Last 30 days</div>
+                            <div className="text-xs text-muted-foreground mt-1">{t('last30Days')}</div>
                         </CardContent>
                     </Card>
                     
                     <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                            <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">Client Retention</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{t('clientRetention')}</CardTitle>
                             <Award className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         </CardHeader>
                         <CardContent>
@@ -550,7 +550,7 @@ export default function AnalyticsPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{analyticsData.averageRating.toFixed(2)}</div>
-                            <div className="text-xs text-muted-foreground mt-1">From {analyticsData.filteredReviews.length} reviews</div>
+                            <div className="text-xs text-muted-foreground mt-1">{t('fromReviews', { count: analyticsData.filteredReviews.length })}</div>
                         </CardContent>
                     </Card>
                     </div>
@@ -562,8 +562,8 @@ export default function AnalyticsPage() {
                 <div className="grid gap-6 md:grid-cols-2">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Revenue Growth</CardTitle>
-                        <CardDescription>Monthly revenue trends and projections</CardDescription>
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('revenueGrowth')}</CardTitle>
+                        <CardDescription>{t('monthlyRevenueTrends')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {loading ? <Skeleton className="h-[300px] w-full" /> : (
@@ -592,8 +592,8 @@ export default function AnalyticsPage() {
                 
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Client Analytics</CardTitle>
-                        <CardDescription>New vs returning client distribution</CardDescription>
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('clientAnalytics')}</CardTitle>
+                        <CardDescription>{t('newVsReturning')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {loading ? <Skeleton className="h-[300px] w-full" /> : (
@@ -680,8 +680,8 @@ export default function AnalyticsPage() {
                 <div className="grid gap-6 md:grid-cols-2">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Performance Insights</CardTitle>
-                        <CardDescription>Key performance indicators and recommendations</CardDescription>
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('performanceInsights')}</CardTitle>
+                        <CardDescription>{t('keyPerformanceIndicators')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {loading ? <Skeleton className="h-48 w-full" /> : (
@@ -692,14 +692,14 @@ export default function AnalyticsPage() {
                                             {analyticsData.isPerformingWell.revenue ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
                                         </div>
                                         <div>
-                                            <p className="font-medium">Revenue Growth</p>
+                                            <p className="font-medium">{t('revenueGrowthLabel')}</p>
                                             <p className="text-sm text-muted-foreground">
-                                                {analyticsData.revenueAnalytics.monthlyGrowth > 0 ? '+' : ''}{analyticsData.revenueAnalytics.monthlyGrowth.toFixed(1)}% this month
+                                                {analyticsData.revenueAnalytics.monthlyGrowth > 0 ? '+' : ''}{analyticsData.revenueAnalytics.monthlyGrowth.toFixed(1)}% {t('thisMonth')}
                                             </p>
                                         </div>
                                     </div>
                                     <Badge variant={analyticsData.isPerformingWell.revenue ? 'default' : 'destructive'}>
-                                        {analyticsData.isPerformingWell.revenue ? 'Good' : 'Needs Attention'}
+                                        {analyticsData.isPerformingWell.revenue ? t('good') : t('needsAttention')}
                                     </Badge>
                                 </div>
                                 
@@ -709,14 +709,14 @@ export default function AnalyticsPage() {
                                             <Users className="h-4 w-4" />
                                         </div>
                                         <div>
-                                            <p className="font-medium">Client Retention</p>
+                                            <p className="font-medium">{t('clientRetention')}</p>
                                             <p className="text-sm text-muted-foreground">
-                                                {analyticsData.clientAnalytics.clientRetentionRate.toFixed(1)}% returning clients
+                                                {analyticsData.clientAnalytics.clientRetentionRate.toFixed(1)}% {t('returningClients')}
                                             </p>
                                         </div>
                                     </div>
                                     <Badge variant={analyticsData.isPerformingWell.retention ? 'default' : 'secondary'}>
-                                        {analyticsData.isPerformingWell.retention ? 'Excellent' : 'Good'}
+                                        {analyticsData.isPerformingWell.retention ? t('excellent') : t('good')}
                                     </Badge>
                                 </div>
                                 
@@ -726,14 +726,14 @@ export default function AnalyticsPage() {
                                             <Activity className="h-4 w-4" />
                                         </div>
                                         <div>
-                                            <p className="font-medium">Utilization Rate</p>
+                                            <p className="font-medium">{t('utilizationRateLabel')}</p>
                                             <p className="text-sm text-muted-foreground">
-                                                {analyticsData.utilizationRate.toFixed(1)}% of bookings completed
+                                                {analyticsData.utilizationRate.toFixed(1)}% {t('bookingsCompleted')}
                                             </p>
                                         </div>
                                     </div>
                                     <Badge variant={analyticsData.isPerformingWell.utilization ? 'default' : 'secondary'}>
-                                        {analyticsData.isPerformingWell.utilization ? 'High' : 'Moderate'}
+                                        {analyticsData.isPerformingWell.utilization ? t('high') : t('moderate')}
                                     </Badge>
                                 </div>
                                 
@@ -743,14 +743,14 @@ export default function AnalyticsPage() {
                                             <Star className="h-4 w-4" />
                                         </div>
                                         <div>
-                                            <p className="font-medium">Average Rating</p>
+                                            <p className="font-medium">{t('averageRating')}</p>
                                             <p className="text-sm text-muted-foreground">
-                                                {analyticsData.averageRating.toFixed(2)}/5.0 from {analyticsData.filteredReviews.length} reviews
+                                                {analyticsData.averageRating.toFixed(2)}/5.0 {t('fromReviews', { count: analyticsData.filteredReviews.length })}
                                             </p>
                                         </div>
                                     </div>
                                     <Badge variant={analyticsData.isPerformingWell.rating ? 'default' : 'secondary'}>
-                                        {analyticsData.isPerformingWell.rating ? 'Excellent' : 'Good'}
+                                        {analyticsData.isPerformingWell.rating ? t('excellent') : t('good')}
                                     </Badge>
                                 </div>
                             </>
@@ -760,8 +760,8 @@ export default function AnalyticsPage() {
                 
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Quick Stats</CardTitle>
-                        <CardDescription>At-a-glance business metrics</CardDescription>
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('quickStats')}</CardTitle>
+                        <CardDescription>{t('atAGlanceMetrics')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         {loading ? <Skeleton className="h-48 w-full" /> : (
@@ -769,32 +769,32 @@ export default function AnalyticsPage() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="text-center p-4 rounded-lg bg-muted/20">
                                         <div className="text-2xl font-bold text-primary">₱{analyticsData.clientAnalytics.averageClientValue.toFixed(0)}</div>
-                                        <div className="text-sm text-muted-foreground">Avg. Client Value</div>
+                                        <div className="text-sm text-muted-foreground">{t('avgClientValue')}</div>
                                     </div>
                                     <div className="text-center p-4 rounded-lg bg-muted/20">
                                         <div className="text-2xl font-bold text-primary">{analyticsData.totalClients}</div>
-                                        <div className="text-sm text-muted-foreground">Total Clients</div>
+                                        <div className="text-sm text-muted-foreground">{t('totalClients')}</div>
                                     </div>
                                 </div>
                                 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="text-center p-4 rounded-lg bg-muted/20">
                                         <div className="text-2xl font-bold text-primary">{analyticsData.totalBookings}</div>
-                                        <div className="text-sm text-muted-foreground">Total Bookings</div>
+                                        <div className="text-sm text-muted-foreground">{t('totalBookingsLabel')}</div>
                                     </div>
                                     <div className="text-center p-4 rounded-lg bg-muted/20">
                                         <div className="text-2xl font-bold text-primary">{analyticsData.cancellationRate.toFixed(1)}%</div>
-                                        <div className="text-sm text-muted-foreground">Cancellation Rate</div>
+                                        <div className="text-sm text-muted-foreground">{t('cancellationRate')}</div>
                                     </div>
                                 </div>
                                 
                                 <div className="p-4 rounded-lg bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
                                     <div className="flex items-center gap-2 mb-2">
                                         <Target className="h-4 w-4 text-primary" />
-                                        <span className="font-medium text-primary">Projected Revenue</span>
+                                        <span className="font-medium text-primary">{t('projectedRevenue')}</span>
                                     </div>
                                     <div className="text-xl font-bold">₱{analyticsData.revenueAnalytics.projectedRevenue.toFixed(2)}</div>
-                                    <div className="text-sm text-muted-foreground">Next month forecast</div>
+                                    <div className="text-sm text-muted-foreground">{t('nextMonthForecast')}</div>
                                 </div>
                             </>
                         )}
@@ -808,8 +808,8 @@ export default function AnalyticsPage() {
                 <div className="grid gap-6 md:grid-cols-2">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Top Locations</CardTitle>
-                        <CardDescription>Revenue by location</CardDescription>
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('topLocations')}</CardTitle>
+                        <CardDescription>{t('revenueByLocation')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {loading ? <Skeleton className="h-[300px] w-full" /> : (
@@ -823,19 +823,19 @@ export default function AnalyticsPage() {
                                                 </div>
                                                 <div>
                                                     <p className="font-medium">{location.location}</p>
-                                                    <p className="text-sm text-muted-foreground">{location.bookings} bookings</p>
+                                                    <p className="text-sm text-muted-foreground">{location.bookings} {t('bookings')}</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
                                                 <p className="font-bold">₱{location.revenue.toFixed(2)}</p>
-                                                <p className="text-sm text-muted-foreground">Revenue</p>
+                                                <p className="text-sm text-muted-foreground">{t('revenue')}</p>
                                             </div>
                                         </div>
                                     ))
                                 ) : (
                                     <div className="text-center py-8 text-muted-foreground">
                                         <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                        <p>No location data available</p>
+                                        <p>{t('noLocationData')}</p>
                                     </div>
                                 )}
                             </div>
@@ -845,8 +845,8 @@ export default function AnalyticsPage() {
                 
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Service Areas</CardTitle>
-                        <CardDescription>Distribution of service areas</CardDescription>
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('serviceAreas')}</CardTitle>
+                        <CardDescription>{t('distributionOfServiceAreas')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {loading ? <Skeleton className="h-[300px] w-full" /> : (
@@ -878,8 +878,8 @@ export default function AnalyticsPage() {
                             <TableRow>
                                 <TableHead>{t('service')}</TableHead>
                                 <TableHead className="text-right">{t('totalRevenue')}</TableHead>
-                                <TableHead className="text-right">Bookings</TableHead>
-                                <TableHead className="text-right">Avg. Value</TableHead>
+                                <TableHead className="text-right">{t('bookingsLabel')}</TableHead>
+                                <TableHead className="text-right">{t('avgValue')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>

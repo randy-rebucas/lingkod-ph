@@ -54,7 +54,7 @@ interface ReferralStats {
 
 export default function ReferralTrackingPage() {
   const { user, userRole } = useAuth();
-  const _t = useTranslations('Partners');
+  const _t = useTranslations('PartnersDashboard');
   const { toast } = useToast();
   const [referrals, setReferrals] = useState<ReferralData[]>([]);
   const [stats, setStats] = useState<ReferralStats | null>(null);

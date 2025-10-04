@@ -101,7 +101,8 @@ const NotificationsTab = memo(function NotificationsTab({
     onNotificationClick, 
     onInviteResponse: _onInviteResponse, 
     onDeleteNotification,
-    analyticsData 
+    analyticsData,
+    t
 }: { 
     notifications: Notification[], 
     filter: 'all' | 'unread' | 'starred' | 'archived', 
@@ -109,7 +110,8 @@ const NotificationsTab = memo(function NotificationsTab({
     onNotificationClick: (notif: Notification) => void,
     onInviteResponse: (notif: Notification, accepted: boolean) => void,
     onDeleteNotification: (id: string) => void,
-    analyticsData: any
+    analyticsData: any,
+    t: any
 }) {
     return (
         <div className="space-y-6">
@@ -124,7 +126,7 @@ const NotificationsTab = memo(function NotificationsTab({
                     )}
                     onClick={() => setFilter('all')}
                 >
-                    All ({analyticsData.totalCount})
+                    {t('all')} ({analyticsData.totalCount})
                 </button>
                 <button
                     className={cn(
@@ -135,7 +137,7 @@ const NotificationsTab = memo(function NotificationsTab({
                     )}
                     onClick={() => setFilter('unread')}
                 >
-                    Unread ({analyticsData.unreadCount})
+                    {t('unread')} ({analyticsData.unreadCount})
                 </button>
                 <button
                     className={cn(
@@ -146,7 +148,7 @@ const NotificationsTab = memo(function NotificationsTab({
                     )}
                     onClick={() => setFilter('starred')}
                 >
-                    Starred ({analyticsData.starredCount})
+                    {t('starred')} ({analyticsData.starredCount})
                 </button>
                 <button
                     className={cn(
@@ -157,7 +159,7 @@ const NotificationsTab = memo(function NotificationsTab({
                     )}
                     onClick={() => setFilter('archived')}
                 >
-                    Archived ({analyticsData.archivedCount})
+                    {t('archived')} ({analyticsData.archivedCount})
                 </button>
             </div>
 
@@ -215,10 +217,10 @@ const NotificationsTab = memo(function NotificationsTab({
                 <div className="text-center py-12">
                     <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-medium mb-2">
-                        {filter === 'unread' ? 'No unread notifications' : 'No notifications'}
+                        {filter === 'unread' ? t('noUnreadNotifications') : t('noNotifications')}
                     </h3>
                     <p className="text-muted-foreground">
-                        {filter === 'unread' ? 'You\'re all caught up!' : 'No notifications to display'}
+                        {filter === 'unread' ? t('allCaughtUp') : t('noNotificationsToDisplay')}
                     </p>
                 </div>
             )}
@@ -478,7 +480,7 @@ const NotificationsPage = memo(function NotificationsPage() {
                 <div className="flex items-center gap-2">
                     <Badge variant="outline" className="flex items-center gap-1">
                         <Zap className="h-3 w-3" />
-                        Advanced Notifications
+                        {t('advancedNotifications')}
                     </Badge>
                     <div className="flex gap-2">
                         {analyticsData.unreadCount > 0 && (
@@ -512,7 +514,7 @@ const NotificationsPage = memo(function NotificationsPage() {
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input 
-                                placeholder="Search notifications..."
+                                placeholder={t('searchNotifications')}
                                 className="pl-10"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -522,27 +524,27 @@ const NotificationsPage = memo(function NotificationsPage() {
                     <div className="flex gap-2">
                         <Select value={typeFilter} onValueChange={setTypeFilter}>
                             <SelectTrigger className="w-40">
-                                <SelectValue placeholder="Type" />
+                                <SelectValue placeholder={t('type')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All Types</SelectItem>
-                                <SelectItem value="booking_update">Booking Updates</SelectItem>
-                                <SelectItem value="new_message">Messages</SelectItem>
-                                <SelectItem value="agency_invite">Agency Invites</SelectItem>
-                                <SelectItem value="payment_received">Payments</SelectItem>
-                                <SelectItem value="system_alert">System Alerts</SelectItem>
-                                <SelectItem value="reminder">Reminders</SelectItem>
+                                <SelectItem value="all">{t('allTypes')}</SelectItem>
+                                <SelectItem value="booking_update">{t('bookingUpdates')}</SelectItem>
+                                <SelectItem value="new_message">{t('messages')}</SelectItem>
+                                <SelectItem value="agency_invite">{t('agencyInvites')}</SelectItem>
+                                <SelectItem value="payment_received">{t('payments')}</SelectItem>
+                                <SelectItem value="system_alert">{t('systemAlerts')}</SelectItem>
+                                <SelectItem value="reminder">{t('reminders')}</SelectItem>
                             </SelectContent>
                         </Select>
                         <Select value={dateFilter} onValueChange={setDateFilter}>
                             <SelectTrigger className="w-32">
-                                <SelectValue placeholder="Date" />
+                                <SelectValue placeholder={t('date')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="all">All Time</SelectItem>
-                                <SelectItem value="today">Today</SelectItem>
-                                <SelectItem value="week">This Week</SelectItem>
-                                <SelectItem value="month">This Month</SelectItem>
+                                <SelectItem value="all">{t('allTime')}</SelectItem>
+                                <SelectItem value="today">{t('today')}</SelectItem>
+                                <SelectItem value="week">{t('thisWeek')}</SelectItem>
+                                <SelectItem value="month">{t('thisMonth')}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -560,6 +562,7 @@ const NotificationsPage = memo(function NotificationsPage() {
                     onInviteResponse={handleInviteResponse}
                     onDeleteNotification={handleDeleteNotification}
                     analyticsData={analyticsData}
+                    t={t}
                 />
             </div>
 

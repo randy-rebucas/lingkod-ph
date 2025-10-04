@@ -245,7 +245,7 @@ export default function EarningsPage() {
                     <div className="flex items-center gap-3">
                         <Badge variant="outline" className="flex items-center gap-1 px-3 py-1">
                             <DollarSign className="h-3 w-3" />
-                            ₱{totalRevenue.toFixed(2)} Total
+                            ₱{totalRevenue.toFixed(2)} {t('total')}
                         </Badge>
                         {isSaturday ? (
                             payoutButton
@@ -272,11 +272,11 @@ export default function EarningsPage() {
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Total Revenue</p>
+                                    <p className="text-sm text-muted-foreground">{t('totalRevenue')}</p>
                                     <p className="text-2xl font-bold text-primary">₱{totalRevenue.toFixed(2)}</p>
                                     <div className="flex items-center gap-1 mt-1">
                                         <TrendingUp className="h-3 w-3 text-green-600" />
-                                        <span className="text-xs text-green-600">+{monthlyGrowth.toFixed(1)}% growth</span>
+                                        <span className="text-xs text-green-600">+{monthlyGrowth.toFixed(1)}% {t('growth')}</span>
                                     </div>
                                 </div>
                                 <div className="p-3 rounded-full bg-primary/10">
@@ -290,11 +290,11 @@ export default function EarningsPage() {
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Available for Payout</p>
+                                    <p className="text-sm text-muted-foreground">{t('availableForPayout')}</p>
                                     <p className="text-2xl font-bold text-emerald-600">₱{availableForPayout.toFixed(2)}</p>
                                     <div className="flex items-center gap-1 mt-1">
                                         <WalletCards className="h-3 w-3 text-blue-600" />
-                                        <span className="text-xs text-blue-600">Ready to withdraw</span>
+                                        <span className="text-xs text-blue-600">{t('readyToWithdraw')}</span>
                                     </div>
                                 </div>
                                 <div className="p-3 rounded-full bg-emerald-100">
@@ -308,11 +308,11 @@ export default function EarningsPage() {
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Completed Jobs</p>
+                                    <p className="text-sm text-muted-foreground">{t('completedJobs')}</p>
                                     <p className="text-2xl font-bold text-orange-600">{totalPaidBookings}</p>
                                     <div className="flex items-center gap-1 mt-1">
                                         <BookCheck className="h-3 w-3 text-orange-600" />
-                                        <span className="text-xs text-orange-600">Total completed</span>
+                                        <span className="text-xs text-orange-600">{t('totalCompleted')}</span>
                                     </div>
                                 </div>
                                 <div className="p-3 rounded-full bg-orange-100">
@@ -326,11 +326,11 @@ export default function EarningsPage() {
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-muted-foreground">Avg. Monthly</p>
+                                    <p className="text-sm text-muted-foreground">{t('avgMonthly')}</p>
                                     <p className="text-2xl font-bold text-purple-600">₱{averageMonthlyEarnings.toFixed(2)}</p>
                                     <div className="flex items-center gap-1 mt-1">
                                         <Calendar className="h-3 w-3 text-purple-600" />
-                                        <span className="text-xs text-purple-600">12-month average</span>
+                                        <span className="text-xs text-purple-600">{t('monthlyAverage')}</span>
                                     </div>
                                 </div>
                                 <div className="p-3 rounded-full bg-purple-100">
@@ -346,8 +346,8 @@ export default function EarningsPage() {
             <div className="max-w-6xl mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Earnings History</CardTitle>
-                        <CardDescription>Monthly earnings performance over the last 12 months</CardDescription>
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('earningsHistory')}</CardTitle>
+                        <CardDescription>{t('monthlyEarningsPerformance')}</CardDescription>
                     </CardHeader>
                     <CardContent className="p-6">
                         <ResponsiveContainer width="100%" height={350}>
@@ -374,16 +374,16 @@ export default function EarningsPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Recent Completed Jobs</CardTitle>
-                            <CardDescription>Your latest completed bookings and earnings</CardDescription>
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('recentCompletedJobs')}</CardTitle>
+                            <CardDescription>{t('latestCompletedBookings')}</CardDescription>
                         </CardHeader>
                         <CardContent className="p-0">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Client</TableHead>
-                                        <TableHead>Service</TableHead>
-                                        <TableHead className="text-right">Amount</TableHead>
+                                        <TableHead>{t('client')}</TableHead>
+                                        <TableHead>{t('service')}</TableHead>
+                                        <TableHead className="text-right">{t('amount')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -396,7 +396,7 @@ export default function EarningsPage() {
                                     )) : (
                                         <TableRow>
                                             <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
-                                                No completed jobs yet
+                                                {t('noCompletedJobsYet')}
                                             </TableCell>
                                         </TableRow>
                                     )}
@@ -407,16 +407,16 @@ export default function EarningsPage() {
 
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payout History</CardTitle>
-                            <CardDescription>Your payout requests and payment status</CardDescription>
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('payoutHistory')}</CardTitle>
+                            <CardDescription>{t('payoutRequestsAndStatus')}</CardDescription>
                         </CardHeader>
                         <CardContent className="p-0">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Date Requested</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead className="text-right">Amount</TableHead>
+                                        <TableHead>{t('dateRequested')}</TableHead>
+                                        <TableHead>{t('status')}</TableHead>
+                                        <TableHead className="text-right">{t('amount')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -435,7 +435,7 @@ export default function EarningsPage() {
                                     )) : (
                                         <TableRow>
                                             <TableCell colSpan={3} className="h-24 text-center text-muted-foreground">
-                                                No payouts requested yet
+                                                {t('noPayoutsRequestedYet')}
                                             </TableCell>
                                         </TableRow>
                                     )}
@@ -457,9 +457,9 @@ export default function EarningsPage() {
                                         <Wallet className="h-5 w-5 text-emerald-600" />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold">Ready for Payout</h3>
+                                        <h3 className="font-semibold">{t('readyForPayout')}</h3>
                                         <p className="text-sm text-muted-foreground">
-                                            You have ₱{availableForPayout.toFixed(2)} available for withdrawal
+                                            {t('availableForWithdrawal', { amount: availableForPayout.toFixed(2) })}
                                         </p>
                                     </div>
                                 </div>
@@ -467,7 +467,7 @@ export default function EarningsPage() {
                                     {!isSaturday && (
                                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                                             <Clock className="h-4 w-4" />
-                                            <span>Payouts only on Saturdays</span>
+                                            <span>{t('payoutsOnlyOnSaturdays')}</span>
                                         </div>
                                     )}
                                     {isSaturday ? (

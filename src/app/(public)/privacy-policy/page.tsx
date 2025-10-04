@@ -25,11 +25,45 @@ import {
   FileText,
   Settings
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function PrivacyPolicyPage() {
   const t = useTranslations('PrivacyPolicy');
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  
+  // Function to scroll to a specific section
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+      setActiveSection(sectionId);
+    }
+  };
+
+  // Scroll spy functionality
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = document.querySelectorAll('[id^="section-"]');
+      const scrollPosition = window.scrollY + 100; // Offset for better UX
+
+      sections.forEach((section) => {
+        const element = section as HTMLElement;
+        const sectionTop = element.offsetTop;
+        const sectionHeight = element.offsetHeight;
+        const sectionId = element.id.replace('section-', '');
+
+        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+          setActiveSection(sectionId);
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   
   const sections = [
     {
@@ -296,7 +330,7 @@ export default function PrivacyPolicyPage() {
                           key={section.id}
                           variant={activeSection === section.id ? "default" : "ghost"}
                           className="w-full justify-start text-left h-auto p-3"
-                          onClick={() => setActiveSection(section.id)}
+                          onClick={() => scrollToSection(`section-${section.id}`)}
                         >
                           <div className="flex items-center gap-3">
                             {section.icon}
@@ -367,7 +401,7 @@ export default function PrivacyPolicyPage() {
               {/* Policy Sections */}
               <div className="space-y-6">
                         {sections.map((section, _index) => (
-                  <Card key={section.id} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
+                  <Card key={section.id} id={`section-${section.id}`} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-8">
                       <div className="flex items-center gap-3 mb-6">
                         <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">

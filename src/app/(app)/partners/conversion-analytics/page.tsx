@@ -59,7 +59,7 @@ interface ConversionMetrics {
 
 export default function ConversionAnalyticsPage() {
   const { user, userRole } = useAuth();
-  const _t = useTranslations('Partners');
+  const _t = useTranslations('PartnersDashboard');
   const [metrics, setMetrics] = useState<ConversionMetrics | null>(null);
   const [_analytics, setAnalytics] = useState<PartnerAnalytics | null>(null);
   const [_referrals, setReferrals] = useState<ReferralData[]>([]);

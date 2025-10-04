@@ -187,7 +187,7 @@ const MessageBubble = memo(({
                     <div className="p-2">
                         <Image
                             src={msg.imageUrl}
-                            alt="Sent image"
+                            alt={t('sentImage')}
                             width={300}
                             height={200}
                             data-ai-hint={msg.hint}
@@ -512,7 +512,7 @@ export default function MessagesPage() {
                                     className="pl-9 bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    aria-label="Search conversations"
+                                    aria-label={t('searchConversationsAria')}
                                 />
                             </div>
                         </div>
@@ -595,7 +595,7 @@ export default function MessagesPage() {
                                 <div className="p-4 border-t border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                                     {previewUrl && (
                                         <div className="relative mb-3 w-24 h-24">
-                                            <Image src={previewUrl} alt="Image preview" fill className="object-cover rounded-lg shadow-soft" />
+                                            <Image src={previewUrl} alt={t('imagePreview')} fill className="object-cover rounded-lg shadow-soft" />
                                             <Button size="icon" variant="destructive" className="absolute -top-2 -right-2 h-6 w-6 rounded-full shadow-soft" onClick={() => { setPreviewUrl(null); setSelectedImage(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}>
                                                 <X className="h-3 w-3" />
                                             </Button>
@@ -611,7 +611,7 @@ export default function MessagesPage() {
                                                 handleTyping();
                                             }}
                                             disabled={isSending}
-                                            aria-label="Type your message"
+                                            aria-label={t('typeMessageAria')}
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter' && !e.shiftKey) {
                                                     e.preventDefault();
@@ -627,7 +627,7 @@ export default function MessagesPage() {
                                             onChange={handleFileChange}
                                             accept="image/*"
                                             className="hidden"
-                                            aria-label="Attach image"
+                                            aria-label={t('attachImageAria')}
                                         />
                                         <Button
                                             size="icon"

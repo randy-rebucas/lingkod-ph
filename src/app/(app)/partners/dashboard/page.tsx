@@ -26,7 +26,7 @@ interface PartnerDashboardData {
 
 export default function PartnersDashboardPage() {
     const { user, userRole } = useAuth();
-    const t = useTranslations('Partners');
+    const t = useTranslations('PartnersDashboard');
     const [dashboardData, setDashboardData] = useState<PartnerDashboardData | null>(null);
     const [loading, setLoading] = useState(true);
 
