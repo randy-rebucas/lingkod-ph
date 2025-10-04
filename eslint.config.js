@@ -63,6 +63,10 @@ export default [
                localStorage: 'readonly',
                URLSearchParams: 'readonly',
                google: 'readonly',
+               alert: 'readonly',
+               btoa: 'readonly',
+               Image: 'readonly',
+               performance: 'readonly',
       },
     },
     plugins: {
@@ -85,6 +89,31 @@ export default [
     files: ['**/*.js'],
     languageOptions: {
       sourceType: 'commonjs',
+    },
+  },
+  {
+    files: ['**/__tests__/**/*', '**/*.test.*', '**/*.spec.*'],
+    languageOptions: {
+      globals: {
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        jest: 'readonly',
+        test: 'readonly',
+        xtest: 'readonly',
+        xit: 'readonly',
+        fit: 'readonly',
+        fdescribe: 'readonly',
+        xdescribe: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-console': 'off',
     },
   },
   {

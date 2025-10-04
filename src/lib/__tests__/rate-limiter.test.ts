@@ -127,11 +127,11 @@ describe('RateLimiter', () => {
       }
 
       // First IP should be blocked
-      let result1 = await rateLimiter.checkLimit(request1);
+      const result1 = await rateLimiter.checkLimit(request1);
       expect(result1.allowed).toBe(false);
 
       // Second IP should still be allowed
-      let result2 = await rateLimiter.checkLimit(request2);
+      const result2 = await rateLimiter.checkLimit(request2);
       expect(result2.allowed).toBe(true);
       expect(result2.remaining).toBe(4);
     });
@@ -357,10 +357,15 @@ describe('Edge Cases', () => {
   });
 
   it('handles concurrent requests', async () => {
+    const concurrentRateLimiter = new RateLimiter({
+      windowMs: 60000, // 1 minute
+      maxRequests: 5,
+    });
+    
     const request = createMockRequest({ 'x-forwarded-for': '192.168.1.1' });
 
     // Make 10 concurrent requests
-    const promises = Array(10).fill(null).map(() => rateLimiter.checkLimit(request));
+    const promises = Array(10).fill(null).map(() => concurrentRateLimiter.checkLimit(request));
     const results = await Promise.all(promises);
 
     // Only 5 should be allowed
@@ -373,9 +378,14 @@ describe('Edge Cases', () => {
   });
 
   it('handles malformed IP headers', () => {
+    const malformedRateLimiter = new RateLimiter({
+      windowMs: 60000, // 1 minute
+      maxRequests: 5,
+    });
+    
     const request = createMockRequest({ 'x-forwarded-for': '' });
 
-    return expect(rateLimiter.checkLimit(request)).resolves.toMatchObject({
+    return expect(malformedRateLimiter.checkLimit(request)).resolves.toMatchObject({
       allowed: true,
       remaining: 4,
     });

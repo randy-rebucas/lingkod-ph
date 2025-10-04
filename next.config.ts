@@ -1,4 +1,3 @@
-
 import type {NextConfig} from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 
@@ -7,10 +6,10 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig: NextConfig = {
   /* config options here */
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false, // Enable type checking for production
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false, // Enable linting for production
   },
   images: {
     remotePatterns: [
@@ -39,8 +38,50 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       }
     ],
+    // Security: Disable image optimization for external domains in production
+    dangerouslyAllowSVG: false,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  webpack: (config, { isServer }) => {
+  // Security headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains; preload',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.adyen.com https://api.sandbox.adyen.com https://api.paypal.com https://api.sandbox.paypal.com https://firestore.googleapis.com https://*.firebaseapp.com https://*.googleapis.com https://*.gstatic.com; frame-src 'self' https://checkoutshopper-test.adyen.com https://checkoutshopper-live.adyen.com https://www.sandbox.paypal.com https://www.paypal.com;",
+          },
+        ],
+      },
+    ];
+  },
+  // Performance optimizations
+  compress: true,
+  poweredByHeader: false,
+  generateEtags: false,
+  // Bundle analyzer
+  webpack: (config, { isServer, dev }) => {
     // Suppress webpack warnings for Handlebars require.extensions
     config.ignoreWarnings = [
       {
@@ -58,7 +99,36 @@ const nextConfig: NextConfig = {
       crypto: false,
     };
 
+    // Production optimizations
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            enforce: true,
+          },
+        },
+      };
+    }
+
     return config;
+  },
+  // Environment variables validation
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+  },
+  // Experimental features for performance
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
 };
 

@@ -1,13 +1,13 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Provider } from '@/types';
+import { Provider, User } from '@/types';
 
 interface UseDashboardStateProps {
-  initialProviders?: Provider[];
+  initialProviders?: User[];
 }
 
 export function useDashboardState({ initialProviders = [] }: UseDashboardStateProps = {}) {
-  const [providers, setProviders] = useState<Provider[]>(initialProviders);
-  const [allProviders, setAllProviders] = useState<Provider[]>(initialProviders);
+  const [providers, setProviders] = useState<User[]>(initialProviders);
+  const [allProviders, setAllProviders] = useState<User[]>(initialProviders);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSmartSearching, setIsSmartSearching] = useState(false);
   const [favoriteProviderIds, setFavoriteProviderIds] = useState<string[]>([]);
@@ -15,7 +15,7 @@ export function useDashboardState({ initialProviders = [] }: UseDashboardStatePr
   const [showNearbyProviders, setShowNearbyProviders] = useState(false);
   const [isLoadingNearby, setIsLoadingNearby] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [searchCache, setSearchCache] = useState<Map<string, Provider[]>>(new Map());
+  const [searchCache, setSearchCache] = useState<Map<string, User[]>>(new Map());
 
   // Memoized provider filtering
   const { agencies, serviceProviders } = useMemo(() => {
@@ -33,13 +33,13 @@ export function useDashboardState({ initialProviders = [] }: UseDashboardStatePr
   }, [allProviders]);
 
   // Update providers and maintain cache
-  const updateProviders = useCallback((newProviders: Provider[]) => {
+  const updateProviders = useCallback((newProviders: User[]) => {
     setProviders(newProviders);
     setAllProviders(newProviders);
   }, []);
 
   // Add to search cache
-  const addToCache = useCallback((key: string, results: Provider[]) => {
+  const addToCache = useCallback((key: string, results: User[]) => {
     setSearchCache(prev => new Map(prev).set(key.toLowerCase().trim(), results));
   }, []);
 

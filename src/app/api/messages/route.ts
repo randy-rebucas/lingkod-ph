@@ -5,10 +5,10 @@ import { auditLogger, extractRequestMetadata } from '@/lib/audit-logger';
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting for messaging
-    const rateLimitResult = await rateLimiters.messaging.checkLimit(request);
+    const rateLimitResult = rateLimiters.api.isAllowed(request);
     
     if (!rateLimitResult.allowed) {
-      return createRateLimitResponse(rateLimitResult.retryAfter!);
+      return createRateLimitResponse('Rate limit exceeded', Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000));
     }
 
     // Extract request metadata for audit logging
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       message: 'Message sent successfully' 
     });
     
-    return addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.resetTime);
+    return addRateLimitHeaders(response, rateLimiters.api, request);
     
   } catch (error) {
     console.error('Message sending error:', error);

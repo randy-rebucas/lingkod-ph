@@ -6,10 +6,10 @@ import { auditLogger, extractRequestMetadata } from '@/lib/audit-logger';
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting for booking creation
-    const rateLimitResult = await rateLimiters.bookingCreation.checkLimit(request);
+    const rateLimitResult = rateLimiters.bookingCreation.isAllowed(request);
     
     if (!rateLimitResult.allowed) {
-      return createRateLimitResponse(rateLimitResult.retryAfter!);
+      return createRateLimitResponse('Rate limit exceeded', Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000));
     }
 
     // Extract request metadata for audit logging
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       message: 'Booking created successfully' 
     });
     
-    return addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.resetTime);
+    return addRateLimitHeaders(response, rateLimiters.bookingCreation, request);
     
   } catch (error) {
     console.error('Booking creation error:', error);
@@ -80,16 +80,16 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // Rate limiting for general API requests
-    const rateLimitResult = await rateLimiters.general.checkLimit(request);
+    const rateLimitResult = rateLimiters.api.isAllowed(request);
     
     if (!rateLimitResult.allowed) {
-      return createRateLimitResponse(rateLimitResult.retryAfter!);
+      return createRateLimitResponse('Rate limit exceeded', Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000));
     }
 
     // Here you would implement the booking retrieval logic
     const response = NextResponse.json({ bookings: [] });
     
-    return addRateLimitHeaders(response, rateLimitResult.remaining, rateLimitResult.resetTime);
+    return addRateLimitHeaders(response, rateLimiters.api, request);
     
   } catch (error) {
     console.error('Booking retrieval error:', error);

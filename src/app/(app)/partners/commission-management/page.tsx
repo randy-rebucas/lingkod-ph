@@ -79,7 +79,7 @@ export default function CommissionManagementPage() {
           const monthlyEarnings = allCommissions
             .filter(c => {
               if (c.status !== 'paid' || !c.paidAt) return false;
-              const paidDate = (c.paidAt as any).toDate ? (c.paidAt as any).toDate() : new Date(c.paidAt);
+              const paidDate = c.paidAt instanceof Date ? c.paidAt : new Date(c.paidAt.seconds * 1000);
               return paidDate.getMonth() === currentMonth && paidDate.getFullYear() === currentYear;
             })
             .reduce((sum, c) => sum + c.commissionAmount, 0);

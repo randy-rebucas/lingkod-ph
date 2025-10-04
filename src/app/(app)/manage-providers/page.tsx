@@ -148,7 +148,7 @@ const getStatusVariant = (status: Provider['status']) => {
 };
 
 
-export default function ManageProvidersPage() {
+function ManageProvidersPage() {
     const { user, userRole } = useAuth();
     const { toast } = useToast();
     const t = useTranslations('ManageProviders');
@@ -1105,4 +1105,4 @@ function InsightsTab({ providers, analyticsData }: { providers: Provider[], anal
     );
 }
 
-    
+export default ManageProvidersPage;

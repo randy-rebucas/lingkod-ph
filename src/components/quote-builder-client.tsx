@@ -71,6 +71,25 @@ const _baseQuoteSchema = z.object({
     terms: z.string().optional(),
 });
 
+const baseQuoteSchema = z.object({
+  clientName: z.string().min(1, "Client name is required"),
+  clientEmail: z.string().email("Valid email is required"),
+  clientAddress: z.string().min(1, "Client address is required"),
+  quoteNumber: z.string().min(1, "Quote number is required"),
+  issueDate: z.date(),
+  validUntil: z.date(),
+  lineItems: z.array(z.object({
+    description: z.string().min(1, "Description is required"),
+    quantity: z.number().min(1, "Quantity must be at least 1"),
+    price: z.number().min(0, "Price must be non-negative"),
+  })),
+  taxRate: z.number().min(0).max(100).default(0),
+  discountType: z.enum(['none', 'percentage', 'fixed']).optional().default('none'),
+  discountValue: z.number().min(0).optional().default(0),
+  notes: z.string().optional(),
+  terms: z.string().optional(),
+});
+
 export type QuoteFormValues = z.infer<typeof baseQuoteSchema>;
 export type LineItem = z.infer<typeof baseLineItemSchema>;
 

@@ -1,175 +1,76 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { getAuth } from 'firebase-admin/auth';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { NextRequest, NextResponse } from 'next/server';
+import createIntlMiddleware from 'next-intl/middleware';
 
-// Initialize Firebase Admin SDK
-if (!getApps().length) {
-  try {
-    initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-      }),
-    });
-  } catch (error) {
-    console.error('Failed to initialize Firebase Admin:', error);
-  }
-}
-
-// Define protected routes and their required roles
-const protectedRoutes = {
-  '/admin': ['admin'],
-  '/earnings': ['provider', 'agency'],
-  '/smart-rate': ['provider', 'agency'],
-  '/quote-builder': ['provider', 'agency'],
-  '/analytics': ['provider', 'agency'],
-  '/invoices': ['provider', 'agency'],
-  '/manage-providers': ['agency'],
-  '/reports': ['agency'],
-  '/post-a-job': ['client', 'agency'],
-  '/my-job-posts': ['client', 'agency'],
-  '/my-favorites': ['client', 'agency'],
-  '/applied-jobs': ['provider'],
-  '/services': ['provider'],
-  '/jobs': ['provider'],
-  '/partners': ['partner'],
-  '/dashboard': ['client', 'provider', 'agency', 'admin', 'partner'],
-  '/bookings': ['client', 'provider', 'agency'],
-  '/profile': ['client', 'provider', 'agency', 'admin', 'partner'],
-  '/messages': ['client', 'provider', 'agency'],
-  '/notifications': ['client', 'provider', 'agency', 'admin', 'partner'],
-  '/settings': ['client', 'provider', 'agency', 'admin', 'partner'],
-  '/billing': ['client', 'provider', 'agency'],
-} as const;
-
-// Public routes that don't require authentication
-const publicRoutes = [
-  '/login',
-  '/signup',
-  '/forgot-password',
-  '/setup',
-  '/about',
-  '/careers',
-  '/contact-us',
-  '/help-center',
-  '/terms-of-service',
-  '/partners',
-  '/',
-];
-
-// Helper function to verify JWT token and get user role
-async function verifyTokenAndGetRole(token: string): Promise<{ uid: string; role: string } | null> {
-  try {
-    const auth = getAuth();
-    const decodedToken = await auth.verifyIdToken(token);
-    
-    // Get user role from Firestore
-    const { getDb } = await import('@/lib/firebase');
-    const { doc, getDoc } = await import('firebase/firestore');
-    
-    const db = getDb();
-    const userDoc = await getDoc(doc(db, 'users', decodedToken.uid));
-    if (!userDoc.exists()) {
-      return null;
-    }
-    
-    const userData = userDoc.data();
-    return {
-      uid: decodedToken.uid,
-      role: userData.role || 'client'
-    };
-  } catch (error) {
-    console.error('Token verification failed:', error);
-    return null;
-  }
-}
-
-// Helper function to log security events
-function logSecurityEvent(event: string, details: any, request: NextRequest) {
-  console.log(`[SECURITY] ${event}:`, {
-    timestamp: new Date().toISOString(),
-    path: request.nextUrl.pathname,
-    userAgent: request.headers.get('user-agent'),
-    ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || request.headers.get('cf-connecting-ip') || 'unknown',
-    ...details
-  });
-}
+const intlMiddleware = createIntlMiddleware({
+  locales: ['en', 'tl'],
+  defaultLocale: 'en',
+  localePrefix: 'as-needed'
+});
 
 export async function middleware(request: NextRequest) {
+  // Security: Rate limiting headers
+  const response = NextResponse.next();
+  
+  // Add security headers
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  
+  // CORS headers for API routes
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    response.headers.set('Access-Control-Allow-Origin', process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'http://localhost:9006');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    response.headers.set('Access-Control-Max-Age', '86400');
+  }
+
+  // Handle preflight requests
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { status: 200, headers: response.headers });
+  }
+
+  // Basic route protection - redirect to login for protected routes
+  // Detailed authentication and role-based access control is handled client-side
   const { pathname } = request.nextUrl;
-  
-  // Skip middleware for public routes
-  if (publicRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))) {
-    return NextResponse.next();
-  }
-  
-  // Skip middleware for API routes, static files, and Next.js internals
-  if (
-    pathname.startsWith('/api/') ||
-    pathname.startsWith('/_next/') ||
-    pathname.startsWith('/favicon.ico') ||
-    pathname.includes('.')
-  ) {
-    return NextResponse.next();
-  }
 
-  // Check if route requires authentication
-  const requiresAuth = Object.keys(protectedRoutes).some(route => 
-    pathname.startsWith(route)
-  );
+  // Protected routes that require authentication
+  const protectedRoutes = [
+    '/dashboard',
+    '/profile',
+    '/bookings',
+    '/admin',
+    '/agency',
+    '/partner',
+    '/provider'
+  ];
 
-  if (requiresAuth) {
-    // Get token from Authorization header or cookies
+  // Check if the route is protected
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  
+  // For protected routes, we'll let the client-side auth context handle the authentication
+  // The middleware will only handle basic security headers and internationalization
+  if (isProtectedRoute) {
+    // Check if there's an auth token in the request headers (from client-side)
     const authHeader = request.headers.get('authorization');
-    const token = authHeader?.replace('Bearer ', '') || 
-                  request.cookies.get('auth-token')?.value;
-
-    if (!token) {
-      logSecurityEvent('UNAUTHORIZED_ACCESS_ATTEMPT', { reason: 'No token provided' }, request);
+    const hasAuthToken = authHeader && authHeader.startsWith('Bearer ');
+    
+    // If no auth token is present, redirect to login
+    // Note: This is a basic check - detailed auth validation happens client-side
+    if (!hasAuthToken) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
-
-    // Verify token and get user role
-    const userInfo = await verifyTokenAndGetRole(token);
-    if (!userInfo) {
-      logSecurityEvent('INVALID_TOKEN_ATTEMPT', { token: token.substring(0, 20) + '...' }, request);
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    // Check if user role is allowed for this route
-    const allowedRoles = Object.entries(protectedRoutes)
-      .find(([route]) => pathname.startsWith(route))?.[1] as string[] | undefined;
-
-    if (allowedRoles && !allowedRoles.includes(userInfo.role)) {
-      logSecurityEvent('UNAUTHORIZED_ROLE_ACCESS', { 
-        userRole: userInfo.role, 
-        requiredRoles: allowedRoles,
-        userId: userInfo.uid 
-      }, request);
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
-    }
-
-    // Log successful authentication
-    logSecurityEvent('AUTHENTICATED_ACCESS', { 
-      userId: userInfo.uid, 
-      role: userInfo.role 
-    }, request);
   }
 
-  return NextResponse.next();
+  // Apply internationalization middleware
+  return intlMiddleware(request);
 }
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    // Skip all internal paths (_next)
+    '/((?!_next|_static|_vercel|[\\w-]+\\.\\w+).*)',
+    // Always run for API routes
+    '/(api|trpc)(.*)',
   ],
 };

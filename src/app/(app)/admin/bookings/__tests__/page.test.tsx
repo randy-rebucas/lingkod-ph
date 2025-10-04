@@ -243,19 +243,21 @@ describe('AdminBookingsPage', () => {
     });
   });
 
+  // Define mockBooking at describe block level for reuse
+  const mockBooking = {
+    id: 'booking-1',
+    serviceName: 'House Cleaning',
+    clientName: 'John Client',
+    providerName: 'Jane Provider',
+    price: 500,
+    status: 'Upcoming',
+    date: { toDate: () => new Date('2024-01-15T10:00:00Z') },
+    clientId: 'client-1',
+    providerId: 'provider-1',
+    createdAt: { toDate: () => new Date('2024-01-10T10:00:00Z') },
+  };
+
   describe('Booking Actions', () => {
-    const mockBooking = {
-      id: 'booking-1',
-      serviceName: 'House Cleaning',
-      clientName: 'John Client',
-      providerName: 'Jane Provider',
-      price: 500,
-      status: 'Upcoming',
-      date: { toDate: () => new Date('2024-01-15T10:00:00Z') },
-      clientId: 'client-1',
-      providerId: 'provider-1',
-      createdAt: { toDate: () => new Date('2024-01-10T10:00:00Z') },
-    };
 
     it('opens booking details dialog when View Details is clicked', () => {
       mockOnSnapshot.mockImplementation((callback) => {

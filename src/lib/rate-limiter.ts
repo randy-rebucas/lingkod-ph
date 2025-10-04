@@ -1,32 +1,29 @@
-
-import type { NextRequest } from 'next/server';
+import { NextRequest } from 'next/server';
 
 interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
   maxRequests: number; // Maximum requests per window
-  keyGenerator?: (request: NextRequest) => string; // Custom key generator
-  message?: string; // Custom error message
+  keyGenerator?: (req: NextRequest) => string; // Custom key generator
 }
 
-interface RateLimitEntry {
-  count: number;
-  resetTime: number;
+interface RateLimitStore {
+  [key: string]: {
+    count: number;
+    resetTime: number;
+  };
 }
 
-// In-memory store for rate limiting (in production, use Redis or similar)
-const rateLimitStore = new Map<string, RateLimitEntry>();
+// In-memory store (use Redis in production)
+const store: RateLimitStore = {};
 
 // Clean up expired entries every 5 minutes
-// Note: In production, consider using Redis or a more robust storage solution
-// for rate limiting to avoid memory issues and support distributed systems
 setInterval(() => {
   const now = Date.now();
-  const entries = Array.from(rateLimitStore.entries());
-  for (const [key, entry] of entries) {
-    if (now > entry.resetTime) {
-      rateLimitStore.delete(key);
+  Object.keys(store).forEach(key => {
+    if (store[key].resetTime < now) {
+      delete store[key];
     }
-  }
+  });
 }, 5 * 60 * 1000);
 
 export class RateLimiter {
@@ -36,178 +33,159 @@ export class RateLimiter {
     this.config = config;
   }
 
-  async checkLimit(request: NextRequest): Promise<{
-    allowed: boolean;
-    remaining: number;
-    resetTime: number;
-    retryAfter?: number;
-  }> {
-    const key = this.config.keyGenerator 
-      ? this.config.keyGenerator(request)
-      : this.getDefaultKey(request);
+  private getKey(req: NextRequest): string {
+    if (this.config.keyGenerator) {
+      return this.config.keyGenerator(req);
+    }
+    
+    // Default: use IP address
+    const forwarded = req.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0] : req.ip || 'unknown';
+    return ip;
+  }
 
+  private getWindowStart(): number {
     const now = Date.now();
-    
-    // Get or create rate limit entry
-    let entry = rateLimitStore.get(key);
-    
-    if (!entry || now > entry.resetTime) {
-      // Create new entry or reset expired one
-      entry = {
+    return Math.floor(now / this.config.windowMs) * this.config.windowMs;
+  }
+
+  isAllowed(req: NextRequest): { allowed: boolean; remaining: number; resetTime: number } {
+    const key = this.getKey(req);
+    const windowStart = this.getWindowStart();
+    const resetTime = windowStart + this.config.windowMs;
+
+    // Get or create entry
+    if (!store[key] || store[key].resetTime < windowStart) {
+      store[key] = {
         count: 0,
-        resetTime: now + this.config.windowMs
+        resetTime,
       };
     }
 
     // Check if limit exceeded
-    if (entry.count >= this.config.maxRequests) {
-      const retryAfter = Math.ceil((entry.resetTime - now) / 1000);
-      return {
-        allowed: false,
-        remaining: 0,
-        resetTime: entry.resetTime,
-        retryAfter
-      };
-    }
-
-    // Increment counter
-    entry.count++;
-    rateLimitStore.set(key, entry);
-
-    return {
-      allowed: true,
-      remaining: this.config.maxRequests - entry.count,
-      resetTime: entry.resetTime
-    };
-  }
-
-  private getDefaultKey(request: NextRequest): string {
-    // Use IP address as default key
-    const ip = request.headers.get('x-forwarded-for') || 
-               request.headers.get('x-real-ip') || 
-               'unknown';
-    return `rate_limit:${ip}`;
-  }
-
-  private check(key: string): { allowed: boolean; remaining: number; resetTime: number } {
-    const now = Date.now();
-    const entry = rateLimitStore.get(key);
+    const allowed = store[key].count < this.config.maxRequests;
     
-    if (!entry || now > entry.resetTime) {
-      return {
-        allowed: true,
-        remaining: this.config.maxRequests,
-        resetTime: now + this.config.windowMs
-      };
+    if (allowed) {
+      store[key].count++;
     }
 
     return {
-      allowed: entry.count < this.config.maxRequests,
-      remaining: Math.max(0, this.config.maxRequests - entry.count),
-      resetTime: entry.resetTime
+      allowed,
+      remaining: Math.max(0, this.config.maxRequests - store[key].count),
+      resetTime,
     };
   }
 
-  // Add missing methods for admin rate limiter compatibility
-  async checkLimitByKey(key: string): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
-    return this.check(key);
-  }
-
-  addRateLimitHeaders(response: Response, key: string): Response {
-    const result = this.check(key);
-    response.headers.set('X-RateLimit-Limit', this.config.maxRequests.toString());
-    response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
-    response.headers.set('X-RateLimit-Reset', result.resetTime.toString());
-    return response;
-  }
-
-  getStatus(key: string): { allowed: boolean; remaining: number; resetTime: number } {
-    return this.check(key);
+  getHeaders(req: NextRequest): Record<string, string> {
+    const result = this.isAllowed(req);
+    
+    return {
+      'X-RateLimit-Limit': this.config.maxRequests.toString(),
+      'X-RateLimit-Remaining': result.remaining.toString(),
+      'X-RateLimit-Reset': Math.ceil(result.resetTime / 1000).toString(),
+    };
   }
 }
 
-// Pre-configured rate limiters for different operations
+// Predefined rate limiters
 export const rateLimiters = {
-  // General API requests: 100 requests per minute
-  general: new RateLimiter({
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 100
+  // General API rate limiting
+  api: new RateLimiter({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    maxRequests: 100, // 100 requests per 15 minutes
   }),
 
-  // Booking creation: 5 requests per minute
+  // Authentication endpoints
+  auth: new RateLimiter({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    maxRequests: 5, // 5 login attempts per 15 minutes
+  }),
+
+  // Payment endpoints
+  payment: new RateLimiter({
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 10, // 10 payment attempts per minute
+  }),
+
+  // File upload
+  upload: new RateLimiter({
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 5, // 5 uploads per minute
+  }),
+
+  // Contact form
+  contact: new RateLimiter({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    maxRequests: 3, // 3 contact form submissions per hour
+  }),
+
+  // Password reset
+  passwordReset: new RateLimiter({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    maxRequests: 3, // 3 password reset attempts per hour
+  }),
+
+  // Booking creation
   bookingCreation: new RateLimiter({
     windowMs: 60 * 1000, // 1 minute
-    maxRequests: 5,
-    keyGenerator: (request) => {
-      const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-      return `booking:${ip}`;
-    }
+    maxRequests: 5, // 5 booking creations per minute
   }),
-
-  // Messaging: 30 messages per minute
-  messaging: new RateLimiter({
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 30,
-    keyGenerator: (request) => {
-      const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'; 
-      return `messaging:${ip}`;
-    }
-  }),
-
-  // Authentication attempts: 5 attempts per minute
-  auth: new RateLimiter({
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 5,
-    keyGenerator: (request) => {
-      const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'; 
-      return `auth:${ip}`;
-    }
-  }),
-
-  // Job posting: 3 posts per hour
-  jobPosting: new RateLimiter({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    maxRequests: 3,
-    keyGenerator: (request) => {
-      const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-      return `job_posting:${ip}`;
-    }
-  }),
-
-  // Job applications: 10 applications per hour
-  jobApplications: new RateLimiter({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    maxRequests: 10,
-    keyGenerator: (request) => {
-      const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-      return `job_applications:${ip}`;
-    }
-  })
 };
 
-// Helper function to create rate limit response
-export function createRateLimitResponse(retryAfter: number) {
+// Middleware function for rate limiting
+export function withRateLimit(limiter: RateLimiter) {
+  return (req: NextRequest) => {
+    const result = limiter.isAllowed(req);
+    const headers = limiter.getHeaders(req);
+
+    if (!result.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: {
+            message: 'Rate limit exceeded',
+            code: 'RATE_LIMIT_EXCEEDED',
+            retryAfter: Math.ceil((result.resetTime - Date.now()) / 1000),
+          },
+        }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            ...headers,
+            'Retry-After': Math.ceil((result.resetTime - Date.now()) / 1000).toString(),
+          },
+        }
+      );
+    }
+
+    return { headers };
+  };
+}
+
+// Utility functions for API routes
+export function createRateLimitResponse(message: string, retryAfter: number) {
   return new Response(
     JSON.stringify({
-      error: 'Rate limit exceeded',
-      message: 'Too many requests. Please try again later.',
-      retryAfter
+      error: {
+        message,
+        code: 'RATE_LIMIT_EXCEEDED',
+        retryAfter,
+      },
     }),
     {
       status: 429,
       headers: {
         'Content-Type': 'application/json',
         'Retry-After': retryAfter.toString(),
-        'X-RateLimit-Limit': 'exceeded',
-        'X-RateLimit-Remaining': '0'
-      }
+      },
     }
   );
 }
 
-// Helper function to add rate limit headers to response
-export function addRateLimitHeaders(response: Response, remaining: number, resetTime: number) {
-  response.headers.set('X-RateLimit-Remaining', remaining.toString());
-  response.headers.set('X-RateLimit-Reset', resetTime.toString());
+export function addRateLimitHeaders(response: Response, limiter: RateLimiter, req: NextRequest) {
+  const headers = limiter.getHeaders(req);
+  Object.entries(headers).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
   return response;
 }

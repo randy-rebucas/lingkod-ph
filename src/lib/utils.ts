@@ -13,7 +13,7 @@ type Budget = {
 };
 
 export function formatBudget(budget: Budget | undefined | null): string {
-  if (!budget || typeof budget.amount !== 'number') {
+  if (!budget || typeof budget.amount !== 'number' || isNaN(budget.amount)) {
     return 'Not specified';
   }
 

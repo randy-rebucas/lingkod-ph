@@ -81,14 +81,21 @@ jest.mock('next-intl', () => ({
   useTranslations: () => (key) => key,
 }))
 
-// Mock Firebase
+// Mock Firebase with proper jest mocks
+const mockGetDb = jest.fn();
+const mockGetAuthInstance = jest.fn();
+
 jest.mock('@/lib/firebase', () => ({
-  getDb: jest.fn(() => ({
-    collection: jest.fn(),
-    doc: jest.fn(),
-  })),
-  getAuthInstance: jest.fn(),
-}))
+  getDb: mockGetDb,
+  getAuthInstance: mockGetAuthInstance,
+}));
+
+// Set default mock implementations
+mockGetDb.mockReturnValue({
+  collection: jest.fn(),
+  doc: jest.fn(),
+});
+mockGetAuthInstance.mockReturnValue({});
 
 // Mock Firebase Firestore
 const mockCollection = jest.fn();
@@ -310,15 +317,23 @@ jest.mock('@/hooks/use-error-handler', () => ({
   }),
 }))
 
+// Mock auth context with proper jest mock
+const mockUseAuth = jest.fn();
 jest.mock('@/context/auth-context', () => ({
-  useAuth: () => ({
-    user: { id: 'test-user-id', role: 'provider', displayName: 'Test User' },
-    loading: false,
-    userRole: 'provider',
-    verificationStatus: 'Verified',
-    getIdToken: jest.fn().mockResolvedValue('mock-token'),
-  }),
-}))
+  useAuth: mockUseAuth,
+}));
+
+// Set default mock implementation
+mockUseAuth.mockReturnValue({
+  user: { id: 'test-user-id', role: 'provider', displayName: 'Test User' },
+  loading: false,
+  userRole: 'provider',
+  verificationStatus: 'Verified',
+  getIdToken: jest.fn().mockResolvedValue('mock-token'),
+});
+
+// Make mockUseAuth available globally for tests
+global.mockUseAuth = mockUseAuth;
 
 // Global test utilities
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -326,6 +341,42 @@ global.ResizeObserver = jest.fn().mockImplementation(() => ({
   unobserve: jest.fn(),
   disconnect: jest.fn(),
 }))
+
+// Mock server-side APIs
+global.Request = jest.fn().mockImplementation((url, options) => ({
+  url,
+  method: options?.method || 'GET',
+  headers: new Map(Object.entries(options?.headers || {})),
+  json: jest.fn().mockResolvedValue({}),
+  text: jest.fn().mockResolvedValue(''),
+}));
+
+global.Response = jest.fn().mockImplementation((body, options) => ({
+  status: options?.status || 200,
+  statusText: options?.statusText || 'OK',
+  headers: new Map(Object.entries(options?.headers || {})),
+  json: jest.fn().mockResolvedValue(body),
+  text: jest.fn().mockResolvedValue(typeof body === 'string' ? body : JSON.stringify(body)),
+}));
+
+// Mock Headers
+global.Headers = jest.fn().mockImplementation((init) => {
+  const headers = new Map();
+  if (init) {
+    if (Array.isArray(init)) {
+      init.forEach(([key, value]) => headers.set(key, value));
+    } else if (typeof init === 'object') {
+      Object.entries(init).forEach(([key, value]) => headers.set(key, value));
+    }
+  }
+  return {
+    get: (name) => headers.get(name),
+    set: (name, value) => headers.set(name, value),
+    has: (name) => headers.has(name),
+    delete: (name) => headers.delete(name),
+    forEach: (callback) => headers.forEach(callback),
+  };
+});
 
 // Mock TextEncoder for email components
 const { TextEncoder, TextDecoder } = require('util');

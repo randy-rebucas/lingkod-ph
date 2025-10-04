@@ -9,7 +9,7 @@ export async function verifyAdminRole(userId: string): Promise<boolean> {
     if (!userDoc.exists()) return false;
     
     const userData = userDoc.data();
-    return userData.role === 'admin' && userData.accountStatus !== 'suspended';
+    return userData.role === 'admin' && (userData.accountStatus !== 'suspended' && userData.accountStatus !== undefined);
   } catch (error) {
     console.error('Error verifying admin role:', error);
     return false;
@@ -22,7 +22,7 @@ export async function verifyUserRole(userId: string, allowedRoles: string[]): Pr
     if (!userDoc.exists()) return false;
     
     const userData = userDoc.data();
-    return allowedRoles.includes(userData.role) && userData.accountStatus !== 'suspended';
+    return allowedRoles.includes(userData.role) && (userData.accountStatus !== 'suspended' && userData.accountStatus !== undefined);
   } catch (error) {
     console.error('Error verifying user role:', error);
     return false;

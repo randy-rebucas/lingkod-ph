@@ -99,7 +99,7 @@ const getStatusVariant = (status: InvoiceStatus) => {
 };
 
 
-export default function InvoicesPage() {
+function InvoicesPage() {
     const { user } = useAuth();
     const t = useTranslations('Invoices');
     const { toast } = useToast();
@@ -682,3 +682,4 @@ export default function InvoicesPage() {
     );
 }
 
+export default InvoicesPage;
