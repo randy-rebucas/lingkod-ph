@@ -5,7 +5,7 @@ import { AdminSessionManager, validateAdminSession } from '@/lib/admin-session-m
 import { requireAdmin2FA } from '@/lib/admin-2fa';
 import { AdminActivityLogger } from '@/lib/admin-activity-monitor';
 import { SecurityEventLogger } from '@/lib/admin-security-notifications';
-import { adminDb as db } from '@/lib/firebase-admin';
+import { adminDb as db } from '@/shared/db/server';
 import { AuditLogger } from '@/lib/audit-logger';
 
 /**

@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/shared/auth";
 import { useTranslations } from 'next-intl';
 import { BarChart2, TrendingUp, Users, DollarSign, PieChart, Calendar, Download, Target, MapPin, TrendingDown, Activity, Award, Star } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import {
   XAxis,
   YAxis,
@@ -21,17 +21,17 @@ import {
   ComposedChart,
   Line
 } from 'recharts';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 import { useState, useEffect, useMemo } from "react";
-import { getDb  } from '@/lib/firebase';
+import { getDb  } from '@/shared/db';
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/shared/ui/skeleton";
 // import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/shared/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { Badge } from "@/shared/ui/badge";
+import { Progress } from "@/shared/ui/progress";
+import { Alert, AlertDescription } from "@/shared/ui/alert";
 
 type Booking = {
     id: string;

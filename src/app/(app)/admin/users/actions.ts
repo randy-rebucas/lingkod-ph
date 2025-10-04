@@ -1,7 +1,7 @@
 
 'use server';
 
-import { getDb  } from '@/lib/firebase';
+import { getDb  } from '@/shared/db';
 import {
   doc,
   updateDoc,
@@ -11,7 +11,7 @@ import {
   getDoc,
 } from 'firebase/firestore';
 // import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { adminAuth } from '@/lib/firebase-admin';
+import { adminAuth } from '@/shared/db/server';
 import { z } from 'zod';
 import { AuditLogger } from '@/lib/audit-logger';
 import { Resend } from 'resend';

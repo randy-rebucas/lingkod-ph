@@ -1,9 +1,9 @@
 import { handleInviteAction } from '../actions';
-import { getDb } from '@/lib/firebase';
+import { getDb } from '@/shared/db';
 import { writeBatch, doc, getDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 // Mock Firebase
-jest.mock('@/lib/firebase');
+jest.mock('@/shared/db');
 const mockGetDb = getDb as jest.MockedFunction<typeof getDb>;
 
 // Mock Firestore functions

@@ -3,16 +3,16 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
-import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
+import { useAuth } from "@/shared/auth";
+import { getDb  } from '@/shared/db';
 import { collection, getDocs, onSnapshot, query, where } from "firebase/firestore";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/shared/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui/avatar";
+import { Skeleton } from "@/shared/ui/skeleton";
 import { Star, Heart } from "lucide-react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/shared/ui/badge";
 
 type Provider = {
     uid: string;

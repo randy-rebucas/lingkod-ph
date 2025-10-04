@@ -4,16 +4,16 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/context/auth-context";
-import { getDb } from '@/lib/firebase';
+import { useAuth } from "@/shared/auth";
+import { getDb } from '@/shared/db';
 import { doc, getDoc, collection, getDocs, where, query, serverTimestamp, addDoc, writeBatch, Timestamp } from "firebase/firestore";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/shared/ui/avatar";
+import { Skeleton } from "@/shared/ui/skeleton";
 import { Star, MessageSquare, Award, User, Briefcase, ArrowLeft, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/shared/ui/alert-dialog";
 import type { Job as JobType } from "@/app/(app)/my-job-posts/page";
 
 

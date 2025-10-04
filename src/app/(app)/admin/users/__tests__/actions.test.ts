@@ -1,11 +1,11 @@
 import { handleCreateUser, handleDeleteUser } from '../actions';
-import { getDb } from '@/lib/firebase';
+import { getDb } from '@/shared/db';
 import { setDoc, doc, deleteDoc, getDoc } from 'firebase/firestore';
-import { adminAuth } from '@/lib/firebase-admin';
+import { adminAuth } from '@/shared/db-admin';
 import { AuditLogger } from '@/lib/audit-logger';
 
 // Mock Firebase
-jest.mock('@/lib/firebase');
+jest.mock('@/shared/db');
 const mockGetDb = getDb as jest.MockedFunction<typeof getDb>;
 
 // Mock Firestore functions
@@ -14,7 +14,7 @@ const mockDeleteDoc = deleteDoc as jest.MockedFunction<typeof deleteDoc>;
 const mockGetDoc = getDoc as jest.MockedFunction<typeof getDoc>;
 
 // Mock Firebase Admin
-jest.mock('@/lib/firebase-admin');
+jest.mock('@/shared/db-admin');
 const mockAdminAuth = adminAuth as jest.Mocked<typeof adminAuth>;
 
 // Mock Audit Logger

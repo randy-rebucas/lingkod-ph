@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/shared/auth';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { useTheme } from 'next-themes';
 import AppLayout from '../layout';
 
 // Mock dependencies
-jest.mock('@/context/auth-context');
+jest.mock('@/shared/auth');
 jest.mock('next/navigation');
 jest.mock('firebase/auth');
 jest.mock('next-themes');

@@ -1,16 +1,16 @@
 
 "use client";
 
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/shared/auth";
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Handshake, Users, Briefcase, BarChart2, DollarSign, TrendingUp, Target, Award } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PartnerAnalyticsService } from "@/lib/partner-analytics";
 import { PartnerReferralTracker } from "@/lib/partner-referral-tracker";
 import { PartnerCommissionManager } from "@/lib/partner-commission-manager";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getDb  } from '@/lib/firebase';
+import { Skeleton } from "@/shared/ui/skeleton";
+import { getDb  } from '@/shared/db';
 
 interface PartnerDashboardData {
     totalReferrals: number;

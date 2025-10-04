@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getDb  } from '@/lib/firebase';
+import { getDb  } from '@/shared/db';
 import { collection, query, where, onSnapshot, limit } from "firebase/firestore";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Megaphone, X } from "lucide-react";

@@ -8,9 +8,9 @@ import { Bot, Loader2, Send, MessageSquare } from 'lucide-react';
 import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/utils';
 import { helpCenterAssistant } from '@/ai/flows/help-center-assistant';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/shared/auth';
 import { useTranslations } from 'next-intl';
 
 type ChatMessage = {

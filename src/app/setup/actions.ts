@@ -2,7 +2,7 @@
 "use server";
 
 import { z } from "zod";
-import { getDb, getAuthInstance   } from '@/lib/firebase';
+import { getDb, getAuthInstance   } from '@/shared/db';
 import { collection, serverTimestamp, doc, setDoc, getDocs, query, limit } from "firebase/firestore";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { generateReferralCode } from '@/lib/referral-code-generator';

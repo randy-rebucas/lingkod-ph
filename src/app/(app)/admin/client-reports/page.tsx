@@ -2,13 +2,13 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '@/context/auth-context';
-import { getDb  } from '@/lib/firebase';
+import { useAuth } from '@/shared/auth';
+import { getDb  } from '@/shared/db';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
+import { Skeleton } from '@/shared/ui/skeleton';
+import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar';
 import { Star } from 'lucide-react';
 import type { User } from '@/app/(app)/admin/users/page';
 

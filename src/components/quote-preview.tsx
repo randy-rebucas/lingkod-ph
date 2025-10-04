@@ -2,7 +2,7 @@
 "use client";
 
 import { useMemo } from 'react';
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/shared/auth";
 import { QuoteFormValues } from "./quote-builder-client";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";

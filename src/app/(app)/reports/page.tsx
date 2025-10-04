@@ -3,11 +3,11 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { useAuth } from '@/context/auth-context';
-import { getDb  } from '@/lib/firebase';
+import { useAuth } from '@/shared/auth';
+import { getDb  } from '@/shared/db';
 import { collection, query, where, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 import { 
   DollarSign, 
   BookCheck, 
@@ -29,8 +29,8 @@ import {
   ArrowUpRight,
   Minus
 } from "lucide-react";
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/shared/ui/skeleton';
+import { Button } from '@/shared/ui/button';
 import {
   // LineChart,
   Line,
@@ -51,15 +51,15 @@ import {
   ScatterChart,
   Scatter
 } from 'recharts';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/shared/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { handleMarkAsPaid } from '@/app/(app)/admin/payouts/actions';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { Progress } from "@/shared/ui/progress";
+import { Alert, AlertDescription } from "@/shared/ui/alert";
+import { Label } from "@/shared/ui/label";
 
 
 type Booking = {

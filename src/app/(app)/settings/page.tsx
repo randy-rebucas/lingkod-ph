@@ -2,12 +2,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/shared/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
+import { Label } from "@/shared/ui/label"
+import { Switch } from "@/shared/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs"
 import {
     Bell,
     AtSign,
@@ -22,11 +22,11 @@ import {
     EyeOff,
     AlertTriangle
 } from "lucide-react"
-import { useAuth } from "@/context/auth-context"
+import { useAuth } from "@/shared/auth"
 import { doc, getDoc, updateDoc } from "firebase/firestore"
-import { getDb  } from '@/lib/firebase';
+import { getDb  } from '@/shared/db';
 import { useToast } from "@/hooks/use-toast"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/shared/ui/skeleton"
 import { useTranslations } from "next-intl"
 import { useTheme } from "next-themes"
 // import { useRouter } from "next/navigation"

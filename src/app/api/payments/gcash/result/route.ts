@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adyenPaymentService } from '@/lib/adyen-payment-service';
-import { adminDb as db } from '@/lib/firebase-admin';
+import { adyenPaymentService } from '@/shared/payments/adyen-payment-service';
+import { adminDb as db } from '@/shared/db/server';
 import { getAuth } from 'firebase-admin/auth';
 
 export async function POST(request: NextRequest) {

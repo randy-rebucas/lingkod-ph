@@ -2,7 +2,7 @@
 "use server";
 
 import { z } from "zod";
-import { getDb  } from '@/lib/firebase';
+import { getDb  } from '@/shared/db';
 import { collection, serverTimestamp, doc, getDoc, Timestamp, updateDoc, query, where, getDocs, writeBatch } from "firebase/firestore";
 
 const postJobSchema = z.object({

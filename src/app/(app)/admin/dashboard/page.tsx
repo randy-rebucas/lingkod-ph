@@ -2,16 +2,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/shared/auth";
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { DollarSign, Users, Users2, Briefcase } from "lucide-react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getDb  } from '@/lib/firebase';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
+import { Badge } from "@/shared/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
+import { getDb  } from '@/shared/db';
 import { collection, query, onSnapshot, orderBy, limit, Timestamp } from "firebase/firestore";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/shared/ui/skeleton";
 // import { formatDistanceToNow } from "date-fns";
 
 type Booking = {

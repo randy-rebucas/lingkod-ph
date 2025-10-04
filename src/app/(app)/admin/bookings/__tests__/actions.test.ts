@@ -1,10 +1,10 @@
 import { handleUpdateBookingStatus } from '../actions';
-import { getDb } from '@/lib/firebase';
+import { getDb } from '@/shared/db';
 import { doc, updateDoc } from 'firebase/firestore';
 import { AuditLogger } from '@/lib/audit-logger';
 
 // Mock Firebase
-jest.mock('@/lib/firebase');
+jest.mock('@/shared/db');
 const mockGetDb = getDb as jest.MockedFunction<typeof getDb>;
 
 // Mock Firebase Firestore

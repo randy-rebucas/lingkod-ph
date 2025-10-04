@@ -5,17 +5,17 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/shared/auth";
 import { useActionState } from "react";
 import { createAdminAction, type FormState } from "./actions";
 import { useTranslations } from 'next-intl';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
 import { Loader2 } from "lucide-react";
-import { getDb  } from '@/lib/firebase';
+import { getDb  } from '@/shared/db';
 import { getDocs, collection } from "firebase/firestore";
 import { Logo } from "@/components/logo";
 

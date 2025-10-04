@@ -67,8 +67,8 @@ import {
   SidebarFooter,
   SidebarTrigger,
   SidebarInset,
-} from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
+} from "@/shared/ui/sidebar";
+import { Button } from "@/shared/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,16 +76,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/shared/ui/dropdown-menu";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useAuth } from "@/context/auth-context";
+} from "@/shared/ui/popover";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
+import { useAuth } from "@/shared/auth";
 import { signOut } from "firebase/auth";
-import { getAuthInstance } from "@/lib/firebase";
+import { getAuthInstance } from "@/shared/db";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationBell } from "@/components/notification-bell";
 import { useTheme } from "next-themes";

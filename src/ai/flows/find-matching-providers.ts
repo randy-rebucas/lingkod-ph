@@ -12,7 +12,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { getDb } from '@/lib/firebase';
+import { getDb } from '@/shared/db';
 
 // Schema for a single provider's details used in the prompt
 const ProviderInfoSchema = z.object({

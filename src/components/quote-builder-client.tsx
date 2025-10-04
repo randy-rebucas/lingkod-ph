@@ -4,28 +4,28 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Input } from "@/shared/ui/input";
+import { Textarea } from "@/shared/ui/textarea";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/shared/ui/form";
 import { CalendarIcon, PlusCircle, Sparkles, Trash2, Loader2, Eye, Percent, Copy, Save, Send, Download, Calculator } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
+import { Calendar } from "@/shared/ui/calendar";
+import { cn } from "@/shared/utils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/use-error-handler";
 import { useState, useCallback } from "react";
 import { generateQuoteDescription } from "@/ai/flows/generate-quote-description";
 import { Separator } from "./ui/separator";
-import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
+import { useAuth } from "@/shared/auth";
+import { getDb  } from '@/shared/db';
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/shared/ui/dialog";
 import { QuotePreview } from "./quote-preview";
 import { useTranslations } from 'next-intl';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 
 // Define schemas and types outside component for export
 const createLineItemSchema = (t: (key: string) => string) => z.object({
@@ -56,7 +56,7 @@ const baseLineItemSchema = z.object({
     price: z.coerce.number(),
 });
 
-const _baseQuoteSchema = z.object({
+const baseQuoteSchema = z.object({
     clientName: z.string(),
     clientEmail: z.string(),
     clientAddress: z.string(),

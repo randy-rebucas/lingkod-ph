@@ -1,16 +1,16 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/shared/auth';
 import AdminBookingsPage from '../page';
-import { getDb } from '@/lib/firebase';
+import { getDb } from '@/shared/db';
 import { handleUpdateBookingStatus } from '../actions';
 
 // Mock the auth context
-jest.mock('@/context/auth-context');
+jest.mock('@/shared/auth');
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
 // Mock Firebase
-jest.mock('@/lib/firebase');
+jest.mock('@/shared/db');
 const mockGetDb = getDb as jest.MockedFunction<typeof getDb>;
 
 // Mock server actions

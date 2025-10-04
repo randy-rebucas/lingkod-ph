@@ -3,25 +3,25 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useAuth } from "@/context/auth-context";
-import { getDb, getStorageInstance } from '@/lib/firebase';
+import { useAuth } from "@/shared/auth";
+import { getDb, getStorageInstance } from '@/shared/db';
 import { doc, onSnapshot, updateDoc, addDoc, collection, serverTimestamp, query, where, getDocs } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Skeleton } from "@/shared/ui/skeleton";
+import { Input } from "@/shared/ui/input";
 import { ArrowLeft, Upload, Loader2, ClipboardCopy, Check, Wallet, Landmark, Info, Smartphone } from "lucide-react";
 import Image from 'next/image';
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/shared/ui/badge";
+import { Separator } from "@/shared/ui/separator";
+import { Alert, AlertDescription, AlertTitle } from "@/shared/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import type { Booking } from "../../page";
 import { QRCode } from "@/components/qrcode-svg";
-import { PaymentConfig } from "@/lib/payment-config";
-import { PaymentRetryService } from "@/lib/payment-retry-service";
+import { PaymentConfig } from "@/shared/payments/payment-config";
+import { PaymentRetryService } from "@/shared/payments/payment-retry-service";
 import { GCashPaymentButton } from "@/components/gcash-payment-button";
 
 export default function PaymentPage() {

@@ -2,23 +2,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
+import { useAuth } from "@/shared/auth";
+import { getDb  } from '@/shared/db';
 import { collection, query, onSnapshot, orderBy } from "firebase/firestore";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
+import { Skeleton } from "@/shared/ui/skeleton";
+import { Badge } from "@/shared/ui/badge";
 import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/shared/ui/button";
 import { Eye, MoreHorizontal, User } from "lucide-react";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
 import type { Booking as BookingType } from "@/app/(app)/bookings/page";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/shared/ui/dropdown-menu";
 import { handleUpdateBookingStatus } from "./actions";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
-// import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+// import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/shared/ui/alert-dialog";
 
 const getStatusVariant = (status: string) => {
     switch (status) {

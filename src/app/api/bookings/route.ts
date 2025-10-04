@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimiters, createRateLimitResponse, addRateLimitHeaders } from '@/lib/rate-limiter';
 import { auditLogger, extractRequestMetadata } from '@/lib/audit-logger';
-// import { verifyUserRole } from '@/lib/auth-utils';
+// import { verifyUserRole } from '@/shared/auth/auth-utils';
 
 export async function POST(request: NextRequest) {
   try {

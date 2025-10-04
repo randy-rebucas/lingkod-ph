@@ -11,7 +11,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { getDb } from '@/lib/firebase';
+import { getDb } from '@/shared/db';
 import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Resend } from 'resend';
 import PayoutRequestEmail from '@/emails/payout-request-email';

@@ -2,8 +2,8 @@
 "use client";
 
 import { useState, useRef, useCallback } from 'react';
-import { useAuth } from '@/context/auth-context';
-import { getDb, getStorageInstance   } from '@/lib/firebase';
+import { useAuth } from '@/shared/auth';
+import { getDb, getStorageInstance   } from '@/shared/db';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';

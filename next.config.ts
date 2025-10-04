@@ -49,13 +49,21 @@ const nextConfig: NextConfig = {
       },
     ];
 
-    // Add fallbacks for Node.js modules that might be used by Genkit
+    // Add fallbacks for Node.js modules that might be used by Genkit and Firebase Admin
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
       net: false,
       tls: false,
       crypto: false,
+      http2: false,
+      child_process: false,
+      stream: false,
+      util: false,
+      url: false,
+      querystring: false,
+      path: false,
+      os: false,
     };
 
     return config;

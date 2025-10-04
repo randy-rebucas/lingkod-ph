@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useTranslations } from 'next-intl';
-import { useAuth } from "@/context/auth-context";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/shared/auth";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
+import { Badge } from "@/shared/ui/badge";
 import { Check, Star, Crown, Zap, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 

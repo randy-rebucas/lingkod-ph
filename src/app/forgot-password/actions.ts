@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { getAuthInstance  } from '@/lib/firebase';
+import { getAuthInstance  } from '@/shared/db';
 import { sendPasswordResetEmail } from "firebase/auth";
 
 const forgotPasswordSchema = z.object({

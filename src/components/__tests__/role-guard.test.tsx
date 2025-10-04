@@ -4,7 +4,7 @@ import { RoleGuard } from '../role-guard';
 
 // Mock the useAuth hook
 const mockUseAuth = jest.fn();
-jest.mock('@/context/auth-context', () => ({
+jest.mock('@/shared/auth', () => ({
   useAuth: () => mockUseAuth(),
 }));
 

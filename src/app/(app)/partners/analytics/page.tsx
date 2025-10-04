@@ -1,11 +1,11 @@
 "use client";
 
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/shared/auth";
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { Badge } from "@/shared/ui/badge";
+import { Progress } from "@/shared/ui/progress";
 import { 
   BarChart2, 
   TrendingUp, 
@@ -35,10 +35,10 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PartnerAnalyticsService, PartnerAnalytics, ReferralData, PartnerCommission } from "@/lib/partner-analytics";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { getDb } from '@/lib/firebase';
+import { Skeleton } from "@/shared/ui/skeleton";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { getDb } from '@/shared/db';
 
 interface AnalyticsData {
   analytics: PartnerAnalytics | null;

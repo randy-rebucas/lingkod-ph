@@ -1,14 +1,14 @@
 "use client";
 
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/shared/auth";
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { Badge } from "@/shared/ui/badge";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { 
   DollarSign, 
   TrendingUp, 
@@ -26,8 +26,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PartnerAnalyticsService, PartnerCommission } from "@/lib/partner-analytics";
-import { Skeleton } from "@/components/ui/skeleton";
-import { getDb } from '@/lib/firebase';
+import { Skeleton } from "@/shared/ui/skeleton";
+import { getDb } from '@/shared/db';
 
 interface CommissionSummary {
   totalEarned: number;

@@ -1,7 +1,7 @@
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/shared/ui/button";
+import { Card } from "@/shared/ui/card";
+import { Badge } from "@/shared/ui/badge";
 import { ArrowRight, Building2, Handshake, Users, Wrench, Star, Award, CheckCircle, Quote, Target, Zap, Mail, MapPin, Briefcase, Clock, DollarSign, UserCheck, Lightbulb, Heart, Gauge, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";

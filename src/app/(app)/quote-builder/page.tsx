@@ -5,7 +5,7 @@ import { memo } from 'react';
 import QuoteBuilderClient from "@/components/quote-builder-client";
 import { StoredQuotesList } from "@/components/stored-quotes-list";
 import { useTranslations } from 'next-intl';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { Calculator, FileText } from "lucide-react";
 
 const QuoteBuilderPage = memo(function QuoteBuilderPage() {

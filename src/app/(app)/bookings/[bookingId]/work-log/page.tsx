@@ -3,22 +3,22 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useAuth } from "@/context/auth-context";
-import { getDb, getStorageInstance   } from '@/lib/firebase';
+import { useAuth } from "@/shared/auth";
+import { getDb, getStorageInstance   } from '@/shared/db';
 import { doc, onSnapshot, updateDoc, arrayUnion, Timestamp, writeBatch, arrayRemove } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
+import { Skeleton } from "@/shared/ui/skeleton";
 import { ArrowLeft, Timer, Play, Square, Camera, Send, PlusCircle, Trash2, CheckSquare } from "lucide-react";
 import { format, formatDistanceStrict } from "date-fns";
 import Image from "next/image";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/shared/ui/textarea";
+import { Input } from "@/shared/ui/input";
+import { Separator } from "@/shared/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import { Checkbox } from "@/shared/ui/checkbox";
 
 
 type WorkLogEntry = {

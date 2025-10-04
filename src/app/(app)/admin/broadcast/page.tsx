@@ -2,17 +2,17 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/shared/auth";
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Textarea } from "@/shared/ui/textarea";
+import { Button } from "@/shared/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Send, Radio } from "lucide-react";
 import { sendBroadcastAction, sendCampaignEmailAction } from "./actions";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
 
 export default function BroadcastPage() {
     const { user, userRole } = useAuth();

@@ -1,8 +1,8 @@
 
 import type {Metadata} from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster"
-import { AuthProvider } from '@/context/auth-context';
+import { Toaster } from "@/shared/ui/toaster"
+import { AuthProvider } from '@/shared/auth';
 import { ThemeProvider } from '@/context/theme-provider';
 import { Inter, Poppins } from 'next/font/google';
 import Script from 'next/script';

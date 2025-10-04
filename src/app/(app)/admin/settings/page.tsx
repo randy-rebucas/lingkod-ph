@@ -2,17 +2,17 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "@/context/auth-context";
-import { getDb, getStorageInstance   } from '@/lib/firebase';
+import { useAuth } from "@/shared/auth";
+import { getDb, getStorageInstance   } from '@/shared/db';
 import { doc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/shared/ui/skeleton";
 import { handleUpdatePlatformSettings, type PlatformSettings } from "./actions";
 import Image from "next/image";
 

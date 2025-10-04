@@ -1,7 +1,7 @@
 
 'use server';
 
-import { getDb  } from '@/lib/firebase';
+import { getDb  } from '@/shared/db';
 import { collection, doc, writeBatch, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { AuditLogger } from '@/lib/audit-logger';
 import { z } from 'zod';

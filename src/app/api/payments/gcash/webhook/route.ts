@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adyenPaymentService } from '@/lib/adyen-payment-service';
+import { adyenPaymentService } from '@/shared/payments/adyen-payment-service';
 import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {

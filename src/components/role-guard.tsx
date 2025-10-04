@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/shared/auth";
 import { ReactNode, memo } from "react";
 import { Skeleton } from "./ui/skeleton";
 

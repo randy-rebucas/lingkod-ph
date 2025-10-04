@@ -1,7 +1,7 @@
 
 'use server';
 
-import { getDb, getStorageInstance   } from '@/lib/firebase';
+import { getDb, getStorageInstance   } from '@/shared/db';
 import { doc, runTransaction, collection, serverTimestamp, addDoc } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { z } from 'zod';

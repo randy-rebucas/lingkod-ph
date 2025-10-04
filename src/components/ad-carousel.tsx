@@ -2,10 +2,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getDb  } from '@/lib/firebase';
+import { getDb  } from '@/shared/db';
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/shared/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -13,7 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
   type CarouselApi,
-} from "@/components/ui/carousel";
+} from "@/shared/ui/carousel";
 import { Button } from "./ui/button";
 import { Skeleton } from "./ui/skeleton";
 import { Badge } from "./ui/badge";

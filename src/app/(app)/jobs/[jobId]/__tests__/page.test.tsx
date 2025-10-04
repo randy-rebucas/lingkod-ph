@@ -1,9 +1,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { useAuth } from '@/context/auth-context';
+import { useAuth } from '@/shared/auth';
 import JobDetailPage from '../page';
 
-jest.mock('@/context/auth-context');
+jest.mock('@/shared/auth');
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
 describe('JobDetailPage', () => {

@@ -2,14 +2,14 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
-import { useAuth } from '@/context/auth-context';
-import { getDb  } from '@/lib/firebase';
+import { useAuth } from '@/shared/auth';
+import { getDb  } from '@/shared/db';
 import { collection, query, where, onSnapshot, getDocs, Timestamp } from 'firebase/firestore';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
 import { DollarSign, BookCheck, Calculator, FilePieChart, CheckCircle } from "lucide-react";
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/shared/ui/skeleton';
+import { Button } from '@/shared/ui/button';
 import {
   LineChart,
   Line,
@@ -22,7 +22,7 @@ import {
   Bar,
   BarChart,
 } from 'recharts';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/shared/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 // import { useTranslations } from 'next-intl';

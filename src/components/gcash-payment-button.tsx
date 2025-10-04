@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Alert, AlertDescription } from '@/shared/ui/alert';
 import { Loader2, Smartphone, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/use-error-handler';
-import { useAuth } from '@/context/auth-context';
-import { PaymentRetryService } from '@/lib/payment-retry-service';
+import { useAuth } from '@/shared/auth';
+import { PaymentRetryService } from '@/shared/payments/payment-retry-service';
 
 interface GCashPaymentButtonProps {
   bookingId: string;

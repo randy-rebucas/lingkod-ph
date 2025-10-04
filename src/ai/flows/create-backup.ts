@@ -8,8 +8,8 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
-import { getDb } from '@/lib/firebase';
-import { adminStorage } from '@/lib/firebase-admin';
+import { getDb } from '@/shared/db';
+import { adminStorage } from '@/shared/db/firebase-admin';
 
 const BackupResultSchema = z.object({
   success: z.boolean(),

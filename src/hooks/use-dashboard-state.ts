@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Provider } from '@/types';
+import { Provider } from '@/shared/types';
 
 interface UseDashboardStateProps {
   initialProviders?: Provider[];

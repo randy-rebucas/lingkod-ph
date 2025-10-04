@@ -6,25 +6,25 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+} from "@/shared/ui/accordion";
+import { Button } from "@/shared/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Input } from "@/shared/ui/input";
+import { Badge } from "@/shared/ui/badge";
 import { Search, MessageCircle, ArrowRight, Bot, Loader2, User, FilePenLine, UserCheck, Building, Phone, Mail, Clock, BookOpen, Video, Download, ExternalLink, ChevronRight, Star, Zap, Shield, Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/shared/ui/dialog";
 import { helpCenterAssistant } from "@/ai/flows/help-center-assistant";
-import { Textarea } from "@/components/ui/textarea";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/context/auth-context";
-import { Label } from "@/components/ui/label";
+import { Textarea } from "@/shared/ui/textarea";
+import { ScrollArea } from "@/shared/ui/scroll-area";
+import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
+import { cn } from "@/shared/utils";
+import { useAuth } from "@/shared/auth";
+import { Label } from "@/shared/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { getDb  } from '@/lib/firebase';
+import { getDb  } from '@/shared/db';
 import { useTranslations } from 'next-intl';
 
 

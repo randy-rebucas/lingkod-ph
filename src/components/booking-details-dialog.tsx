@@ -2,13 +2,13 @@
 "use client";
 
 import { memo, useMemo } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogClose } from "@/shared/ui/dialog";
+import { Button } from "@/shared/ui/button";
+import { Badge } from "@/shared/ui/badge";
 import { Booking } from "@/app/(app)/bookings/page";
 import { format } from "date-fns";
 import { Separator } from "./ui/separator";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/shared/auth";
 import Image from "next/image";
 import { useTranslations } from 'next-intl';
 

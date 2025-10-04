@@ -5,19 +5,19 @@ import { useState, useEffect, useRef, useCallback, useMemo, memo } from "react";
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useSearchParams } from "next/navigation";
-import { useAuth } from "@/context/auth-context";
-import { getDb, getStorageInstance   } from '@/lib/firebase';
+import { useAuth } from "@/shared/auth";
+import { getDb, getStorageInstance   } from '@/shared/db';
 import { collection, query, where, onSnapshot, doc, addDoc, serverTimestamp, orderBy, updateDoc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
+import { Button } from "@/shared/ui/button";
+import { Card } from "@/shared/ui/card";
+import { Input } from "@/shared/ui/input";
+import { ScrollArea } from "@/shared/ui/scroll-area";
+import { cn } from "@/shared/utils";
 import { Send, Search, Paperclip, X, MessageSquare, Loader2 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/shared/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
 

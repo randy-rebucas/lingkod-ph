@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimiters, createRateLimitResponse, addRateLimitHeaders } from '@/lib/rate-limiter';
 import { auditLogger, extractRequestMetadata } from '@/lib/audit-logger';
-import { verifyUserRole } from '@/lib/auth-utils';
-import { getDb  } from '@/lib/firebase';
+import { verifyUserRole } from '@/shared/auth/auth-utils';
+import { getDb  } from '@/shared/db';
 import { doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 
 export async function POST(request: NextRequest) {

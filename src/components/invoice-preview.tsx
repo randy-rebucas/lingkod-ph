@@ -2,7 +2,7 @@
 "use client";
 
 import { useRef, useCallback, useMemo } from 'react';
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/shared/auth";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { Separator } from "./ui/separator";
