@@ -151,7 +151,7 @@ const getStatusClass = (status: BookingStatus) => {
 
 const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: string | null }) => {
     const { toast } = useToast();
-    const t = useTranslations('Bookings');
+    const _t = useTranslations('Bookings');
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -376,7 +376,7 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
 
 const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: string | null }) => {
     const { toast } = useToast();
-    const t = useTranslations('Bookings');
+    const _t = useTranslations('Bookings');
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -620,7 +620,7 @@ const getAvatarFallback = (name: string | null | undefined) => {
     return name.substring(0, 2).toUpperCase();
 };
 
-const EmptyState = ({ status, userRole }: { status: string, userRole: string | null }) => {
+const _EmptyState = ({ status, userRole }: { status: string, userRole: string | null }) => {
     const t = useTranslations('Bookings');
     
     const messages: { [key: string]: { icon: JSX.Element, text: string } } = {
@@ -665,7 +665,7 @@ export default function BookingsPage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
-    const t = useTranslations('Bookings');
+    const _t = useTranslations('Bookings');
 
     useEffect(() => {
         if (!user || !getDb()) {

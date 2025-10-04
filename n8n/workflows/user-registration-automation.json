@@ -1,0 +1,158 @@
+{
+  "name": "User Registration Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "user-registration",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "User Registration Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "user-registration-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.role }}",
+              "operation": "equal",
+              "value2": "provider"
+            }
+          ]
+        }
+      },
+      "id": "check-role",
+      "name": "Check User Role",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.LOCALPRO_API_BASE_URL }}/api/users",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Bearer {{ $env.LOCALPRO_API_KEY }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "={{ $json.email }}",
+          "name": "={{ $json.name }}",
+          "role": "={{ $json.role }}",
+          "phone": "={{ $json.phone }}"
+        }
+      },
+      "id": "create-user",
+      "name": "Create User Profile",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $json.email }}",
+        "subject": "Welcome to LocalPro!",
+        "message": "Hi {{ $json.name }},\n\nWelcome to LocalPro! Your account has been created successfully.\n\nYour role: {{ $json.role }}\n\nBest regards,\nLocalPro Team",
+        "options": {}
+      },
+      "id": "send-welcome-email",
+      "name": "Send Welcome Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $json.email }}",
+        "subject": "Provider Verification Required",
+        "message": "Hi {{ $json.name }},\n\nAs a service provider, you need to complete your verification process.\n\nPlease upload your documents:\n- Government ID\n- Professional License (if applicable)\n- Portfolio samples\n\nComplete verification: {{ $env.LOCALPRO_API_BASE_URL }}/profile/verification\n\nBest regards,\nLocalPro Team",
+        "options": {}
+      },
+      "id": "send-verification-email",
+      "name": "Send Verification Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"User registration processed successfully\", \"userId\": $json.id } }}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "User Registration Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check User Role",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check User Role": {
+      "main": [
+        [
+          {
+            "node": "Create User Profile",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create User Profile",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create User Profile": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Welcome Email": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "user-registration-automation",
+  "tags": []
+}

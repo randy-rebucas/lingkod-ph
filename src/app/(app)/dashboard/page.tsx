@@ -4,7 +4,7 @@
 import { useEffect, useState, useMemo, useCallback, memo } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List, ShieldCheck, Clock, Wallet, Info } from "lucide-react";
+import { DollarSign, Calendar, Star, Users, Loader2, Search, MapPin, Briefcase, Users2, Heart, LayoutGrid, List, ShieldCheck, Wallet, Info } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs, getDoc, doc, addDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs, doc, addDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -22,8 +22,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
 import { format, startOfDay, endOfDay } from "date-fns";
 import { findMatchingProviders } from "@/ai/flows/find-matching-providers";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { AdCarousel } from "@/components/ad-carousel";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LocationBasedProviderService } from "@/lib/location-based-provider-service";
 import { getCurrentLocation } from "@/lib/geolocation-utils";
 
@@ -650,7 +649,7 @@ const DashboardPage = memo(function DashboardPage() {
         ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
         : "N/A";
         
-    const recentBookings = bookings.slice(0, 5);
+    const _recentBookings = bookings.slice(0, 5);
     const earningsData = processEarningsData(bookings);
 
     const handleSmartSearch = useCallback(async (query: string) => {

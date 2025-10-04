@@ -9,8 +9,6 @@ import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy }
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
-  LineChart, 
-  Line, 
   XAxis, 
   YAxis, 
   Tooltip, 
@@ -35,7 +33,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import Link from 'next/link';
+import _Link from 'next/link';
 import { handleRequestPayout } from '@/ai/flows/request-payout';
 import { TooltipProvider, Tooltip as TooltipUI, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import AgencyEarningsPage from '@/app/(app)/agency-earnings/page';
@@ -232,8 +230,8 @@ export default function EarningsPage() {
         ((chartData[chartData.length - 1].earnings - chartData[chartData.length - 2].earnings) / chartData[chartData.length - 2].earnings * 100) : 0;
     
     const averageMonthlyEarnings = chartData.reduce((sum, month) => sum + month.earnings, 0) / chartData.length;
-    const bestMonth = Math.max(...chartData.map(m => m.earnings));
-    const worstMonth = Math.min(...chartData.map(m => m.earnings));
+    const _bestMonth = Math.max(...chartData.map(m => m.earnings));
+    const _worstMonth = Math.min(...chartData.map(m => m.earnings));
 
     return (
         <div className="container space-y-8">

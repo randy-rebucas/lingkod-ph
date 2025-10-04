@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createContext } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { ThemeProvider } from '@/context/theme-provider';
 import { AuthProvider } from '@/context/auth-context';
@@ -12,13 +12,25 @@ const mockAuthContext = {
   getIdToken: global.jest?.fn?.()?.mockResolvedValue?.('mock-token') || (() => Promise.resolve('mock-token')),
 };
 
+// Create mock context for testing
+const MockAuthContext = createContext(mockAuthContext);
+
+// Mock AuthProvider for testing
+const MockAuthProvider = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <MockAuthContext.Provider value={mockAuthContext}>
+      {children}
+    </MockAuthContext.Provider>
+  );
+};
+
 // Custom render function with providers
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <AuthProvider value={mockAuthContext}>
+      <MockAuthProvider>
         {children}
-      </AuthProvider>
+      </MockAuthProvider>
     </ThemeProvider>
   );
 };

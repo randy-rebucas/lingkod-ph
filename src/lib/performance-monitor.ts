@@ -161,28 +161,28 @@ export function initWebVitals() {
   if (typeof window === 'undefined') return;
 
   // Core Web Vitals
-  import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-    getCLS((metric) => {
+  import('web-vitals').then(({ onCLS, onFID, onFCP, onLCP, onTTFB }) => {
+    onCLS((metric: any) => {
       console.log('CLS:', metric);
       // Send to analytics
     });
 
-    getFID((metric) => {
+    onFID((metric: any) => {
       console.log('FID:', metric);
       // Send to analytics
     });
 
-    getFCP((metric) => {
+    onFCP((metric: any) => {
       console.log('FCP:', metric);
       // Send to analytics
     });
 
-    getLCP((metric) => {
+    onLCP((metric: any) => {
       console.log('LCP:', metric);
       // Send to analytics
     });
 
-    getTTFB((metric) => {
+    onTTFB((metric: any) => {
       console.log('TTFB:', metric);
       // Send to analytics
     });

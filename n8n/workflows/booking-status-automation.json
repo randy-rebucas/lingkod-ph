@@ -1,0 +1,171 @@
+{
+  "name": "Booking Status Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "booking-update",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "booking-webhook",
+      "name": "Booking Status Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "booking-status-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "operation": "equal",
+              "value2": "confirmed"
+            }
+          ]
+        }
+      },
+      "id": "check-status",
+      "name": "Check Booking Status",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $json.clientEmail }}",
+        "subject": "Booking Confirmed - {{ $json.serviceName }}",
+        "message": "Hi {{ $json.clientName }},\n\nYour booking has been confirmed!\n\nService: {{ $json.serviceName }}\nProvider: {{ $json.providerName }}\nDate: {{ $json.date }}\nTime: {{ $json.time }}\nLocation: {{ $json.location }}\n\nYou can view your booking details here: {{ $env.LOCALPRO_API_BASE_URL }}/bookings/{{ $json.bookingId }}\n\nBest regards,\nLocalPro Team",
+        "options": {}
+      },
+      "id": "send-confirmation",
+      "name": "Send Confirmation Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $json.providerEmail }}",
+        "subject": "New Booking Confirmed - {{ $json.serviceName }}",
+        "message": "Hi {{ $json.providerName }},\n\nYou have a new confirmed booking!\n\nService: {{ $json.serviceName }}\nClient: {{ $json.clientName }}\nDate: {{ $json.date }}\nTime: {{ $json.time }}\nLocation: {{ $json.location }}\n\nPlease prepare for the service and contact the client if needed.\n\nView booking: {{ $env.LOCALPRO_API_BASE_URL }}/bookings/{{ $json.bookingId }}\n\nBest regards,\nLocalPro Team",
+        "options": {}
+      },
+      "id": "send-provider-notification",
+      "name": "Send Provider Notification",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.LOCALPRO_API_BASE_URL }}/api/notifications",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Bearer {{ $env.LOCALPRO_API_KEY }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "userId": "={{ $json.clientId }}",
+          "type": "booking_confirmed",
+          "title": "Booking Confirmed",
+          "message": "Your booking for {{ $json.serviceName }} has been confirmed",
+          "data": {
+            "bookingId": "={{ $json.bookingId }}",
+            "status": "confirmed"
+          }
+        }
+      },
+      "id": "create-notification",
+      "name": "Create In-App Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Booking status updated successfully\", \"bookingId\": $json.bookingId } }}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Booking Status Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check Booking Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Booking Status": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Provider Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation Email": {
+      "main": [
+        [
+          {
+            "node": "Create In-App Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Provider Notification": {
+      "main": [
+        [
+          {
+            "node": "Create In-App Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create In-App Notification": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "booking-status-automation",
+  "tags": []
+}

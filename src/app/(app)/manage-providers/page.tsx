@@ -153,7 +153,7 @@ function ManageProvidersPage() {
     const { toast } = useToast();
     const t = useTranslations('ManageProviders');
     const [providers, setProviders] = React.useState<Provider[]>([]);
-    const [loading, setLoading] = React.useState(true);
+    const [_loading, setLoading] = React.useState(true);
     const [isInviteDialogOpen, setInviteDialogOpen] = React.useState(false);
     const [inviteEmail, setInviteEmail] = React.useState("");
     const [isInviting, setIsInviting] = React.useState(false);
@@ -363,7 +363,7 @@ function ManageProvidersPage() {
       },
     ];
 
-    const table = useReactTable({
+    const _table = useReactTable({
         data: providers,
         columns,
         getCoreRowModel: getCoreRowModel(),
@@ -691,7 +691,7 @@ function OverviewTab({ providers, analyticsData }: { providers: Provider[], anal
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {providers.slice(0, 5).map((provider, index) => (
+                            {providers.slice(0, 5).map((provider, _index) => (
                                 <div key={provider.id} className="flex items-center gap-3 p-3 rounded-lg border">
                                     <Avatar className="h-8 w-8">
                                         <AvatarFallback>{provider.displayName.charAt(0)}</AvatarFallback>
@@ -816,7 +816,7 @@ function ProvidersTab({ providers, onRemoveProvider }: { providers: Provider[], 
         },
     ];
 
-    const table = useReactTable({
+    const _table = useReactTable({
         data: providers,
         columns,
         getCoreRowModel: getCoreRowModel(),
@@ -833,7 +833,7 @@ function ProvidersTab({ providers, onRemoveProvider }: { providers: Provider[], 
                 <div className="rounded-md border bg-card shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <Table>
                         <TableHeader>
-                        {table.getHeaderGroups().map((headerGroup) => (
+                        {_table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                             {headerGroup.headers.map((header) => {
                                 return (
@@ -851,8 +851,8 @@ function ProvidersTab({ providers, onRemoveProvider }: { providers: Provider[], 
                         ))}
                         </TableHeader>
                         <TableBody>
-                        {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
+                        {_table.getRowModel().rows?.length ? (
+                            _table.getRowModel().rows.map((row) => (
                             <TableRow key={row.id}>
                                 {row.getVisibleCells().map((cell) => (
                                 <TableCell key={cell.id}>
@@ -894,11 +894,11 @@ function PerformanceTab({ providers }: { providers: Provider[] }) {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-4">
-                            {providers.slice(0, 5).map((provider, index) => (
+                            {providers.slice(0, 5).map((provider, _index) => (
                                 <div key={provider.id} className="flex items-center justify-between p-4 rounded-lg border">
                                     <div className="flex items-center gap-3">
                                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold">
-                                            {index + 1}
+                                            {_index + 1}
                                         </div>
                                         <div>
                                             <p className="font-medium">{provider.displayName}</p>
@@ -955,7 +955,7 @@ function PerformanceTab({ providers }: { providers: Provider[] }) {
 }
 
 // Analytics Tab Component
-function AnalyticsTab({ providers, analyticsData }: { providers: Provider[], analyticsData: any }) {
+function AnalyticsTab({ providers: _providers, analyticsData }: { providers: Provider[], analyticsData: any }) {
     return (
         <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
@@ -1026,7 +1026,7 @@ function AnalyticsTab({ providers, analyticsData }: { providers: Provider[], ana
 }
 
 // Insights Tab Component
-function InsightsTab({ providers, analyticsData }: { providers: Provider[], analyticsData: any }) {
+function InsightsTab({ providers: _providers, analyticsData }: { providers: Provider[], analyticsData: any }) {
     return (
         <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">

@@ -54,13 +54,433 @@
     }
   },
   "Services": {
-    "title": "Mga Serbisyo",
+    "title": "Ang Aming Mga Serbisyo",
+    "subtitle": "Tuklasin ang malawak na hanay ng mga serbisyo na available sa LocalPro. Mula sa home maintenance hanggang sa personal care, ikinokonekta namin kayo sa mga pinagkakatiwalaang local service providers sa buong Pilipinas.",
     "categories": "Mga Kategorya",
     "popular": "Mga Sikat na Serbisyo",
     "allServices": "Lahat ng Serbisyo",
     "serviceDetails": "Mga Detalye ng Serbisyo",
     "bookNow": "Mag-book Ngayon",
-    "contactProvider": "Kontakin ang Provider"
+    "contactProvider": "Kontakin ang Provider",
+    "serviceCategories": "Mga Kategorya ng Serbisyo",
+    "serviceCategoriesDescription": "Tuklasin ang aming malawak na hanay ng mga serbisyo na naka-organize ayon sa kategorya",
+    "whyChooseUs": "Bakit Piliin ang LocalPro Services?",
+    "whyChooseUsDescription": "Maranasan ang mga benepisyo ng aming comprehensive service platform",
+    "readyToGetStarted": "Handa na Bang Magsimula?",
+    "readyToGetStartedDescription": "Kailangan man ninyo ng serbisyo o gusto ninyong mag-alok ng inyong expertise, nandito ang LocalPro para ikonekta kayo sa tamang mga tao. Sumali sa libu-libong satisfied customers at service providers sa buong Pilipinas.",
+    "bookAService": "Mag-book ng Serbisyo",
+    "becomeAProvider": "Maging Provider",
+    "stats": {
+      "serviceCategories": "Mga Kategorya ng Serbisyo",
+      "verifiedProviders": "Mga Verified na Provider",
+      "citiesCovered": "Mga Lungsod na Saklaw",
+      "successRate": "Success Rate"
+    },
+    "benefits": {
+      "verifiedInsured": {
+        "title": "Verified at Insured",
+        "description": "Lahat ng service providers ay background-checked at insured para sa inyong peace of mind."
+      },
+      "availability": {
+        "title": "24/7 Availability",
+        "description": "Mag-book ng mga serbisyo anumang oras gamit ang aming round-the-clock booking system."
+      },
+      "qualityGuaranteed": {
+        "title": "Quality Guaranteed",
+        "description": "Sinisiguro namin ang high-quality services gamit ang aming satisfaction guarantee."
+      },
+      "localExperts": {
+        "title": "Mga Local Experts",
+        "description": "Makipag-ugnayan sa mga pinagkakatiwalaang local professionals sa inyong lugar."
+      }
+    },
+    "categories": {
+      "homeProperty": {
+        "title": "Home at Property Services",
+        "description": "Kumpletong home maintenance at improvement services",
+        "services": {
+          "cleaningServices": {
+            "name": "Cleaning Services",
+            "description": "General, deep cleaning, sofa, carpet, atbp."
+          },
+          "housekeeping": {
+            "name": "Housekeeping / Maid Services",
+            "description": "Regular household maintenance at cleaning"
+          },
+          "pestControl": {
+            "name": "Pest Control",
+            "description": "Professional pest elimination at prevention"
+          },
+          "landscaping": {
+            "name": "Landscaping at Gardening",
+            "description": "Garden design, maintenance, at landscaping"
+          },
+          "painting": {
+            "name": "Painting Services",
+            "description": "Interior at exterior painting solutions"
+          },
+          "handyman": {
+            "name": "Handyman Services",
+            "description": "General repairs at maintenance tasks"
+          },
+          "plumbing": {
+            "name": "Plumbing Services",
+            "description": "Pipe repairs, installations, at maintenance"
+          },
+          "electrical": {
+            "name": "Electrical Services",
+            "description": "Wiring, installations, at electrical repairs"
+          },
+          "roofing": {
+            "name": "Roofing Services",
+            "description": "Roof repairs, installation, at maintenance"
+          },
+          "applianceRepair": {
+            "name": "Appliance Repair",
+            "description": "Home appliance maintenance at repairs"
+          },
+          "homeRenovation": {
+            "name": "Home Renovation / Construction",
+            "description": "Kumpletong home remodeling at construction"
+          },
+          "movingServices": {
+            "name": "Moving Services",
+            "description": "Professional moving at relocation services"
+          },
+          "hvac": {
+            "name": "HVAC Services",
+            "description": "Aircon installation, repair, at maintenance"
+          }
+        }
+      },
+      "personalLifestyle": {
+        "title": "Personal at Lifestyle Services",
+        "description": "Personal care at lifestyle enhancement services",
+        "services": {
+          "beautySalon": {
+            "name": "Beauty Salon / Haircut / Makeup",
+            "description": "Professional beauty at styling services"
+          },
+          "barber": {
+            "name": "Barber Services",
+            "description": "Men's grooming at haircut services"
+          },
+          "spaMassage": {
+            "name": "Spa at Massage",
+            "description": "Relaxation at therapeutic massage services"
+          },
+          "nailCare": {
+            "name": "Nail Care",
+            "description": "Manicure, pedicure, at nail art services"
+          },
+          "petGrooming": {
+            "name": "Pet Grooming at Pet Care",
+            "description": "Professional pet grooming at care services"
+          },
+          "tutoring": {
+            "name": "Tutoring at Academic Coaching",
+            "description": "Educational support at academic guidance"
+          },
+          "fitnessTrainers": {
+            "name": "Fitness Trainers",
+            "description": "Personal training at fitness coaching"
+          },
+          "eventMakeup": {
+            "name": "Event Makeup at Styling",
+            "description": "Special event beauty at styling services"
+          }
+        }
+      },
+      "foodHospitality": {
+        "title": "Food at Hospitality Services",
+        "description": "Culinary at hospitality support services",
+        "services": {
+          "catering": {
+            "name": "Catering Services",
+            "description": "Professional catering para sa events at occasions"
+          },
+          "foodStallVendors": {
+            "name": "Food Stall Vendors",
+            "description": "Event support at food stall services"
+          },
+          "eventStaff": {
+            "name": "Event Staff at Waiters",
+            "description": "Professional event staffing at service"
+          },
+          "hotelSupport": {
+            "name": "Hotel at Resort Support Staff",
+            "description": "Hospitality industry support services"
+          }
+        }
+      },
+      "creativeProfessional": {
+        "title": "Creative at Professional Services",
+        "description": "Creative at professional business services",
+        "services": {
+          "photography": {
+            "name": "Photography at Videography",
+            "description": "Professional photography at video services"
+          },
+          "eventPlanning": {
+            "name": "Event Planning at Coordination",
+            "description": "Kumpletong event planning at management"
+          },
+          "itSupport": {
+            "name": "IT Support / Tech Assistance",
+            "description": "Technical support at IT services"
+          },
+          "graphicDesign": {
+            "name": "Graphic Design at Printing Services",
+            "description": "Design at printing solutions"
+          }
+        }
+      },
+      "autoMobile": {
+        "title": "Auto at Mobile Services",
+        "description": "Automotive at mobile device services",
+        "services": {
+          "autoRepair": {
+            "name": "Auto Repair at Car Care",
+            "description": "Automotive repair at maintenance services"
+          },
+          "motorcycleRepair": {
+            "name": "Motorcycle Repair",
+            "description": "Motorcycle maintenance at repair services"
+          },
+          "mobileTechnician": {
+            "name": "Mobile Technician",
+            "description": "Phone, laptop, at gadget repair services"
+          },
+          "delivery": {
+            "name": "Delivery / Courier Services",
+            "description": "Package delivery at courier services"
+          }
+        }
+      },
+      "suppliesDistribution": {
+        "title": "Supplies at Distribution",
+        "description": "LocalPro add-on services at supplies",
+        "services": {
+          "cleaningSupplies": {
+            "name": "Cleaning Supplies at Chemicals",
+            "description": "Professional cleaning supplies at chemicals"
+          },
+          "pestControlChemicals": {
+            "name": "Pest Control Chemicals",
+            "description": "Professional pest control supplies"
+          },
+          "toolsEquipment": {
+            "name": "Tools at Equipment Rentals",
+            "description": "Professional tools at equipment rental"
+          },
+          "plumbingElectrical": {
+            "name": "Plumbing / Electrical Parts",
+            "description": "Professional plumbing at electrical supplies"
+          },
+          "paintsMaterials": {
+            "name": "Paints at Materials",
+            "description": "Quality paints at construction materials"
+          },
+          "starterKits": {
+            "name": "Starter Kits",
+            "description": "Convenient starter kits at packages"
+          }
+        }
+      }
+    }
+  },
+  "Partners": {
+    "title": "Mga Oportunidad sa Partnership",
+    "subtitle": "Makipag-partner sa LocalPro para lumikha ng makabuluhang impact, mag-drive ng growth, at mag-transform ng mga komunidad sa buong Pilipinas.",
+    "joinPartners": "Sumali sa 500+ Partners",
+    "explorePartnerships": "Tuklasin ang Partnerships",
+    "contactUs": "Kontakin Kami",
+    "partnershipOpportunities": "Mga Oportunidad sa Partnership",
+    "partnershipOpportunitiesDescription": "Piliin ang partnership model na nakahanay sa mga layunin ng inyong organisasyon at lumikha ng lasting impact",
+    "successStories": "Mga Success Stories",
+    "successStoriesDescription": "Tingnan kung paano nag-transform ang aming mga partners ng kanilang mga negosyo at komunidad",
+    "partnershipProcess": "Partnership Process",
+    "partnershipProcessDescription": "Ang aming streamlined process ay nagpapadali para magsimula at magtagumpay bilang LocalPro partner",
+    "whatOurPartnersSay": "Ano ang Sinasabi ng Aming Partners",
+    "whatOurPartnersSayDescription": "Makinig sa mga successful partners na nag-transform ng kanilang mga negosyo gamit ang LocalPro",
+    "recognitionAwards": "Recognition at Awards",
+    "recognitionAwardsDescription": "Ang aming commitment sa excellence at social impact ay kinilala ng mga industry leaders",
+    "readyToMakeImpact": "Handa na Bang Gumawa ng Impact?",
+    "readyToMakeImpactDescription": "Sumali sa daan-daang successful partners na nag-transform ng mga komunidad at nagpapalago ng kanilang mga negosyo gamit ang LocalPro. Maglikha tayo ng something amazing together.",
+    "startYourPartnership": "Simulan ang Inyong Partnership",
+    "contactSalesTeam": "Kontakin ang Sales Team",
+    "averageResponseTime": "Average response time: 2 oras",
+    "stats": {
+      "activePartners": "Mga Active Partners",
+      "citiesCovered": "Mga Lungsod na Saklaw",
+      "partnerRevenue": "Partner Revenue",
+      "partnerSatisfaction": "Partner Satisfaction",
+      "jobsCreated": "Mga Trabaho na Nalikha",
+      "economicImpact": "Economic Impact"
+    },
+    "partnershipTypes": {
+      "corporate": {
+        "title": "Corporate Partners",
+        "description": "Mag-alok ng LocalPro's trusted services bilang perk sa inyong mga empleyado o i-integrate ang aming network sa inyong business offerings. Enhance ang inyong value proposition at suportahan ang local professionals.",
+        "benefits": "Employee Benefits Program,B2B Service Integration,Co-branded Marketing Campaigns,Dedicated Account Management,Custom Pricing at Volume Discounts,Priority Customer Support",
+        "idealFor": "Mga malalaking korporasyon, HR departments, employee benefit providers, B2B service companies",
+        "features": "API Integration,White-label Solutions,Custom Reporting,Employee Dashboard",
+        "cta": "Tuklasin ang Corporate Partnership"
+      },
+      "community": {
+        "title": "Community at LGU Partners",
+        "description": "Makipag-collaborate sa amin sa community-based programs, job fairs, at skills training initiatives. I-empower ang inyong constituents sa pamamagitan ng pagkonekta sa kanila ng legitimate work opportunities.",
+        "benefits": "Community Employment Programs,Skills Training Workshops,Job Fair Organization,Local Economic Development,Social Impact Reporting,Government Relations Support",
+        "idealFor": "Local government units, NGOs, community organizations, educational institutions",
+        "features": "Community Dashboard,Impact Analytics,Training Materials,Event Management",
+        "cta": "Simulan ang Community Partnership"
+      },
+      "supply": {
+        "title": "Supply at Material Partners",
+        "description": "Maging preferred supplier para sa aming network ng service providers. Makakuha ng direct access sa growing market ng mga professionals na nangangailangan ng quality tools, materials, at equipment.",
+        "benefits": "Direct B2B Sales Channel,Volume Discount Programs,Marketing at Brand Exposure,Quality Assurance Standards,Inventory Management Tools,Performance Analytics",
+        "idealFor": "Hardware stores, material suppliers, equipment providers, tool manufacturers",
+        "features": "Supplier Portal,Inventory Integration,Order Management,Performance Tracking",
+        "cta": "Sumali sa Supply Network"
+      }
+    },
+    "process": {
+      "initialDiscussion": {
+        "title": "Initial Discussion",
+        "description": "Pag-usapan natin ang inyong mga layunin, challenges, at kung paano tayo makikipagtulungan para makamit ang mutual success",
+        "duration": "1-2 araw",
+        "details": "Discovery call,Needs assessment,Goal alignment"
+      },
+      "partnershipProposal": {
+        "title": "Partnership Proposal",
+        "description": "Gagawa kami ng customized partnership proposal na tailored sa specific needs at objectives ng inyong organisasyon",
+        "duration": "3-5 araw",
+        "details": "Custom proposal,Pricing structure,Implementation plan"
+      },
+      "agreementOnboarding": {
+        "title": "Agreement at Onboarding",
+        "description": "Pirmahan ang partnership agreement at simulan ang comprehensive onboarding process na may dedicated support",
+        "duration": "1-2 linggo",
+        "details": "Contract signing,Account setup,Training sessions"
+      },
+      "launchSupport": {
+        "title": "Launch at Support",
+        "description": "I-launch ang inyong partnership na may ongoing support, optimization, at regular performance reviews",
+        "duration": "Ongoing",
+        "details": "Go-live support,Performance monitoring,Regular check-ins"
+      }
+    },
+    "achievements": {
+      "bestPartnershipProgram": {
+        "title": "Best Partnership Program 2024",
+        "organization": "Philippine Business Awards"
+      },
+      "socialImpactExcellence": {
+        "title": "Social Impact Excellence",
+        "organization": "ASEAN Business Council"
+      },
+      "innovationInEmployment": {
+        "title": "Innovation in Employment",
+        "organization": "Department of Labor"
+      },
+      "communityDevelopmentAward": {
+        "title": "Community Development Award",
+        "organization": "Local Government League"
+      }
+    }
+  },
+  "TermsOfService": {
+    "title": "Terms of Service",
+    "subtitle": "Pakibasa nang mabuti ang mga terms na ito. Sa paggamit ng LocalPro, sumasang-ayon kayo na maging bound sa mga terms at conditions na ito.",
+    "lastUpdated": "Huling na-update: Disyembre 2024",
+    "quickSummary": "Quick Summary",
+    "questions": "Mga Tanong?",
+    "welcome": "Welcome sa LocalPro",
+    "welcomeSubtitle": "Ang inyong pinagkakatiwalaang local services platform",
+    "termsDescription": "Ang mga Terms of Service na ito...",
+    "keyPointsSummary": "Key Points Summary",
+    "questionsAboutTerms": "Mga Tanong Tungkol sa mga Terms na Ito?",
+    "questionsDescription": "Kung may mga tanong o concerns kayo tungkol sa mga Terms of Service na ito, huwag kayong mag-atubiling kontakin ang aming legal team.",
+    "legalDepartment": "Legal Department",
+    "callSupport": "Tawagan ang Support",
+    "address": "Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6521",
+    "sections": {
+      "definitions": {
+        "title": "1. Mga Depinisyon",
+        "content": [
+          "\"LocalPro,\" \"we,\" \"our,\" o \"us\" ay tumutukoy sa LocalPro Services Inc. at sa mga affiliates, subsidiaries, at related companies nito.",
+          "\"User\" o \"you\" ay tumutukoy sa sinumang nag-access o gumagamit ng Platform, kasama ang service providers (\"Providers\"), clients (\"Clients\"), agencies, at iba pang mga indibidwal o entities na gumagamit ng aming mga serbisyo.",
+          "\"Services\" ay tumutukoy sa anumang serbisyo na inaalok sa pamamagitan ng LocalPro platform ng mga Providers sa mga Clients, kasama ngunit hindi limitado sa home services, professional services, at iba pang local services.",
+          "\"Platform\" ay tumutukoy sa aming website, mobile applications, at iba pang digital platforms na pinapatakbo ng LocalPro.",
+          "\"Content\" ay kasama ang lahat ng text, graphics, images, music, software, audio, video, information, o iba pang materials na available sa Platform."
+        ]
+      },
+      "eligibility": {
+        "title": "2. Eligibility at Age Requirements",
+        "content": [
+          "Dapat kayong hindi bababa sa 18 taong gulang at may kakayahang pumasok sa legally binding contracts para magamit ang LocalPro.",
+          "Sa pag-register, kinukumpirma ninyo na ang lahat ng impormasyong ibinigay ay tumpak, kumpleto, at up-to-date.",
+          "Dapat kayong may legal capacity na pumasok sa mga Terms na ito sa inyong jurisdiction.",
+          "Kung nag-register kayo sa ngalan ng isang kumpanya o organisasyon, dapat kayong may authority na i-bind ang entity na iyon sa mga Terms na ito.",
+          "Reserbado namin ang karapatan na tanggihan ang serbisyo sa sinuman sa aming sole discretion."
+        ]
+      },
+      "accountRegistration": {
+        "title": "3. Account Registration at Security",
+        "content": [
+          "Para magamit ang ilang features, dapat kayong gumawa ng account na may tumpak at kumpletong impormasyon.",
+          "Responsable kayo sa pag-maintain ng confidentiality ng inyong login credentials at sa lahat ng activities sa ilalim ng inyong account.",
+          "Dapat ninyong agad na i-notify kami ng anumang unauthorized use ng inyong account o anumang iba pang breach ng security.",
+          "Para sa mga Clients: Maaari ninyong i-browse, i-book, i-rate, at i-review ang mga service providers.",
+          "Para sa mga Providers: Maaari ninyong i-list ang inyong mga serbisyo, i-manage ang mga bookings, tumanggap ng payments, at mag-build ng inyong professional reputation.",
+          "Reserbado namin ang karapatan na suspend o terminate ang mga account na lumalabag sa mga Terms na ito o nakikipag-engage sa fraudulent activity."
+        ]
+      },
+      "platformUse": {
+        "title": "4. Acceptable Use ng Platform",
+        "content": [
+          "Sumasang-ayon kayo na gamitin ang Platform sa compliance sa lahat ng applicable laws at regulations.",
+          "Hindi ninyo gagamitin ang Platform para sa illegal, fraudulent, o harmful purposes.",
+          "Hindi ninyo i-impersonate ang sinumang tao o entity o mag-misrepresent ng inyong affiliation sa sinumang tao o entity.",
+          "Hindi ninyo i-upload, i-post, o i-transmit ang anumang content na defamatory, obscene, o lumalabag sa anumang third-party rights.",
+          "Hindi ninyo susubukan na makakuha ng unauthorized access sa anumang bahagi ng Platform o anumang iba pang systems o networks.",
+          "Hindi ninyo gagamitin ang automated systems o software para mag-extract ng data mula sa Platform nang walang aming written permission."
+        ]
+      },
+      "paymentsFees": {
+        "title": "5. Payments, Fees, at Billing",
+        "content": [
+          "Ang mga Clients ay nagbabayad sa mga Providers sa pamamagitan ng Platform gamit ang secure payment methods. Ang lahat ng pricing, fees, at applicable taxes ay malinaw na ipapakita bago ang checkout.",
+          "Ang mga Providers ay maaaring singilin ng transaction commissions o advertising fees batay sa current pricing structure ng LocalPro.",
+          "Ang lahat ng transactions ay na-process sa PHP (Philippine Peso) o USD, ayon sa napili sa panahon ng registration.",
+          "Ang payment processing fees ay maaaring mag-apply at ipapakita bago ang completion ng transaction.",
+          "Reserbado namin ang karapatan na baguhin ang aming fee structure na may 30 araw na notice sa mga users."
+        ]
+      }
+    },
+    "quickSummary": [
+      {
+        "title": "Service Agreement",
+        "description": "Sa paggamit ng LocalPro, sumasang-ayon kayo sa aming terms at conditions para sa service provision at platform usage."
+      },
+      {
+        "title": "User Responsibilities",
+        "description": "Ang mga users ay dapat 18+, magbigay ng tumpak na impormasyon, at gamitin ang platform nang responsable at legal."
+      },
+      {
+        "title": "Payment Terms",
+        "description": "Malinaw na pricing, secure payments, at transparent fee structure para sa lahat ng transactions."
+      },
+      {
+        "title": "Privacy at Security",
+        "description": "Ang inyong data ay protektado ng industry-standard security measures at privacy practices."
+      }
+    ],
+    "contactInformation": {
+      "email": "legal@localpro.ph",
+      "phone": "+63 917 123 4567",
+      "address": "Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6521"
+    }
   },
   "Profile": {
     "title": "Profile",

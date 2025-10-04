@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { MessageSquare, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import Image from "next/image";
 
 type Conversation = {
     id: string;
@@ -191,7 +192,13 @@ export default function AdminConversationsPage() {
                                                     <div className="bg-card text-card-foreground rounded-lg p-3 text-sm">
                                                         {msg.imageUrl && (
                                                             <div className="p-2">
-                                                                <img src={msg.imageUrl} alt="Sent image" className="rounded-lg object-cover max-w-full" />
+                                                                <Image 
+                                                                    src={msg.imageUrl} 
+                                                                    alt="Sent image" 
+                                                                    width={300}
+                                                                    height={200}
+                                                                    className="rounded-lg object-cover max-w-full" 
+                                                                />
                                                             </div>
                                                         )}
                                                         {msg.text && <p>{msg.text}</p>}

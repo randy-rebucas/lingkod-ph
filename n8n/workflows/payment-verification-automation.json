@@ -1,0 +1,200 @@
+{
+  "name": "Payment Verification Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "payment-verification",
+        "httpMethod": "POST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "payment-webhook",
+      "name": "Payment Verification Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "payment-verification-webhook"
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.LOCALPRO_API_BASE_URL }}/api/payments/validate",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Bearer {{ $env.LOCALPRO_API_KEY }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "paymentId": "={{ $json.paymentId }}",
+          "amount": "={{ $json.amount }}",
+          "method": "={{ $json.method }}",
+          "proofUrl": "={{ $json.proofUrl }}"
+        }
+      },
+      "id": "validate-payment",
+      "name": "Validate Payment",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.validationResult }}",
+              "operation": "equal",
+              "value2": "approved"
+            }
+          ]
+        }
+      },
+      "id": "check-validation",
+      "name": "Check Validation Result",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.LOCALPRO_API_BASE_URL }}/api/bookings/{{ $json.bookingId }}/status",
+        "method": "PATCH",
+        "headers": {
+          "Authorization": "Bearer {{ $env.LOCALPRO_API_KEY }}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "status": "confirmed",
+          "paymentVerified": true,
+          "paymentVerifiedAt": "={{ new Date().toISOString() }}"
+        }
+      },
+      "id": "update-booking",
+      "name": "Update Booking Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $json.clientEmail }}",
+        "subject": "Payment Verified - Booking Confirmed",
+        "message": "Hi {{ $json.clientName }},\n\nYour payment has been verified and your booking is now confirmed!\n\nService: {{ $json.serviceName }}\nAmount: ₱{{ $json.amount }}\nPayment Method: {{ $json.method }}\n\nYour booking details: {{ $env.LOCALPRO_API_BASE_URL }}/bookings/{{ $json.bookingId }}\n\nBest regards,\nLocalPro Team",
+        "options": {}
+      },
+      "id": "send-approval-email",
+      "name": "Send Payment Approval Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $json.clientEmail }}",
+        "subject": "Payment Verification Failed",
+        "message": "Hi {{ $json.clientName }},\n\nUnfortunately, your payment could not be verified.\n\nReason: {{ $json.rejectionReason }}\n\nPlease try uploading a new payment proof or contact support for assistance.\n\nBooking ID: {{ $json.bookingId }}\n\nBest regards,\nLocalPro Team",
+        "options": {}
+      },
+      "id": "send-rejection-email",
+      "name": "Send Payment Rejection Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [1120, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Payment verification processed\", \"result\": $json.validationResult } }}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1340, 300]
+    }
+  ],
+  "connections": {
+    "Payment Verification Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Payment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Payment": {
+      "main": [
+        [
+          {
+            "node": "Check Validation Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Validation Result": {
+      "main": [
+        [
+          {
+            "node": "Update Booking Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Payment Rejection Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Booking Status": {
+      "main": [
+        [
+          {
+            "node": "Send Payment Approval Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Payment Approval Email": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Payment Rejection Email": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "id": "payment-verification-automation",
+  "tags": []
+}

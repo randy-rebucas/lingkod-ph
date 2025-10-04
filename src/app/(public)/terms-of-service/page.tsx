@@ -1,7 +1,7 @@
 
 "use client";
 
-// import { useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,74 +32,42 @@ import { useState } from "react";
 
 export default function TermsOfServicePage() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
+  const t = useTranslations('TermsOfService');
   
   const sections = [
     {
       id: "definitions",
-      title: "1. Definitions",
+      title: t('sections.definitions.title'),
       icon: <BookOpen className="h-5 w-5" />,
-      content: [
-        "\"LocalPro,\" \"we,\" \"our,\" or \"us\" refers to LocalPro Services Inc. and its affiliates, subsidiaries, and related companies.",
-        "\"User\" or \"you\" means anyone who accesses or uses the Platform, including service providers (\"Providers\"), clients (\"Clients\"), agencies, and any other individuals or entities using our services.",
-        "\"Services\" refers to any service offered through the LocalPro platform by Providers to Clients, including but not limited to home services, professional services, and other local services.",
-        "\"Platform\" means our website, mobile applications, and any other digital platforms operated by LocalPro.",
-        "\"Content\" includes all text, graphics, images, music, software, audio, video, information, or other materials available on the Platform.",
-      ],
+      content: t('sections.definitions.content'),
       important: false
     },
     {
       id: "eligibility",
-      title: "2. Eligibility and Age Requirements",
+      title: t('sections.eligibility.title'),
       icon: <Users className="h-5 w-5" />,
-      content: [
-        "You must be at least 18 years old and capable of entering into legally binding contracts to use LocalPro.",
-        "By registering, you confirm that all information provided is accurate, complete, and up-to-date.",
-        "You must have the legal capacity to enter into these Terms in your jurisdiction.",
-        "If you are registering on behalf of a company or organization, you must have the authority to bind that entity to these Terms.",
-        "We reserve the right to refuse service to anyone at our sole discretion.",
-      ],
+      content: t('sections.eligibility.content'),
       important: true
     },
     {
       id: "account-registration",
-      title: "3. Account Registration and Security",
+      title: t('sections.accountRegistration.title'),
       icon: <Lock className="h-5 w-5" />,
-      content: [
-        "To use certain features, you must create an account with accurate and complete information.",
-        "You are responsible for maintaining the confidentiality of your login credentials and for all activities under your account.",
-        "You must immediately notify us of any unauthorized use of your account or any other breach of security.",
-        "For Clients: You may browse, book, rate, and review service providers.",
-        "For Providers: You may list your services, manage bookings, receive payments, and build your professional reputation.",
-        "We reserve the right to suspend or terminate accounts that violate these Terms or engage in fraudulent activity.",
-      ],
+      content: t('sections.accountRegistration.content'),
       important: true
     },
     {
       id: "platform-use",
-      title: "4. Acceptable Use of Platform",
+      title: t('sections.platformUse.title'),
       icon: <Shield className="h-5 w-5" />,
-      content: [
-        "You agree to use the Platform in compliance with all applicable laws and regulations.",
-        "You will not use the Platform for illegal, fraudulent, or harmful purposes.",
-        "You will not impersonate any person or entity or misrepresent your affiliation with any person or entity.",
-        "You will not upload, post, or transmit any content that is defamatory, obscene, or violates any third-party rights.",
-        "You will not attempt to gain unauthorized access to any part of the Platform or any other systems or networks.",
-        "You will not use automated systems or software to extract data from the Platform without our written permission.",
-      ],
+      content: t('sections.platformUse.content'),
       important: true
     },
     {
       id: "payments-fees",
-      title: "5. Payments, Fees, and Billing",
+      title: t('sections.paymentsFees.title'),
       icon: <CreditCard className="h-5 w-5" />,
-      content: [
-        "Clients pay Providers through the Platform using secure payment methods. All pricing, fees, and applicable taxes will be clearly displayed before checkout.",
-        "Providers may be charged transaction commissions or advertising fees based on LocalPro's current pricing structure.",
-        "All transactions are processed in PHP (Philippine Peso) or USD, as selected during registration.",
-        "Payment processing fees may apply and will be disclosed before transaction completion.",
-        "We reserve the right to change our fee structure with 30 days' notice to users.",
-        "Refunds are subject to our refund policy and the specific terms of each service provider.",
-      ],
+      content: t('sections.paymentsFees.content'),
       important: true
     },
     {
@@ -249,28 +217,13 @@ export default function TermsOfServicePage() {
     },
   ];
 
-  const quickSummary = [
-    {
-      title: "Age Requirement",
-      description: "Must be 18+ to use our platform",
-      icon: <Users className="h-4 w-4" />
-    },
-    {
-      title: "Payment Security",
-      description: "Secure transactions with clear pricing",
-      icon: <CreditCard className="h-4 w-4" />
-    },
-    {
-      title: "Service Quality",
-      description: "Ratings and reviews for transparency",
-      icon: <Star className="h-4 w-4" />
-    },
-    {
-      title: "Data Protection",
-      description: "Your privacy is our priority",
-      icon: <Shield className="h-4 w-4" />
-    }
-  ];
+  const quickSummaryData = t('quickSummary') as unknown as any[];
+  const quickSummary = quickSummaryData.map((item, index) => ({
+    ...item,
+    icon: [FileText, Shield, CreditCard, Users, AlertTriangle, CheckCircle][index] ? 
+      [FileText, Shield, CreditCard, Users, AlertTriangle, CheckCircle][index]({ className: "h-4 w-4 text-primary" }) : 
+      FileText({ className: "h-4 w-4 text-primary" })
+  }));
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -284,24 +237,24 @@ export default function TermsOfServicePage() {
               Legal Document
             </Badge>
             <h1 className="text-5xl lg:text-7xl font-bold font-headline mb-8 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Terms of Service
+              {t('title')}
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12">
-              Please read these terms carefully. By using LocalPro, you agree to be bound by these terms and conditions.
+              {t('subtitle')}
             </p>
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-8">
               <Calendar className="h-4 w-4" />
-              Last updated: December 2024
+              {t('lastUpdated')}
             </div>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
                 <a href="#quick-summary">
-                  Quick Summary <ArrowRight className="ml-2 h-5 w-5" />
+                  {t('quickSummary')} <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                 <Link href="/contact-us">
-                  Questions?
+                  {t('questions')}
                 </Link>
               </Button>
             </div>
@@ -417,9 +370,12 @@ export default function TermsOfServicePage() {
                         </div>
                       </div>
                       <div className="space-y-4 text-muted-foreground leading-relaxed">
-                        {section.content.map((paragraph, paragraphIndex) => (
-                          <p key={paragraphIndex} className="text-base">{paragraph}</p>
-                        ))}
+                        {Array.isArray(section.content) ? 
+                          section.content.map((paragraph, paragraphIndex) => (
+                            <p key={paragraphIndex} className="text-base">{paragraph}</p>
+                          )) : 
+                          <p className="text-base">{section.content}</p>
+                        }
                       </div>
                     </CardContent>
                   </Card>

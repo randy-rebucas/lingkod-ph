@@ -96,7 +96,7 @@ import { ProviderEngagementCard } from "@/components/provider-engagement-card";
 
 
 const SidebarSupportChat = () => {
-  const t = useTranslations('AppLayout');
+  const _t = useTranslations('AppLayout');
   
   return (
     <Popover>

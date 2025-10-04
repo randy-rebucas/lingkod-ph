@@ -1,4 +1,4 @@
-import { RateLimiter } from './rate-limiter';
+import { RateLimiter, addRateLimitHeaders } from './rate-limiter';
 import { NextRequest } from 'next/server';
 
 /**
@@ -98,9 +98,9 @@ export class AdminRateLimiter {
     
     // Create a mock NextRequest with the admin ID as the key
     const mockRequest = {
-      headers: new Headers({ 'x-admin-id': adminId }),
+      headers: new Map([['x-admin-id', adminId]]),
       ip: adminId,
-    } as NextRequest;
+    } as unknown as NextRequest;
     
     const result = rateLimiter.isAllowed(mockRequest);
     
@@ -119,7 +119,11 @@ export class AdminRateLimiter {
     adminId: string
   ): Response {
     const rateLimiter = adminRateLimiters[operation];
-    return rateLimiter.addRateLimitHeaders(response, adminId);
+    const mockRequest = {
+      headers: new Map([['x-admin-id', adminId]]),
+      ip: adminId,
+    } as unknown as NextRequest;
+    return addRateLimitHeaders(response, rateLimiter, mockRequest);
   }
 
   /**
@@ -130,7 +134,15 @@ export class AdminRateLimiter {
     adminId: string
   ): { remaining: number; resetTime: number } {
     const rateLimiter = adminRateLimiters[operation];
-    return rateLimiter.getStatus(adminId);
+    const mockRequest = {
+      headers: new Map([['x-admin-id', adminId]]),
+      ip: adminId,
+    } as unknown as NextRequest;
+    const result = rateLimiter.isAllowed(mockRequest);
+    return {
+      remaining: result.remaining,
+      resetTime: result.resetTime,
+    };
   }
 }
 

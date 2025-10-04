@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -44,137 +46,134 @@ import {
   Wrench as ToolWrench,
   PaintBucket
 } from "lucide-react";
-import type { Metadata } from "next";
 import Link from "next/link";
-// import { useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 
-export const metadata: Metadata = {
-  title: 'Our Services - LocalPro',
-  description: 'Discover the comprehensive range of services available on LocalPro. From home maintenance to personal care, we connect you with trusted local service providers across the Philippines.',
-};
 
-const serviceCategories = [
-  {
-    id: "home-property",
-    title: "Home & Property Services",
-    description: "Complete home maintenance and improvement services",
-    icon: <Home className="h-8 w-8 text-primary" />,
-    services: [
-      { name: "Cleaning Services", description: "General, deep cleaning, sofa, carpet, etc.", icon: <Sparkles className="h-5 w-5" /> },
-      { name: "Housekeeping / Maid Services", description: "Regular household maintenance and cleaning", icon: <Users className="h-5 w-5" /> },
-      { name: "Pest Control", description: "Professional pest elimination and prevention", icon: <Bug className="h-5 w-5" /> },
-      { name: "Landscaping & Gardening", description: "Garden design, maintenance, and landscaping", icon: <TreePine className="h-5 w-5" /> },
-      { name: "Painting Services", description: "Interior and exterior painting solutions", icon: <Paintbrush className="h-5 w-5" /> },
-      { name: "Handyman Services", description: "General repairs and maintenance tasks", icon: <Hammer className="h-5 w-5" /> },
-      { name: "Plumbing Services", description: "Pipe repairs, installations, and maintenance", icon: <Droplets className="h-5 w-5" /> },
-      { name: "Electrical Services", description: "Wiring, installations, and electrical repairs", icon: <Zap className="h-5 w-5" /> },
-      { name: "Roofing Services", description: "Roof repairs, installation, and maintenance", icon: <Building className="h-5 w-5" /> },
-      { name: "Appliance Repair", description: "Home appliance maintenance and repairs", icon: <WashingMachine className="h-5 w-5" /> },
-      { name: "Home Renovation / Construction", description: "Complete home remodeling and construction", icon: <Wrench className="h-5 w-5" /> },
-      { name: "Moving Services", description: "Professional moving and relocation services", icon: <Truck className="h-5 w-5" /> },
-      { name: "HVAC Services", description: "Aircon installation, repair, and maintenance", icon: <Wind className="h-5 w-5" /> }
-    ]
-  },
-  {
-    id: "personal-lifestyle",
-    title: "Personal & Lifestyle Services",
-    description: "Personal care and lifestyle enhancement services",
-    icon: <Heart className="h-8 w-8 text-primary" />,
-    services: [
-      { name: "Beauty Salon / Haircut / Makeup", description: "Professional beauty and styling services", icon: <HairScissors className="h-5 w-5" /> },
-      { name: "Barber Services", description: "Men's grooming and haircut services", icon: <HairScissors className="h-5 w-5" /> },
-      { name: "Spa & Massage", description: "Relaxation and therapeutic massage services", icon: <Heart className="h-5 w-5" /> },
-      { name: "Nail Care", description: "Manicure, pedicure, and nail art services", icon: <BeautySparkles className="h-5 w-5" /> },
-      { name: "Pet Grooming & Pet Care", description: "Professional pet grooming and care services", icon: <Heart className="h-5 w-5" /> },
-      { name: "Tutoring & Academic Coaching", description: "Educational support and academic guidance", icon: <BookOpen className="h-5 w-5" /> },
-      { name: "Fitness Trainers", description: "Personal training and fitness coaching", icon: <Dumbbell className="h-5 w-5" /> },
-      { name: "Event Makeup & Styling", description: "Special event beauty and styling services", icon: <BeautySparkles className="h-5 w-5" /> }
-    ]
-  },
-  {
-    id: "food-hospitality",
-    title: "Food & Hospitality Services",
-    description: "Culinary and hospitality support services",
-    icon: <Utensils className="h-8 w-8 text-primary" />,
-    services: [
-      { name: "Catering Services", description: "Professional catering for events and occasions", icon: <Utensils className="h-5 w-5" /> },
-      { name: "Food Stall Vendors", description: "Event support and food stall services", icon: <Utensils className="h-5 w-5" /> },
-      { name: "Event Staff & Waiters", description: "Professional event staffing and service", icon: <EventStaff className="h-5 w-5" /> },
-      { name: "Hotel & Resort Support Staff", description: "Hospitality industry support services", icon: <EventStaff className="h-5 w-5" /> }
-    ]
-  },
-  {
-    id: "creative-professional",
-    title: "Creative & Professional Services",
-    description: "Creative and professional business services",
-    icon: <Camera className="h-8 w-8 text-primary" />,
-    services: [
-      { name: "Photography & Videography", description: "Professional photography and video services", icon: <Camera className="h-5 w-5" /> },
-      { name: "Event Planning & Coordination", description: "Complete event planning and management", icon: <Calendar className="h-5 w-5" /> },
-      { name: "IT Support / Tech Assistance", description: "Technical support and IT services", icon: <Monitor className="h-5 w-5" /> },
-      { name: "Graphic Design & Printing Services", description: "Design and printing solutions", icon: <Palette className="h-5 w-5" /> }
-    ]
-  },
-  {
-    id: "auto-mobile",
-    title: "Auto & Mobile Services",
-    description: "Automotive and mobile device services",
-    icon: <Car className="h-8 w-8 text-primary" />,
-    services: [
-      { name: "Auto Repair & Car Care", description: "Automotive repair and maintenance services", icon: <Car className="h-5 w-5" /> },
-      { name: "Motorcycle Repair", description: "Motorcycle maintenance and repair services", icon: <Car className="h-5 w-5" /> },
-      { name: "Mobile Technician", description: "Phone, laptop, and gadget repair services", icon: <Smartphone className="h-5 w-5" /> },
-      { name: "Delivery / Courier Services", description: "Package delivery and courier services", icon: <Package className="h-5 w-5" /> }
-    ]
-  },
-  {
-    id: "supplies-distribution",
-    title: "Supplies & Distribution",
-    description: "LocalPro add-on services and supplies",
-    icon: <Package2 className="h-8 w-8 text-primary" />,
-    services: [
-      { name: "Cleaning Supplies & Chemicals", description: "Professional cleaning supplies and chemicals", icon: <Sparkles className="h-5 w-5" /> },
-      { name: "Pest Control Chemicals", description: "Professional pest control supplies", icon: <Bug className="h-5 w-5" /> },
-      { name: "Tools & Equipment Rentals", description: "Professional tools and equipment rental", icon: <ToolWrench className="h-5 w-5" /> },
-      { name: "Plumbing / Electrical Parts", description: "Professional plumbing and electrical supplies", icon: <Droplets className="h-5 w-5" /> },
-      { name: "Paints & Materials", description: "Quality paints and construction materials", icon: <PaintBucket className="h-5 w-5" /> },
-      { name: "Starter Kits", description: "Convenient starter kits and packages", icon: <Package2 className="h-5 w-5" /> }
-    ]
-  }
-];
-
-const stats = [
-  { number: "50+", label: "Service Categories" },
-  { number: "10,000+", label: "Verified Providers" },
-  { number: "100+", label: "Cities Covered" },
-  { number: "99.8%", label: "Success Rate" }
-];
-
-const benefits = [
-  {
-    icon: <Shield className="h-10 w-10 text-primary" />,
-    title: "Verified & Insured",
-    description: "All service providers are background-checked and insured for your peace of mind."
-  },
-  {
-    icon: <Clock className="h-10 w-10 text-primary" />,
-    title: "24/7 Availability",
-    description: "Book services anytime with our round-the-clock booking system."
-  },
-  {
-    icon: <Star className="h-10 w-10 text-primary" />,
-    title: "Quality Guaranteed",
-    description: "We ensure high-quality services with our satisfaction guarantee."
-  },
-  {
-    icon: <Users className="h-10 w-10 text-primary" />,
-    title: "Local Experts",
-    description: "Connect with trusted local professionals in your area."
-  }
-];
 
 export default function ServicesPage() {
-  
+  const t = useTranslations('Services');
+
+  const serviceCategories = [
+    {
+      id: "home-property",
+      title: t('categories.homeProperty.title'),
+      description: t('categories.homeProperty.description'),
+      icon: <Home className="h-8 w-8 text-primary" />,
+      services: [
+        { name: t('categories.homeProperty.services.cleaningServices.name'), description: t('categories.homeProperty.services.cleaningServices.description'), icon: <Sparkles className="h-5 w-5" /> },
+        { name: t('categories.homeProperty.services.housekeeping.name'), description: t('categories.homeProperty.services.housekeeping.description'), icon: <Users className="h-5 w-5" /> },
+        { name: t('categories.homeProperty.services.pestControl.name'), description: t('categories.homeProperty.services.pestControl.description'), icon: <Bug className="h-5 w-5" /> },
+        { name: t('categories.homeProperty.services.landscaping.name'), description: t('categories.homeProperty.services.landscaping.description'), icon: <TreePine className="h-5 w-5" /> },
+        { name: t('categories.homeProperty.services.painting.name'), description: t('categories.homeProperty.services.painting.description'), icon: <Paintbrush className="h-5 w-5" /> },
+        { name: t('categories.homeProperty.services.handyman.name'), description: t('categories.homeProperty.services.handyman.description'), icon: <Hammer className="h-5 w-5" /> },
+        { name: t('categories.homeProperty.services.plumbing.name'), description: t('categories.homeProperty.services.plumbing.description'), icon: <Droplets className="h-5 w-5" /> },
+        { name: t('categories.homeProperty.services.electrical.name'), description: t('categories.homeProperty.services.electrical.description'), icon: <Zap className="h-5 w-5" /> },
+        { name: t('categories.homeProperty.services.roofing.name'), description: t('categories.homeProperty.services.roofing.description'), icon: <Building className="h-5 w-5" /> },
+        { name: t('categories.homeProperty.services.applianceRepair.name'), description: t('categories.homeProperty.services.applianceRepair.description'), icon: <WashingMachine className="h-5 w-5" /> },
+        { name: t('categories.homeProperty.services.homeRenovation.name'), description: t('categories.homeProperty.services.homeRenovation.description'), icon: <Wrench className="h-5 w-5" /> },
+        { name: t('categories.homeProperty.services.movingServices.name'), description: t('categories.homeProperty.services.movingServices.description'), icon: <Truck className="h-5 w-5" /> },
+        { name: t('categories.homeProperty.services.hvac.name'), description: t('categories.homeProperty.services.hvac.description'), icon: <Wind className="h-5 w-5" /> }
+      ]
+    },
+    {
+      id: "personal-lifestyle",
+      title: t('categories.personalLifestyle.title'),
+      description: t('categories.personalLifestyle.description'),
+      icon: <Heart className="h-8 w-8 text-primary" />,
+      services: [
+        { name: t('categories.personalLifestyle.services.beautySalon.name'), description: t('categories.personalLifestyle.services.beautySalon.description'), icon: <HairScissors className="h-5 w-5" /> },
+        { name: t('categories.personalLifestyle.services.barber.name'), description: t('categories.personalLifestyle.services.barber.description'), icon: <HairScissors className="h-5 w-5" /> },
+        { name: t('categories.personalLifestyle.services.spaMassage.name'), description: t('categories.personalLifestyle.services.spaMassage.description'), icon: <Heart className="h-5 w-5" /> },
+        { name: t('categories.personalLifestyle.services.nailCare.name'), description: t('categories.personalLifestyle.services.nailCare.description'), icon: <BeautySparkles className="h-5 w-5" /> },
+        { name: t('categories.personalLifestyle.services.petGrooming.name'), description: t('categories.personalLifestyle.services.petGrooming.description'), icon: <Heart className="h-5 w-5" /> },
+        { name: t('categories.personalLifestyle.services.tutoring.name'), description: t('categories.personalLifestyle.services.tutoring.description'), icon: <BookOpen className="h-5 w-5" /> },
+        { name: t('categories.personalLifestyle.services.fitnessTrainers.name'), description: t('categories.personalLifestyle.services.fitnessTrainers.description'), icon: <Dumbbell className="h-5 w-5" /> },
+        { name: t('categories.personalLifestyle.services.eventMakeup.name'), description: t('categories.personalLifestyle.services.eventMakeup.description'), icon: <BeautySparkles className="h-5 w-5" /> }
+      ]
+    },
+    {
+      id: "food-hospitality",
+      title: t('categories.foodHospitality.title'),
+      description: t('categories.foodHospitality.description'),
+      icon: <Utensils className="h-8 w-8 text-primary" />,
+      services: [
+        { name: t('categories.foodHospitality.services.catering.name'), description: t('categories.foodHospitality.services.catering.description'), icon: <Utensils className="h-5 w-5" /> },
+        { name: t('categories.foodHospitality.services.foodStallVendors.name'), description: t('categories.foodHospitality.services.foodStallVendors.description'), icon: <Utensils className="h-5 w-5" /> },
+        { name: t('categories.foodHospitality.services.eventStaff.name'), description: t('categories.foodHospitality.services.eventStaff.description'), icon: <EventStaff className="h-5 w-5" /> },
+        { name: t('categories.foodHospitality.services.hotelSupport.name'), description: t('categories.foodHospitality.services.hotelSupport.description'), icon: <EventStaff className="h-5 w-5" /> }
+      ]
+    },
+    {
+      id: "creative-professional",
+      title: t('categories.creativeProfessional.title'),
+      description: t('categories.creativeProfessional.description'),
+      icon: <Camera className="h-8 w-8 text-primary" />,
+      services: [
+        { name: t('categories.creativeProfessional.services.photography.name'), description: t('categories.creativeProfessional.services.photography.description'), icon: <Camera className="h-5 w-5" /> },
+        { name: t('categories.creativeProfessional.services.eventPlanning.name'), description: t('categories.creativeProfessional.services.eventPlanning.description'), icon: <Calendar className="h-5 w-5" /> },
+        { name: t('categories.creativeProfessional.services.itSupport.name'), description: t('categories.creativeProfessional.services.itSupport.description'), icon: <Monitor className="h-5 w-5" /> },
+        { name: t('categories.creativeProfessional.services.graphicDesign.name'), description: t('categories.creativeProfessional.services.graphicDesign.description'), icon: <Palette className="h-5 w-5" /> }
+      ]
+    },
+    {
+      id: "auto-mobile",
+      title: t('categories.autoMobile.title'),
+      description: t('categories.autoMobile.description'),
+      icon: <Car className="h-8 w-8 text-primary" />,
+      services: [
+        { name: t('categories.autoMobile.services.autoRepair.name'), description: t('categories.autoMobile.services.autoRepair.description'), icon: <Car className="h-5 w-5" /> },
+        { name: t('categories.autoMobile.services.motorcycleRepair.name'), description: t('categories.autoMobile.services.motorcycleRepair.description'), icon: <Car className="h-5 w-5" /> },
+        { name: t('categories.autoMobile.services.mobileTechnician.name'), description: t('categories.autoMobile.services.mobileTechnician.description'), icon: <Smartphone className="h-5 w-5" /> },
+        { name: t('categories.autoMobile.services.delivery.name'), description: t('categories.autoMobile.services.delivery.description'), icon: <Package className="h-5 w-5" /> }
+      ]
+    },
+    {
+      id: "supplies-distribution",
+      title: t('categories.suppliesDistribution.title'),
+      description: t('categories.suppliesDistribution.description'),
+      icon: <Package2 className="h-8 w-8 text-primary" />,
+      services: [
+        { name: t('categories.suppliesDistribution.services.cleaningSupplies.name'), description: t('categories.suppliesDistribution.services.cleaningSupplies.description'), icon: <Sparkles className="h-5 w-5" /> },
+        { name: t('categories.suppliesDistribution.services.pestControlChemicals.name'), description: t('categories.suppliesDistribution.services.pestControlChemicals.description'), icon: <Bug className="h-5 w-5" /> },
+        { name: t('categories.suppliesDistribution.services.toolsEquipment.name'), description: t('categories.suppliesDistribution.services.toolsEquipment.description'), icon: <ToolWrench className="h-5 w-5" /> },
+        { name: t('categories.suppliesDistribution.services.plumbingElectrical.name'), description: t('categories.suppliesDistribution.services.plumbingElectrical.description'), icon: <Droplets className="h-5 w-5" /> },
+        { name: t('categories.suppliesDistribution.services.paintsMaterials.name'), description: t('categories.suppliesDistribution.services.paintsMaterials.description'), icon: <PaintBucket className="h-5 w-5" /> },
+        { name: t('categories.suppliesDistribution.services.starterKits.name'), description: t('categories.suppliesDistribution.services.starterKits.description'), icon: <Package2 className="h-5 w-5" /> }
+      ]
+    }
+  ];
+
+  const stats = [
+    { number: "50+", label: t('stats.serviceCategories') },
+    { number: "10,000+", label: t('stats.verifiedProviders') },
+    { number: "100+", label: t('stats.citiesCovered') },
+    { number: "99.8%", label: t('stats.successRate') }
+  ];
+
+  const benefits = [
+    {
+      icon: <Shield className="h-10 w-10 text-primary" />,
+      title: t('benefits.verifiedInsured.title'),
+      description: t('benefits.verifiedInsured.description')
+    },
+    {
+      icon: <Clock className="h-10 w-10 text-primary" />,
+      title: t('benefits.availability.title'),
+      description: t('benefits.availability.description')
+    },
+    {
+      icon: <Star className="h-10 w-10 text-primary" />,
+      title: t('benefits.qualityGuaranteed.title'),
+      description: t('benefits.qualityGuaranteed.description')
+    },
+    {
+      icon: <Users className="h-10 w-10 text-primary" />,
+      title: t('benefits.localExperts.title'),
+      description: t('benefits.localExperts.description')
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
       {/* Hero Section */}
@@ -184,24 +183,23 @@ export default function ServicesPage() {
           <div className="mx-auto max-w-4xl text-center">
             <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
               <Star className="w-4 h-4 mr-2" />
-              50+ Service Categories
+              50+ {t('stats.serviceCategories')}
             </Badge>
             <h1 className="text-5xl lg:text-7xl font-bold font-headline mb-8 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Our Services
+              {t('title')}
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto mb-12">
-              Discover the comprehensive range of services available on LocalPro. From home maintenance to personal care, 
-              we connect you with trusted local service providers across the Philippines.
+              {t('subtitle')}
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
                 <Link href="/signup">
-                  Book a Service <ArrowRight className="ml-2 h-5 w-5" />
+                  {t('bookAService')} <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                 <Link href="/providers">
-                  Become a Provider
+                  {t('becomeAProvider')}
                 </Link>
               </Button>
             </div>
@@ -227,9 +225,9 @@ export default function ServicesPage() {
       <section className="py-20">
         <div className="container">
           <div className="mx-auto max-w-3xl text-center mb-16">
-            <h2 className="text-4xl font-bold font-headline mb-6">Service Categories</h2>
+            <h2 className="text-4xl font-bold font-headline mb-6">{t('serviceCategories')}</h2>
             <p className="text-lg text-muted-foreground">
-              Explore our comprehensive range of services organized by category
+              {t('serviceCategoriesDescription')}
             </p>
           </div>
           
@@ -277,9 +275,9 @@ export default function ServicesPage() {
       <section className="py-20 bg-muted/30">
         <div className="container">
           <div className="mx-auto max-w-3xl text-center mb-16">
-            <h2 className="text-4xl font-bold font-headline mb-6">Why Choose LocalPro Services?</h2>
+            <h2 className="text-4xl font-bold font-headline mb-6">{t('whyChooseUs')}</h2>
             <p className="text-lg text-muted-foreground">
-              Experience the benefits of our comprehensive service platform
+              {t('whyChooseUsDescription')}
             </p>
           </div>
           <div className="max-w-6xl mx-auto">
@@ -307,22 +305,21 @@ export default function ServicesPage() {
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <Sparkles className="h-8 w-8 text-primary" />
                 </div>
-                <CardTitle className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Ready to Get Started?</CardTitle>
+                <CardTitle className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('readyToGetStarted')}</CardTitle>
               </CardHeader>
               <CardContent className="text-center pb-8">
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                  Whether you need a service or want to offer your expertise, LocalPro is here to connect you with the right people. 
-                  Join thousands of satisfied customers and service providers across the Philippines.
+                  {t('readyToGetStartedDescription')}
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center gap-4">
                   <Button asChild size="lg" className="h-12 px-8 shadow-glow hover:shadow-glow/50 transition-all duration-300">
                     <Link href="/signup">
-                      Book a Service <ArrowRight className="ml-2 h-5 w-5" />
+                      {t('bookAService')} <ArrowRight className="ml-2 h-5 w-5" />
                     </Link>
                   </Button>
                   <Button asChild size="lg" variant="outline" className="h-12 px-8 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
                     <Link href="/providers">
-                      Become a Provider
+                      {t('becomeAProvider')}
                     </Link>
                   </Button>
                 </div>

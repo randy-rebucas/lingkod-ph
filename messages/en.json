@@ -53,13 +53,433 @@
     }
   },
   "Services": {
-    "title": "Services",
+    "title": "Our Services",
+    "subtitle": "Discover the comprehensive range of services available on LocalPro. From home maintenance to personal care, we connect you with trusted local service providers across the Philippines.",
     "categories": "Categories",
     "popular": "Popular Services",
     "allServices": "All Services",
     "serviceDetails": "Service Details",
     "bookNow": "Book Now",
-    "contactProvider": "Contact Provider"
+    "contactProvider": "Contact Provider",
+    "serviceCategories": "Service Categories",
+    "serviceCategoriesDescription": "Explore our comprehensive range of services organized by category",
+    "whyChooseUs": "Why Choose LocalPro Services?",
+    "whyChooseUsDescription": "Experience the benefits of our comprehensive service platform",
+    "readyToGetStarted": "Ready to Get Started?",
+    "readyToGetStartedDescription": "Whether you need a service or want to offer your expertise, LocalPro is here to connect you with the right people. Join thousands of satisfied customers and service providers across the Philippines.",
+    "bookAService": "Book a Service",
+    "becomeAProvider": "Become a Provider",
+    "stats": {
+      "serviceCategories": "Service Categories",
+      "verifiedProviders": "Verified Providers",
+      "citiesCovered": "Cities Covered",
+      "successRate": "Success Rate"
+    },
+    "benefits": {
+      "verifiedInsured": {
+        "title": "Verified & Insured",
+        "description": "All service providers are background-checked and insured for your peace of mind."
+      },
+      "availability": {
+        "title": "24/7 Availability",
+        "description": "Book services anytime with our round-the-clock booking system."
+      },
+      "qualityGuaranteed": {
+        "title": "Quality Guaranteed",
+        "description": "We ensure high-quality services with our satisfaction guarantee."
+      },
+      "localExperts": {
+        "title": "Local Experts",
+        "description": "Connect with trusted local professionals in your area."
+      }
+    },
+    "categories": {
+      "homeProperty": {
+        "title": "Home & Property Services",
+        "description": "Complete home maintenance and improvement services",
+        "services": {
+          "cleaningServices": {
+            "name": "Cleaning Services",
+            "description": "General, deep cleaning, sofa, carpet, etc."
+          },
+          "housekeeping": {
+            "name": "Housekeeping / Maid Services",
+            "description": "Regular household maintenance and cleaning"
+          },
+          "pestControl": {
+            "name": "Pest Control",
+            "description": "Professional pest elimination and prevention"
+          },
+          "landscaping": {
+            "name": "Landscaping & Gardening",
+            "description": "Garden design, maintenance, and landscaping"
+          },
+          "painting": {
+            "name": "Painting Services",
+            "description": "Interior and exterior painting solutions"
+          },
+          "handyman": {
+            "name": "Handyman Services",
+            "description": "General repairs and maintenance tasks"
+          },
+          "plumbing": {
+            "name": "Plumbing Services",
+            "description": "Pipe repairs, installations, and maintenance"
+          },
+          "electrical": {
+            "name": "Electrical Services",
+            "description": "Wiring, installations, and electrical repairs"
+          },
+          "roofing": {
+            "name": "Roofing Services",
+            "description": "Roof repairs, installation, and maintenance"
+          },
+          "applianceRepair": {
+            "name": "Appliance Repair",
+            "description": "Home appliance maintenance and repairs"
+          },
+          "homeRenovation": {
+            "name": "Home Renovation / Construction",
+            "description": "Complete home remodeling and construction"
+          },
+          "movingServices": {
+            "name": "Moving Services",
+            "description": "Professional moving and relocation services"
+          },
+          "hvac": {
+            "name": "HVAC Services",
+            "description": "Aircon installation, repair, and maintenance"
+          }
+        }
+      },
+      "personalLifestyle": {
+        "title": "Personal & Lifestyle Services",
+        "description": "Personal care and lifestyle enhancement services",
+        "services": {
+          "beautySalon": {
+            "name": "Beauty Salon / Haircut / Makeup",
+            "description": "Professional beauty and styling services"
+          },
+          "barber": {
+            "name": "Barber Services",
+            "description": "Men's grooming and haircut services"
+          },
+          "spaMassage": {
+            "name": "Spa & Massage",
+            "description": "Relaxation and therapeutic massage services"
+          },
+          "nailCare": {
+            "name": "Nail Care",
+            "description": "Manicure, pedicure, and nail art services"
+          },
+          "petGrooming": {
+            "name": "Pet Grooming & Pet Care",
+            "description": "Professional pet grooming and care services"
+          },
+          "tutoring": {
+            "name": "Tutoring & Academic Coaching",
+            "description": "Educational support and academic guidance"
+          },
+          "fitnessTrainers": {
+            "name": "Fitness Trainers",
+            "description": "Personal training and fitness coaching"
+          },
+          "eventMakeup": {
+            "name": "Event Makeup & Styling",
+            "description": "Special event beauty and styling services"
+          }
+        }
+      },
+      "foodHospitality": {
+        "title": "Food & Hospitality Services",
+        "description": "Culinary and hospitality support services",
+        "services": {
+          "catering": {
+            "name": "Catering Services",
+            "description": "Professional catering for events and occasions"
+          },
+          "foodStallVendors": {
+            "name": "Food Stall Vendors",
+            "description": "Event support and food stall services"
+          },
+          "eventStaff": {
+            "name": "Event Staff & Waiters",
+            "description": "Professional event staffing and service"
+          },
+          "hotelSupport": {
+            "name": "Hotel & Resort Support Staff",
+            "description": "Hospitality industry support services"
+          }
+        }
+      },
+      "creativeProfessional": {
+        "title": "Creative & Professional Services",
+        "description": "Creative and professional business services",
+        "services": {
+          "photography": {
+            "name": "Photography & Videography",
+            "description": "Professional photography and video services"
+          },
+          "eventPlanning": {
+            "name": "Event Planning & Coordination",
+            "description": "Complete event planning and management"
+          },
+          "itSupport": {
+            "name": "IT Support / Tech Assistance",
+            "description": "Technical support and IT services"
+          },
+          "graphicDesign": {
+            "name": "Graphic Design & Printing Services",
+            "description": "Design and printing solutions"
+          }
+        }
+      },
+      "autoMobile": {
+        "title": "Auto & Mobile Services",
+        "description": "Automotive and mobile device services",
+        "services": {
+          "autoRepair": {
+            "name": "Auto Repair & Car Care",
+            "description": "Automotive repair and maintenance services"
+          },
+          "motorcycleRepair": {
+            "name": "Motorcycle Repair",
+            "description": "Motorcycle maintenance and repair services"
+          },
+          "mobileTechnician": {
+            "name": "Mobile Technician",
+            "description": "Phone, laptop, and gadget repair services"
+          },
+          "delivery": {
+            "name": "Delivery / Courier Services",
+            "description": "Package delivery and courier services"
+          }
+        }
+      },
+      "suppliesDistribution": {
+        "title": "Supplies & Distribution",
+        "description": "LocalPro add-on services and supplies",
+        "services": {
+          "cleaningSupplies": {
+            "name": "Cleaning Supplies & Chemicals",
+            "description": "Professional cleaning supplies and chemicals"
+          },
+          "pestControlChemicals": {
+            "name": "Pest Control Chemicals",
+            "description": "Professional pest control supplies"
+          },
+          "toolsEquipment": {
+            "name": "Tools & Equipment Rentals",
+            "description": "Professional tools and equipment rental"
+          },
+          "plumbingElectrical": {
+            "name": "Plumbing / Electrical Parts",
+            "description": "Professional plumbing and electrical supplies"
+          },
+          "paintsMaterials": {
+            "name": "Paints & Materials",
+            "description": "Quality paints and construction materials"
+          },
+          "starterKits": {
+            "name": "Starter Kits",
+            "description": "Convenient starter kits and packages"
+          }
+        }
+      }
+    }
+  },
+  "Partners": {
+    "title": "Partnership Opportunities",
+    "subtitle": "Partner with LocalPro to create meaningful impact, drive growth, and transform communities across the Philippines.",
+    "joinPartners": "Join 500+ Partners",
+    "explorePartnerships": "Explore Partnerships",
+    "contactUs": "Contact Us",
+    "partnershipOpportunities": "Partnership Opportunities",
+    "partnershipOpportunitiesDescription": "Choose the partnership model that aligns with your organization's goals and create lasting impact",
+    "successStories": "Success Stories",
+    "successStoriesDescription": "See how our partners are transforming their businesses and communities",
+    "partnershipProcess": "Partnership Process",
+    "partnershipProcessDescription": "Our streamlined process makes it easy to get started and succeed as a LocalPro partner",
+    "whatOurPartnersSay": "What Our Partners Say",
+    "whatOurPartnersSayDescription": "Hear from successful partners who have transformed their businesses with LocalPro",
+    "recognitionAwards": "Recognition & Awards",
+    "recognitionAwardsDescription": "Our commitment to excellence and social impact has been recognized by industry leaders",
+    "readyToMakeImpact": "Ready to Make an Impact?",
+    "readyToMakeImpactDescription": "Join hundreds of successful partners who are transforming communities and growing their businesses with LocalPro. Let's create something amazing together.",
+    "startYourPartnership": "Start Your Partnership",
+    "contactSalesTeam": "Contact Sales Team",
+    "averageResponseTime": "Average response time: 2 hours",
+    "stats": {
+      "activePartners": "Active Partners",
+      "citiesCovered": "Cities Covered",
+      "partnerRevenue": "Partner Revenue",
+      "partnerSatisfaction": "Partner Satisfaction",
+      "jobsCreated": "Jobs Created",
+      "economicImpact": "Economic Impact"
+    },
+    "partnershipTypes": {
+      "corporate": {
+        "title": "Corporate Partners",
+        "description": "Offer LocalPro's trusted services as a perk to your employees or integrate our network into your business offerings. Enhance your value proposition and support local professionals.",
+        "benefits": "Employee Benefits Program,B2B Service Integration,Co-branded Marketing Campaigns,Dedicated Account Management,Custom Pricing & Volume Discounts,Priority Customer Support",
+        "idealFor": "Large corporations, HR departments, employee benefit providers, B2B service companies",
+        "features": "API Integration,White-label Solutions,Custom Reporting,Employee Dashboard",
+        "cta": "Explore Corporate Partnership"
+      },
+      "community": {
+        "title": "Community & LGU Partners",
+        "description": "Collaborate with us on community-based programs, job fairs, and skills training initiatives. Empower your constituents by connecting them with legitimate work opportunities.",
+        "benefits": "Community Employment Programs,Skills Training Workshops,Job Fair Organization,Local Economic Development,Social Impact Reporting,Government Relations Support",
+        "idealFor": "Local government units, NGOs, community organizations, educational institutions",
+        "features": "Community Dashboard,Impact Analytics,Training Materials,Event Management",
+        "cta": "Start Community Partnership"
+      },
+      "supply": {
+        "title": "Supply & Material Partners",
+        "description": "Become a preferred supplier for our network of service providers. Gain direct access to a growing market of professionals who need quality tools, materials, and equipment.",
+        "benefits": "Direct B2B Sales Channel,Volume Discount Programs,Marketing & Brand Exposure,Quality Assurance Standards,Inventory Management Tools,Performance Analytics",
+        "idealFor": "Hardware stores, material suppliers, equipment providers, tool manufacturers",
+        "features": "Supplier Portal,Inventory Integration,Order Management,Performance Tracking",
+        "cta": "Join Supply Network"
+      }
+    },
+    "process": {
+      "initialDiscussion": {
+        "title": "Initial Discussion",
+        "description": "Let's discuss your goals, challenges, and how we can work together to achieve mutual success",
+        "duration": "1-2 days",
+        "details": "Discovery call,Needs assessment,Goal alignment"
+      },
+      "partnershipProposal": {
+        "title": "Partnership Proposal",
+        "description": "We'll create a customized partnership proposal tailored to your organization's specific needs and objectives",
+        "duration": "3-5 days",
+        "details": "Custom proposal,Pricing structure,Implementation plan"
+      },
+      "agreementOnboarding": {
+        "title": "Agreement & Onboarding",
+        "description": "Sign the partnership agreement and begin the comprehensive onboarding process with dedicated support",
+        "duration": "1-2 weeks",
+        "details": "Contract signing,Account setup,Training sessions"
+      },
+      "launchSupport": {
+        "title": "Launch & Support",
+        "description": "Launch your partnership with ongoing support, optimization, and regular performance reviews",
+        "duration": "Ongoing",
+        "details": "Go-live support,Performance monitoring,Regular check-ins"
+      }
+    },
+    "achievements": {
+      "bestPartnershipProgram": {
+        "title": "Best Partnership Program 2024",
+        "organization": "Philippine Business Awards"
+      },
+      "socialImpactExcellence": {
+        "title": "Social Impact Excellence",
+        "organization": "ASEAN Business Council"
+      },
+      "innovationInEmployment": {
+        "title": "Innovation in Employment",
+        "organization": "Department of Labor"
+      },
+      "communityDevelopmentAward": {
+        "title": "Community Development Award",
+        "organization": "Local Government League"
+      }
+    }
+  },
+  "TermsOfService": {
+    "title": "Terms of Service",
+    "subtitle": "Please read these terms carefully. By using LocalPro, you agree to be bound by these terms and conditions.",
+    "lastUpdated": "Last updated: December 2024",
+    "quickSummary": "Quick Summary",
+    "questions": "Questions?",
+    "welcome": "Welcome to LocalPro",
+    "welcomeSubtitle": "Your trusted local services platform",
+    "termsDescription": "These Terms of Service...",
+    "keyPointsSummary": "Key Points Summary",
+    "questionsAboutTerms": "Questions About These Terms?",
+    "questionsDescription": "If you have any questions or concerns about these Terms of Service, please don't hesitate to contact our legal team.",
+    "legalDepartment": "Legal Department",
+    "callSupport": "Call Support",
+    "address": "Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6521",
+    "sections": {
+      "definitions": {
+        "title": "1. Definitions",
+        "content": [
+          "\"LocalPro,\" \"we,\" \"our,\" or \"us\" refers to LocalPro Services Inc. and its affiliates, subsidiaries, and related companies.",
+          "\"User\" or \"you\" means anyone who accesses or uses the Platform, including service providers (\"Providers\"), clients (\"Clients\"), agencies, and any other individuals or entities using our services.",
+          "\"Services\" refers to any service offered through the LocalPro platform by Providers to Clients, including but not limited to home services, professional services, and other local services.",
+          "\"Platform\" means our website, mobile applications, and any other digital platforms operated by LocalPro.",
+          "\"Content\" includes all text, graphics, images, music, software, audio, video, information, or other materials available on the Platform."
+        ]
+      },
+      "eligibility": {
+        "title": "2. Eligibility and Age Requirements",
+        "content": [
+          "You must be at least 18 years old and capable of entering into legally binding contracts to use LocalPro.",
+          "By registering, you confirm that all information provided is accurate, complete, and up-to-date.",
+          "You must have the legal capacity to enter into these Terms in your jurisdiction.",
+          "If you are registering on behalf of a company or organization, you must have the authority to bind that entity to these Terms.",
+          "We reserve the right to refuse service to anyone at our sole discretion."
+        ]
+      },
+      "accountRegistration": {
+        "title": "3. Account Registration and Security",
+        "content": [
+          "To use certain features, you must create an account with accurate and complete information.",
+          "You are responsible for maintaining the confidentiality of your login credentials and for all activities under your account.",
+          "You must immediately notify us of any unauthorized use of your account or any other breach of security.",
+          "For Clients: You may browse, book, rate, and review service providers.",
+          "For Providers: You may list your services, manage bookings, receive payments, and build your professional reputation.",
+          "We reserve the right to suspend or terminate accounts that violate these Terms or engage in fraudulent activity."
+        ]
+      },
+      "platformUse": {
+        "title": "4. Acceptable Use of Platform",
+        "content": [
+          "You agree to use the Platform in compliance with all applicable laws and regulations.",
+          "You will not use the Platform for illegal, fraudulent, or harmful purposes.",
+          "You will not impersonate any person or entity or misrepresent your affiliation with any person or entity.",
+          "You will not upload, post, or transmit any content that is defamatory, obscene, or violates any third-party rights.",
+          "You will not attempt to gain unauthorized access to any part of the Platform or any other systems or networks.",
+          "You will not use automated systems or software to extract data from the Platform without our written permission."
+        ]
+      },
+      "paymentsFees": {
+        "title": "5. Payments, Fees, and Billing",
+        "content": [
+          "Clients pay Providers through the Platform using secure payment methods. All pricing, fees, and applicable taxes will be clearly displayed before checkout.",
+          "Providers may be charged transaction commissions or advertising fees based on LocalPro's current pricing structure.",
+          "All transactions are processed in PHP (Philippine Peso) or USD, as selected during registration.",
+          "Payment processing fees may apply and will be disclosed before transaction completion.",
+          "We reserve the right to change our fee structure with 30 days' notice to users."
+        ]
+      }
+    },
+    "quickSummary": [
+      {
+        "title": "Service Agreement",
+        "description": "By using LocalPro, you agree to our terms and conditions for service provision and platform usage."
+      },
+      {
+        "title": "User Responsibilities",
+        "description": "Users must be 18+, provide accurate information, and use the platform responsibly and legally."
+      },
+      {
+        "title": "Payment Terms",
+        "description": "Clear pricing, secure payments, and transparent fee structure for all transactions."
+      },
+      {
+        "title": "Privacy & Security",
+        "description": "Your data is protected with industry-standard security measures and privacy practices."
+      }
+    ],
+    "contactInformation": {
+      "email": "legal@localpro.ph",
+      "phone": "+63 917 123 4567",
+      "address": "Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6521"
+    }
   },
   "Profile": {
     "title": "Profile",

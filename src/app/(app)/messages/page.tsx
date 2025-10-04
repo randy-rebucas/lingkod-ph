@@ -87,14 +87,14 @@ const ConversationItem = memo(({
     onSelect,
     getOtherParticipantInfo,
     getAvatarFallback,
-    t
+    _t
 }: {
     convo: Conversation;
     isActive: boolean;
     onSelect: (convo: Conversation) => void;
     getOtherParticipantInfo: (convo: Conversation) => { name: string; avatar: string };
     getAvatarFallback: (name: string | null | undefined) => string;
-    t: any;
+    _t: any;
 }) => {
     const { name, avatar } = getOtherParticipantInfo(convo);
 
@@ -531,7 +531,7 @@ export default function MessagesPage() {
                                             onSelect={handleSelectConversation}
                                             getOtherParticipantInfo={getOtherParticipantInfo}
                                             getAvatarFallback={getAvatarFallback}
-                                            t={t}
+                                            _t={t}
                                         />
                                     ))
                                 ) : (
