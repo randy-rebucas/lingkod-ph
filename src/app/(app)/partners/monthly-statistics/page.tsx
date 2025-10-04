@@ -15,16 +15,13 @@ import {
   Activity,
   Target,
   Award,
-  Clock,
   ArrowUpRight,
   ArrowDownRight,
   Minus,
-  Filter,
-  Download,
   DollarSign
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { PartnerAnalyticsService, PartnerAnalytics, MonthlyStats } from "@/lib/partner-analytics";
+import { PartnerAnalyticsService, MonthlyStats } from "@/lib/partner-analytics";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getDb } from '@/lib/firebase';
 
@@ -55,10 +52,10 @@ interface MonthlyAnalytics {
 
 export default function MonthlyStatisticsPage() {
   const { user, userRole } = useAuth();
-  const t = useTranslations('Partners');
+  const _t = useTranslations('Partners');
   const [analytics, setAnalytics] = useState<MonthlyAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedYear, _setSelectedYear] = useState(new Date().getFullYear());
 
   useEffect(() => {
     const loadMonthlyData = async () => {

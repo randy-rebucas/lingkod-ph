@@ -1,7 +1,7 @@
 'use server';
 
 import { getDb  } from './firebase';
-import { collection, query, where, getDocs, doc, getDoc, addDoc, updateDoc, serverTimestamp, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, addDoc, updateDoc, serverTimestamp, orderBy, limit } from 'firebase/firestore';
 
 export interface ReportConfig {
   id: string;
@@ -242,7 +242,7 @@ export class AdvancedReportingService {
 
   async generatePerformanceReport(providerId: string, dateRange: { start: Date; end: Date }): Promise<any> {
     try {
-      const [bookings, reviews, services, earnings] = await Promise.all([
+      const [bookings, reviews, _services, earnings] = await Promise.all([
         this.getBookings(providerId, dateRange),
         this.getReviews(providerId, dateRange),
         this.getServices(providerId),
@@ -372,7 +372,7 @@ export class AdvancedReportingService {
     }
   }
 
-  private generateSummary(data: any, config: ReportConfig): any {
+  private generateSummary(data: any, _config: ReportConfig): any {
     return {
       totalRecords: this.countRecords(data),
       keyMetrics: this.extractKeyMetrics(data),

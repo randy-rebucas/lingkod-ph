@@ -1,5 +1,5 @@
 import { getDb  } from './firebase';
-import { doc, setDoc, getDoc, collection, query, where, orderBy, limit, onSnapshot, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { sendEmail } from './email-service';
 
 /**
@@ -118,7 +118,7 @@ export class AdminSecurityNotifications {
   /**
    * Get security events with filtering
    */
-  static async getSecurityEvents(filters: {
+  static async getSecurityEvents(_filters: {
     eventType?: SecurityEventType;
     severity?: SecurityEventSeverity;
     resolved?: boolean;
@@ -157,7 +157,7 @@ export class AdminSecurityNotifications {
   /**
    * Get security event statistics
    */
-  static async getSecurityStatistics(timeRange: '24h' | '7d' | '30d' = '24h'): Promise<{
+  static async getSecurityStatistics(_timeRange: '24h' | '7d' | '30d' = '24h'): Promise<{
     totalEvents: number;
     eventsByType: Record<SecurityEventType, number>;
     eventsBySeverity: Record<SecurityEventSeverity, number>;
@@ -464,7 +464,7 @@ ${JSON.stringify(event.details, null, 2)}
   /**
    * Get recent notifications count
    */
-  private static async getRecentNotifications(eventType: SecurityEventType): Promise<number> {
+  private static async getRecentNotifications(_eventType: SecurityEventType): Promise<number> {
     // This would typically query the notifications collection
     // For now, return 0 as placeholder
     return 0;
@@ -473,7 +473,7 @@ ${JSON.stringify(event.details, null, 2)}
   /**
    * Get recent events count
    */
-  private static async getRecentEvents(eventType: SecurityEventType, severity: SecurityEventSeverity): Promise<number> {
+  private static async getRecentEvents(_eventType: SecurityEventType, _severity: SecurityEventSeverity): Promise<number> {
     // This would typically query the events collection
     // For now, return 0 as placeholder
     return 0;

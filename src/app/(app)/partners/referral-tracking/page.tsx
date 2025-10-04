@@ -17,7 +17,6 @@ import {
   UserPlus, 
   Search, 
   Filter,
-  Calendar,
   Mail,
   TrendingUp,
   Target,
@@ -55,12 +54,12 @@ interface ReferralStats {
 
 export default function ReferralTrackingPage() {
   const { user, userRole } = useAuth();
-  const t = useTranslations('Partners');
+  const _t = useTranslations('Partners');
   const { toast } = useToast();
   const [referrals, setReferrals] = useState<ReferralData[]>([]);
   const [stats, setStats] = useState<ReferralStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'active' | 'completed' | 'cancelled'>('all');
+  const [filter, _setFilter] = useState<'all' | 'pending' | 'active' | 'completed' | 'cancelled'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddReferral, setShowAddReferral] = useState(false);
   const [referralCode, setReferralCode] = useState<string>('');
@@ -437,7 +436,7 @@ export default function ReferralTrackingPage() {
            title: "Link Copied!",
            description: "Your referral message has been copied to clipboard.",
          });
-       } catch (clipboardError) {
+       } catch (_clipboardError) {
          toast({
            variant: "destructive",
            title: "Share Failed",

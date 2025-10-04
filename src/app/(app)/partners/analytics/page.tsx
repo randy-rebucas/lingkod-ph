@@ -7,14 +7,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
-  BarChart2, 
-  TrendingUp, 
   Users, 
   DollarSign, 
   Target, 
   Activity,
   PieChart,
-  LineChart,
   ArrowUpRight,
   ArrowDownRight,
   Trophy,
@@ -64,7 +61,7 @@ interface EnhancedMetrics {
 
 export default function PartnerAnalyticsPage() {
   const { user, userRole } = useAuth();
-  const t = useTranslations('Partners');
+  const _t = useTranslations('Partners');
   const [data, setData] = useState<AnalyticsData>({
     analytics: null,
     referrals: [],
@@ -234,7 +231,7 @@ export default function PartnerAnalyticsPage() {
 
   const analytics = data.analytics;
   const referrals = data.referrals;
-  const commissions = data.commissions;
+  const _commissions = data.commissions;
 
   if (!analytics && !enhancedMetrics) {
     return (
@@ -873,9 +870,9 @@ export default function PartnerAnalyticsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {commissions.length > 0 ? (
+              {_commissions.length > 0 ? (
                 <div className="space-y-4">
-                  {commissions.map((commission) => (
+                  {_commissions.map((commission) => (
                     <div key={commission.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">

@@ -18,11 +18,6 @@ import {
   Activity,
   Clock,
   CheckCircle,
-  XCircle,
-  AlertCircle,
-  Calendar,
-  Filter,
-  Eye
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PartnerAnalyticsService, PartnerAnalytics, ReferralData } from "@/lib/partner-analytics";
@@ -64,10 +59,10 @@ interface ConversionMetrics {
 
 export default function ConversionAnalyticsPage() {
   const { user, userRole } = useAuth();
-  const t = useTranslations('Partners');
+  const _t = useTranslations('Partners');
   const [metrics, setMetrics] = useState<ConversionMetrics | null>(null);
-  const [analytics, setAnalytics] = useState<PartnerAnalytics | null>(null);
-  const [referrals, setReferrals] = useState<ReferralData[]>([]);
+  const [_analytics, setAnalytics] = useState<PartnerAnalytics | null>(null);
+  const [_referrals, setReferrals] = useState<ReferralData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

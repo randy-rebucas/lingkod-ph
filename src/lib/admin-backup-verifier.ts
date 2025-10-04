@@ -1,5 +1,5 @@
 import { getDb  } from './firebase';
-import { doc, setDoc, updateDoc, collection, query, where, getDocs, getDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, getDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { sendEmail } from './email-service';
 
 /**
@@ -493,7 +493,7 @@ export class AdminBackupVerifier {
   /**
    * Get all verification results
    */
-  static async getAllVerificationResults(limit: number = 50): Promise<BackupVerificationResult[]> {
+  static async getAllVerificationResults(_limit: number = 50): Promise<BackupVerificationResult[]> {
     // This would typically use a query with orderBy and limit
     // For now, return empty array as placeholder
     return [];

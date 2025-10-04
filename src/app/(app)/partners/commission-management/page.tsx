@@ -15,7 +15,6 @@ import {
   XCircle,
   Search,
   Download,
-  Calendar,
   CreditCard,
   Banknote,
   Wallet
@@ -35,11 +34,11 @@ interface CommissionSummary {
 
 export default function CommissionManagementPage() {
   const { user, userRole } = useAuth();
-  const t = useTranslations('Partners');
+  const _t = useTranslations('Partners');
   const [commissions, setCommissions] = useState<PartnerCommission[]>([]);
   const [summary, setSummary] = useState<CommissionSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'paid' | 'cancelled'>('all');
+  const [filter, _setFilter] = useState<'all' | 'pending' | 'paid' | 'cancelled'>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {

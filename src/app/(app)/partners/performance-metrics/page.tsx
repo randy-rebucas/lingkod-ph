@@ -17,14 +17,13 @@ import {
   Zap,
   Trophy,
   Star,
-  Clock,
   CheckCircle,
   ArrowUpRight,
   ArrowDownRight,
   Minus
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { PartnerAnalyticsService, PartnerAnalytics, ReferralData, PartnerCommission } from "@/lib/partner-analytics";
+import { PartnerAnalyticsService, PartnerAnalytics } from "@/lib/partner-analytics";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getDb } from '@/lib/firebase';
 
@@ -46,7 +45,7 @@ interface PerformanceMetrics {
 
 export default function PerformanceMetricsPage() {
   const { user, userRole } = useAuth();
-  const t = useTranslations('Partners');
+  const _t = useTranslations('Partners');
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const [analytics, setAnalytics] = useState<PartnerAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -514,7 +513,7 @@ export default function PerformanceMetricsPage() {
             <CardContent>
               <div className="space-y-4">
                 {metrics.overallScore > 0 ? (
-                  metrics.monthlyTrends.map((trend, index) => (
+                  metrics.monthlyTrends.map((trend, _index) => (
                     <div key={trend.month} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="space-y-1">
                         <div className="font-medium">{trend.month}</div>

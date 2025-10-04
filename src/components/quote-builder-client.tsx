@@ -50,13 +50,13 @@ const createQuoteSchema = (t: (key: string) => string, lineItemSchema: z.ZodSche
 });
 
 // Export type using a basic schema for TypeScript inference
-const baseLineItemSchema = z.object({
+const _baseLineItemSchema = z.object({
     description: z.string(),
     quantity: z.coerce.number(),
     price: z.coerce.number(),
 });
 
-const baseQuoteSchema = z.object({
+const _baseQuoteSchema = z.object({
   clientName: z.string().min(1, "Client name is required"),
   clientEmail: z.string().email("Valid email is required"),
   clientAddress: z.string().min(1, "Client address is required"),
@@ -75,8 +75,8 @@ const baseQuoteSchema = z.object({
   terms: z.string().optional(),
 });
 
-export type QuoteFormValues = z.infer<typeof baseQuoteSchema>;
-export type LineItem = z.infer<typeof baseLineItemSchema>;
+export type QuoteFormValues = z.infer<typeof _baseQuoteSchema>;
+export type LineItem = z.infer<typeof _baseLineItemSchema>;
 
 export default function QuoteBuilderClient() {
     const { user } = useAuth();

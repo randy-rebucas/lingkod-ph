@@ -10,18 +10,15 @@ import {
   TrendingUp, 
   BarChart3,
   LineChart,
-  PieChart,
   Activity,
   Target,
-  Clock,
   ArrowUpRight,
   ArrowDownRight,
   Minus,
   Zap,
   Rocket,
   Star,
-  Calendar,
-  Filter
+  Calendar
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PartnerAnalyticsService, PartnerAnalytics, MonthlyStats } from "@/lib/partner-analytics";
@@ -82,7 +79,7 @@ interface GrowthMetrics {
 
 export default function GrowthMetricsPage() {
   const { user, userRole } = useAuth();
-  const t = useTranslations('Partners');
+  const _t = useTranslations('Partners');
   const [metrics, setMetrics] = useState<GrowthMetrics | null>(null);
   const [analytics, setAnalytics] = useState<PartnerAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
@@ -471,7 +468,7 @@ export default function GrowthMetricsPage() {
             <CardContent>
               <div className="space-y-4">
                 {metrics.growthTrends.length > 0 ? (
-                  metrics.growthTrends.map((trend, index) => (
+                  metrics.growthTrends.map((trend, _index) => (
                     <div key={trend.period} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="space-y-1">
                         <div className="font-medium">{trend.period}</div>

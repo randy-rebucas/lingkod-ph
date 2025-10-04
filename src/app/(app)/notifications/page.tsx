@@ -99,7 +99,7 @@ const NotificationsTab = memo(function NotificationsTab({
     filter, 
     setFilter, 
     onNotificationClick, 
-    onInviteResponse, 
+    onInviteResponse: _onInviteResponse, 
     onDeleteNotification,
     analyticsData 
 }: { 
