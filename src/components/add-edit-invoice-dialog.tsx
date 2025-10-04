@@ -31,7 +31,7 @@ const lineItemSchema = z.object({
     price: z.coerce.number().min(0, "Price cannot be negative."),
 });
 
-const invoiceSchema = z.object({
+const _invoiceSchema = z.object({
     clientName: z.string().min(1, "Client name is required."),
     clientEmail: z.string().email("Invalid email address."),
     clientAddress: z.string().min(1, "Client address is required."),
@@ -43,7 +43,7 @@ const invoiceSchema = z.object({
     status: z.enum(["Draft", "Sent", "Paid", "Overdue"]).default("Draft"),
 });
 
-type InvoiceFormValues = z.infer<typeof invoiceSchema>;
+type InvoiceFormValues = z.infer<typeof _invoiceSchema>;
 
 type AddEditInvoiceDialogProps = {
     isOpen: boolean;

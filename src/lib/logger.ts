@@ -5,7 +5,7 @@ interface LogLevel {
   DEBUG: 'debug';
 }
 
-const LOG_LEVELS: LogLevel = {
+const _LOG_LEVELS: LogLevel = {
   ERROR: 'error',
   WARN: 'warn',
   INFO: 'info',

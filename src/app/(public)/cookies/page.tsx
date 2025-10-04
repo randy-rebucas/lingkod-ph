@@ -403,7 +403,7 @@ export default function CookiesPage() {
 
               {/* Policy Sections */}
               <div className="space-y-6">
-                {sections.map((section, index) => (
+                {sections.map((section, _index) => (
                   <Card key={section.id} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-8">
                       <div className="flex items-center gap-3 mb-6">

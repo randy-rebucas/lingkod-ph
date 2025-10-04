@@ -261,6 +261,7 @@ describe('AdminBackupPage', () => {
         success: true,
         message: 'Backup created successfully',
         backupId: 'new-backup-123',
+        documentCount: 100,
       });
 
       render(<AdminBackupPage />);
@@ -288,6 +289,7 @@ describe('AdminBackupPage', () => {
       mockCreateBackup.mockResolvedValue({
         success: false,
         message: 'Failed to create backup',
+        documentCount: 0,
       });
 
       render(<AdminBackupPage />);
@@ -311,7 +313,7 @@ describe('AdminBackupPage', () => {
       // Mock a slow backup creation
       mockCreateBackup.mockImplementation(() => 
         new Promise(resolve => 
-          setTimeout(() => resolve({ success: true, message: 'Backup created' }), 100)
+          setTimeout(() => resolve({ success: true, message: 'Backup created', documentCount: 100 }), 100)
         )
       );
 
@@ -498,7 +500,7 @@ describe('AdminBackupPage', () => {
       // Mock a slow backup creation
       mockCreateBackup.mockImplementation(() => 
         new Promise(resolve => 
-          setTimeout(() => resolve({ success: true, message: 'Backup created' }), 100)
+          setTimeout(() => resolve({ success: true, message: 'Backup created', documentCount: 100 }), 100)
         )
       );
 
@@ -522,6 +524,7 @@ describe('AdminBackupPage', () => {
       mockCreateBackup.mockResolvedValue({
         success: true,
         message: 'Backup created successfully',
+        documentCount: 100,
       });
 
       render(<AdminBackupPage />);

@@ -9,13 +9,10 @@ import { Progress } from "@/components/ui/progress";
 import { 
   Calendar, 
   TrendingUp, 
-  TrendingDown,
   BarChart3,
   LineChart,
   PieChart,
   Activity,
-  Users,
-  DollarSign,
   Target,
   Award,
   Clock,
@@ -23,7 +20,8 @@ import {
   ArrowDownRight,
   Minus,
   Filter,
-  Download
+  Download,
+  DollarSign
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PartnerAnalyticsService, PartnerAnalytics, MonthlyStats } from "@/lib/partner-analytics";

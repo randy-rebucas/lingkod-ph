@@ -24,7 +24,7 @@ export function QuotePreview({ data }: { data: QuoteFormValues }) {
     const t = useTranslations('QuotePreview');
 
     // Memoize all calculations
-    const { subtotal, discountAmount, afterDiscount, taxAmount, total, issueDate, validUntil } = useMemo(() => {
+    const { subtotal, discountAmount, taxAmount, total, issueDate, validUntil } = useMemo(() => {
         const subtotal = data.lineItems.reduce((acc, item) => acc + (Number(item.quantity) || 0) * (Number(item.price) || 0), 0);
         
         // Calculate discount

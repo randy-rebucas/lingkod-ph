@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const token = authHeader.replace('Bearer ', '');
+    const _token = authHeader.replace('Bearer ', '');
     
     // Verify user role (this would need to be implemented with Firebase Admin SDK)
     // For now, we'll assume the token is valid and extract user info

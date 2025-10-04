@@ -16,7 +16,6 @@ import {
   Settings,
   LogOut,
   BriefcaseBusiness,
-  Star,
   FileText,
   Calculator,
   BarChart2,
@@ -35,20 +34,14 @@ import {
   Megaphone,
   Flag,
   Wallet,
-  Shapes,
-  Gift,
   Receipt,
   Radio,
   TrendingUp,
-  DatabaseBackup,
   Shield,
   LifeBuoy,
   Users,
-  Handshake,
   Bell,
   Tag,
-  CreditCard,
-  Layers,
   Award,
   HardDrive,
   Link as LinkIcon,
@@ -91,7 +84,6 @@ import { NotificationBell } from "@/components/notification-bell";
 import { useTheme } from "next-themes";
 import BroadcastBanner from "@/components/broadcast-banner";
 import { Logo } from "@/components/logo";
-import { SupportChat } from "@/components/support-chat";
 import { ProviderEngagementCard } from "@/components/provider-engagement-card";
 
 

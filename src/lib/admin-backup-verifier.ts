@@ -1,6 +1,5 @@
 import { getDb  } from './firebase';
-import { doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, serverTimestamp, Timestamp } from 'firebase/firestore';
-import { ref, getDownloadURL, getMetadata } from 'firebase/storage';
+import { doc, setDoc, updateDoc, collection, query, where, getDocs, getDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { sendEmail } from './email-service';
 
 /**

@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from 'react';
-import { Provider, User } from '@/types';
+import { User } from '@/types';
 
 interface UseDashboardStateProps {
   initialProviders?: User[];

@@ -19,9 +19,6 @@ import {
   Star,
   Clock,
   CheckCircle,
-  Users,
-  DollarSign,
-  Calendar,
   ArrowUpRight,
   ArrowDownRight,
   Minus

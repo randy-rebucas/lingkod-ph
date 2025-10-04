@@ -4,7 +4,7 @@
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Handshake, Users, Briefcase, BarChart2, DollarSign, TrendingUp, Target, Award } from "lucide-react";
+import { Users, Briefcase, DollarSign, TrendingUp, Target, Award } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PartnerAnalyticsService } from "@/lib/partner-analytics";
 import { PartnerReferralTracker } from "@/lib/partner-referral-tracker";

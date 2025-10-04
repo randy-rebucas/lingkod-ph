@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     let decodedToken;
     try {
       decodedToken = await getAuth().verifyIdToken(token);
-    } catch (error) {
+    } catch (_error) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 

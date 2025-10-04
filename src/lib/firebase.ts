@@ -1,7 +1,7 @@
 
 import { getApp, getApps, initializeApp, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
-import { getFirestore, Firestore, initializeFirestore } from "firebase/firestore";
+import { Firestore, initializeFirestore } from "firebase/firestore";
 import { getStorage, FirebaseStorage } from "firebase/storage";
 
 // Check if Firebase environment variables are configured

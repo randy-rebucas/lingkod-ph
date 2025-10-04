@@ -14,60 +14,18 @@ import {
   Download,
   Filter,
   Target,
-  Award,
   Zap,
-  Eye,
   Activity,
-  MapPin,
   Star,
   ArrowUpRight,
-  ArrowDownRight,
-  Minus,
   Calculator,
-  Receipt,
-  CreditCard,
-  Banknote,
-  PiggyBank,
-  TrendingUp as Growth,
-  Percent,
-  FileText,
-  PieChart as ChartPie,
   Search,
-  Mail,
   MessageSquare,
   UserCheck,
-  UserX,
-  Clock,
-  CheckCircle,
-  XCircle,
   DollarSign,
   BookCheck,
-  Wallet,
-  WalletCards,
-  CheckCircle2,
-  Hourglass,
-  User,
-  Shield,
-  Crown,
-  Briefcase,
-  Building,
-  Globe,
-  Phone,
-  MapPin as Location,
-  Calendar as CalendarIcon,
-  Edit,
-  Copy,
-  Send,
-  Archive,
-  Flag,
-  AlertTriangle,
-  Info,
-  HelpCircle,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-  Plus,
-  Minus as MinusIcon
+  Clock,
+  Eye
 } from "lucide-react";
 import {
   ColumnDef,
@@ -94,24 +52,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/auth-context";
 import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, addDoc, serverTimestamp, writeBatch, getDocs, getDoc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc, serverTimestamp, writeBatch, getDocs } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import Link from "next/link";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 
 type Provider = {

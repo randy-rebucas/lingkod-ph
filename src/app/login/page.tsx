@@ -69,7 +69,7 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(getAuthInstance(), email, password);
       toast({ title: t('success'), description: t('loggedInSuccess') });
       router.push('/dashboard');
-    } catch (error: unknown) {
+    } catch (_error: unknown) {
       toast({
         variant: "destructive",
         title: t('loginFailed'),

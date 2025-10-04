@@ -9,7 +9,6 @@ import { Progress } from "@/components/ui/progress";
 import { 
   TrendingUp, 
   Target, 
-  Users, 
   ArrowUpRight,
   ArrowDownRight,
   Minus,

@@ -17,7 +17,6 @@ import {
   X, 
   Star, 
   Trash2, 
-  Check, 
   CheckCheck,
   Search,
   Zap,

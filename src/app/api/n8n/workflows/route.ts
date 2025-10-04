@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, nodes, connections } = body;
+    const { name, nodes: _nodes, connections: _connections } = body;
 
     // In production, you would create the workflow via n8n API
     // const n8nApiUrl = process.env.N8N_API_BASE_URL || 'http://localhost:5678/api/v1';

@@ -449,7 +449,7 @@ export default function HomePage() {
                             <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">{t('topProvidersDesc')}</p>
                         </div>
                         <div className="grid gap-8 lg:grid-cols-3">
-                            {topProviders.map((provider, index) => (
+                            {topProviders.map((provider, _index) => (
                                 <Card key={provider.name} className="group overflow-hidden bg-background/80 backdrop-blur-sm border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-700 hover:-translate-y-4 relative">
                                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                     <div className="relative h-56 overflow-hidden">
@@ -514,8 +514,8 @@ export default function HomePage() {
                             <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">{t('communitySaysDesc')}</p>
                         </div>
                         <div className="grid gap-8 lg:grid-cols-3">
-                            {testimonials.map((testimonial, index) => (
-                                <Card key={index} className="group bg-background/90 backdrop-blur-sm border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 relative overflow-hidden">
+                            {testimonials.map((testimonial, _index) => (
+                                <Card key={_index} className="group bg-background/90 backdrop-blur-sm border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 relative overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                     <CardContent className="p-8 relative z-10">
                                         <div className="flex items-center mb-8">

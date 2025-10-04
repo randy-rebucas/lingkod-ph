@@ -134,7 +134,7 @@ export class AdminActivityMonitor {
   /**
    * Get admin activities with filtering
    */
-  static async getActivities(filters: {
+  static async getActivities(_filters: {
     adminId?: string;
     activityType?: AdminActivityType;
     severity?: AdminActivitySeverity;
@@ -252,7 +252,7 @@ export class AdminActivityMonitor {
   /**
    * Delete activity alert
    */
-  static async deleteAlert(alertId: string): Promise<{ success: boolean; error?: string }> {
+  static async deleteAlert(_alertId: string): Promise<{ success: boolean; error?: string }> {
     // In production, you'd use deleteDoc
     // await deleteDoc(doc(getDb(), this.ALERTS_COLLECTION, alertId));
     return { success: true };

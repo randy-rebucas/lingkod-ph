@@ -8,15 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
   TrendingUp, 
-  TrendingDown,
   BarChart3,
   LineChart,
   PieChart,
   Activity,
-  Users,
-  DollarSign,
   Target,
-  Award,
   Clock,
   ArrowUpRight,
   ArrowDownRight,

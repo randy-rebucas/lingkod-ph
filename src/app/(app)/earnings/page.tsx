@@ -25,9 +25,7 @@ import {
   WalletCards, 
   TrendingUp,
   Calendar,
-  AlertTriangle,
-  Clock,
-  Eye
+  Clock
 } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';

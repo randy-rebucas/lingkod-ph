@@ -826,7 +826,7 @@ function AnalyticsTab({ reportData }: { reportData: ReportData }) {
 }
 
 // Insights Tab Component
-function InsightsTab({ reportData }: { reportData: ReportData }) {
+function InsightsTab({ reportData: _reportData }: { reportData: ReportData }) {
     return (
         <div className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">

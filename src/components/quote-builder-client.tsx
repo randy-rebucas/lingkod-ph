@@ -56,21 +56,6 @@ const baseLineItemSchema = z.object({
     price: z.coerce.number(),
 });
 
-const _baseQuoteSchema = z.object({
-    clientName: z.string(),
-    clientEmail: z.string(),
-    clientAddress: z.string(),
-    quoteNumber: z.string(),
-    issueDate: z.date(),
-    validUntil: z.date(),
-    lineItems: z.array(baseLineItemSchema),
-    taxRate: z.coerce.number().optional().default(0),
-    discountType: z.enum(['none', 'percentage', 'fixed']).optional().default('none'),
-    discountValue: z.coerce.number().min(0).optional().default(0),
-    notes: z.string().optional(),
-    terms: z.string().optional(),
-});
-
 const baseQuoteSchema = z.object({
   clientName: z.string().min(1, "Client name is required"),
   clientEmail: z.string().email("Valid email is required"),
