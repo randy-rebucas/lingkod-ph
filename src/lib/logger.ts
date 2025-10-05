@@ -98,7 +98,7 @@ class Logger {
     }
   }
 
-  private sendToProductionLogger(entry: LogEntry): void {
+  private sendToProductionLogger(_entry: LogEntry): void {
     // TODO: Implement production logging service
     // Examples: Sentry, LogRocket, DataDog, CloudWatch, etc.
     

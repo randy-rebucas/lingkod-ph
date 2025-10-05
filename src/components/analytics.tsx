@@ -19,10 +19,11 @@ export function GoogleAnalytics() {
     }
 
     // Add global error handler for script injection errors
-    const handleScriptError = (event: ErrorEvent) => {
-      if (event.message && event.message.includes('injectScript')) {
-        console.warn('Script injection error caught and handled:', event.message);
-        event.preventDefault();
+    const handleScriptError = (event: any) => {
+      const errorEvent = event as any;
+      if (errorEvent.message && errorEvent.message.includes('injectScript')) {
+        console.warn('Script injection error caught and handled:', errorEvent.message);
+        errorEvent.preventDefault();
         return false;
       }
     };

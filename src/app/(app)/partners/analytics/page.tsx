@@ -108,7 +108,7 @@ export default function PartnerAnalyticsPage() {
   const calculateEnhancedMetrics = (
     analytics: PartnerAnalytics | null, 
     referrals: ReferralData[], 
-    commissions: PartnerCommission[]
+    _commissions: PartnerCommission[]
   ): EnhancedMetrics => {
     // Calculate overall performance score (default to 0 if no analytics)
     const overallScore = analytics ? calculateOverallScore(analytics) : 0;

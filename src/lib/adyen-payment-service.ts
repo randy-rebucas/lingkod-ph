@@ -293,7 +293,7 @@ export class AdyenPaymentService {
       const userDoc = await db.collection('users').doc(bookingData?.clientId).get();
       
       if (userDoc.exists) {
-        const userData = userDoc.data();
+        const _userData = userDoc.data();
         
         // Add notification to user's notifications
         await db.collection(`users/${bookingData?.clientId}/notifications`).add({

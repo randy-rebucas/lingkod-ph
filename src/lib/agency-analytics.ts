@@ -3,10 +3,7 @@ import {
   collection, 
   query, 
   where, 
-  onSnapshot, 
   getDocs, 
-  orderBy, 
-  limit, 
   Timestamp 
 } from 'firebase/firestore';
 

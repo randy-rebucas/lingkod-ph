@@ -436,7 +436,7 @@ export default function ReferralTrackingPage() {
            title: "Link Copied!",
            description: "Your referral message has been copied to clipboard.",
          });
-       } catch (_clipboardError) {
+       } catch {
          toast({
            variant: "destructive",
            title: "Share Failed",

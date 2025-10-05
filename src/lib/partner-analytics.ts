@@ -125,7 +125,7 @@ export class PartnerAnalyticsService {
 
       // Get top performing categories
       const categoryStats = new Map<string, number>();
-      referrals.forEach(referral => {
+      referrals.forEach(_referral => {
         // This would need to be enhanced with actual category data
         categoryStats.set('General', (categoryStats.get('General') || 0) + 1);
       });

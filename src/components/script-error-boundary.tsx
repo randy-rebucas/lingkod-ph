@@ -2,21 +2,24 @@
 
 import { useEffect } from 'react';
 
+
 export function ScriptErrorBoundary({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Handle unhandled promise rejections that might be related to script injection
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      if (event.reason && typeof event.reason === 'string' && event.reason.includes('injectScript')) {
-        console.warn('Script injection promise rejection caught and handled:', event.reason);
-        event.preventDefault();
+    const handleUnhandledRejection = (event: any) => {
+      const promiseEvent = event as any;
+      if (promiseEvent.reason && typeof promiseEvent.reason === 'string' && promiseEvent.reason.includes('injectScript')) {
+        console.warn('Script injection promise rejection caught and handled:', promiseEvent.reason);
+        promiseEvent.preventDefault();
       }
     };
 
     // Handle general errors
-    const handleError = (event: ErrorEvent) => {
-      if (event.message && event.message.includes('injectScript')) {
-        console.warn('Script injection error caught and handled:', event.message);
-        event.preventDefault();
+    const handleError = (event: any) => {
+      const errorEvent = event as any;
+      if (errorEvent.message && errorEvent.message.includes('injectScript')) {
+        console.warn('Script injection error caught and handled:', errorEvent.message);
+        errorEvent.preventDefault();
         return false;
       }
     };

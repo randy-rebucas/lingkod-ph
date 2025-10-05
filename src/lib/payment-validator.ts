@@ -79,8 +79,8 @@ export class PaymentValidator {
         existingTransaction,
         timeDifference
       };
-    } catch (error) {
-      console.error('Error checking duplicate payment:', error);
+    } catch {
+      console.error('Error checking duplicate payment');
       return { isDuplicate: false };
     }
   }
@@ -129,8 +129,8 @@ export class PaymentValidator {
       }
 
       return { valid: true };
-    } catch (error) {
-      console.error('Error validating booking:', error);
+    } catch {
+      console.error('Error validating booking');
       return { valid: false, error: 'Failed to validate booking' };
     }
   }
@@ -170,8 +170,8 @@ export class PaymentValidator {
       }
 
       return { valid: true };
-    } catch (error) {
-      console.error('Error validating payment session:', error);
+    } catch {
+      console.error('Error validating payment session');
       return { valid: false, error: 'Failed to validate payment session' };
     }
   }
@@ -281,7 +281,7 @@ export class PaymentValidator {
           errors.push(amountValidation.error!);
         }
       }
-    } catch (error) {
+    } catch {
       errors.push('Failed to validate payment amount');
     }
 

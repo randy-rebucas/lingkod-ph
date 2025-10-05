@@ -3,7 +3,7 @@
  */
 
 import { getDb } from './firebase';
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit } from 'firebase/firestore';
 import { 
   getCurrentLocation, 
   getNearbyProviders, 

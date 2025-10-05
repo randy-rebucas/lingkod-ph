@@ -142,7 +142,7 @@ export default function AdminBookingsPage() {
                                         <TableCell className="font-medium">{booking.serviceName}</TableCell>
                                         <TableCell>{booking.clientName}</TableCell>
                                         <TableCell>{booking.providerName}</TableCell>
-                                        <TableCell>₱{booking.price.toFixed(2)}</TableCell>
+                                        <TableCell>₱{booking.price?.toFixed(2) || '0.00'}</TableCell>
                                         <TableCell>
                                             <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
                                         </TableCell>

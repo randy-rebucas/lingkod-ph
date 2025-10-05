@@ -24,7 +24,7 @@ export const generateReferralCode = (userId: string): string => {
  * @param partnerName - The partner name (optional, for additional uniqueness)
  * @returns A referral code in the format LP-XXXX-YYY-ZZZ
  */
-export const generatePartnerReferralCode = (partnerId: string, partnerName?: string): string => {
+export const generatePartnerReferralCode = (partnerId: string, _partnerName?: string): string => {
     // Use partner ID as the base, similar to user ID
     const timestamp = Date.now().toString(36).toUpperCase();
     const partnerPart = partnerId.substring(0, 4).toUpperCase();

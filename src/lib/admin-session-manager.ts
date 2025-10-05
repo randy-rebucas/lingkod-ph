@@ -215,7 +215,7 @@ export class AdminSessionManager {
   /**
    * Get active admin sessions
    */
-  static async getActiveSessions(adminId: string): Promise<AdminSession[]> {
+  static async getActiveSessions(_adminId: string): Promise<AdminSession[]> {
     try {
       // This would typically use a query, but for simplicity we'll get all sessions
       // In production, you'd want to use a proper query with where clauses

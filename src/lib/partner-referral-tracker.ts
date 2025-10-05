@@ -10,9 +10,7 @@ import {
   updateDoc,
   serverTimestamp,
   Timestamp,
-  onSnapshot,
-  orderBy,
-  limit
+  orderBy
 } from 'firebase/firestore';
 import { generatePartnerReferralCode } from './referral-code-generator';
 

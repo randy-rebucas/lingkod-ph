@@ -4,7 +4,7 @@
  */
 
 import { PaymentConfig } from './payment-config';
-import { PaymentValidator } from './payment-validator';
+import { PaymentValidator as _PaymentValidator } from './payment-validator';
 import { PaymentRetryService } from './payment-retry-service';
 import { PaymentMonitoringService } from './payment-monitoring';
 import { adminDb as db } from './firebase-admin';
@@ -195,7 +195,7 @@ export class PaymentProductionValidator {
         status = 'warning';
         details.push('Firebase not configured - monitoring will be limited');
       }
-    } catch (error) {
+    } catch {
       status = 'warning';
       details.push('Payment monitoring service has issues - check Firebase configuration');
     }
@@ -225,7 +225,7 @@ export class PaymentProductionValidator {
         // This is expected - retry service should handle errors gracefully
         status = 'pass';
       }
-    } catch (error) {
+    } catch {
       status = 'fail';
       details.push('Payment retry service is not working properly');
     }
@@ -238,7 +238,7 @@ export class PaymentProductionValidator {
           timestamp: new Date(),
           resolved: false,
         });
-      } catch (error) {
+      } catch {
         status = 'warning';
         details.push('Error logging system has issues - check Firebase configuration');
       }
@@ -291,7 +291,7 @@ export class PaymentProductionValidator {
       for (const collection of requiredCollections) {
         try {
           await db.collection(collection).limit(1).get();
-        } catch (error) {
+        } catch {
           status = 'fail';
           details.push(`Required collection '${collection}' is not accessible`);
         }
@@ -299,7 +299,7 @@ export class PaymentProductionValidator {
 
       // Clean up test document
       await db.collection('test').doc('validation').delete();
-    } catch (error) {
+    } catch {
       status = 'warning';
       details.push('Database connectivity issues detected - check Firebase configuration');
     }
@@ -318,7 +318,7 @@ export class PaymentProductionValidator {
     const details: string[] = [];
     const status: 'pass' | 'warning' | 'fail' = 'pass';
 
-    const requiredEndpoints = [
+    const _requiredEndpoints = [
       '/api/payments/gcash/create',
       '/api/payments/gcash/result',
       '/api/payments/gcash/webhook',

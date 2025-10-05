@@ -2,6 +2,7 @@
 "use client";
 
 import { useTranslations } from 'next-intl';
+
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ import {
   Star,
   ArrowRight
 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 export default function TermsOfServicePage() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
@@ -53,7 +54,7 @@ export default function TermsOfServicePage() {
       const scrollPosition = window.scrollY + 100; // Offset for better UX
 
       sections.forEach((section) => {
-        const element = section as HTMLElement;
+        const element = section as any;
         const sectionTop = element.offsetTop;
         const sectionHeight = element.offsetHeight;
         const sectionId = element.id.replace('section-', '');
