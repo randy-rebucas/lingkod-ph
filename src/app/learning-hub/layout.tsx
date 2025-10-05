@@ -1,0 +1,280 @@
+'use client';
+
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
+import { LanguageSwitcher } from '@/components/language-switcher';
+import { useState } from 'react';
+import { Menu, BookOpen, Users, Building2, UserCheck } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { usePathname } from 'next/navigation';
+
+const LearningHubHeader = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const isActive = (path: string) => pathname === path;
+
+  return (
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <div className="h-6 w-px bg-border" />
+          <Link href="/learning-hub" aria-label="Go to learning hub" className="flex items-center space-x-2">
+            <BookOpen className="h-6 w-6 text-primary" />
+            <span className="font-semibold text-lg">Learning Hub</span>
+          </Link>
+        </div>
+        
+        {/* Desktop Navigation */}
+        <nav className="hidden items-center space-x-6 text-sm font-medium lg:flex" role="navigation" aria-label="Learning hub navigation">
+          <Link 
+            href="/learning-hub" 
+            className={`transition-colors relative group flex items-center space-x-2 ${
+              isActive('/learning-hub') ? 'text-primary' : 'hover:text-primary'
+            }`}
+          >
+            <BookOpen className="h-4 w-4" />
+            <span>Overview</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </Link>
+          <Link 
+            href="/learning-hub/clients" 
+            className={`transition-colors relative group flex items-center space-x-2 ${
+              isActive('/learning-hub/clients') ? 'text-primary' : 'hover:text-primary'
+            }`}
+          >
+            <Users className="h-4 w-4" />
+            <span>For Clients</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </Link>
+          <Link 
+            href="/learning-hub/providers" 
+            className={`transition-colors relative group flex items-center space-x-2 ${
+              isActive('/learning-hub/providers') ? 'text-primary' : 'hover:text-primary'
+            }`}
+          >
+            <UserCheck className="h-4 w-4" />
+            <span>For Providers</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </Link>
+          <Link 
+            href="/learning-hub/agencies" 
+            className={`transition-colors relative group flex items-center space-x-2 ${
+              isActive('/learning-hub/agencies') ? 'text-primary' : 'hover:text-primary'
+            }`}
+          >
+            <Building2 className="h-4 w-4" />
+            <span>For Agencies</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </Link>
+          <Link 
+            href="/learning-hub/partners" 
+            className={`transition-colors relative group flex items-center space-x-2 ${
+              isActive('/learning-hub/partners') ? 'text-primary' : 'hover:text-primary'
+            }`}
+          >
+            <Building2 className="h-4 w-4" />
+            <span>For Partners</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </Link>
+        </nav>
+
+        {/* Desktop Actions */}
+        <div className="hidden items-center space-x-3 lg:flex">
+          <LanguageSwitcher />
+          <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+            <BookOpen className="h-3 w-3 mr-1" />
+            Learning Center
+          </Badge>
+        </div>
+
+        {/* Mobile Menu */}
+        <div className="flex items-center space-x-2 lg:hidden">
+          <LanguageSwitcher />
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm" className="p-2">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <div className="flex flex-col space-y-6 mt-6">
+                <div className="flex items-center space-x-2 pb-4 border-b">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                  <span className="font-semibold">Learning Hub</span>
+                </div>
+                <nav className="flex flex-col space-y-4" role="navigation" aria-label="Mobile learning hub navigation">
+                  <Link 
+                    href="/learning-hub" 
+                    className={`text-lg font-medium transition-colors flex items-center space-x-2 ${
+                      isActive('/learning-hub') ? 'text-primary' : 'hover:text-primary'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    <span>Overview</span>
+                  </Link>
+                  <Link 
+                    href="/learning-hub/clients" 
+                    className={`text-lg font-medium transition-colors flex items-center space-x-2 ${
+                      isActive('/learning-hub/clients') ? 'text-primary' : 'hover:text-primary'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Users className="h-4 w-4" />
+                    <span>For Clients</span>
+                  </Link>
+                  <Link 
+                    href="/learning-hub/providers" 
+                    className={`text-lg font-medium transition-colors flex items-center space-x-2 ${
+                      isActive('/learning-hub/providers') ? 'text-primary' : 'hover:text-primary'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <UserCheck className="h-4 w-4" />
+                    <span>For Providers</span>
+                  </Link>
+                  <Link 
+                    href="/learning-hub/agencies" 
+                    className={`text-lg font-medium transition-colors flex items-center space-x-2 ${
+                      isActive('/learning-hub/agencies') ? 'text-primary' : 'hover:text-primary'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Building2 className="h-4 w-4" />
+                    <span>For Agencies</span>
+                  </Link>
+                  <Link 
+                    href="/learning-hub/partners" 
+                    className={`text-lg font-medium transition-colors flex items-center space-x-2 ${
+                      isActive('/learning-hub/partners') ? 'text-primary' : 'hover:text-primary'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Building2 className="h-4 w-4" />
+                    <span>For Partners</span>
+                  </Link>
+                </nav>
+                <div className="pt-6 border-t">
+                  <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200 w-full justify-center">
+                    <BookOpen className="h-3 w-3 mr-1" />
+                    Learning Center
+                  </Badge>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+const LearningHubFooter = () => {
+  const t = useTranslations('Footer');
+  
+  return (
+    <footer className="border-t bg-gradient-to-b from-background to-muted/30">
+      <div className="container">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 py-16">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <BookOpen className="h-6 w-6 text-primary" />
+              <span className="font-semibold text-lg">Learning Hub</span>
+            </div>
+            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
+              Your comprehensive guide to using LocalPro effectively. Learn how to get the most out of our platform.
+            </p>
+            <div className="flex space-x-4">
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" asChild>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                </a>
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" asChild>
+                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                  </svg>
+                </a>
+              </Button>
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0" asChild>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987 6.62 0 11.987-5.367 11.987-11.987C24.014 5.367 18.637.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.198 14.895 3.708 13.744 3.708 12.447s.49-2.448 1.297-3.323c.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.807.875 1.297 2.026 1.297 3.323s-.49 2.448-1.297 3.323c-.875.807-2.026 1.297-3.323 1.297zm7.83-9.281h-1.297v1.297h1.297V7.707zm-3.323 1.297c.718 0 1.297.579 1.297 1.297s-.579 1.297-1.297 1.297-1.297-.579-1.297-1.297.579-1.297 1.297-1.297z"/>
+                  </svg>
+                </a>
+              </Button>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-4 text-foreground">Quick Links</h4>
+            <ul className="space-y-3 text-sm" role="list">
+              <li><Link href="/learning-hub" className="text-muted-foreground hover:text-primary transition-colors">Overview</Link></li>
+              <li><Link href="/learning-hub/clients" className="text-muted-foreground hover:text-primary transition-colors">Client Guide</Link></li>
+              <li><Link href="/learning-hub/providers" className="text-muted-foreground hover:text-primary transition-colors">Provider Guide</Link></li>
+              <li><Link href="/learning-hub/agencies" className="text-muted-foreground hover:text-primary transition-colors">Agency Guide</Link></li>
+              <li><Link href="/learning-hub/partners" className="text-muted-foreground hover:text-primary transition-colors">Partner Guide</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-4 text-foreground">Support</h4>
+            <ul className="space-y-3 text-sm" role="list">
+              <li><Link href="/help-center" className="text-muted-foreground hover:text-primary transition-colors">Help Center</Link></li>
+              <li><Link href="/contact-us" className="text-muted-foreground hover:text-primary transition-colors">Contact Us</Link></li>
+              <li><Link href="/our-services" className="text-muted-foreground hover:text-primary transition-colors">Our Services</Link></li>
+              <li><Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">About Us</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-4 text-foreground">Get Started</h4>
+            <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+              Ready to join LocalPro? Choose your role and get started today.
+            </p>
+            <div className="space-y-2">
+              <Button asChild size="sm" className="w-full">
+                <Link href="/signup">Sign Up Now</Link>
+              </Button>
+              <Button variant="outline" asChild size="sm" className="w-full">
+                <Link href="/login">Login</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+        <div className="border-t pt-8 pb-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-muted-foreground text-sm">
+              &copy; {new Date().getFullYear()} LocalPro Learning Hub. {t('allRightsReserved')}
+            </p>
+            <div className="flex items-center gap-6 text-sm">
+              <Link href="/privacy-policy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
+              <Link href="/terms-of-service" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link>
+              <Link href="/cookies" className="text-muted-foreground hover:text-primary transition-colors">Cookie Policy</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+};
+
+export default function LearningHubLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      <LearningHubHeader />
+      <main className="flex-1">
+        {children}
+      </main>
+      <LearningHubFooter />
+    </div>
+  );
+}

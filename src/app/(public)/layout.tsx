@@ -58,6 +58,13 @@ const Header = () => {
             {t('helpCenter')}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </Link>
+          <Link 
+            href="/learning-hub" 
+            className="transition-colors hover:text-primary relative group"
+          >
+            Learning Hub
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </Link>
         </nav>
 
         {/* Desktop Actions */}
@@ -118,6 +125,13 @@ const Header = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {t('helpCenter')}
+                  </Link>
+                  <Link 
+                    href="/learning-hub" 
+                    className="text-lg font-medium transition-colors hover:text-primary"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Learning Hub
                   </Link>
                 </nav>
                 <div className="flex flex-col space-y-3 pt-6 border-t">
@@ -190,6 +204,7 @@ const Footer = () => {
             <h4 className="font-semibold mb-4 text-foreground">{t('support')}</h4>
             <ul className="space-y-3 text-sm" role="list">
               <li><Link href="/help-center" className="text-muted-foreground hover:text-primary transition-colors">{t('helpCenter')}</Link></li>
+              <li><Link href="/learning-hub" className="text-muted-foreground hover:text-primary transition-colors">Learning Hub</Link></li>
               <li><Link href="/contact-us" className="text-muted-foreground hover:text-primary transition-colors">{t('contact')}</Link></li>
               <li><Link href="/terms-of-service" className="text-muted-foreground hover:text-primary transition-colors">{t('terms')}</Link></li>
               <li><Link href="/privacy-policy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link></li>

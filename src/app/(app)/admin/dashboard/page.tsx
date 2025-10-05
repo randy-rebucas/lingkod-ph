@@ -9,7 +9,7 @@ import { DollarSign, Users, Users2, Briefcase } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { getDb  } from '@/lib/firebase';
+import { getDbSafe } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy, limit, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 // import { formatDistanceToNow } from "date-fns";
@@ -89,13 +89,20 @@ export default function AdminDashboardPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (userRole !== 'admin' || !getDb()) {
+        if (userRole !== 'admin') {
+            setLoading(false);
+            return;
+        }
+
+        const db = getDbSafe();
+        if (!db) {
+            console.error("Firebase database not initialized");
             setLoading(false);
             return;
         }
         
-        const usersQuery = query(collection(getDb(), "users"));
-        const bookingsQuery = query(collection(getDb(), "bookings"));
+        const usersQuery = query(collection(db, "users"));
+        const bookingsQuery = query(collection(db, "bookings"));
 
         const unsubUsers = onSnapshot(usersQuery, (snapshot) => {
             let userCount = 0, providerCount = 0, clientCount = 0, agencyCount = 0;
@@ -121,12 +128,12 @@ export default function AdminDashboardPage() {
             setLoading(false);
         });
 
-        const recentBookingsQuery = query(collection(getDb(), "bookings"), orderBy("createdAt", "desc"), limit(5));
+        const recentBookingsQuery = query(collection(db, "bookings"), orderBy("createdAt", "desc"), limit(5));
         const unsubRecentBookings = onSnapshot(recentBookingsQuery, (snapshot) => {
             setRecentBookings(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking)));
         });
         
-        const recentUsersQuery = query(collection(getDb(), "users"), orderBy("createdAt", "desc"), limit(5));
+        const recentUsersQuery = query(collection(db, "users"), orderBy("createdAt", "desc"), limit(5));
         const unsubRecentUsers = onSnapshot(recentUsersQuery, (snapshot) => {
             setRecentUsers(snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as User)));
         });

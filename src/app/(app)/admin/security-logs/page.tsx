@@ -3,13 +3,14 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
+import { getDbSafe } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { Shield } from "lucide-react";
+import { Shield, AlertCircle } from "lucide-react";
+import { useErrorHandler } from "@/hooks/use-error-handler";
 
 type AuditLog = {
     id: string;
@@ -28,30 +29,90 @@ const formatAction = (action: string) => {
 };
 
 export default function SecurityLogsPage() {
-    const { userRole } = useAuth();
+    const { userRole, loading: authLoading } = useAuth();
     const [logs, setLogs] = useState<AuditLog[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const { handleError } = useErrorHandler();
 
     useEffect(() => {
-        if (userRole !== 'admin' || !getDb()) {
+        // Wait for auth to finish loading before proceeding
+        if (authLoading) {
+            return;
+        }
+
+        if (userRole !== 'admin') {
             setLoading(false);
             return;
         }
 
-        const logsQuery = query(collection(getDb(), "auditLogs"), orderBy("timestamp", "desc"));
-        
-        const unsubscribe = onSnapshot(logsQuery, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AuditLog));
-            setLogs(data);
+        const db = getDbSafe();
+        if (!db) {
+            const errorMsg = "Firebase database not initialized";
+            console.error(errorMsg);
+            setError(errorMsg);
             setLoading(false);
-        }, (error) => {
-            console.error("Error fetching audit logs:", error);
+            return;
+        }
+
+        try {
+            const logsQuery = query(collection(db, "auditLogs"), orderBy("timestamp", "desc"));
+            
+            const unsubscribe = onSnapshot(logsQuery, (snapshot) => {
+                try {
+                    const data = snapshot.docs.map(doc => {
+                        const docData = doc.data();
+                        return { 
+                            id: doc.id, 
+                            ...docData,
+                            // Ensure timestamp is properly handled
+                            timestamp: docData.timestamp || null
+                        } as AuditLog;
+                    });
+                    setLogs(data);
+                    setError(null);
+                    setLoading(false);
+                } catch (parseError) {
+                    console.error("Error parsing audit logs:", parseError);
+                    handleError(parseError, 'parse audit logs');
+                    setError("Failed to parse audit logs");
+                    setLoading(false);
+                }
+            }, (error) => {
+                console.error("Error fetching audit logs:", error);
+                handleError(error, 'fetch audit logs');
+                setError("Failed to fetch audit logs");
+                setLoading(false);
+            });
+
+            return () => unsubscribe();
+        } catch (queryError) {
+            console.error("Error setting up audit logs query:", queryError);
+            handleError(queryError, 'setup audit logs query');
+            setError("Failed to setup audit logs query");
             setLoading(false);
-        });
+        }
+    }, [userRole, authLoading, handleError]);
 
-        return () => unsubscribe();
-    }, [userRole]);
 
+    // Show loading while auth is loading
+    if (authLoading) {
+        return (
+            <div className="container space-y-8">
+                <div className=" mx-auto">
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Security & Access Logs</h1>
+                    <p className="text-muted-foreground">Loading...</p>
+                </div>
+                <div className=" mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardContent className="p-6">
+                            <Skeleton className="h-64 w-full" />
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
 
     if (userRole !== 'admin') {
         return (
@@ -68,6 +129,32 @@ export default function SecurityLogsPage() {
         );
     }
     
+    // Show error state if there's an error
+    if (error) {
+        return (
+            <div className="container space-y-8">
+                <div className=" mx-auto">
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Security & Access Logs</h1>
+                    <p className="text-muted-foreground">Monitor important actions performed on the platform.</p>
+                </div>
+                <div className=" mx-auto">
+                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
+                        <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent flex items-center gap-2">
+                                <AlertCircle className="h-5 w-5 text-destructive" />
+                                Error Loading Logs
+                            </CardTitle>
+                            <CardDescription>{error}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <p className="text-muted-foreground">Please try refreshing the page or contact support if the issue persists.</p>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        );
+    }
+
     if (loading) {
         return (
              <div className="container space-y-8">
@@ -113,10 +200,21 @@ export default function SecurityLogsPage() {
                             <TableBody>
                                 {logs.length > 0 ? logs.map(log => (
                                     <TableRow key={log.id}>
-                                        <TableCell className="text-xs">{log.timestamp ? format(log.timestamp.toDate(), 'PPpp') : 'N/A'}</TableCell>
-                                        <TableCell className="font-medium">{log.actor.name} ({log.actor.role})</TableCell>
-                                        <TableCell>{formatAction(log.action)}</TableCell>
-                                        <TableCell className="font-mono text-xs max-w-sm truncate">{JSON.stringify(log.details)}</TableCell>
+                                        <TableCell className="text-xs">
+                                            {log.timestamp && typeof log.timestamp.toDate === 'function' ? 
+                                                format(log.timestamp.toDate(), 'PPpp') : 
+                                                log.timestamp && typeof log.timestamp === 'object' && 'seconds' in log.timestamp ?
+                                                    format(new Date(log.timestamp.seconds * 1000), 'PPpp') :
+                                                    'N/A'
+                                            }
+                                        </TableCell>
+                                        <TableCell className="font-medium">
+                                            {log.actor?.name || 'Unknown'} ({log.actor?.role || 'Unknown'})
+                                        </TableCell>
+                                        <TableCell>{log.action ? formatAction(log.action) : 'Unknown Action'}</TableCell>
+                                        <TableCell className="font-mono text-xs max-w-sm truncate">
+                                            {log.details ? JSON.stringify(log.details) : 'No details'}
+                                        </TableCell>
                                     </TableRow>
                                 )) : (
                                     <TableRow>

@@ -77,6 +77,11 @@ export function getDb(): Firestore {
   return db;
 }
 
+// Safe version that returns null instead of throwing
+export function getDbSafe(): Firestore | null {
+  return db;
+}
+
 // Helper function to ensure auth is available
 export function getAuthInstance(): Auth {
   if (!auth) {
