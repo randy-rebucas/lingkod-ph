@@ -28,11 +28,45 @@ import {
   Star,
   ArrowRight
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function TermsOfServicePage() {
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const t = useTranslations('TermsOfService');
+  
+  // Function to scroll to a specific section
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+      setActiveSection(sectionId);
+    }
+  };
+
+  // Scroll spy functionality
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = document.querySelectorAll('[id^="section-"]');
+      const scrollPosition = window.scrollY + 100; // Offset for better UX
+
+      sections.forEach((section) => {
+        const element = section as HTMLElement;
+        const sectionTop = element.offsetTop;
+        const sectionHeight = element.offsetHeight;
+        const sectionId = element.id.replace('section-', '');
+
+        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+          setActiveSection(sectionId);
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   
   const sections = [
     {
@@ -217,13 +251,28 @@ export default function TermsOfServicePage() {
     },
   ];
 
-  const quickSummaryData = t('quickSummary') as unknown as any[];
-  const quickSummary = quickSummaryData.map((item, index) => ({
-    ...item,
-    icon: [FileText, Shield, CreditCard, Users, AlertTriangle, CheckCircle][index] ? 
-      [FileText, Shield, CreditCard, Users, AlertTriangle, CheckCircle][index]({ className: "h-4 w-4 text-primary" }) : 
-      FileText({ className: "h-4 w-4 text-primary" })
-  }));
+  const quickSummary = [
+    {
+      title: "Service Agreement",
+      description: "By using LocalPro, you agree to our terms and conditions for service provision and platform usage.",
+      icon: <FileText className="h-4 w-4 text-primary" />
+    },
+    {
+      title: "User Responsibilities", 
+      description: "Users must be 18+, provide accurate information, and use the platform responsibly and legally.",
+      icon: <Shield className="h-4 w-4 text-primary" />
+    },
+    {
+      title: "Payment Terms",
+      description: "Clear pricing, secure payments, and transparent fee structure for all transactions.",
+      icon: <CreditCard className="h-4 w-4 text-primary" />
+    },
+    {
+      title: "Privacy & Security",
+      description: "Your data is protected with industry-standard security measures and privacy practices.",
+      icon: <Users className="h-4 w-4 text-primary" />
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -249,7 +298,7 @@ export default function TermsOfServicePage() {
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button asChild size="lg" className="h-14 px-8 text-lg shadow-glow hover:shadow-glow/50 transition-all duration-300">
                 <a href="#quick-summary">
-                  {t('quickSummary')} <ArrowRight className="ml-2 h-5 w-5" />
+                  Quick Summary <ArrowRight className="ml-2 h-5 w-5" />
                 </a>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 px-8 text-lg border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
@@ -282,7 +331,7 @@ export default function TermsOfServicePage() {
                           key={section.id}
                           variant={activeSection === section.id ? "default" : "ghost"}
                           className="w-full justify-start text-left h-auto p-3"
-                          onClick={() => setActiveSection(section.id)}
+                          onClick={() => scrollToSection(`section-${section.id}`)}
                         >
                           <div className="flex items-center gap-3">
                             {section.icon}
@@ -353,7 +402,7 @@ export default function TermsOfServicePage() {
               {/* Terms Sections */}
               <div className="space-y-6">
                         {sections.map((section, _index) => (
-                  <Card key={section.id} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
+                  <Card key={section.id} id={`section-${section.id}`} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-8">
                       <div className="flex items-center gap-3 mb-6">
                         <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
@@ -370,11 +419,15 @@ export default function TermsOfServicePage() {
                         </div>
                       </div>
                       <div className="space-y-4 text-muted-foreground leading-relaxed">
-                        {Array.isArray(section.content) ? 
-                          section.content.map((paragraph, paragraphIndex) => (
-                            <p key={paragraphIndex} className="text-base">{paragraph}</p>
+                        {typeof section.content === 'string' ? 
+                          (section.content as string).split('. ').map((sentence, sentenceIndex, _, sentences = (section.content as string).split('. ')) => (
+                            <p key={sentenceIndex} className="text-base">{sentence}{sentenceIndex < sentences.length - 1 ? '.' : ''}</p>
                           )) : 
-                          <p className="text-base">{section.content}</p>
+                          Array.isArray(section.content) ? 
+                            section.content.map((paragraph, paragraphIndex) => (
+                              <p key={paragraphIndex} className="text-base">{paragraph}</p>
+                            )) :
+                            <p className="text-base">{section.content}</p>
                         }
                       </div>
                     </CardContent>

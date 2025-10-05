@@ -146,7 +146,7 @@ export default function MyFavoritesPage() {
     if (loading) {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
                     </div>
@@ -157,13 +157,13 @@ export default function MyFavoritesPage() {
 
     return (
         <div className="container space-y-8">
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                 <p className="text-muted-foreground">
                     {t('subtitle')}
                 </p>
             </div>
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 {providers.length > 0 ? (
 
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

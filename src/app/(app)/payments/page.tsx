@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Eye, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useTranslations } from 'next-intl';
 // import Image from "next/image";
 
 type PaymentTransaction = {
@@ -39,6 +40,7 @@ export default function PaymentHistoryPage() {
     const [transactions, setTransactions] = useState<PaymentTransaction[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast: _toast } = useToast();
+    const t = useTranslations('Payments');
 
     useEffect(() => {
         if (!user || !getDb()) return;
@@ -64,13 +66,13 @@ export default function PaymentHistoryPage() {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'completed':
-                return <Badge className="bg-green-100 text-green-800">Completed</Badge>;
+                return <Badge className="bg-green-100 text-green-800">{t('completed')}</Badge>;
             case 'pending':
-                return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>;
+                return <Badge className="bg-yellow-100 text-yellow-800">{t('pending')}</Badge>;
             case 'rejected':
-                return <Badge variant="destructive">Rejected</Badge>;
+                return <Badge variant="destructive">{t('rejected')}</Badge>;
             case 'failed':
-                return <Badge variant="destructive">Failed</Badge>;
+                return <Badge variant="destructive">{t('failed')}</Badge>;
             default:
                 return <Badge variant="outline">{status}</Badge>;
         }
@@ -79,11 +81,11 @@ export default function PaymentHistoryPage() {
     const getTypeLabel = (type: string) => {
         switch (type) {
             case 'booking_payment':
-                return 'Service Payment';
+                return t('servicePayment');
             case 'payout_request':
-                return 'Payout Request';
+                return t('payoutRequest');
             case 'refund':
-                return 'Refund';
+                return t('refund');
             default:
                 return type;
         }
@@ -92,11 +94,11 @@ export default function PaymentHistoryPage() {
     if (loading) {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
-                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payment History</h1>
-                    <p className="text-muted-foreground">View all your payment transactions and receipts.</p>
+                <div className=" mx-auto">
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-6">
                             <Skeleton className="h-64 w-full" />
@@ -109,35 +111,35 @@ export default function PaymentHistoryPage() {
 
     return (
         <div className="container space-y-8">
-            <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <div className=" mx-auto flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payment History</h1>
-                    <p className="text-muted-foreground">View all your payment transactions and receipts.</p>
+                    <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
+                    <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
                 <Button variant="outline" onClick={() => window.location.reload()} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">
                     <RefreshCw className="mr-2 h-4 w-4" />
-                    Refresh
+                    {t('refresh')}
                 </Button>
             </div>
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Transaction History</CardTitle>
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('transactionHistory')}</CardTitle>
                         <CardDescription>
-                            {transactions.length} transaction{transactions.length !== 1 ? 's' : ''} found
+                            {transactions.length} {transactions.length === 1 ? t('transactionFound') : t('transactionsFound')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Type</TableHead>
-                                    <TableHead>Amount</TableHead>
-                                    <TableHead>Method</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                    <TableHead>{t('date')}</TableHead>
+                                    <TableHead>{t('type')}</TableHead>
+                                    <TableHead>{t('amount')}</TableHead>
+                                    <TableHead>{t('method')}</TableHead>
+                                    <TableHead>{t('status')}</TableHead>
+                                    <TableHead className="text-right">{t('actions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -161,41 +163,41 @@ export default function PaymentHistoryPage() {
                                                 <DialogTrigger asChild>
                                                     <Button variant="outline" size="sm">
                                                         <Eye className="mr-2 h-4 w-4" />
-                                                        View Details
+                                                        {t('viewDetails')}
                                                     </Button>
                                                 </DialogTrigger>
                                                 <DialogContent className="max-w-2xl">
                                                     <DialogHeader>
-                                                        <DialogTitle>Transaction Details</DialogTitle>
+                                                        <DialogTitle>{t('transactionDetails')}</DialogTitle>
                                                         <DialogDescription>
-                                                            Transaction ID: {transaction.id}
+                                                            {t('transactionId')}: {transaction.id}
                                                         </DialogDescription>
                                                     </DialogHeader>
                                                     <div className="space-y-4">
                                                         <div className="grid grid-cols-2 gap-4">
                                                             <div>
-                                                                <label className="text-sm font-medium text-muted-foreground">Type</label>
+                                                                <label className="text-sm font-medium text-muted-foreground">{t('type')}</label>
                                                                 <p className="text-sm">{getTypeLabel(transaction.type)}</p>
                                                             </div>
                                                             <div>
-                                                                <label className="text-sm font-medium text-muted-foreground">Amount</label>
+                                                                <label className="text-sm font-medium text-muted-foreground">{t('amount')}</label>
                                                                 <p className="text-sm">₱{transaction.amount.toFixed(2)}</p>
                                                             </div>
                                                             <div>
-                                                                <label className="text-sm font-medium text-muted-foreground">Payment Method</label>
+                                                                <label className="text-sm font-medium text-muted-foreground">{t('paymentMethod')}</label>
                                                                 <p className="text-sm">{transaction.paymentMethod}</p>
                                                             </div>
                                                             <div>
-                                                                <label className="text-sm font-medium text-muted-foreground">Status</label>
+                                                                <label className="text-sm font-medium text-muted-foreground">{t('status')}</label>
                                                                 <div className="mt-1">{getStatusBadge(transaction.status)}</div>
                                                             </div>
                                                             <div>
-                                                                <label className="text-sm font-medium text-muted-foreground">Date</label>
+                                                                <label className="text-sm font-medium text-muted-foreground">{t('date')}</label>
                                                                 <p className="text-sm">{format(transaction.createdAt.toDate(), 'PPp')}</p>
                                                             </div>
                                                             {transaction.verifiedAt && (
                                                                 <div>
-                                                                    <label className="text-sm font-medium text-muted-foreground">Verified At</label>
+                                                                    <label className="text-sm font-medium text-muted-foreground">{t('verifiedAt')}</label>
                                                                     <p className="text-sm">{format(transaction.verifiedAt.toDate(), 'PPp')}</p>
                                                                 </div>
                                                             )}
@@ -203,18 +205,18 @@ export default function PaymentHistoryPage() {
                                                         
                                                         {transaction.rejectionReason && (
                                                             <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                                                                <label className="text-sm font-medium text-red-800">Rejection Reason</label>
+                                                                <label className="text-sm font-medium text-red-800">{t('rejectionReason')}</label>
                                                                 <p className="text-sm text-red-800 mt-1">{transaction.rejectionReason}</p>
                                                             </div>
                                                         )}
 
                                                         {transaction.paypalOrderId && (
                                                             <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-                                                                <label className="text-sm font-medium text-blue-800">PayPal Order ID</label>
+                                                                <label className="text-sm font-medium text-blue-800">{t('paypalOrderId')}</label>
                                                                 <p className="text-sm text-blue-800 mt-1 font-mono">{transaction.paypalOrderId}</p>
                                                                 {transaction.payerEmail && (
                                                                     <>
-                                                                        <label className="text-sm font-medium text-blue-800 mt-2 block">Payer Email</label>
+                                                                        <label className="text-sm font-medium text-blue-800 mt-2 block">{t('payerEmail')}</label>
                                                                         <p className="text-sm text-blue-800 mt-1">{transaction.payerEmail}</p>
                                                                     </>
                                                                 )}
@@ -223,7 +225,7 @@ export default function PaymentHistoryPage() {
 
                                                         {transaction.bookingId && (
                                                             <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
-                                                                <label className="text-sm font-medium text-gray-800">Booking ID</label>
+                                                                <label className="text-sm font-medium text-gray-800">{t('bookingId')}</label>
                                                                 <p className="text-sm text-gray-800 mt-1 font-mono">{transaction.bookingId}</p>
                                                             </div>
                                                         )}
@@ -235,7 +237,7 @@ export default function PaymentHistoryPage() {
                                 )) : (
                                     <TableRow>
                                         <TableCell colSpan={6} className="text-center h-24">
-                                            No payment transactions found.
+                                            {t('noTransactionsFound')}
                                         </TableCell>
                                     </TableRow>
                                 )}

@@ -25,6 +25,9 @@ import { findMatchingProviders } from "@/ai/flows/find-matching-providers";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LocationBasedProviderService } from "@/lib/location-based-provider-service";
 import { getCurrentLocation } from "@/lib/geolocation-utils";
+import ProviderOnboardingBanner from "@/components/provider-onboarding-banner";
+import ClientOnboardingBanner from "@/components/client-onboarding-banner";
+import AgencyOnboardingBanner from "@/components/agency-onboarding-banner";
 
 
 type Booking = {
@@ -117,9 +120,13 @@ const DashboardCard = memo(({ title, icon: Icon, value, change, isLoading }: { t
 });
 
 // Function to process bookings for the earnings chart
-const processEarningsData = (bookings: Booking[]) => {
+const processEarningsData = (bookings: Booking[], t: any) => {
     const monthlyEarnings: { [key: string]: number } = {};
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthNames = [
+        t('monthNames.jan'), t('monthNames.feb'), t('monthNames.mar'), t('monthNames.apr'),
+        t('monthNames.may'), t('monthNames.jun'), t('monthNames.jul'), t('monthNames.aug'),
+        t('monthNames.sep'), t('monthNames.oct'), t('monthNames.nov'), t('monthNames.dec')
+    ];
 
     bookings.forEach(booking => {
         if (booking.status === 'Completed') {
@@ -223,7 +230,7 @@ const ProviderCard = ({ provider, isFavorite, onToggleFavorite, t }: { provider:
                 {provider.distanceFormatted && (
                     <div className="flex items-center gap-2 text-xs text-primary font-medium">
                         <MapPin className="h-3 w-3" />
-                        <span>{provider.distanceFormatted} away</span>
+                        <span>{provider.distanceFormatted} {t('away')}</span>
                     </div>
                 )}
 
@@ -240,11 +247,11 @@ const ProviderCard = ({ provider, isFavorite, onToggleFavorite, t }: { provider:
                     </div>
                 )}
 
-                <p className="text-xs text-muted-foreground line-clamp-1">{provider.bio || 'No bio available.'}</p>
+                <p className="text-xs text-muted-foreground line-clamp-1">{provider.bio || t('noBioAvailable')}</p>
             </CardContent>
             <CardFooter className="pt-2">
                  <Button size="sm" className="w-full shadow-glow hover:shadow-glow/50 transition-all duration-300" asChild>
-                    <Link href={`/providers/${provider.uid}`}>View Profile</Link>
+                    <Link href={`/providers/${provider.uid}`}>{t('viewProfile')}</Link>
                 </Button>
             </CardFooter>
         </Card>
@@ -276,7 +283,7 @@ const AgencyCard = ({ agency, isFavorite, onToggleFavorite, t }: { agency: Provi
                     </Avatar>
                     <Badge className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 text-xs px-1 py-0">
                         <Users2 className="h-2 w-2 mr-1" />
-                        Agency
+{t('agency')}
                     </Badge>
                 </div>
                 <div className="flex items-center justify-center gap-2 mt-3">
@@ -301,7 +308,7 @@ const AgencyCard = ({ agency, isFavorite, onToggleFavorite, t }: { agency: Provi
                 {agency.distanceFormatted && (
                     <div className="flex items-center gap-2 text-xs text-purple-600 font-medium">
                         <MapPin className="h-3 w-3" />
-                        <span>{agency.distanceFormatted} away</span>
+                        <span>{agency.distanceFormatted} {t('away')}</span>
                     </div>
                 )}
 
@@ -318,18 +325,18 @@ const AgencyCard = ({ agency, isFavorite, onToggleFavorite, t }: { agency: Provi
                     </div>
                 )}
 
-                <p className="text-xs text-muted-foreground line-clamp-1">{agency.bio || 'Professional agency services.'}</p>
+                <p className="text-xs text-muted-foreground line-clamp-1">{agency.bio || t('professionalAgencyServices')}</p>
             </CardContent>
             <CardFooter className="pt-2">
                  <Button size="sm" className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0" asChild>
-                    <Link href={`/agencies/${agency.uid}`}>View Agency</Link>
+                    <Link href={`/agencies/${agency.uid}`}>{t('viewAgency')}</Link>
                 </Button>
             </CardFooter>
         </Card>
     );
 };
 
-const ProviderRow = ({ provider, isFavorite, onToggleFavorite }: { provider: Provider; isFavorite: boolean; onToggleFavorite: (provider: Provider) => void; }) => {
+const ProviderRow = ({ provider, isFavorite, onToggleFavorite, t }: { provider: Provider; isFavorite: boolean; onToggleFavorite: (provider: Provider) => void; t: any; }) => {
     return (
         <div className="flex items-center p-4 border-b last:border-b-0 hover:bg-secondary/50">
             <Avatar className="h-12 w-12 mr-4">
@@ -346,7 +353,7 @@ const ProviderRow = ({ provider, isFavorite, onToggleFavorite }: { provider: Pro
                 )}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                     {renderStars(provider.rating)}
-                    <span>({provider.reviewCount} reviews)</span>
+                    <span>({provider.reviewCount} {t('reviews')})</span>
                 </div>
                 <div className="flex flex-wrap gap-1 mt-2">
                     {provider.keyServices?.slice(0, 3).map(service => (
@@ -361,7 +368,7 @@ const ProviderRow = ({ provider, isFavorite, onToggleFavorite }: { provider: Pro
     )
 }
 
-const AgencyRow = ({ agency, isFavorite, onToggleFavorite }: { agency: Provider; isFavorite: boolean; onToggleFavorite: (agency: Provider) => void; }) => {
+const AgencyRow = ({ agency, isFavorite, onToggleFavorite, t }: { agency: Provider; isFavorite: boolean; onToggleFavorite: (agency: Provider) => void; t: any; }) => {
     return (
         <div className="flex items-center p-4 border-b last:border-b-0 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 dark:hover:from-purple-950/20 dark:hover:to-blue-950/20 bg-gradient-to-r from-purple-50/30 to-blue-50/30 dark:from-purple-950/10 dark:to-blue-950/10">
             <div className="relative">
@@ -383,7 +390,7 @@ const AgencyRow = ({ agency, isFavorite, onToggleFavorite }: { agency: Provider;
                 )}
                 <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                     {renderStars(agency.rating)}
-                    <span>({agency.reviewCount} reviews)</span>
+                    <span>({agency.reviewCount} {t('reviews')})</span>
                 </div>
                 <div className="flex flex-wrap gap-1 mt-2">
                     {agency.keyServices?.slice(0, 3).map(service => (
@@ -528,7 +535,7 @@ const DashboardPage = memo(function DashboardPage() {
                     const ratingInfo = providerRatings[data.uid];
                     return {
                         uid: data.uid,
-                        displayName: data.displayName || 'Unnamed Provider',
+                        displayName: data.displayName || t('unnamedProvider'),
                         bio: data.bio,
                         photoURL: data.photoURL,
                         rating: ratingInfo ? ratingInfo.totalRating / ratingInfo.count : 0,
@@ -650,7 +657,7 @@ const DashboardPage = memo(function DashboardPage() {
         : "N/A";
         
     const _recentBookings = bookings.slice(0, 5);
-    const earningsData = processEarningsData(bookings);
+    const earningsData = processEarningsData(bookings, t);
 
     const handleSmartSearch = useCallback(async (query: string) => {
         if (!query.trim()) {
@@ -686,13 +693,13 @@ const DashboardPage = memo(function DashboardPage() {
                 
                 toast({
                     title: t('smartSearchComplete'),
-                    description: `Found and ranked ${matchedProviders.length} providers for you.`,
+                    description: t('foundAndRankedProviders', { count: matchedProviders.length }),
                 });
             } else {
                 setProviders([]);
                 toast({
                     title: t('noResults'),
-                    description: `Could not find any providers for your search. Try a broader term.`,
+                    description: t('noProvidersFoundForSearch'),
                 });
             }
         } catch (error) {
@@ -700,7 +707,7 @@ const DashboardPage = memo(function DashboardPage() {
             handleError(error);
             toast({
                 title: t('smartSearchFailed'),
-                description: "There was an error finding providers. Please try a different search.",
+                description: t('errorFindingProviders'),
                 variant: "destructive",
             });
         } finally {
@@ -724,8 +731,8 @@ const DashboardPage = memo(function DashboardPage() {
             
             if (!location) {
                 toast({
-                    title: "Location Access Required",
-                    description: "Please enable location services to find nearby providers.",
+                    title: t('locationAccessRequired'),
+                    description: t('enableLocationServices'),
                     variant: "destructive",
                 });
                 setShowNearbyProviders(false);
@@ -746,15 +753,15 @@ const DashboardPage = memo(function DashboardPage() {
             setProviders(nearbyProviders);
             
             toast({
-                title: "Nearby Providers Found",
-                description: `Found ${nearbyProviders.length} providers within 50km of your location.`,
+                title: t('nearbyProvidersFoundTitle'),
+                description: t('foundProvidersWithin50km', { count: nearbyProviders.length }),
             });
 
         } catch (error) {
             console.error("Error finding nearby providers:", error);
             toast({
-                title: "Error Finding Nearby Providers",
-                description: "There was an error finding providers near you. Please try again.",
+                title: t('errorFindingNearbyProviders'),
+                description: t('errorFindingProvidersNearYou'),
                 variant: "destructive",
             });
             setShowNearbyProviders(false);
@@ -808,7 +815,7 @@ const DashboardPage = memo(function DashboardPage() {
             handleError(error);
             toast({ 
                 variant: "destructive", 
-                title: "Error", 
+                title: t('error'), 
                 description: t('couldNotUpdateFavorites') 
             });
         }
@@ -825,12 +832,15 @@ const DashboardPage = memo(function DashboardPage() {
     if (userRole === 'client') {
         return (
              <div className="container space-y-8">
+                 {/* Client Onboarding Banner */}
+                 <ClientOnboardingBanner />
+                 
                  <Card className="border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="pb-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h2 className="text-2xl font-bold">Find Service Providers</h2>
-                                <p className="text-muted-foreground">Discover trusted professionals in your area</p>
+                                <h2 className="text-2xl font-bold">{t('findServiceProviders')}</h2>
+                                <p className="text-muted-foreground">{t('discoverTrustedProfessionals')}</p>
                             </div>
                             <div className="flex items-center gap-1 border rounded-lg p-1 bg-background/50">
                                 <Button size="icon" variant={viewMode === 'grid' ? 'secondary' : 'ghost'} onClick={() => setViewMode('grid')} className="h-8 w-8">
@@ -845,46 +855,46 @@ const DashboardPage = memo(function DashboardPage() {
                     <CardContent className="space-y-6">
                         <div className="relative">
                             <Input 
-                                placeholder="Search for services (e.g., house cleaning, web design, tutoring)..." 
+                                placeholder={t('searchPlaceholder')} 
                                 className="w-full h-12 text-base pl-4 pr-20 sm:pr-32 border-2 focus:border-primary transition-colors" 
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && handleSmartSearch(searchTerm)}
-                                aria-label="Search for service providers"
+                                aria-label={t('searchForServiceProviders')}
                                 aria-describedby="search-help"
                             />
                             <Button 
                                 className="absolute right-2 top-1/2 -translate-y-1/2 h-8 sm:px-3 px-2"
                                 onClick={() => handleSmartSearch(searchTerm)}
                                 disabled={isSmartSearching}
-                                aria-label={isSmartSearching ? 'Searching for providers' : 'Search providers'}
+                                aria-label={isSmartSearching ? t('searchingForProviders') : t('searchProviders')}
                             >
                                 {isSmartSearching ? <Loader2 className="mr-1 sm:mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-1 sm:mr-2 h-4 w-4" />}
-                                <span className="hidden sm:inline">{isSmartSearching ? 'Searching...' : 'Search'}</span>
+                                <span className="hidden sm:inline">{isSmartSearching ? t('searching') : t('search')}</span>
                             </Button>
                         </div>
                         <p id="search-help" className="text-xs text-muted-foreground">
-                            Use AI-powered search to find the best providers for your needs. Try searching for specific services or use the quick filters below.
+{t('searchHelp')}
                         </p>
                         
                         {/* Quick Filter Buttons */}
-                        <div className="flex flex-wrap gap-2 sm:gap-3" role="group" aria-label="Quick service filters">
+                        <div className="flex flex-wrap gap-2 sm:gap-3" role="group" aria-label={t('quickServiceFilters')}>
                             <Button 
                                 variant="default" 
                                 size="sm"
                                 onClick={handleNearbyProviders}
                                 disabled={isLoadingNearby}
                                 className="text-xs bg-primary hover:bg-primary/90"
-                                aria-label="Find providers near your location"
+                                aria-label={t('findProvidersNearLocation')}
                             >
                                 {isLoadingNearby ? (
                                     <>
                                         <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                                        Finding...
+{t('finding')}
                                     </>
                                 ) : (
                                     <>
-                                        📍 Find Nearby Providers
+                                        📍 {t('findNearbyProviders')}
                                     </>
                                 )}
                             </Button>
@@ -893,45 +903,45 @@ const DashboardPage = memo(function DashboardPage() {
                                 size="sm"
                                 onClick={() => setSearchTerm('house cleaning')}
                                 className="text-xs"
-                                aria-label="Search for house cleaning services"
+                                aria-label={t('searchForHouseCleaning')}
                             >
-                                🏠 House Cleaning
+                                🏠 {t('houseCleaning')}
                             </Button>
                             <Button 
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => setSearchTerm('web design')}
                                 className="text-xs"
-                                aria-label="Search for web design services"
+                                aria-label={t('searchForWebDesign')}
                             >
-                                💻 Web Design
+                                💻 {t('webDesign')}
                             </Button>
                             <Button 
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => setSearchTerm('tutoring')}
                                 className="text-xs"
-                                aria-label="Search for tutoring services"
+                                aria-label={t('searchForTutoring')}
                             >
-                                📚 Tutoring
+                                📚 {t('tutoring')}
                             </Button>
                             <Button 
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => setSearchTerm('photography')}
                                 className="text-xs"
-                                aria-label="Search for photography services"
+                                aria-label={t('searchForPhotography')}
                             >
-                                📸 Photography
+                                📸 {t('photography')}
                             </Button>
                             <Button 
                                 variant="outline" 
                                 size="sm"
                                 onClick={() => setSearchTerm('plumbing')}
                                 className="text-xs"
-                                aria-label="Search for plumbing services"
+                                aria-label={t('searchForPlumbing')}
                             >
-                                🔧 Plumbing
+                                🔧 {t('plumbing')}
                             </Button>
                         </div>
                         {loadingProviders || isSmartSearching || isLoadingNearby ? (
@@ -940,9 +950,9 @@ const DashboardPage = memo(function DashboardPage() {
                                     <div className="flex items-center gap-3">
                                         <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
                                         <span className="text-muted-foreground">
-                                            {isLoadingNearby ? 'Finding nearby providers...' : 
-                                             isSmartSearching ? 'Searching with AI...' : 
-                                             'Loading providers...'}
+                                            {isLoadingNearby ? t('findingNearbyProviders') : 
+                                             isSmartSearching ? t('searchingWithAI') : 
+                                             t('loadingProviders')}
                                         </span>
                                     </div>
                                 </div>
@@ -964,16 +974,16 @@ const DashboardPage = memo(function DashboardPage() {
                                                     <span className="text-sm text-muted-foreground">
                                                         {showNearbyProviders ? (
                                                             <>
-                                                                {providers.length} nearby provider{providers.length !== 1 ? 's' : ''} found
+                                                                {providers.length} {t('nearbyProvidersFound')}{providers.length !== 1 ? 's' : ''} {t('found')}
                                                                 {userLocation && (
                                                                     <span className="text-xs text-primary ml-2">
-                                                                        (within 50km)
+                                                                        ({t('within50km')})
                                                                     </span>
                                                                 )}
                                                             </>
                                                         ) : (
                                                             <>
-                                                                {providers.length} provider{providers.length !== 1 ? 's' : ''} found
+                                                                {providers.length} {t('providersFound')}{providers.length !== 1 ? 's' : ''} {t('found')}
                                                             </>
                                                         )}
                                                     </span>
@@ -985,7 +995,7 @@ const DashboardPage = memo(function DashboardPage() {
                                                         onClick={showNearbyProviders ? handleClearLocationSearch : () => setSearchTerm('')}
                                                         className="text-xs"
                                                     >
-                                                        Clear {showNearbyProviders ? 'location search' : 'search'}
+                                                        {t('clearSearch')} {showNearbyProviders ? t('clearLocationSearch') : t('clearSearch')}
                                                     </Button>
                                                 )}
                                             </div>
@@ -996,7 +1006,7 @@ const DashboardPage = memo(function DashboardPage() {
                                                     <div className="flex items-center gap-2 mb-4">
                                                         <Users2 className="h-5 w-5 text-purple-600" />
                                                         <h2 className="text-xl font-semibold">
-                                                            Agencies ({agencies.length})
+                                                            {t('agencies')} ({agencies.length})
                                                         </h2>
                                                     </div>
                                                     {viewMode === 'grid' ? (
@@ -1020,6 +1030,7 @@ const DashboardPage = memo(function DashboardPage() {
                                                                         agency={agency} 
                                                                         isFavorite={favoriteProviderIds.includes(agency.uid)}
                                                                         onToggleFavorite={handleToggleFavorite}
+                                                                        t={t}
                                                                     />
                                                                 ))}
                                                             </CardContent>
@@ -1034,7 +1045,7 @@ const DashboardPage = memo(function DashboardPage() {
                                                     <div className="flex items-center gap-2 mb-4">
                                                         <Briefcase className="h-5 w-5 text-blue-600" />
                                                         <h2 className="text-xl font-semibold">
-                                                            Service Providers ({serviceProviders.length})
+                                                            {t('serviceProviders')} ({serviceProviders.length})
                                                         </h2>
                                                     </div>
                                                     {viewMode === 'grid' ? (
@@ -1058,6 +1069,7 @@ const DashboardPage = memo(function DashboardPage() {
                                                                         provider={provider} 
                                                                         isFavorite={favoriteProviderIds.includes(provider.uid)}
                                                                         onToggleFavorite={handleToggleFavorite}
+                                                                        t={t}
                                                                     />
                                                                 ))}
                                                             </CardContent>
@@ -1073,11 +1085,11 @@ const DashboardPage = memo(function DashboardPage() {
                                     <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
                                         <Search className="h-12 w-12 text-muted-foreground" />
                                     </div>
-                                    <h3 className="text-xl font-semibold mb-2">No providers found</h3>
+                                    <h3 className="text-xl font-semibold mb-2">{t('noProvidersFound')}</h3>
                                     <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                                         {searchTerm ? 
-                                            `No providers match "${searchTerm}". Try a different search term or browse our quick filters above.` :
-                                            "Start by searching for a service or use the quick filters above to find providers."
+                                            t('noProvidersMatch', { searchTerm }) :
+                                            t('startBySearching')
                                         }
                                     </p>
                                     <div className="flex flex-wrap justify-center gap-2">
@@ -1086,14 +1098,14 @@ const DashboardPage = memo(function DashboardPage() {
                                             size="sm"
                                             onClick={() => setSearchTerm('')}
                                         >
-                                            Clear Search
+{t('clearSearchButton')}
                                         </Button>
                                         <Button 
                                             variant="outline" 
                                             size="sm"
                                             onClick={() => setSearchTerm('house cleaning')}
                                         >
-                                            Try House Cleaning
+{t('tryHouseCleaning')}
                                         </Button>
                                     </div>
                                 </div>
@@ -1109,23 +1121,25 @@ const DashboardPage = memo(function DashboardPage() {
     if (userRole === 'agency') {
          return (
             <div className="container space-y-8">
+                {/* Agency Onboarding Banner */}
+                <AgencyOnboardingBanner />
 
-                 <div className="max-w-6xl mx-auto">
+                 <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-                        <DashboardCard isLoading={loadingAgencyData} title="Total Revenue" icon={DollarSign} value={`₱${agencyTotalRevenue.toFixed(2)}`} />
-                        <DashboardCard isLoading={loadingAgencyData} title="Completed Bookings" icon={Calendar} value={`${agencyTotalBookings}`} />
-                        <DashboardCard isLoading={loadingAgencyData} title="Managed Providers" icon={Users2} value={`${agencyProviderCount}`} />
-                        <DashboardCard isLoading={loadingAgencyData} title="Agency Rating" icon={Star} value={`${agencyOverallRating}`} change={`Based on ${agencyProviders.reduce((sum, p) => sum + (p.reviewCount || 0), 0)} reviews`} />
-                        <DashboardCard isLoading={loadingAgencyData} title="Pending Payouts" icon={Wallet} value={`₱${agencyPendingPayouts.toFixed(2)}`} />
+                        <DashboardCard isLoading={loadingAgencyData} title={t('totalRevenue')} icon={DollarSign} value={`₱${agencyTotalRevenue.toFixed(2)}`} />
+                        <DashboardCard isLoading={loadingAgencyData} title={t('completedBookings')} icon={Calendar} value={`${agencyTotalBookings}`} />
+                        <DashboardCard isLoading={loadingAgencyData} title={t('managedProviders')} icon={Users2} value={`${agencyProviderCount}`} />
+                        <DashboardCard isLoading={loadingAgencyData} title={t('agencyRating')} icon={Star} value={`${agencyOverallRating}`} change={t('basedOnReviews', { count: agencyProviders.reduce((sum, p) => sum + (p.reviewCount || 0), 0) })} />
+                        <DashboardCard isLoading={loadingAgencyData} title={t('pendingPayouts')} icon={Wallet} value={`₱${agencyPendingPayouts.toFixed(2)}`} />
                     </div>
                 </div>
                 
-                 <div className="max-w-6xl mx-auto">
+                 <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
                         <Card className="lg:col-span-4 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                             <CardHeader>
-                                <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Recent Bookings</CardTitle>
-                                <CardDescription>The latest bookings across your agency.</CardDescription>
+                                <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('recentBookings')}</CardTitle>
+                                <CardDescription>{t('latestBookingsAcrossAgency')}</CardDescription>
                             </CardHeader>
                             <CardContent>
                                  {loadingAgencyData ? (
@@ -1136,9 +1150,9 @@ const DashboardPage = memo(function DashboardPage() {
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>Client</TableHead>
-                                            <TableHead>Provider</TableHead>
-                                            <TableHead>Status</TableHead>
+                                            <TableHead>{t('client')}</TableHead>
+                                            <TableHead>{t('provider')}</TableHead>
+                                            <TableHead>{t('status')}</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -1152,7 +1166,7 @@ const DashboardPage = memo(function DashboardPage() {
                                             </TableRow>
                                         )) : (
                                             <TableRow>
-                                                <TableCell colSpan={3} className="h-24 text-center">No recent bookings.</TableCell>
+                                                <TableCell colSpan={3} className="h-24 text-center">{t('noRecentBookings')}</TableCell>
                                             </TableRow>
                                         )}
                                     </TableBody>
@@ -1162,8 +1176,8 @@ const DashboardPage = memo(function DashboardPage() {
                         </Card>
                          <Card className="lg:col-span-3 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                             <CardHeader>
-                                <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Top Performing Providers</CardTitle>
-                                <CardDescription>Your most valuable providers by revenue.</CardDescription>
+                                <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('topPerformingProviders')}</CardTitle>
+                                <CardDescription>{t('mostValuableProvidersByRevenue')}</CardDescription>
                             </CardHeader>
                             <CardContent>
                                 {loadingAgencyData ? (
@@ -1174,8 +1188,8 @@ const DashboardPage = memo(function DashboardPage() {
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>Provider</TableHead>
-                                            <TableHead className="text-right">Revenue</TableHead>
+                                            <TableHead>{t('provider')}</TableHead>
+                                            <TableHead className="text-right">{t('revenue')}</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -1186,7 +1200,7 @@ const DashboardPage = memo(function DashboardPage() {
                                             </TableRow>
                                         )) : (
                                             <TableRow>
-                                                <TableCell colSpan={2} className="h-24 text-center">No provider data yet.</TableCell>
+                                                <TableCell colSpan={2} className="h-24 text-center">{t('noProviderDataYet')}</TableCell>
                                             </TableRow>
                                         )}
                                     </TableBody>
@@ -1195,7 +1209,7 @@ const DashboardPage = memo(function DashboardPage() {
                             </CardContent>
                              <CardFooter className="justify-center">
                                 <Button asChild variant="outline">
-                                    <Link href="/manage-providers">Manage All Providers</Link>
+                                    <Link href="/manage-providers">{t('manageAllProviders')}</Link>
                                 </Button>
                             </CardFooter>
                         </Card>
@@ -1208,22 +1222,25 @@ const DashboardPage = memo(function DashboardPage() {
     // Provider Dashboard (Default)
     return (
         <div className="container space-y-8">
-            <div className="max-w-6xl mx-auto">
+            {/* Provider Onboarding Banner */}
+            <ProviderOnboardingBanner />
+            
+            <div className=" mx-auto">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-                    <DashboardCard isLoading={loading} title="Total Revenue" icon={DollarSign} value={`₱${totalRevenue.toFixed(2)}`} />
-                    <DashboardCard isLoading={loading} title="Pending Payouts" icon={Wallet} value={`₱${pendingPayouts.toFixed(2)}`} />
-                    <DashboardCard isLoading={loading} title="Upcoming Bookings" icon={Calendar} value={`${upcomingBookingsCount}`} />
-                    <DashboardCard isLoading={loading} title="Total Clients" icon={Users} value={`${totalClientsCount}`} />
-                    <DashboardCard isLoading={loading} title="Overall Rating" icon={Star} value={`${overallRating}`} change={`Based on ${reviews.length} reviews`} />
+                    <DashboardCard isLoading={loading} title={t('totalRevenue')} icon={DollarSign} value={`₱${totalRevenue.toFixed(2)}`} />
+                    <DashboardCard isLoading={loading} title={t('pendingPayouts')} icon={Wallet} value={`₱${pendingPayouts.toFixed(2)}`} />
+                    <DashboardCard isLoading={loading} title={t('upcomingBookings')} icon={Calendar} value={`${upcomingBookingsCount}`} />
+                    <DashboardCard isLoading={loading} title={t('totalClients')} icon={Users} value={`${totalClientsCount}`} />
+                    <DashboardCard isLoading={loading} title={t('overallRating')} icon={Star} value={`${overallRating}`} change={`${t('basedOn')} ${reviews.length} ${t('reviews')}`} />
                 </div>
             </div>
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
                      <Card className="lg:col-span-4 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader>
-                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Earnings Overview</CardTitle>
-                            <CardDescription>Your earnings for the last 6 months.</CardDescription>
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('earningsOverview')}</CardTitle>
+                            <CardDescription>{t('earningsForLast6Months')}</CardDescription>
                         </CardHeader>
                         <CardContent className="pl-2">
                             {loading ? (
@@ -1252,8 +1269,8 @@ const DashboardPage = memo(function DashboardPage() {
                     </Card>
                     <Card className="lg:col-span-3 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader>
-                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Today&apos;s Schedule</CardTitle>
-                            <CardDescription>Your upcoming jobs for today.</CardDescription>
+                            <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('todaysSchedule')}</CardTitle>
+                            <CardDescription>{t('upcomingJobsForToday')}</CardDescription>
                         </CardHeader>
                         <CardContent>
                              {loading ? (
@@ -1266,9 +1283,9 @@ const DashboardPage = memo(function DashboardPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Time</TableHead>
-                                        <TableHead>Client</TableHead>
-                                        <TableHead>Service</TableHead>
+                                        <TableHead>{t('time')}</TableHead>
+                                        <TableHead>{t('client')}</TableHead>
+                                        <TableHead>{t('service')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -1280,7 +1297,7 @@ const DashboardPage = memo(function DashboardPage() {
                                         </TableRow>
                                     )) : (
                                         <TableRow>
-                                            <TableCell colSpan={3} className="h-24 text-center">No jobs scheduled for today.</TableCell>
+                                            <TableCell colSpan={3} className="h-24 text-center">{t('noJobsScheduledForToday')}</TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
@@ -1291,11 +1308,11 @@ const DashboardPage = memo(function DashboardPage() {
                 </div>
             </div>
             
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader>
-                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Recent Reviews</CardTitle>
-                        <CardDescription>What your clients are saying about you.</CardDescription>
+                        <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('recentReviews')}</CardTitle>
+                        <CardDescription>{t('whatClientsAreSaying')}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                          {loading ? (
@@ -1333,11 +1350,11 @@ const DashboardPage = memo(function DashboardPage() {
                             ))
                         ) : (
                             <div className="text-center text-muted-foreground p-8">
-                                No reviews yet.
+                                {t('noReviewsYet')}
                             </div>
                         )}
                         <div className="text-center">
-                            <Button variant="outline" className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">View All Reviews</Button>
+                            <Button variant="outline" className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground">{t('viewAllReviews')}</Button>
                         </div>
                     </CardContent>
                 </Card>

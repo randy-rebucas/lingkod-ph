@@ -129,7 +129,7 @@ export default function MyJobPostsPage() {
     if (loading) {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-6">
                             <Skeleton className="h-48 w-full" />
@@ -142,7 +142,7 @@ export default function MyJobPostsPage() {
 
     return (
         <div className="container space-y-8">
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                 <p className="text-muted-foreground">
                     {t('subtitle')}
@@ -150,7 +150,7 @@ export default function MyJobPostsPage() {
             </div>
 
             {/* Search */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="p-4">
                         <div className="relative">
@@ -167,7 +167,7 @@ export default function MyJobPostsPage() {
             </div>
 
             {/* Job Posts Table */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Table>
                     <TableHeader>
                         <TableRow className="border-b border-border/50">

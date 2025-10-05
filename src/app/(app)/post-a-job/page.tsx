@@ -217,12 +217,12 @@ export default function PostAJobPage() {
 
   return (
     <div className="container space-y-8">
-      <div className="max-w-6xl mx-auto">
+      <div className=" mx-auto">
         <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{pageTitle}</h1>
         <p className="text-muted-foreground">{pageDescription}</p>
       </div>
 
-      <div className="max-w-6xl mx-auto">
+      <div className=" mx-auto">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               

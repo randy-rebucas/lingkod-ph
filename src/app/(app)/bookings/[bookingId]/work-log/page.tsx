@@ -264,7 +264,7 @@ export default function WorkLogPage() {
 
     if (loading) {
         return (
-             <div className="max-w-6xl mx-auto space-y-8">
+             <div className=" mx-auto space-y-8">
                 <Skeleton className="h-96 w-full" />
              </div>
         )
@@ -280,7 +280,7 @@ export default function WorkLogPage() {
 
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className=" mx-auto space-y-8">
             <div className="flex items-center gap-4 mb-6">
                 <Button variant="outline" size="icon" onClick={() => router.back()} className="hover:bg-primary/10 transition-colors">
                     <ArrowLeft className="h-4 w-4" />

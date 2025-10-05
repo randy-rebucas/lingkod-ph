@@ -96,194 +96,194 @@
     },
     "categories": {
       "homeProperty": {
-        "title": "Home at Property Services",
-        "description": "Kumpletong home maintenance at improvement services",
+        "title": "Serbisyo para sa Bahay at Ari-arian",
+        "description": "Kumpletong serbisyo para sa pagpapanatili at pagpapabuti ng bahay",
         "services": {
           "cleaningServices": {
-            "name": "Cleaning Services",
+            "name": "Serbisyo sa Paglilinis",
             "description": "General, deep cleaning, sofa, carpet, atbp."
           },
           "housekeeping": {
-            "name": "Housekeeping / Maid Services",
-            "description": "Regular household maintenance at cleaning"
+            "name": "Housekeeping / Serbisyo ng Katulong",
+            "description": "Regular na pagpapanatili at paglilinis ng bahay"
           },
           "pestControl": {
             "name": "Pest Control",
-            "description": "Professional pest elimination at prevention"
+            "description": "Propesyonal na pag-alis at pag-iwas sa peste"
           },
           "landscaping": {
             "name": "Landscaping at Gardening",
-            "description": "Garden design, maintenance, at landscaping"
+            "description": "Disenyo ng hardin, pagpapanatili, at landscaping"
           },
           "painting": {
-            "name": "Painting Services",
+            "name": "Serbisyo sa Pagpipinta",
             "description": "Interior at exterior painting solutions"
           },
           "handyman": {
-            "name": "Handyman Services",
-            "description": "General repairs at maintenance tasks"
+            "name": "Serbisyo ng Handyman",
+            "description": "Pangkalahatang pag-aayos at gawain sa pagpapanatili"
           },
           "plumbing": {
-            "name": "Plumbing Services",
-            "description": "Pipe repairs, installations, at maintenance"
+            "name": "Serbisyo sa Plumbing",
+            "description": "Pag-aayos ng tubo, pag-install, at pagpapanatili"
           },
           "electrical": {
-            "name": "Electrical Services",
-            "description": "Wiring, installations, at electrical repairs"
+            "name": "Serbisyo sa Kuryente",
+            "description": "Wiring, pag-install, at pag-aayos ng kuryente"
           },
           "roofing": {
-            "name": "Roofing Services",
-            "description": "Roof repairs, installation, at maintenance"
+            "name": "Serbisyo sa Bubong",
+            "description": "Pag-aayos ng bubong, pag-install, at pagpapanatili"
           },
           "applianceRepair": {
-            "name": "Appliance Repair",
-            "description": "Home appliance maintenance at repairs"
+            "name": "Pag-aayos ng Appliance",
+            "description": "Pagpapanatili at pag-aayos ng mga appliance sa bahay"
           },
           "homeRenovation": {
             "name": "Home Renovation / Construction",
-            "description": "Kumpletong home remodeling at construction"
+            "description": "Kumpletong pag-remodel at pagtatayo ng bahay"
           },
           "movingServices": {
-            "name": "Moving Services",
-            "description": "Professional moving at relocation services"
+            "name": "Serbisyo sa Paglilipat",
+            "description": "Propesyonal na serbisyo sa paglilipat at relocation"
           },
           "hvac": {
-            "name": "HVAC Services",
-            "description": "Aircon installation, repair, at maintenance"
+            "name": "Serbisyo sa HVAC",
+            "description": "Pag-install ng aircon, pag-aayos, at pagpapanatili"
           }
         }
       },
       "personalLifestyle": {
-        "title": "Personal at Lifestyle Services",
-        "description": "Personal care at lifestyle enhancement services",
+        "title": "Serbisyo sa Personal at Lifestyle",
+        "description": "Serbisyo sa personal care at pagpapabuti ng lifestyle",
         "services": {
           "beautySalon": {
             "name": "Beauty Salon / Haircut / Makeup",
-            "description": "Professional beauty at styling services"
+            "description": "Propesyonal na serbisyo sa beauty at styling"
           },
           "barber": {
-            "name": "Barber Services",
-            "description": "Men's grooming at haircut services"
+            "name": "Serbisyo ng Barbero",
+            "description": "Serbisyo sa pag-grooming at paggupit ng lalaki"
           },
           "spaMassage": {
             "name": "Spa at Massage",
-            "description": "Relaxation at therapeutic massage services"
+            "description": "Serbisyo sa pagpapahinga at therapeutic massage"
           },
           "nailCare": {
-            "name": "Nail Care",
-            "description": "Manicure, pedicure, at nail art services"
+            "name": "Pag-aalaga ng Kuko",
+            "description": "Serbisyo sa manicure, pedicure, at nail art"
           },
           "petGrooming": {
             "name": "Pet Grooming at Pet Care",
-            "description": "Professional pet grooming at care services"
+            "description": "Propesyonal na serbisyo sa pag-grooming at pag-aalaga ng alagang hayop"
           },
           "tutoring": {
             "name": "Tutoring at Academic Coaching",
-            "description": "Educational support at academic guidance"
+            "description": "Suportang pang-edukasyon at gabay sa akademiko"
           },
           "fitnessTrainers": {
             "name": "Fitness Trainers",
-            "description": "Personal training at fitness coaching"
+            "description": "Personal training at coaching sa fitness"
           },
           "eventMakeup": {
             "name": "Event Makeup at Styling",
-            "description": "Special event beauty at styling services"
+            "description": "Serbisyo sa beauty at styling para sa special events"
           }
         }
       },
       "foodHospitality": {
-        "title": "Food at Hospitality Services",
-        "description": "Culinary at hospitality support services",
+        "title": "Serbisyo sa Pagkain at Hospitality",
+        "description": "Serbisyo sa pagluluto at suporta sa hospitality",
         "services": {
           "catering": {
-            "name": "Catering Services",
-            "description": "Professional catering para sa events at occasions"
+            "name": "Serbisyo sa Catering",
+            "description": "Propesyonal na catering para sa events at okasyon"
           },
           "foodStallVendors": {
             "name": "Food Stall Vendors",
-            "description": "Event support at food stall services"
+            "description": "Suporta sa event at serbisyo ng food stall"
           },
           "eventStaff": {
             "name": "Event Staff at Waiters",
-            "description": "Professional event staffing at service"
+            "description": "Propesyonal na staff para sa event at serbisyo"
           },
           "hotelSupport": {
             "name": "Hotel at Resort Support Staff",
-            "description": "Hospitality industry support services"
+            "description": "Serbisyo ng suporta sa industriya ng hospitality"
           }
         }
       },
       "creativeProfessional": {
-        "title": "Creative at Professional Services",
-        "description": "Creative at professional business services",
+        "title": "Serbisyo sa Creative at Professional",
+        "description": "Serbisyo sa creative at professional business",
         "services": {
           "photography": {
             "name": "Photography at Videography",
-            "description": "Professional photography at video services"
+            "description": "Propesyonal na serbisyo sa photography at video"
           },
           "eventPlanning": {
             "name": "Event Planning at Coordination",
-            "description": "Kumpletong event planning at management"
+            "description": "Kumpletong event planning at pamamahala"
           },
           "itSupport": {
             "name": "IT Support / Tech Assistance",
-            "description": "Technical support at IT services"
+            "description": "Suportang teknikal at serbisyo sa IT"
           },
           "graphicDesign": {
             "name": "Graphic Design at Printing Services",
-            "description": "Design at printing solutions"
+            "description": "Solusyon sa design at printing"
           }
         }
       },
       "autoMobile": {
-        "title": "Auto at Mobile Services",
-        "description": "Automotive at mobile device services",
+        "title": "Serbisyo sa Auto at Mobile",
+        "description": "Serbisyo sa automotive at mobile device",
         "services": {
           "autoRepair": {
             "name": "Auto Repair at Car Care",
-            "description": "Automotive repair at maintenance services"
+            "description": "Serbisyo sa pag-aayos at pagpapanatili ng sasakyan"
           },
           "motorcycleRepair": {
-            "name": "Motorcycle Repair",
-            "description": "Motorcycle maintenance at repair services"
+            "name": "Pag-aayos ng Motorsiklo",
+            "description": "Serbisyo sa pagpapanatili at pag-aayos ng motorsiklo"
           },
           "mobileTechnician": {
             "name": "Mobile Technician",
-            "description": "Phone, laptop, at gadget repair services"
+            "description": "Serbisyo sa pag-aayos ng phone, laptop, at gadget"
           },
           "delivery": {
-            "name": "Delivery / Courier Services",
-            "description": "Package delivery at courier services"
+            "name": "Serbisyo sa Delivery / Courier",
+            "description": "Serbisyo sa paghahatid ng package at courier"
           }
         }
       },
       "suppliesDistribution": {
         "title": "Supplies at Distribution",
-        "description": "LocalPro add-on services at supplies",
+        "description": "Mga add-on services at supplies ng LocalPro",
         "services": {
           "cleaningSupplies": {
             "name": "Cleaning Supplies at Chemicals",
-            "description": "Professional cleaning supplies at chemicals"
+            "description": "Propesyonal na supplies at chemicals sa paglilinis"
           },
           "pestControlChemicals": {
             "name": "Pest Control Chemicals",
-            "description": "Professional pest control supplies"
+            "description": "Propesyonal na supplies para sa pest control"
           },
           "toolsEquipment": {
             "name": "Tools at Equipment Rentals",
-            "description": "Professional tools at equipment rental"
+            "description": "Propesyonal na rental ng tools at equipment"
           },
           "plumbingElectrical": {
             "name": "Plumbing / Electrical Parts",
-            "description": "Professional plumbing at electrical supplies"
+            "description": "Propesyonal na supplies sa plumbing at electrical"
           },
           "paintsMaterials": {
             "name": "Paints at Materials",
-            "description": "Quality paints at construction materials"
+            "description": "De-kalidad na paints at construction materials"
           },
           "starterKits": {
             "name": "Starter Kits",
-            "description": "Convenient starter kits at packages"
+            "description": "Maginhawang starter kits at packages"
           }
         }
       }
@@ -407,55 +407,23 @@
     "sections": {
       "definitions": {
         "title": "1. Mga Depinisyon",
-        "content": [
-          "\"LocalPro,\" \"we,\" \"our,\" o \"us\" ay tumutukoy sa LocalPro Services Inc. at sa mga affiliates, subsidiaries, at related companies nito.",
-          "\"User\" o \"you\" ay tumutukoy sa sinumang nag-access o gumagamit ng Platform, kasama ang service providers (\"Providers\"), clients (\"Clients\"), agencies, at iba pang mga indibidwal o entities na gumagamit ng aming mga serbisyo.",
-          "\"Services\" ay tumutukoy sa anumang serbisyo na inaalok sa pamamagitan ng LocalPro platform ng mga Providers sa mga Clients, kasama ngunit hindi limitado sa home services, professional services, at iba pang local services.",
-          "\"Platform\" ay tumutukoy sa aming website, mobile applications, at iba pang digital platforms na pinapatakbo ng LocalPro.",
-          "\"Content\" ay kasama ang lahat ng text, graphics, images, music, software, audio, video, information, o iba pang materials na available sa Platform."
-        ]
+        "content": "\"LocalPro,\" \"we,\" \"our,\" o \"us\" ay tumutukoy sa LocalPro Services Inc. at sa mga affiliates, subsidiaries, at related companies nito. \"User\" o \"you\" ay tumutukoy sa sinumang nag-access o gumagamit ng Platform, kasama ang service providers (\"Providers\"), clients (\"Clients\"), agencies, at iba pang mga indibidwal o entities na gumagamit ng aming mga serbisyo. \"Services\" ay tumutukoy sa anumang serbisyo na inaalok sa pamamagitan ng LocalPro platform ng mga Providers sa mga Clients, kasama ngunit hindi limitado sa home services, professional services, at iba pang local services. \"Platform\" ay tumutukoy sa aming website, mobile applications, at iba pang digital platforms na pinapatakbo ng LocalPro. \"Content\" ay kasama ang lahat ng text, graphics, images, music, software, audio, video, information, o iba pang materials na available sa Platform."
       },
       "eligibility": {
         "title": "2. Eligibility at Age Requirements",
-        "content": [
-          "Dapat kayong hindi bababa sa 18 taong gulang at may kakayahang pumasok sa legally binding contracts para magamit ang LocalPro.",
-          "Sa pag-register, kinukumpirma ninyo na ang lahat ng impormasyong ibinigay ay tumpak, kumpleto, at up-to-date.",
-          "Dapat kayong may legal capacity na pumasok sa mga Terms na ito sa inyong jurisdiction.",
-          "Kung nag-register kayo sa ngalan ng isang kumpanya o organisasyon, dapat kayong may authority na i-bind ang entity na iyon sa mga Terms na ito.",
-          "Reserbado namin ang karapatan na tanggihan ang serbisyo sa sinuman sa aming sole discretion."
-        ]
+        "content": "Dapat kayong hindi bababa sa 18 taong gulang at may kakayahang pumasok sa legally binding contracts para magamit ang LocalPro. Sa pag-register, kinukumpirma ninyo na ang lahat ng impormasyong ibinigay ay tumpak, kumpleto, at up-to-date. Dapat kayong may legal capacity na pumasok sa mga Terms na ito sa inyong jurisdiction. Kung nag-register kayo sa ngalan ng isang kumpanya o organisasyon, dapat kayong may authority na i-bind ang entity na iyon sa mga Terms na ito. Reserbado namin ang karapatan na tanggihan ang serbisyo sa sinuman sa aming sole discretion."
       },
       "accountRegistration": {
         "title": "3. Account Registration at Security",
-        "content": [
-          "Para magamit ang ilang features, dapat kayong gumawa ng account na may tumpak at kumpletong impormasyon.",
-          "Responsable kayo sa pag-maintain ng confidentiality ng inyong login credentials at sa lahat ng activities sa ilalim ng inyong account.",
-          "Dapat ninyong agad na i-notify kami ng anumang unauthorized use ng inyong account o anumang iba pang breach ng security.",
-          "Para sa mga Clients: Maaari ninyong i-browse, i-book, i-rate, at i-review ang mga service providers.",
-          "Para sa mga Providers: Maaari ninyong i-list ang inyong mga serbisyo, i-manage ang mga bookings, tumanggap ng payments, at mag-build ng inyong professional reputation.",
-          "Reserbado namin ang karapatan na suspend o terminate ang mga account na lumalabag sa mga Terms na ito o nakikipag-engage sa fraudulent activity."
-        ]
+        "content": "Para magamit ang ilang features, dapat kayong gumawa ng account na may tumpak at kumpletong impormasyon. Responsable kayo sa pag-maintain ng confidentiality ng inyong login credentials at sa lahat ng activities sa ilalim ng inyong account. Dapat ninyong agad na i-notify kami ng anumang unauthorized use ng inyong account o anumang iba pang breach ng security. Para sa mga Clients: Maaari ninyong i-browse, i-book, i-rate, at i-review ang mga service providers. Para sa mga Providers: Maaari ninyong i-list ang inyong mga serbisyo, i-manage ang mga bookings, tumanggap ng payments, at mag-build ng inyong professional reputation. Reserbado namin ang karapatan na suspend o terminate ang mga account na lumalabag sa mga Terms na ito o nakikipag-engage sa fraudulent activity."
       },
       "platformUse": {
         "title": "4. Acceptable Use ng Platform",
-        "content": [
-          "Sumasang-ayon kayo na gamitin ang Platform sa compliance sa lahat ng applicable laws at regulations.",
-          "Hindi ninyo gagamitin ang Platform para sa illegal, fraudulent, o harmful purposes.",
-          "Hindi ninyo i-impersonate ang sinumang tao o entity o mag-misrepresent ng inyong affiliation sa sinumang tao o entity.",
-          "Hindi ninyo i-upload, i-post, o i-transmit ang anumang content na defamatory, obscene, o lumalabag sa anumang third-party rights.",
-          "Hindi ninyo susubukan na makakuha ng unauthorized access sa anumang bahagi ng Platform o anumang iba pang systems o networks.",
-          "Hindi ninyo gagamitin ang automated systems o software para mag-extract ng data mula sa Platform nang walang aming written permission."
-        ]
+        "content": "Sumasang-ayon kayo na gamitin ang Platform sa compliance sa lahat ng applicable laws at regulations. Hindi ninyo gagamitin ang Platform para sa illegal, fraudulent, o harmful purposes. Hindi ninyo i-impersonate ang sinumang tao o entity o mag-misrepresent ng inyong affiliation sa sinumang tao o entity. Hindi ninyo i-upload, i-post, o i-transmit ang anumang content na defamatory, obscene, o lumalabag sa anumang third-party rights. Hindi ninyo susubukan na makakuha ng unauthorized access sa anumang bahagi ng Platform o anumang iba pang systems o networks. Hindi ninyo gagamitin ang automated systems o software para mag-extract ng data mula sa Platform nang walang aming written permission."
       },
       "paymentsFees": {
         "title": "5. Payments, Fees, at Billing",
-        "content": [
-          "Ang mga Clients ay nagbabayad sa mga Providers sa pamamagitan ng Platform gamit ang secure payment methods. Ang lahat ng pricing, fees, at applicable taxes ay malinaw na ipapakita bago ang checkout.",
-          "Ang mga Providers ay maaaring singilin ng transaction commissions o advertising fees batay sa current pricing structure ng LocalPro.",
-          "Ang lahat ng transactions ay na-process sa PHP (Philippine Peso) o USD, ayon sa napili sa panahon ng registration.",
-          "Ang payment processing fees ay maaaring mag-apply at ipapakita bago ang completion ng transaction.",
-          "Reserbado namin ang karapatan na baguhin ang aming fee structure na may 30 araw na notice sa mga users."
-        ]
+        "content": "Ang mga Clients ay nagbabayad sa mga Providers sa pamamagitan ng Platform gamit ang secure payment methods. Ang lahat ng pricing, fees, at applicable taxes ay malinaw na ipapakita bago ang checkout. Ang mga Providers ay maaaring singilin ng transaction commissions o advertising fees batay sa current pricing structure ng LocalPro. Ang lahat ng transactions ay na-process sa PHP (Philippine Peso) o USD, ayon sa napili sa panahon ng registration. Ang payment processing fees ay maaaring mag-apply at ipapakita bago ang completion ng transaction. Reserbado namin ang karapatan na baguhin ang aming fee structure na may 30 araw na notice sa mga users."
       }
     },
     "quickSummary": [
@@ -481,6 +449,112 @@
       "phone": "+63 917 123 4567",
       "address": "Poblacion Zone 2, A Bonifacio Street, Baybay City, Leyte, Philippines 6521"
     }
+  },
+  "DashboardOld": {
+    "title": "Dashboard",
+    "findServiceProviders": "Maghanap ng Service Providers",
+    "discoverTrustedProfessionals": "Tuklasin ang mga pinagkakatiwalaang professionals sa inyong lugar",
+    "searchPlaceholder": "Maghanap ng mga serbisyo (hal., house cleaning, web design, tutoring)...",
+    "searchHelp": "Gamitin ang AI-powered search para makahanap ng pinakamahusay na providers para sa inyong pangangailangan. Subukan ang paghahanap ng specific services o gamitin ang quick filters sa ibaba.",
+    "searching": "Naghahanap...",
+    "search": "Maghanap",
+    "findingNearbyProviders": "Naghahanap ng mga malapit na providers...",
+    "searchingWithAI": "Naghahanap gamit ang AI...",
+    "loadingProviders": "Naglo-load ng mga providers...",
+    "findNearbyProviders": "Maghanap ng Malapit na Providers",
+    "finding": "Naghahanap...",
+    "houseCleaning": "House Cleaning",
+    "webDesign": "Web Design",
+    "tutoring": "Tutoring",
+    "photography": "Photography",
+    "plumbing": "Plumbing",
+    "nearbyProvidersFound": "malapit na provider",
+    "providersFound": "provider",
+    "found": "nahanap",
+    "within50km": "sa loob ng 50km",
+    "clearLocationSearch": "I-clear ang location search",
+    "clearSearch": "I-clear ang search",
+    "agencies": "Mga Agency",
+    "serviceProviders": "Mga Service Provider",
+    "noProvidersFound": "Walang nahanap na providers",
+    "noProvidersMatch": "Walang providers na tumugma sa \"{searchTerm}\". Subukan ang ibang search term o browse ang aming quick filters sa itaas.",
+    "startBySearching": "Magsimula sa paghahanap ng serbisyo o gamitin ang quick filters sa itaas para makahanap ng providers.",
+    "clearSearchButton": "I-clear ang Search",
+    "tryHouseCleaning": "Subukan ang House Cleaning",
+    "recentBookings": "Mga Kamakailang Booking",
+    "latestBookingsAcrossAgency": "Ang pinakabagong bookings sa buong inyong agency.",
+    "client": "Client",
+    "provider": "Provider",
+    "status": "Status",
+    "noRecentBookings": "Walang kamakailang bookings.",
+    "topPerformingProviders": "Mga Top Performing Providers",
+    "mostValuableProvidersByRevenue": "Ang inyong pinakamahalagang providers ayon sa revenue.",
+    "revenue": "Revenue",
+    "noProviderDataYet": "Walang provider data pa.",
+    "manageAllProviders": "I-manage ang Lahat ng Providers",
+    "earningsOverview": "Earnings Overview",
+    "earningsForLast6Months": "Ang inyong earnings sa huling 6 na buwan.",
+    "todaysSchedule": "Schedule ngayong Araw",
+    "upcomingJobsForToday": "Ang inyong mga darating na trabaho para sa araw na ito.",
+    "time": "Oras",
+    "service": "Serbisyo",
+    "noJobsScheduledForToday": "Walang naka-schedule na trabaho para sa araw na ito.",
+    "recentReviews": "Mga Kamakailang Review",
+    "whatClientsAreSaying": "Ano ang sinasabi ng inyong mga clients.",
+    "noReviewsYet": "Walang reviews pa.",
+    "viewAllReviews": "Tingnan ang Lahat ng Reviews",
+    "totalRevenue": "Kabuuang Revenue",
+    "pendingPayouts": "Mga Pending Payouts",
+    "upcomingBookings": "Mga Darating na Bookings",
+    "totalClients": "Kabuuang Clients",
+    "overallRating": "Overall Rating",
+    "completedBookings": "Mga Natapos na Bookings",
+    "managedProviders": "Mga Managed Providers",
+    "agencyRating": "Agency Rating",
+    "available": "Available",
+    "limited": "Limited",
+    "unavailable": "Unavailable",
+    "noBioAvailable": "Walang bio available.",
+    "viewProfile": "Tingnan ang Profile",
+    "away": "malayo",
+    "reviews": "mga review",
+    "agency": "Agency",
+    "professionalAgencyServices": "Professional agency services.",
+    "viewAgency": "Tingnan ang Agency",
+    "monthNames": {
+      "jan": "Ene",
+      "feb": "Peb",
+      "mar": "Mar",
+      "apr": "Abr",
+      "may": "May",
+      "jun": "Hun",
+      "jul": "Hul",
+      "aug": "Ago",
+      "sep": "Set",
+      "oct": "Okt",
+      "nov": "Nob",
+      "dec": "Dis"
+    },
+    "addedToFavorites": "Naidagdag sa favorites",
+    "couldNotUpdateFavorites": "Hindi ma-update ang favorites",
+    "error": "Error",
+    "locationAccessRequired": "Location Access Required",
+    "enableLocationServices": "Pakipagana ang location services para makahanap ng malapit na providers.",
+    "nearbyProvidersFoundTitle": "Mga Malapit na Providers na Nahanap",
+    "errorFindingNearbyProviders": "Error sa Paghahanap ng Malapit na Providers",
+    "errorFindingProvidersNearYou": "May error sa paghahanap ng providers malapit sa inyo. Pakisubukan ulit.",
+    "smartSearchFailed": "Nabigo ang smart search",
+    "errorFindingProviders": "May error sa paghahanap ng providers. Pakisubukan ang ibang search.",
+    "basedOn": "Batay sa",
+    "searchForServiceProviders": "Maghanap ng mga service providers",
+    "quickServiceFilters": "Mga quick service filters",
+    "findProvidersNearLocation": "Maghanap ng mga providers malapit sa inyong lokasyon",
+    "searchForHouseCleaning": "Maghanap ng mga house cleaning services",
+    "searchForWebDesign": "Maghanap ng mga web design services",
+    "searchForTutoring": "Maghanap ng mga tutoring services",
+    "searchForPhotography": "Maghanap ng mga photography services",
+    "searchForPlumbing": "Maghanap ng mga plumbing services",
+    "foundProvidersWithin50km": "Nahanap ang {count} providers sa loob ng 50km ng inyong lokasyon."
   },
   "Profile": {
     "title": "Profile",
@@ -546,6 +620,8 @@
     "toggleTheme": "I-toggle ang tema"
   },
   "Dashboard": {
+    "findServiceProviders": "Maghanap ng Service Providers",
+    "discoverTrustedProfessionals": "Tuklasin ang mga pinagkakatiwalaang professionals sa inyong lugar",
     "findServiceProvider": "Maghanap ng Service Provider",
     "describeNeed": "Ilarawan kung ano ang kailangan mo, at hahanapin namin ang tamang pro para sa trabaho.",
     "searchPlaceholder": "hal., 'Kailangan ko ng plumber para sa baradong kitchen sink'",
@@ -566,7 +642,98 @@
     "managedProviders": "Mga Pinamahalaang Provider",
     "agencyRating": "Rating ng Agency",
     "pendingPayouts": "Mga Pending na Payout",
-    "basedOnReviews": "Batay sa {count} mga review"
+    "basedOnReviews": "Batay sa {count} mga review",
+    "unnamedProvider": "Hindi Kilalang Provider",
+    "foundAndRankedProviders": "Nahanap at na-rank ang {count} mga provider para sa inyo.",
+    "noProvidersFoundForSearch": "Walang nahanap na providers para sa inyong search. Subukan ang mas malawak na termino.",
+    "searchingForProviders": "Naghahanap ng mga provider",
+    "searchProviders": "Maghanap ng mga provider",
+    "searchHelp": "Gamitin ang AI-powered search para makahanap ng pinakamahusay na providers para sa inyong pangangailangan. Subukan ang paghahanap ng specific services o gamitin ang quick filters sa ibaba.",
+    "findingNearbyProviders": "Naghahanap ng mga malapit na providers...",
+    "searchingWithAI": "Naghahanap gamit ang AI...",
+    "loadingProviders": "Naglo-load ng mga providers...",
+    "findNearbyProviders": "Maghanap ng Malapit na Providers",
+    "finding": "Naghahanap...",
+    "houseCleaning": "House Cleaning",
+    "webDesign": "Web Design",
+    "tutoring": "Tutoring",
+    "photography": "Photography",
+    "plumbing": "Plumbing",
+    "nearbyProvidersFound": "malapit na provider",
+    "providersFound": "provider",
+    "found": "nahanap",
+    "within50km": "sa loob ng 50km",
+    "clearLocationSearch": "I-clear ang location search",
+    "clearSearch": "I-clear ang search",
+    "agencies": "Mga Agency",
+    "serviceProviders": "Mga Service Provider",
+    "noProvidersFound": "Walang nahanap na providers",
+    "noProvidersMatch": "Walang providers na tumugma sa \"{searchTerm}\". Subukan ang ibang search term o browse ang aming quick filters sa itaas.",
+    "startBySearching": "Magsimula sa paghahanap ng serbisyo o gamitin ang quick filters sa itaas para makahanap ng providers.",
+    "clearSearchButton": "I-clear ang Search",
+    "tryHouseCleaning": "Subukan ang House Cleaning",
+    "recentBookings": "Mga Kamakailang Booking",
+    "latestBookingsAcrossAgency": "Ang pinakabagong mga booking sa inyong agency.",
+    "client": "Client",
+    "provider": "Provider",
+    "status": "Status",
+    "noRecentBookings": "Walang kamakailang mga booking.",
+    "topPerformingProviders": "Mga Pinakamahusay na Provider",
+    "mostValuableProvidersByRevenue": "Ang inyong pinakamahalagang mga provider ayon sa kita.",
+    "revenue": "Kita",
+    "noProviderDataYet": "Walang data ng provider pa.",
+    "manageAllProviders": "Pamahalaan ang Lahat ng Provider",
+    "earningsOverview": "Pangkalahatang Kita",
+    "earningsForLast6Months": "Ang inyong kita sa huling 6 na buwan.",
+    "todaysSchedule": "Iskedyul ng Araw na Ito",
+    "upcomingJobsForToday": "Ang inyong mga darating na trabaho para sa araw na ito.",
+    "time": "Oras",
+    "service": "Serbisyo",
+    "noJobsScheduledForToday": "Walang naka-iskedyul na trabaho para sa araw na ito.",
+    "recentReviews": "Mga Kamakailang Review",
+    "whatClientsAreSaying": "Kung ano ang sinasabi ng inyong mga client tungkol sa inyo.",
+    "noReviewsYet": "Walang review pa.",
+    "viewAllReviews": "Tingnan ang Lahat ng Review",
+    "upcomingBookings": "Mga Darating na Booking",
+    "totalClients": "Kabuuang mga Client",
+    "overallRating": "Pangkalahatang Rating",
+    "noBioAvailable": "Walang bio na available.",
+    "viewProfile": "Tingnan ang Profile",
+    "away": "malayo",
+    "reviews": "mga review",
+    "agency": "Agency",
+    "viewAgency": "Tingnan ang Agency",
+    "professionalAgencyServices": "Mga propesyonal na serbisyo ng agency",
+    "locationAccessRequired": "Kailangan ng access sa lokasyon",
+    "enableLocationServices": "Pakisuyo i-enable ang location services para makahanap ng mga malapit na provider.",
+    "nearbyProvidersFoundTitle": "Nahanap ang mga Malapit na Provider",
+    "foundProvidersWithin50km": "Nahanap ang {count} mga provider sa loob ng 50km ng inyong lokasyon.",
+    "errorFindingNearbyProviders": "Error sa paghahanap ng mga malapit na provider",
+    "errorFindingProvidersNearYou": "May error sa paghahanap ng mga provider malapit sa inyo. Pakisuyo subukan ulit.",
+    "errorFindingProviders": "May error sa paghahanap ng mga provider. Pakisuyo subukan ang ibang search.",
+    "basedOn": "Batay sa",
+    "searchForServiceProviders": "Maghanap ng mga service provider",
+    "quickServiceFilters": "Mga mabilis na filter ng serbisyo",
+    "findProvidersNearLocation": "Maghanap ng mga provider malapit sa inyong lokasyon",
+    "searchForHouseCleaning": "Maghanap ng mga serbisyo sa paglilinis ng bahay",
+    "searchForWebDesign": "Maghanap ng mga serbisyo sa web design",
+    "searchForTutoring": "Maghanap ng mga serbisyo sa pagtuturo",
+    "searchForPhotography": "Maghanap ng mga serbisyo sa photography",
+    "searchForPlumbing": "Maghanap ng mga serbisyo sa plumbing",
+    "monthNames": {
+      "jan": "Ene",
+      "feb": "Peb",
+      "mar": "Mar",
+      "apr": "Abr",
+      "may": "May",
+      "jun": "Hun",
+      "jul": "Hul",
+      "aug": "Ago",
+      "sep": "Set",
+      "oct": "Okt",
+      "nov": "Nob",
+      "dec": "Dis"
+    }
   },
 
 
@@ -831,7 +998,61 @@
     "noCancelledBookings": "Wala kang mga kinanselang booking.",
     "whyNotBookNewService": "Bakit hindi mag-book ng bagong serbisyo ngayon?",
     "seeNewBookingRequests": "Makikita mo ang mga bagong booking request dito.",
-    "findAService": "Maghanap ng Serbisyo"
+    "findAService": "Maghanap ng Serbisyo",
+    "title": "Mga Booking",
+    "subtitle": "Pamahalaan ang inyong mga booking at i-track ang inyong mga service appointments",
+    "advancedBookings": "Advanced Bookings",
+    "advancedFilters": "Mga Advanced Filters",
+    "advancedFiltersDescription": "I-customize ang inyong booking view gamit ang advanced filtering options",
+    "searchBookings": "Maghanap ng mga Booking",
+    "searchPlaceholder": "Maghanap ayon sa serbisyo, provider, o client...",
+    "status": "Status",
+    "allStatus": "Lahat ng Status",
+    "pendingPayment": "Pending Payment",
+    "pendingVerification": "Pending Verification",
+    "upcoming": "Paparating",
+    "inProgress": "Kasulukuyang Ginagawa",
+    "completed": "Kumpleto",
+    "cancelled": "Kanselado",
+    "category": "Kategorya",
+    "allCategories": "Lahat ng Kategorya",
+    "priority": "Priority",
+    "allPriorities": "Lahat ng Priority",
+    "urgent": "Urgent",
+    "high": "Mataas",
+    "medium": "Katamtaman",
+    "low": "Mababa",
+    "dateRange": "Date Range",
+    "allTime": "Lahat ng Oras",
+    "today": "Ngayon",
+    "thisWeek": "Sa Linggong Ito",
+    "thisMonth": "Sa Buwan na Ito",
+    "showCompleted": "Ipakita ang Kumpleto",
+    "show": "Ipakita",
+    "hide": "Itago",
+    "serviceAndContact": "Serbisyo at Kontak",
+    "date": "Petsa",
+    "price": "Presyo",
+    "actions": "Mga Aksyon",
+    "view": "Tingnan",
+    "proceedToPayment": "Magpatuloy sa Bayad",
+    "viewWorkLog": "Tingnan ang Work Log",
+    "rebookService": "I-rebook ang Serbisyo",
+    "leaveReview": "Mag-iwan ng Review",
+    "markComplete": "Markahan bilang Kumpleto",
+    "cancelBooking": "Kanselahin ang Booking",
+    "retryPayment": "Subukan ulit ang Bayad",
+    "noBookingsFound": "Walang nahanap na mga booking",
+    "tryAdjustingSearch": "Subukan ang pag-adjust ng inyong search o filter criteria.",
+    "noBookingsYet": "Wala pa kayong mga booking.",
+    "other": "Iba pa",
+    "success": "Tagumpay",
+    "bookingUpdatedSuccessfully": "Booking {status} matagumpay.",
+    "error": "Error",
+    "failedToUpdateBooking": "Nabigo ang pag-update ng booking status.",
+    "bookingStatusUpdated": "Booking status na-update sa {status}",
+    "bookingHasBeenCancelled": "Ang booking ay na-cancel",
+    "failedToFetchBookings": "Nabigo ang pag-fetch ng inyong mga booking."
   },
   "Components": {
     "status": "Status",
@@ -982,7 +1203,26 @@
     "deleteFailed": "Hindi matanggal ang notification",
     "markAsReadFailed": "Hindi ma-mark ang mga notification bilang nabasa",
     "error": "Error",
-    "success": "Tagumpay"
+    "success": "Tagumpay",
+    "advancedNotifications": "Mga Advanced Notification",
+    "searchNotifications": "Maghanap ng mga notification...",
+    "starred": "Starred",
+    "archived": "Archived",
+    "allCaughtUp": "Nahabol mo na lahat!",
+    "noNotificationsToDisplay": "Walang notification na ipapakita",
+    "type": "Uri",
+    "allTypes": "Lahat ng Uri",
+    "bookingUpdates": "Mga Update sa Booking",
+    "messages": "Mga Mensahe",
+    "agencyInvites": "Mga Imbitasyon sa Agency",
+    "payments": "Mga Bayad",
+    "systemAlerts": "Mga System Alert",
+    "reminders": "Mga Paalala",
+    "date": "Petsa",
+    "allTime": "Lahat ng Oras",
+    "today": "Ngayon",
+    "thisWeek": "Sa Linggong Ito",
+    "thisMonth": "Sa Buwang Ito"
   },
   "InvoicePreview": {
     "invoice": "Invoice",
@@ -1004,6 +1244,38 @@
     "downloadAsPDF": "I-download bilang PDF"
   },
   "BroadcastBanner": {
+    "close": "Isara"
+  },
+  "ProviderOnboardingBanner": {
+    "learnHowToGetStarted": "Alamin kung paano magsimula",
+    "providerGuideTitle": "Ang Provider 101 ay gagabayan ka sa mga pangunahing kaalaman ng platform.",
+    "providerGuideDescription": "I-setup ang iyong profile, pamahalaan ang mga booking, at palaguin ang iyong negosyo.",
+    "exploreProviderGuide": "I-explore ang Provider 101",
+    "help": "Tulong",
+    "close": "Isara"
+  },
+  "ClientOnboardingBanner": {
+    "learnHowToGetStarted": "Alamin kung paano magsimula",
+    "clientGuideTitle": "Ang Client 101 ay gagabayan ka sa paghahanap at pag-book ng mga serbisyo.",
+    "clientGuideDescription": "Tuklasin ang mga provider, mag-book ng serbisyo, at pamahalaan ang iyong mga request nang madali.",
+    "exploreClientGuide": "I-explore ang Client 101",
+    "help": "Tulong",
+    "close": "Isara"
+  },
+  "AgencyOnboardingBanner": {
+    "learnHowToGetStarted": "Alamin kung paano magsimula",
+    "agencyGuideTitle": "Ang Agency 101 ay gagabayan ka sa pamamahala ng iyong team at negosyo.",
+    "agencyGuideDescription": "Pamahalaan ang mga provider, subaybayan ang performance, at palaguin ang iyong agency.",
+    "exploreAgencyGuide": "I-explore ang Agency 101",
+    "help": "Tulong",
+    "close": "Isara"
+  },
+  "PartnerOnboardingBanner": {
+    "learnHowToGetStarted": "Alamin kung paano magsimula",
+    "partnerGuideTitle": "Ang Partner 101 ay gagabayan ka sa mga referral program at commission.",
+    "partnerGuideDescription": "Subaybayan ang mga referral, kumita ng commission, at palaguin ang iyong network.",
+    "explorePartnerGuide": "Simulan ang Pag-track ng Referrals",
+    "help": "Tulong",
     "close": "Isara"
   },
   "CompleteBookingDialog": {
@@ -1235,7 +1507,7 @@
     "viewDetails": "Tingnan ang mga Detalye",
     "contactSales": "Kontakin ang Sales"
   },
-  "Partners": {
+  "PartnersDashboard": {
     "title": "Mga Partner",
     "dashboardTitle": "Maligayang pagdating, {name}!",
     "subtitle": "Makipag-partner sa LocalPro para palaguin ang iyong negosyo at maabot ang mas maraming customer.",
@@ -1267,7 +1539,7 @@
     "partnerBenefits": "Mga Benepisyo ng Partner",
     "contactSales": "Kontakin ang Sales"
   },
-  "TermsOfService": {
+  "TermsOfServiceBasic": {
     "title": "Mga Tuntunin ng Serbisyo",
     "lastUpdated": "Huling Na-update",
     "acceptance": "Pagtanggap ng mga Tuntunin",
@@ -1346,9 +1618,47 @@
     "mustBeLoggedIn": "Dapat kang naka-log in para ma-save ang mga setting.",
     "preferencesSaved": "Na-save na ang iyong mga kagustuhan.",
     "saveFailed": "Hindi Na-save",
-    "description": "Pamahalaan ang mga setting at kagustuhan ng iyong account."
+    "description": "Pamahalaan ang mga setting at kagustuhan ng iyong account.",
+    "youHaveUnsavedChanges": "Mayroon kang mga hindi pa na-save na changes",
+    "appearance": "Appearance",
+    "accountSettings": "Mga Setting ng Account",
+    "manageAccountPreferences": "Pamahalaan ang iyong account preferences at security settings.",
+    "emailNotifications": "Mga Email Notification",
+    "receiveImportantUpdates": "Tumanggap ng important updates sa pamamagitan ng email",
+    "smsNotifications": "Mga SMS Notification",
+    "receiveUrgentUpdates": "Tumanggap ng urgent updates sa pamamagitan ng SMS",
+    "twoFactorAuthentication": "Two-Factor Authentication",
+    "addExtraLayerSecurity": "Magdagdag ng extra layer ng security sa iyong account",
+    "getNotifiedAboutBookingChanges": "Ma-notify tungkol sa booking changes at updates",
+    "receiveNotificationsForNewMessages": "Tumanggap ng notifications para sa mga bagong mensahe",
+    "getNotifiedWhenAgenciesInvite": "Ma-notify kapag nag-invite ang mga agency na sumali ka",
+    "getNotifiedAboutNewJobOpportunities": "Ma-notify tungkol sa mga bagong job opportunities",
+    "receivePromotionalOffers": "Tumanggap ng promotional offers at updates",
+    "privacySettings": "Mga Setting ng Privacy",
+    "controlPrivacyAndDataSharing": "Kontrolin ang iyong privacy at data sharing preferences.",
+    "profileVisibility": "Profile Visibility",
+    "selectProfileVisibility": "Piliin ang profile visibility",
+    "publicEveryoneCanSee": "Public - Lahat ay makakakita ng iyong profile",
+    "connectionsOnlyConnectedUsers": "Connections - Tanging mga connected users lang ang makakakita ng iyong profile",
+    "privateOnlyYouCanSee": "Private - Ikaw lang ang makakakita ng iyong profile",
+    "showOnlineStatus": "Ipakita ang Online Status",
+    "letOthersSeeWhenOnline": "Hayaan ang iba na makita kapag online ka",
+    "allowDirectMessages": "Payagan ang Direct Messages",
+    "letOtherUsersSendDirectMessages": "Hayaan ang ibang users na mag-send ng direct messages sa iyo",
+    "dataSharing": "Data Sharing",
+    "allowSharingAnonymizedData": "Payagan ang sharing ng anonymized data para sa platform improvement",
+    "customizeLookAndFeel": "I-customize ang look at feel ng iyong experience.",
+    "selectTheme": "Piliin ang theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "selectLanguage": "Piliin ang language",
+    "english": "English",
+    "filipino": "Filipino",
+    "saveChanges": "I-save ang Changes",
+    "allChangesHaveBeenSaved": "Lahat ng changes ay na-save na"
   },
-  "Services": {
+  "MyServices": {
     "title": "Aking Mga Serbisyo",
     "subtitle": "Pamahalaan ang mga serbisyo na iyong inaalok sa mga kliyente.",
     "addNewService": "Magdagdag ng Bagong Serbisyo",
@@ -1544,10 +1854,81 @@
     "couldNotRetrieveAddress": "Hindi makuha ang address mula sa coordinates.",
     "geolocationError": "Error sa Geolocation",
     "geolocationNotSupported": "Hindi sinusuportahan ng browser na ito ang geolocation.",
+    "publicProfileInformation": "Public Profile Information",
+    "publicProfileDescription": "Ang impormasyong ito ay ipapakita sa inyong public profile.",
+    "personalDetails": "Personal na Detalye",
+    "personalDetailsDescription": "Ang impormasyong ito ay pribado at hindi ipapakita sa inyong profile.",
+    "emailAddress": "Email Address",
+    "mobileNumber": "Mobile Number",
+    "gender": "Kasarian",
+    "male": "Lalaki",
+    "female": "Babae",
+    "other": "Iba pa",
+    "preferNotToSay": "Mas gusto kong hindi sabihin",
+    "birthdate": "Petsa ng Kapanganakan",
+    "month": "Buwan",
+    "day": "Araw",
+    "year": "Taon",
+    "passwordAndSecurity": "Password at Security",
+    "passwordAndSecurityDescription": "Pamahalaan ang inyong password at account security settings.",
+    "currentPassword": "Kasalukuyang Password",
+    "newPassword": "Bagong Password",
+    "confirmNewPassword": "Kumpirmahin ang Bagong Password",
+    "changePassword": "Palitan ang Password",
+    "loyaltyProgram": "Loyalty Program",
+    "selectGender": "Piliin ang kasarian",
+    "selectStatus": "Piliin ang status",
+    "selectKeyService": "Piliin ang key service",
+    "selectMethod": "Piliin ang method",
+    "tellUsAboutYourself": "Sabihin sa amin ang kaunti tungkol sa inyong sarili o negosyo...",
+    "phonePlaceholder": "hal., 09123456789",
+    "addressPlaceholder": "hal., Quezon City, Metro Manila",
+    "yearsOfExperiencePlaceholder": "hal., 5",
+    "licenseTypePlaceholder": "hal., TESDA NC II",
+    "licenseIssuingStatePlaceholder": "hal., NCR",
+    "licenseIssuingCountryPlaceholder": "hal., Philippines",
+    "yearsOfExperience": "Mga Taon ng Karanasan",
+    "monday": "Lunes",
+    "tuesday": "Martes",
+    "wednesday": "Miyerkules",
+    "thursday": "Huwebes",
+    "friday": "Biyernes",
+    "saturday": "Sabado",
+    "sunday": "Linggo",
     "updateFailed": "Nabigo ang Update",
     "uploadFailed": "Nabigo ang Upload",
     "error": "Error",
     "success": "Tagumpay"
+  },
+  "Payments": {
+    "title": "Payment History",
+    "subtitle": "Tingnan ang lahat ng inyong payment transactions at receipts.",
+    "refresh": "I-refresh",
+    "transactionHistory": "Transaction History",
+    "transactionsFound": "{count} transaction{count, plural, one {} other {s}} nahanap",
+    "date": "Petsa",
+    "type": "Uri",
+    "amount": "Halaga",
+    "method": "Paraan",
+    "status": "Status",
+    "actions": "Mga Aksyon",
+    "viewDetails": "Tingnan ang Detalye",
+    "transactionDetails": "Mga Detalye ng Transaction",
+    "transactionId": "Transaction ID: {id}",
+    "paymentMethod": "Paraan ng Bayad",
+    "verifiedAt": "Na-verify Sa",
+    "rejectionReason": "Dahilan ng Pagtanggi",
+    "paypalOrderId": "PayPal Order ID",
+    "payerEmail": "Email ng Nagbayad",
+    "bookingId": "Booking ID",
+    "noTransactionsFound": "Walang nahanap na payment transactions.",
+    "completed": "Kumpleto",
+    "pending": "Pending",
+    "rejected": "Tinanggihan",
+    "failed": "Nabigo",
+    "servicePayment": "Bayad sa Serbisyo",
+    "payoutRequest": "Request ng Payout",
+    "refund": "Refund"
   },
   "Messages": {
     "title": "Mga Mensahe",
@@ -1572,7 +1953,12 @@
     "couldNotFetchMessages": "Hindi makuha ang mga mensahe.",
     "failedToSendMessage": "Hindi maipadala ang mensahe.",
     "fileTooLarge": "Ang laki ng file ay dapat mas mababa sa 5MB",
-    "databaseConnectionError": "Error sa database connection. Pakisubukan ulit."
+    "databaseConnectionError": "Error sa database connection. Pakisubukan ulit.",
+    "sentImage": "Na-send na larawan",
+    "imagePreview": "Preview ng larawan",
+    "searchConversationsAria": "Maghanap ng mga conversation",
+    "typeMessageAria": "I-type ang iyong mensahe",
+    "attachImageAria": "Mag-attach ng larawan"
   },
   "MyJobPosts": {
     "title": "Aking Mga Job Post",
@@ -1685,7 +2071,37 @@
     "noOpenJobs": "Walang Open na Trabaho",
     "noOpenJobsDescription": "Walang available na open jobs ngayon. Mangyaring bumalik mamaya!",
     "error": "Error",
-    "success": "Tagumpay"
+    "success": "Tagumpay",
+    "filtersAndSearch": "Mga Filter at Search",
+    "findPerfectJob": "Hanapin ang perpektong trabaho para sa iyo",
+    "searchJobs": "Maghanap ng Trabaho",
+    "searchPlaceholder": "Maghanap ayon sa title, description, o location...",
+    "category": "Kategorya",
+    "allCategories": "Lahat ng Kategorya",
+    "budgetRange": "Saklaw ng Budget",
+    "allBudgets": "Lahat ng Budget",
+    "under1000": "Under ₱1,000",
+    "budget1000to5000": "₱1,000 - ₱5,000",
+    "budget5000to10000": "₱5,000 - ₱10,000",
+    "over10000": "Over ₱10,000",
+    "sortBy": "I-sort Ayon sa",
+    "newestFirst": "Pinakabago Muna",
+    "oldestFirst": "Pinakaluma Muna",
+    "highestBudget": "Pinakamataas na Budget",
+    "lowestBudget": "Pinakamababang Budget",
+    "mostApplicants": "Pinakamaraming Applicant",
+    "leastApplicants": "Pinakakaunting Applicant",
+    "titleAZ": "Title A-Z",
+    "titleZA": "Title Z-A",
+    "displayMode": "Display Mode",
+    "grid": "Grid",
+    "list": "List",
+    "gridView": "Grid view",
+    "listView": "List view",
+    "noJobsMatchCriteria": "Walang trabaho na tumugma sa criteria mo",
+    "tryAdjustingSearch": "Subukan mong i-adjust ang search o filter criteria para makahanap ng mas maraming trabaho.",
+    "clearFilters": "I-clear ang mga Filter",
+    "view": "Tingnan"
   },
   "Earnings": {
     "title": "Mga Kita",
@@ -1722,7 +2138,23 @@
     "requestFailed": "Nabigo ang Request",
     "requestFailedDescription": "May error sa pag-submit ng iyong payout request. Mangyaring subukan ulit.",
     "error": "Error",
-    "success": "Tagumpay"
+    "success": "Tagumpay",
+    "total": "Total",
+    "totalRevenue": "Total Revenue",
+    "growth": "growth",
+    "readyToWithdraw": "Ready to withdraw",
+    "completedJobs": "Completed Jobs",
+    "totalCompleted": "Total completed",
+    "avgMonthly": "Avg. Monthly",
+    "monthlyAverage": "12-month average",
+    "monthlyEarningsPerformance": "Monthly earnings performance over the last 12 months",
+    "latestCompletedBookings": "Your latest completed bookings and earnings",
+    "noCompletedJobsYet": "No completed jobs yet",
+    "payoutRequestsAndStatus": "Your payout requests and payment status",
+    "noPayoutsRequestedYet": "No payouts requested yet",
+    "readyForPayout": "Ready for Payout",
+    "availableForWithdrawal": "You have ₱{amount} available for withdrawal",
+    "payoutsOnlyOnSaturdays": "Payouts only on Saturdays"
   },
   "Calendar": {
     "title": "Kalendaryo",
@@ -1745,7 +2177,24 @@
     "upcoming": "Upcoming",
     "completed": "Completed",
     "cancelled": "Cancelled",
-    "pending": "Pending"
+    "pending": "Pending",
+    "pending payment": "Pending Payment",
+    "pending verification": "Pending Verification",
+    "in progress": "In Progress",
+    "payment rejected": "Payment Rejected",
+    "advancedManagement": "Advanced Management",
+    "more": "pa",
+    "clickToAddEvent": "I-click para magdagdag ng event",
+    "eventTitle": "Pamagat ng Event",
+    "enterEventTitle": "I-enter ang pamagat ng event",
+    "serviceName": "Pangalan ng Serbisyo",
+    "enterServiceName": "I-enter ang pangalan ng serbisyo",
+    "startDateTime": "Petsa at Oras ng Simula",
+    "endDateTime": "Petsa at Oras ng Katapusan",
+    "description": "Deskripsyon",
+    "enterEventDescription": "I-enter ang deskripsyon ng event (optional)",
+    "cancel": "Kanselahin",
+    "createEvent": "Gumawa ng Event"
   },
   "AgencyEarnings": {
     "title": "Agency Earnings",
@@ -1789,7 +2238,48 @@
     "totalRevenue": "Total Revenue",
     "noCompletedServices": "Walang completed services pa.",
     "totalBookings": "Total Bookings",
-    "completedJobs": "Completed Jobs"
+    "completedJobs": "Completed Jobs",
+    "last7Days": "Huling 7 araw",
+    "last30Days": "Huling 30 araw",
+    "last90Days": "Huling 90 araw",
+    "lastYear": "Huling taon",
+    "allTime": "Lahat ng panahon",
+    "export": "I-export",
+    "revenueGrowth": "Revenue Growth",
+    "monthlyRevenueTrends": "Monthly revenue trends at projections",
+    "clientAnalytics": "Client Analytics",
+    "newVsReturning": "New vs returning client distribution",
+    "performanceInsights": "Performance Insights",
+    "keyPerformanceIndicators": "Key performance indicators at recommendations",
+    "revenueGrowthLabel": "Revenue Growth",
+    "thisMonth": "ngayong buwan",
+    "good": "Mabuti",
+    "needsAttention": "Kailangan ng Atensyon",
+    "clientRetention": "Client Retention",
+    "returningClients": "returning clients",
+    "excellent": "Napakagaling",
+    "utilizationRateLabel": "Utilization Rate",
+    "bookingsCompleted": "ng bookings na natapos",
+    "high": "Mataas",
+    "moderate": "Katamtaman",
+    "averageRating": "Average Rating",
+    "fromReviews": "mula sa {count} reviews",
+    "quickStats": "Quick Stats",
+    "atAGlanceMetrics": "At-a-glance business metrics",
+    "avgClientValue": "Avg. Client Value",
+    "totalClients": "Total Clients",
+    "totalBookingsLabel": "Total Bookings",
+    "projectedRevenue": "Projected Revenue",
+    "nextMonthForecast": "Next month forecast",
+    "topLocations": "Top Locations",
+    "revenueByLocation": "Revenue ayon sa location",
+    "bookings": "bookings",
+    "revenue": "Revenue",
+    "noLocationData": "Walang location data available",
+    "serviceAreas": "Service Areas",
+    "distributionOfServiceAreas": "Distribution ng service areas",
+    "bookingsLabel": "Bookings",
+    "avgValue": "Avg. Value"
   },
   "AppliedJobs": {
     "title": "Mga Na-apply na Trabaho",
@@ -1820,7 +2310,7 @@
     "paid": "Paid",
     "overdue": "Overdue"
   },
-  "Partners": {
+  "PartnersBasic": {
     "title": "Maligayang pagdating, {name}!",
     "subtitle": "Ito ang iyong Partner Dashboard. Mas maraming features na darating!",
     "accessDenied": "Access Denied",

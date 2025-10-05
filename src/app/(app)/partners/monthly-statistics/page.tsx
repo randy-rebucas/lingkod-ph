@@ -52,7 +52,7 @@ interface MonthlyAnalytics {
 
 export default function MonthlyStatisticsPage() {
   const { user, userRole } = useAuth();
-  const _t = useTranslations('Partners');
+  const _t = useTranslations('PartnersDashboard');
   const [analytics, setAnalytics] = useState<MonthlyAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedYear, _setSelectedYear] = useState(new Date().getFullYear());

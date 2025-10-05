@@ -166,9 +166,10 @@ const ProfilePage = memo(function ProfilePage() {
     const newDocFileInputRef = useRef<HTMLInputElement>(null);
 
     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-    const { isLoaded } = useLoadScript({
+    const { isLoaded, loadError } = useLoadScript({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
         libraries: ["places"],
+        preventGoogleFontsLoading: true,
     });
 
     const years = useMemo(() => {
@@ -627,6 +628,15 @@ const ProfilePage = memo(function ProfilePage() {
 
 
     const handleCurrentLocation = () => {
+        if (!isLoaded || loadError) {
+            toast({ 
+                variant: 'destructive', 
+                title: t('error'), 
+                description: 'Google Maps is not available. Please enter your address manually.' 
+            });
+            return;
+        }
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(async (position) => {
                 const lat = position.coords.latitude;
@@ -635,14 +645,19 @@ const ProfilePage = memo(function ProfilePage() {
                 setLongitude(lng);
 
                 // Reverse Geocode to get address
-                const geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-                    if (status === 'OK' && results && results[0]) {
-                        setAddress(results[0].formatted_address);
-                    } else {
-                        toast({ variant: 'destructive', title: t('error'), description: t('couldNotRetrieveAddress') });
-                    }
-                });
+                try {
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+                        if (status === 'OK' && results && results[0]) {
+                            setAddress(results[0].formatted_address);
+                        } else {
+                            toast({ variant: 'destructive', title: t('error'), description: t('couldNotRetrieveAddress') });
+                        }
+                    });
+                } catch (error) {
+                    console.error('Geocoding error:', error);
+                    toast({ variant: 'destructive', title: t('error'), description: 'Could not retrieve address from coordinates.' });
+                }
             }, (error) => {
                  toast({ variant: 'destructive', title: t('geolocationError'), description: error.message });
             });
@@ -657,13 +672,22 @@ const ProfilePage = memo(function ProfilePage() {
 
     const onPlaceChanged = () => {
         if (autocompleteRef.current) {
-            const place = autocompleteRef.current.getPlace();
-            if (place.formatted_address) {
-                setAddress(place.formatted_address);
-            }
-            if (place.geometry?.location) {
-                setLatitude(place.geometry.location.lat());
-                setLongitude(place.geometry.location.lng());
+            try {
+                const place = autocompleteRef.current.getPlace();
+                if (place.formatted_address) {
+                    setAddress(place.formatted_address);
+                }
+                if (place.geometry?.location) {
+                    setLatitude(place.geometry.location.lat());
+                    setLongitude(place.geometry.location.lng());
+                }
+            } catch (error) {
+                console.error('Error handling place selection:', error);
+                toast({ 
+                    variant: 'destructive', 
+                    title: t('error'), 
+                    description: 'Could not process the selected location.' 
+                });
             }
         }
     };
@@ -671,7 +695,7 @@ const ProfilePage = memo(function ProfilePage() {
     return (
         <div className="container space-y-8">
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="flex-row items-center gap-6 space-y-0 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20 p-6">
                     <div className="relative">
@@ -718,7 +742,7 @@ const ProfilePage = memo(function ProfilePage() {
             </div>
             
             {userRole === 'provider' && invites.length > 0 && (
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card>
                         <CardHeader>
                             <CardTitle>{t('agencyInvitations')}</CardTitle>
@@ -745,7 +769,7 @@ const ProfilePage = memo(function ProfilePage() {
             )}
 
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Tabs defaultValue="public-profile" className="w-full">
                      <TabsList className="w-full h-auto justify-start overflow-x-auto bg-background/80 backdrop-blur-sm shadow-soft border-0">
                     <TabsTrigger value="public-profile" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"><User className="mr-2 h-4 w-4"/> {t('publicProfile')}</TabsTrigger>
@@ -764,8 +788,8 @@ const ProfilePage = memo(function ProfilePage() {
                 <TabsContent value="public-profile" className="mt-8">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                            <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Public Profile Information</CardTitle>
-                            <CardDescription className="text-base">This information will be displayed on your public profile.</CardDescription>
+                            <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('publicProfileInformation')}</CardTitle>
+                            <CardDescription className="text-base">{t('publicProfileDescription')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6 p-6">
                             <div className="space-y-2">
@@ -776,7 +800,7 @@ const ProfilePage = memo(function ProfilePage() {
                                 <Label htmlFor="bio" className="text-sm font-medium">Bio / About</Label>
                                 <Textarea 
                                     id="bio"
-                                    placeholder="Tell us a little about yourself or your business..."
+                                    placeholder={t('tellUsAboutYourself')}
                                     value={bio}
                                     onChange={(e) => setBio(e.target.value)}
                                     rows={5}
@@ -796,35 +820,48 @@ const ProfilePage = memo(function ProfilePage() {
                 <TabsContent value="account-settings" className="mt-8 space-y-6">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                            <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Personal Details</CardTitle>
-                            <CardDescription className="text-base">This information is private and will not be shown on your profile.</CardDescription>
+                            <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('personalDetails')}</CardTitle>
+                            <CardDescription className="text-base">{t('personalDetailsDescription')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6 p-6">
                             <div className="space-y-2">
-                                <Label htmlFor="email" className="text-sm font-medium">Email Address</Label>
+                                <Label htmlFor="email" className="text-sm font-medium">{t('emailAddress')}</Label>
                                 <Input id="email" type="email" value={user.email || ''} disabled className="bg-muted/50 border-2 shadow-soft" />
                             </div>
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="phone" className="text-sm font-medium">Mobile Number</Label>
-                                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g., 09123456789" className="bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft" />
+                                    <Label htmlFor="phone" className="text-sm font-medium">{t('mobileNumber')}</Label>
+                                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={t('phonePlaceholder')} className="bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft" />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="gender">Gender</Label>
+                                    <Label htmlFor="gender">{t('gender')}</Label>
                                     <Select value={gender} onValueChange={setGender}>
-                                        <SelectTrigger id="gender"><SelectValue placeholder="Select gender" /></SelectTrigger>
+                                        <SelectTrigger id="gender"><SelectValue placeholder={t('selectGender')} /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="male">Male</SelectItem>
-                                            <SelectItem value="female">Female</SelectItem>
-                                            <SelectItem value="other">Other</SelectItem>
-                                            <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                                            <SelectItem value="male">{t('male')}</SelectItem>
+                                            <SelectItem value="female">{t('female')}</SelectItem>
+                                            <SelectItem value="other">{t('other')}</SelectItem>
+                                            <SelectItem value="prefer-not-to-say">{t('preferNotToSay')}</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
-                            {isLoaded && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="address">Address / Service Area</Label>
+                            <div className="space-y-2">
+                                <Label htmlFor="address">Address / Service Area</Label>
+                                {loadError ? (
+                                    <div className="space-y-2">
+                                        <Input 
+                                            id="address" 
+                                            value={address} 
+                                            onChange={(e) => setAddress(e.target.value)} 
+                                            placeholder={t('addressPlaceholder')}
+                                            className="w-full"
+                                        />
+                                        <p className="text-xs text-muted-foreground">
+                                            Google Maps integration is not available. Please enter your address manually.
+                                        </p>
+                                    </div>
+                                ) : isLoaded ? (
                                     <div className="flex gap-2 items-center">
                                         <Autocomplete
                                             onLoad={onLoad}
@@ -835,31 +872,49 @@ const ProfilePage = memo(function ProfilePage() {
                                                 id="address" 
                                                 value={address} 
                                                 onChange={(e) => setAddress(e.target.value)} 
-                                                placeholder="e.g., Quezon City, Metro Manila"
+                                                placeholder={t('addressPlaceholder')}
                                                 className="w-full"
                                             />
                                         </Autocomplete>
-                                        
                                     </div>
-                                    <div className="flex gap-2">
-                                        <Button type="button" variant="outline" className="w-full" onClick={handleCurrentLocation}>
-                                            <MapPin className="mr-2 h-4 w-4"/>
-                                            Use Current Location
-                                        </Button>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <Input 
+                                            id="address" 
+                                            value={address} 
+                                            onChange={(e) => setAddress(e.target.value)} 
+                                            placeholder={t('addressPlaceholder')}
+                                            className="w-full"
+                                        />
+                                        <p className="text-xs text-muted-foreground">
+                                            Loading Google Maps...
+                                        </p>
                                     </div>
-                                    <input type="hidden" value={latitude || ''} onChange={() => {}} />
-                                    <input type="hidden" value={longitude || ''} onChange={() => {}} />
+                                )}
+                                <div className="flex gap-2">
+                                    <Button 
+                                        type="button" 
+                                        variant="outline" 
+                                        className="w-full" 
+                                        onClick={handleCurrentLocation}
+                                        disabled={!isLoaded || !!loadError}
+                                    >
+                                        <MapPin className="mr-2 h-4 w-4"/>
+                                        Use Current Location
+                                    </Button>
                                 </div>
-                            )}
+                                <input type="hidden" value={latitude || ''} onChange={() => {}} />
+                                <input type="hidden" value={longitude || ''} onChange={() => {}} />
+                            </div>
                             <div className="space-y-2">
-                                <Label>Birthdate</Label>
+                                <Label>{t('birthdate')}</Label>
                                 <div className="grid grid-cols-3 gap-2">
                                     <Select value={birthMonth} onValueChange={setBirthMonth}>
-                                        <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
+                                        <SelectTrigger><SelectValue placeholder={t('month')} /></SelectTrigger>
                                         <SelectContent>{months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}</SelectContent>
                                     </Select>
                                     <Select value={birthDay} onValueChange={setBirthDay}>
-                                        <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
+                                        <SelectTrigger><SelectValue placeholder={t('day')} /></SelectTrigger>
                                         <SelectContent>
                                             {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(d => (
                                                 <SelectItem key={d} value={String(d)}>{d}</SelectItem>
@@ -867,7 +922,7 @@ const ProfilePage = memo(function ProfilePage() {
                                         </SelectContent>
                                     </Select>
                                     <Select value={birthYear} onValueChange={setBirthYear}>
-                                        <SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger>
+                                        <SelectTrigger><SelectValue placeholder={t('year')} /></SelectTrigger>
                                         <SelectContent>{years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
                                     </Select>
                                 </div>
@@ -883,25 +938,25 @@ const ProfilePage = memo(function ProfilePage() {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Password & Security</CardTitle>
-                            <CardDescription>Manage your password and account security settings.</CardDescription>
+                            <CardTitle>{t('passwordAndSecurity')}</CardTitle>
+                            <CardDescription>{t('passwordAndSecurityDescription')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="current-password">Current Password</Label>
+                                <Label htmlFor="current-password">{t('currentPassword')}</Label>
                                 <Input id="current-password" type="password" />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="new-password">New Password</Label>
+                                <Label htmlFor="new-password">{t('newPassword')}</Label>
                                 <Input id="new-password" type="password" />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                                <Label htmlFor="confirm-password">{t('confirmNewPassword')}</Label>
                                 <Input id="confirm-password" type="password" />
                             </div>
                         </CardContent>
                         <CardFooter>
-                            <Button variant="outline" className="w-full sm:w-auto" disabled>Change Password</Button>
+                            <Button variant="outline" className="w-full sm:w-auto" disabled>{t('changePassword')}</Button>
                         </CardFooter>
                     </Card>
                     
@@ -910,7 +965,7 @@ const ProfilePage = memo(function ProfilePage() {
 
                 <TabsContent value="loyalty" className="mt-6 space-y-6">
                     <div>
-                         <h2 className="text-2xl font-bold">Loyalty Program</h2>
+                         <h2 className="text-2xl font-bold">{t('loyaltyProgram')}</h2>
                          <p className="text-muted-foreground">Earn points for completed bookings and redeem them for exclusive rewards.</p>
                     </div>
 
@@ -1115,13 +1170,13 @@ const ProfilePage = memo(function ProfilePage() {
                             <CardContent className="space-y-4">
                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="yearsOfExperience">Years of Experience</Label>
-                                        <Input id="yearsOfExperience" type="number" value={yearsOfExperience} onChange={(e) => setYearsOfExperience(e.target.value)} placeholder="e.g., 5" />
+                                        <Label htmlFor="yearsOfExperience">{t('yearsOfExperience')}</Label>
+                                        <Input id="yearsOfExperience" type="number" value={yearsOfExperience} onChange={(e) => setYearsOfExperience(e.target.value)} placeholder={t('yearsOfExperiencePlaceholder')} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="availabilityStatus">Availability Status</Label>
                                         <Select value={availabilityStatus} onValueChange={setAvailabilityStatus}>
-                                            <SelectTrigger id="availabilityStatus"><SelectValue placeholder="Select status" /></SelectTrigger>
+                                            <SelectTrigger id="availabilityStatus"><SelectValue placeholder={t('selectStatus')} /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="available">Available for Bookings</SelectItem>
                                                 <SelectItem value="limited">Limited Availability</SelectItem>
@@ -1136,7 +1191,7 @@ const ProfilePage = memo(function ProfilePage() {
                                     <div className="flex gap-2">
                                         <Select onValueChange={setCurrentKeyService} value={currentKeyService}>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select a key service" /></SelectTrigger>
+                                                <SelectValue placeholder={t('selectKeyService')} /></SelectTrigger>
                                             <SelectContent>
                                                 {categories
                                                     .filter(cat => !keyServices.includes(cat.name))
@@ -1237,7 +1292,7 @@ const ProfilePage = memo(function ProfilePage() {
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                              <div className="space-y-2">
                                                 <Label htmlFor="licenseType">License/Certification Type</Label>
-                                                <Input id="licenseType" value={licenseType} onChange={e => setLicenseType(e.target.value)} placeholder="e.g., TESDA NC II" />
+                                                <Input id="licenseType" value={licenseType} onChange={e => setLicenseType(e.target.value)} placeholder={t('licenseTypePlaceholder')} />
                                             </div>
                                              <div className="space-y-2">
                                                 <Label htmlFor="licenseNumber">License Number</Label>
@@ -1251,11 +1306,11 @@ const ProfilePage = memo(function ProfilePage() {
                                             </div>
                                              <div className="space-y-2">
                                                 <Label htmlFor="licenseIssuingState">Issuing State/Region</Label>
-                                                <Input id="licenseIssuingState" value={licenseIssuingState} onChange={e => setLicenseIssuingState(e.target.value)} placeholder="e.g., NCR" />
+                                                <Input id="licenseIssuingState" value={licenseIssuingState} onChange={e => setLicenseIssuingState(e.target.value)} placeholder={t('licenseIssuingStatePlaceholder')} />
                                             </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="licenseIssuingCountry">Issuing Country</Label>
-                                                <Input id="licenseIssuingCountry" value={licenseIssuingCountry} onChange={e => setLicenseIssuingCountry(e.target.value)} placeholder="e.g., Philippines" />
+                                                <Input id="licenseIssuingCountry" value={licenseIssuingCountry} onChange={e => setLicenseIssuingCountry(e.target.value)} placeholder={t('licenseIssuingCountryPlaceholder')} />
                                             </div>
                                         </div>
                                     </div>
@@ -1283,7 +1338,7 @@ const ProfilePage = memo(function ProfilePage() {
                                     <div className="space-y-2">
                                         <Label htmlFor="availabilityStatus">Availability Status</Label>
                                         <Select value={availabilityStatus} onValueChange={setAvailabilityStatus}>
-                                            <SelectTrigger id="availabilityStatus"><SelectValue placeholder="Select status" /></SelectTrigger>
+                                            <SelectTrigger id="availabilityStatus"><SelectValue placeholder={t('selectStatus')} /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="available">Available for Bookings</SelectItem>
                                                 <SelectItem value="limited">Limited Availability</SelectItem>
@@ -1430,7 +1485,7 @@ const ProfilePage = memo(function ProfilePage() {
                                 <div className="space-y-2">
                                 <Label>Payout Method</Label>
                                 <Select value={payoutMethod} onValueChange={setPayoutMethod}>
-                                    <SelectTrigger><SelectValue placeholder="Select a method" /></SelectTrigger>
+                                    <SelectTrigger><SelectValue placeholder={t('selectMethod')} /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="gcash">GCash</SelectItem>
                                         <SelectItem value="bank">Bank Transfer</SelectItem>

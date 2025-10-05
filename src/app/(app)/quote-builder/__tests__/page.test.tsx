@@ -65,7 +65,7 @@ describe('QuoteBuilderPage', () => {
   it('has proper max width constraints', () => {
     render(<QuoteBuilderPage />);
 
-    const maxWidthElements = document.querySelectorAll('.max-w-6xl');
+    const maxWidthElements = document.querySelectorAll('.');
     expect(maxWidthElements.length).toBeGreaterThan(0);
   });
 });

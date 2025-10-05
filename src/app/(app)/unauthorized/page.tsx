@@ -24,7 +24,7 @@ export default function UnauthorizedPage() {
 
   return (
     <div className="container min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="max-w-6xl mx-auto">
+      <div className=" mx-auto">
         <Card className="w-full max-w-md shadow-soft border-0 bg-background/80 backdrop-blur-sm">
         <CardHeader className="text-center border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">

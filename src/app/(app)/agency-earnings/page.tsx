@@ -118,18 +118,18 @@ export default function AgencyEarningsPage() {
     if (loading) {
         return (
              <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Skeleton className="h-10 w-1/3" />
                     <Skeleton className="h-4 w-2/3" />
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-3">
                         <Skeleton className="h-28 w-full" />
                         <Skeleton className="h-28 w-full" />
                         <Skeleton className="h-28 w-full" />
                     </div>
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Skeleton className="h-64 w-full" />
                 </div>
             </div>
@@ -138,12 +138,12 @@ export default function AgencyEarningsPage() {
 
     return (
         <div className="container space-y-8">
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                 <p className="text-muted-foreground">{t('subtitle')}</p>
             </div>
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="grid gap-6 md:grid-cols-3">
                      <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
@@ -178,7 +178,7 @@ export default function AgencyEarningsPage() {
                 </div>
             </div>
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                  <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                         <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('payoutRequests')}</CardTitle>

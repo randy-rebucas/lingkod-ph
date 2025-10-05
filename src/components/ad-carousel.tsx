@@ -42,12 +42,17 @@ export function AdCarousel() {
     const { handleError } = useErrorHandler();
 
     useEffect(() => {
-        import("embla-carousel-autoplay").then((plugin) => {
-            Autoplay.current = plugin.default;
-            if(api) {
-                 api.reInit();
-            }
-        });
+        import("embla-carousel-autoplay")
+            .then((plugin) => {
+                Autoplay.current = plugin.default;
+                if(api) {
+                     api.reInit();
+                }
+            })
+            .catch((error) => {
+                console.warn('Failed to load embla-carousel-autoplay plugin:', error);
+                // Continue without autoplay functionality
+            });
     }, [api]);
 
     useEffect(() => {

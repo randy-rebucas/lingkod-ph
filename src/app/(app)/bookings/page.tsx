@@ -64,7 +64,7 @@ export type Booking = {
     providerAvatar?: string;
     date: Timestamp;
     status: BookingStatus;
-    price: number;
+    price?: number;
     notes?: string;
     reviewId?: string;
     completionPhotoURL?: string;
@@ -151,7 +151,7 @@ const getStatusClass = (status: BookingStatus) => {
 
 const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: string | null }) => {
     const { toast } = useToast();
-    const _t = useTranslations('Bookings');
+    const t = useTranslations('Bookings');
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -183,19 +183,19 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
 
             // Create notification for the other party
             const otherUserId = userRole === 'client' ? booking.providerId : booking.clientId;
-            const notificationMessage = message || `Booking status updated to ${newStatus}`;
+            const notificationMessage = message || t('bookingStatusUpdated', { status: newStatus });
             await createNotification(otherUserId, notificationMessage, `/bookings/${booking.id}`);
 
             toast({
-                title: "Success",
-                description: `Booking ${newStatus.toLowerCase()} successfully.`
+                title: t('success'),
+                description: t('bookingUpdatedSuccessfully', { status: newStatus.toLowerCase() })
             });
         } catch (error) {
             console.error("Error updating booking status:", error);
             toast({
                 variant: "destructive",
-                title: "Error",
-                description: "Failed to update booking status."
+                title: t('error'),
+                description: t('failedToUpdateBooking')
             });
         }
     };
@@ -246,14 +246,14 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
                 <TableCell className="font-medium">
                     <div className="flex items-center gap-1">
                         <Wallet className="h-3 w-3" />
-                        ₱{booking.price.toFixed(2)}
+                        ₱{(booking.price || 0).toFixed(2)}
                     </div>
                 </TableCell>
 
                 {/* Category */}
                 <TableCell>
                     <span className="text-sm text-muted-foreground">
-                        {booking.category || 'Other'}
+                        {booking.category || t('other')}
                     </span>
                 </TableCell>
 
@@ -267,7 +267,7 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
                             className="h-8 px-3"
                         >
                             <Eye className="h-3 w-3 mr-1" />
-                            View
+                            {t('view')}
                         </Button>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -276,7 +276,7 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuLabel>{t('actions')}</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 
                                 {/* Payment Actions */}
@@ -284,7 +284,7 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
                                     <DropdownMenuItem asChild>
                                         <Link href={`/bookings/${booking.id}/payment`} className="flex items-center">
                                             <Wallet className="h-4 w-4 mr-2" />
-                                            Proceed to Payment
+                                            {t('proceedToPayment')}
                                         </Link>
                                     </DropdownMenuItem>
                                 )}
@@ -294,7 +294,7 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
                                     <DropdownMenuItem asChild>
                                         <Link href={`/bookings/${booking.id}/work-log`} className="flex items-center">
                                             <Timer className="h-4 w-4 mr-2" />
-                                            View Work Log
+                                            {t('view')} Work Log
                                         </Link>
                                     </DropdownMenuItem>
                                 )}
@@ -304,7 +304,7 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
                                     <DropdownMenuItem asChild>
                                         <Link href={`/providers/${booking.providerId}`} className="flex items-center">
                                             <Repeat className="h-4 w-4 mr-2" />
-                                            Re-book Service
+                                            {t('rebookService')}
                                         </Link>
                                     </DropdownMenuItem>
                                 )}
@@ -313,7 +313,7 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
                                 {booking.status === "Completed" && !booking.reviewId && userRole === "client" && (
                                     <DropdownMenuItem onClick={() => handleOpenReview(booking)}>
                                         <Check className="h-4 w-4 mr-2" />
-                                        Leave Review
+                                        {t('leaveReview')}
                                     </DropdownMenuItem>
                                 )}
                                 
@@ -321,18 +321,18 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
                                 {booking.status === "In Progress" && userRole === "provider" && (
                                     <DropdownMenuItem onClick={() => handleOpenComplete(booking)}>
                                         <CheckCircle2 className="h-4 w-4 mr-2" />
-                                        Mark Complete
+                                        {t('markComplete')}
                                     </DropdownMenuItem>
                                 )}
                                 
                                 {/* Cancel Actions */}
                                 {(booking.status === "Upcoming" || booking.status === "Pending Payment") && (
                                     <DropdownMenuItem 
-                                        onClick={() => handleStatusUpdate(booking, "Cancelled", "Booking has been cancelled")}
+                                        onClick={() => handleStatusUpdate(booking, "Cancelled", t('bookingHasBeenCancelled'))}
                                         className="text-destructive focus:text-destructive"
                                     >
                                         <X className="h-4 w-4 mr-2" />
-                                        Cancel Booking
+                                        {t('cancelBooking')}
                                     </DropdownMenuItem>
                                 )}
                                 
@@ -341,7 +341,7 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
                                     <DropdownMenuItem asChild>
                                         <Link href={`/bookings/${booking.id}/payment`} className="flex items-center">
                                             <CreditCard className="h-4 w-4 mr-2" />
-                                            Retry Payment
+                                            {t('retryPayment')}
                                         </Link>
                                     </DropdownMenuItem>
                                 )}
@@ -376,7 +376,7 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
 
 const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: string | null }) => {
     const { toast } = useToast();
-    const _t = useTranslations('Bookings');
+    const t = useTranslations('Bookings');
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -408,19 +408,19 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
 
             // Create notification for the other party
             const otherUserId = userRole === 'client' ? booking.providerId : booking.clientId;
-            const notificationMessage = message || `Booking status updated to ${newStatus}`;
+            const notificationMessage = message || t('bookingStatusUpdated', { status: newStatus });
             await createNotification(otherUserId, notificationMessage, `/bookings/${booking.id}`);
 
             toast({
-                title: "Success",
-                description: `Booking ${newStatus.toLowerCase()} successfully.`
+                title: t('success'),
+                description: t('bookingUpdatedSuccessfully', { status: newStatus.toLowerCase() })
             });
         } catch (error) {
             console.error("Error updating booking status:", error);
             toast({
                 variant: "destructive",
-                title: "Error",
-                description: "Failed to update booking status."
+                title: t('error'),
+                description: t('failedToUpdateBooking')
             });
         }
     };
@@ -462,13 +462,13 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
                         </div>
                         <div className="flex items-center gap-1 font-medium">
                             <Wallet className="h-3 w-3" />
-                            ₱{booking.price.toFixed(2)}
+                            ₱{(booking.price || 0).toFixed(2)}
                         </div>
                     </div>
 
                     <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">
-                            {booking.category || 'Other'}
+                            {booking.category || t('other')}
                         </span>
                         <div className="flex items-center gap-2">
                             <Button 
@@ -478,7 +478,7 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
                                 className="h-8 px-3 text-xs"
                             >
                                 <Eye className="h-3 w-3 mr-1" />
-                                View
+                                {t('view')}
                             </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -487,7 +487,7 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-48">
-                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuLabel>{t('actions')}</DropdownMenuLabel>
                                     <DropdownMenuSeparator />
                                     
                                     {/* Payment Actions */}
@@ -495,7 +495,7 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
                                         <DropdownMenuItem asChild>
                                             <Link href={`/bookings/${booking.id}/payment`} className="flex items-center">
                                                 <Wallet className="h-4 w-4 mr-2" />
-                                                Proceed to Payment
+                                                {t('proceedToPayment')}
                                             </Link>
                                         </DropdownMenuItem>
                                     )}
@@ -505,7 +505,7 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
                                         <DropdownMenuItem asChild>
                                             <Link href={`/bookings/${booking.id}/work-log`} className="flex items-center">
                                                 <Timer className="h-4 w-4 mr-2" />
-                                                View Work Log
+                                                {t('view')} Work Log
                                             </Link>
                                         </DropdownMenuItem>
                                     )}
@@ -515,7 +515,7 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
                                         <DropdownMenuItem asChild>
                                             <Link href={`/providers/${booking.providerId}`} className="flex items-center">
                                                 <Repeat className="h-4 w-4 mr-2" />
-                                                Re-book Service
+                                                {t('rebookService')}
                                             </Link>
                                         </DropdownMenuItem>
                                     )}
@@ -524,7 +524,7 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
                                     {booking.status === "Completed" && !booking.reviewId && userRole === "client" && (
                                         <DropdownMenuItem onClick={() => handleOpenReview(booking)}>
                                             <Check className="h-4 w-4 mr-2" />
-                                            Leave Review
+                                            {t('leaveReview')}
                                         </DropdownMenuItem>
                                     )}
                                     
@@ -532,18 +532,18 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
                                     {booking.status === "In Progress" && userRole === "provider" && (
                                         <DropdownMenuItem onClick={() => handleOpenComplete(booking)}>
                                             <CheckCircle2 className="h-4 w-4 mr-2" />
-                                            Mark Complete
+                                            {t('markComplete')}
                                         </DropdownMenuItem>
                                     )}
                                     
                                     {/* Cancel Actions */}
                                     {(booking.status === "Upcoming" || booking.status === "Pending Payment") && (
                                         <DropdownMenuItem 
-                                            onClick={() => handleStatusUpdate(booking, "Cancelled", "Booking has been cancelled")}
+                                            onClick={() => handleStatusUpdate(booking, "Cancelled", t('bookingHasBeenCancelled'))}
                                             className="text-destructive focus:text-destructive"
                                         >
                                             <X className="h-4 w-4 mr-2" />
-                                            Cancel Booking
+                                            {t('cancelBooking')}
                                         </DropdownMenuItem>
                                     )}
                                     
@@ -552,7 +552,7 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
                                         <DropdownMenuItem asChild>
                                             <Link href={`/bookings/${booking.id}/payment`} className="flex items-center">
                                                 <CreditCard className="h-4 w-4 mr-2" />
-                                                Retry Payment
+                                                {t('retryPayment')}
                                             </Link>
                                         </DropdownMenuItem>
                                     )}
@@ -665,7 +665,7 @@ export default function BookingsPage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
-    const _t = useTranslations('Bookings');
+    const t = useTranslations('Bookings');
 
     useEffect(() => {
         if (!user || !getDb()) {
@@ -686,7 +686,7 @@ export default function BookingsPage() {
             setLoading(false);
         }, (error) => {
             console.error("Error fetching bookings:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch your bookings.' });
+            toast({ variant: 'destructive', title: t('error'), description: t('failedToFetchBookings') });
             setLoading(false);
         });
 
@@ -732,7 +732,7 @@ export default function BookingsPage() {
     // Calculate analytics data
     const analyticsData = useMemo(() => {
         const totalBookings = bookings.length;
-        const totalRevenue = bookings.reduce((sum, booking) => sum + booking.price, 0);
+        const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.price || 0), 0);
         const completedBookings = bookings.filter(b => b.status === 'Completed').length;
         const cancelledBookings = bookings.filter(b => b.status === 'Cancelled').length;
         const completionRate = totalBookings > 0 ? (completedBookings / totalBookings) * 100 : 0;
@@ -860,7 +860,7 @@ export default function BookingsPage() {
                     comparison = a.date.toMillis() - b.date.toMillis();
                     break;
                 case "price":
-                    comparison = a.price - b.price;
+                    comparison = (a.price || 0) - (b.price || 0);
                     break;
                 case "status":
                     comparison = a.status.localeCompare(b.status);
@@ -885,43 +885,43 @@ export default function BookingsPage() {
     return (
         <div className="container space-y-8">
             {/* Header */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                            Bookings
+                            {t('title')}
                         </h1>
                         <p className="text-muted-foreground mt-1">
-                            Manage your bookings and track your service appointments
+                            {t('subtitle')}
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
                         <Badge variant="outline" className="flex items-center gap-1">
                             <Zap className="h-3 w-3" />
-                            Advanced Bookings
+                            {t('advancedBookings')}
                         </Badge>
                     </div>
                 </div>
             </div>
 
             {/* Advanced Filter Controls */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Filter className="h-5 w-5" />
-                            Advanced Filters
+                            {t('advancedFilters')}
                         </CardTitle>
-                        <CardDescription>Customize your booking view with advanced filtering options</CardDescription>
+                        <CardDescription>{t('advancedFiltersDescription')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="grid gap-4 md:grid-cols-6">
                         <div className="space-y-2">
-                            <Label htmlFor="search">Search Bookings</Label>
+                            <Label htmlFor="search">{t('searchBookings')}</Label>
                             <div className="relative">
                                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <Input 
-                                    placeholder="Search by service, provider, or client..."
+                                    placeholder={t('searchPlaceholder')}
                                     className="pl-10"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -929,30 +929,30 @@ export default function BookingsPage() {
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="status">Status</Label>
+                            <Label htmlFor="status">{t('status')}</Label>
                             <Select value={selectedStatus} onValueChange={(value: BookingStatus | "all") => setSelectedStatus(value)}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select status" />
+                                    <SelectValue placeholder={t('status')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Status</SelectItem>
-                                    <SelectItem value="Pending Payment">Pending Payment</SelectItem>
-                                    <SelectItem value="Pending Verification">Pending Verification</SelectItem>
-                                    <SelectItem value="Upcoming">Upcoming</SelectItem>
-                                    <SelectItem value="In Progress">In Progress</SelectItem>
-                                    <SelectItem value="Completed">Completed</SelectItem>
-                                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                    <SelectItem value="all">{t('allStatus')}</SelectItem>
+                                    <SelectItem value="Pending Payment">{t('pendingPayment')}</SelectItem>
+                                    <SelectItem value="Pending Verification">{t('pendingVerification')}</SelectItem>
+                                    <SelectItem value="Upcoming">{t('upcoming')}</SelectItem>
+                                    <SelectItem value="In Progress">{t('inProgress')}</SelectItem>
+                                    <SelectItem value="Completed">{t('completed')}</SelectItem>
+                                    <SelectItem value="Cancelled">{t('cancelled')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="category">Category</Label>
+                            <Label htmlFor="category">{t('category')}</Label>
                             <Select value={filterCategory} onValueChange={setFilterCategory}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select category" />
+                                    <SelectValue placeholder={t('category')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Categories</SelectItem>
+                                    <SelectItem value="all">{t('allCategories')}</SelectItem>
                                     {Object.keys(analyticsData.categoryBreakdown).map(category => (
                                         <SelectItem key={category} value={category}>{category}</SelectItem>
                                     ))}
@@ -960,36 +960,36 @@ export default function BookingsPage() {
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="priority">Priority</Label>
+                            <Label htmlFor="priority">{t('priority')}</Label>
                             <Select value={filterPriority} onValueChange={setFilterPriority}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select priority" />
+                                    <SelectValue placeholder={t('priority')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Priorities</SelectItem>
-                                    <SelectItem value="urgent">Urgent</SelectItem>
-                                    <SelectItem value="high">High</SelectItem>
-                                    <SelectItem value="medium">Medium</SelectItem>
-                                    <SelectItem value="low">Low</SelectItem>
+                                    <SelectItem value="all">{t('allPriorities')}</SelectItem>
+                                    <SelectItem value="urgent">{t('urgent')}</SelectItem>
+                                    <SelectItem value="high">{t('high')}</SelectItem>
+                                    <SelectItem value="medium">{t('medium')}</SelectItem>
+                                    <SelectItem value="low">{t('low')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="date">Date Range</Label>
+                            <Label htmlFor="date">{t('dateRange')}</Label>
                             <Select value={dateFilter} onValueChange={setDateFilter}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select date range" />
+                                    <SelectValue placeholder={t('dateRange')} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Time</SelectItem>
-                                    <SelectItem value="today">Today</SelectItem>
-                                    <SelectItem value="week">This Week</SelectItem>
-                                    <SelectItem value="month">This Month</SelectItem>
+                                    <SelectItem value="all">{t('allTime')}</SelectItem>
+                                    <SelectItem value="today">{t('today')}</SelectItem>
+                                    <SelectItem value="week">{t('thisWeek')}</SelectItem>
+                                    <SelectItem value="month">{t('thisMonth')}</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="completed">Show Completed</Label>
+                            <Label htmlFor="completed">{t('showCompleted')}</Label>
                             <div className="flex items-center space-x-2">
                                 <Switch 
                                     id="completed" 
@@ -997,7 +997,7 @@ export default function BookingsPage() {
                                     onCheckedChange={setShowCompleted}
                                 />
                                 <Label htmlFor="completed" className="text-sm">
-                                    {showCompleted ? 'Show' : 'Hide'}
+                                    {showCompleted ? t('show') : t('hide')}
                                 </Label>
                             </div>
                         </div>
@@ -1007,7 +1007,7 @@ export default function BookingsPage() {
             </div>
 
             {/* Bookings Table */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 {loading ? (
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-6">
@@ -1042,7 +1042,7 @@ export default function BookingsPage() {
                                                     onClick={() => handleSort("service")}
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        Service & Contact
+                                                        {t('serviceAndContact')}
                                                         {sortBy === "service" && (
                                                             sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
                                                         )}
@@ -1053,7 +1053,7 @@ export default function BookingsPage() {
                                                     onClick={() => handleSort("date")}
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        Date
+                                                        {t('date')}
                                                         {sortBy === "date" && (
                                                             sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
                                                         )}
@@ -1064,7 +1064,7 @@ export default function BookingsPage() {
                                                     onClick={() => handleSort("status")}
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        Status
+                                                        {t('status')}
                                                         {sortBy === "status" && (
                                                             sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
                                                         )}
@@ -1075,14 +1075,14 @@ export default function BookingsPage() {
                                                     onClick={() => handleSort("price")}
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        Price
+                                                        {t('price')}
                                                         {sortBy === "price" && (
                                                             sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
                                                         )}
                                                     </div>
                                                 </TableHead>
-                                                <TableHead className="font-semibold">Category</TableHead>
-                                                <TableHead className="font-semibold text-right">Actions</TableHead>
+                                                <TableHead className="font-semibold">{t('category')}</TableHead>
+                                                <TableHead className="font-semibold text-right">{t('actions')}</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -1106,11 +1106,11 @@ export default function BookingsPage() {
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-12 text-center">
                             <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                            <h3 className="text-lg font-semibold mb-2">No bookings found</h3>
+                            <h3 className="text-lg font-semibold mb-2">{t('noBookingsFound')}</h3>
                             <p className="text-muted-foreground">
                                 {searchTerm || selectedStatus !== "all" 
-                                    ? "Try adjusting your search or filter criteria."
-                                    : "You don't have any bookings yet."
+                                    ? t('tryAdjustingSearch')
+                                    : t('noBookingsYet')
                                 }
                             </p>
                         </CardContent>

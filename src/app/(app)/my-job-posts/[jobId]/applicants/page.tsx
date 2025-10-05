@@ -196,7 +196,7 @@ export default function ApplicantsPage() {
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
+            <div className=" mx-auto space-y-8">
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
                 </div>
@@ -206,7 +206,7 @@ export default function ApplicantsPage() {
 
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className=" mx-auto space-y-8">
             <div className="relative z-10 flex items-center gap-4">
                 <Button variant="outline" size="icon" onClick={() => router.back()} className="hover:bg-primary/10 transition-colors">
                     <ArrowLeft className="h-4 w-4" />

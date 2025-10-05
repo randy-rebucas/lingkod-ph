@@ -277,7 +277,7 @@ export default function JobsPage() {
                             <Button asChild size="sm" variant="outline" className="h-8 px-3 flex-1 sm:flex-none">
                                 <Link href={`/jobs/${job.id}`}>
                                     <Eye className="h-3 w-3 mr-1" />
-                                    <span className="hidden sm:inline">View</span>
+                                    <span className="hidden sm:inline">{t('view')}</span>
                                 </Link>
                             </Button>
                             <Button
@@ -298,7 +298,7 @@ export default function JobsPage() {
     if (userRole !== 'provider') {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card>
                         <CardHeader>
                             <CardTitle>{t('accessDenied')}</CardTitle>
@@ -313,11 +313,11 @@ export default function JobsPage() {
     if (loading) {
         return (
             <div className="container space-y-8">
-                 <div className="max-w-6xl mx-auto">
+                 <div className=" mx-auto">
                     <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                     <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-72" />)}
                     </div>
@@ -329,7 +329,7 @@ export default function JobsPage() {
     return (
         <div className="container space-y-8">
             {/* Header */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
@@ -345,30 +345,30 @@ export default function JobsPage() {
                             {filterCategory !== 'all' && `${filterCategory} • `}
                             {filterBudget !== 'all' && `${filterBudget.replace('-', ' ')} • `}
                             {sortBy !== 'date' && `${sortBy} • `}
-                            {displayMode === 'list' ? 'List view' : 'Grid view'}
+                            {displayMode === 'list' ? t('listView') : t('gridView')}
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Filters and Controls */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="pb-4">
                         <CardTitle className="flex items-center gap-2 text-lg">
                             <Filter className="h-5 w-5 text-primary" />
-                            Filters & Search
+                            {t('filtersAndSearch')}
                         </CardTitle>
-                        <CardDescription className="text-sm">Find the perfect job for you</CardDescription>
+                        <CardDescription className="text-sm">{t('findPerfectJob')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                             <div className="space-y-2 sm:col-span-2 lg:col-span-1">
-                                <Label htmlFor="search" className="text-sm font-medium">Search Jobs</Label>
+                                <Label htmlFor="search" className="text-sm font-medium">{t('searchJobs')}</Label>
                                 <div className="relative">
                                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                     <Input 
-                                        placeholder="Search by title, description, or location..."
+                                        placeholder={t('searchPlaceholder')}
                                         className="pl-10 h-9"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
@@ -376,13 +376,13 @@ export default function JobsPage() {
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="category" className="text-sm font-medium">Category</Label>
+                                <Label htmlFor="category" className="text-sm font-medium">{t('category')}</Label>
                                 <Select value={filterCategory} onValueChange={setFilterCategory}>
                                     <SelectTrigger className="h-9">
-                                        <SelectValue placeholder="All Categories" />
+                                        <SelectValue placeholder={t('allCategories')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All Categories</SelectItem>
+                                        <SelectItem value="all">{t('allCategories')}</SelectItem>
                                         {categories.map(category => (
                                             <SelectItem key={category} value={category}>{category}</SelectItem>
                                         ))}
@@ -390,48 +390,48 @@ export default function JobsPage() {
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="budget" className="text-sm font-medium">Budget Range</Label>
+                                <Label htmlFor="budget" className="text-sm font-medium">{t('budgetRange')}</Label>
                                 <Select value={filterBudget} onValueChange={setFilterBudget}>
                                     <SelectTrigger className="h-9">
-                                        <SelectValue placeholder="All Budgets" />
+                                        <SelectValue placeholder={t('allBudgets')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="all">All Budgets</SelectItem>
-                                        <SelectItem value="under-1000">Under ₱1,000</SelectItem>
-                                        <SelectItem value="1000-5000">₱1,000 - ₱5,000</SelectItem>
-                                        <SelectItem value="5000-10000">₱5,000 - ₱10,000</SelectItem>
-                                        <SelectItem value="over-10000">Over ₱10,000</SelectItem>
+                                        <SelectItem value="all">{t('allBudgets')}</SelectItem>
+                                        <SelectItem value="under-1000">{t('under1000')}</SelectItem>
+                                        <SelectItem value="1000-5000">{t('budget1000to5000')}</SelectItem>
+                                        <SelectItem value="5000-10000">{t('budget5000to10000')}</SelectItem>
+                                        <SelectItem value="over-10000">{t('over10000')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="sort" className="text-sm font-medium">Sort By</Label>
+                                <Label htmlFor="sort" className="text-sm font-medium">{t('sortBy')}</Label>
                                 <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
                                     const [column, order] = value.split('-');
                                     setSortBy(column as any);
                                     setSortOrder(order as any);
                                 }}>
                                     <SelectTrigger className="h-9">
-                                        <SelectValue placeholder="Sort by" />
+                                        <SelectValue placeholder={t('sortBy')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="date-desc">Newest First</SelectItem>
-                                        <SelectItem value="date-asc">Oldest First</SelectItem>
-                                        <SelectItem value="budget-desc">Highest Budget</SelectItem>
-                                        <SelectItem value="budget-asc">Lowest Budget</SelectItem>
-                                        <SelectItem value="applicants-desc">Most Applicants</SelectItem>
-                                        <SelectItem value="applicants-asc">Least Applicants</SelectItem>
-                                        <SelectItem value="title-asc">Title A-Z</SelectItem>
-                                        <SelectItem value="title-desc">Title Z-A</SelectItem>
+                                        <SelectItem value="date-desc">{t('newestFirst')}</SelectItem>
+                                        <SelectItem value="date-asc">{t('oldestFirst')}</SelectItem>
+                                        <SelectItem value="budget-desc">{t('highestBudget')}</SelectItem>
+                                        <SelectItem value="budget-asc">{t('lowestBudget')}</SelectItem>
+                                        <SelectItem value="applicants-desc">{t('mostApplicants')}</SelectItem>
+                                        <SelectItem value="applicants-asc">{t('leastApplicants')}</SelectItem>
+                                        <SelectItem value="title-asc">{t('titleAZ')}</SelectItem>
+                                        <SelectItem value="title-desc">{t('titleZA')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-sm font-medium">Display Mode</Label>
+                                <Label className="text-sm font-medium">{t('displayMode')}</Label>
                                 <div className="flex items-center justify-between p-2 border border-border rounded-md bg-muted/30">
                                     <div className="flex items-center gap-2">
                                         <Grid3X3 className="h-4 w-4 text-muted-foreground" />
-                                        <span className="text-sm font-medium">Grid</span>
+                                        <span className="text-sm font-medium">{t('grid')}</span>
                                     </div>
                                     <Switch
                                         checked={displayMode === 'list'}
@@ -439,7 +439,7 @@ export default function JobsPage() {
                                         className="data-[state=checked]:bg-primary"
                                     />
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium">List</span>
+                                        <span className="text-sm font-medium">{t('list')}</span>
                                         <List className="h-4 w-4 text-muted-foreground" />
                                     </div>
                                 </div>
@@ -451,7 +451,7 @@ export default function JobsPage() {
 
             {/* Jobs Display */}
             {filteredAndSortedJobs.length > 0 ? (
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     {displayMode === 'grid' ? (
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {filteredAndSortedJobs.map(job => {
@@ -477,13 +477,13 @@ export default function JobsPage() {
                             </div>
                             <h3 className="text-xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
                                 {searchTerm || filterCategory !== 'all' || filterBudget !== 'all' 
-                                    ? 'No jobs match your criteria' 
+                                    ? t('noJobsMatchCriteria') 
                                     : t('noOpenJobs')
                                 }
                             </h3>
                             <p className="text-muted-foreground max-w-md">
                                 {searchTerm || filterCategory !== 'all' || filterBudget !== 'all'
-                                    ? 'Try adjusting your search or filter criteria to find more jobs.'
+                                    ? t('tryAdjustingSearch')
                                     : t('noOpenJobsDescription')
                                 }
                             </p>
@@ -497,7 +497,7 @@ export default function JobsPage() {
                                         setFilterBudget('all');
                                     }}
                                 >
-                                    Clear Filters
+                                    {t('clearFilters')}
                                 </Button>
                             )}
                         </CardContent>

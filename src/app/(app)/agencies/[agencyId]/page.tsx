@@ -336,7 +336,7 @@ export default function AgencyProfilePage() {
     if (loading) {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="flex flex-col md:flex-row items-center gap-6 p-6">
                         <Skeleton className="h-32 w-32 rounded-full" />
                         <div className="space-y-4 flex-1">
@@ -346,10 +346,10 @@ export default function AgencyProfilePage() {
                         </div>
                     </Card>
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Skeleton className="h-64 w-full" />
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Skeleton className="h-48 w-full" />
                 </div>
             </div>
@@ -359,7 +359,7 @@ export default function AgencyProfilePage() {
     if (!agency) {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                             <Building className="h-16 w-16 mb-4 text-primary opacity-60" />
@@ -382,7 +382,7 @@ export default function AgencyProfilePage() {
         <Dialog>
             <div className="container space-y-8">
                 {/* Header Card */}
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-6">
                             <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
@@ -447,7 +447,7 @@ export default function AgencyProfilePage() {
 
                 {/* Contact Information */}
                 {(agency.businessAddress || agency.phoneNumber || agency.email || agency.website) && (
-                    <div className="max-w-6xl mx-auto">
+                    <div className=" mx-auto">
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
@@ -487,7 +487,7 @@ export default function AgencyProfilePage() {
                     </div>
                 )}
 
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div className="md:col-span-2">
                             {/* Services Section */}
@@ -623,7 +623,7 @@ export default function AgencyProfilePage() {
                 <Separator />
 
                 {/* Reviews Section */}
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <h2 className="text-2xl font-bold font-headline mb-4 flex items-center gap-2"><Star /> {t('clientReviews')}</h2>
                     <Card>
                         <CardContent className="p-6 space-y-6">

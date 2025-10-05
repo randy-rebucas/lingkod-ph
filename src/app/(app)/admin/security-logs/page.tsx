@@ -56,7 +56,7 @@ export default function SecurityLogsPage() {
     if (userRole !== 'admin') {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                             <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
@@ -71,11 +71,11 @@ export default function SecurityLogsPage() {
     if (loading) {
         return (
              <div className="container space-y-8">
-                 <div className="max-w-6xl mx-auto">
+                 <div className=" mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Security & Access Logs</h1>
                     <p className="text-muted-foreground">Monitor important actions performed on the platform.</p>
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-6">
                             <Skeleton className="h-64 w-full" />
@@ -88,13 +88,13 @@ export default function SecurityLogsPage() {
 
     return (
         <div className="container space-y-8">
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Security & Access Logs</h1>
                 <p className="text-muted-foreground">
                     Monitor important actions performed on the platform.
                 </p>
             </div>
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                  <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                         <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Admin Action Log</CardTitle>

@@ -143,11 +143,11 @@ export default function AppliedJobsPage() {
     if (loading) {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-48" />)}
                     </div>
@@ -159,7 +159,7 @@ export default function AppliedJobsPage() {
     return (
         <div className="container space-y-8">
             {/* Header */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
@@ -181,7 +181,7 @@ export default function AppliedJobsPage() {
             </div>
 
             {/* Filters and Controls */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="pb-4">
                         <CardTitle className="flex items-center gap-2 text-lg">
@@ -246,7 +246,7 @@ export default function AppliedJobsPage() {
             </div>
             
             {filteredAndSortedJobs.length > 0 ? (
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {filteredAndSortedJobs.map(job => (
                             <Card key={job.id} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group h-full">
@@ -307,7 +307,7 @@ export default function AppliedJobsPage() {
                     </div>
                 </div>
             ) : (
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                             <div className="mb-6 p-4 rounded-full bg-muted/50">

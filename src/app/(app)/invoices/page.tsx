@@ -392,13 +392,13 @@ function InvoicesPage() {
     if (!user) {
          return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                   <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                   <p className="text-muted-foreground">
                       {t('subtitle')}
                   </p>
               </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card>
                         <CardHeader>
                             <CardTitle>{t('upgradeToProOrElite')}</CardTitle>
@@ -419,7 +419,7 @@ function InvoicesPage() {
     return (
       <div className="container space-y-8">
           {/* Header */}
-          <div className="max-w-6xl mx-auto">
+          <div className=" mx-auto">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
                       <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
@@ -441,7 +441,7 @@ function InvoicesPage() {
           </div>
 
           {/* Key Metrics */}
-          <div className="max-w-6xl mx-auto">
+          <div className=" mx-auto">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300">
                       <CardContent className="p-6">
@@ -518,7 +518,7 @@ function InvoicesPage() {
           </div>
 
           {/* Invoices Table */}
-          <div className="max-w-6xl mx-auto">
+          <div className=" mx-auto">
               <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                   <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                       <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">All Invoices</CardTitle>

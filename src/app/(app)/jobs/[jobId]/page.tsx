@@ -125,7 +125,7 @@ export default function JobDetailsPage() {
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8">
+            <div className=" mx-auto space-y-8">
                 <Skeleton className="h-10 w-1/3" />
                 <Skeleton className="h-4 w-2/3" />
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
@@ -145,7 +145,7 @@ export default function JobDetailsPage() {
 
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className=" mx-auto space-y-8">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" onClick={() => router.back()}>

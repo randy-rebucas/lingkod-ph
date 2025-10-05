@@ -182,7 +182,7 @@ export default function CalendarPage() {
 
     return (
         <div className="container space-y-8">
-            {/* <div className="max-w-6xl mx-auto">
+            {/* <div className=" mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('calendarTitle')}</h1>
                 <p className="text-muted-foreground">
                     {t('calendarDescription')}
@@ -192,7 +192,7 @@ export default function CalendarPage() {
                     {t('newEvent')}
                 </Button>
             </div> */}
-            <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className=" mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">
@@ -202,7 +202,7 @@ export default function CalendarPage() {
                 <div className="flex items-center gap-2">
                     <Badge variant="outline" className="flex items-center gap-1">
                         <Zap className="h-3 w-3" />
-                        Advanced Management
+                        {t('advancedManagement')}
                     </Badge>
                     
                     <Dialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen}>
@@ -220,13 +220,14 @@ export default function CalendarPage() {
                                 onSave={handleSaveEvent}
                                 onClose={() => setIsCreateEventOpen(false)}
                                 initialData={formData}
+                                t={t}
                             />
                         </DialogContent>
                     </Dialog>
                 </div>
             </div>
             {/* Simple Calendar */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between border-b border-border/50">
                         <CardTitle className="text-2xl font-bold">
@@ -237,7 +238,7 @@ export default function CalendarPage() {
                                 <ChevronLeft className="h-4 w-4" />
                             </Button>
                             <Button variant="outline" onClick={() => setCurrentDate(new Date())}>
-                                Today
+                                {t('today')}
                             </Button>
                             <Button variant="outline" size="icon" onClick={nextMonth}>
                                 <ChevronRight className="h-4 w-4" />
@@ -246,7 +247,7 @@ export default function CalendarPage() {
                     </CardHeader>
                     <CardContent className="p-6">
                         <div className="grid grid-cols-7 text-center font-semibold text-muted-foreground mb-4">
-                            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                            {[t('sun'), t('mon'), t('tue'), t('wed'), t('thu'), t('fri'), t('sat')].map(day => (
                                 <div key={day} className="py-2 text-sm font-medium">{day}</div>
                             ))}
                         </div>
@@ -276,12 +277,12 @@ export default function CalendarPage() {
                                             ))}
                                             {dayEvents.length > 2 && (
                                                 <div className="text-xs text-muted-foreground font-medium">
-                                                    +{dayEvents.length - 2} more
+                                                    +{dayEvents.length - 2} {t('more')}
                                                 </div>
                                             )}
                                             {dayEvents.length === 0 && isSameMonth(day, currentDate) && (
                                                 <div className="text-xs text-muted-foreground/50 group-hover:text-muted-foreground transition-colors">
-                                                    Click to add event
+                                                    {t('clickToAddEvent')}
                                                 </div>
                                             )}
                                         </div>
@@ -328,7 +329,8 @@ export default function CalendarPage() {
 function CreateEventForm({
     onSave,
     onClose,
-    initialData
+    initialData,
+    t
 }: {
     onSave: (eventData: {
         title: string;
@@ -344,7 +346,8 @@ function CreateEventForm({
         start: Date;
         end: Date;
         serviceName: string;
-    }
+    },
+    t: any
 }) {
     const [formData, setFormData] = useState(initialData);
 
@@ -359,27 +362,27 @@ function CreateEventForm({
         <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                    <Label htmlFor="title">Event Title *</Label>
+                    <Label htmlFor="title">{t('eventTitle')} *</Label>
                     <Input
                         id="title"
                         value={formData.title}
                         onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                        placeholder="Enter event title"
+                        placeholder={t('enterEventTitle')}
                         required
                     />
                 </div>
                 <div>
-                    <Label htmlFor="service">Service Name *</Label>
+                    <Label htmlFor="service">{t('serviceName')} *</Label>
                     <Input
                         id="service"
                         value={formData.serviceName}
                         onChange={(e) => setFormData(prev => ({ ...prev, serviceName: e.target.value }))}
-                        placeholder="Enter service name"
+                        placeholder={t('enterServiceName')}
                         required
                     />
                 </div>
                 <div>
-                    <Label htmlFor="start">Start Date & Time *</Label>
+                    <Label htmlFor="start">{t('startDateTime')} *</Label>
                     <Input
                         id="start"
                         type="datetime-local"
@@ -389,7 +392,7 @@ function CreateEventForm({
                     />
                 </div>
                 <div>
-                    <Label htmlFor="end">End Date & Time *</Label>
+                    <Label htmlFor="end">{t('endDateTime')} *</Label>
                     <Input
                         id="end"
                         type="datetime-local"
@@ -401,23 +404,23 @@ function CreateEventForm({
             </div>
 
             <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">{t('description')}</Label>
                 <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Enter event description (optional)"
+                    placeholder={t('enterEventDescription')}
                     rows={3}
                 />
             </div>
 
             <div className="flex justify-end gap-2">
                 <Button type="button" variant="outline" onClick={onClose}>
-                    Cancel
+                    {t('cancel')}
                 </Button>
                 <Button type="submit">
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    Create Event
+                    {t('createEvent')}
                 </Button>
             </div>
         </form>

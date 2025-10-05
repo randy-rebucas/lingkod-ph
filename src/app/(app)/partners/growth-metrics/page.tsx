@@ -79,7 +79,7 @@ interface GrowthMetrics {
 
 export default function GrowthMetricsPage() {
   const { user, userRole } = useAuth();
-  const _t = useTranslations('Partners');
+  const _t = useTranslations('PartnersDashboard');
   const [metrics, setMetrics] = useState<GrowthMetrics | null>(null);
   const [analytics, setAnalytics] = useState<PartnerAnalytics | null>(null);
   const [loading, setLoading] = useState(true);

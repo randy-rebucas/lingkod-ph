@@ -61,7 +61,7 @@ interface EnhancedMetrics {
 
 export default function PartnerAnalyticsPage() {
   const { user, userRole } = useAuth();
-  const _t = useTranslations('Partners');
+  const _t = useTranslations('PartnersDashboard');
   const [data, setData] = useState<AnalyticsData>({
     analytics: null,
     referrals: [],

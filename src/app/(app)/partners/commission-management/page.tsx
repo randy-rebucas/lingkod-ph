@@ -34,7 +34,7 @@ interface CommissionSummary {
 
 export default function CommissionManagementPage() {
   const { user, userRole } = useAuth();
-  const _t = useTranslations('Partners');
+  const _t = useTranslations('PartnersDashboard');
   const [commissions, setCommissions] = useState<PartnerCommission[]>([]);
   const [summary, setSummary] = useState<CommissionSummary | null>(null);
   const [loading, setLoading] = useState(true);

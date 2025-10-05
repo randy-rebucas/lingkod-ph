@@ -116,7 +116,7 @@ export default function AdminConversationsPage() {
     if (userRole !== 'admin') {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                             <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
@@ -130,13 +130,13 @@ export default function AdminConversationsPage() {
 
     return (
         <div className="container space-y-8 h-full flex flex-col">
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Conversation Monitoring</h1>
                 <p className="text-muted-foreground">
                     Review user conversations on the platform.
                 </p>
             </div>
-            <div className="max-w-6xl mx-auto flex-1">
+            <div className=" mx-auto flex-1">
                 <Card className="flex-1 grid grid-cols-1 md:grid-cols-[350px_1fr] shadow-soft border-0 bg-background/80 backdrop-blur-sm overflow-hidden">
                 <div className="flex flex-col border-r bg-background/50">
                     <ScrollArea className="flex-1">
