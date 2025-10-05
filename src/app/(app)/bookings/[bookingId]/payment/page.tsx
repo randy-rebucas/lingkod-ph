@@ -193,7 +193,7 @@ export default function PaymentPage() {
 
     if (loading) {
         return (
-            <div className="max-w-6xl mx-auto space-y-8 w-full">
+            <div className=" mx-auto space-y-8 w-full">
                 <div className="grid md:grid-cols-2 gap-8">
                     <Skeleton className="h-96 w-full" />
                     <Skeleton className="h-80 w-full" />
@@ -208,7 +208,7 @@ export default function PaymentPage() {
     const isPaymentRejected = booking.status === 'Payment Rejected';
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 w-full">
+        <div className=" mx-auto space-y-8 w-full">
             <div className="relative z-10 flex items-center gap-4">
                 <Button variant="outline" size="icon" onClick={() => router.push('/bookings')} className="hover:bg-primary/10 transition-colors">
                     <ArrowLeft className="h-4 w-4" />

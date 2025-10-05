@@ -25,6 +25,9 @@ import { findMatchingProviders } from "@/ai/flows/find-matching-providers";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LocationBasedProviderService } from "@/lib/location-based-provider-service";
 import { getCurrentLocation } from "@/lib/geolocation-utils";
+import ProviderOnboardingBanner from "@/components/provider-onboarding-banner";
+import ClientOnboardingBanner from "@/components/client-onboarding-banner";
+import AgencyOnboardingBanner from "@/components/agency-onboarding-banner";
 
 
 type Booking = {
@@ -829,6 +832,9 @@ const DashboardPage = memo(function DashboardPage() {
     if (userRole === 'client') {
         return (
              <div className="container space-y-8">
+                 {/* Client Onboarding Banner */}
+                 <ClientOnboardingBanner />
+                 
                  <Card className="border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="pb-4">
                         <div className="flex items-center justify-between">
@@ -1115,8 +1121,10 @@ const DashboardPage = memo(function DashboardPage() {
     if (userRole === 'agency') {
          return (
             <div className="container space-y-8">
+                {/* Agency Onboarding Banner */}
+                <AgencyOnboardingBanner />
 
-                 <div className="max-w-6xl mx-auto">
+                 <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                         <DashboardCard isLoading={loadingAgencyData} title={t('totalRevenue')} icon={DollarSign} value={`₱${agencyTotalRevenue.toFixed(2)}`} />
                         <DashboardCard isLoading={loadingAgencyData} title={t('completedBookings')} icon={Calendar} value={`${agencyTotalBookings}`} />
@@ -1126,7 +1134,7 @@ const DashboardPage = memo(function DashboardPage() {
                     </div>
                 </div>
                 
-                 <div className="max-w-6xl mx-auto">
+                 <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
                         <Card className="lg:col-span-4 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                             <CardHeader>
@@ -1214,7 +1222,10 @@ const DashboardPage = memo(function DashboardPage() {
     // Provider Dashboard (Default)
     return (
         <div className="container space-y-8">
-            <div className="max-w-6xl mx-auto">
+            {/* Provider Onboarding Banner */}
+            <ProviderOnboardingBanner />
+            
+            <div className=" mx-auto">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                     <DashboardCard isLoading={loading} title={t('totalRevenue')} icon={DollarSign} value={`₱${totalRevenue.toFixed(2)}`} />
                     <DashboardCard isLoading={loading} title={t('pendingPayouts')} icon={Wallet} value={`₱${pendingPayouts.toFixed(2)}`} />
@@ -1224,7 +1235,7 @@ const DashboardPage = memo(function DashboardPage() {
                 </div>
             </div>
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
                      <Card className="lg:col-span-4 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader>
@@ -1297,7 +1308,7 @@ const DashboardPage = memo(function DashboardPage() {
                 </div>
             </div>
             
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader>
                         <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('recentReviews')}</CardTitle>

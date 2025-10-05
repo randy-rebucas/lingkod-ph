@@ -64,7 +64,7 @@ export type Booking = {
     providerAvatar?: string;
     date: Timestamp;
     status: BookingStatus;
-    price: number;
+    price?: number;
     notes?: string;
     reviewId?: string;
     completionPhotoURL?: string;
@@ -246,7 +246,7 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
                 <TableCell className="font-medium">
                     <div className="flex items-center gap-1">
                         <Wallet className="h-3 w-3" />
-                        ₱{booking.price.toFixed(2)}
+                        ₱{(booking.price || 0).toFixed(2)}
                     </div>
                 </TableCell>
 
@@ -462,7 +462,7 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
                         </div>
                         <div className="flex items-center gap-1 font-medium">
                             <Wallet className="h-3 w-3" />
-                            ₱{booking.price.toFixed(2)}
+                            ₱{(booking.price || 0).toFixed(2)}
                         </div>
                     </div>
 
@@ -732,7 +732,7 @@ export default function BookingsPage() {
     // Calculate analytics data
     const analyticsData = useMemo(() => {
         const totalBookings = bookings.length;
-        const totalRevenue = bookings.reduce((sum, booking) => sum + booking.price, 0);
+        const totalRevenue = bookings.reduce((sum, booking) => sum + (booking.price || 0), 0);
         const completedBookings = bookings.filter(b => b.status === 'Completed').length;
         const cancelledBookings = bookings.filter(b => b.status === 'Cancelled').length;
         const completionRate = totalBookings > 0 ? (completedBookings / totalBookings) * 100 : 0;
@@ -860,7 +860,7 @@ export default function BookingsPage() {
                     comparison = a.date.toMillis() - b.date.toMillis();
                     break;
                 case "price":
-                    comparison = a.price - b.price;
+                    comparison = (a.price || 0) - (b.price || 0);
                     break;
                 case "status":
                     comparison = a.status.localeCompare(b.status);
@@ -885,7 +885,7 @@ export default function BookingsPage() {
     return (
         <div className="container space-y-8">
             {/* Header */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
@@ -905,7 +905,7 @@ export default function BookingsPage() {
             </div>
 
             {/* Advanced Filter Controls */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
@@ -1007,7 +1007,7 @@ export default function BookingsPage() {
             </div>
 
             {/* Bookings Table */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 {loading ? (
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-6">

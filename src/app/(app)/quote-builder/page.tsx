@@ -13,14 +13,14 @@ const QuoteBuilderPage = memo(function QuoteBuilderPage() {
 
   return (
     <div className="container space-y-8">
-      <div className="max-w-6xl mx-auto">
+      <div className=" mx-auto">
         <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('quoteBuilderTitle')}</h1>
         <p className="text-muted-foreground">
           {t('quoteBuilderDescription')}
         </p>
       </div>
 
-      <div className="max-w-6xl mx-auto">
+      <div className=" mx-auto">
         <Tabs defaultValue="create" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="create" className="flex items-center gap-2">

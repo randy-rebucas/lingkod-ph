@@ -166,9 +166,10 @@ const ProfilePage = memo(function ProfilePage() {
     const newDocFileInputRef = useRef<HTMLInputElement>(null);
 
     const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-    const { isLoaded } = useLoadScript({
+    const { isLoaded, loadError } = useLoadScript({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
         libraries: ["places"],
+        preventGoogleFontsLoading: true,
     });
 
     const years = useMemo(() => {
@@ -627,6 +628,15 @@ const ProfilePage = memo(function ProfilePage() {
 
 
     const handleCurrentLocation = () => {
+        if (!isLoaded || loadError) {
+            toast({ 
+                variant: 'destructive', 
+                title: t('error'), 
+                description: 'Google Maps is not available. Please enter your address manually.' 
+            });
+            return;
+        }
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(async (position) => {
                 const lat = position.coords.latitude;
@@ -635,14 +645,19 @@ const ProfilePage = memo(function ProfilePage() {
                 setLongitude(lng);
 
                 // Reverse Geocode to get address
-                const geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-                    if (status === 'OK' && results && results[0]) {
-                        setAddress(results[0].formatted_address);
-                    } else {
-                        toast({ variant: 'destructive', title: t('error'), description: t('couldNotRetrieveAddress') });
-                    }
-                });
+                try {
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+                        if (status === 'OK' && results && results[0]) {
+                            setAddress(results[0].formatted_address);
+                        } else {
+                            toast({ variant: 'destructive', title: t('error'), description: t('couldNotRetrieveAddress') });
+                        }
+                    });
+                } catch (error) {
+                    console.error('Geocoding error:', error);
+                    toast({ variant: 'destructive', title: t('error'), description: 'Could not retrieve address from coordinates.' });
+                }
             }, (error) => {
                  toast({ variant: 'destructive', title: t('geolocationError'), description: error.message });
             });
@@ -657,13 +672,22 @@ const ProfilePage = memo(function ProfilePage() {
 
     const onPlaceChanged = () => {
         if (autocompleteRef.current) {
-            const place = autocompleteRef.current.getPlace();
-            if (place.formatted_address) {
-                setAddress(place.formatted_address);
-            }
-            if (place.geometry?.location) {
-                setLatitude(place.geometry.location.lat());
-                setLongitude(place.geometry.location.lng());
+            try {
+                const place = autocompleteRef.current.getPlace();
+                if (place.formatted_address) {
+                    setAddress(place.formatted_address);
+                }
+                if (place.geometry?.location) {
+                    setLatitude(place.geometry.location.lat());
+                    setLongitude(place.geometry.location.lng());
+                }
+            } catch (error) {
+                console.error('Error handling place selection:', error);
+                toast({ 
+                    variant: 'destructive', 
+                    title: t('error'), 
+                    description: 'Could not process the selected location.' 
+                });
             }
         }
     };
@@ -671,7 +695,7 @@ const ProfilePage = memo(function ProfilePage() {
     return (
         <div className="container space-y-8">
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="flex-row items-center gap-6 space-y-0 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20 p-6">
                     <div className="relative">
@@ -718,7 +742,7 @@ const ProfilePage = memo(function ProfilePage() {
             </div>
             
             {userRole === 'provider' && invites.length > 0 && (
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card>
                         <CardHeader>
                             <CardTitle>{t('agencyInvitations')}</CardTitle>
@@ -745,7 +769,7 @@ const ProfilePage = memo(function ProfilePage() {
             )}
 
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Tabs defaultValue="public-profile" className="w-full">
                      <TabsList className="w-full h-auto justify-start overflow-x-auto bg-background/80 backdrop-blur-sm shadow-soft border-0">
                     <TabsTrigger value="public-profile" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300"><User className="mr-2 h-4 w-4"/> {t('publicProfile')}</TabsTrigger>
@@ -822,9 +846,22 @@ const ProfilePage = memo(function ProfilePage() {
                                     </Select>
                                 </div>
                             </div>
-                            {isLoaded && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="address">Address / Service Area</Label>
+                            <div className="space-y-2">
+                                <Label htmlFor="address">Address / Service Area</Label>
+                                {loadError ? (
+                                    <div className="space-y-2">
+                                        <Input 
+                                            id="address" 
+                                            value={address} 
+                                            onChange={(e) => setAddress(e.target.value)} 
+                                            placeholder={t('addressPlaceholder')}
+                                            className="w-full"
+                                        />
+                                        <p className="text-xs text-muted-foreground">
+                                            Google Maps integration is not available. Please enter your address manually.
+                                        </p>
+                                    </div>
+                                ) : isLoaded ? (
                                     <div className="flex gap-2 items-center">
                                         <Autocomplete
                                             onLoad={onLoad}
@@ -839,18 +876,36 @@ const ProfilePage = memo(function ProfilePage() {
                                                 className="w-full"
                                             />
                                         </Autocomplete>
-                                        
                                     </div>
-                                    <div className="flex gap-2">
-                                        <Button type="button" variant="outline" className="w-full" onClick={handleCurrentLocation}>
-                                            <MapPin className="mr-2 h-4 w-4"/>
-                                            Use Current Location
-                                        </Button>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <Input 
+                                            id="address" 
+                                            value={address} 
+                                            onChange={(e) => setAddress(e.target.value)} 
+                                            placeholder={t('addressPlaceholder')}
+                                            className="w-full"
+                                        />
+                                        <p className="text-xs text-muted-foreground">
+                                            Loading Google Maps...
+                                        </p>
                                     </div>
-                                    <input type="hidden" value={latitude || ''} onChange={() => {}} />
-                                    <input type="hidden" value={longitude || ''} onChange={() => {}} />
+                                )}
+                                <div className="flex gap-2">
+                                    <Button 
+                                        type="button" 
+                                        variant="outline" 
+                                        className="w-full" 
+                                        onClick={handleCurrentLocation}
+                                        disabled={!isLoaded || !!loadError}
+                                    >
+                                        <MapPin className="mr-2 h-4 w-4"/>
+                                        Use Current Location
+                                    </Button>
                                 </div>
-                            )}
+                                <input type="hidden" value={latitude || ''} onChange={() => {}} />
+                                <input type="hidden" value={longitude || ''} onChange={() => {}} />
+                            </div>
                             <div className="space-y-2">
                                 <Label>{t('birthdate')}</Label>
                                 <div className="grid grid-cols-3 gap-2">

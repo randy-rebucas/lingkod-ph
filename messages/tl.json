@@ -1246,6 +1246,38 @@
   "BroadcastBanner": {
     "close": "Isara"
   },
+  "ProviderOnboardingBanner": {
+    "learnHowToGetStarted": "Alamin kung paano magsimula",
+    "providerGuideTitle": "Ang Provider 101 ay gagabayan ka sa mga pangunahing kaalaman ng platform.",
+    "providerGuideDescription": "I-setup ang iyong profile, pamahalaan ang mga booking, at palaguin ang iyong negosyo.",
+    "exploreProviderGuide": "I-explore ang Provider 101",
+    "help": "Tulong",
+    "close": "Isara"
+  },
+  "ClientOnboardingBanner": {
+    "learnHowToGetStarted": "Alamin kung paano magsimula",
+    "clientGuideTitle": "Ang Client 101 ay gagabayan ka sa paghahanap at pag-book ng mga serbisyo.",
+    "clientGuideDescription": "Tuklasin ang mga provider, mag-book ng serbisyo, at pamahalaan ang iyong mga request nang madali.",
+    "exploreClientGuide": "I-explore ang Client 101",
+    "help": "Tulong",
+    "close": "Isara"
+  },
+  "AgencyOnboardingBanner": {
+    "learnHowToGetStarted": "Alamin kung paano magsimula",
+    "agencyGuideTitle": "Ang Agency 101 ay gagabayan ka sa pamamahala ng iyong team at negosyo.",
+    "agencyGuideDescription": "Pamahalaan ang mga provider, subaybayan ang performance, at palaguin ang iyong agency.",
+    "exploreAgencyGuide": "I-explore ang Agency 101",
+    "help": "Tulong",
+    "close": "Isara"
+  },
+  "PartnerOnboardingBanner": {
+    "learnHowToGetStarted": "Alamin kung paano magsimula",
+    "partnerGuideTitle": "Ang Partner 101 ay gagabayan ka sa mga referral program at commission.",
+    "partnerGuideDescription": "Subaybayan ang mga referral, kumita ng commission, at palaguin ang iyong network.",
+    "explorePartnerGuide": "Simulan ang Pag-track ng Referrals",
+    "help": "Tulong",
+    "close": "Isara"
+  },
   "CompleteBookingDialog": {
     "completeBooking": "Kumpletuhin ang Booking",
     "uploadProof": "I-upload ang patunay ng pagkakumpleto",

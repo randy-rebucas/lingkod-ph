@@ -176,7 +176,7 @@ export default function AdminCategoriesPage() {
     if (userRole !== 'admin') {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                             <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('accessDenied')}</CardTitle>
@@ -191,7 +191,7 @@ export default function AdminCategoriesPage() {
     return (
         <Dialog open={isDialogOpen} onOpenChange={(open) => { if (!open) resetDialog() }}>
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto flex justify-between items-center">
+                <div className=" mx-auto flex justify-between items-center">
                     <div>
                         <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                         <p className="text-muted-foreground">
@@ -200,7 +200,7 @@ export default function AdminCategoriesPage() {
                     </div>
                     <Button onClick={openAddDialog} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground"><PlusCircle className="mr-2"/> {t('addCategory')}</Button>
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                      <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-0">
                             {loading ? (

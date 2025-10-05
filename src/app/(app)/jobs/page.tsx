@@ -298,7 +298,7 @@ export default function JobsPage() {
     if (userRole !== 'provider') {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card>
                         <CardHeader>
                             <CardTitle>{t('accessDenied')}</CardTitle>
@@ -313,11 +313,11 @@ export default function JobsPage() {
     if (loading) {
         return (
             <div className="container space-y-8">
-                 <div className="max-w-6xl mx-auto">
+                 <div className=" mx-auto">
                     <h1 className="text-3xl font-bold font-headline">{t('title')}</h1>
                     <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-72" />)}
                     </div>
@@ -329,7 +329,7 @@ export default function JobsPage() {
     return (
         <div className="container space-y-8">
             {/* Header */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
@@ -352,7 +352,7 @@ export default function JobsPage() {
             </div>
 
             {/* Filters and Controls */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="pb-4">
                         <CardTitle className="flex items-center gap-2 text-lg">
@@ -451,7 +451,7 @@ export default function JobsPage() {
 
             {/* Jobs Display */}
             {filteredAndSortedJobs.length > 0 ? (
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     {displayMode === 'grid' ? (
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                             {filteredAndSortedJobs.map(job => {

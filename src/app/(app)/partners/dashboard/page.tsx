@@ -11,6 +11,7 @@ import { PartnerReferralTracker } from "@/lib/partner-referral-tracker";
 import { PartnerCommissionManager } from "@/lib/partner-commission-manager";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getDb  } from '@/lib/firebase';
+import PartnerOnboardingBanner from "@/components/partner-onboarding-banner";
 
 interface PartnerDashboardData {
     totalReferrals: number;
@@ -29,6 +30,10 @@ export default function PartnersDashboardPage() {
     const t = useTranslations('PartnersDashboard');
     const [dashboardData, setDashboardData] = useState<PartnerDashboardData | null>(null);
     const [loading, setLoading] = useState(true);
+
+    // Debug: Log user role to console
+    console.log('Partner Dashboard - User Role:', userRole);
+    console.log('Partner Dashboard - User:', user);
 
     useEffect(() => {
         const loadDashboardData = async () => {
@@ -68,7 +73,7 @@ export default function PartnersDashboardPage() {
     if (userRole !== 'partner') {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card>
                         <CardHeader>
                             <CardTitle>{t('accessDenied')}</CardTitle>
@@ -83,11 +88,11 @@ export default function PartnersDashboardPage() {
     if (loading) {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Skeleton className="h-8 w-64" />
                     <Skeleton className="h-4 w-96 mt-2" />
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                         {[...Array(4)].map((_, i) => (
                             <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
@@ -109,12 +114,15 @@ export default function PartnersDashboardPage() {
 
     return (
         <div className="container space-y-8">
-            <div className="max-w-6xl mx-auto">
+            {/* Partner Onboarding Banner */}
+            <PartnerOnboardingBanner />
+            
+            <div className=" mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('dashboardTitle', { name: user?.displayName || 'User' })}</h1>
                 <p className="text-muted-foreground">{t('dashboardSubtitle')}</p>
             </div>
             
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                     <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
@@ -170,7 +178,7 @@ export default function PartnersDashboardPage() {
                 </div>
             </div>
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="grid gap-6 md:grid-cols-2">
                     <Card>
                         <CardHeader>

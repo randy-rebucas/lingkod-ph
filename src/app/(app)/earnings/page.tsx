@@ -182,7 +182,7 @@ export default function EarningsPage() {
     if (userRole !== 'provider') {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">{t('providersAndAgenciesOnly')}</p>
                 </div>
@@ -194,11 +194,11 @@ export default function EarningsPage() {
     if (loading) {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Skeleton className="h-10 w-1/3" />
                     <Skeleton className="h-4 w-2/3" />
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-4">
                         <Skeleton className="h-28 w-full" />
                         <Skeleton className="h-28 w-full" />
@@ -206,10 +206,10 @@ export default function EarningsPage() {
                         <Skeleton className="h-28 w-full" />
                     </div>
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Skeleton className="h-80 w-full" />
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Skeleton className="h-64 w-full" />
                 </div>
             </div>
@@ -234,7 +234,7 @@ export default function EarningsPage() {
     return (
         <div className="container space-y-8">
             {/* Header */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
@@ -266,7 +266,7 @@ export default function EarningsPage() {
             </div>
 
             {/* Key Metrics */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300">
                         <CardContent className="p-6">
@@ -343,7 +343,7 @@ export default function EarningsPage() {
             </div>
 
             {/* Earnings Chart */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                         <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('earningsHistory')}</CardTitle>
@@ -370,7 +370,7 @@ export default function EarningsPage() {
             </div>
 
             {/* Recent Transactions and Payouts */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
@@ -448,7 +448,7 @@ export default function EarningsPage() {
 
             {/* Payout Information */}
             {availableForPayout > 0 && (
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-6">
                             <div className="flex items-center justify-between">

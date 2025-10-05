@@ -397,13 +397,13 @@ export default function AnalyticsPage() {
     if (!user) {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">
                         {t('subtitle')}
                     </p>
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card>
                         <CardHeader>
                             <CardTitle>{t('upgradeToElite')}</CardTitle>
@@ -423,7 +423,7 @@ export default function AnalyticsPage() {
 
     return (
         <div className="container space-y-8">
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('advancedAnalyticsTitle')}</h1>
@@ -454,7 +454,7 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Performance Alerts */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 {!analyticsData.isPerformingWell.revenue && analyticsData.revenueAnalytics.monthlyGrowth < 0 && (
                     <Alert>
                         <TrendingDown className="h-4 w-4" />
@@ -474,7 +474,7 @@ export default function AnalyticsPage() {
                 )}
             </div>
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 {loading ? (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                         {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-32" />)}
@@ -558,7 +558,7 @@ export default function AnalyticsPage() {
             </div>
             
             {/* Revenue Analytics */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="grid gap-6 md:grid-cols-2">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
@@ -625,7 +625,7 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Booking Trends and Service Performance */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                 <Card className="lg:col-span-3 shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
@@ -676,7 +676,7 @@ export default function AnalyticsPage() {
             </div>
             
             {/* Performance Insights */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="grid gap-6 md:grid-cols-2">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
@@ -804,7 +804,7 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Geographic Analytics */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="grid gap-6 md:grid-cols-2">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
@@ -865,7 +865,7 @@ export default function AnalyticsPage() {
                 </div>
             </div>
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                 <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                     <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('topPerformingServices')}</CardTitle>

@@ -127,7 +127,7 @@ export default function AdminReportsPage() {
      if (userRole !== 'admin') {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
                             <CardTitle className="font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Access Denied</CardTitle>
@@ -142,18 +142,18 @@ export default function AdminReportsPage() {
     if (loading) {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Skeleton className="h-10 w-1/3" />
                     <Skeleton className="h-4 w-2/3" />
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-3">
                         <Skeleton className="h-28 w-full" />
                         <Skeleton className="h-28 w-full" />
                         <Skeleton className="h-28 w-full" />
                     </div>
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Skeleton className="h-64 w-full" />
                 </div>
             </div>
@@ -162,14 +162,14 @@ export default function AdminReportsPage() {
     
     return (
         <div className="container space-y-8">
-             <div className="max-w-6xl mx-auto flex items-center justify-between">
+             <div className=" mx-auto flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Platform Reports</h1>
                     <p className="text-muted-foreground">Deep dive into the platform&apos;s performance with charts and detailed tables.</p>
                 </div>
             </div>
             
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="grid gap-6 md:grid-cols-3">
                     <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
@@ -201,7 +201,7 @@ export default function AdminReportsPage() {
                 </div>
             </div>
             
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
                     <Card className="lg:col-span-3">
                         <CardHeader>
@@ -242,7 +242,7 @@ export default function AdminReportsPage() {
                 </div>
             </div>
 
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card>
                     <CardHeader>
                         <CardTitle>Provider Performance</CardTitle>

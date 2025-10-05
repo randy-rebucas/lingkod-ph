@@ -431,7 +431,7 @@ const NotificationsPage = memo(function NotificationsPage() {
     if (loading) {
         return (
             <div className="container space-y-8">
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="flex items-center justify-between">
                         <div>
                             <Skeleton className="h-8 w-48 mb-2" />
@@ -443,7 +443,7 @@ const NotificationsPage = memo(function NotificationsPage() {
                         </div>
                     </div>
                 </div>
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="space-y-4">
                         {[...Array(5)].map((_, i) => (
                             <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
@@ -468,7 +468,7 @@ const NotificationsPage = memo(function NotificationsPage() {
     return (
         <div className="container space-y-8">
             {/* Header */}
-            <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className=" mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                         {t('notifications')}
@@ -508,7 +508,7 @@ const NotificationsPage = memo(function NotificationsPage() {
             </div>
 
             {/* Simple Filter Controls */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                     <div className="flex-1 max-w-md">
                         <div className="relative">
@@ -553,7 +553,7 @@ const NotificationsPage = memo(function NotificationsPage() {
 
 
             {/* Notifications List */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <NotificationsTab 
                     notifications={filteredNotifications} 
                     filter={filter}

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
 import { getDb  } from '@/lib/firebase';
@@ -29,7 +29,7 @@ const getStatusVariant = (status: string) => {
 }
 
 export default function ServicesPage() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const { toast } = useToast();
     const t = useTranslations('MyServices');
     const [services, setServices] = useState<Service[]>([]);
@@ -37,12 +37,35 @@ export default function ServicesPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedService, setSelectedService] = useState<Service | null>(null);
 
-    const fetchServices = async () => {
-        if (!user || !getDb()) return;
+    console.log('ServicesPage render', { 
+        user: !!user, 
+        authLoading, 
+        loading, 
+        servicesCount: services.length 
+    });
+
+    const fetchServices = useCallback(async () => {
+        console.log('fetchServices called', { user: !!user, hasDb: !!getDb() });
+        
+        if (!user) {
+            console.log('No user found, setting loading to false');
+            setLoading(false);
+            return;
+        }
+        
+        if (!getDb()) {
+            console.log('No database connection, setting loading to false');
+            setLoading(false);
+            return;
+        }
+        
         setLoading(true);
         try {
+            console.log('Fetching services for user:', user.uid);
             const q = query(collection(getDb(), "services"), where("userId", "==", user.uid));
             const querySnapshot = await getDocs(q);
+            console.log('Query snapshot:', querySnapshot.docs.length, 'documents found');
+            
             const servicesData = querySnapshot.docs.map(doc => {
                 const data = doc.data();
                 return {
@@ -52,6 +75,8 @@ export default function ServicesPage() {
                     createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(),
                 } as Service;
             });
+            
+            console.log('Services data:', servicesData);
             setServices(servicesData);
         } catch (error) {
             console.error("Error fetching services:", error);
@@ -59,11 +84,13 @@ export default function ServicesPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user, t, toast]);
 
     useEffect(() => {
-        fetchServices();
-    }, [user, fetchServices]);
+        if (!authLoading) {
+            fetchServices();
+        }
+    }, [fetchServices, authLoading]);
 
     const handleAddService = () => {
         setSelectedService(null);
@@ -94,7 +121,7 @@ export default function ServicesPage() {
 
     return (
         <div className="container space-y-8">
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
@@ -111,8 +138,8 @@ export default function ServicesPage() {
                 </div>
             </div>
             
-            {loading ? (
-                <div className="max-w-6xl mx-auto">
+            {loading || authLoading ? (
+                <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {[...Array(3)].map((_, i) => (
                         <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
@@ -131,7 +158,7 @@ export default function ServicesPage() {
                     </div>
                 </div>
             ) : services.length > 0 ? (
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {services.map((service) => (
                         <Card key={service.id} className="flex flex-col shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">
@@ -187,7 +214,7 @@ export default function ServicesPage() {
                     </div>
                 </div>
             ) : (
-                <div className="max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
                          <BriefcaseBusiness className="h-16 w-16 mb-4 text-primary opacity-60" />

@@ -182,7 +182,7 @@ export default function CalendarPage() {
 
     return (
         <div className="container space-y-8">
-            {/* <div className="max-w-6xl mx-auto">
+            {/* <div className=" mx-auto">
                 <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('calendarTitle')}</h1>
                 <p className="text-muted-foreground">
                     {t('calendarDescription')}
@@ -192,7 +192,7 @@ export default function CalendarPage() {
                     {t('newEvent')}
                 </Button>
             </div> */}
-            <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className=" mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">
@@ -227,7 +227,7 @@ export default function CalendarPage() {
                 </div>
             </div>
             {/* Simple Calendar */}
-            <div className="max-w-6xl mx-auto">
+            <div className=" mx-auto">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="flex flex-row items-center justify-between border-b border-border/50">
                         <CardTitle className="text-2xl font-bold">

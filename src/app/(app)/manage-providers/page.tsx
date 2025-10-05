@@ -342,7 +342,7 @@ function ManageProvidersPage() {
     if (userRole !== 'agency') {
         return (
              <div className="container space-y-8">
-                 <div className="max-w-6xl mx-auto">
+                 <div className=" mx-auto">
                     <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                     <p className="text-muted-foreground">{t('agencyOnly')}</p>
                 </div>
@@ -352,7 +352,7 @@ function ManageProvidersPage() {
 
     return (
       <div className="container space-y-8">
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className=" mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                   <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('title')}</h1>
                   <p className="text-muted-foreground">
@@ -403,7 +403,7 @@ function ManageProvidersPage() {
           </div>
 
           {/* Advanced Filter Controls */}
-          <div className="max-w-6xl mx-auto">
+          <div className=" mx-auto">
               <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                   <CardHeader>
                       <CardTitle className="flex items-center gap-2">
@@ -473,7 +473,7 @@ function ManageProvidersPage() {
           </div>
 
           {/* Enhanced KPI Cards */}
-          <div className="max-w-6xl mx-auto">
+          <div className=" mx-auto">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm hover:shadow-glow/20 transition-all duration-300 group">
                       <CardContent className="p-6">
@@ -549,7 +549,7 @@ function ManageProvidersPage() {
               </div>
           </div>
 
-          <div className="max-w-6xl mx-auto">
+          <div className=" mx-auto">
               <Tabs defaultValue="overview" className="w-full">
                   <TabsList className="grid w-full grid-cols-5">
                       <TabsTrigger value="overview" className="flex items-center gap-2">

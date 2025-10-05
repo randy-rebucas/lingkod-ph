@@ -1253,6 +1253,38 @@
   "BroadcastBanner": {
     "close": "Close"
   },
+  "ProviderOnboardingBanner": {
+    "learnHowToGetStarted": "Learn how to get started",
+    "providerGuideTitle": "Provider 101 will guide you through the basics of the platform.",
+    "providerGuideDescription": "Set up your profile, manage bookings, and grow your business.",
+    "exploreProviderGuide": "Explore Provider 101",
+    "help": "Help",
+    "close": "Close"
+  },
+  "ClientOnboardingBanner": {
+    "learnHowToGetStarted": "Learn how to get started",
+    "clientGuideTitle": "Client 101 will guide you through finding and booking services.",
+    "clientGuideDescription": "Discover providers, book services, and manage your requests easily.",
+    "exploreClientGuide": "Explore Client 101",
+    "help": "Help",
+    "close": "Close"
+  },
+  "AgencyOnboardingBanner": {
+    "learnHowToGetStarted": "Learn how to get started",
+    "agencyGuideTitle": "Agency 101 will guide you through managing your team and business.",
+    "agencyGuideDescription": "Manage providers, track performance, and grow your agency.",
+    "exploreAgencyGuide": "Explore Agency 101",
+    "help": "Help",
+    "close": "Close"
+  },
+  "PartnerOnboardingBanner": {
+    "learnHowToGetStarted": "Learn how to get started",
+    "partnerGuideTitle": "Partner 101 will guide you through referral programs and commissions.",
+    "partnerGuideDescription": "Track referrals, earn commissions, and grow your network.",
+    "explorePartnerGuide": "Start Tracking Referrals",
+    "help": "Help",
+    "close": "Close"
+  },
   "CompleteBookingDialog": {
     "completeBooking": "Complete Booking",
     "uploadProof": "Upload proof of completion",
