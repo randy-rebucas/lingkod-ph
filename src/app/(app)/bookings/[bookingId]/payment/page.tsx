@@ -232,7 +232,7 @@ export default function PaymentPage() {
                     <CardContent className="space-y-6 p-6">
                         <div className="p-6 rounded-xl bg-gradient-to-r from-muted/50 to-muted/30 text-center space-y-3 border border-border/50 shadow-soft">
                             <p className="text-sm text-muted-foreground font-medium">Total Amount Due</p>
-                            <p className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">₱{booking.price.toFixed(2)}</p>
+                            <p className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">₱{booking.price?.toFixed(2) || '0.00'}</p>
                             <div className="flex items-center justify-center gap-2 pt-3">
                                 <p className="text-sm text-muted-foreground">Booking ID:</p>
                                 <code className="font-mono text-sm p-2 rounded-lg bg-background/80 border border-border/50 shadow-soft">{booking.id}</code>
@@ -264,7 +264,7 @@ export default function PaymentPage() {
                                 <TabsContent value="automated" className="mt-4">
                                     <GCashPaymentButton
                                         bookingId={booking.id}
-                                        amount={booking.price}
+                                        amount={booking.price || 0}
                                         serviceName={booking.serviceName}
                                         onPaymentSuccess={() => {
                                             toast({ title: 'Payment Successful!', description: 'Your booking has been confirmed.' });

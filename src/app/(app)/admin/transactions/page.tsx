@@ -223,7 +223,7 @@ export default function AdminPaymentVerificationPage() {
                                             </TableCell>
                                             <TableCell>{booking.clientName}</TableCell>
                                             <TableCell className="font-medium">{booking.serviceName}</TableCell>
-                                            <TableCell>₱{booking.price.toFixed(2)}</TableCell>
+                                            <TableCell>₱{booking.price?.toFixed(2) || '0.00'}</TableCell>
                                             <TableCell className="text-right flex justify-end gap-2">
                                                 <DialogTrigger asChild>
                                                     <Button variant="outline" size="sm"><Eye className="mr-2 h-4 w-4"/> View Proof</Button>

@@ -312,7 +312,7 @@ export class ProviderPerformanceMonitor {
     messages: any[],
     services: any[],
     jobApplications: any[],
-    period: string
+    _period: string
   ): any {
     const totalBookings = bookings.length;
     const completedBookings = bookings.filter(b => b.status === 'Completed').length;
@@ -433,7 +433,7 @@ export class ProviderPerformanceMonitor {
       const metrics = snapshot.docs.map(doc => doc.data());
       
       return metrics.length > 1 ? metrics[1] : null;
-    } catch (error) {
+    } catch {
       return null;
     }
   }

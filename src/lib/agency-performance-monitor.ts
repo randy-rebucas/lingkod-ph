@@ -1,5 +1,5 @@
 import { getDb  } from './firebase';
-import { collection, query, where, onSnapshot, getDocs, Timestamp, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 
 export interface AgencyPerformanceMetrics {
   agencyId: string;

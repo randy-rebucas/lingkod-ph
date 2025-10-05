@@ -506,7 +506,7 @@ const ProfilePage = memo(function ProfilePage() {
                         await updateDoc(userDocRef, { photoURL: downloadURL });
                     }
                     toast({ title: t('success'), description: t('profilePictureUpdated') });
-                } catch (_error: unknown) {
+                } catch {
                      toast({ variant: "destructive", title: t('updateFailed'), description: t('failedToUpdateProfilePicture') });
                 } finally {
                     setIsUploading(false);

@@ -7,8 +7,8 @@ import { PaymentConfig } from './payment-config';
 import { PaymentValidator } from './payment-validator';
 import { PaymentRetryService } from './payment-retry-service';
 import { PaymentMonitoringService } from './payment-monitoring';
-import { adyenPaymentService } from './adyen-payment-service';
-import { adminDb as db } from './firebase-admin';
+import { adyenPaymentService as _adyenPaymentService } from './adyen-payment-service';
+import { adminDb as _db } from './firebase-admin';
 
 export interface TestResult {
   testName: string;
@@ -124,7 +124,7 @@ export class PaymentFlowTester {
       }
     }
 
-    const duration = Date.now() - startTime;
+    const _duration = Date.now() - startTime;
     const passedTests = results.filter(r => r.status === 'pass').length;
     const failedTests = results.filter(r => r.status === 'fail').length;
 
@@ -207,7 +207,7 @@ export class PaymentFlowTester {
       });
     }
 
-    const duration = Date.now() - startTime;
+    const _duration = Date.now() - startTime;
     const passedTests = results.filter(r => r.status === 'pass').length;
     const failedTests = results.filter(r => r.status === 'fail').length;
     const skippedTests = results.filter(r => r.status === 'skip').length;
@@ -267,7 +267,7 @@ export class PaymentFlowTester {
       });
     }
 
-    const duration = Date.now() - startTime;
+    const _duration = Date.now() - startTime;
     const passedTests = results.filter(r => r.status === 'pass').length;
     const failedTests = results.filter(r => r.status === 'fail').length;
 
@@ -338,7 +338,7 @@ export class PaymentFlowTester {
       });
     }
 
-    const duration = Date.now() - startTime;
+    const _duration = Date.now() - startTime;
     const passedTests = results.filter(r => r.status === 'pass').length;
     const failedTests = results.filter(r => r.status === 'fail').length;
 
@@ -401,7 +401,7 @@ export class PaymentFlowTester {
       });
     }
 
-    const duration = Date.now() - startTime;
+    const _duration = Date.now() - startTime;
     const passedTests = results.filter(r => r.status === 'pass').length;
     const failedTests = results.filter(r => r.status === 'fail').length;
     const skippedTests = results.filter(r => r.status === 'skip').length;

@@ -363,7 +363,7 @@ ${JSON.stringify(activity.details, null, 2)}
   /**
    * Update activity metrics
    */
-  private static async updateMetrics(activity: AdminActivity): Promise<void> {
+  private static async updateMetrics(_activity: AdminActivity): Promise<void> {
     try {
       // This would update real-time metrics
       // Implementation would depend on your specific needs

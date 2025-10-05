@@ -9,7 +9,6 @@ import {
   getDoc,
   addDoc, 
   updateDoc, 
-  deleteDoc, 
   serverTimestamp, 
   writeBatch,
   Timestamp 

@@ -257,7 +257,7 @@ export class ProviderAnalyticsService {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
 
-  private async getCompetitorData(providerId: string, startDate: Date, endDate: Date): Promise<any[]> {
+  private async getCompetitorData(providerId: string, _startDate: Date, _endDate: Date): Promise<any[]> {
     // Get other providers in the same categories
     const providerData = await this.getProviderData(providerId);
     if (!providerData?.services) return [];
@@ -382,7 +382,7 @@ export class ProviderAnalyticsService {
     return (avgPrice / avgCompetitorPrice) * 100;
   }
 
-  private analyzeClientDemographics(bookings: any[]): any {
+  private analyzeClientDemographics(_bookings: any[]): any {
     // Simplified demographic analysis
     return {
       ageGroups: { '18-25': 20, '26-35': 35, '36-45': 25, '46+': 20 },
@@ -400,7 +400,7 @@ export class ProviderAnalyticsService {
     return popularity;
   }
 
-  private analyzeServiceProfitability(bookings: any[], services: any[]): Record<string, number> {
+  private analyzeServiceProfitability(bookings: any[], _services: any[]): Record<string, number> {
     const profitability: Record<string, number> = {};
     bookings.forEach(booking => {
       const serviceName = booking.serviceName;
@@ -427,24 +427,24 @@ export class ProviderAnalyticsService {
     return maxPossibleBookings > 0 ? (totalBookings / maxPossibleBookings) * 100 : 0;
   }
 
-  private calculateCapacityUtilization(bookings: any[], services: any[]): number {
-    const totalCapacity = services.length * 10; // Assuming 10 bookings per service per period
+  private calculateCapacityUtilization(bookings: any[], _services: any[]): number {
+    const totalCapacity = _services.length * 10; // Assuming 10 bookings per service per period
     const usedCapacity = bookings.length;
     return totalCapacity > 0 ? (usedCapacity / totalCapacity) * 100 : 0;
   }
 
-  private calculateResourceEfficiency(bookings: any[], services: any[]): number {
+  private calculateResourceEfficiency(bookings: any[], _services: any[]): number {
     const revenue = bookings.reduce((sum, b) => sum + b.price, 0);
     const costs = bookings.reduce((sum, b) => sum + (b.cost || 0), 0);
     return costs > 0 ? ((revenue - costs) / costs) * 100 : 0;
   }
 
-  private calculateGrowthRate(bookings: any[], period: string): number {
+  private calculateGrowthRate(_bookings: any[], _period: string): number {
     // Simplified growth rate calculation
     return 15; // Placeholder
   }
 
-  private identifyExpansionOpportunities(services: any[], marketData: any[]): string[] {
+  private identifyExpansionOpportunities(_services: any[], _marketData: any[]): string[] {
     return [
       'Add mobile app development services',
       'Expand to digital marketing',
@@ -452,7 +452,7 @@ export class ProviderAnalyticsService {
     ];
   }
 
-  private identifyMarketGaps(services: any[], marketData: any[]): string[] {
+  private identifyMarketGaps(_services: any[], _marketData: any[]): string[] {
     return [
       'AI/ML services',
       'Blockchain development',
@@ -467,7 +467,7 @@ export class ProviderAnalyticsService {
     return (avgRating * 20) + (completionRate * 80);
   }
 
-  private identifyImprovementAreas(reviews: any[], bookings: any[]): string[] {
+  private identifyImprovementAreas(_reviews: any[], _bookings: any[]): string[] {
     return [
       'Response time',
       'Communication',
@@ -475,7 +475,7 @@ export class ProviderAnalyticsService {
     ];
   }
 
-  private identifyBestPractices(reviews: any[], bookings: any[]): string[] {
+  private identifyBestPractices(_reviews: any[], _bookings: any[]): string[] {
     return [
       'Timely delivery',
       'Clear communication',
@@ -483,7 +483,7 @@ export class ProviderAnalyticsService {
     ];
   }
 
-  private generateRecommendations(analytics: any, providerData: any): any {
+  private generateRecommendations(_analytics: any, _providerData: any): any {
     return {
       pricing: [
         'Consider dynamic pricing based on demand',
@@ -508,7 +508,7 @@ export class ProviderAnalyticsService {
     };
   }
 
-  private generateInsights(analytics: any, marketData: any[]): any {
+  private generateInsights(_analytics: any, _marketData: any[]): any {
     return {
       keyFindings: [
         'Strong performance in quality metrics',
@@ -588,7 +588,7 @@ export class ProviderAnalyticsService {
     }
   }
 
-  private analyzeMarketTrends(marketData: any[], location?: string): any {
+  private analyzeMarketTrends(_marketData: any[], _location?: string): any {
     // Analyze market trends based on data
     return {
       growthRate: 12.5,

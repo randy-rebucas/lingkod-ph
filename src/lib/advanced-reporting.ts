@@ -437,7 +437,7 @@ export class AdvancedReportingService {
     return recommendations;
   }
 
-  private getDefaultDashboard(providerId: string): DashboardWidget[] {
+  private getDefaultDashboard(_providerId: string): DashboardWidget[] {
     return [
       {
         id: 'revenue_chart',
@@ -549,7 +549,7 @@ export class AdvancedReportingService {
     };
   }
 
-  private async getExpenses(providerId: string, dateRange: { start: Date; end: Date }): Promise<any> {
+  private async getExpenses(_providerId: string, _dateRange: { start: Date; end: Date }): Promise<any> {
     // Placeholder for expenses data
     return {
       totalExpenses: 0,
@@ -557,7 +557,7 @@ export class AdvancedReportingService {
     };
   }
 
-  private async getCapacityData(providerId: string, dateRange: { start: Date; end: Date }): Promise<any> {
+  private async getCapacityData(_providerId: string, _dateRange: { start: Date; end: Date }): Promise<any> {
     // Placeholder for capacity data
     return {
       totalCapacity: 100,
@@ -576,7 +576,7 @@ export class AdvancedReportingService {
     return trends;
   }
 
-  private calculateRevenueTrends(earnings: any): any {
+  private calculateRevenueTrends(_earnings: any): any {
     // Calculate revenue trends
     return {
       growth: 15.5,
@@ -624,7 +624,7 @@ export class AdvancedReportingService {
     };
   }
 
-  private generateInsights(bookings: any[], reviews: any[], earnings: any): string[] {
+  private generateInsights(_bookings: any[], _reviews: any[], _earnings: any): string[] {
     return [
       'Strong performance in completion rate',
       'Revenue showing positive growth trend',
@@ -632,7 +632,7 @@ export class AdvancedReportingService {
     ];
   }
 
-  private generateRecommendations(bookings: any[], reviews: any[], earnings: any): string[] {
+  private generateRecommendations(_bookings: any[], _reviews: any[], _earnings: any): string[] {
     return [
       'Consider expanding service offerings',
       'Focus on repeat client acquisition',
@@ -641,23 +641,23 @@ export class AdvancedReportingService {
   }
 
   // Additional analysis methods
-  private analyzeRevenueByService(earnings: any): any {
+  private analyzeRevenueByService(_earnings: any): any {
     return {};
   }
 
-  private analyzeRevenueByMonth(earnings: any): any {
+  private analyzeRevenueByMonth(_earnings: any): any {
     return {};
   }
 
-  private analyzeExpensesByCategory(expenses: any): any {
+  private analyzeExpensesByCategory(_expenses: any): any {
     return {};
   }
 
-  private calculateExpenseTrends(expenses: any): any {
+  private calculateExpenseTrends(_expenses: any): any {
     return {};
   }
 
-  private generateFinancialProjections(earnings: any, expenses: any): any {
+  private generateFinancialProjections(_earnings: any, _expenses: any): any {
     return {};
   }
 
@@ -665,19 +665,19 @@ export class AdvancedReportingService {
     return capacity.totalCapacity > 0 ? (bookings.length / capacity.totalCapacity) * 100 : 0;
   }
 
-  private identifyPeakHours(bookings: any[]): any[] {
+  private identifyPeakHours(_bookings: any[]): any[] {
     return [];
   }
 
-  private identifyCapacityGaps(bookings: any[], capacity: any): any[] {
+  private identifyCapacityGaps(_bookings: any[], _capacity: any): any[] {
     return [];
   }
 
-  private calculateAverageBookingDuration(bookings: any[]): number {
+  private calculateAverageBookingDuration(_bookings: any[]): number {
     return 2.5; // hours
   }
 
-  private calculateSetupTime(bookings: any[]): number {
+  private calculateSetupTime(_bookings: any[]): number {
     return 0.5; // hours
   }
 
@@ -685,23 +685,23 @@ export class AdvancedReportingService {
     return bookings.filter(b => b.status === 'Completed').length / bookings.length;
   }
 
-  private calculateOnTimeRate(bookings: any[]): number {
+  private calculateOnTimeRate(_bookings: any[]): number {
     return 0.9; // 90%
   }
 
-  private calculateQualityScore(bookings: any[]): number {
+  private calculateQualityScore(_bookings: any[]): number {
     return 4.2; // out of 5
   }
 
-  private calculateCustomerSatisfaction(bookings: any[]): number {
+  private calculateCustomerSatisfaction(_bookings: any[]): number {
     return 4.5; // out of 5
   }
 
-  private identifyBottlenecks(bookings: any[], services: any[]): any[] {
+  private identifyBottlenecks(_bookings: any[], _services: any[]): any[] {
     return [];
   }
 
-  private suggestImprovements(bookings: any[], services: any[]): string[] {
+  private suggestImprovements(_bookings: any[], _services: any[]): string[] {
     return [
       'Streamline booking process',
       'Improve communication tools',
@@ -709,7 +709,7 @@ export class AdvancedReportingService {
     ];
   }
 
-  private suggestAutomation(bookings: any[], services: any[]): string[] {
+  private suggestAutomation(_bookings: any[], _services: any[]): string[] {
     return [
       'Automate scheduling',
       'Implement automated reminders',

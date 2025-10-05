@@ -56,7 +56,7 @@ export function CompleteBookingDialog({ isOpen, setIsOpen, booking }: CompleteBo
                 clientId: booking.clientId,
                 jobId: booking.jobId,
                 serviceName: booking.serviceName,
-                price: booking.price,
+                price: booking.price || 0,
                 photoDataUrl: previewUrl,
                 fileName: imageFile.name,
             });

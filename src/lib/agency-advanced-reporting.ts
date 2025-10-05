@@ -3,10 +3,7 @@ import {
   collection, 
   query, 
   where, 
-  onSnapshot, 
   getDocs, 
-  orderBy, 
-  limit, 
   Timestamp 
 } from 'firebase/firestore';
 
@@ -441,7 +438,7 @@ export class AgencyAdvancedReportingService {
   /**
    * Generate competitive analysis report data
    */
-  private async generateCompetitiveAnalysisData(startDate: Date, endDate: Date): Promise<any> {
+  private async generateCompetitiveAnalysisData(_startDate: Date, _endDate: Date): Promise<any> {
     // This would typically integrate with external competitive intelligence
     // For now, we'll provide a framework
     
@@ -649,22 +646,22 @@ export class AgencyAdvancedReportingService {
   /**
    * Helper methods for data calculation
    */
-  private calculateMonthlyBreakdown(bookings: any[], startDate: Date, endDate: Date): any[] {
+  private calculateMonthlyBreakdown(_bookings: any[], _startDate: Date, _endDate: Date): any[] {
     // Implementation for monthly breakdown calculation
     return [];
   }
 
-  private calculateProviderBreakdown(bookings: any[], providers: any[]): any[] {
+  private calculateProviderBreakdown(_bookings: any[], _providers: any[]): any[] {
     // Implementation for provider breakdown calculation
     return [];
   }
 
-  private calculateCategoryBreakdown(bookings: any[]): any[] {
+  private calculateCategoryBreakdown(_bookings: any[]): any[] {
     // Implementation for category breakdown calculation
     return [];
   }
 
-  private calculateProviderPerformance(provider: any, bookings: any[]): any {
+  private calculateProviderPerformance(provider: any, _bookings: any[]): any {
     // Implementation for provider performance calculation
     return {
       id: provider.id,
@@ -674,47 +671,47 @@ export class AgencyAdvancedReportingService {
     };
   }
 
-  private calculateCustomerSegments(bookings: any[]): any[] {
+  private calculateCustomerSegments(_bookings: any[]): any[] {
     // Implementation for customer segmentation
     return [];
   }
 
-  private calculateSatisfactionMetrics(bookings: any[]): any {
+  private calculateSatisfactionMetrics(_bookings: any[]): any {
     // Implementation for satisfaction metrics
     return {};
   }
 
-  private calculateRetentionMetrics(bookings: any[]): any {
+  private calculateRetentionMetrics(_bookings: any[]): any {
     // Implementation for retention metrics
     return {};
   }
 
-  private calculateAverageResponseTime(bookings: any[]): number {
+  private calculateAverageResponseTime(_bookings: any[]): number {
     // Implementation for average response time calculation
     return 2.5; // hours
   }
 
-  private calculateUtilizationRate(bookings: any[], providers: any[]): number {
+  private calculateUtilizationRate(_bookings: any[], _providers: any[]): number {
     // Implementation for utilization rate calculation
     return 75; // percentage
   }
 
-  private calculateEfficiencyMetrics(bookings: any[]): any {
+  private calculateEfficiencyMetrics(_bookings: any[]): any {
     // Implementation for efficiency metrics
     return {};
   }
 
-  private identifyBottlenecks(bookings: any[]): any[] {
+  private identifyBottlenecks(_bookings: any[]): any[] {
     // Implementation for bottleneck identification
     return [];
   }
 
-  private identifyImprovements(bookings: any[]): any[] {
+  private identifyImprovements(_bookings: any[]): any[] {
     // Implementation for improvement identification
     return [];
   }
 
-  private async getGrowthData(startDate: Date, endDate: Date): Promise<any> {
+  private async getGrowthData(_startDate: Date, _endDate: Date): Promise<any> {
     // Implementation for getting growth data
     return {
       revenue: 100000,
@@ -728,32 +725,32 @@ export class AgencyAdvancedReportingService {
     return ((current - previous) / previous) * 100;
   }
 
-  private calculateGrowthTrends(current: any, previous: any): any[] {
+  private calculateGrowthTrends(_current: any, _previous: any): any[] {
     // Implementation for growth trends calculation
     return [];
   }
 
-  private calculateGrowthProjections(current: any, previous: any): any {
+  private calculateGrowthProjections(_current: any, _previous: any): any {
     // Implementation for growth projections
     return {};
   }
 
-  private identifyGrowthOpportunities(current: any, previous: any): any[] {
+  private identifyGrowthOpportunities(_current: any, _previous: any): any[] {
     // Implementation for growth opportunities identification
     return [];
   }
 
-  private calculateComplianceScore(auditLogs: any[]): number {
+  private calculateComplianceScore(_auditLogs: any[]): number {
     // Implementation for compliance score calculation
     return 85; // percentage
   }
 
-  private identifyComplianceViolations(auditLogs: any[]): any[] {
+  private identifyComplianceViolations(_auditLogs: any[]): any[] {
     // Implementation for compliance violations identification
     return [];
   }
 
-  private generateComplianceRecommendations(auditLogs: any[]): any[] {
+  private generateComplianceRecommendations(_auditLogs: any[]): any[] {
     // Implementation for compliance recommendations
     return [];
   }

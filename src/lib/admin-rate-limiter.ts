@@ -92,7 +92,7 @@ export class AdminRateLimiter {
   static async checkAdminRateLimit(
     operation: keyof typeof adminRateLimiters,
     adminId: string,
-    request: Request
+    _request: Request
   ): Promise<{ allowed: boolean; message?: string; retryAfter?: number }> {
     const rateLimiter = adminRateLimiters[operation];
     

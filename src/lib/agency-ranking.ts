@@ -3,10 +3,7 @@ import {
   collection, 
   query, 
   where, 
-  onSnapshot, 
   getDocs, 
-  orderBy, 
-  limit, 
   Timestamp 
 } from 'firebase/firestore';
 
@@ -456,7 +453,7 @@ export class AgencyRankingService {
 
     // Get data for each agency
     const agenciesData = [];
-    for (const agency of agencies) {
+    for (const _agency of agencies) {
       const agencyData = await this.getAgencyData(startDate, endDate);
       agenciesData.push(agencyData);
     }
@@ -588,7 +585,7 @@ export class AgencyRankingService {
   /**
    * Calculate trend for the agency
    */
-  private async calculateTrend(agencyData: any): Promise<{
+  private async calculateTrend(_agencyData: any): Promise<{
     direction: 'up' | 'down' | 'stable';
     changePercentage: number;
   }> {

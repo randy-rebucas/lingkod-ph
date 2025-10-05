@@ -72,7 +72,7 @@ export const BookingDetailsDialog = memo(function BookingDetailsDialog({ isOpen,
 
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">{t('price')}</span>
-                        <span className="font-medium">₱{booking.price.toFixed(2)}</span>
+                        <span className="font-medium">₱{booking.price?.toFixed(2) || '0.00'}</span>
                     </div>
 
                     {booking.notes && (

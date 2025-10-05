@@ -273,7 +273,7 @@ export class ProviderRankingService {
     return userDoc.exists() ? userDoc.data() : null;
   }
 
-  private async getAdditionalMetrics(providerId: string): Promise<any> {
+  private async getAdditionalMetrics(_providerId: string): Promise<any> {
     // Get additional metrics like response time, communication quality, etc.
     return {
       responseTime: 2.5, // hours
