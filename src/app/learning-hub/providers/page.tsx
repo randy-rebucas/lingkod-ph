@@ -23,7 +23,9 @@ import {
   ChevronDown,
   ChevronUp,
   Heart,
-  Clock
+  Clock,
+  Shield,
+  CheckCircle
 } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
