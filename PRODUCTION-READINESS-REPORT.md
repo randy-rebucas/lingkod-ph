@@ -102,7 +102,7 @@ The application is functionally complete and can be deployed to production, but 
 
 3. **Update Critical Dependencies**
    ```bash
-   npm update @adyen/adyen-web @adyen/api-library
+   npm update @paypal/paypal-js @paypal/react-paypal-js
    ```
 
 ### **Priority 2: Test Infrastructure**

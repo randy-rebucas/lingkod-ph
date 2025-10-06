@@ -119,7 +119,7 @@ The LocalPro payment system has been fully implemented and enhanced with compreh
 
 ### Production Checklist ✅
 - [x] Environment variable configuration
-- [x] Payment gateway integration (Adyen, PayPal)
+- [x] Payment gateway integration (PayPal)
 - [x] Security measures implemented
 - [x] Error handling and retry logic
 - [x] Monitoring and alerting

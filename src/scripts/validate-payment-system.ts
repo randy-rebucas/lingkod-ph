@@ -40,15 +40,9 @@ async function main() {
     console.log('\n🔧 Step 2: Payment Gateway Configuration');
     console.log('==========================================');
     
-    const adyenValid = PaymentConfig.validateAdyenConfig();
     const paypalValid = PaymentConfig.validatePayPalConfig();
     
-    console.log(`Adyen Configuration: ${adyenValid ? '✅ Valid' : '❌ Invalid'}`);
     console.log(`PayPal Configuration: ${paypalValid ? '✅ Valid' : '❌ Invalid'}`);
-    
-    if (!adyenValid) {
-      console.log('   Missing Adyen configuration for GCash payments');
-    }
     
     if (!paypalValid) {
       console.log('   Missing PayPal configuration for payments');

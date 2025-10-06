@@ -9,13 +9,6 @@ export interface PaymentMethodConfig {
   bankName?: string;
 }
 
-export interface AdyenConfig {
-  apiKey: string;
-  merchantAccount: string;
-  environment: 'test' | 'live';
-  clientKey: string;
-  hmacKey: string;
-}
 
 export interface PayPalConfig {
   clientId: string;
@@ -23,17 +16,6 @@ export interface PayPalConfig {
 }
 
 export class PaymentConfig {
-  // GCash Configuration
-  static readonly GCASH: PaymentMethodConfig = {
-    accountName: process.env.GCASH_ACCOUNT_NAME || 'LocalPro Services',
-    accountNumber: process.env.GCASH_ACCOUNT_NUMBER || '0917-123-4567',
-  };
-
-  // Maya Configuration
-  static readonly MAYA: PaymentMethodConfig = {
-    accountName: process.env.MAYA_ACCOUNT_NAME || 'LocalPro Services',
-    accountNumber: process.env.MAYA_ACCOUNT_NUMBER || '0918-000-5678',
-  };
 
   // Bank Transfer Configuration
   static readonly BANK: PaymentMethodConfig = {
@@ -42,14 +24,6 @@ export class PaymentConfig {
     bankName: process.env.BANK_NAME || 'BPI',
   };
 
-  // Adyen Configuration
-  static readonly ADYEN: AdyenConfig = {
-    apiKey: process.env.ADYEN_API_KEY || '',
-    merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT || '',
-    environment: (process.env.ADYEN_ENVIRONMENT as 'test' | 'live') || 'test',
-    clientKey: process.env.ADYEN_CLIENT_KEY || '',
-    hmacKey: process.env.ADYEN_HMAC_KEY || '',
-  };
 
   // PayPal Configuration
   static readonly PAYPAL: PayPalConfig = {
@@ -68,14 +42,6 @@ export class PaymentConfig {
   };
 
   // Validation Methods
-  static validateAdyenConfig(): boolean {
-    return !!(
-      this.ADYEN.apiKey &&
-      this.ADYEN.merchantAccount &&
-      this.ADYEN.clientKey &&
-      this.ADYEN.hmacKey
-    );
-  }
 
   static validatePayPalConfig(): boolean {
     return !!(this.PAYPAL.clientId && this.PAYPAL.clientSecret);

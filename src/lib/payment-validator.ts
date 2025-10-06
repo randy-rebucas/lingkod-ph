@@ -213,19 +213,8 @@ export class PaymentValidator {
   /**
    * Validate payment method configuration
    */
-  static validatePaymentMethodConfig(method: 'gcash' | 'maya' | 'bank' | 'paypal' | 'adyen'): ValidationResult {
+  static validatePaymentMethodConfig(method: 'bank' | 'paypal'): ValidationResult {
     switch (method) {
-      case 'gcash':
-        if (!PaymentConfig.GCASH.accountName || !PaymentConfig.GCASH.accountNumber) {
-          return { valid: false, error: 'GCash configuration is incomplete' };
-        }
-        break;
-      
-      case 'maya':
-        if (!PaymentConfig.MAYA.accountName || !PaymentConfig.MAYA.accountNumber) {
-          return { valid: false, error: 'Maya configuration is incomplete' };
-        }
-        break;
       
       case 'bank':
         if (!PaymentConfig.BANK.accountName || !PaymentConfig.BANK.accountNumber || !PaymentConfig.BANK.bankName) {
@@ -239,11 +228,6 @@ export class PaymentValidator {
         }
         break;
       
-      case 'adyen':
-        if (!PaymentConfig.validateAdyenConfig()) {
-          return { valid: false, error: 'Adyen configuration is incomplete' };
-        }
-        break;
       
       default:
         return { valid: false, error: 'Unknown payment method' };

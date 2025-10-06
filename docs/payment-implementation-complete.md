@@ -2,7 +2,7 @@
 
 ## Overview
 
-The payment system for LocalPro has been fully implemented and is now fully functional. The system supports multiple payment methods including PayPal, GCash (via Adyen), Maya, and Bank Transfer with comprehensive error handling and user feedback.
+The payment system for LocalPro has been fully implemented and is now fully functional. The system supports multiple payment methods including PayPal and Bank Transfer with comprehensive error handling and user feedback.
 
 ## ✅ Completed Features
 
@@ -20,37 +20,22 @@ The payment system for LocalPro has been fully implemented and is now fully func
 - **Features**:
   - Complete PayPal SDK integration
   - Subscription payment processing
-  - Local payment methods (GCash, Maya) with manual verification
   - Multi-language support
   - Error handling and user feedback
 
-### 3. Adyen GCash Integration
-- **Files**: 
-  - `src/lib/adyen-payment-service.ts`
-  - `src/components/gcash-payment-button.tsx`
-  - `src/app/api/payments/gcash/create/route.ts`
-  - `src/app/api/payments/gcash/result/route.ts`
-  - `src/app/api/payments/gcash/webhook/route.ts`
-- **Features**:
-  - Automated GCash payment processing
-  - Instant payment confirmation
-  - Webhook handling for payment status updates
-  - Database integration for payment tracking
-  - Comprehensive error handling
 
-### 4. Payment Page
+### 3. Payment Page
 - **File**: `src/app/(app)/bookings/[bookingId]/payment/page.tsx`
 - **Features**:
-  - Tabbed interface for different payment methods
-  - Automated GCash payment with instant confirmation
+  - PayPal payment integration
   - Manual payment proof upload
   - Real-time status updates
   - File validation and error handling
 
-### 5. Payment Result Page
+### 4. Payment Result Page
 - **File**: `src/app/(app)/bookings/[bookingId]/payment/result/page.tsx`
 - **Features**:
-  - Handles payment redirects from GCash
+  - Handles payment redirects from PayPal
   - Payment verification and status updates
   - User-friendly success/error messages
   - Automatic redirection to bookings page
@@ -82,19 +67,16 @@ The payment system for LocalPro has been fully implemented and is now fully func
 ## 🔧 Technical Implementation
 
 ### API Endpoints
-1. **POST /api/payments/gcash/create** - Create GCash payment session
-2. **POST /api/payments/gcash/result** - Handle payment result verification
-3. **POST /api/payments/gcash/webhook** - Process Adyen webhooks
 
 ### Database Collections
 - `bookings` - Enhanced with payment status and references
 - `transactions` - Payment transaction records
-- `paymentSessions` - Adyen payment session tracking
+- `paymentSessions` - Payment session tracking
 - `users/{userId}/notifications` - Payment notifications
 
 ### Security Features
 - Firebase authentication for all API calls
-- Adyen webhook signature verification
+- PayPal webhook signature verification
 - File upload validation and security
 - Input sanitization and validation
 - Rate limiting and error handling
@@ -118,10 +100,6 @@ ADYEN_HMAC_KEY=your_hmac_key
 
 ### Local Payment Methods
 ```env
-GCASH_ACCOUNT_NAME=LocalPro Services
-GCASH_ACCOUNT_NUMBER=0917-123-4567
-MAYA_ACCOUNT_NAME=LocalPro Services
-MAYA_ACCOUNT_NUMBER=0918-000-5678
 BANK_ACCOUNT_NAME=LocalPro Services Inc.
 BANK_ACCOUNT_NUMBER=1234-5678-90
 BANK_NAME=BPI
@@ -137,7 +115,7 @@ SMTP_PASS=your_smtp_password
 
 ## 🚀 Payment Flow
 
-### Automated Payments (PayPal & GCash)
+### Automated Payments (PayPal)
 1. User selects payment method
 2. Payment session created
 3. User redirected to payment provider
@@ -147,7 +125,7 @@ SMTP_PASS=your_smtp_password
 7. Email notification sent
 8. User redirected to bookings page
 
-### Manual Payments (GCash, Maya, Bank Transfer)
+### Manual Payments (Bank Transfer)
 1. User selects manual payment method
 2. Payment instructions displayed
 3. User makes payment externally
@@ -192,7 +170,7 @@ SMTP_PASS=your_smtp_password
 
 ### Test Scenarios Covered
 - ✅ PayPal payment flow
-- ✅ GCash automated payment flow
+- ✅ PayPal automated payment flow
 - ✅ Manual payment proof upload
 - ✅ Payment verification process
 - ✅ Error handling scenarios
