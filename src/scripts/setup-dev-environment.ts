@@ -43,8 +43,10 @@ ADYEN_CLIENT_KEY=
 ADYEN_HMAC_KEY=
 
 # PayPal Configuration - Set these for production
-NEXT_PUBLIC_PAYPAL_CLIENT_ID=
-PAYPAL_CLIENT_SECRET=
+# Get these from https://developer.paypal.com/
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=your_paypal_client_id_here
+PAYPAL_CLIENT_SECRET=your_paypal_client_secret_here
+PAYPAL_WEBHOOK_CERT_ID=your_webhook_cert_id_here
 
 # Email Configuration - Set these for production
 RESEND_API_KEY=

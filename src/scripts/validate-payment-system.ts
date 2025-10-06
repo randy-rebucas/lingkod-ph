@@ -173,11 +173,9 @@ async function main() {
 }
 
 // Run the validation
-if (require.main === module) {
-  main().catch(error => {
-    console.error('Fatal error during validation:', error);
-    process.exit(1);
-  });
-}
+main().catch(error => {
+  console.error('Fatal error during validation:', error);
+  process.exit(1);
+});
 
 export { main as validatePaymentSystem };

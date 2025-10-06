@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Upload, Loader2, ClipboardCopy, Check, Wallet, Landmark, Info, Smartphone } from "lucide-react";
+import { ArrowLeft, Upload, Loader2, ClipboardCopy, Check, Wallet, Landmark, Info, Smartphone, CreditCard } from "lucide-react";
 import Image from 'next/image';
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -23,6 +23,7 @@ import { QRCode } from "@/components/qrcode-svg";
 import { PaymentConfig } from "@/lib/payment-config";
 import { PaymentRetryService } from "@/lib/payment-retry-service";
 import { GCashPaymentButton } from "@/components/gcash-payment-button";
+import { PayPalCheckoutButton } from "@/components/paypal-checkout-button";
 
 export default function PaymentPage() {
     const { bookingId } = useParams();
@@ -305,6 +306,25 @@ export default function PaymentPage() {
                                     )}
                                 </div>
                             </div>
+                        </div>
+                        <Separator className="bg-border/50" />
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-3">
+                                <CreditCard className="h-6 w-6 text-blue-600" />
+                                <h3 className="font-semibold text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">PayPal Payment</h3>
+                            </div>
+                            <PayPalCheckoutButton
+                                bookingId={booking.id}
+                                amount={booking.price || 0}
+                                serviceName={booking.serviceName}
+                                onPaymentSuccess={() => {
+                                    toast({ title: 'Payment Successful!', description: 'Your booking has been confirmed.' });
+                                    router.push('/bookings');
+                                }}
+                                onPaymentError={(error) => {
+                                    toast({ variant: 'destructive', title: 'Payment Failed', description: error });
+                                }}
+                            />
                         </div>
 
                     </CardContent>
