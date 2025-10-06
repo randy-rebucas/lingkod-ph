@@ -64,25 +64,49 @@ const ClientsLearningPage = () => {
       step: 1,
       title: "Create Your Account",
       description: "Sign up with your email and verify your account",
-      details: "Provide your basic information and verify your email address to get started."
+      details: "Provide your basic information, verify your email address, and set up your profile preferences to get started.",
+      estimatedTime: "2 minutes",
+      icon: <Users className="h-6 w-6" />
     },
     {
       step: 2,
-      title: "Search for Services",
-      description: "Browse available services in your area",
-      details: "Use our search filters to find the perfect service provider based on location, price, and ratings."
+      title: "Set Your Location",
+      description: "Add your location to find nearby services",
+      details: "Enable location services or manually set your address to discover local service providers in your area.",
+      estimatedTime: "1 minute",
+      icon: <Target className="h-6 w-6" />
     },
     {
       step: 3,
-      title: "Book & Pay",
-      description: "Schedule your service and pay securely",
-      details: "Choose your preferred time slot and complete payment through our secure system."
+      title: "Search for Services",
+      description: "Browse available services in your area",
+      details: "Use our advanced search filters to find the perfect service provider based on location, price, ratings, and availability.",
+      estimatedTime: "3 minutes",
+      icon: <Search className="h-6 w-6" />
     },
     {
       step: 4,
+      title: "Book & Pay",
+      description: "Schedule your service and pay securely",
+      details: "Choose your preferred time slot, add special instructions, and complete payment through our secure system with fraud protection.",
+      estimatedTime: "5 minutes",
+      icon: <CreditCard className="h-6 w-6" />
+    },
+    {
+      step: 5,
+      title: "Track Your Booking",
+      description: "Monitor your service status in real-time",
+      details: "Get real-time updates about your booking status, provider location, and estimated arrival time.",
+      estimatedTime: "Ongoing",
+      icon: <Calendar className="h-6 w-6" />
+    },
+    {
+      step: 6,
       title: "Rate & Review",
       description: "Share your experience to help others",
-      details: "Leave a review and rating to help other clients make informed decisions."
+      details: "Leave a detailed review and rating to help other clients make informed decisions and help providers improve their services.",
+      estimatedTime: "2 minutes",
+      icon: <Star className="h-6 w-6" />
     }
   ];
 
@@ -136,26 +160,71 @@ const ClientsLearningPage = () => {
     }
   ];
 
+  const clientTutorials = [
+    {
+      title: "Complete Client Onboarding",
+      description: "Step-by-step guide to setting up your client account and preferences",
+      duration: "5 minutes",
+      difficulty: "Beginner",
+      topics: ["Account Setup", "Profile Creation", "Location Settings", "Payment Methods"],
+      href: "/learning-hub/articles/client-onboarding"
+    },
+    {
+      title: "Advanced Search Techniques",
+      description: "Master the search functionality to find exactly what you need",
+      duration: "8 minutes",
+      difficulty: "Intermediate",
+      topics: ["Filters", "Location Search", "Price Ranges", "Availability"],
+      href: "/learning-hub/articles/advanced-search-techniques"
+    },
+    {
+      title: "Booking Management",
+      description: "How to manage, modify, and track your bookings effectively",
+      duration: "6 minutes",
+      difficulty: "Beginner",
+      topics: ["Booking Status", "Modifications", "Cancellations", "Rescheduling"],
+      href: "/learning-hub/articles/booking-management"
+    },
+    {
+      title: "Payment Security Guide",
+      description: "Understanding payment protection and security features",
+      duration: "4 minutes",
+      difficulty: "Beginner",
+      topics: ["Secure Payments", "Fraud Protection", "Refunds", "Payment Methods"],
+      href: "/learning-hub/articles/payment-security-guide"
+    }
+  ];
+
   const tips = [
     {
       icon: <Star className="h-5 w-5" />,
       title: "Read Reviews Carefully",
-      description: "Look for detailed reviews that mention specific aspects of the service"
+      description: "Look for detailed reviews that mention specific aspects of the service and check provider response rates"
     },
     {
       icon: <Clock className="h-5 w-5" />,
       title: "Book in Advance",
-      description: "Popular providers often have limited availability, so book early"
+      description: "Popular providers often have limited availability, especially during peak seasons"
     },
     {
       icon: <MessageSquare className="h-5 w-5" />,
       title: "Communicate Clearly",
-      description: "Provide detailed information about your needs when booking"
+      description: "Provide detailed information about your needs, location, and any special requirements"
     },
     {
       icon: <Heart className="h-5 w-5" />,
       title: "Leave Honest Reviews",
-      description: "Help other clients by sharing your experience"
+      description: "Help other clients by sharing your experience with detailed feedback"
+    },
+    {
+      icon: <Target className="h-5 w-5" />,
+      title: "Set Accurate Location",
+      description: "Ensure your location is precise to get accurate pricing and availability"
+    },
+    {
+      icon: <Shield className="h-5 w-5" />,
+      title: "Verify Provider Credentials",
+      description: "Check provider verification badges and certifications before booking"
     }
   ];
 
@@ -277,8 +346,60 @@ const ClientsLearningPage = () => {
         </div>
       </section>
 
-      {/* Tips Section */}
+      {/* Tutorials Section */}
       <section className="py-20 px-4 bg-muted/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">Client Tutorials</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Step-by-step tutorials to help you master LocalPro as a client.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {clientTutorials.map((tutorial, index) => (
+              <Card key={index} className="hover:shadow-lg transition-all duration-300 group">
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-2">
+                    <Badge variant="outline" className="text-xs">
+                      {tutorial.difficulty}
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {tutorial.duration}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                    <Link href={tutorial.href} className="hover:underline">
+                      {tutorial.title}
+                    </Link>
+                  </CardTitle>
+                  <CardDescription className="text-base">
+                    {tutorial.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    {tutorial.topics.map((topic, topicIndex) => (
+                      <Badge key={topicIndex} variant="secondary" className="text-xs">
+                        {topic}
+                      </Badge>
+                    ))}
+                  </div>
+                  <Button variant="ghost" size="sm" asChild className="w-full group-hover:bg-primary/10">
+                    <Link href={tutorial.href} className="flex items-center justify-center space-x-1">
+                      <span>Start Tutorial</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Tips Section */}
+      <section className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Pro Tips for Clients</h2>
@@ -287,7 +408,7 @@ const ClientsLearningPage = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tips.map((tip, index) => (
               <Card key={index} className="text-center hover:shadow-lg transition-shadow">
                 <CardHeader>

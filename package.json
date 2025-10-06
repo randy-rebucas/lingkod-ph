@@ -24,6 +24,8 @@
     "email": "email dev",
     "validate-payments": "tsx src/scripts/validate-payment-system.ts",
     "setup-dev": "tsx src/scripts/setup-dev-environment.ts",
+    "seed:learning-hub": "tsx src/scripts/seed-learning-hub.ts",
+    "seed:learning-hub:mock": "tsx src/scripts/seed-learning-hub-mock.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

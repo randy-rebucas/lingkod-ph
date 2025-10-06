@@ -1,0 +1,157 @@
+{
+  "authors": [
+    {
+      "id": "1",
+      "name": "LocalPro Admin",
+      "email": "admin@localpro.com",
+      "bio": "LocalPro content team",
+      "role": "admin",
+      "status": "active"
+    }
+  ],
+  "categories": [
+    {
+      "id": "1",
+      "name": "Getting Started",
+      "slug": "getting-started",
+      "description": "Essential guides for new users",
+      "icon": "BookOpen",
+      "color": "bg-blue-50 text-blue-600 border-blue-200",
+      "sortOrder": 1,
+      "status": "published"
+    },
+    {
+      "id": "2",
+      "name": "For Clients",
+      "slug": "for-clients",
+      "description": "Resources and guides specifically designed for service clients",
+      "icon": "Users",
+      "color": "bg-green-50 text-green-600 border-green-200",
+      "sortOrder": 2,
+      "status": "published"
+    },
+    {
+      "id": "3",
+      "name": "For Providers",
+      "slug": "for-providers",
+      "description": "Tools and strategies for service providers to grow their business",
+      "icon": "UserCheck",
+      "color": "bg-purple-50 text-purple-600 border-purple-200",
+      "sortOrder": 3,
+      "status": "published"
+    },
+    {
+      "id": "4",
+      "name": "For Agencies",
+      "slug": "for-agencies",
+      "description": "Management tools and strategies for agency owners and managers",
+      "icon": "Building2",
+      "color": "bg-orange-50 text-orange-600 border-orange-200",
+      "sortOrder": 4,
+      "status": "published"
+    },
+    {
+      "id": "5",
+      "name": "For Partners",
+      "slug": "for-partners",
+      "description": "Partnership opportunities and collaboration strategies",
+      "icon": "Target",
+      "color": "bg-indigo-50 text-indigo-600 border-indigo-200",
+      "sortOrder": 5,
+      "status": "published"
+    }
+  ],
+  "articles": [
+    {
+      "id": "1",
+      "title": "Welcome to LocalPro: Your Complete Getting Started Guide",
+      "slug": "welcome-to-localpro-complete-guide",
+      "description": "Everything you need to know to get started with LocalPro, from account creation to your first booking.",
+      "content": "# Welcome to LocalPro!\n\nLocalPro is your gateway to connecting with trusted local service providers. This comprehensive guide will walk you through everything you need to know to get started.\n\n## What is LocalPro?\n\nLocalPro is a platform that connects clients with verified local service providers. Whether you need home cleaning, pet care, handyman services, or professional consultations, LocalPro makes it easy to find, book, and pay for services in your area.\n\n## Getting Started\n\n### 1. Create Your Account\n- Visit our website or download the mobile app\n- Sign up with your email address or phone number\n- Verify your account through the confirmation email/SMS\n- Complete your profile with basic information\n\n### 2. Set Your Location\n- Enable location services for automatic detection\n- Or manually enter your address\n- This helps us show you relevant local services\n\n### 3. Browse Services\n- Use the search bar to find specific services\n- Browse categories like Home & Garden, Personal Care, Professional Services\n- Filter by location, price, availability, and ratings\n\n### 4. Book Your First Service\n- Select a service provider\n- Choose your preferred date and time\n- Add any special instructions\n- Complete payment securely\n\n### 5. Track Your Booking\n- Monitor your booking status in real-time\n- Receive notifications about provider updates\n- Get estimated arrival times\n\n## Key Features\n\n- **Verified Providers**: All service providers are background-checked and verified\n- **Secure Payments**: Your payments are protected with fraud detection\n- **Real-time Tracking**: Track your service provider's location and arrival time\n- **Reviews & Ratings**: Read reviews and leave feedback for others\n- **24/7 Support**: Get help whenever you need it\n\n## Next Steps\n\nNow that you understand the basics, explore our role-specific guides:\n- [For Clients](/learning-hub/clients) - Advanced client features and tips\n- [For Providers](/learning-hub/providers) - How to become a service provider\n- [For Agencies](/learning-hub/agencies) - Managing multiple providers\n- [For Partners](/learning-hub/partners) - Partnership opportunities\n\n## Need Help?\n\nIf you have any questions or need assistance, our support team is here to help:\n- Live chat support\n- Email support\n- Phone support\n- Help center with detailed guides\n\nWelcome to the LocalPro community!",
+      "category": "Getting Started",
+      "tags": [
+        "getting-started",
+        "onboarding",
+        "basics",
+        "welcome"
+      ],
+      "role": "all",
+      "difficulty": "Beginner",
+      "readTime": 8,
+      "featured": true,
+      "popular": true,
+      "status": "published",
+      "authorId": "1",
+      "seoTitle": "Welcome to LocalPro - Complete Getting Started Guide",
+      "seoDescription": "Everything you need to know to get started with LocalPro. Learn how to create an account, find services, and make your first booking.",
+      "featuredImage": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=400&fit=crop",
+      "viewCount": 15420,
+      "likeCount": 245,
+      "shareCount": 89,
+      "attachments": [],
+      "createdAt": "2025-10-06T08:37:32.204Z",
+      "updatedAt": "2025-10-06T08:37:32.205Z",
+      "publishedAt": "2025-10-06T08:37:32.205Z"
+    },
+    {
+      "id": "2",
+      "title": "How to Create and Verify Your LocalPro Account",
+      "slug": "create-verify-localpro-account",
+      "description": "Step-by-step guide to creating your LocalPro account and completing the verification process.",
+      "content": "# How to Create and Verify Your LocalPro Account\n\nCreating your LocalPro account is quick and easy. This guide will walk you through the entire process.\n\n## Creating Your Account\n\n### Step 1: Choose Your Sign-Up Method\nYou can create your account using:\n- Email address\n- Phone number\n- Google account\n- Apple ID\n\n### Step 2: Provide Basic Information\n- Full name\n- Email address or phone number\n- Create a secure password\n- Accept terms of service and privacy policy\n\n### Step 3: Verify Your Contact Information\n- Check your email for a verification link\n- Or enter the SMS code sent to your phone\n- Click the verification link or enter the code\n\n## Account Verification\n\n### Why Verification Matters\nAccount verification helps us:\n- Protect your account from unauthorized access\n- Ensure you receive important notifications\n- Comply with security regulations\n- Provide better customer support\n\n### Verification Methods\n1. **Email Verification**: Click the link in your welcome email\n2. **Phone Verification**: Enter the SMS code\n3. **Identity Verification**: Upload a government-issued ID (for providers)\n\n## Setting Up Your Profile\n\n### Basic Profile Information\n- Profile photo (optional but recommended)\n- Bio or description\n- Service preferences\n- Notification preferences\n\n### Privacy Settings\n- Control who can see your profile\n- Manage data sharing preferences\n- Set communication preferences\n\n## Security Best Practices\n\n### Password Security\n- Use a strong, unique password\n- Enable two-factor authentication\n- Never share your login credentials\n\n### Account Protection\n- Log out from shared devices\n- Monitor your account activity\n- Report suspicious activity immediately\n\n## Troubleshooting\n\n### Common Issues\n- **Didn't receive verification email**: Check spam folder, request resend\n- **SMS code not received**: Check phone number, request new code\n- **Can't log in**: Reset password, check email/phone number\n\n### Getting Help\nIf you encounter any issues:\n1. Check our troubleshooting guide\n2. Contact support via live chat\n3. Email support@localpro.com\n4. Call our support hotline\n\n## Next Steps\n\nOnce your account is verified:\n1. Complete your profile\n2. Set your location preferences\n3. Browse available services\n4. Make your first booking\n\nYour LocalPro account is now ready to use!",
+      "category": "Getting Started",
+      "tags": [
+        "account",
+        "verification",
+        "setup",
+        "security"
+      ],
+      "role": "all",
+      "difficulty": "Beginner",
+      "readTime": 6,
+      "featured": true,
+      "popular": true,
+      "status": "published",
+      "authorId": "1",
+      "seoTitle": "How to Create and Verify Your LocalPro Account - Step by Step",
+      "seoDescription": "Complete guide to creating and verifying your LocalPro account. Learn about security best practices and troubleshooting common issues.",
+      "viewCount": 12850,
+      "likeCount": 198,
+      "shareCount": 67,
+      "attachments": [],
+      "createdAt": "2025-10-06T08:37:32.205Z",
+      "updatedAt": "2025-10-06T08:37:32.205Z",
+      "publishedAt": "2025-10-06T08:37:32.205Z"
+    },
+    {
+      "id": "3",
+      "title": "Understanding LocalPro Service Categories and Types",
+      "slug": "localpro-service-categories-types",
+      "description": "Complete overview of all service categories and types available on LocalPro platform.",
+      "content": "# Understanding LocalPro Service Categories and Types\n\nLocalPro offers a wide range of service categories to meet all your local service needs. This guide will help you understand what's available and how to find the right service for you.\n\n## Home & Garden Services\n\n### Cleaning Services\n- **House Cleaning**: Regular and deep cleaning services\n- **Office Cleaning**: Commercial cleaning solutions\n- **Carpet Cleaning**: Professional carpet and upholstery cleaning\n- **Window Cleaning**: Interior and exterior window cleaning\n- **Post-Construction Cleanup**: Specialized cleaning after renovations\n\n### Maintenance & Repairs\n- **Handyman Services**: General home repairs and maintenance\n- **Plumbing**: Leak repairs, fixture installation, drain cleaning\n- **Electrical Work**: Wiring, outlet installation, lighting\n- **HVAC Services**: Heating, ventilation, and air conditioning\n- **Appliance Repair**: Refrigerator, washer, dryer, and other appliance repairs\n\n### Landscaping & Outdoor\n- **Lawn Care**: Mowing, edging, fertilizing, weed control\n- **Garden Maintenance**: Planting, pruning, seasonal cleanup\n- **Tree Services**: Tree trimming, removal, stump grinding\n- **Pest Control**: Indoor and outdoor pest management\n- **Pool Maintenance**: Cleaning, chemical balancing, equipment repair\n\n## Personal Care Services\n\n### Health & Wellness\n- **Massage Therapy**: Relaxation and therapeutic massage\n- **Personal Training**: Fitness coaching and workout plans\n- **Nutrition Counseling**: Dietary planning and health coaching\n- **Mental Health Support**: Counseling and therapy services\n- **Physical Therapy**: Rehabilitation and injury recovery\n\n### Beauty & Grooming\n- **Hair Services**: Cutting, styling, coloring, treatments\n- **Nail Care**: Manicures, pedicures, nail art\n- **Skincare**: Facials, treatments, consultations\n- **Makeup Services**: Special event and everyday makeup\n- **Barber Services**: Men's haircuts, beard trimming, styling\n\n## Professional Services\n\n### Business & Consulting\n- **Business Consulting**: Strategy, operations, growth planning\n- **Financial Services**: Accounting, tax preparation, financial planning\n- **Legal Services**: Consultation, document preparation, representation\n- **Marketing Services**: Digital marketing, content creation, SEO\n- **IT Support**: Computer repair, network setup, cybersecurity\n\n### Education & Training\n- **Tutoring**: Academic support for all subjects and levels\n- **Language Learning**: Foreign language instruction\n- **Music Lessons**: Instrument and vocal training\n- **Art Classes**: Drawing, painting, crafts, and creative skills\n- **Professional Development**: Career coaching and skill building\n\n## Pet Care Services\n\n### Pet Health & Wellness\n- **Veterinary Services**: Health checkups, vaccinations, treatments\n- **Pet Grooming**: Bathing, brushing, nail trimming, styling\n- **Pet Training**: Obedience training, behavior modification\n- **Pet Sitting**: In-home pet care and companionship\n- **Dog Walking**: Regular exercise and outdoor time\n\n### Pet Services\n- **Pet Transportation**: Safe transport to vet appointments\n- **Pet Photography**: Professional pet portraits and events\n- **Pet Boarding**: Overnight care and accommodation\n- **Pet Waste Removal**: Regular yard cleanup services\n\n## Technology Services\n\n### Computer & Electronics\n- **Computer Repair**: Hardware and software troubleshooting\n- **Phone Repair**: Screen replacement, battery service, data recovery\n- **Network Setup**: WiFi installation, security configuration\n- **Smart Home Setup**: Device installation and automation\n- **Data Recovery**: File and data restoration services\n\n### Software & Development\n- **Website Development**: Custom websites and web applications\n- **App Development**: Mobile and desktop applications\n- **Software Training**: Learning new programs and systems\n- **Database Management**: Setup, maintenance, and optimization\n- **Cloud Services**: Migration, setup, and management\n\n## Event & Entertainment Services\n\n### Event Planning\n- **Party Planning**: Birthday parties, celebrations, special events\n- **Wedding Services**: Planning, coordination, vendor management\n- **Corporate Events**: Meetings, conferences, team building\n- **Catering**: Food service for events of all sizes\n- **Photography**: Event photography and videography\n\n### Entertainment\n- **Music Services**: DJs, live music, sound systems\n- **Entertainment**: Magicians, clowns, performers\n- **Decorations**: Event styling and decoration services\n- **Transportation**: Party buses, limousines, special vehicles\n\n## How to Choose the Right Service\n\n### Consider Your Needs\n- **Scope of Work**: What exactly do you need done?\n- **Timeline**: When do you need the service completed?\n- **Budget**: What's your price range for the service?\n- **Location**: Do you need the service at your home or business?\n\n### Research Providers\n- **Read Reviews**: Check ratings and customer feedback\n- **Compare Prices**: Get quotes from multiple providers\n- **Check Availability**: Ensure they can meet your timeline\n- **Verify Credentials**: Confirm licenses, insurance, and certifications\n\n### Ask Questions\n- **Experience**: How long have they been in business?\n- **References**: Can they provide customer references?\n- **Insurance**: Are they properly insured and bonded?\n- **Guarantees**: What warranties or guarantees do they offer?\n\n## Booking Tips\n\n### Best Practices\n1. **Book in Advance**: Popular services may require advance booking\n2. **Be Specific**: Provide detailed information about your needs\n3. **Ask Questions**: Don't hesitate to ask for clarification\n4. **Read Terms**: Understand cancellation and refund policies\n5. **Leave Reviews**: Help others by sharing your experience\n\n### Communication\n- **Be Clear**: Explain exactly what you need\n- **Provide Access**: Ensure providers can access the work area\n- **Be Available**: Be reachable during the service\n- **Give Feedback**: Let providers know how they're doing\n\n## Getting Started\n\nReady to find the perfect service for your needs?\n\n1. **Browse Categories**: Explore our service categories\n2. **Use Search**: Find specific services in your area\n3. **Read Reviews**: Check provider ratings and feedback\n4. **Book Services**: Schedule appointments that work for you\n5. **Track Progress**: Monitor your bookings in real-time\n\nLocalPro makes it easy to find and book the services you need, when you need them. Start exploring today!",
+      "category": "Getting Started",
+      "tags": [
+        "services",
+        "categories",
+        "types",
+        "overview"
+      ],
+      "role": "all",
+      "difficulty": "Beginner",
+      "readTime": 12,
+      "featured": false,
+      "popular": true,
+      "status": "published",
+      "authorId": "1",
+      "seoTitle": "LocalPro Service Categories and Types - Complete Guide",
+      "seoDescription": "Comprehensive guide to all service categories and types available on LocalPro. Learn how to find and choose the right service for your needs.",
+      "viewCount": 11200,
+      "likeCount": 156,
+      "shareCount": 43,
+      "attachments": [],
+      "createdAt": "2025-10-06T08:37:32.205Z",
+      "updatedAt": "2025-10-06T08:37:32.205Z",
+      "publishedAt": "2025-10-06T08:37:32.205Z"
+    }
+  ]
+}

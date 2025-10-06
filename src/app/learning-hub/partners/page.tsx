@@ -95,25 +95,76 @@ const PartnersLearningPage = () => {
       step: 1,
       title: "Initial Discussion",
       description: "Share your partnership proposal and goals",
-      details: "Contact our partnership team to discuss your business and how we can work together."
+      details: "Contact our partnership team to discuss your business model, goals, and how we can create mutual value.",
+      estimatedTime: "1-2 weeks",
+      icon: <MessageSquare className="h-6 w-6" />
     },
     {
       step: 2,
       title: "Evaluation & Due Diligence",
       description: "We evaluate the partnership opportunity",
-      details: "Our team reviews your proposal, business model, and alignment with our goals."
+      details: "Our team conducts thorough evaluation of your business, market position, and alignment with our strategic goals.",
+      estimatedTime: "2-3 weeks",
+      icon: <Target className="h-6 w-6" />
     },
     {
       step: 3,
       title: "Partnership Agreement",
       description: "Finalize terms and sign partnership agreement",
-      details: "Negotiate terms, create legal agreements, and establish partnership framework."
+      details: "Negotiate partnership terms, create legal agreements, and establish the framework for collaboration.",
+      estimatedTime: "1-2 weeks",
+      icon: <FileText className="h-6 w-6" />
     },
     {
       step: 4,
+      title: "Integration & Setup",
+      description: "Set up technical integration and systems",
+      details: "Implement technical integrations, set up communication channels, and establish operational processes.",
+      estimatedTime: "2-4 weeks",
+      icon: <Settings className="h-6 w-6" />
+    },
+    {
+      step: 5,
       title: "Launch & Support",
       description: "Launch partnership with ongoing support",
-      details: "Execute partnership activities with dedicated support and regular check-ins."
+      details: "Execute partnership activities with dedicated support, regular check-ins, and performance monitoring.",
+      estimatedTime: "Ongoing",
+      icon: <Rocket className="h-6 w-6" />
+    }
+  ];
+
+  const partnerTutorials = [
+    {
+      title: "Partnership Application Guide",
+      description: "Complete guide to applying for and becoming a LocalPro partner",
+      duration: "12 minutes",
+      difficulty: "Beginner",
+      topics: ["Application Process", "Requirements", "Documentation", "Evaluation"],
+      href: "/learning-hub/articles/partnership-application-guide"
+    },
+    {
+      title: "Partnership Types and Benefits",
+      description: "Understanding different partnership models and their benefits",
+      duration: "10 minutes",
+      difficulty: "Beginner",
+      topics: ["Partnership Models", "Benefits", "Requirements", "Expectations"],
+      href: "/learning-hub/articles/partnership-types-benefits"
+    },
+    {
+      title: "Partnership Success Strategies",
+      description: "Proven strategies for building successful partnerships with LocalPro",
+      duration: "15 minutes",
+      difficulty: "Intermediate",
+      topics: ["Success Factors", "Best Practices", "Growth Strategies", "Performance"],
+      href: "/learning-hub/articles/partnership-success-strategies"
+    },
+    {
+      title: "Partnership Management",
+      description: "How to effectively manage and grow your partnership",
+      duration: "8 minutes",
+      difficulty: "Intermediate",
+      topics: ["Management Tools", "Communication", "Performance", "Growth"],
+      href: "/learning-hub/articles/partnership-management"
     }
   ];
 
@@ -121,22 +172,38 @@ const PartnersLearningPage = () => {
     {
       icon: <MessageSquare className="h-5 w-5" />,
       title: "Dedicated Support",
-      description: "Get dedicated account management and support"
+      description: "Get dedicated account management and support",
+      features: ["Account Manager", "Priority Support", "Regular Check-ins", "Strategic Guidance"]
     },
     {
       icon: <TrendingUp className="h-5 w-5" />,
       title: "Co-marketing Opportunities",
-      description: "Access joint marketing and promotional opportunities"
+      description: "Access joint marketing and promotional opportunities",
+      features: ["Joint Campaigns", "Brand Exposure", "Lead Sharing", "Event Partnerships"]
     },
     {
       icon: <CreditCard className="h-5 w-5" />,
       title: "Revenue Sharing",
-      description: "Benefit from revenue sharing and referral programs"
+      description: "Benefit from revenue sharing and referral programs",
+      features: ["Competitive Rates", "Flexible Structures", "Performance Bonuses", "Volume Discounts"]
     },
     {
       icon: <Rocket className="h-5 w-5" />,
       title: "Early Access",
-      description: "Get early access to new features and opportunities"
+      description: "Get early access to new features and opportunities",
+      features: ["Beta Features", "New Markets", "Product Updates", "Innovation Labs"]
+    },
+    {
+      icon: <Globe className="h-5 w-5" />,
+      title: "Market Expansion",
+      description: "Access new markets and customer segments",
+      features: ["New Territories", "Market Insights", "Client Access", "Expansion Support"]
+    },
+    {
+      icon: <Award className="h-5 w-5" />,
+      title: "Recognition Programs",
+      description: "Get recognized for your partnership achievements",
+      features: ["Partner Awards", "Certification", "Public Recognition", "Exclusive Events"]
     }
   ];
 
@@ -386,8 +453,60 @@ const PartnersLearningPage = () => {
         </div>
       </section>
 
-      {/* Success Stories Section */}
+      {/* Tutorials Section */}
       <section className="py-20 px-4 bg-muted/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">Partner Tutorials</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Comprehensive tutorials to help you build successful partnerships with LocalPro.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {partnerTutorials.map((tutorial, index) => (
+              <Card key={index} className="hover:shadow-lg transition-all duration-300 group">
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-2">
+                    <Badge variant="outline" className="text-xs">
+                      {tutorial.difficulty}
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {tutorial.duration}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                    <Link href={tutorial.href} className="hover:underline">
+                      {tutorial.title}
+                    </Link>
+                  </CardTitle>
+                  <CardDescription className="text-base">
+                    {tutorial.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    {tutorial.topics.map((topic, topicIndex) => (
+                      <Badge key={topicIndex} variant="secondary" className="text-xs">
+                        {topic}
+                      </Badge>
+                    ))}
+                  </div>
+                  <Button variant="ghost" size="sm" asChild className="w-full group-hover:bg-primary/10">
+                    <Link href={tutorial.href} className="flex items-center justify-center space-x-1">
+                      <span>Start Tutorial</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Success Stories Section */}
+      <section className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold mb-4">Success Stories</h2>

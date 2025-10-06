@@ -65,25 +65,41 @@ const ProvidersLearningPage = () => {
       step: 1,
       title: "Submit Documents",
       description: "Provide valid ID and business permits",
-      details: "Upload clear photos of your government-issued ID and any relevant business permits or certifications."
+      details: "Upload clear photos of your government-issued ID, business permits, certifications, and any relevant licenses.",
+      estimatedTime: "10 minutes",
+      icon: <FileText className="h-6 w-6" />
     },
     {
       step: 2,
       title: "Background Check",
       description: "We verify your credentials and history",
-      details: "Our team conducts a thorough background check to ensure your credibility and safety."
+      details: "Our team conducts a thorough background check including criminal history, employment verification, and reference checks.",
+      estimatedTime: "2-3 business days",
+      icon: <Shield className="h-6 w-6" />
     },
     {
       step: 3,
       title: "Skill Assessment",
       description: "Demonstrate your expertise in your field",
-      details: "Complete a skills assessment or provide portfolio examples of your work."
+      details: "Complete a skills assessment, provide portfolio examples, or take a competency test relevant to your service area.",
+      estimatedTime: "30-60 minutes",
+      icon: <Award className="h-6 w-6" />
     },
     {
       step: 4,
+      title: "Profile Setup",
+      description: "Create your professional profile",
+      details: "Set up your profile with photos, service descriptions, pricing, availability, and service areas.",
+      estimatedTime: "20 minutes",
+      icon: <UserCheck className="h-6 w-6" />
+    },
+    {
+      step: 5,
       title: "Get Verified",
       description: "Receive your verified badge and start accepting bookings",
-      details: "Once approved, you'll receive your verified badge and can start accepting client bookings."
+      details: "Once approved, you'll receive your verified badge, access to the provider dashboard, and can start accepting client bookings.",
+      estimatedTime: "Immediate",
+      icon: <CheckCircle className="h-6 w-6" />
     }
   ];
 
@@ -110,26 +126,77 @@ const ProvidersLearningPage = () => {
     }
   ];
 
+  const providerTutorials = [
+    {
+      title: "Provider Onboarding Complete Guide",
+      description: "Complete step-by-step guide to becoming a successful LocalPro provider",
+      duration: "15 minutes",
+      difficulty: "Beginner",
+      topics: ["Verification", "Profile Setup", "Service Configuration", "Pricing Strategy"],
+      href: "/learning-hub/articles/provider-onboarding"
+    },
+    {
+      title: "Profile Optimization Masterclass",
+      description: "Learn how to create a compelling profile that attracts more clients",
+      duration: "12 minutes",
+      difficulty: "Intermediate",
+      topics: ["Photos", "Descriptions", "Pricing", "Availability"],
+      href: "/learning-hub/articles/profile-optimization"
+    },
+    {
+      title: "Booking Management System",
+      description: "Master the booking management tools and scheduling features",
+      duration: "10 minutes",
+      difficulty: "Beginner",
+      topics: ["Calendar", "Availability", "Bookings", "Notifications"],
+      href: "/learning-hub/articles/booking-management-system"
+    },
+    {
+      title: "Earnings and Payout Guide",
+      description: "Understanding your earnings, payouts, and financial management",
+      duration: "8 minutes",
+      difficulty: "Beginner",
+      topics: ["Earnings", "Payouts", "Taxes", "Financial Reports"],
+      href: "/learning-hub/articles/earnings-payout-guide"
+    }
+  ];
+
   const businessTools = [
     {
       icon: <Calendar className="h-5 w-5" />,
       title: "Booking Management",
-      description: "Manage your schedule and availability"
+      description: "Manage your schedule, availability, and bookings efficiently",
+      features: ["Real-time Calendar", "Availability Settings", "Booking Notifications", "Rescheduling Tools"]
     },
     {
       icon: <MessageSquare className="h-5 w-5" />,
       title: "Client Communication",
-      description: "Chat with clients directly through the platform"
+      description: "Chat with clients directly through the platform",
+      features: ["In-app Messaging", "Quick Responses", "Message Templates", "Communication History"]
     },
     {
       icon: <CreditCard className="h-5 w-5" />,
       title: "Payment Processing",
-      description: "Secure and fast payment collection"
+      description: "Secure and fast payment collection with multiple options",
+      features: ["Secure Payments", "Multiple Methods", "Instant Payouts", "Payment History"]
     },
     {
       icon: <TrendingUp className="h-5 w-5" />,
       title: "Analytics Dashboard",
-      description: "Track your performance and earnings"
+      description: "Track your performance, earnings, and business growth",
+      features: ["Earnings Reports", "Performance Metrics", "Client Analytics", "Growth Insights"]
+    },
+    {
+      icon: <Star className="h-5 w-5" />,
+      title: "Review Management",
+      description: "Manage and respond to client reviews and ratings",
+      features: ["Review Responses", "Rating Analytics", "Feedback Management", "Reputation Building"]
+    },
+    {
+      icon: <Target className="h-5 w-5" />,
+      title: "Marketing Tools",
+      description: "Promote your services and attract more clients",
+      features: ["Service Promotion", "Special Offers", "Client Retention", "Referral Programs"]
     }
   ];
 
@@ -312,6 +379,58 @@ const ProvidersLearningPage = () => {
         </div>
       </section>
 
+      {/* Tutorials Section */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">Provider Tutorials</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Comprehensive tutorials to help you succeed as a LocalPro provider.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {providerTutorials.map((tutorial, index) => (
+              <Card key={index} className="hover:shadow-lg transition-all duration-300 group">
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-2">
+                    <Badge variant="outline" className="text-xs">
+                      {tutorial.difficulty}
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {tutorial.duration}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                    <Link href={tutorial.href} className="hover:underline">
+                      {tutorial.title}
+                    </Link>
+                  </CardTitle>
+                  <CardDescription className="text-base">
+                    {tutorial.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    {tutorial.topics.map((topic, topicIndex) => (
+                      <Badge key={topicIndex} variant="secondary" className="text-xs">
+                        {topic}
+                      </Badge>
+                    ))}
+                  </div>
+                  <Button variant="ghost" size="sm" asChild className="w-full group-hover:bg-primary/10">
+                    <Link href={tutorial.href} className="flex items-center justify-center space-x-1">
+                      <span>Start Tutorial</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Business Tools Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto">
@@ -322,17 +441,29 @@ const ProvidersLearningPage = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {businessTools.map((tool, index) => (
-              <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+              <Card key={index} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
-                  <div className="mx-auto w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600 mb-4">
-                    {tool.icon}
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                      {tool.icon}
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{tool.title}</CardTitle>
+                      <CardDescription className="text-sm">{tool.description}</CardDescription>
+                    </div>
                   </div>
-                  <CardTitle className="text-lg">{tool.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription>{tool.description}</CardDescription>
+                  <ul className="space-y-2">
+                    {tool.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center space-x-2 text-sm">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full flex-shrink-0"></div>
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
             ))}
