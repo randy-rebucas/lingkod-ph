@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,371 +18,126 @@ import {
   Download,
   Tag,
   TrendingUp,
-  Calendar
+  Calendar,
+  Loader2
 } from 'lucide-react';
 
+interface Article {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  readTime: number;
+  featured: boolean;
+  popular: boolean;
+  updatedAt: string;
+  tags: string[];
+  slug: string;
+  viewCount: number;
+  likeCount: number;
+  shareCount: number;
+}
+
 const AllArticlesPage = () => {
-  const allArticles = [
-    // Client Articles
-    {
-      id: 1,
-      title: "How to Find and Book Services as a Client",
-      description: "Complete guide to finding and booking the best local services on LocalPro",
-      category: "For Clients",
-      readTime: "8 min read",
-      isPopular: true,
-      lastUpdated: "2024-01-15",
-      tags: ["booking", "client", "services", "tutorial"],
-      href: "/learning-hub/articles/client-booking-guide"
-    },
-    {
-      id: 2,
-      title: "Understanding Client Payment Security",
-      description: "Learn how your payments are protected and secure on LocalPro",
-      category: "For Clients",
-      readTime: "6 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-14",
-      tags: ["payment", "security", "client", "protection"],
-      href: "/learning-hub/articles/client-payment-security"
-    },
-    {
-      id: 3,
-      title: "How to Write Effective Reviews",
-      description: "Tips for writing helpful reviews that benefit other clients",
-      category: "For Clients",
-      readTime: "4 min read",
-      isPopular: true,
-      lastUpdated: "2024-01-13",
-      tags: ["reviews", "feedback", "client", "tips"],
-      href: "/learning-hub/articles/writing-reviews"
-    },
-    {
-      id: 4,
-      title: "Client Account Management",
-      description: "How to manage your client account, preferences, and settings",
-      category: "For Clients",
-      readTime: "5 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-12",
-      tags: ["account", "settings", "client", "management"],
-      href: "/learning-hub/articles/client-account-management"
-    },
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [sortBy, setSortBy] = useState('Most Recent');
 
-    // Provider Articles
-    {
-      id: 5,
-      title: "Provider Verification Process",
-      description: "Complete guide to becoming a verified service provider on LocalPro",
-      category: "For Providers",
-      readTime: "10 min read",
-      isPopular: true,
-      lastUpdated: "2024-01-16",
-      tags: ["verification", "provider", "setup", "process"],
-      href: "/learning-hub/articles/provider-verification"
-    },
-    {
-      id: 6,
-      title: "Optimizing Your Provider Profile",
-      description: "Best practices for creating an attractive and effective provider profile",
-      category: "For Providers",
-      readTime: "7 min read",
-      isPopular: true,
-      lastUpdated: "2024-01-15",
-      tags: ["profile", "optimization", "provider", "marketing"],
-      href: "/learning-hub/articles/provider-profile-optimization"
-    },
-    {
-      id: 7,
-      title: "Managing Bookings and Schedule",
-      description: "How to efficiently manage your bookings and availability",
-      category: "For Providers",
-      readTime: "8 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-14",
-      tags: ["bookings", "schedule", "provider", "management"],
-      href: "/learning-hub/articles/provider-booking-management"
-    },
-    {
-      id: 8,
-      title: "Provider Earnings and Payouts",
-      description: "Understanding how earnings work and how to get paid",
-      category: "For Providers",
-      readTime: "6 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-13",
-      tags: ["earnings", "payouts", "provider", "finance"],
-      href: "/learning-hub/articles/provider-earnings"
-    },
+  // Fetch articles from API
+  useEffect(() => {
+    const fetchArticles = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/learning-hub/content?type=articles&status=published');
+        const data = await response.json();
+        
+        if (data.success) {
+          setArticles(data.data);
+          setFilteredArticles(data.data);
+        } else {
+          setError('Failed to fetch articles');
+        }
+      } catch (err) {
+        setError('Error loading articles');
+        console.error('Error fetching articles:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // Agency Articles
-    {
-      id: 9,
-      title: "Agency Setup and Registration",
-      description: "How to register and set up your agency on LocalPro",
-      category: "For Agencies",
-      readTime: "12 min read",
-      isPopular: true,
-      lastUpdated: "2024-01-17",
-      tags: ["agency", "setup", "registration", "business"],
-      href: "/learning-hub/articles/agency-setup"
-    },
-    {
-      id: 10,
-      title: "Managing Multiple Providers",
-      description: "Best practices for managing a team of service providers",
-      category: "For Agencies",
-      readTime: "9 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-16",
-      tags: ["team", "management", "agency", "providers"],
-      href: "/learning-hub/articles/agency-team-management"
-    },
-    {
-      id: 11,
-      title: "Agency Quality Control",
-      description: "How to maintain high service quality across your agency",
-      category: "For Agencies",
-      readTime: "7 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-15",
-      tags: ["quality", "control", "agency", "standards"],
-      href: "/learning-hub/articles/agency-quality-control"
-    },
-    {
-      id: 12,
-      title: "Agency Analytics and Reporting",
-      description: "Understanding your agency's performance metrics and analytics",
-      category: "For Agencies",
-      readTime: "8 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-14",
-      tags: ["analytics", "reporting", "agency", "metrics"],
-      href: "/learning-hub/articles/agency-analytics"
-    },
+    fetchArticles();
+  }, []);
 
-    // Partner Articles
-    {
-      id: 13,
-      title: "Partnership Application Process",
-      description: "How to apply and become a LocalPro partner",
-      category: "For Partners",
-      readTime: "10 min read",
-      isPopular: true,
-      lastUpdated: "2024-01-18",
-      tags: ["partnership", "application", "process", "business"],
-      href: "/learning-hub/articles/partnership-application"
-    },
-    {
-      id: 14,
-      title: "Partnership Benefits and Opportunities",
-      description: "Understanding the benefits and opportunities available to partners",
-      category: "For Partners",
-      readTime: "6 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-17",
-      tags: ["benefits", "opportunities", "partnership", "growth"],
-      href: "/learning-hub/articles/partnership-benefits"
-    },
-    {
-      id: 15,
-      title: "Partner Success Strategies",
-      description: "Proven strategies for successful partnerships with LocalPro",
-      category: "For Partners",
-      readTime: "8 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-16",
-      tags: ["success", "strategies", "partnership", "growth"],
-      href: "/learning-hub/articles/partner-success-strategies"
-    },
+  // Filter and sort articles
+  useEffect(() => {
+    let filtered = [...articles];
 
-    // Getting Started Articles
-    {
-      id: 16,
-      title: "How to Create Your First Booking",
-      description: "Step-by-step guide to booking your first service on LocalPro",
-      category: "Getting Started",
-      readTime: "5 min read",
-      isPopular: true,
-      lastUpdated: "2024-01-15",
-      tags: ["booking", "first-time", "tutorial"],
-      href: "/learning-hub/articles/first-booking"
-    },
-    {
-      id: 2,
-      title: "Account Setup Guide",
-      description: "Complete guide to setting up your LocalPro account",
-      category: "Getting Started",
-      readTime: "8 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-10",
-      tags: ["account", "setup", "profile"],
-      href: "/learning-hub/articles/account-setup"
-    },
-    {
-      id: 3,
-      title: "Profile Creation Best Practices",
-      description: "Learn how to create an attractive and effective profile",
-      category: "Getting Started",
-      readTime: "6 min read",
-      isPopular: true,
-      lastUpdated: "2024-01-12",
-      tags: ["profile", "optimization", "tips"],
-      href: "/learning-hub/articles/profile-creation"
-    },
-    {
-      id: 4,
-      title: "Payment Setup and Verification",
-      description: "How to set up and verify your payment methods",
-      category: "Getting Started",
-      readTime: "4 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-08",
-      tags: ["payment", "verification", "setup"],
-      href: "/learning-hub/articles/payment-setup"
-    },
-
-    // Features & Functionality Articles
-    {
-      id: 5,
-      title: "Advanced Search Features",
-      description: "Master the search functionality to find exactly what you need",
-      category: "Features & Functionality",
-      readTime: "6 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-14",
-      tags: ["search", "filters", "advanced"],
-      href: "/learning-hub/articles/advanced-search"
-    },
-    {
-      id: 6,
-      title: "Booking Management System",
-      description: "Complete guide to managing your bookings and appointments",
-      category: "Features & Functionality",
-      readTime: "10 min read",
-      isPopular: true,
-      lastUpdated: "2024-01-16",
-      tags: ["booking", "management", "calendar"],
-      href: "/learning-hub/articles/booking-management"
-    },
-    {
-      id: 7,
-      title: "Reviews and Ratings System",
-      description: "How to use and benefit from the review system",
-      category: "Features & Functionality",
-      readTime: "7 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-11",
-      tags: ["reviews", "ratings", "feedback"],
-      href: "/learning-hub/articles/reviews-ratings"
-    },
-    {
-      id: 8,
-      title: "Analytics Dashboard Guide",
-      description: "Understanding your analytics and performance metrics",
-      category: "Features & Functionality",
-      readTime: "9 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-13",
-      tags: ["analytics", "dashboard", "metrics"],
-      href: "/learning-hub/articles/analytics-dashboard"
-    },
-
-    // Troubleshooting Articles
-    {
-      id: 9,
-      title: "Troubleshooting Login Issues",
-      description: "Common login problems and their solutions",
-      category: "Troubleshooting",
-      readTime: "3 min read",
-      isPopular: true,
-      lastUpdated: "2024-01-17",
-      tags: ["login", "troubleshooting", "password"],
-      href: "/learning-hub/articles/login-troubleshooting"
-    },
-    {
-      id: 10,
-      title: "Payment Problems and Solutions",
-      description: "Resolve common payment issues and errors",
-      category: "Troubleshooting",
-      readTime: "5 min read",
-      isPopular: true,
-      lastUpdated: "2024-01-15",
-      tags: ["payment", "errors", "solutions"],
-      href: "/learning-hub/articles/payment-troubleshooting"
-    },
-    {
-      id: 11,
-      title: "Booking Errors and Fixes",
-      description: "Common booking issues and how to resolve them",
-      category: "Troubleshooting",
-      readTime: "4 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-12",
-      tags: ["booking", "errors", "fixes"],
-      href: "/learning-hub/articles/booking-errors"
-    },
-    {
-      id: 12,
-      title: "Account Recovery Process",
-      description: "How to recover your account if you're locked out",
-      category: "Troubleshooting",
-      readTime: "6 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-09",
-      tags: ["account", "recovery", "security"],
-      href: "/learning-hub/articles/account-recovery"
-    },
-
-    // Security & Privacy Articles
-    {
-      id: 13,
-      title: "Understanding Payment Security",
-      description: "Learn about our secure payment system and fraud protection",
-      category: "Security & Privacy",
-      readTime: "8 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-16",
-      tags: ["security", "payment", "fraud"],
-      href: "/learning-hub/articles/payment-security"
-    },
-    {
-      id: 14,
-      title: "Data Protection and Privacy",
-      description: "How we protect your personal information",
-      category: "Security & Privacy",
-      readTime: "7 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-14",
-      tags: ["privacy", "data", "protection"],
-      href: "/learning-hub/articles/data-protection"
-    },
-    {
-      id: 15,
-      title: "Privacy Settings Guide",
-      description: "Control your privacy and data sharing preferences",
-      category: "Security & Privacy",
-      readTime: "5 min read",
-      isPopular: false,
-      lastUpdated: "2024-01-11",
-      tags: ["privacy", "settings", "control"],
-      href: "/learning-hub/articles/privacy-settings"
-    },
-    {
-      id: 16,
-      title: "Account Security Best Practices",
-      description: "Keep your account secure with these essential tips",
-      category: "Security & Privacy",
-      readTime: "6 min read",
-      isPopular: true,
-      lastUpdated: "2024-01-13",
-      tags: ["security", "account", "best-practices"],
-      href: "/learning-hub/articles/account-security"
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(article =>
+        article.title.toLowerCase().includes(query) ||
+        article.description.toLowerCase().includes(query) ||
+        article.tags.some(tag => tag.toLowerCase().includes(query))
+      );
     }
-  ];
 
-  const categories = ["All", "For Clients", "For Providers", "For Agencies", "For Partners", "Getting Started", "Features & Functionality", "Troubleshooting", "Security & Privacy"];
-  const sortOptions = ["Most Recent", "Most Popular", "Alphabetical", "Reading Time"];
+    // Filter by category
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(article => article.category === selectedCategory);
+    }
+
+    // Sort articles
+    switch (sortBy) {
+      case 'Most Popular':
+        filtered.sort((a, b) => b.viewCount - a.viewCount);
+        break;
+      case 'Alphabetical':
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'Reading Time':
+        filtered.sort((a, b) => a.readTime - b.readTime);
+        break;
+      case 'Most Recent':
+      default:
+        filtered.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+        break;
+    }
+
+    setFilteredArticles(filtered);
+  }, [articles, searchQuery, selectedCategory, sortBy]);
+
+  // Get unique categories
+  const categories = ['All', ...Array.from(new Set(articles.map(article => article.category)))];
+  const sortOptions = ['Most Recent', 'Most Popular', 'Alphabetical', 'Reading Time'];
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading articles...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -397,7 +153,7 @@ const AllArticlesPage = () => {
               All Articles
             </h1>
             <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-              Browse our complete collection of {allArticles.length} articles covering everything you need to know about LocalPro.
+              Browse our complete collection of {articles.length} articles covering everything you need to know about LocalPro.
             </p>
             
             {/* Search and Filter Bar */}
@@ -407,6 +163,8 @@ const AllArticlesPage = () => {
                 <Input 
                   placeholder="Search articles by title, description, or tags..." 
                   className="pl-10 pr-4 py-3 text-lg border-2 focus:border-primary"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
@@ -416,12 +174,13 @@ const AllArticlesPage = () => {
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Filter by category:</span>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   {categories.map((category) => (
                     <Badge 
                       key={category} 
-                      variant={category === "All" ? "default" : "outline"}
+                      variant={category === selectedCategory ? "default" : "outline"}
                       className="cursor-pointer hover:bg-primary/10"
+                      onClick={() => setSelectedCategory(category)}
                     >
                       {category}
                     </Badge>
@@ -437,10 +196,14 @@ const AllArticlesPage = () => {
       <section className="py-16 px-4">
         <div className="container mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold">All Articles ({allArticles.length})</h2>
+            <h2 className="text-2xl font-bold">All Articles ({filteredArticles.length})</h2>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Sort by:</span>
-              <select className="px-3 py-1 border rounded-md text-sm">
+              <select 
+                className="px-3 py-1 border rounded-md text-sm"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
                 {sortOptions.map((option) => (
                   <option key={option} value={option}>{option}</option>
                 ))}
@@ -449,14 +212,29 @@ const AllArticlesPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allArticles.map((article) => (
+            {filteredArticles.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <p className="text-muted-foreground text-lg">No articles found matching your criteria.</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedCategory('All');
+                  }}
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            ) : (
+              filteredArticles.map((article) => (
               <Card key={article.id} className="hover:shadow-lg transition-all duration-300 group">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
                     <Badge variant="outline" className="text-xs">
                       {article.category}
                     </Badge>
-                    {article.isPopular && (
+                      {article.popular && (
                       <Badge variant="default" className="text-xs bg-orange-100 text-orange-800 border-orange-200">
                         <Star className="h-3 w-3 mr-1" />
                         Popular
@@ -464,7 +242,7 @@ const AllArticlesPage = () => {
                     )}
                   </div>
                   <CardTitle className="text-lg group-hover:text-primary transition-colors line-clamp-2">
-                    <Link href={article.href} className="hover:underline">
+                      <Link href={`/learning-hub/articles/${article.slug}`} className="hover:underline">
                       {article.title}
                     </Link>
                   </CardTitle>
@@ -493,25 +271,38 @@ const AllArticlesPage = () => {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {article.readTime}
+                          {article.readTime} min read
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {new Date(article.updatedAt).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Engagement Stats */}
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <TrendingUp className="h-3 w-3" />
+                        {article.viewCount.toLocaleString()} views
                       </div>
                       <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(article.lastUpdated).toLocaleDateString()}
-                      </div>
+                        <Star className="h-3 w-3" />
+                        {article.likeCount} likes
                     </div>
                   </div>
 
                   {/* Read Article Button */}
                   <Button variant="ghost" size="sm" asChild className="w-full group-hover:bg-primary/10">
-                    <Link href={article.href} className="flex items-center justify-center space-x-1">
+                      <Link href={`/learning-hub/articles/${article.slug}`} className="flex items-center justify-center space-x-1">
                       <span>Read Article</span>
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
                 </CardContent>
               </Card>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </section>

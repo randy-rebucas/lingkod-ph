@@ -48,6 +48,7 @@ import {
   Target,
   Activity,
   TrendingDown,
+  BookOpen,
 } from "lucide-react";
 import {
   SidebarProvider,
@@ -718,6 +719,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <Link href="/admin/rewards" className="flex items-center gap-3 px-3 py-2">
                         <Award className="h-5 w-5 group-hover:scale-110 transition-transform" />
                         <span className="font-medium">Rewards</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={isActive("/admin/learning-hub")} className="hover:bg-primary/10 hover:text-primary transition-all duration-200 group rounded-lg">
+                      <Link href="/admin/learning-hub" className="flex items-center gap-3 px-3 py-2">
+                        <BookOpen className="h-5 w-5 group-hover:scale-110 transition-transform" />
+                        <span className="font-medium">Learning Hub</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

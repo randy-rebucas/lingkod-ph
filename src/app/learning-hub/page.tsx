@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,10 +31,187 @@ import {
   Shield,
   Zap,
   Star,
-  Tag
+  Tag,
+  Loader2
 } from 'lucide-react';
 
+// Types for API responses
+interface ContentItem {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  role: string;
+  type: 'article' | 'tutorial' | 'topic' | 'resource';
+  featured: boolean;
+  popular: boolean;
+  href: string;
+  readTime: string;
+  viewCount?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Stats {
+  totalContent: number;
+  totalArticles: number;
+  totalTutorials: number;
+  totalTopics: number;
+  totalResources: number;
+  totalCategories: number;
+  totalViews: number;
+  featuredCount: number;
+  popularCount: number;
+  roleCounts: {
+    clients: number;
+    providers: number;
+    agencies: number;
+    partners: number;
+    all: number;
+  };
+  categories: string[];
+}
+
 const LearningHubOverviewPage = () => {
+  // State management
+  const [content, setContent] = useState<ContentItem[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<ContentItem[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Fetch all data
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [contentResponse, statsResponse] = await Promise.all([
+        fetch('/api/learning-hub/content?limit=20'),
+        fetch('/api/learning-hub/stats')
+      ]);
+
+      const contentResult = await contentResponse.json();
+      const statsResult = await statsResponse.json();
+
+      if (contentResult.success) {
+        setContent(contentResult.data);
+      } else {
+        console.warn('Failed to fetch content:', contentResult.error);
+        setContent([]);
+      }
+
+      if (statsResult.success) {
+        setStats(statsResult.data);
+      } else {
+        console.warn('Failed to fetch stats:', statsResult.error);
+        // Set default stats if API fails
+        setStats({
+          totalContent: 0,
+          totalArticles: 0,
+          totalTutorials: 0,
+          totalTopics: 0,
+          totalResources: 0,
+          totalCategories: 0,
+          totalViews: 0,
+          featuredCount: 0,
+          popularCount: 0,
+          roleCounts: {
+            clients: 0,
+            providers: 0,
+            agencies: 0,
+            partners: 0,
+            all: 0
+          },
+          categories: []
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      // Set empty data on error
+      setContent([]);
+      setStats({
+        totalContent: 0,
+        totalArticles: 0,
+        totalTutorials: 0,
+        totalTopics: 0,
+        totalResources: 0,
+        totalCategories: 0,
+        totalViews: 0,
+        featuredCount: 0,
+        popularCount: 0,
+        roleCounts: {
+          clients: 0,
+          providers: 0,
+          agencies: 0,
+          partners: 0,
+          all: 0
+        },
+        categories: []
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle search
+  const handleSearch = async (query: string) => {
+    setSearchQuery(query);
+    
+    if (!query.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      const response = await fetch(`/api/learning-hub/content?search=${encodeURIComponent(query)}&limit=10`);
+      const result = await response.json();
+      
+      if (result.success) {
+        setSearchResults(result.data);
+      }
+    } catch (error) {
+      console.error('Error searching:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Get content by role
+  const getContentByRole = (role: string) => {
+    return content.filter(item => item.role === role || item.role === 'all');
+  };
+
+  // Get featured content
+  const getFeaturedContent = () => {
+    return content.filter(item => item.featured).slice(0, 4);
+  };
+
+  // Get popular topics (categories with most content)
+  const getPopularTopics = () => {
+    if (!stats) return [];
+    
+    const categoryCounts = content.reduce((acc, item) => {
+      acc[item.category] = (acc[item.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(categoryCounts)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 6)
+      .map(([name, count]) => ({
+        name,
+        count,
+        href: `/learning-hub/categories/${name.toLowerCase().replace(/\s+/g, '-')}`
+      }));
+  };
+
   const userRoles = [
     {
       title: "For Clients",
@@ -41,7 +219,7 @@ const LearningHubOverviewPage = () => {
       icon: <Users className="h-8 w-8" />,
       href: "/learning-hub/clients",
       color: "bg-blue-50 text-blue-600 border-blue-200",
-      articleCount: 25,
+      articleCount: stats?.roleCounts.clients || 0,
       featured: ["Finding Services", "Booking Process", "Payment Security", "Reviews & Ratings"]
     },
     {
@@ -50,7 +228,7 @@ const LearningHubOverviewPage = () => {
       icon: <UserCheck className="h-8 w-8" />,
       href: "/learning-hub/providers",
       color: "bg-green-50 text-green-600 border-green-200",
-      articleCount: 30,
+      articleCount: stats?.roleCounts.providers || 0,
       featured: ["Verification Process", "Profile Optimization", "Booking Management", "Earnings"]
     },
     {
@@ -59,7 +237,7 @@ const LearningHubOverviewPage = () => {
       icon: <Building2 className="h-8 w-8" />,
       href: "/learning-hub/agencies",
       color: "bg-purple-50 text-purple-600 border-purple-200",
-      articleCount: 20,
+      articleCount: stats?.roleCounts.agencies || 0,
       featured: ["Team Management", "Quality Control", "Analytics", "Growth Strategies"]
     },
     {
@@ -68,7 +246,7 @@ const LearningHubOverviewPage = () => {
       icon: <Target className="h-8 w-8" />,
       href: "/learning-hub/partners",
       color: "bg-orange-50 text-orange-600 border-orange-200",
-      articleCount: 15,
+      articleCount: stats?.roleCounts.partners || 0,
       featured: ["Partnership Types", "Benefits", "Application Process", "Success Stories"]
     }
   ];
@@ -113,55 +291,24 @@ const LearningHubOverviewPage = () => {
   ];
 
   const knowledgeStats = [
-    { label: "Total Articles", value: "150+", icon: <FileText className="h-5 w-5" /> },
-    { label: "Categories", value: "12", icon: <BookOpen className="h-5 w-5" /> },
-    { label: "Video Guides", value: "45+", icon: <Video className="h-5 w-5" /> },
-    { label: "Updated Weekly", value: "Yes", icon: <Clock className="h-5 w-5" /> }
+    { label: "Total Content", value: stats?.totalContent.toString() || "0", icon: <FileText className="h-5 w-5" /> },
+    { label: "Categories", value: stats?.totalCategories.toString() || "0", icon: <BookOpen className="h-5 w-5" /> },
+    { label: "Video Guides", value: stats?.totalTutorials.toString() || "0", icon: <Video className="h-5 w-5" /> },
+    { label: "Total Views", value: stats?.totalViews.toString() || "0", icon: <TrendingUp className="h-5 w-5" /> }
   ];
 
-  const featuredArticles = [
-    {
-      title: "How to Create Your First Booking",
-      description: "Step-by-step guide to booking your first service on LocalPro",
-      category: "Getting Started",
-      readTime: "5 min read",
-      isPopular: true,
-      href: "/learning-hub/articles/first-booking"
-    },
-    {
-      title: "Understanding Payment Security",
-      description: "Learn about our secure payment system and fraud protection",
-      category: "Security & Privacy",
-      readTime: "8 min read",
-      isPopular: false,
-      href: "/learning-hub/articles/payment-security"
-    },
-    {
-      title: "Troubleshooting Login Issues",
-      description: "Common login problems and their solutions",
-      category: "Troubleshooting",
-      readTime: "3 min read",
-      isPopular: true,
-      href: "/learning-hub/articles/login-troubleshooting"
-    },
-    {
-      title: "Advanced Search Features",
-      description: "Master the search functionality to find exactly what you need",
-      category: "Features & Functionality",
-      readTime: "6 min read",
-      isPopular: false,
-      href: "/learning-hub/articles/advanced-search"
-    }
-  ];
+  // Get featured articles from real data
+  const featuredArticles = getFeaturedContent().map(article => ({
+    title: article.title,
+    description: article.description,
+    category: article.category,
+    readTime: article.readTime,
+    isPopular: article.popular,
+    href: article.href
+  }));
 
-  const popularTopics = [
-    { name: "Account Setup", count: 45, href: "/learning-hub/topics/account-setup" },
-    { name: "Payment Issues", count: 32, href: "/learning-hub/topics/payment-issues" },
-    { name: "Booking Problems", count: 28, href: "/learning-hub/topics/booking-problems" },
-    { name: "Profile Management", count: 24, href: "/learning-hub/topics/profile-management" },
-    { name: "Security Settings", count: 19, href: "/learning-hub/topics/security-settings" },
-    { name: "Mobile App", count: 16, href: "/learning-hub/topics/mobile-app" }
-  ];
+  // Get popular topics from real data
+  const popularTopics = getPopularTopics();
 
   const quickResources = [
     {
@@ -186,6 +333,18 @@ const LearningHubOverviewPage = () => {
       href: "/contact"
     }
   ];
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading learning hub content...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -212,8 +371,43 @@ const LearningHubOverviewPage = () => {
                 <Input 
                   placeholder="Search articles, guides, and tutorials..." 
                   className="pl-10 pr-4 py-3 text-lg border-2 focus:border-primary"
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
                 />
+                {isSearching && (
+                  <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
+                )}
               </div>
+              
+              {/* Search Results */}
+              {searchQuery && searchResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-96 overflow-y-auto">
+                  {searchResults.map((item) => (
+                    <Link key={item.id} href={item.href}>
+                      <div className="p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">{item.title}</h4>
+                            <p className="text-sm text-gray-600 mt-1 line-clamp-2">{item.description}</p>
+                            <div className="flex items-center mt-2 space-x-4 text-xs text-gray-500">
+                              <span className="bg-gray-100 px-2 py-1 rounded">{item.category}</span>
+                              <span>{item.readTime}</span>
+                              <span className="capitalize">{item.type}</span>
+                            </div>
+                          </div>
+                          <ArrowRight className="h-4 w-4 text-gray-400 ml-2 flex-shrink-0" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+              
+              {searchQuery && !isSearching && searchResults.length === 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-10 p-4">
+                  <p className="text-gray-600 text-center">No results found for "{searchQuery}"</p>
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -357,7 +551,7 @@ const LearningHubOverviewPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {featuredArticles.map((article, index) => (
+            {featuredArticles.length > 0 ? featuredArticles.map((article, index) => (
               <Card key={index} className="hover:shadow-lg transition-all duration-300 group">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
@@ -395,7 +589,13 @@ const LearningHubOverviewPage = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )) : (
+              <div className="col-span-2 text-center py-12">
+                <BookOpen className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">No Featured Articles Yet</h3>
+                <p className="text-muted-foreground">Check back soon for featured content!</p>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -411,7 +611,7 @@ const LearningHubOverviewPage = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
-            {popularTopics.map((topic, index) => (
+            {popularTopics.length > 0 ? popularTopics.map((topic, index) => (
               <Link key={index} href={topic.href}>
                 <Card className="text-center hover:shadow-lg transition-all duration-300 group cursor-pointer">
                   <CardContent className="p-4">
@@ -425,7 +625,13 @@ const LearningHubOverviewPage = () => {
                   </CardContent>
                 </Card>
               </Link>
-            ))}
+            )) : (
+              <div className="col-span-full text-center py-12">
+                <Tag className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-medium text-muted-foreground mb-2">No Topics Available</h3>
+                <p className="text-muted-foreground">Content will appear here as it's added to the learning hub.</p>
+              </div>
+            )}
           </div>
         </div>
       </section>
