@@ -70,7 +70,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: https://www.google-analytics.com; font-src 'self' data:; connect-src 'self' https://api.paypal.com https://api.sandbox.paypal.com https://firestore.googleapis.com https://*.firebaseapp.com https://*.googleapis.com https://*.gstatic.com https://www.google-analytics.com https://analytics.google.com; frame-src 'self' https://www.sandbox.paypal.com https://www.paypal.com;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: https://www.google-analytics.com https://www.gstatic.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.paypal.com https://api.sandbox.paypal.com https://firestore.googleapis.com https://*.firebaseapp.com https://*.googleapis.com https://*.gstatic.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com; frame-src 'self' https://www.sandbox.paypal.com https://www.paypal.com;",
           },
         ],
       },

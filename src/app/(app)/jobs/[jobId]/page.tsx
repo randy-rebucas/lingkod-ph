@@ -125,11 +125,11 @@ export default function JobDetailsPage() {
 
     if (loading) {
         return (
-            <div className=" mx-auto space-y-8">
+            <div className="container mx-auto space-y-8 w-full max-w-7xl px-4">
                 <Skeleton className="h-10 w-1/3" />
                 <Skeleton className="h-4 w-2/3" />
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20"><Skeleton className="h-8 w-3/4" /></CardHeader>
+                <Card className="bg-background/60 backdrop-blur-sm border-0 shadow-soft">
+                    <CardHeader><Skeleton className="h-8 w-3/4" /></CardHeader>
                     <CardContent className="space-y-4">
                         <Skeleton className="h-24 w-full" />
                         <Skeleton className="h-10 w-1/4" />
@@ -145,15 +145,18 @@ export default function JobDetailsPage() {
 
 
     return (
-        <div className=" mx-auto space-y-8">
-            <div className="flex items-center justify-between">
+        <div className="container mx-auto space-y-8 w-full max-w-7xl px-4">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-4">
-                    <Button variant="outline" size="icon" onClick={() => router.back()}>
+                    <Button variant="outline" size="icon" onClick={() => router.back()} className="hover:bg-primary/10 transition-colors">
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <div>
-                        <h1 className="text-3xl font-bold font-headline">{job.title}</h1>
-                        <p className="text-muted-foreground">
+                        <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                            {job.title}
+                        </h1>
+                        <p className="text-muted-foreground mt-1">
                             Posted by {job.clientName}
                         </p>
                     </div>
@@ -178,6 +181,7 @@ export default function JobDetailsPage() {
                                 value={reportReason}
                                 onChange={(e) => setReportReason(e.target.value)}
                                 placeholder="e.g., This job seems like a scam, the description is inappropriate..."
+                                className="min-h-[100px]"
                             />
                         </div>
                         <DialogFooter>
@@ -190,50 +194,68 @@ export default function JobDetailsPage() {
                 </Dialog>
             </div>
 
-            <Card>
+            <Card className="bg-background/60 backdrop-blur-sm border-0 shadow-soft">
                 <CardHeader>
-                    <CardTitle>Job Details</CardTitle>
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground pt-2">
-                        <div className="flex items-center gap-2"><Briefcase className="h-4 w-4" /> <Badge variant="secondary">{job.categoryName}</Badge></div>
-                        <div className="flex items-center gap-2"><MapPin className="h-4 w-4" /> {job.location}</div>
-                        <div className="flex items-center gap-2"><Clock className="h-4 w-4" /> {formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true })}</div>
-                        <div className="flex items-center gap-2"><Users className="h-4 w-4" /> {job.applications?.length || 0} Applicants</div>
+                    <CardTitle className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Job Details</CardTitle>
+                    <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-muted-foreground pt-4">
+                        <div className="flex items-center gap-2">
+                            <Briefcase className="h-4 w-4 text-primary" />
+                            <Badge variant="secondary" className="shadow-soft">{job.categoryName}</Badge>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <MapPin className="h-4 w-4 text-primary" />
+                            <span className="font-medium">{job.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-primary" />
+                            <span>{formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true })}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-primary" />
+                            <span className="font-medium">{job.applications?.length || 0} Applicants</span>
+                        </div>
                         {job.clientIsVerified && (
-                            <div className="flex items-center gap-1 text-green-600 font-medium">
-                                <ShieldCheck className="h-4 w-4" /> Verified Client
+                            <div className="flex items-center gap-2 text-green-600 font-semibold">
+                                <ShieldCheck className="h-4 w-4" />
+                                <span>Verified Client</span>
                             </div>
                         )}
                     </div>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                    <Separator />
-                    <div>
-                        <h3 className="font-semibold mb-2">Description</h3>
-                        <p className="text-muted-foreground whitespace-pre-wrap">{job.description}</p>
+                <CardContent className="space-y-8">
+                    <Separator className="bg-border/50" />
+                    <div className="space-y-4">
+                        <h3 className="text-xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Description</h3>
+                        <div className="p-6 rounded-xl bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
+                            <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">{job.description}</p>
+                        </div>
                     </div>
 
                     {job.additionalDetails && job.additionalDetails.length > 0 && (
-                        <div>
-                            <h3 className="font-semibold mb-2">Additional Details</h3>
-                            <div className="space-y-3">
+                        <div className="space-y-4">
+                            <h3 className="text-xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Additional Details</h3>
+                            <div className="space-y-4">
                                 {job.additionalDetails.map((detail, index) => (
-                                    <div key={index}>
-                                        <p className="font-medium text-sm">{detail.question}</p>
-                                        <p className="text-muted-foreground text-sm pl-4 border-l-2 ml-2 mt-1">{detail.answer || "No answer provided."}</p>
+                                    <div key={index} className="p-4 rounded-lg bg-gradient-to-r from-muted/20 to-muted/10 border border-border/30 shadow-soft">
+                                        <p className="font-semibold text-sm mb-2 text-foreground">{detail.question}</p>
+                                        <p className="text-muted-foreground text-sm leading-relaxed pl-4 border-l-2 border-primary/30">{detail.answer || "No answer provided."}</p>
                                     </div>
                                 ))}
                             </div>
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="flex-col items-start gap-4 bg-secondary/50 p-6">
-                    <div>
-                        <p className="text-sm text-muted-foreground">Budget</p>
-                        <p className="text-3xl font-bold text-primary">{formatBudget(job.budget)}</p>
+                <CardFooter className="flex-col items-start gap-6 bg-gradient-to-r from-muted/40 to-muted/20 p-8 border-t border-border/50">
+                    <div className="text-center w-full">
+                        <p className="text-sm text-muted-foreground font-medium mb-2">Total Budget</p>
+                        <p className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{formatBudget(job.budget)}</p>
+                        {job.budget.negotiable && (
+                            <p className="text-xs text-muted-foreground mt-2">Budget is negotiable</p>
+                        )}
                     </div>
                     <Button
                         size="lg"
-                        className="w-full"
+                        className="w-full shadow-glow hover:shadow-glow/50 transition-all duration-300"
                         onClick={handleApply}
                         disabled={!!hasApplied}
                         title={hasApplied ? "You have already applied" : "Apply for this job"}

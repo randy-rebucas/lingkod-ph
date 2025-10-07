@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ArrowLeft, Upload, Loader2, ClipboardCopy, Check, Landmark, Info, CreditCard } from "lucide-react";
 import Image from 'next/image';
 import { Badge } from "@/components/ui/badge";
@@ -206,28 +207,31 @@ export default function PaymentPage() {
     const isPaymentRejected = booking.status === 'Payment Rejected';
 
     return (
-        <div className=" mx-auto space-y-8 w-full">
-            <div className="relative z-10 flex items-center gap-4">
-                <Button variant="outline" size="icon" onClick={() => router.push('/bookings')} className="hover:bg-primary/10 transition-colors">
-                    <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <div>
-                    <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
-                        Payment Instructions
-                    </h1>
-                    <p className="text-xl text-muted-foreground leading-relaxed">
-                        For booking: {booking.serviceName}
-                    </p>
+        <div className="container mx-auto space-y-8 w-full max-w-7xl px-4">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex items-center gap-4">
+                    <Button variant="outline" size="icon" onClick={() => router.push('/bookings')} className="hover:bg-primary/10 transition-colors">
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <div>
+                        <h1 className="text-3xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                            Payment Instructions
+                        </h1>
+                        <p className="text-muted-foreground mt-1">
+                            For booking: {booking.serviceName}
+                        </p>
+                    </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payment Details</CardTitle>
+                <Card className="bg-background/60 backdrop-blur-sm border-0 shadow-soft">
+                    <CardHeader>
+                        <CardTitle className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Payment Details</CardTitle>
                         <CardDescription className="text-base">Please complete your payment using one of the methods below.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-6 p-6">
+                    <CardContent className="space-y-6">
                         <div className="p-6 rounded-xl bg-gradient-to-r from-muted/50 to-muted/30 text-center space-y-3 border border-border/50 shadow-soft">
                             <p className="text-sm text-muted-foreground font-medium">Total Amount Due</p>
                             <p className="text-5xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">₱{booking.price?.toFixed(2) || '0.00'}</p>
@@ -243,15 +247,24 @@ export default function PaymentPage() {
 
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
-                                <Landmark className="h-6 w-6 text-indigo-700" />
-                                <h3 className="font-semibold text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Bank Transfer (BPI)</h3>
+                                <Landmark className="h-6 w-6 text-primary" />
+                                <h3 className="text-xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Bank Transfer (BPI)</h3>
                             </div>
-                            <div className="p-4 rounded-lg bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
-                                <div className="text-sm space-y-2">
-                                    <p><strong>Account Name:</strong> {PaymentConfig.BANK.accountName}</p>
-                                    <p><strong>Account Number:</strong> {PaymentConfig.BANK.accountNumber}</p>
+                            <div className="p-6 rounded-xl bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
+                                <div className="text-sm space-y-3">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground font-medium">Account Name:</span>
+                                        <span className="font-semibold">{PaymentConfig.BANK.accountName}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground font-medium">Account Number:</span>
+                                        <span className="font-mono font-semibold">{PaymentConfig.BANK.accountNumber}</span>
+                                    </div>
                                     {PaymentConfig.BANK.bankName && (
-                                        <p><strong>Bank:</strong> {PaymentConfig.BANK.bankName}</p>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-muted-foreground font-medium">Bank:</span>
+                                            <span className="font-semibold">{PaymentConfig.BANK.bankName}</span>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -259,8 +272,8 @@ export default function PaymentPage() {
                         <Separator className="bg-border/50" />
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
-                                <CreditCard className="h-6 w-6 text-blue-600" />
-                                <h3 className="font-semibold text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">PayPal Payment</h3>
+                                <CreditCard className="h-6 w-6 text-primary" />
+                                <h3 className="text-xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">PayPal Payment</h3>
                             </div>
                             <PayPalCheckoutButton
                                 bookingId={booking.id}
@@ -278,9 +291,9 @@ export default function PaymentPage() {
 
                     </CardContent>
                 </Card>
-                <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
-                        <CardTitle className="font-headline text-xl bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Upload Proof of Payment</CardTitle>
+                <Card className="bg-background/60 backdrop-blur-sm border-0 shadow-soft">
+                    <CardHeader>
+                        <CardTitle className="text-2xl font-bold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Upload Proof of Payment</CardTitle>
                         <CardDescription className="text-base">
                             {isPaymentUploaded
                                 ? "Your payment proof has been submitted."
@@ -288,19 +301,19 @@ export default function PaymentPage() {
                             }
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4 p-6">
+                    <CardContent className="space-y-6">
                         {isPaymentRejected ? (
-                            <div className="space-y-4 text-center">
-                                <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-border/50 shadow-soft">
+                            <div className="space-y-6 text-center">
+                                <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-border/50 shadow-soft">
                                     <Image src={booking.paymentProofUrl || "https://placehold.co/600x400.png"} alt="Payment proof" layout="fill" className="object-contain" />
                                 </div>
-                                <Badge variant="destructive" className="shadow-soft">Status: {booking.status}</Badge>
+                                <Badge variant="destructive" className="shadow-soft text-sm px-4 py-2">Status: {booking.status}</Badge>
                                 {booking.paymentRejectionReason && (
-                                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg shadow-soft">
-                                        <p className="text-sm text-red-800"><strong>Rejection Reason:</strong> {booking.paymentRejectionReason}</p>
+                                    <div className="p-6 bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl shadow-soft">
+                                        <p className="text-sm text-red-800 font-medium"><strong>Rejection Reason:</strong> {booking.paymentRejectionReason}</p>
                                     </div>
                                 )}
-                                <p className="text-sm text-muted-foreground">Please upload a new payment proof or contact support for assistance.</p>
+                                <p className="text-sm text-muted-foreground leading-relaxed">Please upload a new payment proof or contact support for assistance.</p>
                                 <Button onClick={() => {
                                     setPaymentProofFile(null);
                                     setPaymentProofPreview(null);
@@ -310,27 +323,27 @@ export default function PaymentPage() {
                                 </Button>
                             </div>
                         ) : isPaymentUploaded && booking.paymentProofUrl ? (
-                            <div className="space-y-4 text-center">
-                                <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-border/50 shadow-soft">
+                            <div className="space-y-6 text-center">
+                                <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-border/50 shadow-soft">
                                     <Image src={booking.paymentProofUrl} alt="Payment proof" layout="fill" className="object-contain" />
                                 </div>
-                                <Badge className="shadow-soft">Status: {booking.status}</Badge>
-                                <p className="text-sm text-muted-foreground">An admin will verify your payment shortly.</p>
+                                <Badge className="shadow-soft text-sm px-4 py-2">Status: {booking.status}</Badge>
+                                <p className="text-sm text-muted-foreground leading-relaxed">An admin will verify your payment shortly.</p>
                             </div>
                         ) : (
-                            <div className="space-y-4">
-                                <div className="aspect-video w-full rounded-lg border-2 border-dashed border-border/50 flex items-center justify-center bg-gradient-to-r from-muted/30 to-muted/20 overflow-hidden shadow-soft">
+                            <div className="space-y-6">
+                                <div className="aspect-video w-full rounded-xl border-2 border-dashed border-border/50 flex items-center justify-center bg-gradient-to-r from-muted/30 to-muted/20 overflow-hidden shadow-soft">
                                     {paymentProofPreview ? (
                                         <Image src={paymentProofPreview} alt="Payment proof preview" layout="fill" className="object-contain" />
                                     ) : (
-                                        <div className="text-center text-muted-foreground p-6">
-                                            <Upload className="h-12 w-12 mx-auto mb-3 text-primary opacity-60" />
-                                            <p className="text-lg font-medium">Select a file to upload</p>
-                                            <p className="text-sm mt-1">Screenshot or photo of your payment receipt</p>
+                                        <div className="text-center text-muted-foreground p-8">
+                                            <Upload className="h-16 w-16 mx-auto mb-4 text-primary opacity-60" />
+                                            <p className="text-xl font-semibold mb-2">Select a file to upload</p>
+                                            <p className="text-sm leading-relaxed">Screenshot or photo of your payment receipt</p>
                                         </div>
                                     )}
                                 </div>
-                                <Input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="text-sm bg-background/80 backdrop-blur-sm border-2 focus:border-primary transition-colors shadow-soft" />
+                                <Input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileChange} className="h-12" />
                                 <Button className="w-full shadow-glow hover:shadow-glow/50 transition-all duration-300" onClick={handleUploadProof} disabled={isUploading || !paymentProofFile}>
                                     {isUploading ? <Loader2 className="mr-2 animate-spin" /> : <Upload className="mr-2" />}
                                     {isUploading ? 'Uploading...' : 'Submit Proof of Payment'}
