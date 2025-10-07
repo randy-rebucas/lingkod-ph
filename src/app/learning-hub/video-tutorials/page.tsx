@@ -16,17 +16,10 @@ import {
   Building2,
   Target,
   Search,
-  Filter,
   Download,
   BookOpen,
-  FileText,
-  Award,
   TrendingUp,
-  Calendar,
   ChevronRight,
-  ExternalLink,
-  CheckCircle,
-  Lightbulb
 } from 'lucide-react';
 
 interface VideoTutorial {

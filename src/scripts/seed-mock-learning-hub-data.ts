@@ -7,8 +7,8 @@ config({ path: resolve(process.cwd(), '.env.local') });
 
 // Import Firebase modules
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, initializeFirestore } from 'firebase/firestore';
-import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 interface MockArticle {
   id: string;

@@ -15,14 +15,8 @@ import {
   EyeOff,
   Star,
   TrendingUp,
-  Users,
-  UserCheck,
-  Building2,
-  Target,
-  BookOpen,
   Plus,
   X,
-  AlertCircle,
   FileText,
   Monitor
 } from 'lucide-react';
@@ -162,22 +156,6 @@ const NewArticlePage = () => {
     }
   };
 
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'clients':
-        return <Users className="h-4 w-4" />;
-      case 'providers':
-        return <UserCheck className="h-4 w-4" />;
-      case 'agencies':
-        return <Building2 className="h-4 w-4" />;
-      case 'partners':
-        return <Target className="h-4 w-4" />;
-      case 'all':
-        return <BookOpen className="h-4 w-4" />;
-      default:
-        return null;
-    }
-  };
 
   return (
     <div className="container space-y-8">

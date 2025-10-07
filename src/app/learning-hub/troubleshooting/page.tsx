@@ -16,7 +16,6 @@ import {
   Mail,
   Search,
   RefreshCw,
-  Shield,
   CreditCard,
   User,
   Calendar

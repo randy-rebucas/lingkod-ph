@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ArticleModel, TutorialModel, TopicModel, ResourceModel } from '@/lib/firebase/learning-hub';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     console.log('Fetching learning hub statistics...');
 
@@ -53,8 +53,13 @@ export async function GET(request: NextRequest) {
     const featuredCount = [...articlesData, ...tutorialsData, ...topicsData, ...resourcesData].filter(item => item.featured).length;
     const popularCount = [...articlesData, ...tutorialsData, ...topicsData, ...resourcesData].filter(item => item.popular).length;
 
-    // Calculate total views
-    const totalViews = [...articlesData, ...tutorialsData, ...topicsData, ...resourcesData].reduce((sum, item) => sum + (item.viewCount || 0), 0);
+    // Calculate total views (articles, tutorials, topics have viewCount, resources have downloadCount)
+    const totalViews = [
+      ...articlesData.map(item => item.viewCount || 0),
+      ...tutorialsData.map(item => item.viewCount || 0),
+      ...topicsData.map(item => item.viewCount || 0),
+      ...resourcesData.map(item => (item as any).downloadCount || 0)
+    ].reduce((sum, count) => sum + count, 0);
 
     const stats = {
       totalContent,

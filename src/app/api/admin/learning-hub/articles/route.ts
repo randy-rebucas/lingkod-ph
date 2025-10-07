@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ArticleModel, type Article } from '@/lib/firebase/learning-hub';
+import { ArticleModel } from '@/lib/firebase/learning-hub';
 
 // GET /api/admin/learning-hub/articles - Get all articles
 export async function GET(request: NextRequest) {
@@ -15,14 +15,13 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     const articles = await ArticleModel.findMany({
-      role,
-      category,
-      difficulty,
-      status,
+      role: role || undefined,
+      category: category || undefined,
+      difficulty: difficulty || undefined,
+      status: status || undefined,
       featured,
       popular,
-      limit,
-      offset
+      limit
     });
 
     return NextResponse.json({

@@ -4,10 +4,11 @@ import { ArticleModel } from '@/lib/firebase/learning-hub';
 // GET /api/admin/learning-hub/articles/[id] - Get article by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const article = await ArticleModel.findById(params.id);
+    const { id } = await params;
+    const article = await ArticleModel.findById(id);
 
     if (!article) {
       return NextResponse.json(
@@ -32,12 +33,13 @@ export async function GET(
 // PUT /api/admin/learning-hub/articles/[id] - Update article
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     
-    const article = await ArticleModel.update(params.id, body);
+    const article = await ArticleModel.update(id, body);
 
     if (!article) {
       return NextResponse.json(
@@ -63,10 +65,11 @@ export async function PUT(
 // DELETE /api/admin/learning-hub/articles/[id] - Delete article
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const article = await ArticleModel.delete(params.id);
+    const { id } = await params;
+    const article = await ArticleModel.delete(id);
 
     if (!article) {
       return NextResponse.json(

@@ -10,7 +10,6 @@ import {
   where, 
   orderBy, 
   limit, 
-  startAfter,
   increment,
   serverTimestamp
 } from 'firebase/firestore';

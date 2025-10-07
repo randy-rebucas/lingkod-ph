@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { 
   Search,
-  Filter,
   Clock,
   Star,
   Tag,
@@ -20,8 +19,6 @@ import {
   Target,
   FileText,
   Video,
-  TrendingUp,
-  Calendar,
   ChevronRight,
   X,
   SlidersHorizontal

@@ -14,11 +14,8 @@ import {
   ArrowRight, 
   CheckCircle, 
   
-  CreditCard, 
   MessageSquare, 
-  Calendar,
   Target,
-  Globe,
   FileText,
   Video,
   Download,
@@ -184,7 +181,7 @@ const LearningHubOverviewPage = () => {
   };
 
   // Get content by role
-  const getContentByRole = (role: string) => {
+  const _getContentByRole = (role: string) => {
     return content.filter(item => item.role === role || item.role === 'all');
   };
 

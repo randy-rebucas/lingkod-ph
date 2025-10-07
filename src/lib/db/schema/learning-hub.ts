@@ -159,7 +159,7 @@ export const AuthorSchema = z.object({
   bio: z.string().max(500).optional(),
   avatar: z.string().url().optional(),
   role: z.string().default('author'),
-  status: StatusSchema.default('active'),
+  status: StatusSchema.default('published'),
   createdAt: z.date().default(() => new Date()),
   updatedAt: z.date().default(() => new Date())
 });

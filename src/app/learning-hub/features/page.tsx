@@ -18,7 +18,6 @@ import {
   MapPin,
   Bell,
   MessageSquare,
-  CreditCard,
   Shield,
   Zap
 } from 'lucide-react';

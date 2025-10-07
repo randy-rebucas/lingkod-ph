@@ -10,7 +10,6 @@ import {
   Download,
   FileText,
   File,
-  Image,
   Video,
   BookOpen,
   Users,
@@ -18,24 +17,14 @@ import {
   Building2,
   Target,
   Search,
-  Filter,
-  Calendar,
   Star,
-  CheckCircle,
-  ExternalLink,
-  ChevronRight,
   FileSpreadsheet,
-  FilePdf,
+  FileText as FilePdf,
   FileImage,
   FileVideo,
   Archive,
   Globe,
   Mail,
-  Phone,
-  MapPin,
-  Clock,
-  Award,
-  TrendingUp
 } from 'lucide-react';
 
 interface Resource {

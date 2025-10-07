@@ -13,19 +13,13 @@ import {
   Tag,
   BookOpen,
   Users,
-  TrendingUp,
   Calendar,
   FileText,
   Video,
-  Download,
-  ExternalLink,
   Search,
-  Filter,
   ChevronRight,
   CheckCircle,
-  Lightbulb,
   Target,
-  Award,
   MessageSquare
 } from 'lucide-react';
 

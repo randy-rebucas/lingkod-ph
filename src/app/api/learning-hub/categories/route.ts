@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { CategoryModel } from '@/lib/firebase/learning-hub';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     console.log('Fetching learning hub categories...');
 

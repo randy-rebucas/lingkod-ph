@@ -11,18 +11,10 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Save,
   ArrowLeft,
-  Eye,
-  EyeOff,
   Star,
   TrendingUp,
-  Users,
-  UserCheck,
-  Building2,
-  Target,
-  BookOpen,
   Plus,
   X,
-  AlertCircle,
   FileText,
   Monitor
 } from 'lucide-react';
@@ -75,7 +67,6 @@ const EditArticlePage = () => {
         
         // Mock article data
         const mockArticle = {
-          id: params.id,
           title: 'How to Create and Verify Your LocalPro Account',
           slug: 'create-verify-account',
           description: 'Complete guide to setting up and verifying your LocalPro account for maximum security and functionality.',
@@ -124,12 +115,12 @@ If you encounter any issues during account creation or verification, our support
           excerpt: 'Learn how to create and verify your LocalPro account with this step-by-step guide.',
           category: 'Getting Started',
           tags: ['account', 'setup', 'verification', 'security'],
-          role: 'all',
-          difficulty: 'Beginner',
+          role: 'all' as 'clients' | 'providers' | 'agencies' | 'partners' | 'all',
+          difficulty: 'Beginner' as 'Beginner' | 'Intermediate' | 'Advanced',
           readTime: 8,
           featured: true,
           popular: true,
-          status: 'published',
+          status: 'published' as 'draft' | 'published' | 'archived',
           seoTitle: 'How to Create and Verify Your LocalPro Account - Complete Guide',
           seoDescription: 'Step-by-step guide to creating and verifying your LocalPro account. Learn about security features and account setup.',
           featuredImage: 'https://example.com/account-setup.jpg'
@@ -232,22 +223,6 @@ If you encounter any issues during account creation or verification, our support
     }
   };
 
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'clients':
-        return <Users className="h-4 w-4" />;
-      case 'providers':
-        return <UserCheck className="h-4 w-4" />;
-      case 'agencies':
-        return <Building2 className="h-4 w-4" />;
-      case 'partners':
-        return <Target className="h-4 w-4" />;
-      case 'all':
-        return <BookOpen className="h-4 w-4" />;
-      default:
-        return null;
-    }
-  };
 
   if (loading) {
     return (

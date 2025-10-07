@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { useState } from 'react';
-import { Menu, BookOpen, Users, Building2, UserCheck, FileText, Zap, Settings, HelpCircle, Target, Search, Video, Download } from 'lucide-react';
+import { Menu, BookOpen, Users, Building2, UserCheck, FileText, Target, Search, Video, Download } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { usePathname } from 'next/navigation';

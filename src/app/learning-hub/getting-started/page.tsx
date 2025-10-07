@@ -10,7 +10,6 @@ import {
   Star,
   ArrowRight,
   BookOpen,
-  CheckCircle,
   Play,
   Download,
   FileText,
