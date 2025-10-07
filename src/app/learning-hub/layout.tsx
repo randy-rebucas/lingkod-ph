@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { useState } from 'react';
-import { Menu, BookOpen, Users, Building2, UserCheck } from 'lucide-react';
+import { Menu, BookOpen, Users, Building2, UserCheck, FileText, Target, Search, Video, Download } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { usePathname } from 'next/navigation';
@@ -46,7 +46,7 @@ const LearningHubHeader = () => {
             }`}
           >
             <Users className="h-4 w-4" />
-            <span>For Clients</span>
+            <span>Clients</span>
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </Link>
           <Link 
@@ -56,7 +56,7 @@ const LearningHubHeader = () => {
             }`}
           >
             <UserCheck className="h-4 w-4" />
-            <span>For Providers</span>
+            <span>Providers</span>
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </Link>
           <Link 
@@ -66,7 +66,7 @@ const LearningHubHeader = () => {
             }`}
           >
             <Building2 className="h-4 w-4" />
-            <span>For Agencies</span>
+            <span>Agencies</span>
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </Link>
           <Link 
@@ -75,8 +75,48 @@ const LearningHubHeader = () => {
               isActive('/learning-hub/partners') ? 'text-primary' : 'hover:text-primary'
             }`}
           >
-            <Building2 className="h-4 w-4" />
-            <span>For Partners</span>
+            <Target className="h-4 w-4" />
+            <span>Partners</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </Link>
+          <Link 
+            href="/learning-hub/all-articles" 
+            className={`transition-colors relative group flex items-center space-x-2 ${
+              isActive('/learning-hub/all-articles') ? 'text-primary' : 'hover:text-primary'
+            }`}
+          >
+            <FileText className="h-4 w-4" />
+            <span>All Articles</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </Link>
+          <Link 
+            href="/learning-hub/search" 
+            className={`transition-colors relative group flex items-center space-x-2 ${
+              isActive('/learning-hub/search') ? 'text-primary' : 'hover:text-primary'
+            }`}
+          >
+            <Search className="h-4 w-4" />
+            <span>Search</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </Link>
+          <Link 
+            href="/learning-hub/video-tutorials" 
+            className={`transition-colors relative group flex items-center space-x-2 ${
+              isActive('/learning-hub/video-tutorials') ? 'text-primary' : 'hover:text-primary'
+            }`}
+          >
+            <Video className="h-4 w-4" />
+            <span>Videos</span>
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </Link>
+          <Link 
+            href="/learning-hub/resources" 
+            className={`transition-colors relative group flex items-center space-x-2 ${
+              isActive('/learning-hub/resources') ? 'text-primary' : 'hover:text-primary'
+            }`}
+          >
+            <Download className="h-4 w-4" />
+            <span>Resources</span>
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </Link>
         </nav>
@@ -125,7 +165,7 @@ const LearningHubHeader = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Users className="h-4 w-4" />
-                    <span>For Clients</span>
+                    <span>Clients</span>
                   </Link>
                   <Link 
                     href="/learning-hub/providers" 
@@ -135,7 +175,7 @@ const LearningHubHeader = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <UserCheck className="h-4 w-4" />
-                    <span>For Providers</span>
+                    <span>Providers</span>
                   </Link>
                   <Link 
                     href="/learning-hub/agencies" 
@@ -145,7 +185,7 @@ const LearningHubHeader = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Building2 className="h-4 w-4" />
-                    <span>For Agencies</span>
+                    <span>Agencies</span>
                   </Link>
                   <Link 
                     href="/learning-hub/partners" 
@@ -154,8 +194,48 @@ const LearningHubHeader = () => {
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Building2 className="h-4 w-4" />
-                    <span>For Partners</span>
+                    <Target className="h-4 w-4" />
+                    <span>Partners</span>
+                  </Link>
+                  <Link 
+                    href="/learning-hub/all-articles" 
+                    className={`text-lg font-medium transition-colors flex items-center space-x-2 ${
+                      isActive('/learning-hub/all-articles') ? 'text-primary' : 'hover:text-primary'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <FileText className="h-4 w-4" />
+                    <span>All Articles</span>
+                  </Link>
+                  <Link 
+                    href="/learning-hub/search" 
+                    className={`text-lg font-medium transition-colors flex items-center space-x-2 ${
+                      isActive('/learning-hub/search') ? 'text-primary' : 'hover:text-primary'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Search className="h-4 w-4" />
+                    <span>Search</span>
+                  </Link>
+                  <Link 
+                    href="/learning-hub/video-tutorials" 
+                    className={`text-lg font-medium transition-colors flex items-center space-x-2 ${
+                      isActive('/learning-hub/video-tutorials') ? 'text-primary' : 'hover:text-primary'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Video className="h-4 w-4" />
+                    <span>Videos</span>
+                  </Link>
+                  <Link 
+                    href="/learning-hub/resources" 
+                    className={`text-lg font-medium transition-colors flex items-center space-x-2 ${
+                      isActive('/learning-hub/resources') ? 'text-primary' : 'hover:text-primary'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>Resources</span>
                   </Link>
                 </nav>
                 <div className="pt-6 border-t">
@@ -216,10 +296,10 @@ const LearningHubFooter = () => {
             <h4 className="font-semibold mb-4 text-foreground">Quick Links</h4>
             <ul className="space-y-3 text-sm" role="list">
               <li><Link href="/learning-hub" className="text-muted-foreground hover:text-primary transition-colors">Overview</Link></li>
-              <li><Link href="/learning-hub/clients" className="text-muted-foreground hover:text-primary transition-colors">Client Guide</Link></li>
-              <li><Link href="/learning-hub/providers" className="text-muted-foreground hover:text-primary transition-colors">Provider Guide</Link></li>
-              <li><Link href="/learning-hub/agencies" className="text-muted-foreground hover:text-primary transition-colors">Agency Guide</Link></li>
-              <li><Link href="/learning-hub/partners" className="text-muted-foreground hover:text-primary transition-colors">Partner Guide</Link></li>
+              <li><Link href="/learning-hub/all-articles" className="text-muted-foreground hover:text-primary transition-colors">All Articles</Link></li>
+              <li><Link href="/learning-hub/getting-started" className="text-muted-foreground hover:text-primary transition-colors">Getting Started</Link></li>
+              <li><Link href="/learning-hub/features" className="text-muted-foreground hover:text-primary transition-colors">Features Guide</Link></li>
+              <li><Link href="/learning-hub/troubleshooting" className="text-muted-foreground hover:text-primary transition-colors">Help & Support</Link></li>
             </ul>
           </div>
           <div>

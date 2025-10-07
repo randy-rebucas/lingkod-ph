@@ -1,29 +1,57 @@
-import { initializeApp, getApps } from 'firebase-admin/app';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { getAuth } from 'firebase-admin/auth';
 
-// Initialize Firebase Admin SDK with fallback configuration for development
+// Initialize Firebase Admin SDK with proper credentials
+let adminDb: any = null;
+let adminStorage: any = null;
+let adminAuth: any = null;
+
 if (!getApps().length) {
   try {
-    // Try to initialize with project ID if available
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'localpro-dev';
     
-    initializeApp({
-      projectId: projectId,
-      storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${projectId}.appspot.com`,
-    });
+    // Check if we have service account credentials
+    if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
+      // Initialize with service account credentials
+      initializeApp({
+        credential: cert({
+          projectId: projectId,
+          privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        }),
+        projectId: projectId,
+        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${projectId}.appspot.com`,
+      });
+      console.log('✅ Firebase Admin SDK initialized with service account credentials');
+    } else {
+      // Initialize with project ID only (for development)
+      initializeApp({
+        projectId: projectId,
+        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${projectId}.appspot.com`,
+      });
+      console.log('⚠️ Firebase Admin SDK initialized without service account credentials (development mode)');
+    }
+    
+    // Initialize services
+    adminDb = getFirestore();
+    adminStorage = getStorage();
+    adminAuth = getAuth();
+    
   } catch (error) {
-    console.warn('Firebase Admin initialization failed:', error);
-    // Initialize with minimal config for development
-    initializeApp({
-      projectId: 'localpro-dev',
-      storageBucket: 'localpro-dev.appspot.com',
-    });
+    console.error('❌ Firebase Admin initialization failed:', error);
+    // Set to null to indicate failure
+    adminDb = null;
+    adminStorage = null;
+    adminAuth = null;
   }
+} else {
+  // App already initialized, get services
+  adminDb = getFirestore();
+  adminStorage = getStorage();
+  adminAuth = getAuth();
 }
 
-// Export with error handling for development
-export const adminDb = getFirestore();
-export const adminStorage = getStorage();
-export const adminAuth = getAuth();
+// Export with error handling
+export { adminDb, adminStorage, adminAuth };

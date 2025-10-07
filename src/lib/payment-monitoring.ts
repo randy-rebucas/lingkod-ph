@@ -123,7 +123,7 @@ export class PaymentMonitoringService {
       let verifiedPayments = 0;
       let rejectedPayments = 0;
 
-      metricsQuery.docs.forEach(doc => {
+      metricsQuery.docs.forEach((doc: any) => {
         const data = doc.data();
         totalPayments += data.totalPayments || 0;
         successfulPayments += data.successfulPayments || 0;
@@ -181,7 +181,7 @@ export class PaymentMonitoringService {
 
       const stats: Record<string, { count: number; amount: number; successCount: number }> = {};
 
-      eventsQuery.docs.forEach(doc => {
+      eventsQuery.docs.forEach((doc: any) => {
         const data = doc.data();
         const method = data.paymentMethod;
 
@@ -276,9 +276,9 @@ export class PaymentMonitoringService {
 
       if (eventsQuery.empty) return false;
 
-      const amounts = eventsQuery.docs.map(doc => doc.data().amount);
-      const mean = amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
-      const variance = amounts.reduce((sum, amount) => sum + Math.pow(amount - mean, 2), 0) / amounts.length;
+      const amounts = eventsQuery.docs.map((doc: any) => doc.data().amount);
+      const mean = amounts.reduce((sum: number, amount: number) => sum + amount, 0) / amounts.length;
+      const variance = amounts.reduce((sum: number, amount: number) => sum + Math.pow(amount - mean, 2), 0) / amounts.length;
       const stdDev = Math.sqrt(variance);
 
       // Check if any recent payments are more than 3 standard deviations from mean
@@ -287,7 +287,7 @@ export class PaymentMonitoringService {
         .where('timestamp', '>=', new Date(today.getTime() - 24 * 60 * 60 * 1000))
         .get();
 
-      return recentPayments.docs.some(doc => {
+      return recentPayments.docs.some((doc: any) => {
         const amount = doc.data().amount;
         return Math.abs(amount - mean) > 3 * stdDev;
       });
@@ -313,7 +313,7 @@ export class PaymentMonitoringService {
       const paymentMap = new Map<string, number>();
       let duplicates = 0;
 
-      eventsQuery.docs.forEach(doc => {
+      eventsQuery.docs.forEach((doc: any) => {
         const data = doc.data();
         const key = `${data.bookingId}_${data.amount}_${data.paymentMethod}`;
         const count = paymentMap.get(key) || 0;

@@ -65,25 +65,84 @@ const AgenciesLearningPage = () => {
       step: 1,
       title: "Agency Registration",
       description: "Register your agency and provide business documentation",
-      details: "Submit your business registration, permits, and agency information for verification."
+      details: "Submit your business registration, permits, insurance certificates, and agency information for verification.",
+      estimatedTime: "15 minutes",
+      icon: <Building2 className="h-6 w-6" />
     },
     {
       step: 2,
-      title: "Team Onboarding",
-      description: "Add and verify your service providers",
-      details: "Invite your team members and ensure they complete the provider verification process."
+      title: "Business Verification",
+      description: "Complete business verification and compliance checks",
+      details: "Our team verifies your business credentials, insurance coverage, and compliance with local regulations.",
+      estimatedTime: "3-5 business days",
+      icon: <Shield className="h-6 w-6" />
     },
     {
       step: 3,
-      title: "Platform Setup",
-      description: "Configure your agency dashboard and settings",
-      details: "Set up your agency profile, service categories, pricing, and operational preferences."
+      title: "Team Onboarding",
+      description: "Add and verify your service providers",
+      details: "Invite your team members, ensure they complete individual provider verification, and set up team hierarchies.",
+      estimatedTime: "2-3 days per provider",
+      icon: <Users className="h-6 w-6" />
     },
     {
       step: 4,
+      title: "Platform Setup",
+      description: "Configure your agency dashboard and settings",
+      details: "Set up your agency profile, service categories, pricing structures, operational preferences, and quality standards.",
+      estimatedTime: "30 minutes",
+      icon: <Settings className="h-6 w-6" />
+    },
+    {
+      step: 5,
+      title: "Quality Assurance Setup",
+      description: "Establish quality control and monitoring systems",
+      details: "Set up quality standards, monitoring systems, training programs, and performance metrics for your team.",
+      estimatedTime: "1 hour",
+      icon: <Award className="h-6 w-6" />
+    },
+    {
+      step: 6,
       title: "Go Live",
       description: "Start accepting bookings and managing operations",
-      details: "Launch your agency on LocalPro and begin serving clients in your area."
+      details: "Launch your agency on LocalPro, begin serving clients, and start building your reputation in the market.",
+      estimatedTime: "Immediate",
+      icon: <Target className="h-6 w-6" />
+    }
+  ];
+
+  const agencyTutorials = [
+    {
+      title: "Agency Setup Complete Guide",
+      description: "Complete step-by-step guide to setting up your agency on LocalPro",
+      duration: "20 minutes",
+      difficulty: "Beginner",
+      topics: ["Registration", "Verification", "Team Setup", "Configuration"],
+      href: "/learning-hub/articles/agency-setup-guide"
+    },
+    {
+      title: "Team Management Best Practices",
+      description: "Learn how to effectively manage and coordinate your service provider team",
+      duration: "15 minutes",
+      difficulty: "Intermediate",
+      topics: ["Team Coordination", "Scheduling", "Performance", "Communication"],
+      href: "/learning-hub/articles/team-management"
+    },
+    {
+      title: "Quality Control Systems",
+      description: "Establish and maintain high service quality standards across your agency",
+      duration: "12 minutes",
+      difficulty: "Intermediate",
+      topics: ["Quality Standards", "Monitoring", "Training", "Improvement"],
+      href: "/learning-hub/articles/quality-control"
+    },
+    {
+      title: "Agency Analytics and Reporting",
+      description: "Understanding your agency's performance metrics and growth analytics",
+      duration: "10 minutes",
+      difficulty: "Beginner",
+      topics: ["Analytics", "Reports", "KPIs", "Growth Metrics"],
+      href: "/learning-hub/articles/agency-analytics"
     }
   ];
 
@@ -91,22 +150,38 @@ const AgenciesLearningPage = () => {
     {
       icon: <BarChart3 className="h-5 w-5" />,
       title: "Performance Analytics",
-      description: "Track bookings, revenue, and provider performance"
+      description: "Track bookings, revenue, and provider performance",
+      features: ["Revenue Reports", "Provider Performance", "Client Analytics", "Growth Metrics"]
     },
     {
       icon: <Users className="h-5 w-5" />,
       title: "Team Management",
-      description: "Manage provider schedules, assignments, and performance"
+      description: "Manage provider schedules, assignments, and performance",
+      features: ["Team Scheduling", "Assignment Management", "Performance Tracking", "Communication Tools"]
     },
     {
       icon: <Settings className="h-5 w-5" />,
       title: "Quality Assurance",
-      description: "Monitor service quality and client satisfaction"
+      description: "Monitor service quality and client satisfaction",
+      features: ["Quality Monitoring", "Client Feedback", "Training Programs", "Standards Management"]
     },
     {
       icon: <Globe className="h-5 w-5" />,
       title: "Market Expansion",
-      description: "Access new markets and customer segments"
+      description: "Access new markets and customer segments",
+      features: ["Market Analysis", "Expansion Tools", "Client Acquisition", "Territory Management"]
+    },
+    {
+      icon: <CreditCard className="h-5 w-5" />,
+      title: "Financial Management",
+      description: "Manage agency finances, payouts, and revenue",
+      features: ["Revenue Tracking", "Provider Payouts", "Financial Reports", "Tax Management"]
+    },
+    {
+      icon: <Award className="h-5 w-5" />,
+      title: "Brand Management",
+      description: "Maintain consistent brand standards and reputation",
+      features: ["Brand Guidelines", "Reputation Management", "Marketing Tools", "Client Relations"]
     }
   ];
 
@@ -308,6 +383,58 @@ const AgenciesLearningPage = () => {
                 ))}
               </CardContent>
             </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Tutorials Section */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">Agency Tutorials</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Comprehensive tutorials to help you build and manage a successful agency.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {agencyTutorials.map((tutorial, index) => (
+              <Card key={index} className="hover:shadow-lg transition-all duration-300 group">
+                <CardHeader>
+                  <div className="flex items-start justify-between mb-2">
+                    <Badge variant="outline" className="text-xs">
+                      {tutorial.difficulty}
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {tutorial.duration}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                    <Link href={tutorial.href} className="hover:underline">
+                      {tutorial.title}
+                    </Link>
+                  </CardTitle>
+                  <CardDescription className="text-base">
+                    {tutorial.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    {tutorial.topics.map((topic, topicIndex) => (
+                      <Badge key={topicIndex} variant="secondary" className="text-xs">
+                        {topic}
+                      </Badge>
+                    ))}
+                  </div>
+                  <Button variant="ghost" size="sm" asChild className="w-full group-hover:bg-primary/10">
+                    <Link href={tutorial.href} className="flex items-center justify-center space-x-1">
+                      <span>Start Tutorial</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
