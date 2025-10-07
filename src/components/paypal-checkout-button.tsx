@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Smartphone, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { Loader2, CreditCard, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/use-error-handler';
 import { useAuth } from '@/context/auth-context';
 import { PaymentRetryService } from '@/lib/payment-retry-service';
+// PayPal service is only used on server-side, not in client components
 
-interface GCashPaymentButtonProps {
+interface PayPalCheckoutButtonProps {
   bookingId: string;
   amount: number;
   serviceName: string;
@@ -20,26 +21,32 @@ interface GCashPaymentButtonProps {
   onPaymentError?: (error: string) => void;
 }
 
-export function GCashPaymentButton({
+export function PayPalCheckoutButton({
   bookingId,
   amount,
   serviceName,
   onPaymentStart,
   onPaymentSuccess,
   onPaymentError,
-}: GCashPaymentButtonProps) {
+}: PayPalCheckoutButtonProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
-  const [redirectUrl, setRedirectUrl] = useState<string>('');
+  const [approvalUrl, setApprovalUrl] = useState<string>('');
+  const [isConfigured, setIsConfigured] = useState(false);
   
   const router = useRouter();
   const { toast } = useToast();
   const { handleError } = useErrorHandler();
   const { getIdToken } = useAuth();
 
+  // Check PayPal configuration on mount
+  useEffect(() => {
+    setIsConfigured(!!(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET));
+  }, []);
+
   // Memoize the payment handler to prevent unnecessary re-renders
-  const handleGCashPayment = useCallback(async () => {
+  const handlePayPalPayment = useCallback(async () => {
     try {
       setIsProcessing(true);
       setPaymentStatus('processing');
@@ -50,11 +57,12 @@ export function GCashPaymentButton({
         throw new Error('Authentication required');
       }
 
-      const returnUrl = `${window.location.origin}/bookings/${bookingId}/payment/result`;
+      const returnUrl = `${window.location.origin}/bookings/${bookingId}/payment/result?method=paypal`;
+      const cancelUrl = `${window.location.origin}/bookings/${bookingId}/payment`;
       
       // Use retry service for payment creation
       const paymentResult = await PaymentRetryService.retryPaymentCreation(async () => {
-        const response = await fetch('/api/payments/gcash/create', {
+        const response = await fetch('/api/payments/paypal/create', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -63,6 +71,7 @@ export function GCashPaymentButton({
           body: JSON.stringify({
             bookingId,
             returnUrl,
+            cancelUrl,
           }),
         });
 
@@ -82,20 +91,20 @@ export function GCashPaymentButton({
       if (result.success) {
         // Payment event tracking will be handled server-side
 
-        if (result.redirectUrl) {
-          // Redirect to GCash payment page
-          setRedirectUrl(result.redirectUrl);
+        if (result.approvalUrl) {
+          // Redirect to PayPal payment page
+          setApprovalUrl(result.approvalUrl);
           setPaymentStatus('processing');
           
           // Open in new tab or redirect
-          window.location.href = result.redirectUrl;
+          window.location.href = result.approvalUrl;
         } else {
           // Payment was immediately successful
           setPaymentStatus('success');
           onPaymentSuccess?.();
           toast({
             title: 'Payment Successful!',
-            description: 'Your GCash payment has been processed successfully.',
+            description: 'Your PayPal payment has been processed successfully.',
           });
           
           // Redirect to bookings page after a short delay
@@ -110,12 +119,12 @@ export function GCashPaymentButton({
         toast({
           variant: 'destructive',
           title: 'Payment Failed',
-          description: result.error || 'Your GCash payment could not be processed.',
+          description: result.error || 'Your PayPal payment could not be processed.',
         });
       }
     } catch (error) {
       setPaymentStatus('error');
-      const errorMessage = handleError(error, 'GCash payment');
+      const errorMessage = handleError(error, 'PayPal payment');
       setErrorMessage(errorMessage);
       onPaymentError?.(errorMessage);
     } finally {
@@ -123,7 +132,7 @@ export function GCashPaymentButton({
     }
   }, [bookingId, getIdToken, onPaymentStart, onPaymentSuccess, onPaymentError, toast, router, handleError]);
 
-  const handlePaymentResult = async (pspReference: string) => {
+  const handlePaymentResult = async (orderId: string) => {
     try {
       setIsProcessing(true);
       
@@ -132,7 +141,7 @@ export function GCashPaymentButton({
         throw new Error('Authentication required');
       }
       
-      const response = await fetch('/api/payments/gcash/result', {
+      const response = await fetch('/api/payments/paypal/capture', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +149,7 @@ export function GCashPaymentButton({
         },
         body: JSON.stringify({
           bookingId,
-          pspReference,
+          orderId,
         }),
       });
 
@@ -151,7 +160,7 @@ export function GCashPaymentButton({
         onPaymentSuccess?.();
         toast({
           title: 'Payment Successful!',
-          description: 'Your GCash payment has been confirmed.',
+          description: 'Your PayPal payment has been confirmed.',
         });
         
         // Redirect to bookings page
@@ -181,22 +190,25 @@ export function GCashPaymentButton({
   // Check for payment result in URL parameters (for redirect handling)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const pspReference = urlParams.get('pspReference');
-    const resultCode = urlParams.get('resultCode');
+    const orderId = urlParams.get('orderId');
+    const method = urlParams.get('method');
     
-    if (pspReference && resultCode) {
-      if (resultCode === 'Authorised') {
-        handlePaymentResult(pspReference);
-      } else {
-        setPaymentStatus('error');
-        setErrorMessage('Payment was not successful');
-        onPaymentError?.('Payment was not successful');
-      }
+    if (orderId && method === 'paypal') {
+      handlePaymentResult(orderId);
     }
-  }, [handlePaymentResult, onPaymentError]);
+  }, [handlePaymentResult]);
 
   // Memoize the payment button render to prevent unnecessary re-renders
   const renderPaymentButton = useMemo(() => {
+    if (!isConfigured) {
+      return (
+        <Button disabled className="w-full" aria-label="PayPal not configured">
+          <CreditCard className="mr-2 h-4 w-4" />
+          PayPal Not Available
+        </Button>
+      );
+    }
+
     switch (paymentStatus) {
       case 'processing':
         return (
@@ -218,12 +230,12 @@ export function GCashPaymentButton({
         return (
           <div className="space-y-2">
             <Button 
-              onClick={handleGCashPayment}
+              onClick={handlePayPalPayment}
               className="w-full"
               disabled={isProcessing}
               aria-label="Retry payment"
             >
-              <Smartphone className="mr-2 h-4 w-4" />
+              <CreditCard className="mr-2 h-4 w-4" />
               Try Again
             </Button>
             <Alert variant="destructive" role="alert">
@@ -238,27 +250,27 @@ export function GCashPaymentButton({
       default:
         return (
           <Button 
-            onClick={handleGCashPayment}
+            onClick={handlePayPalPayment}
             className="w-full"
             disabled={isProcessing}
-            aria-label="Pay with GCash"
+            aria-label="Pay with PayPal"
           >
-            <Smartphone className="mr-2 h-4 w-4" />
-            Pay with GCash
+            <CreditCard className="mr-2 h-4 w-4" />
+            Pay with PayPal
           </Button>
         );
     }
-  }, [paymentStatus, isProcessing, errorMessage, handleGCashPayment]);
+  }, [paymentStatus, isProcessing, errorMessage, handlePayPalPayment, isConfigured]);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Smartphone className="h-5 w-5 text-blue-500" />
-          GCash Payment
+          <CreditCard className="h-5 w-5 text-blue-500" />
+          PayPal Payment
         </CardTitle>
         <CardDescription>
-          Pay securely with GCash - instant confirmation
+          Pay securely with PayPal - instant confirmation
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -269,13 +281,13 @@ export function GCashPaymentButton({
         
         {renderPaymentButton}
         
-        {redirectUrl && (
+        {approvalUrl && (
           <Alert>
             <ExternalLink className="h-4 w-4" />
             <AlertDescription>
-              You will be redirected to GCash to complete your payment. 
+              You will be redirected to PayPal to complete your payment. 
               <a 
-                href={redirectUrl} 
+                href={approvalUrl} 
                 className="ml-1 text-blue-600 hover:underline"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -287,7 +299,7 @@ export function GCashPaymentButton({
         )}
         
         <div className="text-xs text-muted-foreground text-center">
-          <p>• Secure payment processing by Adyen</p>
+          <p>• Secure payment processing by PayPal</p>
           <p>• Instant payment confirmation</p>
           <p>• No manual verification required</p>
         </div>

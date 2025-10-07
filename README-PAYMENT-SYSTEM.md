@@ -18,8 +18,8 @@ This will run a comprehensive validation of the entire payment system and provid
 ### ✅ Core Payment Features
 
 #### 1. Booking Payments
-- **Automated GCash**: Adyen-powered GCash payments with instant confirmation
-- **Manual Payment Methods**: GCash, Maya, and Bank Transfer with proof upload
+- **PayPal Payments**: Automated payments and subscriptions
+- **Manual Payment Methods**: Bank Transfer with proof upload
 - **Payment Verification**: Admin interface for manual payment verification
 - **Real-time Updates**: Live payment status updates and notifications
 
@@ -32,7 +32,7 @@ This will run a comprehensive validation of the entire payment system and provid
 ## 🏗️ Technical Architecture
 
 ### Core Services
-- **`AdyenPaymentService`**: Complete Adyen integration for GCash payments
+- **`PayPalCheckoutButton`**: Complete PayPal integration for payments
 - **`PaymentConfig`**: Centralized payment configuration management
 - **`PaymentValidator`**: Comprehensive payment validation system
 - **`PaymentRetryService`**: Robust retry mechanisms for failed operations
@@ -41,14 +41,11 @@ This will run a comprehensive validation of the entire payment system and provid
 - **`PaymentFlowTester`**: Comprehensive payment flow testing
 
 ### API Endpoints
-- **`/api/payments/gcash/create`**: Create GCash payment sessions
-- **`/api/payments/gcash/result`**: Handle payment result verification
-- **`/api/payments/gcash/webhook`**: Process Adyen webhooks
+- **`/api/payments/paypal/webhook`**: Process PayPal webhooks
 - **`/api/admin/secure-action`**: Admin payment operations
 
 ### Frontend Components
 - **`PayPalCheckoutButton`**: Subscription payment component
-- **`GCashPaymentButton`**: Automated GCash payment component
 - **Payment Pages**: Complete payment flow interfaces
 - **Admin Interfaces**: Payment verification and management
 
@@ -122,7 +119,7 @@ This will run a comprehensive validation of the entire payment system and provid
 
 ### Environment Setup
 1. **Configure Environment Variables**: Set up all required environment variables
-2. **Payment Gateway Setup**: Configure live Adyen and PayPal accounts
+2. **Payment Gateway Setup**: Configure live PayPal account
 3. **Database Configuration**: Set up production Firestore database
 4. **SSL Configuration**: Configure HTTPS and SSL certificates
 5. **Domain Setup**: Configure production domain and DNS
@@ -138,14 +135,6 @@ This will run a comprehensive validation of the entire payment system and provid
 
 ### Required Environment Variables
 
-#### Adyen Configuration
-```env
-ADYEN_API_KEY=your_adyen_api_key_here
-ADYEN_MERCHANT_ACCOUNT=your_merchant_account_here
-ADYEN_ENVIRONMENT=live
-ADYEN_CLIENT_KEY=your_client_key_here
-ADYEN_HMAC_KEY=your_hmac_key_here
-```
 
 #### PayPal Configuration
 ```env
@@ -155,10 +144,6 @@ PAYPAL_CLIENT_SECRET=your_paypal_secret_here
 
 #### Payment Method Details
 ```env
-GCASH_ACCOUNT_NAME=Your Real GCash Account Name
-GCASH_ACCOUNT_NUMBER=Your Real GCash Account Number
-MAYA_ACCOUNT_NAME=Your Real Maya Account Name
-MAYA_ACCOUNT_NUMBER=Your Real Maya Account Number
 BANK_ACCOUNT_NAME=Your Real Bank Account Name
 BANK_ACCOUNT_NUMBER=Your Real Bank Account Number
 BANK_NAME=Your Bank Name
@@ -188,7 +173,7 @@ ENCRYPTION_KEY=your_strong_encryption_key
 ## 🎯 Key Benefits
 
 ### For Users
-- **Multiple Payment Methods**: PayPal, GCash, Maya, Bank Transfer
+- **Multiple Payment Methods**: PayPal, Bank Transfer
 - **Instant Confirmation**: Automated payment confirmation
 - **Secure Transactions**: Bank-level security for all payments
 - **Mobile Optimized**: Optimized for mobile devices
@@ -220,7 +205,7 @@ The payment system is now fully production-ready with:
 ## 🚀 Next Steps
 
 1. **Configure Production Environment**: Set up production environment variables
-2. **Set Up Payment Gateways**: Configure live Adyen and PayPal accounts
+2. **Set Up Payment Gateways**: Configure live PayPal account
 3. **Deploy to Production**: Deploy the system to production
 4. **Monitor Closely**: Monitor the system closely after deployment
 5. **Go Live**: Launch the payment system for users

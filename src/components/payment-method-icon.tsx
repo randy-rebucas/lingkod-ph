@@ -11,7 +11,7 @@ type PaymentMethodIconProps = {
 export const PaymentMethodIcon = memo(function PaymentMethodIcon({ method }: PaymentMethodIconProps) {
     const icon = useMemo(() => {
         const lowerMethod = method.toLowerCase();
-        if (lowerMethod.includes('gcash') || lowerMethod.includes('maya') || lowerMethod.includes('coins')) {
+        if (lowerMethod.includes('coins')) {
             return <Wallet className="h-6 w-6 text-blue-500" aria-hidden="true" />;
         }
         if (lowerMethod.includes('bdo') || lowerMethod.includes('bpi') || lowerMethod.includes('unionbank')) {

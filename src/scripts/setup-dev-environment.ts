@@ -22,29 +22,18 @@ JWT_SECRET=dev-jwt-secret-key-${Date.now()}
 ENCRYPTION_KEY=dev-encryption-key-32-chars-long
 
 # Payment Configuration
-# GCash Configuration
-GCASH_ACCOUNT_NAME=LocalPro Services
-GCASH_ACCOUNT_NUMBER=0917-123-4567
-
-# Maya Configuration
-MAYA_ACCOUNT_NAME=LocalPro Services
-MAYA_ACCOUNT_NUMBER=0918-000-5678
 
 # Bank Configuration
 BANK_ACCOUNT_NAME=LocalPro Services Inc.
 BANK_ACCOUNT_NUMBER=1234-5678-90
 BANK_NAME=BPI
 
-# Adyen Configuration (for GCash payments) - Set these for production
-ADYEN_API_KEY=
-ADYEN_MERCHANT_ACCOUNT=
-ADYEN_ENVIRONMENT=test
-ADYEN_CLIENT_KEY=
-ADYEN_HMAC_KEY=
 
 # PayPal Configuration - Set these for production
-NEXT_PUBLIC_PAYPAL_CLIENT_ID=
-PAYPAL_CLIENT_SECRET=
+# Get these from https://developer.paypal.com/
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=your_paypal_client_id_here
+PAYPAL_CLIENT_SECRET=your_paypal_client_secret_here
+PAYPAL_WEBHOOK_CERT_ID=your_webhook_cert_id_here
 
 # Email Configuration - Set these for production
 RESEND_API_KEY=
@@ -80,12 +69,11 @@ function setupDevelopmentEnvironment() {
   console.log('📋 Next Steps:');
   console.log('1. Update Firebase configuration in .env.local');
   console.log('2. Set up Firebase project and get your configuration values');
-  console.log('3. For production, configure Adyen and PayPal credentials');
+  console.log('3. For production, configure PayPal credentials');
   console.log('4. Run the payment system validation: npm run validate-payment-system\n');
 
   console.log('🔧 Development Mode Features:');
   console.log('- Payment system will work with manual uploads');
-  console.log('- GCash automated payments require Adyen configuration');
   console.log('- PayPal payments require PayPal configuration');
   console.log('- Firebase features will be limited without proper configuration\n');
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adyenPaymentService } from '@/lib/adyen-payment-service';
+import { paypalPaymentService } from '@/lib/paypal-payment-service';
 import { adminDb as db } from '@/lib/firebase-admin';
 import { getAuth } from 'firebase-admin/auth';
 
@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { bookingId, returnUrl } = body;
+    const { bookingId, orderId } = body;
 
-    if (!bookingId || !returnUrl) {
+    if (!bookingId || !orderId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -39,30 +39,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized access to booking' }, { status: 403 });
     }
 
-    // Check if booking is in correct state for payment
-    if (bookingData?.status !== 'Pending Payment') {
-      return NextResponse.json({ error: 'Booking is not in pending payment state' }, { status: 400 });
+    // Verify PayPal order exists and belongs to this booking
+    const orderDoc = await db.collection('paypalOrders').doc(bookingId).get();
+    if (!orderDoc.exists) {
+      return NextResponse.json({ error: 'PayPal order not found' }, { status: 404 });
     }
 
-    // Create GCash payment
-    const paymentRequest = {
-      amount: bookingData.price,
-      currency: 'PHP',
-      reference: `booking_${bookingId}_${Date.now()}`,
-      returnUrl,
-      bookingId,
-      clientId: decodedToken.uid,
-      serviceName: bookingData.serviceName,
-    };
+    const orderData = orderDoc.data();
+    if (orderData?.orderId !== orderId) {
+      return NextResponse.json({ error: 'Invalid PayPal order' }, { status: 400 });
+    }
 
-    const result = await adyenPaymentService.createGCashPayment(paymentRequest);
+    // Capture PayPal payment
+    const result = await paypalPaymentService.captureOrder(orderId, bookingId, db);
 
     if (result.success) {
       return NextResponse.json({
         success: true,
-        paymentId: result.paymentId,
-        redirectUrl: result.redirectUrl,
-        pspReference: result.pspReference,
+        transactionId: result.transactionId,
+        payerEmail: result.payerEmail,
       });
     } else {
       return NextResponse.json({
@@ -71,13 +66,13 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
   } catch (error) {
-    console.error('GCash payment creation error:', error);
+    console.error('PayPal payment capture error:', error);
     
     let errorMessage = 'Internal server error';
     let statusCode = 500;
     
     if (error instanceof Error) {
-      if (error.message.includes('Adyen')) {
+      if (error.message.includes('PayPal')) {
         errorMessage = 'Payment service temporarily unavailable';
         statusCode = 503;
       } else if (error.message.includes('network') || error.message.includes('fetch')) {

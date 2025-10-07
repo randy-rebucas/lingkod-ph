@@ -10,7 +10,7 @@ This guide provides a comprehensive setup for integrating n8n workflow automatio
 - **Framework**: Next.js 15.3.3 with TypeScript
 - **Database**: Firebase Firestore
 - **Authentication**: Firebase Auth with RBAC
-- **Payment**: Adyen, PayPal, GCash, Maya, Bank Transfer
+- **Payment**: PayPal, Bank Transfer
 - **AI**: Google AI (Genkit)
 - **Email**: Resend with React Email templates
 

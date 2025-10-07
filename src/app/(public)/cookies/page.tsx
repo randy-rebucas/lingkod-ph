@@ -79,7 +79,7 @@ export default function CookiesPage() {
         "Google Analytics: We use Google Analytics to analyze the use of our website. Google Analytics gathers information about website use by means of cookies. The information gathered relating to our website is used to create reports about the use of our website.",
         "Google Ads: We use Google Ads to display relevant advertisements. Google may use cookies to serve ads based on your prior visits to our website or other websites.",
         "Facebook Pixel: We use Facebook Pixel to track conversions from Facebook ads, optimize ads, build audiences for future ads, and remarket to people who have taken action on our website.",
-        "Payment Processors: Our payment partners (Adyen, GCash) may set cookies to process payments securely and prevent fraud.",
+        "Payment Processors: Our payment partners (PayPal) may set cookies to process payments securely and prevent fraud.",
         "Social Media: Social media platforms may set cookies when you interact with social media features on our website.",
       ],
       important: true

@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react';
 import { PaymentMethodIcon } from '../payment-method-icon';
 
 describe('PaymentMethodIcon', () => {
-  it('renders GCash icon', () => {
-    render(<PaymentMethodIcon method="gcash" />);
-    expect(screen.getByLabelText('Payment method: gcash')).toBeInTheDocument();
+  it('renders wallet icon for coins', () => {
+    render(<PaymentMethodIcon method="coins" />);
+    expect(screen.getByLabelText('Payment method: coins')).toBeInTheDocument();
   });
 
   it('renders bank icon', () => {

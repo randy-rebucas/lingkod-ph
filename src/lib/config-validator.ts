@@ -15,10 +15,6 @@ export function validatePaymentConfiguration(): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // Validate Adyen configuration
-  if (!PaymentConfig.validateAdyenConfig()) {
-    errors.push('Adyen configuration is incomplete');
-  }
 
   // Validate PayPal configuration
   if (!PaymentConfig.validatePayPalConfig()) {
@@ -26,8 +22,8 @@ export function validatePaymentConfiguration(): ValidationResult {
   }
 
   // Check for default values (warnings)
-  if (PaymentConfig.GCASH.accountNumber === '0917-123-4567') {
-    warnings.push('Using default GCash account number');
+  if (PaymentConfig.BANK.accountNumber === '1234-5678-90') {
+    warnings.push('Using default bank account number');
   }
 
   if (PaymentConfig.BANK.accountNumber === '1234-5678-90') {
@@ -62,22 +58,11 @@ export function validatePaymentConfiguration(): ValidationResult {
 /**
  * Validate specific payment method configuration
  */
-export function validatePaymentMethodConfig(method: 'gcash' | 'maya' | 'bank' | 'paypal' | 'adyen'): ValidationResult {
+export function validatePaymentMethodConfig(method: 'bank' | 'paypal'): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
 
   switch (method) {
-    case 'gcash':
-      if (!PaymentConfig.GCASH.accountName || !PaymentConfig.GCASH.accountNumber) {
-        errors.push('GCash configuration is incomplete');
-      }
-      break;
-    
-    case 'maya':
-      if (!PaymentConfig.MAYA.accountName || !PaymentConfig.MAYA.accountNumber) {
-        errors.push('Maya configuration is incomplete');
-      }
-      break;
     
     case 'bank':
       if (!PaymentConfig.BANK.accountName || !PaymentConfig.BANK.accountNumber || !PaymentConfig.BANK.bankName) {
@@ -91,11 +76,6 @@ export function validatePaymentMethodConfig(method: 'gcash' | 'maya' | 'bank' | 
       }
       break;
     
-    case 'adyen':
-      if (!PaymentConfig.validateAdyenConfig()) {
-        errors.push('Adyen configuration is incomplete');
-      }
-      break;
     
     default:
       errors.push('Unknown payment method');

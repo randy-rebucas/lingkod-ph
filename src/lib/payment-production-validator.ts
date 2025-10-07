@@ -83,11 +83,6 @@ export class PaymentProductionValidator {
     const details: string[] = [];
     let status: 'pass' | 'warning' | 'fail' = 'pass';
 
-    // Check Adyen configuration
-    if (!PaymentConfig.validateAdyenConfig()) {
-      status = 'fail';
-      details.push('Adyen configuration is incomplete');
-    }
 
     // Check PayPal configuration
     if (!PaymentConfig.validatePayPalConfig()) {
@@ -96,9 +91,9 @@ export class PaymentProductionValidator {
     }
 
     // Check for default values
-    if (PaymentConfig.GCASH.accountNumber === '0917-123-4567') {
+    if (PaymentConfig.BANK.accountNumber === '1234-5678-90') {
       status = status === 'fail' ? 'fail' : 'warning';
-      details.push('Using default GCash account number');
+      details.push('Using default bank account number');
     }
 
     if (PaymentConfig.BANK.accountNumber === '1234-5678-90') {
@@ -106,11 +101,6 @@ export class PaymentProductionValidator {
       details.push('Using default bank account number');
     }
 
-    // Check environment
-    if (PaymentConfig.ADYEN.environment === 'test') {
-      status = status === 'fail' ? 'fail' : 'warning';
-      details.push('Using test environment for Adyen');
-    }
 
     return {
       status,
@@ -147,10 +137,6 @@ export class PaymentProductionValidator {
     }
 
     // Check for secure API keys
-    if (PaymentConfig.ADYEN.apiKey.length < 20) {
-      status = 'fail';
-      details.push('Adyen API key appears to be invalid or too short');
-    }
 
     if (PaymentConfig.PAYPAL.clientId.length < 20) {
       status = 'fail';
@@ -344,10 +330,6 @@ export class PaymentProductionValidator {
     let status: 'pass' | 'warning' | 'fail' = 'pass';
 
     // Check webhook configuration
-    if (!PaymentConfig.ADYEN.hmacKey) {
-      status = 'fail';
-      details.push('Adyen HMAC key not configured for webhook verification');
-    }
 
     if (!process.env.NEXT_PUBLIC_APP_URL) {
       status = 'fail';
@@ -355,7 +337,7 @@ export class PaymentProductionValidator {
     }
 
     // Check webhook endpoint URL
-    const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/gcash/webhook`;
+    const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/paypal/webhook`;
     if (!webhookUrl.startsWith('https://')) {
       if (status !== 'fail') {
         status = 'warning';

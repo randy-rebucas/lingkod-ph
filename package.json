@@ -26,6 +26,7 @@
     "setup-dev": "tsx src/scripts/setup-dev-environment.ts",
     "seed:learning-hub": "tsx src/scripts/seed-learning-hub.ts",
     "seed:learning-hub:mock": "tsx src/scripts/seed-learning-hub-mock.ts",
+    "test-paypal": "tsx src/scripts/test-paypal-integration.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -45,12 +46,12 @@
     "n8n:backup": "docker exec localpro-n8n n8n export:workflow --all --output=/home/node/.n8n/backup"
   },
   "dependencies": {
-    "@adyen/adyen-web": "^6.22.0",
-    "@adyen/api-library": "^29.1.0",
     "@genkit-ai/googleai": "^1.13.0",
     "@genkit-ai/next": "^1.13.0",
     "@hookform/resolvers": "^3.9.0",
     "@opentelemetry/exporter-jaeger": "^2.1.0",
+    "@paypal/paypal-js": "^9.0.1",
+    "@paypal/react-paypal-js": "^8.9.2",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.6",
     "@radix-ui/react-avatar": "^1.1.3",
