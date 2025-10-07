@@ -7,7 +7,6 @@ import { PaymentConfig } from './payment-config';
 import { PaymentValidator } from './payment-validator';
 import { PaymentRetryService } from './payment-retry-service';
 import { PaymentMonitoringService } from './payment-monitoring';
-import { adyenPaymentService as _adyenPaymentService } from './adyen-payment-service';
 import { adminDb as _db } from './firebase-admin';
 
 export interface TestResult {
@@ -58,30 +57,6 @@ export class PaymentFlowTester {
     const results: TestResult[] = [];
     const startTime = Date.now();
 
-    // Test Adyen configuration
-    try {
-      const adyenValid = PaymentConfig.validateAdyenConfig();
-      results.push({
-        testName: 'Adyen Configuration',
-        status: adyenValid ? 'pass' : 'fail',
-        message: adyenValid ? 'Adyen configuration is valid' : 'Adyen configuration is invalid',
-        details: {
-          hasApiKey: !!PaymentConfig.ADYEN.apiKey,
-          hasMerchantAccount: !!PaymentConfig.ADYEN.merchantAccount,
-          hasClientKey: !!PaymentConfig.ADYEN.clientKey,
-          hasHmacKey: !!PaymentConfig.ADYEN.hmacKey,
-          environment: PaymentConfig.ADYEN.environment,
-        },
-      });
-    } catch (error) {
-      results.push({
-        testName: 'Adyen Configuration',
-        status: 'fail',
-        message: 'Error testing Adyen configuration',
-        details: { error: error instanceof Error ? error.message : String(error) },
-      });
-    }
-
     // Test PayPal configuration
     try {
       const paypalValid = PaymentConfig.validatePayPalConfig();
@@ -104,7 +79,7 @@ export class PaymentFlowTester {
     }
 
     // Test payment method configurations
-    const paymentMethods = ['gcash', 'maya', 'bank'] as const;
+    const paymentMethods = ['bank', 'paypal'] as const;
     for (const method of paymentMethods) {
       try {
         const validation = PaymentValidator.validatePaymentMethodConfig(method);
@@ -143,30 +118,30 @@ export class PaymentFlowTester {
     const results: TestResult[] = [];
     const startTime = Date.now();
 
-    // Test GCash automated payment
+    // Test PayPal payment
     try {
-      const adyenValid = PaymentConfig.validateAdyenConfig();
-      if (adyenValid) {
+      const paypalValid = PaymentConfig.validatePayPalConfig();
+      if (paypalValid) {
         // Test payment creation (without actually creating a payment)
         results.push({
-          testName: 'GCash Automated Payment',
+          testName: 'PayPal Payment',
           status: 'pass',
-          message: 'GCash automated payment configuration is ready',
+          message: 'PayPal payment configuration is ready',
           details: { configured: true },
         });
       } else {
         results.push({
-          testName: 'GCash Automated Payment',
+          testName: 'PayPal Payment',
           status: 'skip',
-          message: 'Adyen not configured - skipping GCash automated payment test',
+          message: 'PayPal not configured - skipping PayPal payment test',
           details: { configured: false },
         });
       }
     } catch (error) {
       results.push({
-        testName: 'GCash Automated Payment',
+        testName: 'PayPal Payment',
         status: 'fail',
-        message: 'Error testing GCash automated payment',
+        message: 'Error testing PayPal payment',
         details: { error: error instanceof Error ? error.message : String(error) },
       });
     }

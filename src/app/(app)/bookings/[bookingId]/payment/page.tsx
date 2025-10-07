@@ -12,17 +12,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Upload, Loader2, ClipboardCopy, Check, Wallet, Landmark, Info, Smartphone } from "lucide-react";
+import { ArrowLeft, Upload, Loader2, ClipboardCopy, Check, Landmark, Info, CreditCard } from "lucide-react";
 import Image from 'next/image';
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Booking } from "../../page";
-import { QRCode } from "@/components/qrcode-svg";
 import { PaymentConfig } from "@/lib/payment-config";
 import { PaymentRetryService } from "@/lib/payment-retry-service";
-import { GCashPaymentButton } from "@/components/gcash-payment-button";
+import { PayPalCheckoutButton } from "@/components/paypal-checkout-button";
 
 export default function PaymentPage() {
     const { bookingId } = useParams();
@@ -245,54 +243,6 @@ export default function PaymentPage() {
 
                         <div className="space-y-4">
                             <div className="flex items-center gap-3">
-                                <Wallet className="h-6 w-6 text-blue-500" />
-                                <h3 className="font-semibold text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">GCash Payment</h3>
-                            </div>
-
-                            <Tabs defaultValue="automated" className="w-full">
-                                <TabsList className="grid w-full grid-cols-2 bg-background/80 backdrop-blur-sm shadow-soft border-0">
-                                    <TabsTrigger value="automated" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300">
-                                        <Smartphone className="h-4 w-4" />
-                                        Instant
-                                    </TabsTrigger>
-                                    <TabsTrigger value="manual" className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-glow transition-all duration-300">
-                                        <Upload className="h-4 w-4" />
-                                        Manual
-                                    </TabsTrigger>
-                                </TabsList>
-
-                                <TabsContent value="automated" className="mt-4">
-                                    <GCashPaymentButton
-                                        bookingId={booking.id}
-                                        amount={booking.price || 0}
-                                        serviceName={booking.serviceName}
-                                        onPaymentSuccess={() => {
-                                            toast({ title: 'Payment Successful!', description: 'Your booking has been confirmed.' });
-                                            router.push('/bookings');
-                                        }}
-                                        onPaymentError={(error) => {
-                                            toast({ variant: 'destructive', title: 'Payment Failed', description: error });
-                                        }}
-                                    />
-                                </TabsContent>
-
-                                <TabsContent value="manual" className="mt-6">
-                                    <div className="p-4 rounded-lg bg-gradient-to-r from-muted/30 to-muted/20 border border-border/50 shadow-soft">
-                                        <div className="text-sm space-y-2">
-                                            <p><strong>Account Name:</strong> {PaymentConfig.GCASH.accountName}</p>
-                                            <p><strong>Account Number:</strong> {PaymentConfig.GCASH.accountNumber}</p>
-                                            <div className="w-32 h-32 mt-3 mx-auto"><QRCode /></div>
-                                            <p className="text-xs text-muted-foreground mt-3 text-center">
-                                                After payment, upload proof for manual verification
-                                            </p>
-                                        </div>
-                                    </div>
-                                </TabsContent>
-                            </Tabs>
-                        </div>
-                        <Separator className="bg-border/50" />
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3">
                                 <Landmark className="h-6 w-6 text-indigo-700" />
                                 <h3 className="font-semibold text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Bank Transfer (BPI)</h3>
                             </div>
@@ -305,6 +255,25 @@ export default function PaymentPage() {
                                     )}
                                 </div>
                             </div>
+                        </div>
+                        <Separator className="bg-border/50" />
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-3">
+                                <CreditCard className="h-6 w-6 text-blue-600" />
+                                <h3 className="font-semibold text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">PayPal Payment</h3>
+                            </div>
+                            <PayPalCheckoutButton
+                                bookingId={booking.id}
+                                amount={booking.price || 0}
+                                serviceName={booking.serviceName}
+                                onPaymentSuccess={() => {
+                                    toast({ title: 'Payment Successful!', description: 'Your booking has been confirmed.' });
+                                    router.push('/bookings');
+                                }}
+                                onPaymentError={(error) => {
+                                    toast({ variant: 'destructive', title: 'Payment Failed', description: error });
+                                }}
+                            />
                         </div>
 
                     </CardContent>

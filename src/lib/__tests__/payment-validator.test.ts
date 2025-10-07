@@ -88,7 +88,7 @@ describe('PaymentValidator', () => {
         get: jest.fn().mockResolvedValue(mockQuery),
       } as any);
 
-      const result = await PaymentValidator.checkDuplicatePayment('booking-1', 1000, 'gcash');
+      const result = await PaymentValidator.checkDuplicatePayment('booking-1', 1000, 'paypal');
 
       expect(result.isDuplicate).toBe(false);
       expect(result.existingTransaction).toBeUndefined();
@@ -102,7 +102,7 @@ describe('PaymentValidator', () => {
       const mockTransaction = {
         id: 'txn-1',
         amount: 1000,
-        paymentMethod: 'gcash',
+        paymentMethod: 'paypal',
         createdAt: { toDate: () => fiveMinutesAgo },
       };
 
@@ -118,7 +118,7 @@ describe('PaymentValidator', () => {
         get: jest.fn().mockResolvedValue(mockQuery),
       } as any);
 
-      const result = await PaymentValidator.checkDuplicatePayment('booking-1', 1000, 'gcash');
+      const result = await PaymentValidator.checkDuplicatePayment('booking-1', 1000, 'paypal');
 
       expect(result.isDuplicate).toBe(true);
       expect(result.existingTransaction).toEqual(mockTransaction);
@@ -132,7 +132,7 @@ describe('PaymentValidator', () => {
       const mockTransaction = {
         id: 'txn-1',
         amount: 1000,
-        paymentMethod: 'gcash',
+        paymentMethod: 'paypal',
         createdAt: { toDate: () => sixMinutesAgo },
       };
 
@@ -148,7 +148,7 @@ describe('PaymentValidator', () => {
         get: jest.fn().mockResolvedValue(mockQuery),
       } as any);
 
-      const result = await PaymentValidator.checkDuplicatePayment('booking-1', 1000, 'gcash');
+      const result = await PaymentValidator.checkDuplicatePayment('booking-1', 1000, 'paypal');
 
       expect(result.isDuplicate).toBe(false);
       expect(result.existingTransaction).toEqual(mockTransaction);
@@ -163,7 +163,7 @@ describe('PaymentValidator', () => {
         get: jest.fn().mockRejectedValue(new Error('Firestore error')),
       } as any);
 
-      const result = await PaymentValidator.checkDuplicatePayment('booking-1', 1000, 'gcash');
+      const result = await PaymentValidator.checkDuplicatePayment('booking-1', 1000, 'paypal');
 
       expect(result.isDuplicate).toBe(false);
       expect(result.existingTransaction).toBeUndefined();
@@ -547,53 +547,6 @@ describe('PaymentValidator', () => {
   });
 
   describe('validatePaymentMethodConfig', () => {
-    it('returns valid for gcash with complete config', () => {
-      mockPaymentConfig.GCASH = {
-        accountName: 'Test Account',
-        accountNumber: '09123456789',
-      };
-
-      const result = PaymentValidator.validatePaymentMethodConfig('gcash');
-
-      expect(result.valid).toBe(true);
-      expect(result.error).toBeUndefined();
-    });
-
-    it('returns invalid for gcash with incomplete config', () => {
-      mockPaymentConfig.GCASH = {
-        accountName: '',
-        accountNumber: '09123456789',
-      };
-
-      const result = PaymentValidator.validatePaymentMethodConfig('gcash');
-
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('GCash configuration is incomplete');
-    });
-
-    it('returns valid for maya with complete config', () => {
-      mockPaymentConfig.MAYA = {
-        accountName: 'Test Account',
-        accountNumber: '09123456789',
-      };
-
-      const result = PaymentValidator.validatePaymentMethodConfig('maya');
-
-      expect(result.valid).toBe(true);
-      expect(result.error).toBeUndefined();
-    });
-
-    it('returns invalid for maya with incomplete config', () => {
-      mockPaymentConfig.MAYA = {
-        accountName: 'Test Account',
-        accountNumber: '',
-      };
-
-      const result = PaymentValidator.validatePaymentMethodConfig('maya');
-
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Maya configuration is incomplete');
-    });
 
     it('returns valid for bank with complete config', () => {
       mockPaymentConfig.BANK = {
@@ -639,23 +592,6 @@ describe('PaymentValidator', () => {
       expect(result.error).toBe('PayPal configuration is incomplete');
     });
 
-    it('returns valid for adyen with valid config', () => {
-      mockPaymentConfig.validateAdyenConfig.mockReturnValue(true);
-
-      const result = PaymentValidator.validatePaymentMethodConfig('adyen');
-
-      expect(result.valid).toBe(true);
-      expect(result.error).toBeUndefined();
-    });
-
-    it('returns invalid for adyen with invalid config', () => {
-      mockPaymentConfig.validateAdyenConfig.mockReturnValue(false);
-
-      const result = PaymentValidator.validatePaymentMethodConfig('adyen');
-
-      expect(result.valid).toBe(false);
-      expect(result.error).toBe('Adyen configuration is incomplete');
-    });
 
     it('returns invalid for unknown payment method', () => {
       const result = PaymentValidator.validatePaymentMethodConfig('unknown' as any);
@@ -691,7 +627,7 @@ describe('PaymentValidator', () => {
       } as any);
 
       mockPaymentConfig.validatePaymentAmount.mockReturnValue(true);
-      mockPaymentConfig.GCASH = { accountName: 'Test', accountNumber: '09123456789' };
+      mockPaymentConfig.BANK = { accountName: 'Test', accountNumber: '09123456789', bankName: 'Test Bank' };
 
       const result = await PaymentValidator.validatePayment('booking-1', 'user-1', 1000, 'gcash');
 
@@ -741,7 +677,7 @@ describe('PaymentValidator', () => {
 
       mockPaymentConfig.validatePaymentAmount.mockReturnValue(true);
       mockPaymentConfig.validateFileUpload.mockReturnValue({ valid: true });
-      mockPaymentConfig.GCASH = { accountName: 'Test', accountNumber: '09123456789' };
+      mockPaymentConfig.BANK = { accountName: 'Test', accountNumber: '09123456789', bankName: 'Test Bank' };
 
       const result = await PaymentValidator.validatePayment('booking-1', 'user-1', 1000, 'gcash', mockFile);
 

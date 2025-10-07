@@ -13,7 +13,7 @@
 - **Multi-Role User System**: Support for Clients, Providers, Agencies, Admins, and Partners
 - **Service Discovery**: Advanced search and filtering with location-based results
 - **Booking Management**: Real-time booking system with calendar integration
-- **Payment Processing**: Multiple payment methods (GCash, Maya, PayPal, Cards, Bank Transfer)
+- **Payment Processing**: Multiple payment methods (PayPal, Bank Transfer)
 - **AI-Powered Features**: Smart rate suggestions, quote builder, and provider matching
 - **Internationalization**: English and Filipino (Tagalog) support
 - **Real-time Communication**: In-app messaging and email notifications
@@ -73,10 +73,9 @@
 - **AI Integration**: Google AI (Genkit) for smart features
 
 ### Payment System
-- **Primary Gateway**: Adyen (GCash, Cards, Bank Transfer)
-- **Secondary Gateway**: PayPal (Subscriptions)
-- **Manual Payments**: GCash, Maya, Bank Transfer with proof upload
-- **Security**: HMAC verification, encrypted storage, audit logging
+- **Primary Gateway**: PayPal (Subscriptions and Payments)
+- **Manual Payments**: Bank Transfer with proof upload
+- **Security**: Encrypted storage, audit logging
 
 ### Development Tools
 - **Package Manager**: npm
@@ -91,7 +90,6 @@
 - Node.js 18+ 
 - npm or yarn
 - Firebase project
-- Adyen account (for payments)
 - PayPal account (for subscriptions)
 
 ### Installation
@@ -122,12 +120,6 @@
    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
    NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
    
-   # Adyen Payment Configuration
-   ADYEN_API_KEY=your_adyen_api_key
-   ADYEN_MERCHANT_ACCOUNT=your_merchant_account
-   ADYEN_ENVIRONMENT=test
-   ADYEN_CLIENT_KEY=your_client_key
-   ADYEN_HMAC_KEY=your_hmac_key
    
    # PayPal Configuration
    NEXT_PUBLIC_PAYPAL_CLIENT_ID=your_paypal_client_id
@@ -215,10 +207,7 @@ npm run setup-dev        # Set up development environment
 LocalPro includes a comprehensive payment system supporting multiple payment methods:
 
 ### Supported Payment Methods
-- **GCash**: Automated payments via Adyen integration
-- **Maya**: Manual payment with proof upload
-- **PayPal**: Subscription payments and international transactions
-- **Credit/Debit Cards**: Via Adyen integration
+- **PayPal**: Automated payments and subscriptions
 - **Bank Transfer**: Manual payment with proof upload
 
 ### Payment Features
@@ -352,10 +341,6 @@ LocalPro includes comprehensive documentation covering all aspects of the platfo
 - **[Manual Payment Verification Guide](./docs/manual-payment-verification-guide.md)** - Manual payment process guide
 
 #### **Payment Integration Details**
-- **[Adyen GCash Integration](./docs/adyen-gcash-integration.md)** - Adyen payment gateway integration
-- **[Adyen Payment Service Fixes](./docs/adyen-payment-service-fixes.md)** - Service fixes and improvements
-- **[GCash Adyen Implementation Summary](./docs/gcash-adyen-implementation-summary.md)** - Implementation details
-- **[GCash Adyen Fixes Summary](./docs/gcash-adyen-fixes-summary.md)** - Fixes and improvements summary
 
 ### 🔒 Security Documentation
 
@@ -446,7 +431,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - Firebase for backend infrastructure
-- Adyen for payment processing
+- PayPal for payment processing
 - Next.js team for the amazing framework
 - Radix UI for accessible component primitives
 - Tailwind CSS for utility-first styling

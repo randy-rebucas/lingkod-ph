@@ -143,7 +143,7 @@ export interface Transaction {
   amount: number;
   type: 'service_payment' | 'payout_request' | 'refund' | 'commission';
   status: 'pending' | 'completed' | 'failed' | 'cancelled';
-  paymentMethod: 'gcash' | 'maya' | 'bank_transfer' | 'card' | 'paypal';
+  paymentMethod: 'bank_transfer' | 'card' | 'paypal';
   createdAt: Date;
   updatedAt: Date;
   completedAt?: Date;
@@ -203,7 +203,7 @@ export interface Payout {
   providerId: string;
   amount: number;
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  paymentMethod: 'gcash' | 'maya' | 'bank_transfer';
+  paymentMethod: 'bank_transfer';
   accountDetails: {
     accountName: string;
     accountNumber: string;

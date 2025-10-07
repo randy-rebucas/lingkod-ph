@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adyenPaymentService } from '@/lib/adyen-payment-service';
+import { paypalPaymentService } from '@/lib/paypal-payment-service';
 import { adminDb as db } from '@/lib/firebase-admin';
 import { getAuth } from 'firebase-admin/auth';
 
@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { bookingId, pspReference } = body;
+    const { bookingId, returnUrl, cancelUrl } = body;
 
-    if (!bookingId || !pspReference) {
+    if (!bookingId || !returnUrl || !cancelUrl) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -39,14 +39,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized access to booking' }, { status: 403 });
     }
 
-    // Handle payment result
-    const result = await adyenPaymentService.handlePaymentResult(bookingId, pspReference);
+    // Check if booking is in correct state for payment
+    if (bookingData?.status !== 'Pending Payment') {
+      return NextResponse.json({ error: 'Booking is not in pending payment state' }, { status: 400 });
+    }
+
+    // Create PayPal payment
+    const paymentRequest = {
+      amount: bookingData.price,
+      currency: 'PHP',
+      bookingId,
+      clientId: decodedToken.uid,
+      serviceName: bookingData.serviceName,
+      returnUrl,
+      cancelUrl,
+    };
+
+    const result = await paypalPaymentService.createOrder(paymentRequest, db);
 
     if (result.success) {
       return NextResponse.json({
         success: true,
-        paymentId: result.paymentId,
-        pspReference: result.pspReference,
+        orderId: result.orderId,
+        approvalUrl: result.approvalUrl,
       });
     } else {
       return NextResponse.json({
@@ -55,20 +70,20 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
   } catch (error) {
-    console.error('GCash payment result handling error:', error);
+    console.error('PayPal payment creation error:', error);
     
     let errorMessage = 'Internal server error';
     let statusCode = 500;
     
     if (error instanceof Error) {
-      if (error.message.includes('Adyen')) {
+      if (error.message.includes('PayPal')) {
         errorMessage = 'Payment service temporarily unavailable';
         statusCode = 503;
       } else if (error.message.includes('network') || error.message.includes('fetch')) {
         errorMessage = 'Network error. Please try again.';
         statusCode = 503;
       } else if (error.message.includes('validation')) {
-        errorMessage = 'Invalid payment verification request';
+        errorMessage = 'Invalid payment request';
         statusCode = 400;
       }
     }
