@@ -26,7 +26,6 @@ import {
   MessageSquare,
   Clock,
   Users,
-  Globe,
   Lock,
   CheckCircle,
   AlertCircle,
@@ -98,7 +97,7 @@ export default function PrivacySettingsPage() {
     }
   };
 
-  const updatePrivacySetting = (type: 'profile' | 'onlineStatus' | 'directMessages' | 'dataSharing', field: string, value: any) => {
+  const updatePrivacySetting = (type: 'profile' | 'onlineStatus' | 'directMessages', field: string, value: any) => {
     if (!settings) return;
     
     const newSettings = { ...settings };
@@ -505,132 +504,6 @@ export default function PrivacySettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Data Sharing */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5" />
-              Data Sharing & Privacy
-            </CardTitle>
-            <CardDescription>
-              Control how your data is shared and used
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                These settings control how your data is shared with third parties and used for analytics and marketing.
-              </AlertDescription>
-            </Alert>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Share with Partners</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Share data with trusted business partners
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.privacy.dataSharing.shareWithPartners}
-                  onCheckedChange={(checked) => updatePrivacySetting('dataSharing', 'shareWithPartners', checked)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Share with Advertisers</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Share data for targeted advertising
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.privacy.dataSharing.shareWithAdvertisers}
-                  onCheckedChange={(checked) => updatePrivacySetting('dataSharing', 'shareWithAdvertisers', checked)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Share with Analytics</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Share data for analytics and improvement
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.privacy.dataSharing.shareWithAnalytics}
-                  onCheckedChange={(checked) => updatePrivacySetting('dataSharing', 'shareWithAnalytics', checked)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Marketing Consent</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Allow use of data for marketing purposes
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.privacy.dataSharing.marketingConsent}
-                  onCheckedChange={(checked) => updatePrivacySetting('dataSharing', 'marketingConsent', checked)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Analytics Consent</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Allow use of data for analytics
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.privacy.dataSharing.analyticsConsent}
-                  onCheckedChange={(checked) => updatePrivacySetting('dataSharing', 'analyticsConsent', checked)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Cookies Consent</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Allow use of cookies for functionality
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.privacy.dataSharing.cookiesConsent}
-                  onCheckedChange={(checked) => updatePrivacySetting('dataSharing', 'cookiesConsent', checked)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Allow Data Export</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Allow exporting your personal data
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.privacy.dataSharing.allowDataExport}
-                  onCheckedChange={(checked) => updatePrivacySetting('dataSharing', 'allowDataExport', checked)}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Allow Data Deletion</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Allow deletion of your personal data
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.privacy.dataSharing.allowDataDeletion}
-                  onCheckedChange={(checked) => updatePrivacySetting('dataSharing', 'allowDataDeletion', checked)}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

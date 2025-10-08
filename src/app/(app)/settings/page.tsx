@@ -13,14 +13,10 @@ import {
   Shield, 
   Eye, 
   Palette, 
-  User, 
   Smartphone, 
   Mail, 
   MessageSquare,
-  Globe,
-  Download,
-  Upload,
-  RotateCcw
+  Globe
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -75,17 +71,6 @@ export default function SettingsPage() {
       borderColor: 'border-orange-200'
     },
     {
-      id: 'account',
-      title: 'Account Settings',
-      description: 'Manage your account information',
-      icon: User,
-      href: '/settings/account',
-      badge: null,
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50',
-      borderColor: 'border-gray-200'
-    },
-    {
       id: 'messages',
       title: 'Messages & Communication',
       description: 'Control how others can contact you',
@@ -98,53 +83,6 @@ export default function SettingsPage() {
     }
   ];
 
-  const quickActions = [
-    {
-      id: 'export',
-      title: 'Export Settings',
-      description: 'Download your settings as a backup',
-      icon: Download,
-      action: () => handleExportSettings(),
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200'
-    },
-    {
-      id: 'import',
-      title: 'Import Settings',
-      description: 'Restore settings from a backup file',
-      icon: Upload,
-      action: () => handleImportSettings(),
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200'
-    },
-    {
-      id: 'reset',
-      title: 'Reset to Defaults',
-      description: 'Restore all settings to default values',
-      icon: RotateCcw,
-      action: () => handleResetSettings(),
-      color: 'text-red-600',
-      bgColor: 'bg-red-50',
-      borderColor: 'border-red-200'
-    }
-  ];
-
-  const handleExportSettings = () => {
-    // TODO: Implement settings export
-    console.log('Export settings');
-  };
-
-  const handleImportSettings = () => {
-    // TODO: Implement settings import
-    console.log('Import settings');
-  };
-
-  const handleResetSettings = () => {
-    // TODO: Implement settings reset
-    console.log('Reset settings');
-  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -196,42 +134,6 @@ export default function SettingsPage() {
         })}
       </div>
 
-      <Separator />
-
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {quickActions.map((action) => {
-            const IconComponent = action.icon;
-            return (
-              <Card 
-                key={action.id} 
-                className={`cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-105 ${action.borderColor} border-2`}
-                onClick={action.action}
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${action.bgColor}`}>
-                      <IconComponent className={`h-6 w-6 ${action.color}`} />
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-lg">
-                        {action.title}
-                      </CardTitle>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-sm">
-                    {action.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
 
       {/* Settings Overview */}
       <Card>

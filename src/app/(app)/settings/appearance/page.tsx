@@ -28,8 +28,6 @@ import {
   Clock,
   DollarSign,
   Hash,
-  Layout,
-  Sidebar,
   Compass,
   HelpCircle
 } from 'lucide-react';
@@ -101,7 +99,7 @@ export default function AppearanceSettingsPage() {
     }
   };
 
-  const updateAppearanceSetting = (type: 'theme' | 'language' | 'layout', field: string, value: any) => {
+  const updateAppearanceSetting = (type: 'theme' | 'language', field: string, value: any) => {
     if (!settings) return;
     
     const newSettings = { ...settings };
@@ -527,75 +525,6 @@ export default function AppearanceSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Layout Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Layout className="h-5 w-5" />
-              Layout & Interface
-            </CardTitle>
-            <CardDescription>
-              Customize the layout and interface elements
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="sidebar-collapsed">Collapsed Sidebar</Label>
-                <p className="text-sm text-muted-foreground">
-                  Start with sidebar collapsed by default
-                </p>
-              </div>
-              <Switch
-                id="sidebar-collapsed"
-                checked={settings.appearance.layout.sidebarCollapsed}
-                onCheckedChange={(checked) => updateAppearanceSetting('layout', 'sidebarCollapsed', checked)}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="compact-mode">Compact Mode</Label>
-                <p className="text-sm text-muted-foreground">
-                  Use more compact spacing throughout the interface
-                </p>
-              </div>
-              <Switch
-                id="compact-mode"
-                checked={settings.appearance.layout.compactMode}
-                onCheckedChange={(checked) => updateAppearanceSetting('layout', 'compactMode', checked)}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="show-breadcrumbs">Show Breadcrumbs</Label>
-                <p className="text-sm text-muted-foreground">
-                  Display navigation breadcrumbs at the top of pages
-                </p>
-              </div>
-              <Switch
-                id="show-breadcrumbs"
-                checked={settings.appearance.layout.showBreadcrumbs}
-                onCheckedChange={(checked) => updateAppearanceSetting('layout', 'showBreadcrumbs', checked)}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="show-tooltips">Show Tooltips</Label>
-                <p className="text-sm text-muted-foreground">
-                  Display helpful tooltips on hover
-                </p>
-              </div>
-              <Switch
-                id="show-tooltips"
-                checked={settings.appearance.layout.showTooltips}
-                onCheckedChange={(checked) => updateAppearanceSetting('layout', 'showTooltips', checked)}
-              />
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Preview */}
         <Card>

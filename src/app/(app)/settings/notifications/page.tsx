@@ -17,8 +17,6 @@ import {
   Mail, 
   Smartphone, 
   Clock, 
-  Volume2, 
-  VolumeX, 
   CheckCircle, 
   AlertCircle, 
   Phone,
@@ -103,7 +101,7 @@ export default function NotificationSettingsPage() {
     }
   };
 
-  const updateNotificationSetting = (type: 'email' | 'sms' | 'inApp' | 'push', field: string, value: any) => {
+  const updateNotificationSetting = (type: 'email' | 'sms' | 'push', field: string, value: any) => {
     if (!settings) return;
     
     const newSettings = { ...settings };
@@ -589,71 +587,6 @@ export default function NotificationSettingsPage() {
           </CardContent>
         </Card>
 
-        {/* In-App Notifications */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              In-App Notifications
-            </CardTitle>
-            <CardDescription>
-              Control notifications within the application
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="inapp-enabled">Enable In-App Notifications</Label>
-                <p className="text-sm text-muted-foreground">
-                  Show notifications in the application
-                </p>
-              </div>
-              <Switch
-                id="inapp-enabled"
-                checked={settings.notifications.inApp.enabled}
-                onCheckedChange={(checked) => updateNotificationSetting('inApp', 'enabled', checked)}
-              />
-            </div>
-
-            <Separator />
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="flex items-center gap-2">
-                    <Volume2 className="h-4 w-4" />
-                    Notification Sound
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Play sound when receiving notifications
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.notifications.inApp.soundEnabled}
-                  onCheckedChange={(checked) => updateNotificationSetting('inApp', 'soundEnabled', checked)}
-                  disabled={!settings.notifications.inApp.enabled}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label className="flex items-center gap-2">
-                    <VolumeX className="h-4 w-4" />
-                    Vibration
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Vibrate device when receiving notifications
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.notifications.inApp.vibrationEnabled}
-                  onCheckedChange={(checked) => updateNotificationSetting('inApp', 'vibrationEnabled', checked)}
-                  disabled={!settings.notifications.inApp.enabled}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Frequency Settings */}
         <Card>
