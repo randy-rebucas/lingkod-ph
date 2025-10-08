@@ -1,8 +1,8 @@
 'use server';
 
 import { getDb } from './firebase';
-import { doc, getDoc, collection, query, where, getDocs, limit } from 'firebase/firestore';
-import { UserSettingsService } from './user-settings-service';
+import { doc, getDoc } from 'firebase/firestore';
+import { getUserSettings } from './user-settings-service';
 
 export interface PrivacyCheckResult {
   allowed: boolean;
@@ -47,7 +47,7 @@ export class PrivacyEnforcementService {
   static async canViewProfile(viewerId: string, targetUserId: string): Promise<PrivacyCheckResult> {
     try {
       // Get target user's privacy settings
-      const targetUserSettings = await UserSettingsService.getUserSettings(targetUserId);
+      const targetUserSettings = await getUserSettings(targetUserId);
       
       // Check if profile is public
       if (!targetUserSettings.privacy.profile.profilePublic) {
@@ -84,7 +84,7 @@ export class PrivacyEnforcementService {
       
       // Get target user's settings and profile data
       const [targetUserSettings, targetUserData] = await Promise.all([
-        UserSettingsService.getUserSettings(targetUserId),
+        getUserSettings(targetUserId),
         this.getUserProfileData(targetUserId)
       ]);
       
@@ -139,7 +139,7 @@ export class PrivacyEnforcementService {
   static async canSendDirectMessage(senderId: string, recipientId: string): Promise<PrivacyCheckResult> {
     try {
       // Get recipient's privacy settings
-      const recipientSettings = await UserSettingsService.getUserSettings(recipientId);
+      const recipientSettings = await getUserSettings(recipientId);
       
       // Check if direct messages are allowed
       if (!recipientSettings.privacy.directMessages.allowDirectMessages) {
@@ -204,7 +204,7 @@ export class PrivacyEnforcementService {
   static async canSearchUser(searcherId: string, targetUserId: string): Promise<PrivacyCheckResult> {
     try {
       // Get target user's privacy settings
-      const targetUserSettings = await UserSettingsService.getUserSettings(targetUserId);
+      const targetUserSettings = await getUserSettings(targetUserId);
       
       // Check if search is allowed
       if (!targetUserSettings.privacy.profile.allowSearch) {
@@ -336,7 +336,7 @@ export class PrivacyEnforcementService {
    */
   static async isUserOnline(userId: string): Promise<boolean> {
     try {
-      const userSettings = await UserSettingsService.getUserSettings(userId);
+      const userSettings = await getUserSettings(userId);
       
       // Check if online status is enabled
       if (!userSettings.privacy.onlineStatus.showOnlineStatus) {
@@ -359,7 +359,7 @@ export class PrivacyEnforcementService {
    */
   static async getUserLastSeen(userId: string): Promise<Date | null> {
     try {
-      const userSettings = await UserSettingsService.getUserSettings(userId);
+      const userSettings = await getUserSettings(userId);
       
       // Check if last seen is enabled
       if (!userSettings.privacy.onlineStatus.showLastSeen) {
@@ -383,7 +383,7 @@ export class PrivacyEnforcementService {
   static async canContactUser(requesterId: string, targetUserId: string): Promise<PrivacyCheckResult> {
     try {
       // Get target user's privacy settings
-      const targetUserSettings = await UserSettingsService.getUserSettings(targetUserId);
+      const targetUserSettings = await getUserSettings(targetUserId);
       
       // Check if direct contact is allowed
       if (!targetUserSettings.privacy.profile.allowDirectContact) {

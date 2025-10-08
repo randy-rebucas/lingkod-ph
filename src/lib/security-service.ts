@@ -2,9 +2,9 @@
 
 import { getDb } from './firebase';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, addDoc, query, where, getDocs, limit, deleteDoc } from 'firebase/firestore';
-import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
-import { UserSettingsService } from './user-settings-service';
-import { SMSService } from './sms-service';
+import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import { getUserSettings, updateUserSettings } from './user-settings-service';
+import { sendVerificationCode } from './sms-service';
 import { sendEmail } from './email-service';
 import crypto from 'crypto';
 
@@ -101,7 +101,7 @@ export class SecurityService {
 
       // Send verification code
       if (method === 'sms') {
-        const userSettings = await UserSettingsService.getUserSettings(userId);
+        const userSettings = await getUserSettings(userId);
         if (!userSettings.notifications.sms.phoneVerified) {
           return { success: false, error: 'Phone number not verified' };
         }
@@ -110,7 +110,7 @@ export class SecurityService {
         await this.sendSMSVerificationCode(userSettings.notifications.sms.phoneNumber!, verificationCode);
         await this.storeVerificationCode(userId, verificationCode);
       } else if (method === 'email') {
-        const userSettings = await UserSettingsService.getUserSettings(userId);
+        const userSettings = await getUserSettings(userId);
         const verificationCode = this.generateVerificationCode();
         await this.sendEmailVerificationCode(userSettings.account.email, verificationCode);
         await this.storeVerificationCode(userId, verificationCode);
@@ -154,9 +154,9 @@ export class SecurityService {
       });
 
       // Update user settings
-      const currentSettings = await UserSettingsService.getUserSettings(userId);
+      const currentSettings = await getUserSettings(userId);
       if (currentSettings) {
-        await UserSettingsService.updateUserSettings(userId, {
+        await updateUserSettings(userId, {
           account: {
             ...currentSettings.account,
             security: {
@@ -208,9 +208,9 @@ export class SecurityService {
       });
 
       // Update user settings
-      const currentSettings = await UserSettingsService.getUserSettings(userId);
+      const currentSettings = await getUserSettings(userId);
       if (currentSettings) {
-        await UserSettingsService.updateUserSettings(userId, {
+        await updateUserSettings(userId, {
           account: {
             ...currentSettings.account,
             security: {
@@ -526,7 +526,7 @@ export class SecurityService {
   /**
    * Verify TOTP code
    */
-  private static verifyTOTPCode(secret: string, code: string): boolean {
+  private static verifyTOTPCode(_secret: string, _code: string): boolean {
     // This would typically use a TOTP library like speakeasy
     // For now, return true for demonstration
     return true;
@@ -588,7 +588,7 @@ export class SecurityService {
    */
   private static async sendSMSVerificationCode(phoneNumber: string, code: string): Promise<void> {
     try {
-      await SMSService.sendVerificationCode(phoneNumber, code);
+      await sendVerificationCode(phoneNumber, code);
     } catch (error) {
       console.error('Error sending SMS verification code:', error);
     }
@@ -671,7 +671,7 @@ export class SecurityService {
   /**
    * Check for suspicious activity
    */
-  private static async checkSuspiciousActivity(userId: string, ipAddress: string): Promise<void> {
+  private static async checkSuspiciousActivity(userId: string, _ipAddress: string): Promise<void> {
     try {
       // Check for multiple failed attempts from different IPs
       const recentAttempts = await this.getRecentLoginAttempts(userId, 10);
@@ -697,11 +697,12 @@ export class SecurityService {
   /**
    * Get location from IP address
    */
-  private static async getLocationFromIP(ipAddress: string): Promise<string> {
+  private static async getLocationFromIP(_ipAddress: string): Promise<string> {
     try {
       // This would typically use a geolocation service
       // For now, return a placeholder
       return 'Unknown Location';
+    // eslint-disable-next-line no-unreachable
     } catch (error) {
       console.error('Error getting location from IP:', error);
       return 'Unknown Location';

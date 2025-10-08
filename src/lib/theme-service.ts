@@ -1,6 +1,6 @@
 'use client';
 
-import { UserSettingsService } from './user-settings-service';
+import { getUserSettings } from './user-settings-service';
 
 export interface ThemeConfig {
   theme: 'light' | 'dark' | 'system';
@@ -32,7 +32,7 @@ export class ThemeService {
    */
   static async initializeTheme(userId: string): Promise<void> {
     try {
-      const userSettings = await UserSettingsService.getUserSettings(userId);
+      const userSettings = await getUserSettings(userId);
       const themeConfig: ThemeConfig = {
         theme: userSettings.appearance.theme.theme === 'auto' ? 'system' : userSettings.appearance.theme.theme as 'light' | 'dark' | 'system',
         primaryColor: userSettings.appearance.theme.primaryColor,
@@ -56,7 +56,7 @@ export class ThemeService {
    */
   static async applyTheme(themeConfig: ThemeConfig): Promise<void> {
     try {
-      const root = document.documentElement;
+      const _root = document.documentElement;
       
       // Apply theme mode
       this.applyThemeMode(themeConfig.theme);
@@ -309,35 +309,43 @@ export class ThemeService {
    * Dispatch theme change event
    */
   private static dispatchThemeChangeEvent(themeConfig: ThemeConfig): void {
-    const event = new CustomEvent(this.THEME_CHANGE_EVENT, {
-      detail: themeConfig
-    });
-    window.dispatchEvent(event);
+    if (typeof window !== 'undefined') {
+      const event = new (window as any).CustomEvent(this.THEME_CHANGE_EVENT, {
+        detail: themeConfig
+      });
+      window.dispatchEvent(event);
+    }
   }
 
   /**
    * Dispatch language change event
    */
   private static dispatchLanguageChangeEvent(languageConfig: LanguageConfig): void {
-    const event = new CustomEvent(this.LANGUAGE_CHANGE_EVENT, {
-      detail: languageConfig
-    });
-    window.dispatchEvent(event);
+    if (typeof window !== 'undefined') {
+      const event = new (window as any).CustomEvent(this.LANGUAGE_CHANGE_EVENT, {
+        detail: languageConfig
+      });
+      window.dispatchEvent(event);
+    }
   }
 
   /**
    * Listen for theme changes
    */
   static onThemeChange(callback: (themeConfig: ThemeConfig) => void): () => void {
-    const handler = (event: CustomEvent) => {
+    if (typeof window === 'undefined') {
+      return () => {};
+    }
+    
+    const handler = (event: any) => {
       callback(event.detail);
     };
     
-    window.addEventListener(this.THEME_CHANGE_EVENT, handler as EventListener);
+    window.addEventListener(this.THEME_CHANGE_EVENT, handler);
     
     // Return cleanup function
     return () => {
-      window.removeEventListener(this.THEME_CHANGE_EVENT, handler as EventListener);
+      window.removeEventListener(this.THEME_CHANGE_EVENT, handler);
     };
   }
 
@@ -345,15 +353,19 @@ export class ThemeService {
    * Listen for language changes
    */
   static onLanguageChange(callback: (languageConfig: LanguageConfig) => void): () => void {
-    const handler = (event: CustomEvent) => {
+    if (typeof window === 'undefined') {
+      return () => {};
+    }
+    
+    const handler = (event: any) => {
       callback(event.detail);
     };
     
-    window.addEventListener(this.LANGUAGE_CHANGE_EVENT, handler as EventListener);
+    window.addEventListener(this.LANGUAGE_CHANGE_EVENT, handler);
     
     // Return cleanup function
     return () => {
-      window.removeEventListener(this.LANGUAGE_CHANGE_EVENT, handler as EventListener);
+      window.removeEventListener(this.LANGUAGE_CHANGE_EVENT, handler);
     };
   }
 

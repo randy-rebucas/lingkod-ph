@@ -298,7 +298,7 @@ export async function getSMSStatus(messageId: string): Promise<{
 /**
  * Get SMS usage statistics
  */
-export async function getSMSUsageStats(timeRange: 'day' | 'week' | 'month' = 'month'): Promise<{
+export async function getSMSUsageStats(_timeRange: 'day' | 'week' | 'month' = 'month'): Promise<{
   totalSent: number;
   totalDelivered: number;
   totalFailed: number;
@@ -315,6 +315,7 @@ export async function getSMSUsageStats(timeRange: 'day' | 'week' | 'month' = 'mo
       totalCost: 0,
       averageDeliveryTime: 0
     };
+  // eslint-disable-next-line no-unreachable
   } catch (error) {
     console.error('Error getting SMS usage stats:', error);
     return {
@@ -349,7 +350,7 @@ export async function validatePhoneNumber(phoneNumber: string): Promise<{
       valid: true,
       formatted
     };
-  } catch (error) {
+  } catch {
     return {
       valid: false,
       error: 'Error validating phone number'
@@ -360,11 +361,12 @@ export async function validatePhoneNumber(phoneNumber: string): Promise<{
 /**
  * Check if SMS notifications are enabled for user
  */
-export async function isSMSEnabledForUser(userId: string): Promise<boolean> {
+export async function isSMSEnabledForUser(_userId: string): Promise<boolean> {
   try {
     // This would typically check user settings from database
     // For now, return true as default
     return true;
+  // eslint-disable-next-line no-unreachable
   } catch (error) {
     console.error('Error checking SMS settings for user:', error);
     return false;

@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Bell, Mail, Smartphone, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Mail, Smartphone, AlertCircle, ArrowLeft, Bell } from 'lucide-react';
 import { UserSettings } from '@/types/user-settings';
 import { getUserSettings, updateUserSettings } from '@/lib/user-settings-service';
 

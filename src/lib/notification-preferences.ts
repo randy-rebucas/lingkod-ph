@@ -1,7 +1,7 @@
 'use server';
 
 import { getDb } from './firebase';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 export interface NotificationPreferences {
   // Email notifications
@@ -319,7 +319,7 @@ export class NotificationPreferencesService {
   /**
    * Get notification statistics for user
    */
-  static async getNotificationStats(userId: string): Promise<{
+  static async getNotificationStats(_userId: string): Promise<{
     totalNotifications: number;
     unreadNotifications: number;
     emailNotificationsSent: number;

@@ -6,7 +6,6 @@ import { getDb  } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy, where, Timestamp } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
 import { TableSkeleton } from "@/components/ui/loading-states";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";

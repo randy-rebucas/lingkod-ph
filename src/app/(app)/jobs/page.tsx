@@ -470,7 +470,7 @@ export default function JobsPage() {
             ) : (
                 <div className="max-w-4xl mx-auto">
                     <JobsEmptyState
-                        hasFilters={searchTerm || filterCategory !== 'all' || filterBudget !== 'all'}
+                        hasFilters={!!(searchTerm || filterCategory !== 'all' || filterBudget !== 'all')}
                         onClearFilters={() => {
                             setSearchTerm('');
                             setFilterCategory('all');

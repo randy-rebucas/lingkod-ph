@@ -1,9 +1,8 @@
 'use server';
 
 import { getDb } from './firebase';
-import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, deleteDoc, writeBatch, updateDoc } from 'firebase/firestore';
-import { UserSettingsService } from './user-settings-service';
-import { sendEmail } from './email-service';
+import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, writeBatch, updateDoc } from 'firebase/firestore';
+import { getUserSettings } from './user-settings-service';
 
 export interface DataExportRequest {
   id?: string;
@@ -377,7 +376,7 @@ export class DataManagementService {
   private static async collectUserData(userId: string): Promise<UserDataExport> {
     try {
       // Get user settings
-      const settings = await UserSettingsService.getUserSettings(userId);
+      const settings = await getUserSettings(userId);
       
       // Get user profile data
       const profile = await this.getUserProfileData(userId);
@@ -662,58 +661,58 @@ export class DataManagementService {
   }
 
   // Email notification methods
-  private static async sendExportConfirmationEmail(userId: string, requestId: string): Promise<void> {
+  private static async sendExportConfirmationEmail(_userId: string, _requestId: string): Promise<void> {
     // TODO: Implement email sending
   }
 
-  private static async sendExportCompletionEmail(userId: string, downloadUrl: string): Promise<void> {
+  private static async sendExportCompletionEmail(_userId: string, _downloadUrl: string): Promise<void> {
     // TODO: Implement email sending
   }
 
-  private static async sendDeletionConfirmationEmail(userId: string, requestId: string, confirmationCode: string): Promise<void> {
+  private static async sendDeletionConfirmationEmail(_userId: string, _requestId: string, _confirmationCode: string): Promise<void> {
     // TODO: Implement email sending
   }
 
-  private static async sendDeletionCompletionEmail(userId: string): Promise<void> {
+  private static async sendDeletionCompletionEmail(_userId: string): Promise<void> {
     // TODO: Implement email sending
   }
 
-  private static async sendDeletionCancellationEmail(userId: string): Promise<void> {
+  private static async sendDeletionCancellationEmail(_userId: string): Promise<void> {
     // TODO: Implement email sending
   }
 
   // Data retrieval methods
-  private static async getUserProfileData(userId: string): Promise<any> {
+  private static async getUserProfileData(_userId: string): Promise<any> {
     // TODO: Implement
     return null;
   }
 
-  private static async getUserBookings(userId: string): Promise<any[]> {
+  private static async getUserBookings(_userId: string): Promise<any[]> {
     // TODO: Implement
     return [];
   }
 
-  private static async getUserMessages(userId: string): Promise<any[]> {
+  private static async getUserMessages(_userId: string): Promise<any[]> {
     // TODO: Implement
     return [];
   }
 
-  private static async getUserReviews(userId: string): Promise<any[]> {
+  private static async getUserReviews(_userId: string): Promise<any[]> {
     // TODO: Implement
     return [];
   }
 
-  private static async getUserPayments(userId: string): Promise<any[]> {
+  private static async getUserPayments(_userId: string): Promise<any[]> {
     // TODO: Implement
     return [];
   }
 
-  private static async getUserNotifications(userId: string): Promise<any[]> {
+  private static async getUserNotifications(_userId: string): Promise<any[]> {
     // TODO: Implement
     return [];
   }
 
-  private static async getUserAuditLogs(userId: string): Promise<any[]> {
+  private static async getUserAuditLogs(_userId: string): Promise<any[]> {
     // TODO: Implement
     return [];
   }

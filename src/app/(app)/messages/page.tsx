@@ -15,8 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { Send, Search, Paperclip, X, MessageSquare, Loader2, Check, CheckCheck } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Send, Search, Paperclip, X, MessageSquare, Check, CheckCheck } from "lucide-react";
 import { SkeletonGrid, LoadingSpinner } from "@/components/ui/loading-states";
 import { useToast } from "@/hooks/use-toast";
 

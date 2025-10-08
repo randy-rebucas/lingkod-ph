@@ -300,7 +300,7 @@ export async function sendPhoneVerificationCode(
 
     // Generate verification code
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+    const _expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
     // Store verification code in database
     const verificationData = {
@@ -389,7 +389,7 @@ export async function importUserSettings(
  */
 export async function getSettingsAuditLog(
   userId: string,
-  limit: number = 50
+  _limit: number = 50
 ): Promise<SettingsChange[]> {
   try {
     if (!getDb()) {

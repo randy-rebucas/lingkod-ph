@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { getDb } from '@/lib/firebase';
-import { collection, query, where, orderBy, limit, getDocs, startAfter, DocumentSnapshot } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, getDocs, startAfter } from 'firebase/firestore';
 
 export async function GET(request: NextRequest) {
   try {

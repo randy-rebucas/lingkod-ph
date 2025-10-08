@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, Shield, AlertCircle, Bell, ArrowLeft } from 'lucide-react';
+import { MessageSquare, Shield, AlertCircle, ArrowLeft } from 'lucide-react';
 import { UserSettings } from '@/types/user-settings';
 import { getUserSettings, updateUserSettings } from '@/lib/user-settings-service';
 import { useRouter } from 'next/navigation';

@@ -185,7 +185,7 @@ interface BookingsEmptyStateProps {
 
 export function BookingsEmptyState({ 
   status = 'all',
-  userRole,
+  userRole: _userRole,
   className 
 }: BookingsEmptyStateProps) {
   const getStatusConfig = (status: string) => {

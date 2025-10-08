@@ -5,8 +5,7 @@ import * as React from "react";
 import {
   ArrowUpDown,
   ChevronDown,
-  MoreHorizontal,
-  FileText
+  MoreHorizontal
 } from "lucide-react";
 import {
   ColumnDef,

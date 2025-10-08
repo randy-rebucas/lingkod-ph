@@ -1,7 +1,7 @@
 'use server';
 
 import { getDb } from './firebase';
-import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { sendEmail } from './email-service';
 
 export interface BookingNotificationData {

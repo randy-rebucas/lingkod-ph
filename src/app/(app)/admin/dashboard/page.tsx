@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getDbSafe } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy, limit, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SkeletonCards, TableSkeleton } from "@/components/ui/loading-states";
+import { TableSkeleton } from "@/components/ui/loading-states";
 // import { formatDistanceToNow } from "date-fns";
 
 type Booking = {

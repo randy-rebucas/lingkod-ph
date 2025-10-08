@@ -1,8 +1,6 @@
-'use server';
-
 import { getDb } from './firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, orderBy, limit, updateDoc } from 'firebase/firestore';
-import { SMSService } from './sms-service';
+import { sendSMS } from './sms-service';
 import { getUserSettings } from './user-settings-service';
 import { sendEmail } from './email-service';
 
@@ -380,12 +378,12 @@ export class NotificationDeliveryService {
         return { success: false, error: 'Phone number not verified' };
       }
 
-      const smsResult = await SMSService.sendSMS({
-        type: this.mapCategoryToSMSType(data.category),
-        phoneNumber: userSettings.notifications.sms.phoneNumber!,
-        message: data.message,
-        priority: data.priority
-      });
+        const smsResult = await sendSMS({
+          type: this.mapCategoryToSMSType(data.category),
+          phoneNumber: userSettings.notifications.sms.phoneNumber!,
+          message: data.message,
+          priority: data.priority
+        });
 
       if (smsResult.success) {
         await this.logDelivery({
@@ -438,10 +436,10 @@ export class NotificationDeliveryService {
   /**
    * Send push notification
    */
-  private static async sendPushNotification(
-    data: NotificationDeliveryData,
-    userSettings: any
-  ): Promise<DeliveryResult> {
+    private static async sendPushNotification(
+      _data: NotificationDeliveryData,
+      _userSettings: any
+    ): Promise<DeliveryResult> {
     try {
       // TODO: Implement push notification service (Firebase Cloud Messaging)
       // For now, return success
