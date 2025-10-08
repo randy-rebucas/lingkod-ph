@@ -26,8 +26,8 @@ type Payout = {
     requestedAt: Timestamp;
     processedAt?: Timestamp;
     payoutDetails: {
-        method: 'gcash' | 'bank';
-        gCashNumber?: string;
+        method: 'paypal' | 'bank';
+        paypalEmail?: string;
         bankName?: string;
         bankAccountNumber?: string;
         bankAccountName?: string;
@@ -43,10 +43,10 @@ const getStatusVariant = (status: PayoutStatus) => {
 };
 
 const PayoutDetails = ({ payout }: { payout: Payout }) => {
-    if (payout.payoutDetails.method === 'gcash') {
+    if (payout.payoutDetails.method === 'paypal') {
         return (
             <div className="text-xs">
-                <p><strong>GCash:</strong> {payout.payoutDetails.gCashNumber}</p>
+                <p><strong>PayPal Email:</strong> {payout.payoutDetails.paypalEmail}</p>
             </div>
         )
     }

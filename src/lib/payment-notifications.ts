@@ -213,13 +213,13 @@ export class PaymentNotificationService {
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #059669;">Payment Confirmed! 🎉</h2>
           <p>Dear ${data.clientName},</p>
-          <p>Great news! Your ${data.paymentMethod || 'GCash'} payment has been processed successfully and your booking is now confirmed.</p>
+          <p>Great news! Your ${data.paymentMethod || 'PayPal'} payment has been processed successfully and your booking is now confirmed.</p>
           
           <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="margin-top: 0;">Booking Details</h3>
             <p><strong>Service:</strong> ${data.serviceName}</p>
             <p><strong>Amount:</strong> ₱${data.amount.toFixed(2)}</p>
-            <p><strong>Payment Method:</strong> ${data.paymentMethod || 'GCash'}</p>
+            <p><strong>Payment Method:</strong> ${data.paymentMethod || 'PayPal'}</p>
             <p><strong>Booking ID:</strong> ${data.bookingId}</p>
           </div>
           

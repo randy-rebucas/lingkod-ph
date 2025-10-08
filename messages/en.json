@@ -1429,15 +1429,7 @@
     "accountName": "Account Name",
     "accountNumber": "Account Number",
     "iHavePaid": "I Have Paid",
-    "processingPayment": "Processing your payment...",
-    "gcashStep1": "Open your GCash app.",
-    "gcashStep2": "Tap 'Send' and choose 'Express Send' or scan the QR code.",
-    "gcashStep3": "Enter the details above and the amount: ₱{amount}.",
-    "gcashStep4": "After payment, click the 'I Have Paid' button below.",
-    "mayaStep1": "Open your Maya app.",
-    "mayaStep2": "Tap 'Send Money' or scan the QR code.",
-    "mayaStep3": "Enter the amount: ₱{amount} and complete the payment.",
-    "mayaStep4": "After payment, click the 'I Have Paid' button below."
+    "processingPayment": "Processing your payment..."
   },
   "QRCode": {
     "sampleQRCode": "Sample QR Code"

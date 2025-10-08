@@ -141,7 +141,7 @@ const ClientsLearningPage = () => {
     },
     {
       question: "What payment methods are accepted?",
-      answer: "We accept GCash, credit cards, debit cards, and bank transfers. All payments are processed securely through our platform with fraud protection."
+      answer: "We accept PayPal, credit cards, debit cards, and bank transfers. All payments are processed securely through our platform with fraud protection."
     },
     {
       question: "Can I cancel or reschedule my booking?",

@@ -305,9 +305,9 @@ export class PaymentProductionValidator {
     const status: 'pass' | 'warning' | 'fail' = 'pass';
 
     const _requiredEndpoints = [
-      '/api/payments/gcash/create',
-      '/api/payments/gcash/result',
-      '/api/payments/gcash/webhook',
+      '/api/payments/paypal/create',
+      '/api/payments/paypal/capture',
+      '/api/payments/paypal/webhook',
       '/api/admin/secure-action',
     ];
 

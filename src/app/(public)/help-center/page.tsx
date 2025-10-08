@@ -43,7 +43,7 @@ const clientFaqs = [
   },
   {
     question: "What payment methods are accepted?",
-    answer: "We support a variety of payment methods, including GCash, Maya, Debit/Credit Card, and Bank Transfer, all processed securely through our platform. Some providers may also offer cash on delivery.",
+    answer: "We support a variety of payment methods, including PayPal, Debit/Credit Card, and Bank Transfer, all processed securely through our platform. Some providers may also offer cash on delivery.",
     category: "Payment",
     popular: true
   },

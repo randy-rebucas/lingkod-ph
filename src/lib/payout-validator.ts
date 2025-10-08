@@ -14,12 +14,10 @@ export interface PayoutValidationResult {
 }
 
 export interface PayoutDetails {
-  method: 'bank_transfer' | 'gcash' | 'paymaya' | 'paypal';
+  method: 'bank_transfer' | 'paypal';
   accountNumber?: string;
   accountName?: string;
   bankName?: string;
-  gcashNumber?: string;
-  paymayaNumber?: string;
   paypalEmail?: string;
   routingNumber?: string;
 }
@@ -164,16 +162,6 @@ export class PayoutValidator {
       case 'bank_transfer':
         if (!details.accountNumber || !details.accountName || !details.bankName) {
           errors.push('Bank transfer requires account number, account name, and bank name');
-        }
-        break;
-      case 'gcash':
-        if (!details.gcashNumber) {
-          errors.push('GCash requires phone number');
-        }
-        break;
-      case 'paymaya':
-        if (!details.paymayaNumber) {
-          errors.push('PayMaya requires phone number');
         }
         break;
       case 'paypal':
