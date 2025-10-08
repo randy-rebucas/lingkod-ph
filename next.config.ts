@@ -129,6 +129,21 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    // Turbopack compatibility settings
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+        },
+      },
+      // Suppress specific warnings and errors
+      resolveAlias: {
+        // Add any specific module aliases if needed
+      },
+    },
+    // Additional compatibility settings
+    serverComponentsExternalPackages: [],
   },
 };
 

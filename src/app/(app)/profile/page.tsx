@@ -30,9 +30,9 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { format } from "date-fns";
 import { X } from "lucide-react";
 import { handleInviteAction } from "./actions";
-import { useLoadScript, Autocomplete } from "@react-google-maps/api";
 import { Separator } from "@/components/ui/separator";
 import { useActionState } from "react";
+import { getReadableAddress } from "@/lib/reverse-geocoding";
 
 
 type Reward = {
@@ -164,14 +164,9 @@ const ProfilePage = memo(function ProfilePage() {
     const [newDocName, setNewDocName] = useState("");
     const [newDocFile, setNewDocFile] = useState<File | null>(null);
     const [isUploadingDoc, setIsUploadingDoc] = useState(false);
+    const [isGettingLocation, setIsGettingLocation] = useState(false);
     const newDocFileInputRef = useRef<HTMLInputElement>(null);
 
-    const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-    const { isLoaded, loadError } = useLoadScript({
-        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
-        libraries: ["places"],
-        preventGoogleFontsLoading: true,
-    });
 
     const years = useMemo(() => {
         const currentYear = new Date().getFullYear();
@@ -629,67 +624,59 @@ const ProfilePage = memo(function ProfilePage() {
 
 
     const handleCurrentLocation = () => {
-        if (!isLoaded || loadError) {
-            toast({ 
-                variant: 'destructive', 
-                title: t('error'), 
-                description: 'Google Maps is not available. Please enter your address manually.' 
-            });
-            return;
-        }
-
         if (navigator.geolocation) {
+            setIsGettingLocation(true);
+            
             navigator.geolocation.getCurrentPosition(async (position) => {
                 const lat = position.coords.latitude;
                 const lng = position.coords.longitude;
                 setLatitude(lat);
                 setLongitude(lng);
-
-                // Reverse Geocode to get address
+                
                 try {
-                    const geocoder = new google.maps.Geocoder();
-                    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-                        if (status === 'OK' && results && results[0]) {
-                            setAddress(results[0].formatted_address);
-                        } else {
-                            toast({ variant: 'destructive', title: t('error'), description: t('couldNotRetrieveAddress') });
-                        }
-                    });
+                    // Get readable address from coordinates
+                    const readableAddress = await getReadableAddress(lat, lng);
+                    
+                    if (readableAddress && readableAddress !== `${lat.toFixed(6)}, ${lng.toFixed(6)}`) {
+                        setAddress(readableAddress);
+                        toast({ 
+                            variant: 'default', 
+                            title: t('success'), 
+                            description: 'Location captured successfully! You can edit the address if needed.' 
+                        });
+                    } else {
+                        // Fallback to coordinate format
+                        setAddress(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+                        toast({ 
+                            variant: 'default', 
+                            title: 'Location captured', 
+                            description: 'Coordinates saved. Please enter your full address manually.' 
+                        });
+                    }
                 } catch (error) {
-                    console.error('Geocoding error:', error);
-                    toast({ variant: 'destructive', title: t('error'), description: 'Could not retrieve address from coordinates.' });
+                    console.error('Error getting readable address:', error);
+                    // Fallback to coordinate format
+                    setAddress(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+                    
+                    toast({ 
+                        variant: 'default', 
+                        title: 'Location captured', 
+                        description: 'Coordinates saved. Please enter your full address manually.' 
+                    });
+                } finally {
+                    setIsGettingLocation(false);
                 }
             }, (error) => {
-                 toast({ variant: 'destructive', title: t('geolocationError'), description: error.message });
-            });
-        } else {
-            toast({ variant: 'destructive', title: t('error'), description: t('geolocationNotSupported') });
-        }
-    };
-
-    const onLoad = (autocomplete: google.maps.places.Autocomplete) => {
-        autocompleteRef.current = autocomplete;
-    };
-
-    const onPlaceChanged = () => {
-        if (autocompleteRef.current) {
-            try {
-                const place = autocompleteRef.current.getPlace();
-                if (place.formatted_address) {
-                    setAddress(place.formatted_address);
-                }
-                if (place.geometry?.location) {
-                    setLatitude(place.geometry.location.lat());
-                    setLongitude(place.geometry.location.lng());
-                }
-            } catch (error) {
-                console.error('Error handling place selection:', error);
+                console.error('Geolocation error:', error);
                 toast({ 
                     variant: 'destructive', 
                     title: t('error'), 
-                    description: 'Could not process the selected location.' 
+                    description: t('geolocationError') 
                 });
-            }
+                setIsGettingLocation(false);
+            });
+        } else {
+            toast({ variant: 'destructive', title: t('error'), description: t('geolocationNotSupported') });
         }
     };
 
@@ -849,59 +836,32 @@ const ProfilePage = memo(function ProfilePage() {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="address">Address / Service Area</Label>
-                                {loadError ? (
-                                    <div className="space-y-2">
-                                        <Input 
-                                            id="address" 
-                                            value={address} 
-                                            onChange={(e) => setAddress(e.target.value)} 
-                                            placeholder={t('addressPlaceholder')}
-                                            className="w-full"
-                                        />
-                                        <p className="text-xs text-muted-foreground">
-                                            Google Maps integration is not available. Please enter your address manually.
-                                        </p>
-                                    </div>
-                                ) : isLoaded ? (
-                                    <div className="flex gap-2 items-center">
-                                        <Autocomplete
-                                            onLoad={onLoad}
-                                            onPlaceChanged={onPlaceChanged}
-                                            className="w-full"
-                                        >
-                                            <Input 
-                                                id="address" 
-                                                value={address} 
-                                                onChange={(e) => setAddress(e.target.value)} 
-                                                placeholder={t('addressPlaceholder')}
-                                                className="w-full"
-                                            />
-                                        </Autocomplete>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-2">
-                                        <Input 
-                                            id="address" 
-                                            value={address} 
-                                            onChange={(e) => setAddress(e.target.value)} 
-                                            placeholder={t('addressPlaceholder')}
-                                            className="w-full"
-                                        />
-                                        <p className="text-xs text-muted-foreground">
-                                            Loading Google Maps...
-                                        </p>
-                                    </div>
-                                )}
+                                <div className="space-y-2">
+                                    <Input 
+                                        id="address" 
+                                        value={address} 
+                                        onChange={(e) => setAddress(e.target.value)} 
+                                        placeholder={t('addressPlaceholder')}
+                                        className="w-full"
+                                    />
+                                    <p className="text-xs text-muted-foreground">
+                                        Enter your full address manually, or use the "Use Current Location" button to automatically detect your address.
+                                    </p>
+                                </div>
                                 <div className="flex gap-2">
                                     <Button 
                                         type="button" 
                                         variant="outline" 
                                         className="w-full" 
                                         onClick={handleCurrentLocation}
-                                        disabled={!isLoaded || !!loadError}
+                                        disabled={isGettingLocation}
                                     >
-                                        <MapPin className="mr-2 h-4 w-4"/>
-                                        Use Current Location
+                                        {isGettingLocation ? (
+                                            <LoadingSpinner size="sm" className="mr-2" />
+                                        ) : (
+                                            <MapPin className="mr-2 h-4 w-4"/>
+                                        )}
+                                        {isGettingLocation ? 'Getting Location...' : 'Use Current Location'}
                                     </Button>
                                 </div>
                                 <input type="hidden" value={latitude || ''} onChange={() => {}} />

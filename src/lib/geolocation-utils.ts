@@ -110,31 +110,33 @@ export function hasValidCoordinates(location: LocationData): boolean {
 }
 
 /**
- * Get location from address using Google Maps Geocoding API
+ * Get location from address using our server-side API
  * @param address Address to geocode
  * @returns Promise with coordinates or null
  */
 export function geocodeAddress(address: string): Promise<Coordinates | null> {
-  return new Promise((resolve) => {
-    if (!window.google?.maps?.Geocoder) {
-      console.warn('Google Maps API not available');
-      resolve(null);
-      return;
-    }
+  return new Promise(async (resolve) => {
+    try {
+      const response = await fetch(
+        `/api/geocoding/forward?address=${encodeURIComponent(address)}`
+      );
 
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address }, (results, status) => {
-      if (status === 'OK' && results && results[0]?.geometry?.location) {
-        const location = results[0].geometry.location;
-        resolve({
-          lat: location.lat(),
-          lng: location.lng()
-        });
-      } else {
-        console.warn('Geocoding failed:', status);
-        resolve(null);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    });
+
+      const data = await response.json();
+
+      if (data.error) {
+        console.warn('Geocoding API error:', data.error);
+        resolve(null);
+      } else {
+        resolve(data);
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      resolve(null);
+    }
   });
 }
 

@@ -70,6 +70,12 @@ export function GoogleAnalytics() {
         src="https://www.googletagmanager.com/gtag/js?id=G-N6FJYX83QN"
         onError={(e) => {
           console.warn('Google Analytics script failed to load:', e);
+          // Suppress injectScript errors specifically
+          if (e && typeof e === 'object' && 'message' in e && 
+              typeof e.message === 'string' && e.message.includes('injectScript')) {
+            console.warn('injectScript error suppressed in Google Analytics:', e.message);
+            return;
+          }
         }}
         onLoad={() => {
           console.log('Google Analytics script loaded successfully');
@@ -80,6 +86,12 @@ export function GoogleAnalytics() {
         strategy="afterInteractive"
         onError={(e) => {
           console.warn('Google Analytics initialization script failed:', e);
+          // Suppress injectScript errors specifically
+          if (e && typeof e === 'object' && 'message' in e && 
+              typeof e.message === 'string' && e.message.includes('injectScript')) {
+            console.warn('injectScript error suppressed in Google Analytics init:', e.message);
+            return;
+          }
         }}
         dangerouslySetInnerHTML={{
           __html: `

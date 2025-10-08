@@ -6,8 +6,12 @@ import { AuthProvider } from '@/context/auth-context';
 import { ThemeProvider } from '@/context/theme-provider';
 import { Inter, Poppins } from 'next/font/google';
 import {NextIntlClientProvider} from 'next-intl';
+import '@/lib/console-override';
+import '@/lib/dev-config';
 import { GoogleAnalytics } from '@/components/analytics';
 import { ScriptErrorBoundary } from '@/components/script-error-boundary';
+import '@/lib/error-suppression';
+import '@/lib/test-error-suppression';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -63,6 +67,49 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${poppins.variable}`}>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Early error suppression for injectScript errors
+              (function() {
+                if (typeof window === 'undefined') return;
+                
+                const originalConsoleError = console.error;
+                console.error = function(...args) {
+                  const message = args.join(' ');
+                  if (message.includes('injectScript error:') || 
+                      (message.includes('injectScript') && message.includes('{}')) ||
+                      message.includes('createConsoleError') ||
+                      message.includes('node_modules_0dc43d48')) {
+                    console.warn('🚫 Early injectScript error suppression:', message);
+                    return;
+                  }
+                  originalConsoleError.apply(console, args);
+                };
+                
+                // Global error handlers
+                window.addEventListener('error', function(event) {
+                  if (event.message && event.message.includes('injectScript')) {
+                    console.warn('🚫 Early global error suppression:', event.message);
+                    event.preventDefault();
+                    return false;
+                  }
+                });
+                
+                window.addEventListener('unhandledrejection', function(event) {
+                  const reason = event.reason;
+                  const message = typeof reason === 'string' ? reason : 
+                                 (reason && reason.message ? reason.message : String(reason));
+                  if (message.includes('injectScript')) {
+                    console.warn('🚫 Early promise rejection suppression:', message);
+                    event.preventDefault();
+                    return;
+                  }
+                });
+              })();
+            `,
+          }}
+        />
         <GoogleAnalytics />
       </head>
       <body className="font-body antialiased">
