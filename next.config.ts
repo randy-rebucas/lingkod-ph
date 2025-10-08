@@ -125,25 +125,27 @@ const nextConfig: NextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
+  // Server external packages (moved from experimental)
+  serverExternalPackages: [],
+  
+  // Turbopack configuration (moved from experimental.turbo)
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+    },
+    // Suppress specific warnings and errors
+    resolveAlias: {
+      // Add any specific module aliases if needed
+    },
+  },
+  
   // Experimental features for performance
   experimental: {
     optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    // Turbopack compatibility settings
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-      // Suppress specific warnings and errors
-      resolveAlias: {
-        // Add any specific module aliases if needed
-      },
-    },
-    // Additional compatibility settings
-    serverComponentsExternalPackages: [],
   },
 };
 

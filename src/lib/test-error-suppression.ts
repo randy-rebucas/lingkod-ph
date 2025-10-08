@@ -35,7 +35,12 @@ export function testInjectScriptErrorSuppression() {
   console.log('Test 6: Global error event');
   setTimeout(() => {
     const error = new Error('injectScript error: {}');
-    window.dispatchEvent(new ErrorEvent('error', { error, message: error.message }));
+    // Use browser's native ErrorEvent constructor
+    const errorEvent = new (window as any).ErrorEvent('error', { 
+      error, 
+      message: error.message 
+    });
+    window.dispatchEvent(errorEvent);
   }, 100);
 
   console.log('✅ Test completed. Check console for results.');

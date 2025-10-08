@@ -3,6 +3,25 @@
  * This addresses compatibility issues between third-party libraries and Turbopack
  */
 
+// Type definitions for browser events
+interface Event {
+  preventDefault(): void;
+  type: string;
+}
+
+interface PromiseRejectionEvent extends Event {
+  reason: any;
+  promise: Promise<any>;
+}
+
+interface ErrorEvent extends Event {
+  message: string;
+  filename?: string;
+  lineno?: number;
+  colno?: number;
+  error?: Error;
+}
+
 export function setupInjectScriptErrorSuppression() {
   if (typeof window === 'undefined') return;
 
