@@ -28,6 +28,7 @@ import {
   Clock
 } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonCards, TableSkeleton, LoadingSpinner } from '@/components/ui/loading-states';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -199,18 +200,13 @@ export default function EarningsPage() {
                     <Skeleton className="h-4 w-2/3" />
                 </div>
                 <div className=" mx-auto">
-                    <div className="grid gap-6 md:grid-cols-4">
-                        <Skeleton className="h-28 w-full" />
-                        <Skeleton className="h-28 w-full" />
-                        <Skeleton className="h-28 w-full" />
-                        <Skeleton className="h-28 w-full" />
-                    </div>
+                    <SkeletonCards count={4} cardClassName="h-28" />
                 </div>
                 <div className=" mx-auto">
                     <Skeleton className="h-80 w-full" />
                 </div>
                 <div className=" mx-auto">
-                    <Skeleton className="h-64 w-full" />
+                    <TableSkeleton rows={6} columns={4} />
                 </div>
             </div>
         );
@@ -218,7 +214,7 @@ export default function EarningsPage() {
 
     const payoutButton = (
         <Button disabled={availableForPayout <= 400 || !isSaturday || isRequestingPayout} onClick={handlePayoutRequest}>
-            {isRequestingPayout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isRequestingPayout && <LoadingSpinner size="sm" className="mr-2" />}
             {t('requestPayout')}
         </Button>
     );

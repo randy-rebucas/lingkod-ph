@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getDbSafe } from '@/lib/firebase';
 import { collection, query, onSnapshot, orderBy, limit, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonCards, TableSkeleton } from "@/components/ui/loading-states";
 // import { formatDistanceToNow } from "date-fns";
 
 type Booking = {
@@ -180,7 +181,7 @@ export default function AdminDashboardPage() {
                         <CardDescription>The latest bookings made on the platform.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {loading ? <Skeleton className="h-48 w-full" /> : (
+                        {loading ? <TableSkeleton rows={6} columns={4} /> : (
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -216,7 +217,7 @@ export default function AdminDashboardPage() {
                         <CardDescription>The latest users to join the platform.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {loading ? <Skeleton className="h-48 w-full" /> : (
+                        {loading ? <TableSkeleton rows={6} columns={4} /> : (
                             <div className="space-y-4">
                                 {recentUsers.length > 0 ? recentUsers.map(user => (
                                     <div key={user.uid} className="flex items-center">

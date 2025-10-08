@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonCards } from '@/components/ui/loading-states';
 import { useToast } from '@/hooks/use-toast';
 import { handleInviteAction } from '@/app/(app)/profile/actions';
 import { cn } from '@/lib/utils';
@@ -444,22 +445,7 @@ const NotificationsPage = memo(function NotificationsPage() {
                     </div>
                 </div>
                 <div className=" mx-auto">
-                    <div className="space-y-4">
-                        {[...Array(5)].map((_, i) => (
-                            <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                                <CardContent className="p-6">
-                                    <div className="flex items-start space-x-4">
-                                        <Skeleton className="h-12 w-12 rounded-full" />
-                                        <div className="space-y-2 flex-1">
-                                            <Skeleton className="h-4 w-3/4" />
-                                            <Skeleton className="h-3 w-1/2" />
-                                        </div>
-                                        <Skeleton className="h-8 w-8" />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                    <SkeletonCards count={5} />
                 </div>
             </div>
         );

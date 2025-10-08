@@ -14,10 +14,11 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import { doc, getDoc, setDoc, serverTimestamp, getDocs, collection, query, limit } from "firebase/firestore";
-import { Loader2 } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-states";
 import { Logo } from "@/components/logo";
 import { useTranslations } from 'next-intl';
 import { generateReferralCode } from '@/lib/referral-code-generator';
+import { Loader2 } from 'lucide-react';
 
 
 export default function LoginPage() {
@@ -123,7 +124,7 @@ export default function LoginPage() {
   if (authLoading || user || isSetupRequired === null || isSetupRequired === true) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-secondary">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <LoadingSpinner size="xl" />
       </div>
     );
   }
@@ -182,7 +183,7 @@ export default function LoginPage() {
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      <LoadingSpinner size="sm" className="mr-2" />
                       {t('loggingIn')}
                     </>
                   ) : (

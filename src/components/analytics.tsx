@@ -28,10 +28,33 @@ export function GoogleAnalytics() {
       }
     };
 
+    // Handle unhandled promise rejections that might be related to script injection
+    const handleUnhandledRejection = (event: any) => {
+      const promiseEvent = event as any;
+      if (promiseEvent.reason && typeof promiseEvent.reason === 'string' && promiseEvent.reason.includes('injectScript')) {
+        console.warn('Script injection promise rejection caught and handled:', promiseEvent.reason);
+        promiseEvent.preventDefault();
+      }
+    };
+
+    // Handle general errors that might be related to script injection
+    const handleGeneralError = (event: any) => {
+      const errorEvent = event as any;
+      if (errorEvent.error && errorEvent.error.message && errorEvent.error.message.includes('injectScript')) {
+        console.warn('Script injection error caught and handled:', errorEvent.error.message);
+        errorEvent.preventDefault();
+        return false;
+      }
+    };
+
     window.addEventListener('error', handleScriptError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    window.addEventListener('error', handleGeneralError);
     
     return () => {
       window.removeEventListener('error', handleScriptError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      window.removeEventListener('error', handleGeneralError);
     };
   }, []);
 
@@ -55,6 +78,9 @@ export function GoogleAnalytics() {
       <Script
         id="gtag-init"
         strategy="afterInteractive"
+        onError={(e) => {
+          console.warn('Google Analytics initialization script failed:', e);
+        }}
         dangerouslySetInnerHTML={{
           __html: `
             try {
@@ -69,6 +95,12 @@ export function GoogleAnalytics() {
               console.log('Google Analytics initialized successfully');
             } catch (error) {
               console.warn('Google Analytics initialization failed:', error);
+              // Suppress injectScript errors specifically
+              if (error.message && error.message.includes('injectScript')) {
+                console.warn('injectScript error suppressed:', error.message);
+                return;
+              }
+              throw error;
             }
           `,
         }}

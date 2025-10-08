@@ -26,6 +26,7 @@ import { useState, useEffect, useMemo } from "react";
 import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonCards, TableSkeleton } from "@/components/ui/loading-states";
 // import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -476,9 +477,7 @@ export default function AnalyticsPage() {
 
             <div className=" mx-auto">
                 {loading ? (
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                        {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-32" />)}
-                    </div>
+                    <SkeletonCards count={6} cardClassName="h-32" />
                 ) : (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                     <Card className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-0 bg-background/80 backdrop-blur-sm group">

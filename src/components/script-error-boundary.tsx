@@ -24,6 +24,10 @@ export function ScriptErrorBoundary({ children }: { children: React.ReactNode })
       }
     };
 
+    // Note: Console error override removed due to compatibility issues
+    // The error boundary will still catch and handle script injection errors
+    // through the unhandledrejection and error event listeners above
+
     // Add event listeners
     window.addEventListener('unhandledrejection', handleUnhandledRejection);
     window.addEventListener('error', handleError);

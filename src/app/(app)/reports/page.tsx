@@ -30,6 +30,7 @@ import {
   Minus
 } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonCards, TableSkeleton } from '@/components/ui/loading-states';
 import { Button } from '@/components/ui/button';
 import {
   // LineChart,
@@ -281,12 +282,8 @@ export default function ReportsPage() {
             <div className="container space-y-8">
                 <Skeleton className="h-10 w-1/3" />
                 <Skeleton className="h-4 w-2/3" />
-                <div className="grid gap-6 md:grid-cols-3">
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
-                    <Skeleton className="h-28 w-full" />
-                </div>
-                <Skeleton className="h-64 w-full" />
+                <SkeletonCards count={3} cardClassName="h-28" />
+                <TableSkeleton rows={8} columns={4} />
             </div>
         );
     }

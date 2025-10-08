@@ -9,7 +9,8 @@ import { collection, getDocs, onSnapshot, query, where } from "firebase/firestor
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonCards } from "@/components/ui/loading-states";
+import { EmptyState } from "@/components/ui/empty-states";
 import { Star, Heart } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -147,9 +148,7 @@ export default function MyFavoritesPage() {
         return (
             <div className="container space-y-8">
                 <div className=" mx-auto">
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-64 w-full" />)}
-                    </div>
+                    <SkeletonCards count={4} />
                 </div>
             </div>
         );
@@ -173,18 +172,17 @@ export default function MyFavoritesPage() {
                     </div>
 
                 ) : (
-                  <Card className="shadow-elevated border border-border/50 bg-background/90 backdrop-blur-sm hover:shadow-floating hover:border-primary/30 transition-all duration-300">
-                        <CardContent className="flex flex-col items-center justify-center text-center p-12">
-                            <Heart className="h-20 w-20 mb-6 text-primary opacity-60" />
-                            <div className="space-y-3">
-                                <h3 className="text-2xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noFavoritesYet')}</h3>
-                                <p className="text-lg text-muted-foreground max-w-md">{t('noFavoritesDescription')}</p>
-                            </div>
-                            <Button asChild className="mt-6 shadow-elevated hover:shadow-primary-glow transition-all duration-300 border-2 border-primary/20 hover:border-primary">
+                    <EmptyState
+                        icon={<Heart className="h-20 w-20 text-primary opacity-60" />}
+                        title={t('noFavoritesYet')}
+                        description={t('noFavoritesDescription')}
+                        action={
+                            <Button asChild className="shadow-elevated hover:shadow-primary-glow transition-all duration-300 border-2 border-primary/20 hover:border-primary">
                                 <Link href="/dashboard">{t('findProviders')}</Link>
                             </Button>
-                        </CardContent>
-                    </Card>
+                        }
+                        variant="card"
+                    />
                 )}
             </div>
         </div>

@@ -9,6 +9,7 @@ import { collection, query, onSnapshot, orderBy, Timestamp } from "firebase/fire
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TableSkeleton, LoadingSpinner } from "@/components/ui/loading-states";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -234,7 +235,7 @@ export default function AdminUsersPage() {
                 <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-6">
-                            <Skeleton className="h-64 w-full" />
+                            <TableSkeleton rows={8} columns={6} />
                         </CardContent>
                     </Card>
                 </div>
@@ -425,7 +426,9 @@ export default function AdminUsersPage() {
                     </div>
                     <DialogFooter>
                         <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                        <Button onClick={onCreateUser} disabled={isSubmitting}>{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}Create User</Button>
+                        <Button onClick={onCreateUser} disabled={isSubmitting}>
+                            {isSubmitting ? <LoadingSpinner size="sm" className="mr-2" /> : null}Create User
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -455,7 +458,9 @@ export default function AdminUsersPage() {
                     </div>
                     <DialogFooter>
                         <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
-                        <Button onClick={onUpdateUser} disabled={isSubmitting}>{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}Save Changes</Button>
+                        <Button onClick={onUpdateUser} disabled={isSubmitting}>
+                            {isSubmitting ? <LoadingSpinner size="sm" className="mr-2" /> : null}Save Changes
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -481,7 +486,7 @@ export default function AdminUsersPage() {
                     <DialogFooter>
                         <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
                         <Button onClick={onSendEmail} disabled={isSubmitting}>
-                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Mail className="mr-2 h-4 w-4" />}
+                            {isSubmitting ? <LoadingSpinner size="sm" className="mr-2" /> : <Mail className="mr-2 h-4 w-4" />}
                             Send Email
                         </Button>
                     </DialogFooter>

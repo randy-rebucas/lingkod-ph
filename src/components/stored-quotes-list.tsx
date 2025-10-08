@@ -48,6 +48,8 @@ import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, Timest
 import { useToast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/use-error-handler";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonGrid } from "@/components/ui/loading-states";
+import { NoDataEmptyState } from "@/components/ui/empty-states";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { QuoteFormValues } from "./quote-builder-client";
 import { Card, CardContent } from "./ui/card";
@@ -302,7 +304,7 @@ export function StoredQuotesList() {
              <Card>
                 <CardContent className="p-6">
                     <Skeleton className="h-10 w-full mb-4" />
-                    {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full mb-2" />)}
+                    <SkeletonGrid count={5} itemClassName="h-12 mb-2" />
                 </CardContent>
             </Card>
         )
@@ -310,13 +312,11 @@ export function StoredQuotesList() {
     
     if (quotes.length === 0) {
         return (
-             <Card>
-                <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                    <FileText className="h-16 w-16 mb-4" />
-                    <h3 className="text-xl font-semibold">{t('noStoredQuotes')}</h3>
-                    <p>{t('createFirstQuoteMessage')}</p>
-                </CardContent>
-            </Card>
+            <NoDataEmptyState
+                title={t('noStoredQuotes')}
+                description={t('createFirstQuoteMessage')}
+                variant="card"
+            />
         )
     }
 

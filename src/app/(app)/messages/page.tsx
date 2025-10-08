@@ -17,6 +17,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Send, Search, Paperclip, X, MessageSquare, Loader2, Check, CheckCheck } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonGrid, LoadingSpinner } from "@/components/ui/loading-states";
 import { useToast } from "@/hooks/use-toast";
 
 
@@ -520,8 +521,8 @@ export default function MessagesPage() {
                 {/* Conversations List */}
                 <ScrollArea className="flex-1">
                     {loadingConversations ? (
-                        <div className="p-4 space-y-4">
-                            {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 w-full bg-gray-200" />)}
+                        <div className="p-4">
+                            <SkeletonGrid count={5} itemClassName="h-16 bg-gray-200" />
                         </div>
                     ) : filteredConversations.length > 0 ? (
                         filteredConversations.map((convo) => (
@@ -573,7 +574,7 @@ export default function MessagesPage() {
                             <ScrollArea className="h-full p-6">
                                 {loadingMessages ? (
                                     <div className="flex justify-center items-center h-full">
-                                        <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+                                        <LoadingSpinner size="lg" text="Loading messages..." />
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
@@ -644,7 +645,7 @@ export default function MessagesPage() {
                                         disabled={isSending || (!newMessage.trim() && !selectedImage)}
                                         className="bg-green-600 hover:bg-green-700 text-white"
                                     >
-                                        {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                                        {isSending ? <LoadingSpinner size="sm" /> : <Send className="h-4 w-4" />}
                                     </Button>
                                 </div>
                             </form>

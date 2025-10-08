@@ -29,8 +29,8 @@ import {
   Zap,
   Star,
   Tag,
-  Loader2
 } from 'lucide-react';
+import { PageLoading, InlineLoading } from '@/components/ui/loading-states';
 
 // Types for API responses
 interface ContentItem {
@@ -334,12 +334,10 @@ const LearningHubOverviewPage = () => {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">Loading learning hub content...</p>
-        </div>
-      </div>
+      <PageLoading 
+        text="Loading learning hub content..." 
+        className="bg-gradient-to-b from-background to-muted/20" 
+      />
     );
   }
 
@@ -372,7 +370,7 @@ const LearningHubOverviewPage = () => {
                   onChange={(e) => handleSearch(e.target.value)}
                 />
                 {isSearching && (
-                  <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
+                  <InlineLoading className="absolute right-3 top-1/2 transform -translate-y-1/2" />
                 )}
               </div>
               

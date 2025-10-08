@@ -7,6 +7,7 @@ import { collection, query, onSnapshot, orderBy, where, Timestamp } from "fireba
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TableSkeleton } from "@/components/ui/loading-states";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -101,7 +102,7 @@ export default function PaymentHistoryPage() {
                 <div className=" mx-auto">
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-6">
-                            <Skeleton className="h-64 w-full" />
+                            <TableSkeleton rows={6} columns={5} />
                         </CardContent>
                     </Card>
                 </div>

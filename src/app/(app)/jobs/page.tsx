@@ -9,7 +9,8 @@ import { collection, query, where, onSnapshot, doc, updateDoc, arrayUnion, Times
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonCards } from "@/components/ui/loading-states";
+import { JobsEmptyState } from "@/components/ui/empty-states";
 import { Briefcase, MapPin, Users, ShieldCheck, Clock, Search, Filter, Grid3X3, List, Eye } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -318,9 +319,7 @@ export default function JobsPage() {
                     <p className="text-muted-foreground">{t('subtitle')}</p>
                 </div>
                 <div className=" mx-auto">
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-72" />)}
-                    </div>
+                    <SkeletonCards count={6} cardClassName="h-72" />
                 </div>
             </div>
         )
@@ -470,38 +469,14 @@ export default function JobsPage() {
                 </div>
             ) : (
                 <div className="max-w-4xl mx-auto">
-                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                        <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                            <div className="mb-6 p-4 rounded-full bg-muted/50">
-                                <Briefcase className="h-12 w-12 text-primary opacity-60" />
-                            </div>
-                            <h3 className="text-xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">
-                                {searchTerm || filterCategory !== 'all' || filterBudget !== 'all' 
-                                    ? t('noJobsMatchCriteria') 
-                                    : t('noOpenJobs')
-                                }
-                            </h3>
-                            <p className="text-muted-foreground max-w-md">
-                                {searchTerm || filterCategory !== 'all' || filterBudget !== 'all'
-                                    ? t('tryAdjustingSearch')
-                                    : t('noOpenJobsDescription')
-                                }
-                            </p>
-                            {(searchTerm || filterCategory !== 'all' || filterBudget !== 'all') && (
-                                <Button 
-                                    variant="outline" 
-                                    className="mt-4"
-                                    onClick={() => {
-                                        setSearchTerm('');
-                                        setFilterCategory('all');
-                                        setFilterBudget('all');
-                                    }}
-                                >
-                                    {t('clearFilters')}
-                                </Button>
-                            )}
-                        </CardContent>
-                    </Card>
+                    <JobsEmptyState
+                        hasFilters={searchTerm || filterCategory !== 'all' || filterBudget !== 'all'}
+                        onClearFilters={() => {
+                            setSearchTerm('');
+                            setFilterCategory('all');
+                            setFilterBudget('all');
+                        }}
+                    />
                 </div>
             )}
         </div>

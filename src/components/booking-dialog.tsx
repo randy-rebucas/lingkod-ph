@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from '@/hooks/use-toast';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/loading-states';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -208,7 +209,7 @@ export function BookingDialog({ isOpen, setIsOpen, service, provider, onBookingC
                                 <Button type="button" variant="outline" disabled={isSaving}>{t('cancel')}</Button>
                             </DialogClose>
                             <Button type="submit" disabled={isSaving}>
-                                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isSaving && <LoadingSpinner size="sm" className="mr-2" />}
                                 {isSaving ? t('proceeding') : t('proceedToPayment')}
                             </Button>
                         </DialogFooter>

@@ -15,6 +15,8 @@ import { AddEditServiceDialog, Service } from '@/components/add-edit-service-dia
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonCards } from '@/components/ui/loading-states';
+import { NoDataEmptyState } from '@/components/ui/empty-states';
 
 
 const getStatusVariant = (status: string) => {
@@ -140,22 +142,7 @@ export default function ServicesPage() {
             
             {loading || authLoading ? (
                 <div className=" mx-auto">
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {[...Array(3)].map((_, i) => (
-                        <Card key={i} className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                            <CardHeader>
-                                <Skeleton className="h-6 w-3/4" />
-                                <Skeleton className="h-4 w-1/4" />
-                            </CardHeader>
-                            <CardContent>
-                                <Skeleton className="h-12 w-full" />
-                            </CardContent>
-                            <CardFooter>
-                                <Skeleton className="h-8 w-1/3" />
-                            </CardFooter>
-                        </Card>
-                    ))}
-                    </div>
+                    <SkeletonCards count={3} />
                 </div>
             ) : services.length > 0 ? (
                 <div className=" mx-auto">
@@ -215,13 +202,11 @@ export default function ServicesPage() {
                 </div>
             ) : (
                 <div className=" mx-auto">
-                    <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-                    <CardContent className="flex flex-col items-center justify-center text-center text-muted-foreground p-12">
-                         <BriefcaseBusiness className="h-16 w-16 mb-4 text-primary opacity-60" />
-                        <h3 className="text-xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t('noServicesFound')}</h3>
-                        <p>{t('noServicesDescription')}</p>
-                    </CardContent>
-                    </Card>
+                    <NoDataEmptyState
+                        title={t('noServicesFound')}
+                        description={t('noServicesDescription')}
+                        variant="card"
+                    />
                 </div>
             )}
 

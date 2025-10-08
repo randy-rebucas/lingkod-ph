@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingSpinner, SkeletonCards } from "@/components/ui/loading-states";
 import { Badge } from "@/components/ui/badge";
 import { Camera, Upload, Loader2, User, Settings, Briefcase, Award, Users, Copy, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Wallet, Building, FileText, Trash2 } from "lucide-react";
 import { getStorageInstance, getDb   } from '@/lib/firebase';
@@ -810,7 +811,7 @@ const ProfilePage = memo(function ProfilePage() {
                         </CardContent>
                          <CardFooter className="p-6 pt-0">
                             <Button onClick={handlePublicProfileUpdate} disabled={isSavingPublic} className="shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                                {isSavingPublic && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isSavingPublic && <LoadingSpinner size="sm" className="mr-2" />}
                                 {isSavingPublic ? 'Saving...' : 'Update Profile'}
                             </Button>
                         </CardFooter>
@@ -930,7 +931,7 @@ const ProfilePage = memo(function ProfilePage() {
                         </CardContent>
                          <CardFooter>
                             <Button onClick={handlePersonalDetailsUpdate} disabled={isSavingPersonal}>
-                                {isSavingPersonal && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isSavingPersonal && <LoadingSpinner size="sm" className="mr-2" />}
                                 {isSavingPersonal ? 'Saving...' : 'Update Details'}
                             </Button>
                         </CardFooter>
@@ -998,7 +999,7 @@ const ProfilePage = memo(function ProfilePage() {
                                                     variant="secondary"
                                                     disabled={isRedeeming === reward.id || loyaltyPoints < reward.pointsRequired}
                                                 >
-                                                    {isRedeeming === reward.id ? <Loader2 className="animate-spin" /> : 'Redeem'}
+                                                    {isRedeeming === reward.id ? <LoadingSpinner size="sm" /> : 'Redeem'}
                                                 </Button>
                                             </AlertDialogTrigger>
                                             <AlertDialogContent>
@@ -1222,7 +1223,7 @@ const ProfilePage = memo(function ProfilePage() {
                             </CardContent>
                             <CardFooter>
                                 <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
-                                    {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSavingProvider && <LoadingSpinner size="sm" className="mr-2" />}
                                     {isSavingProvider ? 'Saving...' : 'Update Professional Details'}
                                 </Button>
                             </CardFooter>
@@ -1271,7 +1272,7 @@ const ProfilePage = memo(function ProfilePage() {
                             </CardContent>
                              <CardFooter>
                                 <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
-                                    {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSavingProvider && <LoadingSpinner size="sm" className="mr-2" />}
                                     {isSavingProvider ? 'Saving...' : 'Update Availability'}
                                 </Button>
                             </CardFooter>
@@ -1318,7 +1319,7 @@ const ProfilePage = memo(function ProfilePage() {
                             </CardContent>
                              <CardFooter>
                                 <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
-                                    {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSavingProvider && <LoadingSpinner size="sm" className="mr-2" />}
                                     {isSavingProvider ? 'Saving...' : 'Update Credentials'}
                                 </Button>
                             </CardFooter>
@@ -1381,7 +1382,7 @@ const ProfilePage = memo(function ProfilePage() {
                                         <Input value={newDocName} onChange={e => setNewDocName(e.target.value)} placeholder="Document Name (e.g., Business Permit)" />
                                         <Input type="file" ref={newDocFileInputRef} onChange={e => setNewDocFile(e.target.files ? e.target.files[0] : null)} className="max-w-xs" />
                                         <Button onClick={handleUploadDocument} disabled={isUploadingDoc}>
-                                            {isUploadingDoc ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                                            {isUploadingDoc ? <LoadingSpinner size="sm" className="mr-2" /> : <Upload className="mr-2 h-4 w-4" />}
                                             Upload
                                         </Button>
                                     </div>
@@ -1419,7 +1420,7 @@ const ProfilePage = memo(function ProfilePage() {
                             </CardContent>
                              <CardFooter>
                                 <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
-                                    {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSavingProvider && <LoadingSpinner size="sm" className="mr-2" />}
                                     {isSavingProvider ? 'Saving...' : 'Update Business Details'}
                                 </Button>
                             </CardFooter>
@@ -1467,7 +1468,7 @@ const ProfilePage = memo(function ProfilePage() {
                             </CardContent>
                              <CardFooter>
                                 <Button onClick={handleProviderDetailsUpdate} disabled={isSavingProvider}>
-                                    {isSavingProvider && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {isSavingProvider && <LoadingSpinner size="sm" className="mr-2" />}
                                     {isSavingProvider ? 'Saving...' : 'Update Availability'}
                                 </Button>
                             </CardFooter>
@@ -1517,7 +1518,7 @@ const ProfilePage = memo(function ProfilePage() {
                         </CardContent>
                         <CardFooter>
                             <Button onClick={handlePayoutDetailsUpdate} disabled={isSavingPayout}>
-                                {isSavingPayout && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isSavingPayout && <LoadingSpinner size="sm" className="mr-2" />}
                                 {isSavingPayout ? 'Saving...' : 'Save Payout Details'}
                             </Button>
                         </CardFooter>

@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { PageLoading } from '@/components/ui/loading-states';
 import { getDb  } from '@/lib/firebase';
 import { getDocs, collection } from "firebase/firestore";
 import { Logo } from "@/components/logo";
@@ -65,9 +65,7 @@ export default function SetupPage() {
 
     if (authLoading || user) {
         return (
-          <div className="flex min-h-screen items-center justify-center bg-secondary">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          </div>
+          <PageLoading text="Setting up..." className="bg-secondary" />
         );
     }
 

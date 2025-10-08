@@ -35,6 +35,8 @@ import { useAuth } from "@/context/auth-context";
 import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or, serverTimestamp, orderBy, addDoc, getDoc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { TableSkeleton } from "@/components/ui/loading-states";
+import { BookingsEmptyState } from "@/components/ui/empty-states";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
 import { LeaveReviewDialog } from "@/components/leave-review-dialog";
 import { CompleteBookingDialog } from "@/components/complete-booking-dialog";
@@ -620,43 +622,6 @@ const getAvatarFallback = (name: string | null | undefined) => {
     return name.substring(0, 2).toUpperCase();
 };
 
-const _EmptyState = ({ status, userRole }: { status: string, userRole: string | null }) => {
-    const t = useTranslations('Bookings');
-    
-    const messages: { [key: string]: { icon: JSX.Element, text: string } } = {
-        'Pending Payment': { icon: <CreditCard className="h-20 w-20" />, text: t('noBookingsAwaitingPayment') },
-        'Pending Verification': { icon: <FileCheck className="h-20 w-20" />, text: t('noPaymentsPendingVerification') },
-        Upcoming: { icon: <Calendar className="h-20 w-20" />, text: t('noUpcomingBookings') },
-        "In Progress": { icon: <Timer className="h-20 w-20" />, text: t('noJobsInProgress') },
-        Completed: { icon: <CheckCircle2 className="h-20 w-20" />, text: t('noCompletedBookings') },
-        Cancelled: { icon: <Ban className="h-20 w-20" />, text: t('noCancelledBookings') }
-    };
-    const clientAction = t('whyNotBookNewService');
-    const providerAction = t('seeNewBookingRequests');
-    
-    const messageInfo = messages[status];
-
-    if (!messageInfo) {
-        return null; // or a default fallback
-    }
-
-    return (
-        <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-            <CardContent className="flex flex-col items-center justify-center text-center p-12">
-                <div className="mb-6 text-primary opacity-60">{messageInfo.icon}</div>
-                <div className="space-y-3">
-                    <h3 className="text-2xl font-semibold font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{messageInfo.text}</h3>
-                    <p className="text-lg text-muted-foreground max-w-md">{userRole === 'client' ? clientAction : providerAction}</p>
-                </div>
-                 {userRole === 'client' && (
-                    <Button asChild className="mt-6 shadow-glow hover:shadow-glow/50 transition-all duration-300">
-                        <Link href="/dashboard">{t('findAService')}</Link>
-                    </Button>
-                )}
-            </CardContent>
-        </Card>
-    )
-}
 
 
 
@@ -1011,21 +976,7 @@ export default function BookingsPage() {
                 {loading ? (
                     <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                         <CardContent className="p-6">
-                            <div className="space-y-4">
-                                {[...Array(6)].map((_, i) => (
-                                    <div key={i} className="flex items-center space-x-4">
-                                        <Skeleton className="h-8 w-8 rounded-full" />
-                                        <div className="space-y-2 flex-1">
-                                            <Skeleton className="h-4 w-3/4" />
-                                            <Skeleton className="h-3 w-1/2" />
-                                        </div>
-                                        <Skeleton className="h-6 w-20" />
-                                        <Skeleton className="h-6 w-16" />
-                                        <Skeleton className="h-6 w-12" />
-                                        <Skeleton className="h-8 w-16" />
-                                    </div>
-                                ))}
-                            </div>
+                            <TableSkeleton rows={6} columns={6} />
                         </CardContent>
                     </Card>
                 ) : filteredAndSortedBookings.length > 0 ? (

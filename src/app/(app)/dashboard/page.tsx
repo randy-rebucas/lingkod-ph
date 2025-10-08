@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { getDb  } from '@/lib/firebase';
 import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs, doc, addDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { SkeletonCards, LoadingSpinner } from "@/components/ui/loading-states";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -946,21 +947,22 @@ const DashboardPage = memo(function DashboardPage() {
                         </div>
                         {loadingProviders || isSmartSearching || isLoadingNearby ? (
                             <div className="space-y-4" role="status" aria-live="polite">
-                                <div className="flex items-center justify-center py-8">
-                                    <div className="flex items-center gap-3">
-                                        <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
-                                        <span className="text-muted-foreground">
-                                            {isLoadingNearby ? t('findingNearbyProviders') : 
-                                             isSmartSearching ? t('searchingWithAI') : 
-                                             t('loadingProviders')}
-                                        </span>
+                                <LoadingSpinner 
+                                    size="lg"
+                                    text={isLoadingNearby ? t('findingNearbyProviders') : 
+                                          isSmartSearching ? t('searchingWithAI') : 
+                                          t('loadingProviders')}
+                                    centered
+                                />
+                                {viewMode === 'grid' ? (
+                                    <SkeletonCards count={6} />
+                                ) : (
+                                    <div className="space-y-2">
+                                        {Array.from({ length: 6 }).map((_, i) => (
+                                            <Skeleton key={i} className="h-20 w-full" />
+                                        ))}
                                     </div>
-                                </div>
-                                <div className={cn("gap-4", viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'space-y-2')}>
-                                    {[...Array(6)].map((_, i) => (
-                                        <Skeleton key={i} className={cn("w-full", viewMode === 'grid' ? 'h-64' : 'h-20')} />
-                                    ))}
-                                </div>
+                                )}
                             </div>
                         ) : (
                              providers.length > 0 ? (

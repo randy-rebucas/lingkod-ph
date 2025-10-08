@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, Bot, DollarSign, Lightbulb, TrendingUp, MapPin, Target, BarChart3, Zap, Award } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LoadingSpinner } from "@/components/ui/loading-states";
 import { useTranslations } from 'next-intl';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -137,7 +138,7 @@ export default function SmartRateClient() {
               <Button type="submit" disabled={isPending} className="w-full">
                 {isPending ? (
                   <>
-                    <Sparkles className="mr-2 h-4 w-4 animate-spin" />
+                    <LoadingSpinner size="sm" className="mr-2" />
                     {t('analyzing')}
                   </>
                 ) : (
