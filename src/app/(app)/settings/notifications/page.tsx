@@ -3,21 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Bell, Mail, Smartphone, AlertCircle } from 'lucide-react';
+import { Bell, Mail, Smartphone, AlertCircle, ArrowLeft } from 'lucide-react';
 import { UserSettings } from '@/types/user-settings';
 import { getUserSettings, updateUserSettings } from '@/lib/user-settings-service';
 
 export default function NotificationSettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
   useEffect(() => {
     if (user) {
       loadSettings();
@@ -98,14 +99,18 @@ export default function NotificationSettingsPage() {
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Bell className="h-8 w-8" />
-            Notification Settings
-          </h1>
-          <p className="text-muted-foreground">
-            Manage how and when you receive notifications
-          </p>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              Notification Settings
+            </h1>
+            <p className="text-muted-foreground">
+              Manage how and when you receive notifications
+            </p>
+          </div>
         </div>
         <Button onClick={saveSettings} disabled={saving}>
           {saving ? 'Saving...' : 'Save Changes'}

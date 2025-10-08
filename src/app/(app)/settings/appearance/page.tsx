@@ -8,17 +8,17 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Palette, Globe, Monitor, Moon, Sun, AlertCircle } from 'lucide-react';
+import { Palette, Globe, Monitor, Moon, Sun, AlertCircle, ArrowLeft, Bell } from 'lucide-react';
 import { UserSettings } from '@/types/user-settings';
 import { getUserSettings, updateUserSettings } from '@/lib/user-settings-service';
-
+import { useRouter } from 'next/navigation';
 export default function AppearanceSettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
+  const router = useRouter();
   useEffect(() => {
     if (user) {
       loadSettings();
@@ -107,14 +107,18 @@ export default function AppearanceSettingsPage() {
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Palette className="h-8 w-8" />
-            Appearance & Language
-          </h1>
-          <p className="text-muted-foreground">
-            Customize your interface and language preferences
-          </p>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => router.back()}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              Appearance & Language
+            </h1>
+            <p className="text-muted-foreground">
+              Customize your interface and language preferences
+            </p>
+          </div>
         </div>
         <Button onClick={saveSettings} disabled={saving}>
           {saving ? 'Saving...' : 'Save Changes'}

@@ -7,17 +7,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Shield, Eye, User, AlertCircle } from 'lucide-react';
+import { Shield, Eye, User, AlertCircle, ArrowLeft } from 'lucide-react';
 import { UserSettings } from '@/types/user-settings';
 import { getUserSettings, updateUserSettings } from '@/lib/user-settings-service';
-
+import { useRouter } from 'next/navigation';
 export default function PrivacySettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
+  const router = useRouter();
   useEffect(() => {
     if (user) {
       loadSettings();
@@ -106,14 +106,18 @@ export default function PrivacySettingsPage() {
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Shield className="h-8 w-8" />
-            Privacy & Security
-          </h1>
-          <p className="text-muted-foreground">
-            Control your privacy and security settings
-          </p>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => router.back()}> 
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              Privacy & Security
+            </h1>
+            <p className="text-muted-foreground">
+              Control your privacy and security settings
+            </p>
+          </div>
         </div>
         <Button onClick={saveSettings} disabled={saving}>
           {saving ? 'Saving...' : 'Save Changes'}
