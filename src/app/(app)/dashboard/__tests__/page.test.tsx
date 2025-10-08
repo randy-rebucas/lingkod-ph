@@ -321,6 +321,15 @@ describe('DashboardPage', () => {
         }
       });
     });
+
+    it('displays verification note with 100+ providers message', async () => {
+      render(<DashboardPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Provider Verification Status')).toBeInTheDocument();
+        expect(screen.getByText(/We have 100\+ total providers which are still in the process of verifying their account/)).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Agency Dashboard', () => {
