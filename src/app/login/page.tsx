@@ -82,16 +82,16 @@ export default function LoginPage() {
   };
   
   const handleFacebookLogin = async () => {
+    console.log('Facebook login clicked');
     setLoading(true);
-    const provider = new FacebookAuthProvider();
     try {
+        const provider = new FacebookAuthProvider();
         const result = await signInWithPopup(getAuthInstance(), provider);
         const user = result.user;
         
         const userDocRef = doc(getDb(), 'users', user.uid);
         const userDoc = await getDoc(userDocRef);
         
-        // If it's a new user, create a document for them
         if (!userDoc.exists()) {
             const newReferralCode = generateReferralCode(user.uid);
             await setDoc(userDocRef, {
@@ -99,12 +99,12 @@ export default function LoginPage() {
                 email: user.email,
                 displayName: user.displayName,
                 photoURL: user.photoURL,
-                role: 'client', // Default role for Facebook sign-in
+                role: 'client',
                 createdAt: serverTimestamp(),
                 loyaltyPoints: 0,
                 referralCode: newReferralCode,
             });
-             toast({ title: t('welcome'), description: t('accountCreated') });
+            toast({ title: t('welcome'), description: t('accountCreated') });
         } else {
             toast({ title: t('welcomeBackFacebook'), description: t('loggedInFacebook') });
         }
