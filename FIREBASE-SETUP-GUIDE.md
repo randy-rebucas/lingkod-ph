@@ -52,7 +52,35 @@ If you plan to use Firebase Authentication:
 1. Go to **Authentication** in Firebase Console
 2. Click "Get started"
 3. Go to **Sign-in method** tab
-4. Enable the authentication methods you want to use (Email/Password, Google, etc.)
+4. Enable the authentication methods you want to use:
+   - **Email/Password**: For traditional email/password login
+   - **Google**: For Google OAuth login
+   - **Facebook**: For Facebook OAuth login
+
+### Facebook Authentication Setup
+
+To enable Facebook login:
+
+1. In Firebase Console, go to **Authentication** > **Sign-in method**
+2. Click on **Facebook** provider
+3. Enable Facebook authentication
+4. You'll need to create a Facebook App:
+   - Go to [Facebook Developers](https://developers.facebook.com/)
+   - Create a new app or use an existing one
+   - Add Facebook Login product to your app
+   - Get your **App ID** and **App Secret**
+   - Add your domain to the Facebook app settings
+5. Enter your Facebook **App ID** and **App Secret** in Firebase Console
+6. Add your authorized domains (your website domain and localhost for development)
+
+### Required Facebook App Settings
+
+In your Facebook App settings, make sure to:
+
+1. Add your domain to **App Domains**
+2. Add your website URL to **Website** platform
+3. Add `https://your-project-id.firebaseapp.com/__/auth/handler` to **Valid OAuth Redirect URIs**
+4. For development, also add `http://localhost:3000/__/auth/handler`
 
 ## Step 6: Set Up Firestore Security Rules
 

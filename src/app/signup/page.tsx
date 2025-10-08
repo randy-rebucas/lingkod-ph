@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
-import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider } from "firebase/auth";
 import { getAuthInstance, getDb   } from '@/lib/firebase';
 import { doc, setDoc, serverTimestamp, runTransaction, getDocs, query, where, collection, limit, getDoc } from "firebase/firestore";
 
@@ -214,6 +214,57 @@ const SignupFormContainer = () => {
     }
   };
 
+  const handleFacebookSignup = async () => {
+    setLoading(true);
+    const provider = new FacebookAuthProvider();
+    try {
+      const result = await signInWithPopup(getAuthInstance(), provider);
+      const user = result.user;
+      
+      const userRef = doc(getDb(), "users", user.uid);
+      const userDoc = await getDoc(userRef);
+
+      if (!userDoc.exists()) {
+        const newReferralCode = generateReferralCode(user.uid);
+        
+        await setDoc(userRef, {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+            phone: user.phoneNumber || '',
+            role: 'client', // All new users are clients
+            accountStatus: 'active',
+            createdAt: serverTimestamp(),
+            loyaltyPoints: 0,
+            referralCode: newReferralCode,
+        });
+
+        const refCode = searchParams.get('ref');
+        if (refCode) {
+          const referralError = await handleReferral(refCode, user);
+          if (referralError) {
+              toast({ variant: 'destructive', title: t('invalidReferralCode'), description: referralError });
+          } else {
+             toast({ title: t('referralApplied'), description: t('referralBonus') });
+          }
+        }
+      } 
+      
+      toast({ title: t('success'), description: t('signedUpFacebook') });
+      router.push('/dashboard');
+
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: t('facebookSignupFailed'),
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
     <form className="space-y-6" onSubmit={handleSignup}>
@@ -310,6 +361,21 @@ const SignupFormContainer = () => {
               </svg>
             )}
             {t('signUpWithGoogle')}
+        </Button>
+        <Button 
+          variant="outline" 
+          className="w-full h-12 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300" 
+          onClick={handleFacebookSignup} 
+          disabled={loading}
+        >
+            {loading ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : (
+              <svg className="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            )}
+            {t('signUpWithFacebook')}
         </Button>
     </div>
     </>
