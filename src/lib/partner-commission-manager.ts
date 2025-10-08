@@ -63,7 +63,7 @@ export interface CommissionPayment {
   paymentDate: Timestamp;
   totalAmount: number;
   commissionCount: number;
-  paymentMethod: 'bank_transfer' | 'paypal' | 'gcash' | 'paymaya';
+  paymentMethod: 'bank_transfer' | 'paypal';
   paymentReference: string;
   status: 'pending' | 'completed' | 'failed';
   bankDetails?: {
@@ -321,7 +321,7 @@ export class PartnerCommissionManager {
     partnerId: string,
     commissionIds: string[],
     paymentData: {
-      paymentMethod: 'bank_transfer' | 'paypal' | 'gcash' | 'paymaya';
+      paymentMethod: 'bank_transfer' | 'paypal';
       paymentReference: string;
       bankDetails?: {
         accountName: string;

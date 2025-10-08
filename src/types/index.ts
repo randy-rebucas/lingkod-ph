@@ -143,7 +143,7 @@ export interface Transaction {
   amount: number;
   type: 'service_payment' | 'payout_request' | 'refund' | 'commission';
   status: 'pending' | 'completed' | 'failed' | 'cancelled';
-  paymentMethod: 'bank_transfer' | 'card' | 'paypal';
+  paymentMethod: 'bank_transfer' | 'paypal';
   createdAt: Date;
   updatedAt: Date;
   completedAt?: Date;

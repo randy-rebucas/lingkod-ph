@@ -629,7 +629,7 @@ describe('PaymentValidator', () => {
       mockPaymentConfig.validatePaymentAmount.mockReturnValue(true);
       mockPaymentConfig.BANK = { accountName: 'Test', accountNumber: '09123456789', bankName: 'Test Bank' };
 
-      const result = await PaymentValidator.validatePayment('booking-1', 'user-1', 1000, 'gcash');
+      const result = await PaymentValidator.validatePayment('booking-1', 'user-1', 1000, 'paypal');
 
       expect(result.valid).toBe(true);
       expect(result.error).toBeUndefined();
@@ -643,7 +643,7 @@ describe('PaymentValidator', () => {
         }),
       } as any);
 
-      const result = await PaymentValidator.validatePayment('booking-1', 'user-1', 1000, 'gcash');
+      const result = await PaymentValidator.validatePayment('booking-1', 'user-1', 1000, 'paypal');
 
       expect(result.valid).toBe(false);
       expect(result.error).toContain('Failed to validate booking');
@@ -679,7 +679,7 @@ describe('PaymentValidator', () => {
       mockPaymentConfig.validateFileUpload.mockReturnValue({ valid: true });
       mockPaymentConfig.BANK = { accountName: 'Test', accountNumber: '09123456789', bankName: 'Test Bank' };
 
-      const result = await PaymentValidator.validatePayment('booking-1', 'user-1', 1000, 'gcash', mockFile);
+      const result = await PaymentValidator.validatePayment('booking-1', 'user-1', 1000, 'paypal', mockFile);
 
       expect(result.valid).toBe(true);
       expect(result.warnings).toContain('File size is very small. Please ensure the image is clear and readable.');

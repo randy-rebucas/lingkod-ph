@@ -18,15 +18,19 @@ import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 
 
-type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info' | 'renewal_reminder' | 'new_review' | 'new_job';
+type NotificationType = 'booking_update' | 'new_message' | 'agency_invite' | 'info' | 'renewal_reminder' | 'new_review' | 'new_job' | 'payment_update' | 'account_update' | 'system_update' | 'security_alert' | 'feature_announcement' | 'maintenance' | 'service_outage' | 'policy_update' | 'welcome' | 'success' | 'warning' | 'error';
 
 type Notification = {
     id: string;
     type: NotificationType;
+    title?: string;
     message: string;
     link: string;
     read: boolean;
     createdAt: unknown; // Firestore Timestamp
+    priority?: 'low' | 'medium' | 'high' | 'urgent';
+    actionUrl?: string;
+    actionText?: string;
     inviteId?: string;
     agencyId?: string;
     agencyName?: string;
@@ -41,6 +45,18 @@ const getIconForType = (type: NotificationType) => {
         case 'renewal_reminder': return <Star className="h-4 w-4 text-yellow-500" aria-hidden="true" />;
         case 'new_review': return <Star className="h-4 w-4 text-yellow-500" aria-hidden="true" />;
         case 'new_job': return <Briefcase className="h-4 w-4 text-blue-500" aria-hidden="true" />;
+        case 'payment_update': return <ThumbsUp className="h-4 w-4 text-green-500" aria-hidden="true" />;
+        case 'account_update': return <UserPlus className="h-4 w-4 text-blue-500" aria-hidden="true" />;
+        case 'system_update': return <Bell className="h-4 w-4 text-blue-500" aria-hidden="true" />;
+        case 'security_alert': return <ThumbsDown className="h-4 w-4 text-red-500" aria-hidden="true" />;
+        case 'feature_announcement': return <Star className="h-4 w-4 text-purple-500" aria-hidden="true" />;
+        case 'maintenance': return <Briefcase className="h-4 w-4 text-orange-500" aria-hidden="true" />;
+        case 'service_outage': return <ThumbsDown className="h-4 w-4 text-red-500" aria-hidden="true" />;
+        case 'policy_update': return <Briefcase className="h-4 w-4 text-gray-500" aria-hidden="true" />;
+        case 'welcome': return <UserPlus className="h-4 w-4 text-green-500" aria-hidden="true" />;
+        case 'success': return <ThumbsUp className="h-4 w-4 text-green-500" aria-hidden="true" />;
+        case 'warning': return <ThumbsDown className="h-4 w-4 text-yellow-500" aria-hidden="true" />;
+        case 'error': return <ThumbsDown className="h-4 w-4 text-red-500" aria-hidden="true" />;
         default: return <Bell className="h-4 w-4" aria-hidden="true" />;
     }
 };

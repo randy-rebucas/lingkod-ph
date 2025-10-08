@@ -152,7 +152,7 @@ const ProfilePage = memo(function ProfilePage() {
 
     // Payout fields
     const [payoutMethod, setPayoutMethod] = useState('');
-    const [gCashNumber, setGCashNumber] = useState('');
+    const [paypalEmail, setPaypalEmail] = useState('');
     const [bankName, setBankName] = useState('');
     const [bankAccountNumber, setBankAccountNumber] = useState('');
     const [bankAccountName, setBankAccountName] = useState('');
@@ -241,7 +241,7 @@ const ProfilePage = memo(function ProfilePage() {
                 if (userRole === 'provider' || userRole === 'agency') {
                     // Load payout details
                     setPayoutMethod(data.payoutDetails?.method || '');
-                    setGCashNumber(data.payoutDetails?.gCashNumber || '');
+                    setPaypalEmail(data.payoutDetails?.paypalEmail || '');
                     setBankName(data.payoutDetails?.bankName || '');
                     setBankAccountNumber(data.payoutDetails?.bankAccountNumber || '');
                     setBankAccountName(data.payoutDetails?.bankAccountName || '');
@@ -457,8 +457,8 @@ const ProfilePage = memo(function ProfilePage() {
         try {
             const userDocRef = doc(getDb(), "users", user.uid);
             const payoutDetails: Record<string, unknown> = { method: payoutMethod };
-            if (payoutMethod === 'gcash') {
-                payoutDetails.gCashNumber = gCashNumber;
+            if (payoutMethod === 'paypal') {
+                payoutDetails.paypalEmail = paypalEmail;
             } else if (payoutMethod === 'bank') {
                 payoutDetails.bankName = bankName;
                 payoutDetails.bankAccountNumber = bankAccountNumber;
@@ -1487,15 +1487,15 @@ const ProfilePage = memo(function ProfilePage() {
                                 <Select value={payoutMethod} onValueChange={setPayoutMethod}>
                                     <SelectTrigger><SelectValue placeholder={t('selectMethod')} /></SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="gcash">GCash</SelectItem>
+                                        <SelectItem value="paypal">PayPal</SelectItem>
                                         <SelectItem value="bank">Bank Transfer</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
-                            {payoutMethod === 'gcash' && (
+                            {payoutMethod === 'paypal' && (
                                 <div className="space-y-2 border-l-2 border-primary pl-4">
-                                    <Label htmlFor="gCashNumber">GCash Number</Label>
-                                    <Input id="gCashNumber" value={gCashNumber} onChange={e => setGCashNumber(e.target.value)} placeholder="09123456789"/>
+                                    <Label htmlFor="paypalEmail">PayPal Email</Label>
+                                    <Input id="paypalEmail" value={paypalEmail} onChange={e => setPaypalEmail(e.target.value)} placeholder="your-email@example.com"/>
                                 </div>
                             )}
                             {payoutMethod === 'bank' && (

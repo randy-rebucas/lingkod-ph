@@ -1430,15 +1430,7 @@
     "accountName": "Pangalan ng Account",
     "accountNumber": "Numero ng Account",
     "iHavePaid": "Nagbayad Na Ako",
-    "processingPayment": "Pinoproseso ang iyong pagbabayad...",
-    "gcashStep1": "Buksan ang iyong GCash app.",
-    "gcashStep2": "I-tap ang 'Send' at piliin ang 'Express Send' o i-scan ang QR code.",
-    "gcashStep3": "I-enter ang mga detalye sa itaas at ang halaga: ₱{amount}.",
-    "gcashStep4": "Pagkatapos ng pagbabayad, i-click ang 'I Have Paid' button sa ibaba.",
-    "mayaStep1": "Buksan ang iyong Maya app.",
-    "mayaStep2": "I-tap ang 'Send Money' o i-scan ang QR code.",
-    "mayaStep3": "I-enter ang halaga: ₱{amount} at kumpletuhin ang pagbabayad.",
-    "mayaStep4": "Pagkatapos ng pagbabayad, i-click ang 'I Have Paid' button sa ibaba."
+    "processingPayment": "Pinoproseso ang iyong pagbabayad..."
   },
   "QRCode": {
     "sampleQRCode": "Sample QR Code"

@@ -77,7 +77,7 @@ export const bookingSchema = z.object({
 });
 
 // Payment validation schemas
-export const paymentMethodSchema = z.enum(['gcash', 'paypal', 'bank_transfer']);
+export const paymentMethodSchema = z.enum(['paypal', 'bank_transfer']);
 export const paymentStatusSchema = z.enum(['pending', 'completed', 'failed', 'refunded']);
 
 export const paymentSchema = z.object({

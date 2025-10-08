@@ -35,7 +35,7 @@ Q: What's the difference between booking a service and posting a job?
 A: Booking a service is for when you've already found a provider and a specific service they offer. Posting a job is for when you have a specific task and want to receive applications from interested providers.
 
 Q: What payment methods are accepted?
-A: We support a variety of payment methods, including GCash, Maya, Debit/Credit Card, and Bank Transfer, all processed securely through our platform. Some providers may also offer cash on delivery.
+A: We support a variety of payment methods, including PayPal, Debit/Credit Card, and Bank Transfer, all processed securely through our platform. Some providers may also offer cash on delivery.
 
 Q: Is my payment secure?
 A: Yes, all online payments are processed through a secure payment gateway. For manual payments, we hold the funds until you confirm the job is complete, providing an extra layer of security.

@@ -37,7 +37,7 @@ export default function PaymentResultPage() {
         setMessage('Invalid PayPal payment response');
       }
     } else {
-      // Handle other payment methods (GCash, etc.)
+      // Handle other payment methods
       handleOtherPaymentResult();
     }
   }, [bookingId, user, searchParams]);
@@ -96,7 +96,7 @@ export default function PaymentResultPage() {
   };
 
   const handleOtherPaymentResult = () => {
-    // Handle GCash and other payment method results
+    // Handle other payment method results
     const resultCode = searchParams.get('resultCode');
     
     if (resultCode === 'Authorised') {

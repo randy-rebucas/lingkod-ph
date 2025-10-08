@@ -125,7 +125,7 @@ describe('PaymentHistoryPage', () => {
         amount: 500,
         type: 'booking_payment',
         status: 'completed',
-        paymentMethod: 'GCash',
+        paymentMethod: 'PayPal',
         createdAt: { toDate: () => new Date('2024-01-15T10:00:00Z') },
         verifiedAt: { toDate: () => new Date('2024-01-15T10:05:00Z') },
         paypalOrderId: 'PAYPAL-123',
@@ -150,7 +150,7 @@ describe('PaymentHistoryPage', () => {
         amount: 200,
         type: 'refund',
         status: 'rejected',
-        paymentMethod: 'GCash',
+        paymentMethod: 'PayPal',
         createdAt: { toDate: () => new Date('2024-01-17T09:15:00Z') },
         rejectedAt: { toDate: () => new Date('2024-01-17T09:20:00Z') },
         rejectedBy: 'admin-1',
@@ -197,7 +197,7 @@ describe('PaymentHistoryPage', () => {
       expect(screen.getByText('₱500.00')).toBeInTheDocument();
       expect(screen.getByText('₱300.00')).toBeInTheDocument();
       expect(screen.getByText('₱200.00')).toBeInTheDocument();
-      expect(screen.getByText('GCash')).toBeInTheDocument();
+      expect(screen.getByText('PayPal')).toBeInTheDocument();
       expect(screen.getByText('PayPal')).toBeInTheDocument();
     });
 
@@ -229,7 +229,7 @@ describe('PaymentHistoryPage', () => {
       amount: 500,
       type: 'booking_payment',
       status: 'completed',
-      paymentMethod: 'GCash',
+      paymentMethod: 'PayPal',
       createdAt: { toDate: () => new Date('2024-01-15T10:00:00Z') },
       verifiedAt: { toDate: () => new Date('2024-01-15T10:05:00Z') },
       paypalOrderId: 'PAYPAL-123',
@@ -274,7 +274,7 @@ describe('PaymentHistoryPage', () => {
 
       expect(screen.getByText('Service Payment')).toBeInTheDocument();
       expect(screen.getByText('₱500.00')).toBeInTheDocument();
-      expect(screen.getByText('GCash')).toBeInTheDocument();
+      expect(screen.getByText('PayPal')).toBeInTheDocument();
       expect(screen.getByText('Completed')).toBeInTheDocument();
     });
 
@@ -376,7 +376,7 @@ describe('PaymentHistoryPage', () => {
           type: 'booking_payment',
           amount: 500,
           status: 'completed',
-          paymentMethod: 'GCash',
+          paymentMethod: 'PayPal',
           createdAt: { toDate: () => new Date('2024-01-15T10:00:00Z') },
         },
         {
@@ -392,7 +392,7 @@ describe('PaymentHistoryPage', () => {
           type: 'refund',
           amount: 200,
           status: 'completed',
-          paymentMethod: 'GCash',
+          paymentMethod: 'PayPal',
           createdAt: { toDate: () => new Date('2024-01-17T09:15:00Z') },
         },
       ];
@@ -423,7 +423,7 @@ describe('PaymentHistoryPage', () => {
           type: 'booking_payment',
           amount: 500,
           status: 'completed',
-          paymentMethod: 'GCash',
+          paymentMethod: 'PayPal',
           createdAt: { toDate: () => new Date('2024-01-15T10:00:00Z') },
         },
         {
@@ -439,7 +439,7 @@ describe('PaymentHistoryPage', () => {
           type: 'booking_payment',
           amount: 200,
           status: 'rejected',
-          paymentMethod: 'GCash',
+          paymentMethod: 'PayPal',
           createdAt: { toDate: () => new Date('2024-01-17T09:15:00Z') },
         },
         {
@@ -447,7 +447,7 @@ describe('PaymentHistoryPage', () => {
           type: 'booking_payment',
           amount: 150,
           status: 'failed',
-          paymentMethod: 'GCash',
+          paymentMethod: 'PayPal',
           createdAt: { toDate: () => new Date('2024-01-18T11:00:00Z') },
         },
       ];
@@ -532,7 +532,7 @@ describe('PaymentHistoryPage', () => {
         type: 'booking_payment',
         amount: 500,
         status: 'completed',
-        paymentMethod: 'GCash',
+        paymentMethod: 'PayPal',
         createdAt: { toDate: () => new Date('2024-01-15T10:00:00Z') },
       };
 
@@ -558,7 +558,7 @@ describe('PaymentHistoryPage', () => {
         type: 'booking_payment',
         amount: 500.50,
         status: 'completed',
-        paymentMethod: 'GCash',
+        paymentMethod: 'PayPal',
         createdAt: { toDate: () => new Date('2024-01-15T10:00:00Z') },
       };
 
@@ -581,7 +581,7 @@ describe('PaymentHistoryPage', () => {
   describe('Transaction Count', () => {
     it('displays correct transaction count', () => {
       const mockTransactions = [
-        { id: 'txn-1', type: 'booking_payment', amount: 500, status: 'completed', paymentMethod: 'GCash', createdAt: { toDate: () => new Date() } },
+        { id: 'txn-1', type: 'booking_payment', amount: 500, status: 'completed', paymentMethod: 'PayPal', createdAt: { toDate: () => new Date() } },
         { id: 'txn-2', type: 'booking_payment', amount: 300, status: 'pending', paymentMethod: 'PayPal', createdAt: { toDate: () => new Date() } },
       ];
 
@@ -606,7 +606,7 @@ describe('PaymentHistoryPage', () => {
         type: 'booking_payment',
         amount: 500,
         status: 'completed',
-        paymentMethod: 'GCash',
+        paymentMethod: 'PayPal',
         createdAt: { toDate: () => new Date() },
       };
 

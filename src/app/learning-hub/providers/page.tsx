@@ -213,7 +213,7 @@ const ProvidersLearningPage = () => {
     },
     {
       question: "How do I get paid?",
-      answer: "Payments are processed automatically after service completion. You can withdraw funds to your bank account or GCash within 1-2 business days."
+      answer: "Payments are processed automatically after service completion. You can withdraw funds to your bank account or PayPal within 1-2 business days."
     },
     {
       question: "Can I set my own prices?",

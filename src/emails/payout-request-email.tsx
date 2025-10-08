@@ -16,8 +16,8 @@ interface PayoutRequestEmailProps {
   providerName: string;
   amount: number;
   payoutDetails: {
-    method: 'gcash' | 'bank';
-    gCashNumber?: string;
+    method: 'paypal' | 'bank';
+    paypalEmail?: string;
     bankName?: string;
     bankAccountNumber?: string;
     bankAccountName?: string;
@@ -47,8 +47,8 @@ export const PayoutRequestEmail = ({
         <Heading as="h2" style={messageHeading}>Payout Details</Heading>
         <Section style={detailsSection}>
           <Text><strong>Method:</strong> {payoutDetails.method.toUpperCase()}</Text>
-          {payoutDetails.method === 'gcash' ? (
-            <Text><strong>GCash Number:</strong> {payoutDetails.gCashNumber}</Text>
+          {payoutDetails.method === 'paypal' ? (
+            <Text><strong>PayPal Email:</strong> {payoutDetails.paypalEmail}</Text>
           ) : (
             <>
               <Text><strong>Bank Name:</strong> {payoutDetails.bankName}</Text>
