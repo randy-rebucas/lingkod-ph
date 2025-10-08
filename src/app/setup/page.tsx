@@ -18,6 +18,7 @@ import { PageLoading } from '@/components/ui/loading-states';
 import { getDb  } from '@/lib/firebase';
 import { getDocs, collection } from "firebase/firestore";
 import { Logo } from "@/components/logo";
+import { Loader2 } from "lucide-react";
 
 const initialState: FormState = {
   error: null,

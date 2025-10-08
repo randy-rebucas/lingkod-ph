@@ -694,6 +694,8 @@
     "whatClientsAreSaying": "Kung ano ang sinasabi ng inyong mga client tungkol sa inyo.",
     "noReviewsYet": "Walang review pa.",
     "viewAllReviews": "Tingnan ang Lahat ng Review",
+    "verificationNote": "Mayroon kaming {count} kabuuang provider{plural} na nasa proseso pa ng pag-verify ng kanilang account. Tanging ang mga provider na nakumpleto na ang kanilang profile at verification ang ipinapakita.",
+    "verificationNoteTitle": "Status ng Provider Verification",
     "upcomingBookings": "Mga Darating na Booking",
     "totalClients": "Kabuuang mga Client",
     "overallRating": "Pangkalahatang Rating",

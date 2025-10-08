@@ -559,6 +559,7 @@ const DashboardPage = memo(function DashboardPage() {
         fetchProviders();
     }, [userRole]);
 
+
     // Fetch client's favorites
     useEffect(() => {
         if (userRole !== 'client' || !user || !getDb()) return;
@@ -835,6 +836,17 @@ const DashboardPage = memo(function DashboardPage() {
              <div className="container space-y-8">
                  {/* Client Onboarding Banner */}
                  <ClientOnboardingBanner />
+                 
+                 {/* Provider Verification Note */}
+                 <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+                     <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                     <AlertDescription className="text-amber-800 dark:text-amber-200">
+                         <strong>{t('verificationNoteTitle')}:</strong> {t('verificationNote', { 
+                             count: '100+', 
+                             plural: 's' 
+                         })}
+                     </AlertDescription>
+                 </Alert>
                  
                  <Card className="border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="pb-4">

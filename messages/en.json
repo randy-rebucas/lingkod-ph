@@ -718,6 +718,8 @@
     "whatClientsAreSaying": "What your clients are saying about you.",
     "noReviewsYet": "No reviews yet.",
     "viewAllReviews": "View All Reviews",
+    "verificationNote": "We have {count} total provider{plural} which are still in the process of verifying their account. Only providers who have completed their profile and verification are shown.",
+    "verificationNoteTitle": "Provider Verification Status",
     "upcomingBookings": "Upcoming Bookings",
     "totalClients": "Total Clients",
     "overallRating": "Overall Rating",
