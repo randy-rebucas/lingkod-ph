@@ -27,7 +27,7 @@ import { getUserSettings, updateUserSettings } from '@/lib/user-settings-service
 export default function MessagesSettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const _t = useTranslations('MessagesSettings');
+  const _t = useTranslations('Settings');
   
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);

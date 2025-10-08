@@ -37,7 +37,7 @@ import { getUserSettings, updateUserSettings } from '@/lib/user-settings-service
 export default function AccountSettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const t = useTranslations('AccountSettings');
+  const t = useTranslations('Settings');
   
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);

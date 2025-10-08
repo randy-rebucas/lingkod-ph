@@ -39,7 +39,7 @@ import { getUserSettings, updateUserSettings } from '@/lib/user-settings-service
 export default function AppearanceSettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const t = useTranslations('AppearanceSettings');
+  const t = useTranslations('Settings');
   
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);

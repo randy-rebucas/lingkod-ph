@@ -30,7 +30,12 @@ export async function getUserSettings(userId: string): Promise<UserSettings> {
     const settingsDoc = await getDoc(doc(getDb(), COLLECTION, userId));
     
     if (settingsDoc.exists()) {
-      const settingsData = settingsDoc.data() as UserSettings;
+      const settingsData = settingsDoc.data() as any;
+      
+      // Convert Firestore Timestamps to JavaScript Date objects
+      if (settingsData.lastUpdated && typeof settingsData.lastUpdated.toDate === 'function') {
+        settingsData.lastUpdated = settingsData.lastUpdated.toDate();
+      }
       
       // Check if settings need migration
       if (settingsData.version !== CURRENT_VERSION) {
@@ -455,6 +460,8 @@ function mergeWithDefaults(settings: Partial<UserSettings>): UserSettings {
   return {
     ...DEFAULT_USER_SETTINGS,
     ...settings,
+    // Ensure lastUpdated is a proper Date object
+    lastUpdated: settings.lastUpdated instanceof Date ? settings.lastUpdated : new Date(),
     notifications: {
       ...DEFAULT_USER_SETTINGS.notifications,
       ...settings.notifications,
