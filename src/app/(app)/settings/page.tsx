@@ -1,130 +1,85 @@
 'use client';
 
 import React from 'react';
-import { useAuth } from '@/context/auth-context';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { 
   Settings, 
   Bell, 
   Shield, 
   Eye, 
   Palette, 
-  Smartphone, 
-  Mail, 
-  MessageSquare,
-  Globe
+  MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SettingsPage() {
-  const _user = useAuth();
-  const _t = useTranslations('Settings');
-  const _router = useRouter();
-
   const settingsSections = [
     {
       id: 'notifications',
       title: 'Notifications',
       description: 'Manage your notification preferences',
       icon: Bell,
-      href: '/settings/notifications',
-      badge: null,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
-      borderColor: 'border-blue-200'
+      href: '/settings/notifications'
     },
     {
       id: 'privacy',
       title: 'Privacy & Security',
       description: 'Control your privacy and security settings',
       icon: Shield,
-      href: '/settings/privacy',
-      badge: null,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      borderColor: 'border-green-200'
+      href: '/settings/privacy'
     },
     {
       id: 'profile',
       title: 'Profile Visibility',
       description: 'Manage what others can see about you',
       icon: Eye,
-      href: '/settings/profile',
-      badge: null,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      borderColor: 'border-purple-200'
+      href: '/settings/profile'
     },
     {
       id: 'appearance',
       title: 'Appearance & Language',
       description: 'Customize your interface and language',
       icon: Palette,
-      href: '/settings/appearance',
-      badge: null,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-      borderColor: 'border-orange-200'
+      href: '/settings/appearance'
     },
     {
       id: 'messages',
       title: 'Messages & Communication',
       description: 'Control how others can contact you',
       icon: MessageSquare,
-      href: '/settings/messages',
-      badge: null,
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50',
-      borderColor: 'border-indigo-200'
+      href: '/settings/messages'
     }
   ];
 
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Settings className="h-8 w-8" />
-            Settings
-          </h1>
-          <p className="text-muted-foreground">
-            Manage your account preferences and privacy settings
-          </p>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <Settings className="h-8 w-8" />
+          Settings
+        </h1>
+        <p className="text-muted-foreground">
+          Manage your account preferences and privacy settings
+        </p>
       </div>
 
       {/* Settings Sections */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {settingsSections.map((section) => {
           const IconComponent = section.icon;
           return (
             <Link key={section.id} href={section.href}>
-              <Card className={`cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-105 ${section.borderColor} border-2`}>
-                <CardHeader className="pb-3">
+              <Card className="cursor-pointer transition-all duration-200 hover:shadow-md">
+                <CardHeader>
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${section.bgColor}`}>
-                      <IconComponent className={`h-6 w-6 ${section.color}`} />
-                    </div>
-                    <div className="flex-1">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        {section.title}
-                        {section.badge && (
-                          <Badge variant="secondary" className="text-xs">
-                            {section.badge}
-                          </Badge>
-                        )}
-                      </CardTitle>
-                    </div>
+                    <IconComponent className="h-6 w-6 text-muted-foreground" />
+                    <CardTitle className="text-lg">{section.title}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <CardDescription className="text-sm">
+                  <CardDescription>
                     {section.description}
                   </CardDescription>
                 </CardContent>
@@ -133,60 +88,6 @@ export default function SettingsPage() {
           );
         })}
       </div>
-
-
-      {/* Settings Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Settings Overview</CardTitle>
-          <CardDescription>
-            Quick overview of your current settings
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium">Email Notifications</span>
-              </div>
-              <Badge variant="outline" className="text-xs">
-                Enabled
-              </Badge>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Smartphone className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium">SMS Notifications</span>
-              </div>
-              <Badge variant="outline" className="text-xs">
-                Disabled
-              </Badge>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-purple-600" />
-                <span className="text-sm font-medium">Profile Visibility</span>
-              </div>
-              <Badge variant="outline" className="text-xs">
-                Public
-              </Badge>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4 text-orange-600" />
-                <span className="text-sm font-medium">Language</span>
-              </div>
-              <Badge variant="outline" className="text-xs">
-                English
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

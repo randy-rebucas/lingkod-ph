@@ -3,7 +3,7 @@
 import { getDb } from './firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, orderBy, limit, updateDoc } from 'firebase/firestore';
 import { SMSService } from './sms-service';
-import { UserSettingsService } from './user-settings-service';
+import { getUserSettings } from './user-settings-service';
 import { sendEmail } from './email-service';
 
 export interface NotificationDeliveryData {
@@ -60,7 +60,7 @@ export class NotificationDeliveryService {
   static async sendNotification(data: NotificationDeliveryData): Promise<DeliveryResult> {
     try {
       // Get user settings
-      const userSettings = await UserSettingsService.getUserSettings(data.userId);
+      const userSettings = await getUserSettings(data.userId);
       
       // Check if notification type is enabled for this category
       const isEnabled = this.isNotificationEnabled(userSettings, data.type, data.category);
@@ -461,16 +461,40 @@ export class NotificationDeliveryService {
     type: string,
     category: string
   ): boolean {
+    if (!userSettings?.notifications) return false;
+
     switch (type) {
       case 'email':
-        return userSettings.notifications.email[`${category}Updates`] || false;
+        if (!userSettings.notifications.email.enabled) return false;
+        return this.isCategoryEnabled(userSettings.notifications.email, category);
       case 'sms':
-        return userSettings.notifications.sms.enabled && 
-               userSettings.notifications.sms[`${category}Updates`] || false;
+        if (!userSettings.notifications.sms.enabled || !userSettings.notifications.sms.phoneVerified) return false;
+        return this.isCategoryEnabled(userSettings.notifications.sms, category);
       case 'in_app':
-        return userSettings.notifications.inApp[`${category}Updates`] || false;
+        if (!userSettings.notifications.inApp.enabled) return false;
+        return this.isCategoryEnabled(userSettings.notifications.inApp, category);
       case 'push':
-        return userSettings.notifications.push[`${category}Updates`] || false;
+        if (!userSettings.notifications.push.enabled) return false;
+        return this.isCategoryEnabled(userSettings.notifications.push, category);
+      default:
+        return false;
+    }
+  }
+
+  private static isCategoryEnabled(notificationSettings: any, category: string): boolean {
+    switch (category) {
+      case 'booking':
+        return notificationSettings.bookingUpdates || false;
+      case 'payment':
+        return notificationSettings.paymentUpdates || false;
+      case 'message':
+        return notificationSettings.newMessages || false;
+      case 'system':
+        return notificationSettings.systemUpdates || false;
+      case 'security':
+        return notificationSettings.securityAlerts || false;
+      case 'promotional':
+        return notificationSettings.promotionalEmails || false;
       default:
         return false;
     }

@@ -1,7 +1,7 @@
 'use server';
 
 import { getDb } from './firebase';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
 import { 
   UserSettings, 
   DEFAULT_USER_SETTINGS, 
@@ -208,27 +208,61 @@ export async function verifyPhoneNumber(
   verificationCode: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    if (!getDb()) {
+      return { success: false, error: 'Firebase not initialized' };
+    }
+
     // Validate phone number format
     const validation = await validatePhoneNumber(phoneNumber);
     if (!validation.valid) {
       return { success: false, error: validation.error };
     }
 
-    // TODO: Implement verification code validation
-    // For now, we'll assume the code is valid
-    const isValidCode = true; // This should be implemented with proper verification
-
-    if (!isValidCode) {
-      return { success: false, error: 'Invalid verification code' };
+    // Get stored verification data
+    const verificationDoc = await getDoc(doc(getDb(), 'phoneVerifications', `${userId}_${validation.formatted!}`));
+    
+    if (!verificationDoc.exists()) {
+      return { success: false, error: 'No verification code found. Please request a new code.' };
     }
 
-    // Update SMS settings with verified phone number
+    const verificationData = verificationDoc.data();
+    
+    // Check if code has expired
+    const now = new Date();
+    const expiresAt = verificationData.expiresAt.toDate();
+    if (now > expiresAt) {
+      // Clean up expired verification
+      await deleteDoc(doc(getDb(), 'phoneVerifications', `${userId}_${validation.formatted!}`));
+      return { success: false, error: 'Verification code has expired. Please request a new code.' };
+    }
+
+    // Check if max attempts exceeded
+    if (verificationData.attempts >= verificationData.maxAttempts) {
+      // Clean up verification after max attempts
+      await deleteDoc(doc(getDb(), 'phoneVerifications', `${userId}_${validation.formatted!}`));
+      return { success: false, error: 'Maximum verification attempts exceeded. Please request a new code.' };
+    }
+
+    // Increment attempts
+    await updateDoc(doc(getDb(), 'phoneVerifications', `${userId}_${validation.formatted!}`), {
+      attempts: verificationData.attempts + 1
+    });
+
+    // Verify the code
+    if (verificationData.code !== verificationCode) {
+      return { success: false, error: 'Invalid verification code. Please try again.' };
+    }
+
+    // Code is valid - update SMS settings with verified phone number
     const result = await updateNotificationSettings(userId, 'sms', {
       phoneNumber: validation.formatted,
       phoneVerified: true
     });
 
     if (result.success) {
+      // Clean up verification data
+      await deleteDoc(doc(getDb(), 'phoneVerifications', `${userId}_${validation.formatted!}`));
+      
       // Send confirmation SMS
       await sendSMS({
         type: 'account_update',
@@ -254,6 +288,10 @@ export async function sendPhoneVerificationCode(
   phoneNumber: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    if (!getDb()) {
+      return { success: false, error: 'Firebase not initialized' };
+    }
+
     // Validate phone number format
     const validation = await validatePhoneNumber(phoneNumber);
     if (!validation.valid) {
@@ -262,16 +300,29 @@ export async function sendPhoneVerificationCode(
 
     // Generate verification code
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+
+    // Store verification code in database
+    const verificationData = {
+      userId,
+      phoneNumber: validation.formatted!,
+      code: verificationCode,
+      expiresAt: serverTimestamp(),
+      attempts: 0,
+      maxAttempts: 3,
+      createdAt: serverTimestamp()
+    };
+
+    await setDoc(doc(getDb(), 'phoneVerifications', `${userId}_${validation.formatted!}`), verificationData);
 
     // Send SMS with verification code
     const smsResult = await sendVerificationCode(validation.formatted!, verificationCode);
     
     if (!smsResult.success) {
+      // Clean up stored verification code if SMS fails
+      await deleteDoc(doc(getDb(), 'phoneVerifications', `${userId}_${validation.formatted!}`));
       return { success: false, error: smsResult.error };
     }
-
-    // TODO: Store verification code in database with expiration
-    // For now, we'll just return success
     
     return { success: true };
     
