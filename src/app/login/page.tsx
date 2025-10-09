@@ -114,7 +114,7 @@ export default function LoginPage() {
         toast({
             variant: "destructive",
             title: t('facebookLoginFailed'),
-            description: error instanceof Error ? error.message : 'An error occurred',
+            description: error instanceof Error ? error.message : String(error),
         });
     } finally {
         setLoading(false);
@@ -154,7 +154,7 @@ export default function LoginPage() {
         toast({
             variant: "destructive",
             title: t('googleLoginFailed'),
-            description: error instanceof Error ? error.message : 'An error occurred',
+            description: error instanceof Error ? error.message : String(error),
         });
     } finally {
         setLoading(false);

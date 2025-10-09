@@ -156,7 +156,7 @@ const SignupFormContainer = () => {
       toast({
         variant: "destructive",
         title: t('signupFailed'),
-        description: error.message,
+        description: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setLoading(false);
@@ -207,7 +207,7 @@ const SignupFormContainer = () => {
       toast({
         variant: "destructive",
         title: t('googleSignupFailed'),
-        description: error.message,
+        description: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setLoading(false);
@@ -258,7 +258,7 @@ const SignupFormContainer = () => {
       toast({
         variant: "destructive",
         title: t('facebookSignupFailed'),
-        description: error.message,
+        description: error instanceof Error ? error.message : String(error),
       });
     } finally {
       setLoading(false);
