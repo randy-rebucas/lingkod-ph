@@ -114,8 +114,8 @@ describe('Admin Bookings Actions', () => {
 
     it('handles undefined actor data', async () => {
       const undefinedActor = {
-        id: undefined as any,
-        name: undefined,
+        id: 'test-id',
+        name: null,
       };
 
       const result = await handleUpdateBookingStatus('booking-123', 'Completed', undefinedActor);
@@ -168,7 +168,7 @@ describe('Admin Bookings Actions', () => {
     });
 
     it('handles audit logging errors gracefully', async () => {
-      mockAuditLogger.getInstance().logAction.mockRejectedValue(new Error('Audit error'));
+      (mockAuditLogger.getInstance().logAction as jest.Mock).mockRejectedValue(new Error('Audit error'));
 
       const result = await handleUpdateBookingStatus('booking-123', 'Completed', mockActor);
 

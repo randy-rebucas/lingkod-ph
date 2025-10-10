@@ -18,7 +18,7 @@ describe('BookingPaymentResultPage', () => {
       loading: false,
     } as any);
 
-    render(<BookingPaymentResultPage params={{ bookingId: 'booking-123' }} />);
+    render(<BookingPaymentResultPage />);
     expect(screen.getByText(/payment result/i)).toBeInTheDocument();
   });
 
@@ -29,7 +29,7 @@ describe('BookingPaymentResultPage', () => {
       loading: true,
     } as any);
 
-    render(<BookingPaymentResultPage params={{ bookingId: 'booking-123' }} />);
+    render(<BookingPaymentResultPage />);
     // Should handle loading state
   });
 });

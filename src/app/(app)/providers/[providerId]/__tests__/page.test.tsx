@@ -18,7 +18,7 @@ describe('ProviderDetailPage', () => {
       loading: false,
     } as any);
 
-    render(<ProviderDetailPage params={{ providerId: 'provider-123' }} />);
+    render(<ProviderDetailPage />);
     expect(screen.getByText(/provider/i)).toBeInTheDocument();
   });
 
@@ -29,7 +29,7 @@ describe('ProviderDetailPage', () => {
       loading: true,
     } as any);
 
-    render(<ProviderDetailPage params={{ providerId: 'provider-123' }} />);
+    render(<ProviderDetailPage />);
     // Should handle loading state
   });
 });

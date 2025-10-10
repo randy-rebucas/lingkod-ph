@@ -153,7 +153,7 @@ describe('AdminDashboardPage', () => {
 
       mockOnSnapshot.mockImplementation((callback) => {
         callback({
-          forEach: (fn) => mockUsers.forEach(fn),
+          forEach: (fn: any) => mockUsers.forEach(fn),
           size: 5,
         });
         return jest.fn();
@@ -175,7 +175,7 @@ describe('AdminDashboardPage', () => {
 
       mockOnSnapshot.mockImplementation((callback) => {
         callback({
-          forEach: (fn) => mockBookings.forEach(fn),
+          forEach: (fn: any) => mockBookings.forEach(fn),
           size: 4,
         });
         return jest.fn();

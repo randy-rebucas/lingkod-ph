@@ -30,7 +30,7 @@ describe('Auth Utils', () => {
       const result = await verifyAdminRole('admin-user-id');
 
       expect(result).toBe(true);
-      expect(mockGetDoc).toHaveBeenCalledWith(doc({}, 'users', 'admin-user-id'));
+      expect(mockGetDoc).toHaveBeenCalledWith(doc(mockGetDb(), 'users', 'admin-user-id'));
     });
 
     it('returns false for non-admin user', async () => {
@@ -139,7 +139,7 @@ describe('Auth Utils', () => {
       const result = await verifyUserRole('provider-user-id', ['provider', 'client']);
 
       expect(result).toBe(true);
-      expect(mockGetDoc).toHaveBeenCalledWith(doc({}, 'users', 'provider-user-id'));
+      expect(mockGetDoc).toHaveBeenCalledWith(doc(mockGetDb(), 'users', 'provider-user-id'));
     });
 
     it('returns false for user with disallowed role', async () => {

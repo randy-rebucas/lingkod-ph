@@ -18,7 +18,7 @@ describe('JobDetailPage', () => {
       loading: false,
     } as any);
 
-    render(<JobDetailPage params={{ jobId: 'job-123' }} />);
+    render(<JobDetailPage />);
     expect(screen.getByText(/job details/i)).toBeInTheDocument();
   });
 
@@ -29,7 +29,7 @@ describe('JobDetailPage', () => {
       loading: true,
     } as any);
 
-    render(<JobDetailPage params={{ jobId: 'job-123' }} />);
+    render(<JobDetailPage />);
     // Should handle loading state
   });
 });

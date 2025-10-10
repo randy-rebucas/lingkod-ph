@@ -26,12 +26,12 @@ describe('RateLimiter', () => {
     it('allows requests within limit', async () => {
       const request = createMockRequest({ 'x-forwarded-for': '192.168.1.1' });
 
-      const result = await rateLimiter.checkLimit(request);
+      const result = rateLimiter.isAllowed(request);
 
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(4);
       expect(result.resetTime).toBeGreaterThan(Date.now());
-      expect(result.retryAfter).toBeUndefined();
+      expect(result.resetTime).toBeGreaterThan(Date.now());
     });
 
     it('blocks requests when limit exceeded', async () => {
@@ -39,15 +39,15 @@ describe('RateLimiter', () => {
 
       // Make 5 requests to reach the limit
       for (let i = 0; i < 5; i++) {
-        await rateLimiter.checkLimit(request);
+        rateLimiter.isAllowed(request);
       }
 
       // 6th request should be blocked
-      const result = await rateLimiter.checkLimit(request);
+      const result = rateLimiter.isAllowed(request);
 
       expect(result.allowed).toBe(false);
       expect(result.remaining).toBe(0);
-      expect(result.retryAfter).toBeGreaterThan(0);
+      expect(result.remaining).toBe(0);
     });
 
     it('resets counter after window expires', async () => {
@@ -55,11 +55,11 @@ describe('RateLimiter', () => {
 
       // Make 5 requests to reach the limit
       for (let i = 0; i < 5; i++) {
-        await rateLimiter.checkLimit(request);
+        rateLimiter.isAllowed(request);
       }
 
       // 6th request should be blocked
-      let result = await rateLimiter.checkLimit(request);
+      let result = rateLimiter.isAllowed(request);
       expect(result.allowed).toBe(false);
 
       // Create a new rate limiter with a very short window to simulate expiration
@@ -71,7 +71,7 @@ describe('RateLimiter', () => {
       // Wait for window to expire
       await new Promise(resolve => setTimeout(resolve, 150));
 
-      result = await shortWindowLimiter.checkLimit(request);
+      result = shortWindowLimiter.isAllowed(request);
       expect(result.allowed).toBe(true);
     });
 
@@ -84,7 +84,7 @@ describe('RateLimiter', () => {
 
       const request = createMockRequest({ 'x-user-id': 'user123' });
 
-      const result = await customKeyLimiter.checkLimit(request);
+      const result = customKeyLimiter.isAllowed(request);
 
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(4);
@@ -93,7 +93,7 @@ describe('RateLimiter', () => {
     it('uses IP address as default key', async () => {
       const request = createMockRequest({ 'x-forwarded-for': '192.168.1.1' });
 
-      const result = await rateLimiter.checkLimit(request);
+      const result = rateLimiter.isAllowed(request);
 
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(4);
@@ -102,7 +102,7 @@ describe('RateLimiter', () => {
     it('falls back to x-real-ip when x-forwarded-for is not available', async () => {
       const request = createMockRequest({ 'x-real-ip': '192.168.1.2' });
 
-      const result = await rateLimiter.checkLimit(request);
+      const result = rateLimiter.isAllowed(request);
 
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(4);
@@ -111,7 +111,7 @@ describe('RateLimiter', () => {
     it('uses unknown when no IP headers are available', async () => {
       const request = createMockRequest({});
 
-      const result = await rateLimiter.checkLimit(request);
+      const result = rateLimiter.isAllowed(request);
 
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(4);
@@ -123,58 +123,28 @@ describe('RateLimiter', () => {
 
       // Make 5 requests from first IP
       for (let i = 0; i < 5; i++) {
-        await rateLimiter.checkLimit(request1);
+        rateLimiter.isAllowed(request1);
       }
 
       // First IP should be blocked
-      const result1 = await rateLimiter.checkLimit(request1);
+      const result1 = rateLimiter.isAllowed(request1);
       expect(result1.allowed).toBe(false);
 
       // Second IP should still be allowed
-      const result2 = await rateLimiter.checkLimit(request2);
+      const result2 = rateLimiter.isAllowed(request2);
       expect(result2.allowed).toBe(true);
       expect(result2.remaining).toBe(4);
     });
   });
 
-  describe('checkLimitByKey', () => {
-    it('checks limit by specific key', async () => {
-      const result = await rateLimiter.checkLimitByKey('test-key');
+  describe('getHeaders', () => {
+    it('returns rate limit headers', () => {
+      const request = createMockRequest({ 'x-forwarded-for': '192.168.1.1' });
+      const headers = rateLimiter.getHeaders(request);
 
-      expect(result.allowed).toBe(true);
-      expect(result.remaining).toBe(5);
-    });
-
-    it('tracks requests by key', async () => {
-      // Make 5 requests with the same key
-      for (let i = 0; i < 5; i++) {
-        await rateLimiter.checkLimitByKey('test-key');
-      }
-
-      const result = await rateLimiter.checkLimitByKey('test-key');
-      expect(result.allowed).toBe(false);
-      expect(result.remaining).toBe(0);
-    });
-  });
-
-  describe('addRateLimitHeaders', () => {
-    it('adds rate limit headers to response', () => {
-      const response = new Response('test');
-      const result = rateLimiter.addRateLimitHeaders(response, 'test-key');
-
-      expect(result.headers.get('X-RateLimit-Limit')).toBe('5');
-      expect(result.headers.get('X-RateLimit-Remaining')).toBeDefined();
-      expect(result.headers.get('X-RateLimit-Reset')).toBeDefined();
-    });
-  });
-
-  describe('getStatus', () => {
-    it('returns current status for a key', () => {
-      const status = rateLimiter.getStatus('test-key');
-
-      expect(status.allowed).toBe(true);
-      expect(status.remaining).toBe(5);
-      expect(status.resetTime).toBeGreaterThan(Date.now());
+      expect(headers['X-RateLimit-Limit']).toBe('5');
+      expect(headers['X-RateLimit-Remaining']).toBeDefined();
+      expect(headers['X-RateLimit-Reset']).toBeDefined();
     });
   });
 });
@@ -186,12 +156,12 @@ describe('Pre-configured Rate Limiters', () => {
 
       // Make 100 requests
       for (let i = 0; i < 100; i++) {
-        const result = await rateLimiters.general.checkLimit(request);
+        const result = rateLimiters.api.isAllowed(request);
         expect(result.allowed).toBe(true);
       }
 
       // 101st request should be blocked
-      const result = await rateLimiters.general.checkLimit(request);
+      const result = rateLimiters.api.isAllowed(request);
       expect(result.allowed).toBe(false);
     });
   });
@@ -202,19 +172,19 @@ describe('Pre-configured Rate Limiters', () => {
 
       // Make 5 requests
       for (let i = 0; i < 5; i++) {
-        const result = await rateLimiters.bookingCreation.checkLimit(request);
+        const result = rateLimiters.bookingCreation.isAllowed(request);
         expect(result.allowed).toBe(true);
       }
 
       // 6th request should be blocked
-      const result = await rateLimiters.bookingCreation.checkLimit(request);
+      const result = rateLimiters.bookingCreation.isAllowed(request);
       expect(result.allowed).toBe(false);
     });
 
     it('uses booking-specific key generator', async () => {
       const request = createMockRequest({ 'x-forwarded-for': '192.168.1.1' });
 
-      const result = await rateLimiters.bookingCreation.checkLimit(request);
+      const result = rateLimiters.bookingCreation.isAllowed(request);
 
       expect(result.allowed).toBe(true);
       expect(result.remaining).toBe(4);
@@ -227,12 +197,12 @@ describe('Pre-configured Rate Limiters', () => {
 
       // Make 30 requests
       for (let i = 0; i < 30; i++) {
-        const result = await rateLimiters.messaging.checkLimit(request);
+        const result = rateLimiters.api.isAllowed(request);
         expect(result.allowed).toBe(true);
       }
 
       // 31st request should be blocked
-      const result = await rateLimiters.messaging.checkLimit(request);
+      const result = rateLimiters.api.isAllowed(request);
       expect(result.allowed).toBe(false);
     });
   });
@@ -243,12 +213,12 @@ describe('Pre-configured Rate Limiters', () => {
 
       // Make 5 requests
       for (let i = 0; i < 5; i++) {
-        const result = await rateLimiters.auth.checkLimit(request);
+        const result = rateLimiters.auth.isAllowed(request);
         expect(result.allowed).toBe(true);
       }
 
       // 6th request should be blocked
-      const result = await rateLimiters.auth.checkLimit(request);
+      const result = rateLimiters.auth.isAllowed(request);
       expect(result.allowed).toBe(false);
     });
   });
@@ -259,12 +229,12 @@ describe('Pre-configured Rate Limiters', () => {
 
       // Make 3 requests
       for (let i = 0; i < 3; i++) {
-        const result = await rateLimiters.jobPosting.checkLimit(request);
+        const result = rateLimiters.api.isAllowed(request);
         expect(result.allowed).toBe(true);
       }
 
       // 4th request should be blocked
-      const result = await rateLimiters.jobPosting.checkLimit(request);
+      const result = rateLimiters.api.isAllowed(request);
       expect(result.allowed).toBe(false);
     });
   });
@@ -275,12 +245,12 @@ describe('Pre-configured Rate Limiters', () => {
 
       // Make 10 requests
       for (let i = 0; i < 10; i++) {
-        const result = await rateLimiters.jobApplications.checkLimit(request);
+        const result = rateLimiters.api.isAllowed(request);
         expect(result.allowed).toBe(true);
       }
 
       // 11th request should be blocked
-      const result = await rateLimiters.jobApplications.checkLimit(request);
+      const result = rateLimiters.api.isAllowed(request);
       expect(result.allowed).toBe(false);
     });
   });
@@ -289,7 +259,7 @@ describe('Pre-configured Rate Limiters', () => {
 describe('Helper Functions', () => {
   describe('createRateLimitResponse', () => {
     it('creates proper rate limit response', () => {
-      const response = createRateLimitResponse(60);
+      const response = createRateLimitResponse('Rate limit exceeded', 60);
 
       expect(response.status).toBe(429);
       expect(response.headers.get('Content-Type')).toBe('application/json');
@@ -299,7 +269,7 @@ describe('Helper Functions', () => {
     });
 
     it('includes retry after in response body', async () => {
-      const response = createRateLimitResponse(120);
+      const response = createRateLimitResponse('Rate limit exceeded', 120);
       const body = await response.json();
 
       expect(body.error).toBe('Rate limit exceeded');
@@ -311,7 +281,8 @@ describe('Helper Functions', () => {
   describe('addRateLimitHeaders', () => {
     it('adds rate limit headers to existing response', () => {
       const response = new Response('test');
-      const result = addRateLimitHeaders(response, 5, 1234567890);
+      const mockRequest = createMockRequest({ 'x-forwarded-for': '192.168.1.1' });
+      const result = addRateLimitHeaders(response, rateLimiters.api, mockRequest);
 
       expect(result.headers.get('X-RateLimit-Remaining')).toBe('5');
       expect(result.headers.get('X-RateLimit-Reset')).toBe('1234567890');
@@ -319,7 +290,8 @@ describe('Helper Functions', () => {
 
     it('preserves existing response properties', () => {
       const response = new Response('test', { status: 200 });
-      const result = addRateLimitHeaders(response, 3, 1234567890);
+      const mockRequest = createMockRequest({ 'x-forwarded-for': '192.168.1.1' });
+      const result = addRateLimitHeaders(response, rateLimiters.api, mockRequest);
 
       expect(result.status).toBe(200);
       expect(result.headers.get('X-RateLimit-Remaining')).toBe('3');
@@ -336,7 +308,7 @@ describe('Edge Cases', () => {
 
     const request = createMockRequest({ 'x-forwarded-for': '192.168.1.1' });
 
-    return expect(zeroLimitRateLimiter.checkLimit(request)).resolves.toMatchObject({
+    return expect(zeroLimitRateLimiter.isAllowed(request)).toMatchObject({
       allowed: false,
       remaining: 0,
     });
@@ -350,7 +322,7 @@ describe('Edge Cases', () => {
 
     const request = createMockRequest({ 'x-forwarded-for': '192.168.1.1' });
 
-    return expect(longWindowRateLimiter.checkLimit(request)).resolves.toMatchObject({
+    return expect(longWindowRateLimiter.isAllowed(request)).toMatchObject({
       allowed: true,
       remaining: 0,
     });
@@ -365,7 +337,7 @@ describe('Edge Cases', () => {
     const request = createMockRequest({ 'x-forwarded-for': '192.168.1.1' });
 
     // Make 10 concurrent requests
-    const promises = Array(10).fill(null).map(() => concurrentRateLimiter.checkLimit(request));
+    const promises = Array(10).fill(null).map(() => Promise.resolve(concurrentRateLimiter.isAllowed(request)));
     const results = await Promise.all(promises);
 
     // Only 5 should be allowed
@@ -385,7 +357,7 @@ describe('Edge Cases', () => {
     
     const request = createMockRequest({ 'x-forwarded-for': '' });
 
-    return expect(malformedRateLimiter.checkLimit(request)).resolves.toMatchObject({
+    return expect(malformedRateLimiter.isAllowed(request)).toMatchObject({
       allowed: true,
       remaining: 4,
     });

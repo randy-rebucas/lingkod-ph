@@ -260,7 +260,7 @@ describe('AdminBackupPage', () => {
       mockCreateBackup.mockResolvedValue({
         success: true,
         message: 'Backup created successfully',
-        backupId: 'new-backup-123',
+        backupUrl: 'https://example.com/backup-123',
         documentCount: 100,
       });
 

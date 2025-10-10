@@ -283,8 +283,7 @@ describe('completeBookingAction', () => {
 
   describe('Edge Cases', () => {
     it('should handle booking without jobId', async () => {
-      const inputWithoutJobId = { ...validInput };
-      delete inputWithoutJobId.jobId;
+      const { jobId, ...inputWithoutJobId } = validInput;
 
       // Mock successful photo upload
       const mockUploadResult = {

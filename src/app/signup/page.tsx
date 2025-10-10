@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { getAuthInstance, getDb   } from '@/lib/firebase';
-import { doc, setDoc, serverTimestamp, runTransaction, getDocs, query, where, collection, limit, getDoc } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, runTransaction, getDocs, query, where, collection, limit } from "firebase/firestore";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

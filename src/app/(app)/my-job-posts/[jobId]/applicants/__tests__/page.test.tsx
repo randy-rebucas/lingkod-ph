@@ -18,7 +18,7 @@ describe('JobApplicantsPage', () => {
       loading: false,
     } as any);
 
-    render(<JobApplicantsPage params={{ jobId: 'job-123' }} />);
+    render(<JobApplicantsPage />);
     expect(screen.getByText(/applicants/i)).toBeInTheDocument();
   });
 
@@ -29,7 +29,7 @@ describe('JobApplicantsPage', () => {
       loading: false,
     } as any);
 
-    render(<JobApplicantsPage params={{ jobId: 'job-123' }} />);
+    render(<JobApplicantsPage />);
     expect(screen.getByText(/access denied/i)).toBeInTheDocument();
   });
 });

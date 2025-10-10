@@ -476,7 +476,7 @@ describe('PaymentValidator', () => {
   describe('validatePaymentProofFile', () => {
     it('returns valid for valid file', () => {
       const mockFile = new File(['test content'], 'test.jpg', { type: 'image/jpeg' });
-      mockFile.size = 50000; // 50KB
+      Object.defineProperty(mockFile, 'size', { value: 50000, writable: true }); // 50KB
 
       mockPaymentConfig.validateFileUpload.mockReturnValue({ valid: true });
 
@@ -502,7 +502,7 @@ describe('PaymentValidator', () => {
 
     it('returns warning for very small file', () => {
       const mockFile = new File(['x'], 'test.jpg', { type: 'image/jpeg' });
-      mockFile.size = 500; // Less than 1KB
+      Object.defineProperty(mockFile, 'size', { value: 500, writable: true }); // Less than 1KB
 
       mockPaymentConfig.validateFileUpload.mockReturnValue({ valid: true });
 
@@ -549,11 +549,14 @@ describe('PaymentValidator', () => {
   describe('validatePaymentMethodConfig', () => {
 
     it('returns valid for bank with complete config', () => {
-      mockPaymentConfig.BANK = {
-        accountName: 'Test Account',
-        accountNumber: '1234567890',
-        bankName: 'Test Bank',
-      };
+      Object.defineProperty(mockPaymentConfig, 'BANK', {
+        value: {
+          accountName: 'Test Account',
+          accountNumber: '1234567890',
+          bankName: 'Test Bank',
+        },
+        writable: true
+      });
 
       const result = PaymentValidator.validatePaymentMethodConfig('bank');
 
@@ -562,11 +565,14 @@ describe('PaymentValidator', () => {
     });
 
     it('returns invalid for bank with incomplete config', () => {
-      mockPaymentConfig.BANK = {
-        accountName: 'Test Account',
-        accountNumber: '1234567890',
-        bankName: '',
-      };
+      Object.defineProperty(mockPaymentConfig, 'BANK', {
+        value: {
+          accountName: 'Test Account',
+          accountNumber: '1234567890',
+          bankName: '',
+        },
+        writable: true
+      });
 
       const result = PaymentValidator.validatePaymentMethodConfig('bank');
 
@@ -627,7 +633,10 @@ describe('PaymentValidator', () => {
       } as any);
 
       mockPaymentConfig.validatePaymentAmount.mockReturnValue(true);
-      mockPaymentConfig.BANK = { accountName: 'Test', accountNumber: '09123456789', bankName: 'Test Bank' };
+      Object.defineProperty(mockPaymentConfig, 'BANK', {
+        value: { accountName: 'Test', accountNumber: '09123456789', bankName: 'Test Bank' },
+        writable: true
+      });
 
       const result = await PaymentValidator.validatePayment('booking-1', 'user-1', 1000, 'paypal');
 
@@ -651,7 +660,7 @@ describe('PaymentValidator', () => {
 
     it('includes warnings from file validation', async () => {
       const mockFile = new File(['x'], 'test.jpg', { type: 'image/jpeg' });
-      mockFile.size = 500; // Very small file
+      Object.defineProperty(mockFile, 'size', { value: 500, writable: true }); // Very small file
 
       const mockBookingData = {
         clientId: 'user-1',
@@ -677,7 +686,10 @@ describe('PaymentValidator', () => {
 
       mockPaymentConfig.validatePaymentAmount.mockReturnValue(true);
       mockPaymentConfig.validateFileUpload.mockReturnValue({ valid: true });
-      mockPaymentConfig.BANK = { accountName: 'Test', accountNumber: '09123456789', bankName: 'Test Bank' };
+      Object.defineProperty(mockPaymentConfig, 'BANK', {
+        value: { accountName: 'Test', accountNumber: '09123456789', bankName: 'Test Bank' },
+        writable: true
+      });
 
       const result = await PaymentValidator.validatePayment('booking-1', 'user-1', 1000, 'paypal', mockFile);
 

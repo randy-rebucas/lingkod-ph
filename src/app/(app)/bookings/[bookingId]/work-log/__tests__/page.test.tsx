@@ -18,7 +18,7 @@ describe('BookingWorkLogPage', () => {
       loading: false,
     } as any);
 
-    render(<BookingWorkLogPage params={{ bookingId: 'booking-123' }} />);
+    render(<BookingWorkLogPage />);
     expect(screen.getByText(/work log/i)).toBeInTheDocument();
   });
 
@@ -29,7 +29,7 @@ describe('BookingWorkLogPage', () => {
       loading: true,
     } as any);
 
-    render(<BookingWorkLogPage params={{ bookingId: 'booking-123' }} />);
+    render(<BookingWorkLogPage />);
     // Should handle loading state
   });
 });

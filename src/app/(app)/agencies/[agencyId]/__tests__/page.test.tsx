@@ -18,7 +18,7 @@ describe('AgencyDetailPage', () => {
       loading: false,
     } as any);
 
-    render(<AgencyDetailPage params={{ agencyId: 'agency-123' }} />);
+    render(<AgencyDetailPage />);
     expect(screen.getByText(/agency/i)).toBeInTheDocument();
   });
 
@@ -29,7 +29,7 @@ describe('AgencyDetailPage', () => {
       loading: true,
     } as any);
 
-    render(<AgencyDetailPage params={{ agencyId: 'agency-123' }} />);
+    render(<AgencyDetailPage />);
     // Should handle loading state
   });
 });
