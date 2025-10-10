@@ -89,7 +89,7 @@ export default function AdminCategoriesPage() {
         } finally {
             setLoading(false);
         }
-    }, [toast, currentPage]);
+    }, [toast, currentPage, pageHistory]);
 
     useEffect(() => {
         if (userRole !== 'admin' || !getDb()) {

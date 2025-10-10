@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,34 +20,12 @@ export default function PaymentResultPage() {
   const [message, setMessage] = useState<string>('');
   const [orderId, setOrderId] = useState<string>('');
 
-  useEffect(() => {
-    if (!bookingId || !user) return;
-
-    const method = searchParams.get('method');
-    const orderIdParam = searchParams.get('orderId');
-    const _token = searchParams.get('token');
-    const _payerId = searchParams.get('PayerID');
-
-    if (method === 'paypal') {
-      if (orderIdParam) {
-        setOrderId(orderIdParam);
-        handlePayPalResult(orderIdParam);
-      } else {
-        setStatus('error');
-        setMessage('Invalid PayPal payment response');
-      }
-    } else {
-      // Handle other payment methods
-      handleOtherPaymentResult();
-    }
-  }, [bookingId, user, searchParams]);
-
-  const handlePayPalResult = async (orderId: string) => {
+  const handlePayPalResult = useCallback(async (orderId: string) => {
     try {
       if (!user) {
         throw new Error('Authentication required');
       }
-      
+
       const token = await user.getIdToken();
       if (!token) {
         throw new Error('Authentication required');
@@ -93,9 +71,9 @@ export default function PaymentResultPage() {
         description: 'An error occurred while processing your payment.',
       });
     }
-  };
+  }, [bookingId, user, toast]);
 
-  const handleOtherPaymentResult = () => {
+  const handleOtherPaymentResult = useCallback(() => {
     // Handle other payment method results
     const resultCode = searchParams.get('resultCode');
     
@@ -106,7 +84,29 @@ export default function PaymentResultPage() {
       setStatus('error');
       setMessage('Payment was not successful');
     }
-  };
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!bookingId || !user) return;
+
+    const method = searchParams.get('method');
+    const orderIdParam = searchParams.get('orderId');
+    const _token = searchParams.get('token');
+    const _payerId = searchParams.get('PayerID');
+
+    if (method === 'paypal') {
+      if (orderIdParam) {
+        setOrderId(orderIdParam);
+        handlePayPalResult(orderIdParam);
+      } else {
+        setStatus('error');
+        setMessage('Invalid PayPal payment response');
+      }
+    } else {
+      // Handle other payment methods
+      handleOtherPaymentResult();
+    }
+  }, [bookingId, user, searchParams, handleOtherPaymentResult, handlePayPalResult]);
 
   const getStatusIcon = () => {
     switch (status) {

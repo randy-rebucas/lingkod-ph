@@ -70,7 +70,31 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: https://www.google-analytics.com; font-src 'self' data:; connect-src 'self' https://api.paypal.com https://api.sandbox.paypal.com https://firestore.googleapis.com https://*.firebaseapp.com https://*.googleapis.com https://*.gstatic.com https://www.google-analytics.com https://analytics.google.com; frame-src 'self' https://www.sandbox.paypal.com https://www.paypal.com;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' data:; img-src 'self' data: https: https://www.google-analytics.com; font-src 'self' data:; connect-src 'self' https://api.paypal.com https://api.sandbox.paypal.com https://firestore.googleapis.com https://*.firebaseapp.com https://*.googleapis.com https://*.gstatic.com https://www.google-analytics.com https://analytics.google.com; frame-src 'self' https://www.sandbox.paypal.com https://www.paypal.com;",
+          },
+        ],
+      },
+      // Specific headers for CSS files
+      {
+        source: '/_next/static/css/(.*)',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/css; charset=utf-8',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      // Headers for all static assets
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },
@@ -80,6 +104,11 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   generateEtags: false,
+  
+  // Development server configuration
+  devIndicators: {
+    position: 'bottom-right',
+  },
   // Bundle analyzer
   webpack: (config, { isServer, dev }) => {
     // Suppress webpack warnings for Handlebars require.extensions

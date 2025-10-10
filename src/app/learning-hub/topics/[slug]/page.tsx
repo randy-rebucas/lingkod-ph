@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -68,8 +68,8 @@ const TopicPage = () => {
   const [topicData, setTopicData] = useState<TopicData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Mock data - in a real app, this would come from an API or database
-  const topicsDatabase: Record<string, TopicData> = {
+  // Mock data - in a real app, this would come from an API or database      
+  const topicsDatabase: Record<string, TopicData> = useMemo(() => ({
     'account-setup': {
       slug: 'account-setup',
       title: 'Account Setup',
@@ -562,7 +562,7 @@ const TopicPage = () => {
         }
       ]
     }
-  };
+  }), []);
 
   useEffect(() => {
     // Simulate API call
@@ -576,7 +576,7 @@ const TopicPage = () => {
     };
 
     fetchTopicData();
-  }, [slug]);
+  }, [slug, topicsDatabase]);
 
   if (loading) {
     return (

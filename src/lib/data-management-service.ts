@@ -1,7 +1,8 @@
 'use server';
 
-import { getDb } from './firebase';
-import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, writeBatch, updateDoc } from 'firebase/firestore';
+import { getDb, getStorageInstance } from './firebase';
+import { collection, addDoc, serverTimestamp, doc, getDoc, query, where, getDocs, writeBatch, updateDoc, setDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getUserSettings } from './user-settings-service';
 
 export interface DataExportRequest {
@@ -448,11 +449,13 @@ export class DataManagementService {
    */
   private static async uploadExportFile(file: Buffer, requestId: string): Promise<string> {
     try {
-      // TODO: Implement actual file upload to cloud storage
-      // This would typically upload to AWS S3, Google Cloud Storage, etc.
+      // Upload to Firebase Storage (production-ready implementation)
+      const storage = getStorageInstance();
+      const storageRef = ref(storage, `exports/${requestId}.zip`);
+      const uploadResult = await uploadBytes(storageRef, file);
+      const downloadUrl = await getDownloadURL(uploadResult.ref);
       
-      // For now, return a placeholder URL
-      return `https://storage.example.com/exports/${requestId}.zip`;
+      return downloadUrl;
       
     } catch (error) {
       console.error('Error uploading export file:', error);
@@ -631,13 +634,24 @@ export class DataManagementService {
    */
   private static async scheduleDataDeletion(userId: string, scheduledFor: Date): Promise<void> {
     try {
-      // TODO: Implement actual scheduling (e.g., using a job queue)
-      // This would typically schedule a job to run at the specified time
+      if (!getDb()) {
+        throw new Error('Database not initialized');
+      }
+      
+      // Store the scheduled deletion in Firestore
+      await setDoc(doc(getDb(), 'scheduledDeletions', userId), {
+        userId,
+        scheduledFor,
+        status: 'scheduled',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
       
       console.log(`Data deletion scheduled for user ${userId} at ${scheduledFor}`);
       
     } catch (error) {
       console.error('Error scheduling data deletion:', error);
+      throw error;
     }
   }
 
@@ -661,59 +675,237 @@ export class DataManagementService {
   }
 
   // Email notification methods
-  private static async sendExportConfirmationEmail(_userId: string, _requestId: string): Promise<void> {
-    // TODO: Implement email sending
+  private static async sendExportConfirmationEmail(userId: string, requestId: string): Promise<void> {
+    try {
+      // Get user email from profile
+      const userProfile = await this.getUserProfileData(userId);
+      if (!userProfile?.email) {
+        console.error('User email not found for export confirmation');
+        return;
+      }
+
+      // Send email using the existing email system
+      const { sendEmail } = await import('./email-service');
+      await sendEmail({
+        to: userProfile.email,
+        subject: 'Data Export Request Confirmed',
+        html: `
+          <h2>Data Export Request Confirmed</h2>
+          <p>Your data export request has been received and is being processed.</p>
+          <p><strong>Request ID:</strong> ${requestId}</p>
+          <p><strong>Estimated completion time:</strong> 24-48 hours</p>
+          <p>You will receive another email once your data export is ready for download.</p>
+        `
+      });
+    } catch (error) {
+      console.error('Error sending export confirmation email:', error);
+    }
   }
 
-  private static async sendExportCompletionEmail(_userId: string, _downloadUrl: string): Promise<void> {
-    // TODO: Implement email sending
+  private static async sendExportCompletionEmail(userId: string, downloadUrl: string): Promise<void> {
+    try {
+      const userProfile = await this.getUserProfileData(userId);
+      if (!userProfile?.email) {
+        console.error('User email not found for export completion');
+        return;
+      }
+
+      const { sendEmail } = await import('./email-service');
+      await sendEmail({
+        to: userProfile.email,
+        subject: 'Your Data Export is Ready',
+        html: `
+          <h2>Your Data Export is Ready</h2>
+          <p>Your data export has been completed and is ready for download.</p>
+          <p><a href="${downloadUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Download Your Data</a></p>
+          <p><strong>Note:</strong> This download link will expire in 7 days.</p>
+        `
+      });
+    } catch (error) {
+      console.error('Error sending export completion email:', error);
+    }
   }
 
-  private static async sendDeletionConfirmationEmail(_userId: string, _requestId: string, _confirmationCode: string): Promise<void> {
-    // TODO: Implement email sending
+  private static async sendDeletionConfirmationEmail(userId: string, requestId: string, confirmationCode: string): Promise<void> {
+    try {
+      const userProfile = await this.getUserProfileData(userId);
+      if (!userProfile?.email) {
+        console.error('User email not found for deletion confirmation');
+        return;
+      }
+
+      const { sendEmail } = await import('./email-service');
+      await sendEmail({
+        to: userProfile.email,
+        subject: 'Data Deletion Request - Confirmation Required',
+        html: `
+          <h2>Data Deletion Request - Confirmation Required</h2>
+          <p>You have requested to delete your account and all associated data.</p>
+          <p><strong>Request ID:</strong> ${requestId}</p>
+          <p><strong>Confirmation Code:</strong> ${confirmationCode}</p>
+          <p><strong>Scheduled Deletion Date:</strong> ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
+          <p>If you did not request this deletion, please contact support immediately.</p>
+        `
+      });
+    } catch (error) {
+      console.error('Error sending deletion confirmation email:', error);
+    }
   }
 
-  private static async sendDeletionCompletionEmail(_userId: string): Promise<void> {
-    // TODO: Implement email sending
+  private static async sendDeletionCompletionEmail(userId: string): Promise<void> {
+    try {
+      const userProfile = await this.getUserProfileData(userId);
+      if (!userProfile?.email) {
+        console.error('User email not found for deletion completion');
+        return;
+      }
+
+      const { sendEmail } = await import('./email-service');
+      await sendEmail({
+        to: userProfile.email,
+        subject: 'Your Data Has Been Deleted',
+        html: `
+          <h2>Your Data Has Been Deleted</h2>
+          <p>Your account and all associated data have been permanently deleted as requested.</p>
+          <p><strong>Deletion Date:</strong> ${new Date().toLocaleDateString()}</p>
+          <p>Thank you for using our service.</p>
+        `
+      });
+    } catch (error) {
+      console.error('Error sending deletion completion email:', error);
+    }
   }
 
-  private static async sendDeletionCancellationEmail(_userId: string): Promise<void> {
-    // TODO: Implement email sending
+  private static async sendDeletionCancellationEmail(userId: string): Promise<void> {
+    try {
+      const userProfile = await this.getUserProfileData(userId);
+      if (!userProfile?.email) {
+        console.error('User email not found for deletion cancellation');
+        return;
+      }
+
+      const { sendEmail } = await import('./email-service');
+      await sendEmail({
+        to: userProfile.email,
+        subject: 'Data Deletion Request Cancelled',
+        html: `
+          <h2>Data Deletion Request Cancelled</h2>
+          <p>Your data deletion request has been cancelled.</p>
+          <p><strong>Cancellation Date:</strong> ${new Date().toLocaleDateString()}</p>
+          <p>Your account and data remain active. If you have any questions, please contact support.</p>
+        `
+      });
+    } catch (error) {
+      console.error('Error sending deletion cancellation email:', error);
+    }
   }
 
   // Data retrieval methods
-  private static async getUserProfileData(_userId: string): Promise<any> {
-    // TODO: Implement
-    return null;
+  private static async getUserProfileData(userId: string): Promise<any> {
+    try {
+      if (!getDb()) return null;
+      
+      const userDoc = await getDoc(doc(getDb(), 'users', userId));
+      return userDoc.exists() ? userDoc.data() : null;
+    } catch (error) {
+      console.error('Error getting user profile data:', error);
+      return null;
+    }
   }
 
-  private static async getUserBookings(_userId: string): Promise<any[]> {
-    // TODO: Implement
-    return [];
+  private static async getUserBookings(userId: string): Promise<any[]> {
+    try {
+      if (!getDb()) return [];
+      
+      const bookingsQuery = query(
+        collection(getDb(), 'bookings'),
+        where('clientId', '==', userId)
+      );
+      const bookingsSnap = await getDocs(bookingsQuery);
+      return bookingsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting user bookings:', error);
+      return [];
+    }
   }
 
-  private static async getUserMessages(_userId: string): Promise<any[]> {
-    // TODO: Implement
-    return [];
+  private static async getUserMessages(userId: string): Promise<any[]> {
+    try {
+      if (!getDb()) return [];
+      
+      const messagesQuery = query(
+        collection(getDb(), 'messages'),
+        where('senderId', '==', userId)
+      );
+      const messagesSnap = await getDocs(messagesQuery);
+      return messagesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting user messages:', error);
+      return [];
+    }
   }
 
-  private static async getUserReviews(_userId: string): Promise<any[]> {
-    // TODO: Implement
-    return [];
+  private static async getUserReviews(userId: string): Promise<any[]> {
+    try {
+      if (!getDb()) return [];
+      
+      const reviewsQuery = query(
+        collection(getDb(), 'reviews'),
+        where('clientId', '==', userId)
+      );
+      const reviewsSnap = await getDocs(reviewsQuery);
+      return reviewsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting user reviews:', error);
+      return [];
+    }
   }
 
-  private static async getUserPayments(_userId: string): Promise<any[]> {
-    // TODO: Implement
-    return [];
+  private static async getUserPayments(userId: string): Promise<any[]> {
+    try {
+      if (!getDb()) return [];
+      
+      const paymentsQuery = query(
+        collection(getDb(), 'payments'),
+        where('userId', '==', userId)
+      );
+      const paymentsSnap = await getDocs(paymentsQuery);
+      return paymentsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting user payments:', error);
+      return [];
+    }
   }
 
-  private static async getUserNotifications(_userId: string): Promise<any[]> {
-    // TODO: Implement
-    return [];
+  private static async getUserNotifications(userId: string): Promise<any[]> {
+    try {
+      if (!getDb()) return [];
+      
+      const notificationsQuery = query(
+        collection(getDb(), 'notifications'),
+        where('userId', '==', userId)
+      );
+      const notificationsSnap = await getDocs(notificationsQuery);
+      return notificationsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting user notifications:', error);
+      return [];
+    }
   }
 
-  private static async getUserAuditLogs(_userId: string): Promise<any[]> {
-    // TODO: Implement
-    return [];
+  private static async getUserAuditLogs(userId: string): Promise<any[]> {
+    try {
+      if (!getDb()) return [];
+      
+      const auditLogsQuery = query(
+        collection(getDb(), 'auditLogs'),
+        where('userId', '==', userId)
+      );
+      const auditLogsSnap = await getDocs(auditLogsQuery);
+      return auditLogsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      console.error('Error getting user audit logs:', error);
+      return [];
+    }
   }
 }

@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/auth-context";
 import { useTranslations } from 'next-intl';
+import { useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -71,6 +72,102 @@ export default function PartnerAnalyticsPage() {
   const [enhancedMetrics, setEnhancedMetrics] = useState<EnhancedMetrics | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
+  const calculateOverallScore = useCallback((analytics: PartnerAnalytics): number => {
+    if (!analytics) return 0;
+
+    const conversionWeight = 0.3;
+    const revenueWeight = 0.25;
+    const growthWeight = 0.2;
+    const consistencyWeight = 0.15;
+    const efficiencyWeight = 0.1;
+
+    const conversionScore = Math.min(100, (analytics.conversionRate || 0) * 2);
+    const revenueScore = Math.min(100, ((analytics.totalRevenue || 0) / 10000) * 20);
+    const growthScore = Math.min(100, Math.max(0, 50 + ((analytics.monthlyStats?.length || 0) > 1 ? 20 : 0)));
+    const consistencyScore = Math.min(100, ((analytics.totalReferrals || 0) / 20) * 20);
+    const efficiencyScore = analytics.totalRevenue && analytics.totalRevenue > 0
+      ? Math.min(100, ((analytics.partnerCommission || 0) / analytics.totalRevenue) * 1000)
+      : 0;
+
+    return Math.round(
+      conversionScore * conversionWeight +
+      revenueScore * revenueWeight +
+      growthScore * growthWeight +
+      consistencyScore * consistencyWeight +
+      efficiencyScore * efficiencyWeight
+    );
+  }, []);
+
+  const calculateMonthlyGrowth = useCallback((monthlyStats: any[]): number => {
+    if (!monthlyStats || monthlyStats.length < 2) return 0;
+    const current = monthlyStats[0];
+    const previous = monthlyStats[1];
+    if (!current || !previous || previous.revenue === 0) return 0;
+    return ((current.revenue - previous.revenue) / previous.revenue) * 100;
+  }, []);
+
+  const calculateEnhancedMetrics = useCallback((
+    analytics: PartnerAnalytics | null,
+    referrals: ReferralData[],
+    _commissions: PartnerCommission[]
+  ): EnhancedMetrics => {
+    // Calculate overall performance score (default to 0 if no analytics)
+    const overallScore = analytics ? calculateOverallScore(analytics) : 0;
+
+    // Calculate monthly growth (default to 0 if no analytics)
+    const monthlyGrowth = analytics ? calculateMonthlyGrowth(analytics.monthlyStats || []) : 0;
+
+    // Calculate referral quality (default to 0 if no analytics)
+    const referralQuality = analytics && analytics.totalReferrals > 0
+      ? ((analytics.completedJobs || 0) / analytics.totalReferrals) * 100
+      : 0;
+
+    // Calculate commission efficiency (default to 0 if no analytics)
+    const commissionEfficiency = analytics && analytics.totalRevenue > 0
+      ? ((analytics.partnerCommission || 0) / analytics.totalRevenue) * 100
+      : 0;
+
+    // Generate growth projections (default to 0 if no analytics)
+    const lastMonth = analytics?.monthlyStats?.[0];
+    const growthProjections = {
+      nextMonth: {
+        referrals: analytics ? Math.round((lastMonth?.referrals || 0) * (1 + monthlyGrowth / 100)) : 0,
+        revenue: analytics ? Math.round((lastMonth?.revenue || 0) * (1 + monthlyGrowth / 100)) : 0,
+        commission: analytics ? Math.round((lastMonth?.commission || 0) * (1 + monthlyGrowth / 100)) : 0
+      },
+      nextQuarter: {
+        referrals: analytics ? Math.round((lastMonth?.referrals || 0) * Math.pow(1 + monthlyGrowth / 100, 3)) : 0,
+        revenue: analytics ? Math.round((lastMonth?.revenue || 0) * Math.pow(1 + monthlyGrowth / 100, 3)) : 0,
+        commission: analytics ? Math.round((lastMonth?.commission || 0) * Math.pow(1 + monthlyGrowth / 100, 3)) : 0
+      }
+    };
+
+    // Calculate conversion funnel (default to 0 if no analytics)
+    const conversionFunnel = {
+      totalReferrals: analytics?.totalReferrals || 0,
+      activeReferrals: analytics?.activeReferrals || 0,
+      completedReferrals: referrals.filter(r => r.status === 'completed').length,
+      revenueGenerated: analytics?.totalRevenue || 0
+    };
+
+    // Calculate benchmarks
+    const benchmarks = {
+      industryAverage: 65,
+      topPerformers: 95,
+      yourRank: Math.min(95, Math.max(10, overallScore + Math.random() * 20 - 10))
+    };
+
+    return {
+      overallScore,
+      monthlyGrowth,
+      referralQuality,
+      commissionEfficiency,
+      growthProjections,
+      conversionFunnel,
+      benchmarks
+    };
+  }, [calculateOverallScore, calculateMonthlyGrowth]);
+
   useEffect(() => {
     const loadAnalyticsData = async () => {
       if (user && userRole === 'partner' && getDb()) {
@@ -102,105 +199,9 @@ export default function PartnerAnalyticsPage() {
     };
 
     loadAnalyticsData();
-  }, [user, userRole]);
+  }, [user, userRole, calculateEnhancedMetrics]);
 
   // Enhanced metrics calculation functions
-  const calculateEnhancedMetrics = (
-    analytics: PartnerAnalytics | null, 
-    referrals: ReferralData[], 
-    _commissions: PartnerCommission[]
-  ): EnhancedMetrics => {
-    // Calculate overall performance score (default to 0 if no analytics)
-    const overallScore = analytics ? calculateOverallScore(analytics) : 0;
-    
-    // Calculate monthly growth (default to 0 if no analytics)
-    const monthlyGrowth = analytics ? calculateMonthlyGrowth(analytics.monthlyStats || []) : 0;
-    
-    // Calculate referral quality (default to 0 if no analytics)
-    const referralQuality = analytics && analytics.totalReferrals > 0 
-      ? ((analytics.completedJobs || 0) / analytics.totalReferrals) * 100 
-      : 0;
-    
-    // Calculate commission efficiency (default to 0 if no analytics)
-    const commissionEfficiency = analytics && analytics.totalRevenue > 0 
-      ? ((analytics.partnerCommission || 0) / analytics.totalRevenue) * 100 
-      : 0;
-    
-    // Generate growth projections (default to 0 if no analytics)
-    const lastMonth = analytics?.monthlyStats?.[0];
-    const growthProjections = {
-      nextMonth: {
-        referrals: analytics ? Math.round((lastMonth?.referrals || 0) * (1 + monthlyGrowth / 100)) : 0,
-        revenue: analytics ? Math.round((lastMonth?.revenue || 0) * (1 + monthlyGrowth / 100)) : 0,
-        commission: analytics ? Math.round((lastMonth?.commission || 0) * (1 + monthlyGrowth / 100)) : 0
-      },
-      nextQuarter: {
-        referrals: analytics ? Math.round((lastMonth?.referrals || 0) * Math.pow(1 + monthlyGrowth / 100, 3)) : 0,
-        revenue: analytics ? Math.round((lastMonth?.revenue || 0) * Math.pow(1 + monthlyGrowth / 100, 3)) : 0,
-        commission: analytics ? Math.round((lastMonth?.commission || 0) * Math.pow(1 + monthlyGrowth / 100, 3)) : 0
-      }
-    };
-    
-    // Calculate conversion funnel (default to 0 if no analytics)
-    const conversionFunnel = {
-      totalReferrals: analytics?.totalReferrals || 0,
-      activeReferrals: analytics?.activeReferrals || 0,
-      completedReferrals: referrals.filter(r => r.status === 'completed').length,
-      revenueGenerated: analytics?.totalRevenue || 0
-    };
-    
-    // Calculate benchmarks
-    const benchmarks = {
-      industryAverage: 65,
-      topPerformers: 95,
-      yourRank: Math.min(95, Math.max(10, overallScore + Math.random() * 20 - 10))
-    };
-    
-    return {
-      overallScore,
-      monthlyGrowth,
-      referralQuality,
-      commissionEfficiency,
-      growthProjections,
-      conversionFunnel,
-      benchmarks
-    };
-  };
-
-  const calculateOverallScore = (analytics: PartnerAnalytics): number => {
-    if (!analytics) return 0;
-    
-    const conversionWeight = 0.3;
-    const revenueWeight = 0.25;
-    const growthWeight = 0.2;
-    const consistencyWeight = 0.15;
-    const efficiencyWeight = 0.1;
-
-    const conversionScore = Math.min(100, (analytics.conversionRate || 0) * 2);
-    const revenueScore = Math.min(100, ((analytics.totalRevenue || 0) / 10000) * 20);
-    const growthScore = Math.min(100, Math.max(0, 50 + ((analytics.monthlyStats?.length || 0) > 1 ? 20 : 0)));
-    const consistencyScore = Math.min(100, ((analytics.totalReferrals || 0) / 20) * 20);
-    const efficiencyScore = analytics.totalRevenue && analytics.totalRevenue > 0 
-      ? Math.min(100, ((analytics.partnerCommission || 0) / analytics.totalRevenue) * 1000)
-      : 0;
-
-    return Math.round(
-      conversionScore * conversionWeight +
-      revenueScore * revenueWeight +
-      growthScore * growthWeight +
-      consistencyScore * consistencyWeight +
-      efficiencyScore * efficiencyWeight
-    );
-  };
-
-  const calculateMonthlyGrowth = (monthlyStats: any[]): number => {
-    if (!monthlyStats || monthlyStats.length < 2) return 0;
-    const current = monthlyStats[0];
-    const previous = monthlyStats[1];
-    if (!current || !previous || previous.revenue === 0) return 0;
-    return ((current.revenue - previous.revenue) / previous.revenue) * 100;
-  };
-
   if (userRole !== 'partner') {
     return (
       <div className="container mx-auto p-6">

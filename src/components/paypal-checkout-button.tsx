@@ -132,7 +132,7 @@ export function PayPalCheckoutButton({
     }
   }, [bookingId, getIdToken, onPaymentStart, onPaymentSuccess, onPaymentError, toast, router, handleError]);
 
-  const handlePaymentResult = async (orderId: string) => {
+  const handlePaymentResult = useCallback(async (orderId: string) => {
     try {
       setIsProcessing(true);
       
@@ -185,7 +185,7 @@ export function PayPalCheckoutButton({
     } finally {
       setIsProcessing(false);
     }
-  };
+  }, [bookingId, getIdToken, onPaymentSuccess, onPaymentError, toast, router, handleError]);
 
   // Check for payment result in URL parameters (for redirect handling)
   useEffect(() => {
