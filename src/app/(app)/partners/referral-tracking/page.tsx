@@ -139,7 +139,7 @@ export default function ReferralTrackingPage() {
     };
 
     loadReferralData();
-  }, [user, userRole]);
+  }, [user, userRole, toast]);
 
   const handleAddReferral = async () => {
     if (!user || !newReferral.name || !newReferral.email) {

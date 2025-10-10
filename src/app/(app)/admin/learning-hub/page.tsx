@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -71,7 +71,7 @@ const AdminLearningHubPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Fetch content from API
-  const fetchContent = async (showRefreshLoader = false) => {
+  const fetchContent = useCallback(async (showRefreshLoader = false) => {
     try {
       if (showRefreshLoader) {
         setRefreshing(true);
@@ -107,11 +107,11 @@ const AdminLearningHubPage = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [selectedType, selectedStatus, selectedRole, searchQuery]);
 
   useEffect(() => {
     fetchContent();
-  }, []);
+  }, [fetchContent]);
 
   // Refetch when filters change
   useEffect(() => {
@@ -120,7 +120,7 @@ const AdminLearningHubPage = () => {
     }, 300); // Debounce search
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, selectedType, selectedStatus, selectedRole]);
+  }, [searchQuery, selectedType, selectedStatus, selectedRole, fetchContent]);
 
   // Content is already filtered by the API
   const filteredContent = content;

@@ -342,7 +342,7 @@ export default function AnalyticsPage() {
             unsubBookings();
             unsubReviews();
         };
-    }, [user, getDb]);
+    }, [user]);
 
     const analyticsData = useMemo(() => {
         const { bookings: filteredBookings, reviews: filteredReviews } = filterDataByTimePeriod(bookings, reviews, timePeriod);

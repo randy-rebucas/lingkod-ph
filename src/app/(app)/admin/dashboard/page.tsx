@@ -145,7 +145,7 @@ export default function AdminDashboardPage() {
             unsubRecentBookings();
             unsubRecentUsers();
         };
-    }, []);
+    }, [userRole]);
 
     if (userRole !== 'admin') {
         return (

@@ -20,7 +20,7 @@
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "email": "email dev",
     "validate-payments": "tsx src/scripts/validate-payment-system.ts",
@@ -104,6 +104,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.37.0",
     "@next/bundle-analyzer": "^15.5.4",
     "@testing-library/jest-dom": "^6.8.0",
@@ -117,6 +118,7 @@
     "@typescript-eslint/eslint-plugin": "^8.46.0",
     "@typescript-eslint/parser": "^8.46.0",
     "critters": "^0.0.23",
+    "eslint": "^9.37.0",
     "eslint-config-next": "15.5.4",
     "genkit-cli": "^1.13.0",
     "husky": "^9.1.7",

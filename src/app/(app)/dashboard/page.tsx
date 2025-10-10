@@ -557,7 +557,7 @@ const DashboardPage = memo(function DashboardPage() {
             }
         };
         fetchProviders();
-    }, [userRole]);
+    }, [userRole, t]);
 
 
     // Fetch client's favorites
@@ -715,7 +715,7 @@ const DashboardPage = memo(function DashboardPage() {
         } finally {
             setIsSmartSearching(false);
         }
-    }, [allProviders, searchCache, t, handleError]);
+    }, [allProviders, searchCache, t, handleError, toast]);
 
     // Handle debounced search
     useEffect(() => {
@@ -821,7 +821,7 @@ const DashboardPage = memo(function DashboardPage() {
                 description: t('couldNotUpdateFavorites') 
             });
         }
-    }, [user, favoriteProviderIds, t, handleError]);
+    }, [user, favoriteProviderIds, t, handleError, toast]);
 
     // Memoized provider filtering
     const { agencies, serviceProviders } = useMemo(() => {

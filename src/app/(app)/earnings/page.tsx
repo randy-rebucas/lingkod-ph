@@ -131,7 +131,7 @@ export default function EarningsPage() {
             unsubscribeBookings();
             unsubscribePayouts();
         };
-    }, [user, userRole, getDb]);
+    }, [user, userRole]);
 
     const totalRevenue = bookings.reduce((sum, b) => sum + b.price, 0);
     const totalPaidOut = payouts.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);

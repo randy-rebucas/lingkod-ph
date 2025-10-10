@@ -337,15 +337,6 @@ export default function MessagesPage() {
     }, [toast, t]);
 
     // Memoized filtered conversations
-    const filteredConversations = useMemo(() => {
-        if (!searchQuery.trim()) return conversations;
-        return conversations.filter(convo => {
-            const { name } = getOtherParticipantInfo(convo);
-            return name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                convo.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
-        });
-    }, [conversations, searchQuery, user]);
-
     // Memoized other participant info function
     const getOtherParticipantInfo = useCallback((convo: Conversation) => {
         if (!user) return { name: t('user'), avatar: '' };
@@ -358,6 +349,15 @@ export default function MessagesPage() {
         }
         return { name: t('unknownUser'), avatar: '' };
     }, [user, t]);
+
+    const filteredConversations = useMemo(() => {
+        if (!searchQuery.trim()) return conversations;
+        return conversations.filter(convo => {
+            const { name } = getOtherParticipantInfo(convo);
+            return name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                convo.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
+        });
+    }, [conversations, searchQuery, getOtherParticipantInfo]);
 
     // Handle typing indicator
     const handleTyping = useCallback(() => {
@@ -382,6 +382,52 @@ export default function MessagesPage() {
             }
         };
     }, [typingTimeout]);
+
+    // Image compression utility
+    const compressImage = useCallback((file: File): Promise<File> => {
+        return new Promise<File>((resolve) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new window.Image();
+
+            img.onload = () => {
+                const maxWidth = 800;
+                const maxHeight = 600;
+                let { width, height } = img;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = (height * maxWidth) / width;
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = (width * maxHeight) / height;
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                ctx?.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const compressedFile = new File([blob], file.name, {    
+                            type: 'image/jpeg',
+                            lastModified: Date.now(),
+                        });
+                        resolve(compressedFile);
+                    } else {
+                        resolve(file);
+                    }
+                }, 'image/jpeg', 0.8);
+            };
+
+            img.src = URL.createObjectURL(file);
+        });
+    }, []);
 
     const handleSendMessage = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
@@ -447,54 +493,9 @@ export default function MessagesPage() {
         } finally {
             setIsSending(false);
         }
-    }, [newMessage, selectedImage, user, activeConversation, getStorageInstance(), getDb(), toast, t]);
+    }, [newMessage, selectedImage, user, activeConversation, toast, t, compressImage]);
 
     // Image compression utility
-    const compressImage = useCallback((file: File): Promise<File> => {
-        return new Promise<File>((resolve) => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = new window.Image();
-
-            img.onload = () => {
-                const maxWidth = 800;
-                const maxHeight = 600;
-                let { width, height } = img;
-
-                if (width > height) {
-                    if (width > maxWidth) {
-                        height = (height * maxWidth) / width;
-                        width = maxWidth;
-                    }
-                } else {
-                    if (height > maxHeight) {
-                        width = (width * maxHeight) / height;
-                        height = maxHeight;
-                    }
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-
-                ctx?.drawImage(img, 0, 0, width, height);
-
-                canvas.toBlob((blob) => {
-                    if (blob) {
-                        const compressedFile = new File([blob], file.name, {
-                            type: 'image/jpeg',
-                            lastModified: Date.now(),
-                        });
-                        resolve(compressedFile);
-                    } else {
-                        resolve(file);
-                    }
-                }, 'image/jpeg', 0.8);
-            };
-
-            img.src = URL.createObjectURL(file);
-        });
-    }, []);
-
 
 
     return (

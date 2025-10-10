@@ -654,7 +654,7 @@ export default function BookingsPage() {
         });
 
         return () => unsubscribe();
-    }, [user, toast]);
+    }, [user, toast, t]);
 
     const pendingPaymentBookings = bookings.filter(b => b.status === 'Pending Payment');
     const pendingVerificationBookings = bookings.filter(b => b.status === 'Pending Verification');

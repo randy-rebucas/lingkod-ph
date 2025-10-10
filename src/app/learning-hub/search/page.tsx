@@ -50,7 +50,7 @@ const SearchPage = () => {
   const [showFilters, setShowFilters] = useState(false);
 
   // Mock search data - in a real app, this would come from an API
-  const searchData: SearchResult[] = [
+  const searchData: SearchResult[] = useMemo(() => [
     // Articles
     {
       id: '1',
@@ -278,7 +278,7 @@ const SearchPage = () => {
       lastUpdated: '2023-12-31',
       role: 'clients'
     }
-  ];
+  ], []);
 
   const categories = ['All', 'Getting Started', 'For Clients', 'For Providers', 'For Agencies', 'For Partners', 'Features & Functionality', 'Troubleshooting', 'Security & Privacy'];
   const difficulties = ['All', 'Beginner', 'Intermediate', 'Advanced'];
@@ -320,7 +320,7 @@ const SearchPage = () => {
     }
 
     return results;
-  }, [searchQuery, selectedCategory, selectedDifficulty, selectedType, selectedRole]);
+  }, [searchQuery, selectedCategory, selectedDifficulty, selectedType, selectedRole, searchData]);
 
   const clearFilters = () => {
     setSelectedCategory('All');
