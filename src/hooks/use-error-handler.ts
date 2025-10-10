@@ -15,7 +15,12 @@ export function useErrorHandler(options: ErrorHandlerOptions = {}) {
     let errorMessage = fallbackMessage;
     let toastMessage = fallbackMessage;
 
-    if (error instanceof Error) {
+    // Handle event objects that might be passed incorrectly
+    if (error && typeof error === 'object' && 'type' in error && 'target' in error) {
+      console.warn('Event object passed to handleError instead of error:', error);
+      errorMessage = 'An unexpected error occurred';
+      toastMessage = 'An unexpected error occurred. Please try again.';
+    } else if (error instanceof Error) {
       errorMessage = error.message;
       toastMessage = error.message;
 
@@ -30,6 +35,9 @@ export function useErrorHandler(options: ErrorHandlerOptions = {}) {
         errorMessage = 'Database error occurred';
         toastMessage = 'A database error occurred. Please try again.';
       }
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+      toastMessage = error;
     }
 
     if (logError) {

@@ -903,7 +903,7 @@ const DashboardPage = memo(function DashboardPage() {
                                 {isLoadingNearby ? (
                                     <>
                                         <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-{t('finding')}
+                                        {t('finding')}
                                     </>
                                 ) : (
                                     <>

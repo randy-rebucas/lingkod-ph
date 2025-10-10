@@ -2907,5 +2907,13 @@
     "eliteFeature4": "Dedicated Support",
     "eliteFeature5": "Lowest Commission Rate",
     "eliteFeature6": "Custom Branding"
+  },
+  "InteractiveOnboardingTour": {
+    "title": "Welcome to Lingkod!",
+    "description": "Let's take a quick tour to help you get started.",
+    "next": "Next",
+    "previous": "Previous",
+    "skip": "Skip Tour",
+    "finish": "Finish Tour"
   }
 }

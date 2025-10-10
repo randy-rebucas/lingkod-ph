@@ -2757,5 +2757,13 @@
     "eliteFeature4": "Dedicated Support",
     "eliteFeature5": "Pinakamababang Commission Rate",
     "eliteFeature6": "Custom Branding"
+  },
+  "InteractiveOnboardingTour": {
+    "title": "Maligayang pagdating sa Lingkod!",
+    "description": "Maglakbay tayo upang matulungan kang magsimula.",
+    "next": "Susunod",
+    "previous": "Nakaraan",
+    "skip": "Laktawan ang Tour",
+    "finish": "Tapusin ang Tour"
   }
 }

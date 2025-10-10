@@ -18,7 +18,10 @@ function LogoComponent({ className, showTagline = true }: LogoProps) {
   return (
     <div className={cn("flex items-center", className)}>
       <div className="flex flex-col">
-        <h1 className="text-3xl font-bold font-headline leading-none">
+        <h1 
+          className="text-3xl font-bold font-headline leading-none"
+          suppressHydrationWarning
+        >
           <span className="text-primary">{localText}</span>
           <span className="text-accent">{proText}</span>
         </h1>
