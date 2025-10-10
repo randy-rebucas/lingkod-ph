@@ -47,6 +47,10 @@ const Header = () => {
             {t('forBusinesses')}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
           </Link>
+          <Link href="#partners" className="transition-colors hover:text-primary relative group">
+            Partners
+            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
+          </Link>
           <Link href="/about" className="transition-colors hover:text-primary relative group">
             {t('about')}
             <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all group-hover:w-full"></span>
@@ -108,6 +112,13 @@ const Header = () => {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {t('forBusinesses')}
+                  </Link>
+                  <Link 
+                    href="#partners" 
+                    className="text-lg font-medium transition-colors hover:text-primary"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Partners
                   </Link>
                   <Link 
                     href="/about" 
@@ -177,29 +188,15 @@ const Footer = () => {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-4 text-foreground">{t('stayConnected')}</h4>
+            <h4 className="font-semibold mb-4 text-foreground">Contact Information</h4>
             <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-              Follow us for updates and community news.
+              Get in touch with us for support and inquiries.
             </p>
             <div className="flex space-x-4">
               <Button variant="outline" size="sm" className="h-8 w-8 p-0" asChild>
-                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                <a href="https://www.facebook.com/localproasia/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                </a>
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0" asChild>
-                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                  </svg>
-                </a>
-              </Button>
-              <Button variant="outline" size="sm" className="h-8 w-8 p-0" asChild>
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 6.62 5.367 11.987 11.988 11.987 6.62 0 11.987-5.367 11.987-11.987C24.014 5.367 18.637.001 12.017.001zM8.449 16.988c-1.297 0-2.448-.49-3.323-1.297C4.198 14.895 3.708 13.744 3.708 12.447s.49-2.448 1.297-3.323c.875-.807 2.026-1.297 3.323-1.297s2.448.49 3.323 1.297c.807.875 1.297 2.026 1.297 3.323s-.49 2.448-1.297 3.323c-.875.807-2.026 1.297-3.323 1.297zm7.83-9.281h-1.297v1.297h1.297V7.707zm-3.323 1.297c.718 0 1.297.579 1.297 1.297s-.579 1.297-1.297 1.297-1.297-.579-1.297-1.297.579-1.297 1.297-1.297z"/>
                   </svg>
                 </a>
               </Button>
@@ -452,7 +449,9 @@ export default function HomePage() {
                             {topProviders.map((provider, _index) => (
                                 <Card key={provider.name} className="group overflow-hidden bg-background/80 backdrop-blur-sm border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-700 hover:-translate-y-4 relative">
                                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                                    <div className="relative h-56 overflow-hidden">
+                                    
+                                    {/* Background Image Section */}
+                                    <div className="relative h-48 overflow-hidden">
                                         <Image 
                                             src={provider.background} 
                                             alt={provider.specialty} 
@@ -466,12 +465,18 @@ export default function HomePage() {
                                                 ⭐ Top Rated
                                             </Badge>
                                         </div>
-                                        <Avatar className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 h-32 w-32 border-4 border-background ring-4 ring-primary/30 shadow-2xl group-hover:scale-105 transition-transform duration-300">
+                                    </div>
+                                    
+                                    {/* Avatar Section - Separate from background */}
+                                    <div className="relative -mt-16 mb-4 flex justify-center">
+                                        <Avatar className="h-32 w-32 border-4 border-background ring-4 ring-primary/30 shadow-2xl group-hover:scale-105 transition-transform duration-300">
                                             <AvatarImage src={provider.avatar} alt={provider.name} data-ai-hint={provider.hint} />
                                             <AvatarFallback className="text-xl font-bold">{provider.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
                                         </Avatar>
                                     </div>
-                                    <CardContent className="text-center p-8 pt-24 relative z-10">
+                                    
+                                    {/* Content Section */}
+                                    <CardContent className="text-center p-6 pt-2">
                                         <CardTitle className="text-2xl font-bold mb-3">{provider.name}</CardTitle>
                                         <CardDescription className="text-lg mb-6 font-medium">{provider.specialty}</CardDescription>
                                         <div className="flex items-center justify-center gap-2 mb-3">
@@ -489,7 +494,7 @@ export default function HomePage() {
                         {/* View All Providers CTA */}
                         <div className="text-center mt-12">
                             <Button asChild size="lg" variant="outline" className="h-12 px-8 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300">
-                                <Link href="/providers">View All Providers</Link>
+                                <Link href="/login">View All Providers</Link>
                             </Button>
                         </div>
                     </div>
@@ -540,6 +545,145 @@ export default function HomePage() {
                     </div>
                 </section>
 
+                {/* Partners Section */}
+                <section id="partners" className="bg-gradient-to-b from-muted to-background py-24 relative overflow-hidden">
+                    {/* Background decoration */}
+                    <div className="absolute inset-0 bg-grid-pattern opacity-3"></div>
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl"></div>
+                    
+                    <div className="container relative z-10">
+                        <div className="mx-auto mb-20 max-w-4xl text-center">
+                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
+                                <Building className="h-4 w-4" />
+                                Our Partners
+                            </div>
+                            <h2 className="font-headline text-4xl font-bold md:text-6xl mb-6 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                                Trusted by Leading Organizations
+                            </h2>
+                            <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
+                                We're proud to partner with government agencies, businesses, and organizations that share our vision of connecting communities with quality local services.
+                            </p>
+                        </div>
+                        
+                        {/* Model Partner - LGU Ormoc */}
+                        <div className="max-w-4xl mx-auto mb-16">
+                            <Card className="group bg-background/90 backdrop-blur-sm border border-border/50 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <div className="p-8 lg:p-12 relative z-10">
+                                    <div className="flex flex-col lg:flex-row items-center gap-8">
+                                        {/* Logo Section */}
+                                        <div className="flex-shrink-0">
+                                            <div className="w-32 h-32 lg:w-40 lg:h-40 bg-white rounded-full shadow-lg flex items-center justify-center border-4 border-primary/20 group-hover:scale-105 transition-transform duration-300">
+                                                <Image 
+                                                    src="/images/partners/lgu-ormoc.jpg" 
+                                                    alt="LGU Ormoc Official Seal" 
+                                                    width={120} 
+                                                    height={120} 
+                                                    className="w-24 h-24 lg:w-32 lg:h-32 rounded-full object-cover"
+                                                />
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Content Section */}
+                                        <div className="flex-1 text-center lg:text-left">
+                                            <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
+                                                <Badge className="bg-primary/10 text-primary border-primary/20 px-4 py-2 text-sm font-medium">
+                                                    Model Partner
+                                                </Badge>
+                                                <Badge variant="outline" className="px-4 py-2 text-sm font-medium">
+                                                    Government LGU
+                                                </Badge>
+                                            </div>
+                                            <h3 className="text-3xl lg:text-4xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                                                City of Ormoc
+                                            </h3>
+                                            <p className="text-lg text-muted-foreground leading-relaxed mb-6 max-w-2xl">
+                                                The City of Ormoc serves as our model partner, demonstrating how local government units can leverage LocalPro to connect their constituents with verified service providers. Through this partnership, we're building stronger communities and supporting local economic development.
+                                            </p>
+                                            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-muted-foreground">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                    <span>Active Partnership</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                                    <span>Community Impact</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                                    <span>Verified Services</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
+                        
+                        {/* Partner Benefits */}
+                        <div className="grid gap-8 lg:grid-cols-3 max-w-6xl mx-auto">
+                            <Card className="group bg-background/70 backdrop-blur-sm border border-border/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 text-center p-8 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <CardHeader className="pb-4 relative z-10">
+                                    <div className="w-20 h-20 bg-gradient-to-br from-green-500/10 to-green-500/5 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                                        <Building className="h-10 w-10 text-green-600" />
+                                    </div>
+                                    <CardTitle className="text-2xl font-bold mb-2">Government Partnership</CardTitle>
+                                </CardHeader>
+                                <CardContent className="relative z-10">
+                                    <p className="text-muted-foreground leading-relaxed text-lg">Work with local government units to provide verified services to their constituents and support community development.</p>
+                                </CardContent>
+                            </Card>
+                            
+                            <Card className="group bg-background/70 backdrop-blur-sm border border-border/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 text-center p-8 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <CardHeader className="pb-4 relative z-10">
+                                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                                        <Star className="h-10 w-10 text-blue-600" />
+                                    </div>
+                                    <CardTitle className="text-2xl font-bold mb-2">Business Growth</CardTitle>
+                                </CardHeader>
+                                <CardContent className="relative z-10">
+                                    <p className="text-muted-foreground leading-relaxed text-lg">Expand your reach and grow your business through our platform's extensive network of customers and service providers.</p>
+                                </CardContent>
+                            </Card>
+                            
+                            <Card className="group bg-background/70 backdrop-blur-sm border border-border/50 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 text-center p-8 relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <CardHeader className="pb-4 relative z-10">
+                                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-300 shadow-lg">
+                                        <Sparkles className="h-10 w-10 text-purple-600" />
+                                    </div>
+                                    <CardTitle className="text-2xl font-bold mb-2">Community Impact</CardTitle>
+                                </CardHeader>
+                                <CardContent className="relative z-10">
+                                    <p className="text-muted-foreground leading-relaxed text-lg">Make a positive impact in your community by connecting people with trusted local services and supporting economic growth.</p>
+                                </CardContent>
+                            </Card>
+                        </div>
+                        
+                        {/* Partnership CTA */}
+                        <div className="text-center mt-16">
+                            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 rounded-3xl p-8 lg:p-12 border border-primary/20">
+                                <h3 className="text-2xl lg:text-3xl font-bold mb-4 bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                                    Interested in Becoming a Partner?
+                                </h3>
+                                <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+                                    Join our network of trusted partners and help us build stronger communities across the Philippines.
+                                </p>
+                                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                    <Button asChild size="lg" className="h-12 px-8 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
+                                        <Link href="/partners">Learn More</Link>
+                                    </Button>
+                                    <Button asChild size="lg" variant="outline" className="h-12 px-8 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300 hover:scale-105">
+                                        <Link href="/contact-us">Contact Us</Link>
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 {/* Join Platform Section (B2B2C CTA) */}
                 <section id="join" className="bg-gradient-to-br from-primary via-primary to-primary/80 py-32 relative overflow-hidden">
