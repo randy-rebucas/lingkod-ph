@@ -927,7 +927,32 @@
     "googleSignupFailed": "Google Sign-up Failed",
     "referralApplied": "Referral Applied!",
     "referralBonus": "You and your friend have received bonus points.",
-    "invalidReferralCode": "Invalid Referral Code"
+    "invalidReferralCode": "Invalid Referral Code",
+    "completeProfile": {
+      "title": "Complete Your Profile",
+      "subtitle": "Add your details to get started",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Juan Dela Cruz",
+      "emailAddress": "Email Address",
+      "emailOptional": "(Optional)",
+      "emailPlaceholder": "juan@example.com",
+      "phoneNumber": "Your phone number:",
+      "completingProfile": "Completing Profile...",
+      "completeProfile": "Complete Profile",
+      "profileCompletedSuccess": "Profile completed successfully!",
+      "profileCompletionFailed": "Failed to complete profile",
+      "authenticationRequired": "Authentication Required",
+      "signInToComplete": "Please sign in to complete your profile."
+    },
+    "accountSuspended": {
+      "title": "Account Suspended",
+      "subtitle": "Your account has been temporarily suspended. Please contact our support team for assistance.",
+      "contactSupport": "Contact Support",
+      "supportDescription": "Our support team is here to help you resolve this issue.",
+      "supportEmail": "support@localpro.asia",
+      "supportPhone": "+63 912 345 6789",
+      "returnToHome": "Return to Home"
+    }
   },
   "About": {
     "title": "About LocalPro",

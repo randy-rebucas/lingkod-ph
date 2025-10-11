@@ -920,7 +920,32 @@
     "googleSignupFailed": "Nabigo ang Google Sign-up",
     "referralApplied": "Na-apply ang Referral!",
     "referralBonus": "Ikaw at ang iyong kaibigan ay nakatanggap ng bonus points.",
-    "invalidReferralCode": "Hindi Valid na Referral Code"
+    "invalidReferralCode": "Hindi Valid na Referral Code",
+    "completeProfile": {
+      "title": "Kumpletuhin ang Iyong Profile",
+      "subtitle": "Idagdag ang iyong mga detalye para makapagsimula",
+      "fullName": "Buong Pangalan",
+      "fullNamePlaceholder": "Juan Dela Cruz",
+      "emailAddress": "Email Address",
+      "emailOptional": "(Optional)",
+      "emailPlaceholder": "juan@example.com",
+      "phoneNumber": "Ang iyong phone number:",
+      "completingProfile": "Kinukumpleto ang Profile...",
+      "completeProfile": "Kumpletuhin ang Profile",
+      "profileCompletedSuccess": "Matagumpay na nakumpleto ang profile!",
+      "profileCompletionFailed": "Nabigo ang pagkumpleto ng profile",
+      "authenticationRequired": "Kailangan ang Authentication",
+      "signInToComplete": "Pakimag-sign in para makumpleto ang iyong profile."
+    },
+    "accountSuspended": {
+      "title": "Na-suspend ang Account",
+      "subtitle": "Ang iyong account ay pansamantalang na-suspend. Pakikontak ang aming support team para sa tulong.",
+      "contactSupport": "Kontakin ang Support",
+      "supportDescription": "Ang aming support team ay nandito para tulungan ka na ma-resolve ang issue na ito.",
+      "supportEmail": "support@localpro.asia",
+      "supportPhone": "+63 912 345 6789",
+      "returnToHome": "Bumalik sa Home"
+    }
   },
   "About": {
     "title": "Tungkol sa LocalPro",
