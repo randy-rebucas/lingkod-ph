@@ -133,7 +133,6 @@ export default function AgencyProfilePage() {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [providers, setProviders] = useState<Provider[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [isFavorited, setIsFavorited] = useState(false);
     const [isFavoriteLoading, setIsFavoriteLoading] = useState(true);
 
@@ -154,7 +153,7 @@ export default function AgencyProfilePage() {
                 if (agencyResult.success && agencyResult.data) {
                     setAgency(agencyResult.data);
                 } else {
-                    setError(agencyResult.error || 'Agency not found');
+                    toast({ variant: "destructive", title: t('error'), description: agencyResult.error || 'Agency not found' });
                     return;
                 }
 
@@ -187,14 +186,14 @@ export default function AgencyProfilePage() {
 
             } catch (error) {
                 console.error("Error fetching agency data:", error);
-                setError('Failed to load agency data');
+                toast({ variant: "destructive", title: t('error'), description: 'Failed to load agency data' });
             } finally {
                 setLoading(false);
             }
         };
 
         fetchAgencyData();
-    }, [agencyId]);
+    }, [agencyId]); // eslint-disable-line react-hooks/exhaustive-deps
     
     useEffect(() => {
         if (!user || !agencyId) {
