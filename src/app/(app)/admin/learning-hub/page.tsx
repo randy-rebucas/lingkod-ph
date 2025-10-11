@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import type { ContentItem } from '@/app/learning-hub/actions';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,22 +44,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-interface ContentItem {
-  id: string;
-  title: string;
-  type: 'article' | 'tutorial' | 'topic' | 'resource';
-  category: string;
-  role: 'clients' | 'providers' | 'agencies' | 'partners' | 'all';
-  status: 'draft' | 'published' | 'archived';
-  featured: boolean;
-  popular: boolean;
-  author: string;
-  createdAt: string;
-  updatedAt: string;
-  viewCount?: number;
-  downloadCount?: number;
-  rating?: number;
-}
+// ContentItem type is imported from learning-hub actions
 
 const AdminLearningHubPage = () => {
   const [content, setContent] = useState<ContentItem[]>([]);
@@ -88,11 +74,16 @@ const AdminLearningHubPage = () => {
       if (selectedRole !== 'all') params.append('role', selectedRole);
       if (searchQuery) params.append('search', searchQuery);
       
-      const response = await fetch(`/api/admin/learning-hub/content?${params.toString()}`);
-      const result = await response.json();
+      const { getLearningHubContent } = await import('@/app/learning-hub/actions');
+      const result = await getLearningHubContent({
+        type: selectedType !== 'all' ? selectedType : undefined,
+        status: selectedStatus !== 'all' ? selectedStatus : undefined,
+        role: selectedRole !== 'all' ? selectedRole : undefined,
+        search: searchQuery || undefined,
+      });
       
       if (result.success) {
-        setContent(result.data);
+        setContent(result.data || []);
         setError(null);
       } else {
         console.error('Failed to fetch content:', result.error);
@@ -177,7 +168,7 @@ const AdminLearningHubPage = () => {
     featured: content.filter(item => item.featured).length,
     popular: content.filter(item => item.popular).length,
     totalViews: content.reduce((sum, item) => sum + (item.viewCount || 0), 0),
-    totalDownloads: content.reduce((sum, item) => sum + (item.downloadCount || 0), 0)
+    totalDownloads: 0 // downloadCount not available in ContentItem type
   };
 
   if (loading) {
@@ -555,11 +546,11 @@ const AdminLearningHubPage = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={getStatusColor(item.status)}>
-                        {item.status}
+                      <Badge variant="outline" className={getStatusColor(item.status || 'draft')}>
+                        {item.status || 'draft'}
                       </Badge>
                     </TableCell>
-                    <TableCell>{item.author}</TableCell>
+                    <TableCell>{item.authorId || 'Unknown'}</TableCell>
                     <TableCell>
                       <div className="text-sm text-muted-foreground">
                         {item.viewCount && (
@@ -568,18 +559,7 @@ const AdminLearningHubPage = () => {
                             <span>{item.viewCount.toLocaleString()}</span>
                           </div>
                         )}
-                        {item.downloadCount && (
-                          <div className="flex items-center space-x-1">
-                            <Download className="h-3 w-3" />
-                            <span>{item.downloadCount.toLocaleString()}</span>
-                          </div>
-                        )}
-                        {item.rating && (
-                          <div className="flex items-center space-x-1">
-                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            <span>{item.rating}</span>
-                          </div>
-                        )}
+                        {/* downloadCount and rating not available in ContentItem type */}
                       </div>
                     </TableCell>
                     <TableCell>

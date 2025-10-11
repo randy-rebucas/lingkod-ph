@@ -6,7 +6,7 @@ import { doc, writeBatch, serverTimestamp, getDoc, collection } from "firebase/f
 import { z } from "zod";
 
 const InviteActionSchema = z.object({
-  inviteId: z.string(),
+  inviteId: z.string().min(1, 'Invite ID is required'),
   accepted: z.boolean(),
 });
 

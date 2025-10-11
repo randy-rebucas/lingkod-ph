@@ -39,6 +39,23 @@ describe('postJobAction', () => {
     jest.clearAllMocks();
     mockGetDb.mockReturnValue(mockDb as any);
     mockServerTimestamp.mockReturnValue('mock-timestamp' as any);
+    
+    // Mock Firestore functions
+    mockGetDoc.mockResolvedValue({
+      exists: () => true,
+      data: () => ({ name: 'Test Category' })
+    } as any);
+    mockUpdateDoc.mockResolvedValue(undefined);
+    mockCollection.mockReturnValue({} as any);
+    mockQuery.mockReturnValue({} as any);
+    mockWhere.mockReturnValue({} as any);
+    mockGetDocs.mockResolvedValue({
+      forEach: jest.fn()
+    } as any);
+    mockWriteBatch.mockReturnValue({
+      set: jest.fn(),
+      commit: jest.fn().mockResolvedValue(undefined)
+    } as any);
   });
 
   describe('Validation', () => {

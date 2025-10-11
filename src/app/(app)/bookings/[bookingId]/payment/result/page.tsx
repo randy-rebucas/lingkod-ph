@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { capturePayPalPayment } from '../../../actions';
 
 export default function PaymentResultPage() {
   const { bookingId } = useParams();
@@ -31,19 +32,14 @@ export default function PaymentResultPage() {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch('/api/payments/paypal/capture', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          bookingId,
-          orderId,
-        }),
-      });
+      if (!bookingId || Array.isArray(bookingId)) {
+        throw new Error('Booking ID is required');
+      }
 
-      const result = await response.json();
+      const result = await capturePayPalPayment({
+        bookingId,
+        orderId,
+      });
 
       if (result.success) {
         setStatus('success');

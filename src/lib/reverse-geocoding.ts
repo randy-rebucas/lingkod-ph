@@ -3,14 +3,7 @@
  * Converts latitude and longitude coordinates to readable addresses
  */
 
-export interface GeocodingResult {
-  address: string;
-  city?: string;
-  province?: string;
-  country?: string;
-  postalCode?: string;
-  fullAddress: string;
-}
+import type { GeocodingResult } from './geocoding-actions';
 
 /**
  * Reverse geocode coordinates to get a readable address
@@ -20,23 +13,15 @@ export interface GeocodingResult {
  */
 export async function reverseGeocode(lat: number, lng: number): Promise<GeocodingResult | null> {
   try {
-    // Use our server-side API route to avoid CORS issues
-    const response = await fetch(
-      `/api/geocoding/reverse?lat=${lat}&lng=${lng}`
-    );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (data.error) {
-      console.warn('Geocoding API error:', data.error);
+    const { reverseGeocode: reverseGeocodeAction } = await import('./geocoding-actions');
+    const result = await reverseGeocodeAction(lat, lng);
+    
+    if (result.success && result.data) {
+      return result.data;
+    } else {
+      console.error('Reverse geocoding failed:', result.error);
       return null;
     }
-
-    return data;
   } catch (error) {
     console.error('Reverse geocoding error:', error);
     return null;

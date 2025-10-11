@@ -21,6 +21,7 @@ import {
   Monitor
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { createArticleAction } from '../../actions';
 
 const NewArticlePage = () => {
   const router = useRouter();
@@ -120,19 +121,10 @@ const NewArticlePage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/admin/learning-hub/articles', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          authorId: 'default-author-id', // In a real app, this would come from auth
-          publishedAt: formData.status === 'published' ? new Date() : null
-        }),
+      const result = await createArticleAction({
+        ...formData,
+        authorId: 'default-author-id', // In a real app, this would come from auth
       });
-
-      const result = await response.json();
 
       if (result.success) {
         toast({ title: 'Success', description: 'Article created successfully!' });

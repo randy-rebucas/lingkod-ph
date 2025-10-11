@@ -61,15 +61,18 @@ export default function PerformanceDashboard() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`/api/analytics/performance?timeframe=${timeframe}&limit=100`);
+      const { getPerformanceAnalytics } = await import('@/lib/analytics-actions');
+      const result = await getPerformanceAnalytics({ 
+        timeframe, 
+        limit: 100 
+      });
       
-      if (!response.ok) {
-        throw new Error('Failed to load performance data');
+      if (result.success && result.data) {
+        setMetrics(result.data.aggregatedMetrics);
+        setReports(result.data.reports);
+      } else {
+        throw new Error(result.error || 'Failed to load performance data');
       }
-      
-      const data = await response.json();
-      setMetrics(data.aggregatedMetrics);
-      setReports(data.reports);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {

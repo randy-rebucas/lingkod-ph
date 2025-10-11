@@ -31,6 +31,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { PageLoading, InlineLoading } from '@/components/ui/loading-states';
+import { getLearningHubContent, getLearningHubStats } from './actions';
 
 // Types for API responses
 interface ContentItem {
@@ -87,23 +88,38 @@ const LearningHubOverviewPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [contentResponse, statsResponse] = await Promise.all([
-        fetch('/api/learning-hub/content?limit=20'),
-        fetch('/api/learning-hub/stats')
+      const [contentResult, statsResult] = await Promise.all([
+        getLearningHubContent({ limit: 20 }),
+        getLearningHubStats()
       ]);
 
-      const contentResult = await contentResponse.json();
-      const statsResult = await statsResponse.json();
-
       if (contentResult.success) {
-        setContent(contentResult.data);
+        setContent(contentResult.data || []);
       } else {
         console.warn('Failed to fetch content:', contentResult.error);
         setContent([]);
       }
 
       if (statsResult.success) {
-        setStats(statsResult.data);
+        setStats(statsResult.data || {
+          totalContent: 0,
+          totalArticles: 0,
+          totalTutorials: 0,
+          totalTopics: 0,
+          totalResources: 0,
+          totalCategories: 0,
+          totalViews: 0,
+          featuredCount: 0,
+          popularCount: 0,
+          roleCounts: {
+            clients: 0,
+            providers: 0,
+            agencies: 0,
+            partners: 0,
+            all: 0
+          },
+          categories: []
+        });
       } else {
         console.warn('Failed to fetch stats:', statsResult.error);
         // Set default stats if API fails
@@ -167,11 +183,10 @@ const LearningHubOverviewPage = () => {
 
     try {
       setIsSearching(true);
-      const response = await fetch(`/api/learning-hub/content?search=${encodeURIComponent(query)}&limit=10`);
-      const result = await response.json();
+      const result = await getLearningHubContent({ search: query, limit: 10 });
       
       if (result.success) {
-        setSearchResults(result.data);
+        setSearchResults(result.data || []);
       }
     } catch (error) {
       console.error('Error searching:', error);

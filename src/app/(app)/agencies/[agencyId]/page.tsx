@@ -4,8 +4,18 @@ import { useEffect, useState, useRef } from "react";
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { getDb  } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp, deleteDoc, onSnapshot, orderBy } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
+import { 
+  getAgency, 
+  getAgencyServices,
+  getAgencyProviders, 
+  getAgencyReviews, 
+  addAgencyToFavorites, 
+  removeAgencyFromFavorites, 
+  isAgencyFavorited, 
+  startConversationWithAgency, 
+  reportAgency
+} from '../actions';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -123,6 +133,7 @@ export default function AgencyProfilePage() {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [providers, setProviders] = useState<Provider[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [isFavorited, setIsFavorited] = useState(false);
     const [isFavoriteLoading, setIsFavoriteLoading] = useState(true);
 
@@ -133,53 +144,50 @@ export default function AgencyProfilePage() {
     const [isReporting, setIsReporting] = useState(false);
 
     useEffect(() => {
-        if (!agencyId || !getDb()) return;
+        if (!agencyId) return;
 
         const fetchAgencyData = async () => {
             setLoading(true);
             try {
-                // Fetch agency details
-                const agencyDocRef = doc(getDb(), "users", agencyId);
-                const agencyDoc = await getDoc(agencyDocRef);
-                if (agencyDoc.exists()) {
-                    const agencyData = { uid: agencyDoc.id, ...agencyDoc.data() } as Agency;
-                    // Only show if it's actually an agency
-                    if (agencyData.role === 'agency') {
-                        setAgency(agencyData);
-                    }
+                // Fetch agency details using server action
+                const agencyResult = await getAgency(agencyId);
+                if (agencyResult.success && agencyResult.data) {
+                    setAgency(agencyResult.data);
+                } else {
+                    setError(agencyResult.error || 'Agency not found');
+                    return;
                 }
 
-                // Fetch services
-                const servicesQuery = query(collection(getDb(), "services"), where("userId", "==", agencyId), where("status", "==", "Active"));
-                const servicesSnapshot = await getDocs(servicesQuery);
-                const servicesData = servicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
-                setServices(servicesData);
+                // Fetch services using server action
+                const servicesResult = await getAgencyServices(agencyId);
+                if (servicesResult.success && servicesResult.data) {
+                    setServices(servicesResult.data as Service[]);
+                }
 
-                // Fetch reviews
-                const reviewsQuery = query(collection(getDb(), "reviews"), where("providerId", "==", agencyId), orderBy("createdAt", "desc"));
-                const reviewsSnapshot = await getDocs(reviewsQuery);
-                const reviewsData = reviewsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
-                setReviews(reviewsData);
+                // Fetch reviews using server action
+                const reviewsResult = await getAgencyReviews(agencyId);
+                if (reviewsResult.success && reviewsResult.data) {
+                    setReviews(reviewsResult.data);
+                }
 
-                // Fetch agency providers
-                const providersQuery = query(collection(getDb(), "users"), where("role", "==", "provider"), where("agencyId", "==", agencyId));
-                const providersSnapshot = await getDocs(providersQuery);
-                const providersData = providersSnapshot.docs.map(doc => {
-                    const data = doc.data();
-                    return {
-                        id: doc.id,
+                // Fetch agency providers using server action
+                const providersResult = await getAgencyProviders(agencyId);
+                if (providersResult.success && providersResult.data) {
+                    const providersData = providersResult.data.map((data: any) => ({
+                        id: data.id,
                         displayName: data.displayName,
                         photoURL: data.photoURL,
                         specialties: data.specialties || [],
                         rating: data.averageRating || 0,
                         totalBookings: data.totalBookings || 0,
                         isVerified: data.isVerified || false
-                    } as Provider;
-                });
-                setProviders(providersData);
+                    } as Provider));
+                    setProviders(providersData);
+                }
 
             } catch (error) {
                 console.error("Error fetching agency data:", error);
+                setError('Failed to load agency data');
             } finally {
                 setLoading(false);
             }
@@ -189,23 +197,26 @@ export default function AgencyProfilePage() {
     }, [agencyId]);
     
     useEffect(() => {
-        if (!user || !agencyId || !getDb()) {
+        if (!user || !agencyId) {
             setIsFavoriteLoading(false);
             return;
         }
-        setIsFavoriteLoading(true);
-        const favQuery = query(
-            collection(getDb(), 'favorites'),
-            where('userId', '==', user.uid),
-            where('providerId', '==', agencyId)
-        );
-
-        const unsubscribe = onSnapshot(favQuery, (snapshot) => {
-            setIsFavorited(!snapshot.empty);
-            setIsFavoriteLoading(false);
-        });
         
-        return () => unsubscribe();
+        const checkFavoriteStatus = async () => {
+            setIsFavoriteLoading(true);
+            try {
+                const result = await isAgencyFavorited(agencyId, user.uid);
+                if (result.success) {
+                    setIsFavorited(result.data || false);
+                }
+            } catch (error) {
+                console.error('Error checking favorite status:', error);
+            } finally {
+                setIsFavoriteLoading(false);
+            }
+        };
+        
+        checkFavoriteStatus();
     }, [user, agencyId]);
 
     const handleToggleFavorite = async () => {
@@ -214,23 +225,25 @@ export default function AgencyProfilePage() {
             return;
         }
         setIsFavoriteLoading(true);
-        const favoritesRef = collection(getDb(), 'favorites');
         
         try {
+            let result;
             if (isFavorited) {
-                const q = query(favoritesRef, where('userId', '==', user.uid), where('providerId', '==', agency.uid));
-                const snapshot = await getDocs(q);
-                if (!snapshot.empty) {
-                    await deleteDoc(snapshot.docs[0].ref);
+                result = await removeAgencyFromFavorites(agency.uid, user.uid);
+                if (result.success) {
+                    toast({ title: t('removedFromFavorites') });
+                    setIsFavorited(false);
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotUpdateFavorites') });
                 }
-                toast({ title: t('removedFromFavorites') });
             } else {
-                 await addDoc(favoritesRef, {
-                    userId: user.uid,
-                    providerId: agency.uid,
-                    favoritedAt: serverTimestamp()
-                });
-                toast({ title: t('addedToFavorites') });
+                result = await addAgencyToFavorites(agency.uid, user.uid);
+                if (result.success) {
+                    toast({ title: t('addedToFavorites') });
+                    setIsFavorited(true);
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotUpdateFavorites') });
+                }
             }
         } catch (error) {
             console.error("Error updating favorite status:", error);
@@ -252,39 +265,15 @@ export default function AgencyProfilePage() {
         }
 
         try {
-            // Check if a conversation already exists
-            const conversationsRef = collection(getDb(), "conversations");
-            const q = query(conversationsRef, where("participants", "array-contains", user.uid));
-            const querySnapshot = await getDocs(q);
+            const result = await startConversationWithAgency(agency.uid, user.uid, "Conversation started.");
             
-            let existingConvoId: string | null = null;
-            querySnapshot.forEach(doc => {
-                const convo = doc.data();
-                if (convo.participants.includes(agency.uid)) {
-                    existingConvoId = doc.id;
-                }
-            });
-
-            if (existingConvoId) {
-                router.push(`/messages?conversationId=${existingConvoId}`);
+            if (result.success && result.data) {
+                router.push(`/messages?conversationId=${result.data.id}`);
+            } else if (result.error === 'Conversation exists' && result.data) {
+                // Conversation already exists, redirect to it
+                router.push(`/messages?conversationId=${result.data.id}`);
             } else {
-                // Create a new conversation
-                const newConvoRef = await addDoc(collection(getDb(), "conversations"), {
-                    participants: [user.uid, agency.uid],
-                    participantInfo: {
-                        [user.uid]: {
-                            displayName: user.displayName,
-                            photoURL: user.photoURL || '',
-                        },
-                        [agency.uid]: {
-                            displayName: agency.displayName,
-                            photoURL: agency.photoURL || '',
-                        }
-                    },
-                    lastMessage: "Conversation started.",
-                    timestamp: serverTimestamp(),
-                });
-                router.push(`/messages?conversationId=${newConvoRef.id}`);
+                toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotStartConversation') });
             }
         } catch (error) {
             console.error("Error starting conversation:", error);
@@ -299,16 +288,20 @@ export default function AgencyProfilePage() {
         }
         setIsReporting(true);
         try {
-            await addDoc(collection(getDb(), "reports"), {
-                reportedBy: user.uid,
-                reportedItemType: 'user',
-                reportedItemId: agency.uid,
+            const result = await reportAgency({
+                agencyId: agency.uid,
+                reporterId: user.uid,
                 reason: reportReason,
-                status: 'New',
-                createdAt: serverTimestamp(),
+                description: reportReason, // Using reportReason as description for now
+                category: 'other' // Default category, could be made configurable
             });
-            toast({ title: t('reportSubmitted'), description: t('reportSubmittedDescription') });
-            setReportReason("");
+            
+            if (result.success) {
+                toast({ title: t('reportSubmitted'), description: t('reportSubmittedDescription') });
+                setReportReason("");
+            } else {
+                toast({ variant: "destructive", title: t('error'), description: result.error || t('failedToSubmitReport') });
+            }
         } catch(error) {
             console.error("Error submitting report:", error);
             toast({ variant: "destructive", title: t('error'), description: t('failedToSubmitReport') });

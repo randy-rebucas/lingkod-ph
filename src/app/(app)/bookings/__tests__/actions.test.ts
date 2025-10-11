@@ -44,6 +44,25 @@ describe('completeBookingAction', () => {
     mockGetDb.mockReturnValue(mockDb as any);
     mockGetStorageInstance.mockReturnValue(mockStorage as any);
     mockServerTimestamp.mockReturnValue('mock-timestamp' as any);
+    
+    // Mock Firebase Storage functions
+    mockRef.mockReturnValue({} as any);
+    mockUploadString.mockResolvedValue(undefined);
+    mockGetDownloadURL.mockResolvedValue('https://example.com/photo.jpg');
+    
+    // Mock Firestore functions
+    mockRunTransaction.mockImplementation(async (callback) => {
+      const mockTransaction = {
+        get: jest.fn().mockResolvedValue({
+          exists: () => true,
+          data: () => ({ loyaltyPoints: 100 })
+        }),
+        update: jest.fn(),
+      };
+      return await callback(mockTransaction);
+    });
+    mockCollection.mockReturnValue({} as any);
+    mockAddDoc.mockResolvedValue({ id: 'notification-123' } as any);
   });
 
   describe('Validation', () => {

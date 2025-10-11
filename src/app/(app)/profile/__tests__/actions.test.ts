@@ -13,6 +13,12 @@ const mockCollection = collection as jest.MockedFunction<typeof collection>;
 const mockServerTimestamp = serverTimestamp as jest.MockedFunction<typeof serverTimestamp>;
 
 describe('handleInviteAction', () => {
+  const mockBatch = {
+    update: jest.fn(),
+    set: jest.fn(),
+    commit: jest.fn(),
+  };
+
   const mockDb = {
     collection: mockCollection,
     doc: jest.fn(),
@@ -22,13 +28,15 @@ describe('handleInviteAction', () => {
     jest.clearAllMocks();
     mockGetDb.mockReturnValue(mockDb as any);
     mockServerTimestamp.mockReturnValue('mock-timestamp' as any);
+    mockWriteBatch.mockReturnValue(mockBatch as any);
+    mockBatch.commit.mockResolvedValue(undefined);
   });
 
   describe('Validation', () => {
     it('should reject invalid form data', async () => {
       const invalidFormData = new FormData();
-      invalidFormData.append('inviteId', '');
-      invalidFormData.append('accepted', 'invalid');
+      invalidFormData.append('inviteId', ''); // Empty string should fail validation
+      invalidFormData.append('accepted', 'true');
 
       const result = await handleInviteAction(
         { error: null, message: '' },
@@ -55,6 +63,7 @@ describe('handleInviteAction', () => {
     it('should reject missing accepted field', async () => {
       const invalidFormData = new FormData();
       invalidFormData.append('inviteId', 'invite-123');
+      // Missing accepted field - this should fail validation
 
       const result = await handleInviteAction(
         { error: null, message: '' },
@@ -93,13 +102,7 @@ describe('handleInviteAction', () => {
         data: () => mockProviderData,
       } as any);
 
-      // Mock batch operations
-      const mockBatch = {
-        update: jest.fn(),
-        set: jest.fn(),
-        commit: jest.fn(),
-      };
-      mockWriteBatch.mockReturnValue(mockBatch as any);
+      // Batch operations are already mocked globally
     });
 
     it('should accept invite successfully', async () => {
@@ -114,13 +117,6 @@ describe('handleInviteAction', () => {
     });
 
     it('should update provider with agencyId when accepted', async () => {
-      const mockBatch = {
-        update: jest.fn(),
-        set: jest.fn(),
-        commit: jest.fn(),
-      };
-      mockWriteBatch.mockReturnValue(mockBatch as any);
-
       await handleInviteAction(
         { error: null, message: '' },
         validFormData
@@ -133,13 +129,6 @@ describe('handleInviteAction', () => {
     });
 
     it('should update invite status to accepted', async () => {
-      const mockBatch = {
-        update: jest.fn(),
-        set: jest.fn(),
-        commit: jest.fn(),
-      };
-      mockWriteBatch.mockReturnValue(mockBatch as any);
-
       await handleInviteAction(
         { error: null, message: '' },
         validFormData
@@ -152,13 +141,6 @@ describe('handleInviteAction', () => {
     });
 
     it('should create notification for agency when accepted', async () => {
-      const mockBatch = {
-        update: jest.fn(),
-        set: jest.fn(),
-        commit: jest.fn(),
-      };
-      mockWriteBatch.mockReturnValue(mockBatch as any);
-
       await handleInviteAction(
         { error: null, message: '' },
         validFormData
@@ -204,13 +186,7 @@ describe('handleInviteAction', () => {
         data: () => mockProviderData,
       } as any);
 
-      // Mock batch operations
-      const mockBatch = {
-        update: jest.fn(),
-        set: jest.fn(),
-        commit: jest.fn(),
-      };
-      mockWriteBatch.mockReturnValue(mockBatch as any);
+      // Batch operations are already mocked globally
     });
 
     it('should decline invite successfully', async () => {
@@ -225,13 +201,6 @@ describe('handleInviteAction', () => {
     });
 
     it('should update invite status to declined', async () => {
-      const mockBatch = {
-        update: jest.fn(),
-        set: jest.fn(),
-        commit: jest.fn(),
-      };
-      mockWriteBatch.mockReturnValue(mockBatch as any);
-
       await handleInviteAction(
         { error: null, message: '' },
         declineFormData
@@ -244,13 +213,6 @@ describe('handleInviteAction', () => {
     });
 
     it('should create notification for agency when declined', async () => {
-      const mockBatch = {
-        update: jest.fn(),
-        set: jest.fn(),
-        commit: jest.fn(),
-      };
-      mockWriteBatch.mockReturnValue(mockBatch as any);
-
       await handleInviteAction(
         { error: null, message: '' },
         declineFormData
@@ -269,13 +231,6 @@ describe('handleInviteAction', () => {
     });
 
     it('should not update provider when declined', async () => {
-      const mockBatch = {
-        update: jest.fn(),
-        set: jest.fn(),
-        commit: jest.fn(),
-      };
-      mockWriteBatch.mockReturnValue(mockBatch as any);
-
       await handleInviteAction(
         { error: null, message: '' },
         declineFormData

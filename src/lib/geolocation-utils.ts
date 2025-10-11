@@ -114,34 +114,21 @@ export function hasValidCoordinates(location: LocationData): boolean {
  * @param address Address to geocode
  * @returns Promise with coordinates or null
  */
-export function geocodeAddress(address: string): Promise<Coordinates | null> {
-  return new Promise((resolve) => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(
-          `/api/geocoding/forward?address=${encodeURIComponent(address)}`
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.error) {
-          console.warn('Geocoding API error:', data.error);
-          resolve(null);
-        } else {
-          resolve(data);
-        }
-      } catch (error) {
-        console.error('Geocoding error:', error);
-        resolve(null);
-      }
-    };
-
-    fetchData();
-  });
+export async function geocodeAddress(address: string): Promise<Coordinates | null> {
+  try {
+    const { geocodeAddress: geocodeAction } = await import('./geocoding-actions');
+    const result = await geocodeAction(address);
+    
+    if (result.success && result.data) {
+      return result.data;
+    } else {
+      console.error('Geocoding failed:', result.error);
+      return null;
+    }
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    return null;
+  }
 }
 
 /**
