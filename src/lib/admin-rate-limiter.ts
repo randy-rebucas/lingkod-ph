@@ -102,7 +102,7 @@ export class AdminRateLimiter {
       ip: adminId,
     } as unknown as NextRequest;
     
-    const result = rateLimiter.isAllowed(mockRequest);
+    const result = await rateLimiter.isAllowed(mockRequest);
     
     return {
       allowed: result.allowed,
@@ -113,32 +113,32 @@ export class AdminRateLimiter {
   /**
    * Add rate limit headers to response
    */
-  static addRateLimitHeaders(
+  static async addRateLimitHeaders(
     response: Response,
     operation: keyof typeof adminRateLimiters,
     adminId: string
-  ): Response {
+  ): Promise<Response> {
     const rateLimiter = adminRateLimiters[operation];
     const mockRequest = {
       headers: new Map([['x-admin-id', adminId]]),
       ip: adminId,
     } as unknown as NextRequest;
-    return addRateLimitHeaders(response, rateLimiter, mockRequest);
+    return await addRateLimitHeaders(response, rateLimiter, mockRequest);
   }
 
   /**
    * Get rate limit status for an admin operation
    */
-  static getRateLimitStatus(
+  static async getRateLimitStatus(
     operation: keyof typeof adminRateLimiters,
     adminId: string
-  ): { remaining: number; resetTime: number } {
+  ): Promise<{ remaining: number; resetTime: number }> {
     const rateLimiter = adminRateLimiters[operation];
     const mockRequest = {
       headers: new Map([['x-admin-id', adminId]]),
       ip: adminId,
     } as unknown as NextRequest;
-    const result = rateLimiter.isAllowed(mockRequest);
+    const result = await rateLimiter.isAllowed(mockRequest);
     return {
       remaining: result.remaining,
       resetTime: result.resetTime,

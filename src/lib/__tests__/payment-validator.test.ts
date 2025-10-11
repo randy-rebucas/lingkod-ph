@@ -622,19 +622,31 @@ describe('PaymentValidator', () => {
         data: () => mockBookingData,
       };
 
-      mockDb.collection.mockReturnValue({
-        doc: jest.fn().mockReturnValue({
-          get: jest.fn().mockResolvedValue(mockBookingDoc),
-        }),
+      // Mock the database calls for both validateBookingForPayment and the direct call in validatePayment
+      const mockDoc = {
+        get: jest.fn().mockResolvedValue(mockBookingDoc),
+      };
+      
+      const mockCollection = {
+        doc: jest.fn().mockReturnValue(mockDoc),
         where: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         get: jest.fn().mockResolvedValue({ empty: true, docs: [] }),
-      } as any);
+      };
+
+      // Ensure the mock is called for both database calls
+      mockDb.collection.mockImplementation((collectionName) => {
+        if (collectionName === 'bookings') {
+          return mockCollection as any;
+        }
+        return mockCollection as any;
+      });
 
       mockPaymentConfig.validatePaymentAmount.mockReturnValue(true);
-      Object.defineProperty(mockPaymentConfig, 'BANK', {
-        value: { accountName: 'Test', accountNumber: '09123456789', bankName: 'Test Bank' },
+      mockPaymentConfig.validatePayPalConfig.mockReturnValue(true);
+      Object.defineProperty(mockPaymentConfig, 'PAYPAL', {
+        value: { clientId: 'test', clientSecret: 'test', mode: 'sandbox' },
         writable: true
       });
 
@@ -674,20 +686,32 @@ describe('PaymentValidator', () => {
         data: () => mockBookingData,
       };
 
-      mockDb.collection.mockReturnValue({
-        doc: jest.fn().mockReturnValue({
-          get: jest.fn().mockResolvedValue(mockBookingDoc),
-        }),
+      // Mock the database calls for both validateBookingForPayment and the direct call in validatePayment
+      const mockDoc = {
+        get: jest.fn().mockResolvedValue(mockBookingDoc),
+      };
+      
+      const mockCollection = {
+        doc: jest.fn().mockReturnValue(mockDoc),
         where: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
         get: jest.fn().mockResolvedValue({ empty: true, docs: [] }),
-      } as any);
+      };
+
+      // Ensure the mock is called for both database calls
+      mockDb.collection.mockImplementation((collectionName) => {
+        if (collectionName === 'bookings') {
+          return mockCollection as any;
+        }
+        return mockCollection as any;
+      });
 
       mockPaymentConfig.validatePaymentAmount.mockReturnValue(true);
+      mockPaymentConfig.validatePayPalConfig.mockReturnValue(true);
       mockPaymentConfig.validateFileUpload.mockReturnValue({ valid: true });
-      Object.defineProperty(mockPaymentConfig, 'BANK', {
-        value: { accountName: 'Test', accountNumber: '09123456789', bankName: 'Test Bank' },
+      Object.defineProperty(mockPaymentConfig, 'PAYPAL', {
+        value: { clientId: 'test', clientSecret: 'test', mode: 'sandbox' },
         writable: true
       });
 

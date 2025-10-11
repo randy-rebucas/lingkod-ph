@@ -450,16 +450,135 @@ class PerformanceMonitoringService {
         },
       };
 
-      // Send to analytics endpoint
-      await fetch('/api/analytics/performance', {
+      // Send to multiple analytics services
+      await Promise.allSettled([
+        this.sendToGoogleAnalytics(report),
+        this.sendToMixpanel(report),
+        this.sendToAmplitude(report),
+        this.sendToCustomAnalytics(report),
+      ]);
+    } catch (error) {
+      console.error('Failed to send performance report:', error);
+    }
+  }
+
+  /**
+   * Send performance data to Google Analytics
+   */
+  private async sendToGoogleAnalytics(report: PerformanceReport): Promise<void> {
+    if (!process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID) return;
+
+    try {
+      // Send Core Web Vitals to Google Analytics
+      for (const metric of report.metrics) {
+        if (['CLS', 'FID', 'FCP', 'LCP', 'TTFB'].includes(metric.name)) {
+          // Use gtag if available
+          if (typeof window !== 'undefined' && (window as any).gtag) {
+            (window as any).gtag('event', metric.name, {
+              event_category: 'Web Vitals',
+              event_label: metric.id,
+              value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+              non_interaction: true,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to send to Google Analytics:', error);
+    }
+  }
+
+  /**
+   * Send performance data to Mixpanel
+   */
+  private async sendToMixpanel(report: PerformanceReport): Promise<void> {
+    if (!process.env.NEXT_PUBLIC_MIXPANEL_TOKEN) return;
+
+    try {
+      const mixpanelData = {
+        event: 'Performance Metrics',
+        properties: {
+          token: process.env.NEXT_PUBLIC_MIXPANEL_TOKEN,
+          distinct_id: report.userId || 'anonymous',
+          session_id: report.sessionId,
+          timestamp: report.timestamp.toISOString(),
+          url: report.url,
+          user_agent: report.userAgent,
+          viewport: report.viewport,
+          connection: report.connection,
+          device: report.device,
+          metrics: report.metrics.reduce((acc, metric) => {
+            acc[metric.name.toLowerCase()] = metric.value;
+            return acc;
+          }, {} as Record<string, number>),
+        },
+      };
+
+      await fetch('https://api.mixpanel.com/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mixpanelData),
+      });
+    } catch (error) {
+      console.warn('Failed to send to Mixpanel:', error);
+    }
+  }
+
+  /**
+   * Send performance data to Amplitude
+   */
+  private async sendToAmplitude(report: PerformanceReport): Promise<void> {
+    if (!process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY) return;
+
+    try {
+      const amplitudeData = {
+        api_key: process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY,
+        events: [{
+          user_id: report.userId || 'anonymous',
+          session_id: report.sessionId,
+          event_type: 'Performance Metrics',
+          time: Math.floor(report.timestamp.getTime()),
+          event_properties: {
+            url: report.url,
+            user_agent: report.userAgent,
+            viewport: report.viewport,
+            connection: report.connection,
+            device: report.device,
+            metrics: report.metrics.reduce((acc, metric) => {
+              acc[metric.name.toLowerCase()] = metric.value;
+              return acc;
+            }, {} as Record<string, number>),
+          },
+        }],
+      };
+
+      await fetch('https://api2.amplitude.com/2/httpapi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(amplitudeData),
+      });
+    } catch (error) {
+      console.warn('Failed to send to Amplitude:', error);
+    }
+  }
+
+  /**
+   * Send performance data to custom analytics endpoint
+   */
+  private async sendToCustomAnalytics(report: PerformanceReport): Promise<void> {
+    if (!process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT) return;
+
+    try {
+      await fetch(process.env.NEXT_PUBLIC_ANALYTICS_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(process.env.ANALYTICS_API_KEY && { 'Authorization': `Bearer ${process.env.ANALYTICS_API_KEY}` }),
         },
         body: JSON.stringify(report),
       });
     } catch (error) {
-      console.error('Failed to send performance report:', error);
+      console.warn('Failed to send to custom analytics:', error);
     }
   }
 
@@ -548,5 +667,79 @@ export const performanceMonitoring = PerformanceMonitoringService.getInstance();
 export const startPerformanceMonitoring = () => performanceMonitoring;
 export const getPerformanceSummary = () => performanceMonitoring.getPerformanceSummary();
 export const clearPerformanceMetrics = () => performanceMonitoring.clearMetrics();
+
+// Custom event tracking functions
+export const trackCustomEvent = (eventName: string, properties?: Record<string, any>, userId?: string) => {
+  if (typeof window === 'undefined') return;
+
+  const eventData = {
+    event: eventName,
+    properties: {
+      timestamp: new Date().toISOString(),
+      url: window.location.href,
+      user_agent: navigator.userAgent,
+      ...properties,
+    },
+    userId: userId || 'anonymous',
+  };
+
+  // Send to multiple analytics services
+  Promise.allSettled([
+    sendToGoogleAnalyticsEvent(eventData),
+    sendToMixpanelEvent(eventData),
+    sendToAmplitudeEvent(eventData),
+  ]).catch(error => {
+    console.warn('Failed to track custom event:', error);
+  });
+};
+
+const sendToGoogleAnalyticsEvent = async (eventData: any) => {
+  if (!process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || !(window as any).gtag) return;
+  
+  (window as any).gtag('event', eventData.event, {
+    event_category: 'Custom Event',
+    event_label: eventData.properties.url,
+    custom_map: eventData.properties,
+  });
+};
+
+const sendToMixpanelEvent = async (eventData: any) => {
+  if (!process.env.NEXT_PUBLIC_MIXPANEL_TOKEN) return;
+
+  const mixpanelData = {
+    event: eventData.event,
+    properties: {
+      token: process.env.NEXT_PUBLIC_MIXPANEL_TOKEN,
+      distinct_id: eventData.userId,
+      ...eventData.properties,
+    },
+  };
+
+  await fetch('https://api.mixpanel.com/track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(mixpanelData),
+  });
+};
+
+const sendToAmplitudeEvent = async (eventData: any) => {
+  if (!process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY) return;
+
+  const amplitudeData = {
+    api_key: process.env.NEXT_PUBLIC_AMPLITUDE_API_KEY,
+    events: [{
+      user_id: eventData.userId,
+      event_type: eventData.event,
+      time: Math.floor(new Date().getTime()),
+      event_properties: eventData.properties,
+    }],
+  };
+
+  await fetch('https://api2.amplitude.com/2/httpapi', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(amplitudeData),
+  });
+};
 export const setPerformanceMonitoringEnabled = (enabled: boolean) => 
   performanceMonitoring.setEnabled(enabled);

@@ -5,7 +5,7 @@ import { auditLogger, extractRequestMetadata } from '@/lib/audit-logger';
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting for messaging
-    const rateLimitResult = rateLimiters.api.isAllowed(request);
+    const rateLimitResult = await rateLimiters.api.isAllowed(request);
     
     if (!rateLimitResult.allowed) {
       return createRateLimitResponse('Rate limit exceeded', Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000));

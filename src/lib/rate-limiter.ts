@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server';
+import { redisRateLimiters } from './redis-rate-limiter';
 
 interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
@@ -28,6 +29,7 @@ setInterval(() => {
 
 export class RateLimiter {
   private config: RateLimitConfig;
+  private store: RateLimitStore = {};
 
   constructor(config: RateLimitConfig) {
     this.config = config;
@@ -50,46 +52,56 @@ export class RateLimiter {
     return Math.floor(now / this.config.windowMs) * this.config.windowMs;
   }
 
-  isAllowed(req: NextRequest): { allowed: boolean; remaining: number; resetTime: number } {
+  async isAllowed(req: NextRequest): Promise<{ allowed: boolean; remaining: number; resetTime: number }> {
     const key = this.getKey(req);
     const windowStart = this.getWindowStart();
     const resetTime = windowStart + this.config.windowMs;
 
     // Get or create entry
-    if (!store[key] || store[key].resetTime < windowStart) {
-      store[key] = {
+    if (!this.store[key] || this.store[key].resetTime < windowStart) {
+      this.store[key] = {
         count: 0,
         resetTime,
       };
     }
 
     // Check if limit exceeded
-    const allowed = store[key].count < this.config.maxRequests;
+    const allowed = this.store[key].count < this.config.maxRequests;
     
     if (allowed) {
-      store[key].count++;
+      this.store[key].count++;
     }
 
     return {
       allowed,
-      remaining: Math.max(0, this.config.maxRequests - store[key].count),
+      remaining: Math.max(0, this.config.maxRequests - this.store[key].count),
       resetTime,
     };
   }
 
-  getHeaders(req: NextRequest): Record<string, string> {
-    const result = this.isAllowed(req);
+  async getHeaders(req: NextRequest): Promise<Record<string, string>> {
+    const key = this.getKey(req);
+    const windowStart = this.getWindowStart();
+    const resetTime = windowStart + this.config.windowMs;
+
+    // Get current count without incrementing
+    const currentCount = this.store[key] && this.store[key].resetTime >= windowStart 
+      ? this.store[key].count 
+      : 0;
     
     return {
       'X-RateLimit-Limit': this.config.maxRequests.toString(),
-      'X-RateLimit-Remaining': result.remaining.toString(),
-      'X-RateLimit-Reset': Math.ceil(result.resetTime / 1000).toString(),
+      'X-RateLimit-Remaining': Math.max(0, this.config.maxRequests - currentCount).toString(),
+      'X-RateLimit-Reset': Math.ceil(resetTime / 1000).toString(),
     };
   }
 }
 
+// Choose between Redis and in-memory rate limiters based on environment
+const useRedis = process.env.REDIS_URL && process.env.NODE_ENV === 'production';
+
 // Predefined rate limiters
-export const rateLimiters = {
+export const rateLimiters = useRedis ? redisRateLimiters : {
   // General API rate limiting
   api: new RateLimiter({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -130,13 +142,17 @@ export const rateLimiters = {
   bookingCreation: new RateLimiter({
     windowMs: 60 * 1000, // 1 minute
     maxRequests: 5, // 5 booking creations per minute
+    keyGenerator: (req) => {
+      const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+      return `booking:${ip}`;
+    },
   }),
 };
 
 // Middleware function for rate limiting
-export function withRateLimit(limiter: RateLimiter) {
-  return (req: NextRequest) => {
-    const result = limiter.isAllowed(req);
+export function withRateLimit(limiter: RateLimiter | any) {
+  return async (req: NextRequest) => {
+    const result = await limiter.isAllowed(req);
     const headers = limiter.getHeaders(req);
 
     if (!result.allowed) {
@@ -167,26 +183,40 @@ export function withRateLimit(limiter: RateLimiter) {
 export function createRateLimitResponse(message: string, retryAfter: number) {
   return new Response(
     JSON.stringify({
-      error: {
-        message,
-        code: 'RATE_LIMIT_EXCEEDED',
-        retryAfter,
-      },
+      error: message,
+      message: 'Too many requests. Please try again later.',
+      retryAfter,
     }),
     {
       status: 429,
       headers: {
         'Content-Type': 'application/json',
         'Retry-After': retryAfter.toString(),
+        'X-RateLimit-Limit': 'exceeded',
+        'X-RateLimit-Remaining': '0',
       },
     }
   );
 }
 
-export function addRateLimitHeaders(response: Response, limiter: RateLimiter, req: NextRequest) {
-  const headers = limiter.getHeaders(req);
-  Object.entries(headers).forEach(([key, value]) => {
-    response.headers.set(key, value);
+export async function addRateLimitHeaders(response: Response, limiter: RateLimiter | any, req: NextRequest) {
+  const headers = await limiter.getHeaders(req);
+  const newResponse = new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: new Headers(response.headers),
   });
-  return response;
+  
+  Object.entries(headers).forEach(([key, value]) => {
+    newResponse.headers.set(key, value as string);
+  });
+  return newResponse;
 }
+
+// Utility function to get the appropriate rate limiter type
+export function getRateLimiterType(): 'redis' | 'memory' {
+  return useRedis ? 'redis' : 'memory';
+}
+
+// Export both rate limiter types for flexibility
+export { RedisRateLimiter, redisRateLimiters } from './redis-rate-limiter';

@@ -1,36 +1,16 @@
 'use server';
 
-// import { Twilio } from 'twilio';
+import { Twilio } from 'twilio';
 
-// Mock Twilio client for development
-// const twilioClient = new Twilio(
-//   process.env.TWILIO_ACCOUNT_SID,
-//   process.env.TWILIO_AUTH_TOKEN
-// );
+// Initialize Twilio client
+const twilioClient = new Twilio(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 
-// Mock Twilio client interface
-interface MockTwilioClient {
-  messages: {
-    create: (options: any) => Promise<any>;
-    (messageId: string): {
-      fetch: () => Promise<any>;
-    };
-  };
-}
-
-const twilioClient: MockTwilioClient = {
-  messages: Object.assign(
-    async (options: any) => {
-      console.log('Mock SMS sent:', options);
-      return { sid: 'mock_sid_' + Date.now() };
-    },
-    {
-      create: async (options: any) => {
-        console.log('Mock SMS sent:', options);
-        return { sid: 'mock_sid_' + Date.now() };
-      }
-    }
-  ) as any
+// Check if Twilio is properly configured
+const isTwilioConfigured = () => {
+  return !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
 };
 
 export interface SMSNotificationData {
@@ -57,6 +37,24 @@ const COST_PER_SMS = 0.0075; // Approximate cost in USD
  */
 export async function sendSMS(data: SMSNotificationData): Promise<SMSDeliveryResult> {
   try {
+    // Check if we're in development mode or if Twilio is not configured
+    if (process.env.NODE_ENV === 'development' && !isTwilioConfigured()) {
+      console.log('SMS would be sent (development mode):', {
+        to: data.phoneNumber,
+        message: data.message,
+        type: data.type
+      });
+      return { 
+        success: true, 
+        messageId: 'dev-mode-' + Date.now(),
+        cost: 0
+      };
+    }
+
+    if (!isTwilioConfigured()) {
+      throw new Error('Twilio not configured. Please set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN');
+    }
+
     if (!FROM_NUMBER) {
       throw new Error('Twilio phone number not configured');
     }
@@ -91,6 +89,7 @@ export async function sendSMS(data: SMSNotificationData): Promise<SMSDeliveryRes
       status: 'sent'
     });
 
+    console.log('SMS sent successfully:', { messageId: result.sid, to: formattedNumber });
     return {
       success: true,
       messageId: result.sid,

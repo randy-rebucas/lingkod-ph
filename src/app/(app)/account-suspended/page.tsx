@@ -11,7 +11,6 @@ import { useEffect } from 'react';
 
 export default function AccountSuspendedPage() {
   const router = useRouter();
-  const t = useTranslations('Auth');
   const tSuspended = useTranslations('Auth.accountSuspended');
   const { user, loading } = useAuth();
 

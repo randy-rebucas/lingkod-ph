@@ -76,6 +76,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "@react-email/components": "^0.5.5",
     "@tanstack/react-table": "^8.21.3",
+    "@types/redis": "^4.0.10",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
@@ -98,9 +99,11 @@
     "react-email": "^4.2.12",
     "react-hook-form": "^7.54.2",
     "recharts": "^2.15.1",
+    "redis": "^5.8.3",
     "resend": "^3.5.0",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
+    "twilio": "^5.10.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {

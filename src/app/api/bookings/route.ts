@@ -6,7 +6,7 @@ import { auditLogger, extractRequestMetadata } from '@/lib/audit-logger';
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting for booking creation
-    const rateLimitResult = rateLimiters.bookingCreation.isAllowed(request);
+    const rateLimitResult = await rateLimiters.bookingCreation.isAllowed(request);
     
     if (!rateLimitResult.allowed) {
       return createRateLimitResponse('Rate limit exceeded', Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000));
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     // Rate limiting for general API requests
-    const rateLimitResult = rateLimiters.api.isAllowed(request);
+    const rateLimitResult = await rateLimiters.api.isAllowed(request);
     
     if (!rateLimitResult.allowed) {
       return createRateLimitResponse('Rate limit exceeded', Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000));

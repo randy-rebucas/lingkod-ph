@@ -8,7 +8,7 @@ import { doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting for job applications
-    const rateLimitResult = rateLimiters.api.isAllowed(request);
+    const rateLimitResult = await rateLimiters.api.isAllowed(request);
     
     if (!rateLimitResult.allowed) {
       return createRateLimitResponse('Rate limit exceeded', Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000));
