@@ -4,8 +4,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, updateDoc, arrayUnion, Timestamp, orderBy } from "firebase/firestore";
+import { 
+  getOpenJobs,
+  applyForJob
+} from './actions';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -37,7 +39,7 @@ export type Job = {
     clientName: string;
     clientId: string;
     clientIsVerified?: boolean;
-    createdAt: Timestamp;
+    createdAt: Date;
     applications?: string[]; // Array of provider IDs
 };
 
@@ -56,33 +58,44 @@ export default function JobsPage() {
 
 
     useEffect(() => {
-        if (userRole !== 'provider' || !getDb()) {
+        if (userRole !== 'provider') {
             setLoading(false);
             return;
         }
 
-        const jobsQuery = query(collection(getDb(), "jobs"), where("status", "==", "Open"), orderBy("createdAt", "desc"));
-        const unsubscribe = onSnapshot(jobsQuery, (snapshot) => {
-            const jobsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
-            setJobs(jobsData);
-            setLoading(false);
-        }, (error) => {
-            console.error("Error fetching jobs:", error);
-            toast({ variant: 'destructive', title: t('error'), description: t('couldNotFetchJobs') });
-            setLoading(false);
-        });
+        const fetchJobs = async () => {
+            setLoading(true);
+            try {
+                const result = await getOpenJobs();
+                if (result.success && result.data) {
+                    setJobs(result.data);
+                } else {
+                    toast({ variant: 'destructive', title: t('error'), description: result.error || t('couldNotFetchJobs') });
+                }
+            } catch (error) {
+                console.error("Error fetching jobs:", error);
+                toast({ variant: 'destructive', title: t('error'), description: t('couldNotFetchJobs') });
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        return () => unsubscribe();
+        fetchJobs();
     }, [userRole, toast, t]);
 
     const handleApply = async (jobId: string, providerId: string) => {
-        if (!getDb()) return;
         try {
-            const jobRef = doc(getDb(), "jobs", jobId);
-            await updateDoc(jobRef, {
-                applications: arrayUnion(providerId)
-            });
-            toast({ title: t('success'), description: t('successfullyApplied') });
+            const result = await applyForJob(jobId, providerId);
+            if (result.success) {
+                toast({ title: t('success'), description: t('successfullyApplied') });
+                // Refresh jobs to show updated application status
+                const jobsResult = await getOpenJobs();
+                if (jobsResult.success && jobsResult.data) {
+                    setJobs(jobsResult.data);
+                }
+            } else {
+                toast({ variant: 'destructive', title: t('error'), description: result.error || t('failedToApply') });
+            }
         } catch (error) {
             console.error("Error applying for job:", error);
             toast({ variant: 'destructive', title: t('error'), description: t('failedToApply') });
@@ -141,7 +154,7 @@ export default function JobsPage() {
             let comparison = 0;
             switch (sortBy) {
                 case "date":
-                    comparison = a.createdAt.toMillis() - b.createdAt.toMillis();
+                    comparison = a.createdAt.getTime() - b.createdAt.getTime();
                     break;
                 case "budget":
                     comparison = a.budget.amount - b.budget.amount;
@@ -185,7 +198,7 @@ export default function JobsPage() {
                     <p className="text-muted-foreground text-sm h-12 line-clamp-3">{job.description}</p>
                     <div className="text-sm space-y-2 text-muted-foreground">
                         <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" /> <span>{t('posted')} {job.createdAt ? formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true }) : '...'}</span>
+                            <Clock className="h-4 w-4" /> <span>{t('posted')} {job.createdAt ? formatDistanceToNow(job.createdAt, { addSuffix: true }) : '...'}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <MapPin className="h-4 w-4" /> <span>{job.location}</span>
@@ -248,7 +261,7 @@ export default function JobsPage() {
                             <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-muted-foreground">
                                 <span className="flex items-center gap-1">
                                     <Clock className="h-3 w-3" />
-                                    {formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true })}
+                                    {formatDistanceToNow(job.createdAt, { addSuffix: true })}
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <MapPin className="h-3 w-3" />

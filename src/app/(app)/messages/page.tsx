@@ -6,9 +6,12 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { getDb, getStorageInstance   } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, addDoc, serverTimestamp, orderBy, updateDoc, getDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { 
+  getUserConversations,
+  getConversationMessages,
+  sendMessage,
+  createNotification
+} from './actions';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -30,7 +33,7 @@ type Conversation = {
         }
     };
     lastMessage: string;
-    timestamp: any;
+    timestamp: Date;
     unread?: number;
 };
 
@@ -39,7 +42,7 @@ type Message = {
     senderId: string;
     text: string;
     imageUrl?: string;
-    timestamp: any;
+    timestamp: Date;
     hint?: string;
     status?: 'sent' | 'delivered' | 'read';
 };
@@ -54,29 +57,6 @@ const getAvatarFallback = (name: string | null | undefined) => {
     return name.substring(0, 2).toUpperCase();
 };
 
-const createNotification = async (userId: string, senderName: string, message: string, link: string) => {
-    if (!getDb()) return;
-    try {
-        const userNotifSettingsRef = doc(getDb(), 'users', userId);
-        const docSnap = await getDoc(userNotifSettingsRef);
-
-        if (docSnap.exists() && docSnap.data().notificationSettings?.newMessages === false) {
-            return;
-        }
-
-        const notificationsRef = collection(getDb(), `users/${userId}/notifications`);
-        await addDoc(notificationsRef, {
-            userId,
-            message: `${senderName}: ${message}`,
-            link,
-            type: 'new_message',
-            read: false,
-            createdAt: serverTimestamp(),
-        });
-    } catch (error) {
-        console.error("Error creating notification: ", error);
-    }
-};
 
 
 // Memoized conversation item component
@@ -115,7 +95,7 @@ const ConversationItem = memo(({
                     <div className="flex justify-between items-center mb-1">
                         <p className="font-medium truncate text-sm text-gray-900">{name}</p>
                         <p className="text-xs text-gray-500 flex-shrink-0">
-                            {convo.timestamp?.toDate().toLocaleDateString([], { month: 'numeric', day: 'numeric', year: '2-digit' })}
+                            {convo.timestamp?.toLocaleDateString([], { month: 'numeric', day: 'numeric', year: '2-digit' })}
                         </p>
                     </div>
                     <div className="flex justify-between items-end">
@@ -191,7 +171,7 @@ const MessageBubble = memo(({
                 {isCurrentUser && (
                     <div className="flex justify-end items-center px-3 pb-2">
                         <span className="text-xs text-gray-200">
-                            {msg.timestamp?.toDate().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
+                            {msg.timestamp?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
                         </span>
                         <span className="ml-1">
                             {getStatusIcon(msg.status)}
@@ -201,7 +181,7 @@ const MessageBubble = memo(({
                 {!isCurrentUser && (
                     <div className="flex justify-start items-center px-3 pb-2">
                         <span className="text-xs text-gray-500">
-                            {msg.timestamp?.toDate().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
+                            {msg.timestamp?.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
                         </span>
                     </div>
                 )}
@@ -263,48 +243,49 @@ export default function MessagesPage() {
     }, [searchParams, conversations]);
 
     useEffect(() => {
-        if (!user || !getDb()) return;
-        setLoadingConversations(true);
-        const q = query(collection(getDb(), "conversations"), where("participants", "array-contains", user.uid));
+        if (!user) return;
+        
+        const fetchConversations = async () => {
+            setLoadingConversations(true);
+            try {
+                const result = await getUserConversations(user.uid);
+                if (result.success && result.data) {
+                    setConversations(result.data);
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotFetchConversations') });
+                }
+            } catch (error) {
+                console.error("Error fetching conversations: ", error);
+                toast({ variant: "destructive", title: t('error'), description: t('couldNotFetchConversations') });
+            } finally {
+                setLoadingConversations(false);
+            }
+        };
 
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const convos = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as Conversation)).sort((a, b) => b.timestamp - a.timestamp);
-            setConversations(convos);
-            setLoadingConversations(false);
-        }, (error) => {
-            console.error("Error fetching conversations: ", error);
-            toast({ variant: "destructive", title: t('error'), description: t('couldNotFetchConversations') })
-            setLoadingConversations(false);
-        });
-
-        return () => unsubscribe();
+        fetchConversations();
     }, [user, toast, t]);
 
     useEffect(() => {
-        if (!activeConversation || !getDb()) return;
+        if (!activeConversation) return;
 
-        setLoadingMessages(true);
-        const messagesRef = collection(getDb(), "conversations", activeConversation.id, "messages");
-        const q = query(messagesRef, orderBy("timestamp", "asc"));
+        const fetchMessages = async () => {
+            setLoadingMessages(true);
+            try {
+                const result = await getConversationMessages(activeConversation.id);
+                if (result.success && result.data) {
+                    setMessages(result.data);
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotFetchMessages') });
+                }
+            } catch (error) {
+                console.error("Error fetching messages: ", error);
+                toast({ variant: "destructive", title: t('error'), description: t('couldNotFetchMessages') });
+            } finally {
+                setLoadingMessages(false);
+            }
+        };
 
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const msgs = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as Message));
-            setMessages(msgs);
-            setLoadingMessages(false);
-        }, (error) => {
-            console.error("Error fetching messages: ", error);
-            toast({ variant: "destructive", title: t('error'), description: t('couldNotFetchMessages') })
-            setLoadingMessages(false);
-        });
-
-        return () => unsubscribe();
-
+        fetchMessages();
     }, [activeConversation, toast, t]);
 
     useEffect(() => {
@@ -435,53 +416,58 @@ export default function MessagesPage() {
 
         setIsSending(true);
 
-        if (!getStorageInstance() || !getDb()) {
-            toast({
-                variant: "destructive",
-                title: t('error'),
-                description: t('databaseConnectionError')
-            });
-            setIsSending(false);
-            return;
-        }
-
         try {
-            let imageUrl = '';
+            let compressedFile: File | undefined;
             if (selectedImage) {
                 // Compress image if it's too large
-                const compressedFile = await compressImage(selectedImage);
-                const storageRef = ref(getStorageInstance(), `chat-images/${activeConversation.id}/${Date.now()}_${compressedFile.name}`);
-                const uploadResult = await uploadBytes(storageRef, compressedFile);
-                imageUrl = await getDownloadURL(uploadResult.ref);
+                compressedFile = await compressImage(selectedImage);
             }
 
-            const messageData: Omit<Message, 'id'> = {
-                senderId: user.uid,
-                text: newMessage,
-                timestamp: serverTimestamp(),
-                status: 'sent',
-                ...(imageUrl && { imageUrl: imageUrl }),
-            };
+            // Send message using server action
+            const result = await sendMessage(
+                activeConversation.id,
+                user.uid,
+                newMessage,
+                compressedFile
+            );
 
-            const messagesRef = collection(getDb(), "conversations", activeConversation.id, "messages");
-            await addDoc(messagesRef, messageData);
+            if (result.success) {
+                // Create notification for recipient
+                const recipientId = activeConversation.participants.find(p => p !== user.uid);
+                if (recipientId) {
+                    await createNotification(
+                        recipientId, 
+                        user.displayName || t('someone'), 
+                        newMessage || t('sentAnImage'), 
+                        `/messages?conversationId=${activeConversation.id}`
+                    );
+                }
 
-            const conversationRef = doc(getDb(), "conversations", activeConversation.id);
-            await updateDoc(conversationRef, {
-                lastMessage: newMessage || t('imageSent'),
-                timestamp: serverTimestamp()
-            });
+                setNewMessage("");
+                setSelectedImage(null);
+                setPreviewUrl(null);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = "";
+                }
 
-            const recipientId = activeConversation.participants.find(p => p !== user.uid);
-            if (recipientId) {
-                await createNotification(recipientId, user.displayName || t('someone'), newMessage || t('sentAnImage'), `/messages?conversationId=${activeConversation.id}`);
-            }
+                // Refresh messages and conversations
+                const [messagesResult, conversationsResult] = await Promise.all([
+                    getConversationMessages(activeConversation.id),
+                    getUserConversations(user.uid)
+                ]);
 
-            setNewMessage("");
-            setSelectedImage(null);
-            setPreviewUrl(null);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
+                if (messagesResult.success && messagesResult.data) {
+                    setMessages(messagesResult.data);
+                }
+                if (conversationsResult.success && conversationsResult.data) {
+                    setConversations(conversationsResult.data);
+                }
+            } else {
+                toast({
+                    variant: "destructive",
+                    title: t('error'),
+                    description: result.error || t('failedToSendMessage')
+                });
             }
         } catch (error) {
             console.error("Error sending message: ", error);

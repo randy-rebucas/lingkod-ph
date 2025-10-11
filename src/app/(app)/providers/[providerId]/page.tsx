@@ -5,8 +5,16 @@ import { useEffect, useState, useRef } from "react";
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { getDb  } from '@/lib/firebase';
-import { doc, getDoc, collection, query, where, getDocs, Timestamp, addDoc, serverTimestamp, deleteDoc, onSnapshot, orderBy } from "firebase/firestore";
+import { 
+  getProvider,
+  getProviderServices,
+  getProviderReviews, 
+  addProviderToFavorites,
+  removeProviderFromFavorites,
+  isProviderFavorited,
+  startConversationWithProvider,
+  reportProvider
+} from '../actions';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,7 +67,7 @@ type Review = {
     clientAvatar?: string;
     rating: number;
     comment: string;
-    createdAt: Timestamp;
+    createdAt: Date;
 };
 
 const renderStars = (rating: number) => {
@@ -113,33 +121,35 @@ export default function ProviderProfilePage() {
     const [isReporting, setIsReporting] = useState(false);
 
     useEffect(() => {
-        if (!providerId || !getDb()) return;
+        if (!providerId) return;
 
         const fetchProviderData = async () => {
-            if (!getDb()) return;
             setLoading(true);
             try {
-                // Fetch provider details
-                const providerDocRef = doc(getDb(), "users", providerId);
-                const providerDoc = await getDoc(providerDocRef);
-                if (providerDoc.exists()) {
-                    setProvider({ uid: providerDoc.id, ...providerDoc.data() } as Provider);
+                // Fetch provider details using server action
+                const providerResult = await getProvider(providerId);
+                if (providerResult.success && providerResult.data) {
+                    setProvider(providerResult.data as Provider);
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: providerResult.error || 'Provider not found' });
+                    return;
                 }
 
-                // Fetch services
-                const servicesQuery = query(collection(getDb(), "services"), where("userId", "==", providerId), where("status", "==", "Active"));
-                const servicesSnapshot = await getDocs(servicesQuery);
-                const servicesData = servicesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Service));
-                setServices(servicesData);
+                // Fetch services using server action
+                const servicesResult = await getProviderServices(providerId);
+                if (servicesResult.success && servicesResult.data) {
+                    setServices(servicesResult.data as Service[]);
+                }
 
-                // Fetch reviews
-                const reviewsQuery = query(collection(getDb(), "reviews"), where("providerId", "==", providerId), orderBy("createdAt", "desc"));
-                const reviewsSnapshot = await getDocs(reviewsQuery);
-                const reviewsData = reviewsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
-                setReviews(reviewsData);
+                // Fetch reviews using server action
+                const reviewsResult = await getProviderReviews(providerId);
+                if (reviewsResult.success && reviewsResult.data) {
+                    setReviews(reviewsResult.data as Review[]);
+                }
 
             } catch (error) {
                 console.error("Error fetching provider data:", error);
+                toast({ variant: "destructive", title: t('error'), description: 'Failed to load provider data' });
             } finally {
                 setLoading(false);
             }
@@ -149,49 +159,54 @@ export default function ProviderProfilePage() {
     }, [providerId]);
     
     useEffect(() => {
-        if (!user || !providerId || !getDb()) {
+        if (!user || !providerId) {
             setIsFavoriteLoading(false);
             return;
         }
-        setIsFavoriteLoading(true);
-        const favQuery = query(
-            collection(getDb(), 'favorites'),
-            where('userId', '==', user.uid),
-            where('providerId', '==', providerId)
-        );
 
-        const unsubscribe = onSnapshot(favQuery, (snapshot) => {
-            setIsFavorited(!snapshot.empty);
-            setIsFavoriteLoading(false);
-        });
-        
-        return () => unsubscribe();
+        const checkFavoriteStatus = async () => {
+            setIsFavoriteLoading(true);
+            try {
+                const result = await isProviderFavorited(providerId, user.uid);
+                if (result.success) {
+                    setIsFavorited(result.data || false);
+                }
+            } catch (error) {
+                console.error('Error checking favorite status:', error);
+            } finally {
+                setIsFavoriteLoading(false);
+            }
+        };
+
+        checkFavoriteStatus();
     }, [user, providerId]);
 
 
     const handleToggleFavorite = async () => {
-        if (!user || !provider || !getDb()) {
+        if (!user || !provider) {
             toast({ variant: "destructive", title: t('error'), description: t('mustBeLoggedInToFavorite') });
             return;
         }
         setIsFavoriteLoading(true);
-        const favoritesRef = collection(getDb(), 'favorites');
-        
+
         try {
+            let result;
             if (isFavorited) {
-                const q = query(favoritesRef, where('userId', '==', user.uid), where('providerId', '==', provider.uid));
-                const snapshot = await getDocs(q);
-                if (!snapshot.empty) {
-                    await deleteDoc(snapshot.docs[0].ref);
+                result = await removeProviderFromFavorites(provider.uid, user.uid);
+                if (result.success) {
+                    toast({ title: t('removedFromFavorites') });
+                    setIsFavorited(false);
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotUpdateFavorites') });
                 }
-                toast({ title: t('removedFromFavorites') });
             } else {
-                 await addDoc(favoritesRef, {
-                    userId: user.uid,
-                    providerId: provider.uid,
-                    favoritedAt: serverTimestamp()
-                });
-                toast({ title: t('addedToFavorites') });
+                result = await addProviderToFavorites(provider.uid, user.uid);
+                if (result.success) {
+                    toast({ title: t('addedToFavorites') });
+                    setIsFavorited(true);
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotUpdateFavorites') });
+                }
             }
         } catch (error) {
             console.error("Error updating favorite status:", error);
@@ -202,7 +217,7 @@ export default function ProviderProfilePage() {
     };
     
     const handleSendMessage = async () => {
-        if (!user || !provider || !getDb()) {
+        if (!user || !provider) {
             toast({ variant: "destructive", title: t('error'), description: t('mustBeLoggedInToMessage') });
             return;
         }
@@ -213,39 +228,22 @@ export default function ProviderProfilePage() {
         }
 
         try {
-            // Check if a conversation already exists
-            const conversationsRef = collection(getDb(), "conversations");
-            const q = query(conversationsRef, where("participants", "array-contains", user.uid));
-            const querySnapshot = await getDocs(q);
-            
-            let existingConvoId: string | null = null;
-            querySnapshot.forEach(doc => {
-                const convo = doc.data();
-                if (convo.participants.includes(provider.uid)) {
-                    existingConvoId = doc.id;
-                }
-            });
+            const result = await startConversationWithProvider(
+                provider.uid, 
+                user.uid, 
+                user.displayName || 'User', 
+                user.photoURL || '', 
+                provider.displayName, 
+                provider.photoURL || ''
+            );
 
-            if (existingConvoId) {
-                router.push(`/messages?conversationId=${existingConvoId}`);
+            if (result.success && result.data) {
+                router.push(`/messages?conversationId=${result.data.id}`);
+            } else if (result.error === 'Conversation exists' && result.data) {
+                // Conversation already exists, redirect to it
+                router.push(`/messages?conversationId=${result.data.id}`);
             } else {
-                // Create a new conversation
-                const newConvoRef = await addDoc(collection(getDb(), "conversations"), {
-                    participants: [user.uid, provider.uid],
-                    participantInfo: {
-                        [user.uid]: {
-                            displayName: user.displayName,
-                            photoURL: user.photoURL || '',
-                        },
-                        [provider.uid]: {
-                            displayName: provider.displayName,
-                            photoURL: provider.photoURL || '',
-                        }
-                    },
-                    lastMessage: "Conversation started.",
-                    timestamp: serverTimestamp(),
-                });
-                router.push(`/messages?conversationId=${newConvoRef.id}`);
+                toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotStartConversation') });
             }
         } catch (error) {
             console.error("Error starting conversation:", error);
@@ -254,22 +252,26 @@ export default function ProviderProfilePage() {
     };
 
     const handleReportProvider = async () => {
-        if (!user || !provider || !reportReason || !getDb()) {
+        if (!user || !provider || !reportReason) {
             toast({ variant: "destructive", title: t('error'), description: t('pleaseProvideReason') });
             return;
         }
         setIsReporting(true);
         try {
-            await addDoc(collection(getDb(), "reports"), {
+            const result = await reportProvider({
                 reportedBy: user.uid,
                 reportedItemType: 'user',
                 reportedItemId: provider.uid,
                 reason: reportReason,
-                status: 'New',
-                createdAt: serverTimestamp(),
+                status: 'New'
             });
-            toast({ title: t('reportSubmitted'), description: t('reportSubmittedDescription') });
-            setReportReason("");
+
+            if (result.success) {
+                toast({ title: t('reportSubmitted'), description: t('reportSubmittedDescription') });
+                setReportReason("");
+            } else {
+                toast({ variant: "destructive", title: t('error'), description: result.error || t('failedToSubmitReport') });
+            }
         } catch(error) {
             console.error("Error submitting report:", error);
             toast({ variant: "destructive", title: t('error'), description: t('failedToSubmitReport') });
@@ -454,7 +456,7 @@ export default function ProviderProfilePage() {
                                                 {renderStars(review.rating)}
                                             </div>
                                         </div>
-                                        <p className="text-xs text-muted-foreground">{format(review.createdAt.toDate(), "PPP")}</p>
+                                        <p className="text-xs text-muted-foreground">{format(review.createdAt, "PPP")}</p>
                                         <p className="mt-2 text-sm">{review.comment}</p>
                                     </div>
                                 </div>
