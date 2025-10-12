@@ -2,8 +2,13 @@
 
 import React, { useState, useEffect, memo } from 'react';
 import { useAuth } from '@/context/auth-context';
-import { getDb  } from '@/lib/firebase';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { 
+  getUserNotifications,
+  markNotificationAsRead,
+  deleteNotification,
+  markAllNotificationsAsRead,
+  deleteAllReadNotifications
+} from './actions';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -44,7 +49,7 @@ type Notification = {
     message: string;
     link: string;
     read: boolean;
-    createdAt: any; // Firestore Timestamp
+    createdAt: Date;
     inviteId?: string;
     agencyId?: string;
     agencyName?: string;
@@ -189,7 +194,7 @@ const NotificationsTab = memo(function NotificationsTab({
                                     {notif.message}
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-1">
-                                    {notif.createdAt ? formatDistanceToNow(notif.createdAt.toDate(), { addSuffix: true }) : ''}
+                                    {notif.createdAt ? formatDistanceToNow(notif.createdAt, { addSuffix: true }) : ''}
                                 </p>
                             </div>
 
@@ -243,35 +248,45 @@ const NotificationsPage = memo(function NotificationsPage() {
     const [dateFilter, setDateFilter] = useState<string>('all');
 
     useEffect(() => {
-        if (!user || !getDb()) {
+        if (!user) {
             setLoading(false);
             return;
         }
 
-        setLoading(true);
-        const notifsRef = collection(getDb(), `users/${user.uid}/notifications`);
-        const q = query(notifsRef, orderBy('createdAt', 'desc'));
+        const fetchNotifications = async () => {
+            setLoading(true);
+            try {
+                const result = await getUserNotifications(user.uid);
+                if (result.success && result.data) {
+                    setNotifications(result.data);
+                } else {
+                    toast({ variant: 'destructive', title: 'Error', description: result.error || 'Failed to fetch notifications.' });
+                }
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch notifications.' });
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const notifsData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as Notification));
-            setNotifications(notifsData);
-            setLoading(false);
-        }, (error) => {
-            console.error("Error fetching notifications:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch notifications.' });
-            setLoading(false);
-        });
-
-        return () => unsubscribe();
+        fetchNotifications();
     }, [user, toast]);
 
     const handleNotificationClick = async (notif: Notification) => {
-        if (!user || !getDb()) return;
+        if (!user) return;
         if (!notif.read) {
-            await updateDoc(doc(getDb(), `users/${user.uid}/notifications`, notif.id), { read: true });
+            try {
+                const result = await markNotificationAsRead(user.uid, notif.id);
+                if (result.success) {
+                    // Update local state
+                    setNotifications(prev => 
+                        prev.map(n => n.id === notif.id ? { ...n, read: true } : n)
+                    );
+                }
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+            }
         }
         if (notif.type !== 'agency_invite' && notif.link) {
             router.push(notif.link);
@@ -295,39 +310,52 @@ const NotificationsPage = memo(function NotificationsPage() {
     };
     
     const handleDeleteNotification = async (notificationId: string) => {
-        if (!user || !getDb()) return;
+        if (!user) return;
         try {
-            await deleteDoc(doc(getDb(), `users/${user.uid}/notifications`, notificationId));
-            toast({ title: t('success'), description: t('notificationDeleted') });
-            } catch {
+            const result = await deleteNotification(user.uid, notificationId);
+            if (result.success) {
+                // Update local state
+                setNotifications(prev => prev.filter(n => n.id !== notificationId));
+                toast({ title: t('success'), description: t('notificationDeleted') });
+            } else {
+                toast({ variant: 'destructive', title: t('error'), description: result.error || t('deleteFailed') });
+            }
+        } catch (error) {
+            console.error('Error deleting notification:', error);
             toast({ variant: 'destructive', title: t('error'), description: t('deleteFailed') });
         }
     };
 
     const handleMarkAllAsRead = async () => {
-        if (!user || !getDb()) return;
+        if (!user) return;
         try {
-            const unreadNotifications = notifications.filter(n => !n.read);
-            const promises = unreadNotifications.map(notif => 
-                updateDoc(doc(getDb(), `users/${user.uid}/notifications`, notif.id), { read: true })
-            );
-            await Promise.all(promises);
-            toast({ title: t('success'), description: t('allMarkedAsRead') });
-            } catch {
+            const result = await markAllNotificationsAsRead(user.uid);
+            if (result.success) {
+                // Update local state
+                setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+                toast({ title: t('success'), description: t('allMarkedAsRead') });
+            } else {
+                toast({ variant: 'destructive', title: t('error'), description: result.error || t('markAsReadFailed') });
+            }
+        } catch (error) {
+            console.error('Error marking all notifications as read:', error);
             toast({ variant: 'destructive', title: t('error'), description: t('markAsReadFailed') });
         }
     };
 
     const handleDeleteAllRead = async () => {
-        if (!user || !getDb()) return;
+        if (!user) return;
         try {
-            const readNotifications = notifications.filter(n => n.read);
-            const promises = readNotifications.map(notif => 
-                deleteDoc(doc(getDb(), `users/${user.uid}/notifications`, notif.id))
-            );
-            await Promise.all(promises);
-            toast({ title: t('success'), description: t('readNotificationsDeleted') });
-            } catch {
+            const result = await deleteAllReadNotifications(user.uid);
+            if (result.success) {
+                // Update local state
+                setNotifications(prev => prev.filter(n => !n.read));
+                toast({ title: t('success'), description: t('readNotificationsDeleted') });
+            } else {
+                toast({ variant: 'destructive', title: t('error'), description: result.error || t('deleteFailed') });
+            }
+        } catch (error) {
+            console.error('Error deleting all read notifications:', error);
             toast({ variant: 'destructive', title: t('error'), description: t('deleteFailed') });
         }
     };
@@ -339,7 +367,7 @@ const NotificationsPage = memo(function NotificationsPage() {
         const archivedCount = notifications.filter(n => n.archived).length;
         const todayCount = notifications.filter(n => {
             const today = new Date();
-            const notifDate = n.createdAt?.toDate();
+            const notifDate = n.createdAt;
             return notifDate && notifDate.toDateString() === today.toDateString();
         }).length;
         
@@ -407,7 +435,7 @@ const NotificationsPage = memo(function NotificationsPage() {
         if (dateFilter !== 'all') {
             const now = new Date();
             filtered = filtered.filter(n => {
-                const notifDate = n.createdAt?.toDate();
+                const notifDate = n.createdAt;
                 if (!notifDate) return false;
 
                 switch (dateFilter) {

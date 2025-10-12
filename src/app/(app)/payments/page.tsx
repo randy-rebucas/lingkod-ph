@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
-import { collection, query, onSnapshot, orderBy, where, Timestamp } from "firebase/firestore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TableSkeleton } from "@/components/ui/loading-states";
@@ -14,6 +12,7 @@ import { Eye, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useTranslations } from 'next-intl';
+import { getPaymentsData } from './actions';
 // import Image from "next/image";
 
 type PaymentTransaction = {
@@ -25,10 +24,10 @@ type PaymentTransaction = {
     type: 'booking_payment' | 'payout_request' | 'refund';
     status: 'pending' | 'completed' | 'rejected' | 'failed';
     paymentMethod: string;
-    createdAt: Timestamp;
-    verifiedAt?: Timestamp;
+    createdAt: Date;
+    verifiedAt?: Date;
     verifiedBy?: string;
-    rejectedAt?: Timestamp;
+    rejectedAt?: Date;
     rejectedBy?: string;
     rejectionReason?: string;
     paypalOrderId?: string;
@@ -43,24 +42,27 @@ export default function PaymentHistoryPage() {
     const t = useTranslations('Payments');
 
     useEffect(() => {
-        if (!user || !getDb()) return;
+        if (!user) return;
 
-        const transactionsQuery = query(
-            collection(getDb(), "transactions"),
-            where("clientId", "==", user.uid),
-            orderBy("createdAt", "desc")
-        );
-        
-        const unsubscribe = onSnapshot(transactionsQuery, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as PaymentTransaction));
-            setTransactions(data);
-            setLoading(false);
-        }, (error) => {
-            console.error("Error fetching transactions:", error);
-            setLoading(false);
-        });
+        const fetchPayments = async () => {
+            setLoading(true);
+            try {
+                const result = await getPaymentsData(user.uid);
+                if (result.success && result.data) {
+                    setTransactions(result.data);
+                } else {
+                    console.error("Error fetching payments:", result.error);
+                    setTransactions([]);
+                }
+            } catch (error) {
+                console.error("Error fetching payments:", error);
+                setTransactions([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        return () => unsubscribe();
+        fetchPayments();
     }, [user]);
 
     const getStatusBadge = (status: string) => {
@@ -146,7 +148,7 @@ export default function PaymentHistoryPage() {
                                 {transactions.length > 0 ? transactions.map(transaction => (
                                     <TableRow key={transaction.id}>
                                         <TableCell className="text-sm">
-                                            {format(transaction.createdAt.toDate(), 'PPp')}
+                                            {format(transaction.createdAt, 'PPp')}
                                         </TableCell>
                                         <TableCell className="font-medium">
                                             {getTypeLabel(transaction.type)}
@@ -193,12 +195,12 @@ export default function PaymentHistoryPage() {
                                                             </div>
                                                             <div>
                                                                 <label className="text-sm font-medium text-muted-foreground">{t('date')}</label>
-                                                                <p className="text-sm">{format(transaction.createdAt.toDate(), 'PPp')}</p>
+                                                                <p className="text-sm">{format(transaction.createdAt, 'PPp')}</p>
                                                             </div>
                                                             {transaction.verifiedAt && (
                                                                 <div>
                                                                     <label className="text-sm font-medium text-muted-foreground">{t('verifiedAt')}</label>
-                                                                    <p className="text-sm">{format(transaction.verifiedAt.toDate(), 'PPp')}</p>
+                                                                    <p className="text-sm">{format(transaction.verifiedAt, 'PPp')}</p>
                                                                 </div>
                                                             )}
                                                         </div>

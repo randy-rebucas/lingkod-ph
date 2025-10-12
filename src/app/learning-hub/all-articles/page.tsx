@@ -21,26 +21,13 @@ import {
   Calendar,
   Loader2
 } from 'lucide-react';
+import { getLearningHubContent, type ContentItem } from '../actions';
 
-interface Article {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  readTime: number;
-  featured: boolean;
-  popular: boolean;
-  updatedAt: string;
-  tags: string[];
-  slug: string;
-  viewCount: number;
-  likeCount: number;
-  shareCount: number;
-}
+// Using ContentItem type from actions
 
 const AllArticlesPage = () => {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<ContentItem[]>([]);
+  const [filteredArticles, setFilteredArticles] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,12 +39,11 @@ const AllArticlesPage = () => {
     const fetchArticles = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/learning-hub/content?type=articles&status=published');
-        const data = await response.json();
+        const result = await getLearningHubContent({ type: 'articles', status: 'published' });
         
-        if (data.success) {
-          setArticles(data.data);
-          setFilteredArticles(data.data);
+        if (result.success) {
+          setArticles(result.data || []);
+          setFilteredArticles(result.data || []);
         } else {
           setError('Failed to fetch articles');
         }
@@ -82,7 +68,7 @@ const AllArticlesPage = () => {
       filtered = filtered.filter(article =>
         article.title.toLowerCase().includes(query) ||
         article.description.toLowerCase().includes(query) ||
-        article.tags.some(tag => tag.toLowerCase().includes(query))
+        (article.tags || []).some(tag => tag.toLowerCase().includes(query))
       );
     }
 
@@ -94,13 +80,13 @@ const AllArticlesPage = () => {
     // Sort articles
     switch (sortBy) {
       case 'Most Popular':
-        filtered.sort((a, b) => b.viewCount - a.viewCount);
+        filtered.sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
         break;
       case 'Alphabetical':
         filtered.sort((a, b) => a.title.localeCompare(b.title));
         break;
       case 'Reading Time':
-        filtered.sort((a, b) => a.readTime - b.readTime);
+        filtered.sort((a, b) => (a.readTime || '5').localeCompare(b.readTime || '5'));
         break;
       case 'Most Recent':
       default:
@@ -253,15 +239,15 @@ const AllArticlesPage = () => {
                 <CardContent className="space-y-4">
                   {/* Tags */}
                   <div className="flex flex-wrap gap-1">
-                    {article.tags.slice(0, 3).map((tag) => (
+                    {(article.tags || []).slice(0, 3).map((tag) => (
                       <Badge key={tag} variant="secondary" className="text-xs">
                         <Tag className="h-2 w-2 mr-1" />
                         {tag}
                       </Badge>
                     ))}
-                    {article.tags.length > 3 && (
+                    {(article.tags || []).length > 3 && (
                       <Badge variant="secondary" className="text-xs">
-                        +{article.tags.length - 3} more
+                        +{(article.tags || []).length - 3} more
                       </Badge>
                     )}
                   </div>
@@ -271,7 +257,7 @@ const AllArticlesPage = () => {
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                          {article.readTime} min read
+                          {article.readTime || '5'} min read
                         </div>
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
@@ -284,11 +270,11 @@ const AllArticlesPage = () => {
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <TrendingUp className="h-3 w-3" />
-                        {article.viewCount.toLocaleString()} views
+                        {(article.viewCount || 0).toLocaleString()} views
                       </div>
                       <div className="flex items-center gap-1">
                         <Star className="h-3 w-3" />
-                        {article.likeCount} likes
+                        {/* likeCount not available in ContentItem */}
                     </div>
                   </div>
 

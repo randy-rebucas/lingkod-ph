@@ -150,3 +150,76 @@ export async function postJobAction(
     };
   }
 }
+
+// Get job categories
+export async function getCategories(): Promise<{ success: boolean; data?: Array<{ id: string; name: string }>; error?: string }> {
+  try {
+    const db = getDb();
+    const categoriesRef = collection(db, 'categories');
+    const q = query(categoriesRef, where('active', '==', true));
+    const snapshot = await getDocs(q);
+    
+    const categories = snapshot.docs.map(doc => ({
+      id: doc.id,
+      name: doc.data().name
+    }));
+    
+    return { success: true, data: categories };
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to fetch categories' 
+    };
+  }
+}
+
+// Get job by ID for editing
+export async function getJobById(jobId: string, userId: string): Promise<{ success: boolean; data?: any; error?: string }> {
+  try {
+    const db = getDb();
+    const jobRef = doc(db, 'jobs', jobId);
+    const jobSnap = await getDoc(jobRef);
+    
+    if (!jobSnap.exists()) {
+      return { success: false, error: 'Job not found' };
+    }
+    
+    const jobData = jobSnap.data();
+    
+    // Security check: ensure the user owns this job
+    if (jobData.clientId !== userId) {
+      return { success: false, error: 'Permission denied' };
+    }
+    
+    // Convert Firestore data to form-compatible format
+    const formattedJob = {
+      id: jobSnap.id,
+      title: jobData.title,
+      description: jobData.description,
+      categoryId: jobData.categoryId,
+      budgetAmount: jobData.budget?.amount || 0,
+      budgetType: jobData.budget?.type || 'Fixed',
+      isNegotiable: jobData.budget?.negotiable || false,
+      location: jobData.location,
+      deadline: jobData.deadline ? jobData.deadline.toDate() : null,
+      additionalDetails: jobData.additionalDetails ? JSON.stringify(jobData.additionalDetails) : '',
+      status: jobData.status,
+      createdAt: jobData.createdAt ? jobData.createdAt.toDate() : null,
+    };
+    
+    return { success: true, data: formattedJob };
+  } catch (error) {
+    console.error('Error fetching job:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to fetch job' 
+    };
+  }
+}
+
+// Get job templates (placeholder function)
+export async function getJobTemplates(): Promise<{ success: boolean; data?: any[]; error?: string }> {
+  // For now, return empty array as templates are not implemented yet
+  return { success: true, data: [] };
+}

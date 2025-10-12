@@ -96,10 +96,12 @@ export function AddEditInvoiceDialog({ isOpen, setIsOpen, invoice, onInvoiceSave
 
     useEffect(() => {
         if (invoice) {
+            // Exclude status field to avoid type conflicts with "Deleted" status
+            const { status: _status, ...invoiceData } = invoice;
             form.reset({
-                ...invoice,
-                issueDate: invoice.issueDate.toDate(),
-                dueDate: invoice.dueDate.toDate(),
+                ...invoiceData,
+                issueDate: invoiceData.issueDate,
+                dueDate: invoiceData.dueDate,
             });
         } else {
             form.reset({

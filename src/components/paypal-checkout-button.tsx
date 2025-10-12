@@ -9,7 +9,7 @@ import { Loader2, CreditCard, CheckCircle, XCircle, ExternalLink } from 'lucide-
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/use-error-handler';
 import { useAuth } from '@/context/auth-context';
-import { PaymentRetryService } from '@/lib/payment-retry-service';
+import { createPayPalPayment, capturePayPalPayment } from '@/app/(app)/bookings/actions';
 // PayPal service is only used on server-side, not in client components
 
 interface PayPalCheckoutButtonProps {
@@ -60,26 +60,11 @@ export function PayPalCheckoutButton({
       const returnUrl = `${window.location.origin}/bookings/${bookingId}/payment/result?method=paypal`;
       const cancelUrl = `${window.location.origin}/bookings/${bookingId}/payment`;
       
-      // Use retry service for payment creation
-      const paymentResult = await PaymentRetryService.retryPaymentCreation(async () => {
-        const response = await fetch('/api/payments/paypal/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            bookingId,
-            returnUrl,
-            cancelUrl,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        return await response.json();
+      // Use server action for payment creation
+      const paymentResult = await createPayPalPayment({
+        bookingId,
+        returnUrl,
+        cancelUrl,
       });
 
       if (!paymentResult.success) {
@@ -141,19 +126,10 @@ export function PayPalCheckoutButton({
         throw new Error('Authentication required');
       }
       
-      const response = await fetch('/api/payments/paypal/capture', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          bookingId,
-          orderId,
-        }),
+      const result = await capturePayPalPayment({
+        bookingId,
+        orderId,
       });
-
-      const result = await response.json();
 
       if (result.success) {
         setPaymentStatus('success');

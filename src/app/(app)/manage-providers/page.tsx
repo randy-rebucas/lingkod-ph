@@ -51,9 +51,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, serverTimestamp, writeBatch, getDocs } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
+import { getAgencyProviders, removeProviderFromAgency } from './actions';
+import { getDb } from '@/lib/firebase';
+import { 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  writeBatch, 
+  doc, 
+  serverTimestamp 
+} from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -117,42 +126,25 @@ function ManageProvidersPage() {
             return;
         }
 
-        const providersQuery = query(collection(getDb(), "users"), where("agencyId", "==", user.uid));
-        const invitesQuery = query(collection(getDb(), "invites"), where("agencyId", "==", user.uid), where("status", "==", "pending"));
-
-        const unsubscribeProviders = onSnapshot(providersQuery, (snapshot) => {
-            const activeProviders = snapshot.docs.map(doc => ({
-                id: doc.id,
-                displayName: doc.data().displayName,
-                email: doc.data().email,
-                status: "Active"
-            } as Provider));
-            
-             setProviders(prev => [
-                ...activeProviders,
-                ...prev.filter(p => p.status !== 'Active')
-            ]);
-        });
-        
-        const unsubscribeInvites = onSnapshot(invitesQuery, (snapshot) => {
-            const pendingProviders = snapshot.docs.map(doc => ({
-                id: doc.id,
-                displayName: "Invitation Sent",
-                email: doc.data().email,
-                status: "Pending",
-            } as Provider));
-
-            setProviders(prev => [
-                ...prev.filter(p => p.status !== 'Pending'),
-                ...pendingProviders
-            ]);
-            setLoading(false);
-        });
-
-        return () => {
-            unsubscribeProviders();
-            unsubscribeInvites();
+        const fetchProviders = async () => {
+            setLoading(true);
+            try {
+                const result = await getAgencyProviders(user.uid);
+                if (result.success && result.data) {
+                    setProviders(result.data);
+                } else {
+                    console.error("Error fetching agency providers:", result.error);
+                    setProviders([]);
+                }
+            } catch (error) {
+                console.error("Error fetching agency providers:", error);
+                setProviders([]);
+            } finally {
+                setLoading(false);
+            }
         };
+
+        fetchProviders();
     }, [user, userRole]);
     
     const handleInviteProvider = async () => {
@@ -232,18 +224,13 @@ function ManageProvidersPage() {
         }
     };
 
-    const handleRemoveProvider = async (providerId: string, status: Provider['status']) => {
-        if (!user || !getDb()) return;
+    const handleRemoveProvider = async (providerId: string, _status: Provider['status']) => {
+        if (!user) return;
         try {
-            const batch = writeBatch(getDb());
-            if (status === 'Active') {
-                const providerRef = doc(getDb(), "users", providerId);
-                batch.update(providerRef, { agencyId: null });
-            } else { // Pending
-                const inviteRef = doc(getDb(), "invites", providerId);
-                batch.delete(inviteRef);
+            const result = await removeProviderFromAgency(providerId);
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to remove provider');
             }
-            await batch.commit();
             toast({ title: t('success'), description: t('providerRemoved') });
         } catch(error) {
              console.error("Error removing provider:", error);

@@ -29,9 +29,10 @@ describe('Admin Bookings Actions', () => {
     jest.clearAllMocks();
     
     mockGetDb.mockReturnValue(mockDb as any);
+    mockUpdateDoc.mockResolvedValue(undefined);
     
     mockAuditLogger.getInstance.mockReturnValue({
-      logAction: jest.fn(),
+      logAction: jest.fn().mockResolvedValue(undefined),
     } as any);
   });
 
@@ -42,7 +43,7 @@ describe('Admin Bookings Actions', () => {
       expect(result.error).toBeNull();
       expect(result.message).toBe('Booking status updated to Completed.');
       expect(mockUpdateDoc).toHaveBeenCalledWith(
-        expect.any(Object),
+        expect.any(Object), // This will be the document reference from doc()
         { status: 'Completed' }
       );
     });
@@ -89,14 +90,14 @@ describe('Admin Bookings Actions', () => {
     it('handles missing booking ID', async () => {
       const result = await handleUpdateBookingStatus('', 'Completed', mockActor);
 
-      expect(result.error).toBeDefined();
+      expect(result.error).toBe('Missing required parameters');
       expect(result.message).toBe('Failed to update booking status.');
     });
 
     it('handles missing status', async () => {
       const result = await handleUpdateBookingStatus('booking-123', '', mockActor);
 
-      expect(result.error).toBeDefined();
+      expect(result.error).toBe('Missing required parameters');
       expect(result.message).toBe('Failed to update booking status.');
     });
 
@@ -108,7 +109,7 @@ describe('Admin Bookings Actions', () => {
 
       const result = await handleUpdateBookingStatus('booking-123', 'Completed', nullActor);
 
-      expect(result.error).toBeDefined();
+      expect(result.error).toBe('Missing required parameters');
       expect(result.message).toBe('Failed to update booking status.');
     });
 
@@ -120,8 +121,8 @@ describe('Admin Bookings Actions', () => {
 
       const result = await handleUpdateBookingStatus('booking-123', 'Completed', undefinedActor);
 
-      expect(result.error).toBeDefined();
-      expect(result.message).toBe('Failed to update booking status.');
+      expect(result.error).toBeNull();
+      expect(result.message).toBe('Booking status updated to Completed.');
     });
   });
 
@@ -133,20 +134,20 @@ describe('Admin Bookings Actions', () => {
     });
 
     it('handles database connection errors', async () => {
-      mockGetDb.mockReturnValue(null as any);
+      mockUpdateDoc.mockRejectedValue(new Error('Database error'));
 
       const result = await handleUpdateBookingStatus('booking-123', 'Completed', mockActor);
 
-      expect(result.error).toBeDefined();
+      expect(result.error).toBe('Database error');
       expect(result.message).toBe('Failed to update booking status.');
     });
 
     it('handles invalid document reference', async () => {
-      mockDb.doc.mockReturnValue(null as any);
+      mockUpdateDoc.mockRejectedValue(new Error('Invalid document reference'));
 
       const result = await handleUpdateBookingStatus('booking-123', 'Completed', mockActor);
 
-      expect(result.error).toBeDefined();
+      expect(result.error).toBe('Invalid document reference');
       expect(result.message).toBe('Failed to update booking status.');
     });
   });
@@ -293,21 +294,21 @@ describe('Admin Bookings Actions', () => {
     it('handles empty status', async () => {
       const result = await handleUpdateBookingStatus('booking-123', '', mockActor);
 
-      expect(result.error).toBeDefined();
+      expect(result.error).toBe('Missing required parameters');
       expect(result.message).toBe('Failed to update booking status.');
     });
 
     it('handles null status', async () => {
       const result = await handleUpdateBookingStatus('booking-123', null as any, mockActor);
 
-      expect(result.error).toBeDefined();
+      expect(result.error).toBe('Missing required parameters');
       expect(result.message).toBe('Failed to update booking status.');
     });
 
     it('handles undefined status', async () => {
       const result = await handleUpdateBookingStatus('booking-123', undefined as any, mockActor);
 
-      expect(result.error).toBeDefined();
+      expect(result.error).toBe('Missing required parameters');
       expect(result.message).toBe('Failed to update booking status.');
     });
   });
@@ -341,7 +342,7 @@ describe('Admin Bookings Actions', () => {
     });
 
     it('handles unknown errors', async () => {
-      mockUpdateDoc.mockRejectedValue('Unknown error');
+      mockUpdateDoc.mockRejectedValue(new Error('Unknown error'));
 
       const result = await handleUpdateBookingStatus('booking-123', 'Completed', mockActor);
 

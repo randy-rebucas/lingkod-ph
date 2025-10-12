@@ -4,8 +4,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
-import { getDb  } from '@/lib/firebase';
-import { collection, query, where, getDocs, doc, deleteDoc, Timestamp } from 'firebase/firestore';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from '@/hooks/use-toast';
 import { SkeletonCards } from '@/components/ui/loading-states';
 import { NoDataEmptyState } from '@/components/ui/empty-states';
+import { getServicesData, deleteService } from './actions';
 
 
 const getStatusVariant = (status: string) => {
@@ -46,7 +45,7 @@ export default function ServicesPage() {
     });
 
     const fetchServices = useCallback(async () => {
-        console.log('fetchServices called', { user: !!user, hasDb: !!getDb() });
+        console.log('fetchServices called', { user: !!user });
         
         if (!user) {
             console.log('No user found, setting loading to false');
@@ -54,34 +53,22 @@ export default function ServicesPage() {
             return;
         }
         
-        if (!getDb()) {
-            console.log('No database connection, setting loading to false');
-            setLoading(false);
-            return;
-        }
-        
         setLoading(true);
         try {
             console.log('Fetching services for user:', user.uid);
-            const q = query(collection(getDb(), "services"), where("userId", "==", user.uid));
-            const querySnapshot = await getDocs(q);
-            console.log('Query snapshot:', querySnapshot.docs.length, 'documents found');
-            
-            const servicesData = querySnapshot.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    ...data,
-                    // Convert Firestore Timestamp to Date if necessary
-                    createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(),
-                } as Service;
-            });
-            
-            console.log('Services data:', servicesData);
-            setServices(servicesData);
+            const result = await getServicesData(user.uid);
+            if (result.success && result.data) {
+                console.log('Services data:', result.data);
+                setServices(result.data);
+            } else {
+                console.error("Error fetching services:", result.error);
+                toast({ variant: 'destructive', title: t('error'), description: t('failedToFetchServices') });
+                setServices([]);
+            }
         } catch (error) {
             console.error("Error fetching services:", error);
             toast({ variant: 'destructive', title: t('error'), description: t('failedToFetchServices') });
+            setServices([]);
         } finally {
             setLoading(false);
         }
@@ -104,11 +91,14 @@ export default function ServicesPage() {
     };
     
     const handleDeleteService = async (serviceId: string) => {
-        if (!getDb()) return;
         try {
-            await deleteDoc(doc(getDb(), 'services', serviceId));
-            toast({ title: t('success'), description: t('serviceDeletedSuccessfully') });
-            fetchServices(); // Refresh list
+            const result = await deleteService(serviceId);
+            if (result.success) {
+                toast({ title: t('success'), description: t('serviceDeletedSuccessfully') });
+                fetchServices(); // Refresh list
+            } else {
+                throw new Error(result.error || 'Failed to delete service');
+            }
         } catch (error) {
             console.error("Error deleting service:", error);
             toast({ variant: 'destructive', title: t('error'), description: t('failedToDeleteService') });

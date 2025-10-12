@@ -4,8 +4,6 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
-import { collection, getDocs, onSnapshot, query, where } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -14,6 +12,7 @@ import { EmptyState } from "@/components/ui/empty-states";
 import { Star, Heart } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { getMyFavorites } from './actions';
 
 type Provider = {
     uid: string;
@@ -94,54 +93,30 @@ export default function MyFavoritesPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!user || !getDb()) {
+        if (!user) {
             setLoading(false);
             return;
         }
 
-        const favoritesRef = collection(getDb(), 'favorites');
-        const q = query(favoritesRef, where('userId', '==', user.uid));
-
-        const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const fetchFavorites = async () => {
             setLoading(true);
-            const favoriteProviderIds = snapshot.docs.map(doc => doc.data().providerId);
-
-            if (favoriteProviderIds.length === 0) {
-                setProviders([]);
-                setLoading(false);
-                return;
-            }
-
-            const providersQuery = query(collection(getDb(), "users"), where("uid", "in", favoriteProviderIds));
-            const providersSnap = await getDocs(providersQuery);
-
-            const reviewsSnapshot = await getDocs(collection(getDb(), "reviews"));
-            const allReviews = reviewsSnapshot.docs.map(doc => doc.data());
-
-            const providerRatings: { [key: string]: { totalRating: number, count: number } } = {};
-            allReviews.forEach((review: any) => {
-                if (!providerRatings[review.providerId]) {
-                    providerRatings[review.providerId] = { totalRating: 0, count: 0 };
+            try {
+                const result = await getMyFavorites(user.uid);
+                if (result.success && result.data) {
+                    setProviders(result.data);
+                } else {
+                    console.error("Error fetching favorites:", result.error);
+                    setProviders([]);
                 }
-                providerRatings[review.providerId].totalRating += review.rating;
-                providerRatings[review.providerId].count++;
-            });
+            } catch (error) {
+                console.error("Error fetching favorites:", error);
+                setProviders([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-            const providersData = providersSnap.docs.map(doc => {
-                const data = doc.data();
-                const ratingInfo = providerRatings[data.uid];
-                return {
-                    ...data,
-                    uid: doc.id,
-                    rating: ratingInfo ? ratingInfo.totalRating / ratingInfo.count : 0,
-                    reviewCount: ratingInfo ? ratingInfo.count : 0,
-                } as Provider;
-            });
-            setProviders(providersData);
-            setLoading(false);
-        });
-
-        return () => unsubscribe();
+        fetchFavorites();
     }, [user]);
 
     if (loading) {

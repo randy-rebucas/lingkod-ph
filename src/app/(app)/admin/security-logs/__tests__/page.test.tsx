@@ -19,7 +19,7 @@ describe('AdminSecurityLogsPage', () => {
     } as any);
 
     render(<AdminSecurityLogsPage />);
-    expect(screen.getByText(/security logs/i)).toBeInTheDocument();
+    expect(screen.getByText(/Security & Access Logs/i)).toBeInTheDocument();
   });
 
   it('shows access denied for non-admin users', () => {

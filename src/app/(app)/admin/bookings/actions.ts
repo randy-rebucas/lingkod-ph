@@ -19,15 +19,29 @@ export async function handleUpdateBookingStatus(
   actor: Actor,
 ) {
   try {
+    // Validate input parameters
+    if (!bookingId || !status || !actor?.id) {
+      return { 
+        error: 'Missing required parameters', 
+        message: 'Failed to update booking status.' 
+      };
+    }
+
     const bookingRef = doc(getDb(), 'bookings', bookingId);
     await updateDoc(bookingRef, { status });
 
-    await AuditLogger.getInstance().logAction(
-        actor.id,
-        'bookings',
-        'BOOKING_STATUS_UPDATED',
-        { bookingId, newStatus: status, actorRole: 'admin' }
-    );
+    // Try to log audit action, but don't fail if it doesn't work
+    try {
+      await AuditLogger.getInstance().logAction(
+          actor.id,
+          'bookings',
+          'BOOKING_STATUS_UPDATED',
+          { bookingId, newStatus: status, actorRole: 'admin' }
+      );
+    } catch (auditError) {
+      console.warn('Failed to log audit action:', auditError);
+      // Continue execution even if audit logging fails
+    }
 
     return {
       error: null,

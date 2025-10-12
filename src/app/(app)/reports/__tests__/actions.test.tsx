@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useAuth } from '@/context/auth-context';
-import ReportsPage from '../actions';
+import ReportsPage from '../page';
 
 jest.mock('@/context/auth-context');
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;

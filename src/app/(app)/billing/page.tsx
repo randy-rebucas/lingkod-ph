@@ -4,8 +4,6 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, orderBy, Timestamp } from "firebase/firestore";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +14,7 @@ import { Eye, Receipt, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { InvoicePreview } from "@/components/invoice-preview";
 import { Input } from "@/components/ui/input";
+import { getProviderInvoices } from './actions';
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
 
@@ -33,8 +32,8 @@ export type Invoice = {
     clientAddress: string;
     amount: number;
     status: InvoiceStatus;
-    issueDate: Timestamp;
-    dueDate: Timestamp;
+    issueDate: Date;
+    dueDate: Date;
     lineItems: LineItem[];
     taxRate: number;
     providerId: string;
@@ -60,23 +59,30 @@ export default function BillingPage() {
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        if (!user || !getDb()) {
+        if (!user) {
             setLoading(false);
             return;
         }
 
-        const invoicesQuery = query(collection(getDb(), "invoices"), where("clientEmail", "==", user.email), orderBy("issueDate", "desc"));
+        const fetchBillingData = async () => {
+            setLoading(true);
+            try {
+                const result = await getProviderInvoices(user.uid);
+                if (result.success && result.data) {
+                    setInvoices(result.data || []);
+                } else {
+                    console.error("Error fetching billing data:", result.error);
+                    setInvoices([]);
+                }
+            } catch (error) {
+                console.error("Error fetching billing data:", error);
+                setInvoices([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        const unsubscribe = onSnapshot(invoicesQuery, (snapshot) => {
-            const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invoice));
-            setInvoices(data);
-            setLoading(false);
-        }, (error) => {
-            console.error("Error fetching invoices:", error);
-            setLoading(false);
-        });
-
-        return () => unsubscribe();
+        fetchBillingData();
     }, [user]);
 
     // Simple search filter
@@ -153,8 +159,8 @@ export default function BillingPage() {
                             {filteredInvoices.length > 0 ? filteredInvoices.map(invoice => (
                                 <TableRow key={invoice.id} className="hover:bg-muted/30 transition-colors border-b border-border/30">
                                     <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
-                                    <TableCell>{format(invoice.issueDate.toDate(), 'PP')}</TableCell>
-                                    <TableCell>{format(invoice.dueDate.toDate(), 'PP')}</TableCell>
+                                    <TableCell>{format(invoice.issueDate, 'PP')}</TableCell>
+                                    <TableCell>{format(invoice.dueDate, 'PP')}</TableCell>
                                     <TableCell className="font-semibold text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">₱{invoice.amount.toFixed(2)}</TableCell>
                                     <TableCell>
                                         <Badge variant={getStatusVariant(invoice.status)} className="shadow-soft">{t(invoice.status.toLowerCase())}</Badge>

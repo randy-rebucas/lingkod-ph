@@ -12,8 +12,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, orderBy, limit, Timestamp, getDocs, doc, addDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
+import { 
+  getProviderDashboardData,
+  getAgencyDashboardData,
+  getClientDashboardData,
+  getAllProviders,
+  getAllReviews,
+  addProviderToFavorites,
+  removeProviderFromFavorites,
+  searchProviders
+} from './actions';
 import { SkeletonCards, LoadingSpinner } from "@/components/ui/loading-states";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -21,8 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/use-error-handler";
 import { useDebounce } from "@/hooks/use-debounce";
 import { cn } from "@/lib/utils";
-import { format, startOfDay, endOfDay } from "date-fns";
-import { findMatchingProviders } from "@/ai/flows/find-matching-providers";
+import { format } from "date-fns";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { LocationBasedProviderService } from "@/lib/location-based-provider-service";
 import { getCurrentLocation } from "@/lib/geolocation-utils";
@@ -40,7 +48,7 @@ type Booking = {
     serviceName: string;
     status: "Upcoming" | "Completed" | "Cancelled";
     price: number;
-    date: Timestamp;
+    date: Timestamp | Date;
 };
 
 type Review = {
@@ -131,7 +139,7 @@ const processEarningsData = (bookings: Booking[], t: any) => {
 
     bookings.forEach(booking => {
         if (booking.status === 'Completed') {
-            const date = booking.date.toDate();
+            const date = toDate(booking.date);
             const month = date.getMonth();
             const year = date.getFullYear();
             // Using a "YYYY-MM" key to handle data spanning multiple years
@@ -185,6 +193,30 @@ const getAvatarFallback = (name: string | null | undefined) => {
         return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
+};
+
+// Helper function to safely convert Firebase Timestamp or Date to Date object
+const toDate = (dateValue: Timestamp | Date): Date => {
+    if (dateValue && typeof (dateValue as any).toDate === 'function') {
+        return (dateValue as Timestamp).toDate();
+    }
+    if (dateValue instanceof Date) {
+        return dateValue;
+    }
+    // Handle case where it might be a serialized timestamp or other format
+    return new Date(dateValue.toString());
+};
+
+// Helper function to safely get milliseconds from Firebase Timestamp or Date
+const toMillis = (dateValue: Timestamp | Date): number => {
+    if (dateValue && typeof (dateValue as any).toMillis === 'function') {
+        return (dateValue as Timestamp).toMillis();
+    }
+    if (dateValue instanceof Date) {
+        return dateValue.getTime();
+    }
+    // Handle case where it might be a serialized timestamp or other format
+    return new Date(dateValue.toString()).getTime();
 };
 
 const ProviderCard = ({ provider, isFavorite, onToggleFavorite, t }: { provider: Provider; isFavorite: boolean; onToggleFavorite: (provider: Provider) => void; t: any; }) => {
@@ -443,201 +475,136 @@ const DashboardPage = memo(function DashboardPage() {
 
     // Fetch data for provider dashboard
     useEffect(() => {
-        if (!user || userRole !== 'provider' || !getDb()) {
+        if (!user || userRole !== 'provider') {
             setLoading(false);
             return;
         }
-        setLoading(true);
 
-        const todayStart = startOfDay(new Date());
-        const todayEnd = endOfDay(new Date());
-
-        const bookingsQuery = query(
-            collection(getDb(), "bookings"),
-            where("providerId", "==", user.uid),
-            orderBy("date", "desc")
-        );
-        
-        const todaysJobsQuery = query(
-            collection(getDb(), "bookings"),
-            where("providerId", "==", user.uid),
-            where("date", ">=", todayStart),
-            where("date", "<=", todayEnd),
-            orderBy("date", "asc")
-        );
-
-        const reviewsQuery = query(
-            collection(getDb(), "reviews"),
-            where("providerId", "==", user.uid),
-            orderBy("createdAt", "desc"),
-            limit(5)
-        );
-        
-         const payoutsQuery = query(collection(getDb(), "payouts"), where("providerId", "==", user.uid));
-
-        const unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
-            const bookingsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
-            setBookings(bookingsData);
-            setLoading(false);
-        }, (error) => { console.error("Firestore Error:", error); setLoading(false); });
-        
-        const unsubscribeTodaysJobs = onSnapshot(todaysJobsQuery, (snapshot) => {
-            const jobsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
-            setTodaysJobs(jobsData);
-        }, (error) => { console.error("Firestore Error:", error); });
-
-        const unsubscribeReviews = onSnapshot(reviewsQuery, (snapshot) => {
-            const reviewsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
-            setReviews(reviewsData);
-        });
-        
-         const unsubscribePayouts = onSnapshot(payoutsQuery, (snapshot) => {
-            const payoutsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
-            setPayouts(payoutsData);
-        });
-
-        return () => {
-            unsubscribeBookings();
-            unsubscribeReviews();
-            unsubscribePayouts();
-            unsubscribeTodaysJobs();
+        const fetchProviderData = async () => {
+            setLoading(true);
+            try {
+                const result = await getProviderDashboardData(user.uid);
+                if (result.success && result.data) {
+                    setBookings(result.data.bookings || []);
+                    setTodaysJobs(result.data.todaysJobs || []);
+                    setReviews(result.data.reviews || []);
+                    setPayouts(result.data.payouts || []);
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: result.error || 'Failed to load dashboard data' });
+                }
+            } catch (error) {
+                console.error("Error fetching provider dashboard data:", error);
+                toast({ variant: "destructive", title: t('error'), description: 'Failed to load dashboard data' });
+            } finally {
+                setLoading(false);
+            }
         };
 
-    }, [user, userRole]);
+        fetchProviderData();
+    }, [user, userRole]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Handle debounced search - moved after handleSmartSearch definition
 
     // Fetch data for client dashboard
     useEffect(() => {
-        if (userRole !== 'client' || !getDb()) return;
+        if (userRole !== 'client') return;
         
-        const fetchProviders = async () => {
-            if (!getDb()) return;
+        const fetchClientData = async () => {
             setLoadingProviders(true);
             try {
-                // Fetch all reviews first to calculate ratings
-                const reviewsSnapshot = await getDocs(collection(getDb(), "reviews"));
-                const allReviews = reviewsSnapshot.docs.map(doc => doc.data() as Review);
-                
-                const providerRatings: { [key: string]: { totalRating: number, count: number } } = {};
-                allReviews.forEach(review => {
-                    if (!providerRatings[review.providerId]) {
-                        providerRatings[review.providerId] = { totalRating: 0, count: 0 };
-                    }
-                    providerRatings[review.providerId].totalRating += review.rating;
-                    providerRatings[review.providerId].count++;
-                });
+                const [providersResult, reviewsResult] = await Promise.all([
+                    getAllProviders(),
+                    getAllReviews()
+                ]);
 
-                // Fetch all providers and agencies
-                const q = query(collection(getDb(), "users"), where("role", "in", ["provider", "agency"]));
-                const querySnapshot = await getDocs(q);
-                const providersData = querySnapshot.docs.map(doc => {
-                    const data = doc.data();
-                    const ratingInfo = providerRatings[data.uid];
-                    return {
-                        uid: data.uid,
-                        displayName: data.displayName || t('unnamedProvider'),
-                        bio: data.bio,
-                        photoURL: data.photoURL,
-                        rating: ratingInfo ? ratingInfo.totalRating / ratingInfo.count : 0,
-                        reviewCount: ratingInfo ? ratingInfo.count : 0,
-                        availabilityStatus: data.availabilityStatus,
-                        keyServices: data.keyServices,
-                        address: data.address,
-                        isVerified: data.verification?.status === 'Verified',
-                        role: data.role,
-                    } as Provider;
-                });
-                setProviders(providersData);
-                setAllProviders(providersData); // Store a copy for resetting search
+                if (providersResult.success && providersResult.data && reviewsResult.success && reviewsResult.data) {
+                    const allReviews = reviewsResult.data;
+                    const allProviders = providersResult.data;
+                    
+                    const providerRatings: { [key: string]: { totalRating: number, count: number } } = {};
+                    allReviews.forEach(review => {
+                        if (!providerRatings[review.providerId]) {
+                            providerRatings[review.providerId] = { totalRating: 0, count: 0 };
+                        }
+                        providerRatings[review.providerId].totalRating += review.rating;
+                        providerRatings[review.providerId].count++;
+                    });
+
+                    const providersData = allProviders.map(provider => {
+                        const ratingInfo = providerRatings[provider.uid];
+                        return {
+                            ...provider,
+                            displayName: provider.displayName || t('unnamedProvider'),
+                            rating: ratingInfo ? ratingInfo.totalRating / ratingInfo.count : 0,
+                            reviewCount: ratingInfo ? ratingInfo.count : 0,
+                            isVerified: provider.verification?.status === 'Verified',
+                        } as Provider;
+                    });
+                    
+                    setProviders(providersData);
+                    setAllProviders(providersData); // Store a copy for resetting search
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: 'Failed to load providers data' });
+                }
             } catch (error) {
-                console.error("Error fetching providers: ", error);
+                console.error("Error fetching client data: ", error);
+                toast({ variant: "destructive", title: t('error'), description: 'Failed to load providers data' });
             } finally {
                 setLoadingProviders(false);
             }
         };
-        fetchProviders();
-    }, [userRole, t]);
+        fetchClientData();
+    }, [userRole, t]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
     // Fetch client's favorites
     useEffect(() => {
-        if (userRole !== 'client' || !user || !getDb()) return;
+        if (userRole !== 'client' || !user) return;
 
-        const favRef = collection(getDb(), 'favorites');
-        const q = query(favRef, where('userId', '==', user.uid));
+        const fetchClientFavorites = async () => {
+            try {
+                const result = await getClientDashboardData(user.uid);
+                if (result.success && result.data) {
+                    const favIds = result.data.favorites?.map((fav: any) => fav.providerId) || [];
+                    setFavoriteProviderIds(favIds);
+                }
+            } catch (error) {
+                console.error("Error fetching client favorites:", error);
+            }
+        };
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const favIds = snapshot.docs.map(doc => doc.data().providerId);
-            setFavoriteProviderIds(favIds);
-        });
-        return () => unsubscribe();
+        fetchClientFavorites();
     }, [user, userRole]);
 
 
     // Fetch data for agency dashboard
     useEffect(() => {
-        if (userRole !== 'agency' || !user || !getDb()) {
+        if (userRole !== 'agency' || !user) {
              setLoadingAgencyData(false);
             return;
         }
 
         const fetchAgencyData = async () => {
-            if (!getDb()) return;
             setLoadingAgencyData(true);
             try {
-                // 1. Get all providers managed by the agency
-                const providersQuery = query(collection(getDb(), "users"), where("agencyId", "==", user.uid));
-                const providersSnapshot = await getDocs(providersQuery);
-                const providerIds = providersSnapshot.docs.map(doc => doc.id);
-                 const fetchedProviders = providersSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() } as Provider));
-
-                if (providerIds.length === 0) {
-                    setAgencyProviders([]);
-                    setAgencyBookings([]);
-                    setAgencyPayouts([]);
-                    setLoadingAgencyData(false);
-                    return;
+                const result = await getAgencyDashboardData(user.uid);
+                if (result.success && result.data) {
+                    setAgencyProviders(result.data.providers || []);
+                    setAgencyBookings(result.data.bookings || []);
+                    setAgencyPayouts(result.data.payouts || []);
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: result.error || 'Failed to load agency dashboard data' });
                 }
-                
-                // 2. Get all bookings for these providers
-                const bookingsQuery = query(collection(getDb(), "bookings"), where("providerId", "in", providerIds));
-                const bookingsSnapshot = await getDocs(bookingsQuery);
-                const fetchedBookings = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
-                setAgencyBookings(fetchedBookings);
-                
-                 // 3. Get all reviews for these providers to calculate ratings and revenue
-                const reviewsQuery = query(collection(getDb(), 'reviews'), where('providerId', 'in', providerIds));
-                const reviewsSnapshot = await getDocs(reviewsQuery);
-                const allReviews = reviewsSnapshot.docs.map(doc => doc.data() as Review);
-
-                const providerStats = fetchedProviders.map(p => {
-                    const providerReviews = allReviews.filter(r => r.providerId === p.uid);
-                    const providerBookings = fetchedBookings.filter(b => b.providerId === p.uid && b.status === 'Completed');
-                    const rating = providerReviews.length > 0 ? providerReviews.reduce((sum, r) => sum + r.rating, 0) / providerReviews.length : 0;
-                    const totalRevenue = providerBookings.reduce((sum, b) => sum + b.price, 0);
-
-                    return { ...p, rating, reviewCount: providerReviews.length, totalRevenue };
-                });
-
-                setAgencyProviders(providerStats);
-                
-                // 4. Get all payout requests for the agency
-                const payoutsQuery = query(collection(getDb(), 'payouts'), where('agencyId', '==', user.uid));
-                const payoutsSnapshot = await getDocs(payoutsQuery);
-                const fetchedPayouts = payoutsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
-                setAgencyPayouts(fetchedPayouts);
-
-
             } catch (error) {
                 console.error("Error fetching agency data:", error);
+                toast({ variant: "destructive", title: t('error'), description: 'Failed to load agency dashboard data' });
             } finally {
                 setLoadingAgencyData(false);
             }
         };
         fetchAgencyData();
 
-    }, [user, userRole]);
+    }, [user, userRole]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
     // Derived stats for provider
@@ -676,18 +643,14 @@ const DashboardPage = memo(function DashboardPage() {
 
         setIsSmartSearching(true);
         try {
-            const result = await findMatchingProviders({ query });
-            if (result.providers.length > 0) {
-                const rankedProviderIds = result.providers.reduce((acc, p) => {
-                    acc[p.providerId] = { rank: p.rank, reasoning: p.reasoning };
-                    return acc;
-                }, {} as Record<string, { rank: number, reasoning: string }>);
-                
-                const matchedProviders = allProviders.filter(p => rankedProviderIds[p.uid]).map(p => ({
-                    ...p,
-                    searchRank: rankedProviderIds[p.uid].rank,
-                    searchReasoning: rankedProviderIds[p.uid].reasoning
-                })).sort((a,b) => (a.searchRank || 99) - (b.searchRank || 99));
+            // Use server action for search
+            const result = await searchProviders(query);
+            if (result.success && result.data && result.data.length > 0) {
+                const matchedProviders = result.data.map(provider => ({
+                    ...provider,
+                    displayName: provider.displayName || t('unnamedProvider'),
+                    isVerified: provider.verification?.status === 'Verified',
+                }));
 
                 // Cache the results
                 setSearchCache(prev => new Map(prev).set(cacheKey, matchedProviders));
@@ -787,30 +750,31 @@ const DashboardPage = memo(function DashboardPage() {
     const agencyOverallRating = agencyProviders.length > 0
         ? (agencyProviders.reduce((sum, p) => sum + (p.rating || 0), 0) / agencyProviders.length).toFixed(1)
         : "N/A";
-    const agencyRecentBookings = agencyBookings.sort((a,b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5);
+    const agencyRecentBookings = agencyBookings.sort((a,b) => toMillis(b.date) - toMillis(a.date)).slice(0, 5);
     const topPerformingProviders = [...agencyProviders].sort((a,b) => (b.totalRevenue || 0) - (a.totalRevenue || 0)).slice(0, 5);
 
     const handleToggleFavorite = useCallback(async (provider: Provider) => {
-        if (!user || !getDb()) return;
-        const favoritesRef = collection(getDb(), 'favorites');
+        if (!user) return;
         const isFavorited = favoriteProviderIds.includes(provider.uid);
 
         try {
+            let result;
             if (isFavorited) {
-                const q = query(favoritesRef, where('userId', '==', user.uid), where('providerId', '==', provider.uid));
-                const snapshot = await getDocs(q);
-                if (!snapshot.empty) {
-                    const docId = snapshot.docs[0].id;
-                    await deleteDoc(doc(getDb(), 'favorites', docId));
+                result = await removeProviderFromFavorites(provider.uid, user.uid);
+                if (result.success) {
+                    toast({ title: t('removedFromFavorites') });
+                    setFavoriteProviderIds(prev => prev.filter(id => id !== provider.uid));
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotUpdateFavorites') });
                 }
-                toast({ title: t('removedFromFavorites') });
             } else {
-                await addDoc(favoritesRef, {
-                    userId: user.uid,
-                    providerId: provider.uid,
-                    favoritedAt: serverTimestamp()
-                });
-                toast({ title: t('addedToFavorites') });
+                result = await addProviderToFavorites(provider.uid, user.uid);
+                if (result.success) {
+                    toast({ title: t('addedToFavorites') });
+                    setFavoriteProviderIds(prev => [...prev, provider.uid]);
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotUpdateFavorites') });
+                }
             }
         } catch (error) {
             console.error("Error toggling favorite:", error);
@@ -1305,7 +1269,7 @@ const DashboardPage = memo(function DashboardPage() {
                                 <TableBody>
                                     {todaysJobs.length > 0 ? todaysJobs.map((booking) => (
                                         <TableRow key={booking.id}>
-                                            <TableCell>{format(booking.date.toDate(), 'p')}</TableCell>
+                                            <TableCell>{format(toDate(booking.date), 'p')}</TableCell>
                                             <TableCell className="font-medium">{booking.clientName}</TableCell>
                                             <TableCell>{booking.serviceName}</TableCell>
                                         </TableRow>

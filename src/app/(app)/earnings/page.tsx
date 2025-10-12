@@ -4,8 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
-import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy } from 'firebase/firestore';
+import { getProviderEarningsData, requestPayout } from './actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
@@ -32,7 +31,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import _Link from 'next/link';
-import { handleRequestPayout } from '@/ai/flows/request-payout';
 import { TooltipProvider, Tooltip as TooltipUI, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import AgencyEarningsPage from '@/app/(app)/agency-earnings/page';
 import { formatDistanceToNow } from 'date-fns';
@@ -42,14 +40,14 @@ type CompletedBooking = {
     clientName: string;
     serviceName: string;
     price: number;
-    date: Timestamp;
+    date: Date;
 };
 
 type Payout = {
     id: string;
     amount: number;
     status: 'Pending' | 'Paid';
-    requestedAt: Timestamp;
+    requestedAt: Date;
 };
 
 const processChartData = (bookings: CompletedBooking[]) => {
@@ -57,7 +55,7 @@ const processChartData = (bookings: CompletedBooking[]) => {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     bookings.forEach(booking => {
-        const date = booking.date.toDate();
+        const date = booking.date;
         const month = date.getMonth();
         const year = date.getFullYear();
         const key = `${year}-${month}`;
@@ -100,38 +98,40 @@ export default function EarningsPage() {
     const isSaturday = new Date().getDay() === 6;
 
     useEffect(() => {
-        if (!user || userRole !== 'provider' || !getDb()) {
+        if (!user || userRole !== 'provider') {
             setLoading(false);
             return;
         }
 
-        const bookingsQuery = query(
-            collection(getDb(), "bookings"),
-            where("providerId", "==", user.uid),
-            where("status", "==", "Completed")
-        );
-
-        const unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
-            const bookingsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CompletedBooking))
-                .sort((a, b) => b.date.toMillis() - a.date.toMillis());
-            setBookings(bookingsData);
-            setLoading(false);
-        }, (error) => {
-            console.error("Firestore Error:", error);
-            setLoading(false);
-        });
-        
-        const payoutsQuery = query(collection(getDb(), "payouts"), where("providerId", "==", user.uid), orderBy("requestedAt", "desc"));
-        const unsubscribePayouts = onSnapshot(payoutsQuery, (snapshot) => {
-            const payoutsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Payout));
-            setPayouts(payoutsData);
-        });
-
-        return () => {
-            unsubscribeBookings();
-            unsubscribePayouts();
+        const fetchEarningsData = async () => {
+            setLoading(true);
+            try {
+                const result = await getProviderEarningsData(user.uid);
+                
+                if (result.success && result.data) {
+                    setBookings(result.data.completedBookings as CompletedBooking[]);
+                    setPayouts(result.data.payouts as Payout[]);
+                } else {
+                    toast({
+                        variant: "destructive",
+                        title: "Error",
+                        description: result.error || "Failed to load earnings data"
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching earnings data:", error);
+                toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: "Failed to load earnings data"
+                });
+            } finally {
+                setLoading(false);
+            }
         };
-    }, [user, userRole]);
+
+        fetchEarningsData();
+    }, [user, userRole, toast]);
 
     const totalRevenue = bookings.reduce((sum, b) => sum + b.price, 0);
     const totalPaidOut = payouts.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);
@@ -142,27 +142,32 @@ export default function EarningsPage() {
     const chartData = processChartData(bookings);
 
     const handlePayoutRequest = async () => {
-        if (!user || !getDb()) return;
-        
-        // Final check for payout details before proceeding
-        const userDocRef = doc(getDb(), 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (!userDoc.exists() || !userDoc.data()?.payoutDetails?.method) {
-            toast({
-                variant: "destructive",
-                title: t('payoutDetailsMissing'),
-                description: t('payoutDetailsMissingDescription'),
-            });
-            return;
-        }
+        if (!user) return;
         
         setIsRequestingPayout(true);
         try {
-            await handleRequestPayout({ providerId: user.uid, amount: availableForPayout });
-            toast({
-                title: t('payoutRequested'),
-                description: t('payoutRequestedDescription'),
+            const result = await requestPayout({
+                providerId: user.uid,
+                amount: availableForPayout
             });
+            
+            if (result.success) {
+                toast({
+                    title: t('payoutRequested'),
+                    description: t('payoutRequestedDescription'),
+                });
+                // Refresh data
+                const earningsResult = await getProviderEarningsData(user.uid);
+                if (earningsResult.success && earningsResult.data) {
+                    setPayouts(earningsResult.data.payouts as Payout[]);
+                }
+            } else {
+                toast({
+                    variant: "destructive",
+                    title: t('requestFailed'),
+                    description: result.error || t('requestFailedDescription'),
+                });
+            }
         } catch (error) {
             console.error(error);
             toast({
@@ -418,7 +423,7 @@ export default function EarningsPage() {
                                     {payouts.slice(0, 5).length > 0 ? payouts.slice(0, 5).map((payout) => (
                                         <TableRow key={payout.id}>
                                             <TableCell className="text-sm">
-                                                {formatDistanceToNow(payout.requestedAt.toDate(), { addSuffix: true })}
+                                                {formatDistanceToNow(payout.requestedAt, { addSuffix: true })}
                                             </TableCell>
                                             <TableCell>
                                                 <Badge variant={payout.status === 'Paid' ? 'secondary' : 'outline'}>

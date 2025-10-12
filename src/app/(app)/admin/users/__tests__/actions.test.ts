@@ -37,9 +37,18 @@ describe('Admin User Actions', () => {
     jest.clearAllMocks();
     mockGetDb.mockReturnValue(mockDb as any);
     
+    // Mock Firestore functions
+    mockSetDoc.mockResolvedValue(undefined);
+    mockDeleteDoc.mockResolvedValue(undefined);
+    mockGetDoc.mockResolvedValue({ exists: () => true, data: () => ({}) } as any);
+    
+    // Mock Firebase Admin Auth
+    mockAdminAuth.createUser = jest.fn().mockResolvedValue({ uid: 'new-user-123' });
+    mockAdminAuth.deleteUser = jest.fn().mockResolvedValue(undefined);
+    
     // Mock AuditLogger instance
     const mockAuditLoggerInstance = {
-      logAction: jest.fn(),
+      logAction: jest.fn().mockResolvedValue(undefined),
     };
     mockAuditLogger.getInstance.mockReturnValue(mockAuditLoggerInstance as any);
   });
@@ -66,7 +75,7 @@ describe('Admin User Actions', () => {
       const result = await handleCreateUser(validUserData, mockActor);
 
       expect(result.error).toBeNull();
-      expect(result.message).toBe('User created successfully!');
+      expect(result.message).toBe('User John Doe (john@example.com) created successfully with role: provider.');
       expect(mockAdminAuth.createUser).toHaveBeenCalledWith({
         email: 'john@example.com',
         password: 'password123',
@@ -97,7 +106,7 @@ describe('Admin User Actions', () => {
 
       const result = await handleCreateUser(validUserData, mockActor);
 
-      expect(result.error).toContain('Failed to create user: Auth creation failed');
+      expect(result.error).toBe('Auth creation failed');
       expect(result.message).toBe('User creation failed.');
     });
 
@@ -113,7 +122,7 @@ describe('Admin User Actions', () => {
 
       const result = await handleCreateUser(validUserData, mockActor);
 
-      expect(result.error).toContain('Failed to create user: Firestore error');
+      expect(result.error).toBe('Firestore error');
       expect(result.message).toBe('User creation failed.');
     });
 
@@ -201,7 +210,7 @@ describe('Admin User Actions', () => {
       const result = await handleDeleteUser(userId, mockActor);
 
       expect(result.error).toBeNull();
-      expect(result.message).toBe('User deleted successfully!');
+      expect(result.message).toBe('User record has been deleted successfully from the database.');
       expect(mockDeleteDoc).toHaveBeenCalled();
     });
 
@@ -212,7 +221,7 @@ describe('Admin User Actions', () => {
 
       const result = await handleDeleteUser(userId, mockActor);
 
-      expect(result.error).toContain('Failed to delete user: Deletion failed');
+      expect(result.error).toBe('Deletion failed');
       expect(result.message).toBe('User deletion failed.');
     });
 
@@ -247,7 +256,7 @@ describe('Admin User Actions', () => {
         phone: '+1234567890',
       }, mockActor);
 
-      expect(result.error).toContain('Failed to create user: An unknown error occurred');
+      expect(result.error).toBe('Unknown error');
       expect(result.message).toBe('User creation failed.');
     });
 
@@ -256,7 +265,7 @@ describe('Admin User Actions', () => {
 
       const result = await handleDeleteUser('user-123', mockActor);
 
-      expect(result.error).toContain('Failed to delete user: An unknown error occurred');
+      expect(result.error).toBe('Unknown error');
       expect(result.message).toBe('User deletion failed.');
     });
   });

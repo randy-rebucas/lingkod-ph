@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateProfile } from 'firebase/auth';
-import { getDb } from '@/lib/firebase';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { completeUserProfile } from './actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,14 +43,15 @@ export default function CompleteProfilePage() {
       // Update Firebase Auth profile
       await updateProfile(user, { displayName: name });
 
-      // Update Firestore user document
-      const userDocRef = doc(getDb(), 'users', user.uid);
-      await updateDoc(userDocRef, {
+      // Update Firestore user document using server action
+      const result = await completeUserProfile(user.uid, {
         displayName: name,
-        email: email || user.email,
-        profileCompleted: true,
-        profileCompletedAt: serverTimestamp(),
+        email: email || user.email || '',
       });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to complete profile');
+      }
 
       toast({
         title: t('success'),

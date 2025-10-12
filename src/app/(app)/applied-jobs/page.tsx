@@ -3,8 +3,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,6 +15,7 @@ import Link from "next/link";
 import { CheckSquare, Search, Filter, MapPin, Clock, ShieldCheck, Eye } from "lucide-react";
 import { formatBudget } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { getAppliedJobs } from './actions';
 
 // Define the Job type locally to avoid import issues
 type Job = {
@@ -33,7 +32,7 @@ type Job = {
     clientName: string;
     clientId: string;
     clientIsVerified?: boolean;
-    createdAt: Timestamp;
+    createdAt: Date;
     applications?: string[]; // Array of provider IDs
     status?: string;
 };
@@ -59,23 +58,30 @@ export default function AppliedJobsPage() {
     const [filterStatus, setFilterStatus] = useState('all');
 
     useEffect(() => {
-        if (!user || userRole !== 'provider' || !getDb()) {
+        if (!user || userRole !== 'provider') {
             setLoading(false);
             return;
         }
 
-        const jobsQuery = query(collection(getDb(), "jobs"), where("applications", "array-contains", user.uid));
-        
-        const unsubscribe = onSnapshot(jobsQuery, (snapshot) => {
-            const jobsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
-            setAppliedJobs(jobsData);
-            setLoading(false);
-        }, (error) => {
-            console.error("Error fetching applied jobs:", error);
-            setLoading(false);
-        });
+        const fetchAppliedJobs = async () => {
+            setLoading(true);
+            try {
+                const result = await getAppliedJobs(user.uid);
+                if (result.success && result.data) {
+                    setAppliedJobs(result.data);
+                } else {
+                    console.error("Error fetching applied jobs:", result.error);
+                    setAppliedJobs([]);
+                }
+            } catch (error) {
+                console.error("Error fetching applied jobs:", error);
+                setAppliedJobs([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        return () => unsubscribe();
+        fetchAppliedJobs();
     }, [user, userRole]);
 
     const _handleSort = (field: string) => {
@@ -112,8 +118,8 @@ export default function AppliedJobsPage() {
                     break;
                 case 'date':
                 default:
-                    aValue = a.createdAt.toDate();
-                    bValue = b.createdAt.toDate();
+                    aValue = a.createdAt;
+                    bValue = b.createdAt;
                     break;
             }
             
@@ -278,7 +284,7 @@ export default function AppliedJobsPage() {
                                             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                                                 <span className="flex items-center gap-1">
                                                     <Clock className="h-3 w-3" />
-                                                    {formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true })}
+                                                    {formatDistanceToNow(job.createdAt, { addSuffix: true })}
                                                 </span>
                                                 <span className="flex items-center gap-1">
                                                     <MapPin className="h-3 w-3" />
