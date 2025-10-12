@@ -15,6 +15,12 @@ export interface PayPalConfig {
   clientSecret: string;
 }
 
+export interface PayMayaConfig {
+  publicKey: string;
+  secretKey: string;
+  webhookSecret: string;
+}
+
 export class PaymentConfig {
 
   // Bank Transfer Configuration
@@ -31,6 +37,13 @@ export class PaymentConfig {
     clientSecret: process.env.PAYPAL_CLIENT_SECRET || '',
   };
 
+  // PayMaya Configuration
+  static readonly PAYMAYA: PayMayaConfig = {
+    publicKey: process.env.NEXT_PUBLIC_PAYMAYA_PUBLIC_KEY || '',
+    secretKey: process.env.PAYMAYA_SECRET_KEY || '',
+    webhookSecret: process.env.PAYMAYA_WEBHOOK_SECRET || '',
+  };
+
   // Payment Settings
   static readonly SETTINGS = {
     PAYMENT_SESSION_TIMEOUT: 15 * 60 * 1000, // 15 minutes
@@ -45,6 +58,10 @@ export class PaymentConfig {
 
   static validatePayPalConfig(): boolean {
     return !!(this.PAYPAL.clientId && this.PAYPAL.clientSecret);
+  }
+
+  static validatePayMayaConfig(): boolean {
+    return !!(this.PAYMAYA.publicKey && this.PAYMAYA.secretKey);
   }
 
   static validatePaymentAmount(amount: number, expectedAmount: number): boolean {

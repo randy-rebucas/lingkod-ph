@@ -1,118 +1,196 @@
-#!/usr/bin/env tsx
-
 /**
  * PayPal Integration Test Script
- * Tests the PayPal integration functionality
+ * Tests the complete PayPal subscription flow
  */
 
-import { PayPalPaymentService } from '../lib/paypal-payment-service';
-import { PaymentConfig } from '../lib/payment-config';
+import { paypalSubscriptionService } from '@/lib/paypal-subscription-service';
+import { PaymentConfig } from '@/lib/payment-config';
 
-async function testPayPalIntegration() {
-  console.log('🧪 Testing PayPal Integration...\n');
-
-  // Test 1: Configuration Validation
-  console.log('1. Testing PayPal Configuration...');
-  const isConfigured = PayPalPaymentService.isConfigured();
-  console.log(`   ✅ PayPal Configuration: ${isConfigured ? 'Valid' : 'Invalid'}`);
-  
-  if (!isConfigured) {
-    console.log('   ⚠️  PayPal is not configured. Please set the following environment variables:');
-    console.log('      - NEXT_PUBLIC_PAYPAL_CLIENT_ID');
-    console.log('      - PAYPAL_CLIENT_SECRET');
-    console.log('');
-  }
-
-  // Test 2: Payment Config Validation
-  console.log('2. Testing Payment Config...');
-  const paypalConfigValid = PaymentConfig.validatePayPalConfig();
-  console.log(`   ✅ PayPal Config Validation: ${paypalConfigValid ? 'Valid' : 'Invalid'}`);
-  
-  if (paypalConfigValid) {
-    console.log(`   📋 Client ID: ${PaymentConfig.PAYPAL.clientId.substring(0, 10)}...`);
-    console.log(`   📋 Client Secret: ${PaymentConfig.PAYPAL.clientSecret ? 'Set' : 'Not Set'}`);
-  }
-  console.log('');
-
-  // Test 3: Service Instance
-  console.log('3. Testing Service Instance...');
-  try {
-    const _service = new PayPalPaymentService();
-    console.log('   ✅ PayPal Service Instance: Created successfully');
-  } catch (error) {
-    console.log('   ❌ PayPal Service Instance: Failed to create');
-    console.log(`   Error: ${error}`);
-  }
-  console.log('');
-
-  // Test 4: Environment Variables
-  console.log('4. Testing Environment Variables...');
-  const requiredEnvVars = [
-    'NEXT_PUBLIC_PAYPAL_CLIENT_ID',
-    'PAYPAL_CLIENT_SECRET'
-  ];
-
-  let allEnvVarsSet = true;
-  requiredEnvVars.forEach(envVar => {
-    const value = process.env[envVar];
-    const isSet = !!value;
-    console.log(`   ${isSet ? '✅' : '❌'} ${envVar}: ${isSet ? 'Set' : 'Not Set'}`);
-    if (!isSet) allEnvVarsSet = false;
-  });
-  console.log('');
-
-  // Test 5: API Endpoints Check
-  console.log('5. Testing API Endpoints...');
-  const apiEndpoints = [
-    '/api/payments/paypal/create',
-    '/api/payments/paypal/capture',
-    '/api/payments/paypal/webhook'
-  ];
-
-  apiEndpoints.forEach(endpoint => {
-    console.log(`   ✅ API Endpoint: ${endpoint}`);
-  });
-  console.log('');
-
-  // Test 6: Component Files Check
-  console.log('6. Testing Component Files...');
-  const componentFiles = [
-    'src/components/paypal-checkout-button.tsx',
-    'src/lib/paypal-payment-service.ts'
-  ];
-
-  componentFiles.forEach(file => {
-    console.log(`   ✅ Component File: ${file}`);
-  });
-  console.log('');
-
-  // Summary
-  console.log('📊 PayPal Integration Test Summary:');
-  console.log(`   Configuration: ${isConfigured ? '✅ Ready' : '❌ Not Configured'}`);
-  console.log(`   Environment: ${allEnvVarsSet ? '✅ Complete' : '❌ Incomplete'}`);
-  console.log(`   API Endpoints: ✅ Available`);
-  console.log(`   Components: ✅ Available`);
-  console.log('');
-
-  if (isConfigured && allEnvVarsSet) {
-    console.log('🎉 PayPal Integration is ready for use!');
-    console.log('');
-    console.log('📝 Next Steps:');
-    console.log('   1. Test the payment flow in development');
-    console.log('   2. Configure PayPal webhook URLs in PayPal Developer Dashboard');
-    console.log('   3. Test with real PayPal sandbox transactions');
-    console.log('   4. Deploy to production with live PayPal credentials');
-  } else {
-    console.log('⚠️  PayPal Integration needs configuration:');
-    if (!isConfigured) {
-      console.log('   - Set up PayPal Developer account');
-      console.log('   - Configure environment variables');
-    }
-    if (!allEnvVarsSet) {
-      console.log('   - Add missing environment variables to .env.local');
-    }
-  }
+interface TestResult {
+  test: string;
+  success: boolean;
+  error?: string;
+  details?: any;
 }
 
-// Run the test
-testPayPalIntegration().catch(console.error);
+async function testPayPalIntegration(): Promise<TestResult[]> {
+  const results: TestResult[] = [];
+
+  console.log('🧪 Testing PayPal Integration...\n');
+
+  // Test 1: Configuration Check
+  console.log('1️⃣ Testing PayPal Configuration...');
+  try {
+    const isConfigured = PaymentConfig.validatePayPalConfig();
+    results.push({
+      test: 'PayPal Configuration',
+      success: isConfigured,
+      error: isConfigured ? undefined : 'PayPal credentials not configured',
+      details: {
+        hasClientId: !!PaymentConfig.PAYPAL.clientId,
+        hasClientSecret: !!PaymentConfig.PAYPAL.clientSecret,
+        environment: process.env.NODE_ENV
+      }
+    });
+    console.log(isConfigured ? '✅ Configuration OK' : '❌ Configuration Failed');
+  } catch (error) {
+    results.push({
+      test: 'PayPal Configuration',
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    console.log('❌ Configuration Error:', error);
+  }
+
+  // Test 2: Access Token
+  console.log('\n2️⃣ Testing PayPal Access Token...');
+  try {
+    const service = new paypalSubscriptionService();
+    const token = await (service as any).getAccessToken();
+    results.push({
+      test: 'PayPal Access Token',
+      success: !!token,
+      error: token ? undefined : 'Failed to get access token',
+      details: {
+        tokenLength: token?.length || 0,
+        tokenPrefix: token?.substring(0, 10) + '...'
+      }
+    });
+    console.log(token ? '✅ Access Token OK' : '❌ Access Token Failed');
+  } catch (error) {
+    results.push({
+      test: 'PayPal Access Token',
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    console.log('❌ Access Token Error:', error);
+  }
+
+  // Test 3: Create Test Plan
+  console.log('\n3️⃣ Testing PayPal Plan Creation...');
+  try {
+    const testPlan = {
+      planId: `test_plan_${Date.now()}`,
+      planName: 'Test Plan',
+      description: 'Test subscription plan for integration testing',
+      price: 100,
+      currency: 'PHP'
+    };
+
+    const result = await paypalSubscriptionService.createSubscriptionPlan(testPlan);
+    results.push({
+      test: 'PayPal Plan Creation',
+      success: result.success,
+      error: result.error,
+      details: {
+        planId: result.planId,
+        requestedPlan: testPlan
+      }
+    });
+    console.log(result.success ? '✅ Plan Creation OK' : '❌ Plan Creation Failed');
+    if (result.error) console.log('Error:', result.error);
+  } catch (error) {
+    results.push({
+      test: 'PayPal Plan Creation',
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    console.log('❌ Plan Creation Error:', error);
+  }
+
+  // Test 4: API Endpoints
+  console.log('\n4️⃣ Testing API Endpoints...');
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    
+    // Test subscription create endpoint
+    const createResponse = await fetch(`${baseUrl}/api/subscriptions/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        planId: 'test_plan',
+        planName: 'Test Plan',
+        price: 100,
+        currency: 'PHP',
+        userId: 'test_user',
+        userEmail: 'test@example.com'
+      })
+    });
+
+    const createResult = await createResponse.json();
+    results.push({
+      test: 'API Endpoints',
+      success: createResponse.status === 200 || createResponse.status === 400, // 400 is expected for test data
+      error: createResponse.status >= 500 ? 'Server error' : undefined,
+      details: {
+        createEndpoint: {
+          status: createResponse.status,
+          response: createResult
+        }
+      }
+    });
+    console.log(createResponse.status < 500 ? '✅ API Endpoints OK' : '❌ API Endpoints Failed');
+  } catch (error) {
+    results.push({
+      test: 'API Endpoints',
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    console.log('❌ API Endpoints Error:', error);
+  }
+
+  return results;
+}
+
+async function runPayPalTests() {
+  console.log('🚀 Starting PayPal Integration Tests...\n');
+  
+  const results = await testPayPalIntegration();
+  
+  console.log('\n📊 Test Results Summary:');
+  console.log('========================');
+  
+  let passedTests = 0;
+  let totalTests = results.length;
+  
+  results.forEach((result, index) => {
+    const status = result.success ? '✅ PASS' : '❌ FAIL';
+    console.log(`${index + 1}. ${result.test}: ${status}`);
+    if (result.error) {
+      console.log(`   Error: ${result.error}`);
+    }
+    if (result.success) passedTests++;
+  });
+  
+  console.log('\n📈 Overall Results:');
+  console.log(`Passed: ${passedTests}/${totalTests} tests`);
+  console.log(`Success Rate: ${Math.round((passedTests / totalTests) * 100)}%`);
+  
+  if (passedTests === totalTests) {
+    console.log('\n🎉 All tests passed! PayPal integration is working correctly.');
+  } else {
+    console.log('\n⚠️  Some tests failed. Please check the configuration and try again.');
+    console.log('\n💡 Common issues:');
+    console.log('1. Missing or incorrect PayPal credentials in .env.local');
+    console.log('2. PayPal app not properly configured in developer dashboard');
+    console.log('3. Network connectivity issues');
+    console.log('4. PayPal API rate limiting');
+  }
+  
+  return results;
+}
+
+// Run tests if this script is executed directly
+if (require.main === module) {
+  runPayPalTests()
+    .then((results) => {
+      const allPassed = results.every(r => r.success);
+      process.exit(allPassed ? 0 : 1);
+    })
+    .catch((error) => {
+      console.error('Test execution failed:', error);
+      process.exit(1);
+    });
+}
+
+export { testPayPalIntegration, runPayPalTests };

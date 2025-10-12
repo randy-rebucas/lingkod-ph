@@ -2932,6 +2932,24 @@
     "eliteFeature3": "Advanced Analytics Suite",
     "eliteFeature4": "Dedicated Support",
     "eliteFeature5": "Lowest Commission Rate",
-    "eliteFeature6": "Custom Branding"
+    "eliteFeature6": "Custom Branding",
+    "currentPlan": "Current Plan",
+    "manageSubscription": "Manage Subscription",
+    "subscriptionSuccess": "Subscription Successful!",
+    "subscriptionCancelled": "Subscription Cancelled",
+    "subscriptionSuspended": "Subscription Suspended",
+    "billingInformation": "Billing Information",
+    "paymentMethod": "Payment Method",
+    "billingCycle": "Billing Cycle",
+    "subscriptionId": "Subscription ID",
+    "subscriptionActions": "Subscription Actions",
+    "managePaymentMethod": "Manage Payment Method",
+    "cancelSubscription": "Cancel Subscription",
+    "upgradePlan": "Upgrade Plan",
+    "viewPayPalAccount": "View PayPal Account",
+    "subscriptionExpired": "Subscription Expired",
+    "subscriptionActivated": "Subscription Activated",
+    "paymentCompleted": "Payment Completed",
+    "paymentFailed": "Payment Failed"
   }
 }

@@ -107,6 +107,33 @@ async function processWebhookEvent(webhookEvent: any) {
         }
         break;
 
+      // Subscription events
+      case 'BILLING.SUBSCRIPTION.ACTIVATED':
+      case 'BILLING.SUBSCRIPTION.CANCELLED':
+      case 'BILLING.SUBSCRIPTION.SUSPENDED':
+      case 'BILLING.SUBSCRIPTION.PAYMENT.COMPLETED':
+      case 'BILLING.SUBSCRIPTION.PAYMENT.FAILED':
+      case 'BILLING.SUBSCRIPTION.EXPIRED':
+        // Forward subscription events to subscription webhook handler
+        try {
+          const subscriptionWebhookUrl = `${request.nextUrl.origin}/api/subscriptions/webhook`;
+          await fetch(subscriptionWebhookUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'paypal-transmission-sig': request.headers.get('paypal-transmission-sig') || '',
+              'paypal-cert-id': request.headers.get('paypal-cert-id') || '',
+              'paypal-auth-algo': request.headers.get('paypal-auth-algo') || '',
+              'paypal-transmission-id': request.headers.get('paypal-transmission-id') || '',
+              'paypal-transmission-time': request.headers.get('paypal-transmission-time') || '',
+            },
+            body: JSON.stringify(webhookEvent),
+          });
+        } catch (error) {
+          console.error('Error forwarding subscription webhook:', error);
+        }
+        break;
+
       default:
         console.log(`Unhandled PayPal webhook event type: ${eventType}`);
     }

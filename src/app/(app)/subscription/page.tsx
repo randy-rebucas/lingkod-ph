@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Star, Crown, Zap, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { PayMayaPaymentButton } from "@/components/paymaya-payment-button";
+import { getUserSubscription } from "./actions";
+import { useToast } from "@/hooks/use-toast";
 
 interface SubscriptionPlan {
   id: string;
@@ -82,10 +85,36 @@ export default function SubscriptionPage() {
   const { user } = useAuth();
   const t = useTranslations('Subscription');
   const router = useRouter();
+  const { toast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentSubscription, setCurrentSubscription] = useState<any>(null);
+  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
   
   const subscriptionPlans = getSubscriptionPlans(t);
+
+  // Load current subscription
+  useEffect(() => {
+    const loadCurrentSubscription = async () => {
+      if (!user) {
+        setIsLoadingSubscription(false);
+        return;
+      }
+
+      try {
+        const result = await getUserSubscription(user.uid);
+        if (result.success && result.data) {
+          setCurrentSubscription(result.data);
+        }
+      } catch (error) {
+        console.error('Error loading subscription:', error);
+      } finally {
+        setIsLoadingSubscription(false);
+      }
+    };
+
+    loadCurrentSubscription();
+  }, [user]);
 
   const handleSelectPlan = async (planId: string) => {
     if (!user) {
@@ -93,26 +122,77 @@ export default function SubscriptionPage() {
       return;
     }
 
-    setIsLoading(true);
-    setSelectedPlan(planId);
-
-    try {
-      // Here you would typically integrate with your payment system
-      // For now, we'll simulate the process
-      console.log(`User ${user.email} selected plan: ${planId}`);
-      
-      // Redirect to payment processing or success page
-      // router.push(`/payment/subscription?plan=${planId}`);
-      
-      // For demo purposes, show success message
-      alert(`Selected ${planId} plan! Payment integration would be implemented here.`);
-    } catch (error) {
-      console.error('Error selecting plan:', error);
-      alert('Error selecting plan. Please try again.');
-    } finally {
-      setIsLoading(false);
-      setSelectedPlan(null);
+    // If user already has this plan, redirect to management
+    if (currentSubscription?.plan === planId) {
+      router.push('/subscription/manage');
+      return;
     }
+
+    // For free plan, just update the subscription
+    if (planId === 'free') {
+      setIsLoading(true);
+      try {
+        // Update to free plan (no payment required)
+        const response = await fetch('/api/subscriptions/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.uid,
+            planId: 'free',
+            planName: 'Free',
+            price: 0,
+            period: 'month',
+          }),
+        });
+
+        if (response.ok) {
+          toast({
+            title: "Plan Updated",
+            description: "You have successfully switched to the Free plan.",
+          });
+          // Refresh subscription data
+          const result = await getUserSubscription(user.uid);
+          if (result.success && result.data) {
+            setCurrentSubscription(result.data);
+          }
+        } else {
+          throw new Error('Failed to update plan');
+        }
+      } catch (error) {
+        console.error('Error updating plan:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update plan. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handlePaymentStart = () => {
+    setIsLoading(true);
+  };
+
+  const handlePaymentSuccess = (subscriptionId: string) => {
+    setIsLoading(false);
+    toast({
+      title: "Payment Successful!",
+      description: "Your subscription has been activated. Redirecting to success page...",
+    });
+    // The PayPal redirect will handle the success page
+  };
+
+  const handlePaymentError = (error: string) => {
+    setIsLoading(false);
+    toast({
+      title: "Payment Failed",
+      description: error,
+      variant: "destructive",
+    });
   };
 
   return (
@@ -126,6 +206,39 @@ export default function SubscriptionPage() {
           {t('subtitle')}
         </p>
       </div>
+
+      {/* Current Subscription Status */}
+      {user && !isLoadingSubscription && currentSubscription && (
+        <div className="mb-8">
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Current Plan: {currentSubscription.planName}</h3>
+                  <p className="text-muted-foreground">
+                    {currentSubscription.price > 0 
+                      ? `₱${currentSubscription.price}/${currentSubscription.period}`
+                      : 'Free Plan'
+                    }
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Badge variant={currentSubscription.status === 'active' ? 'default' : 'secondary'}>
+                    {currentSubscription.status}
+                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => router.push('/subscription/manage')}
+                  >
+                    Manage
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Plans Grid */}
       <div className="grid md:grid-cols-3 gap-8 mb-12">
@@ -177,24 +290,37 @@ export default function SubscriptionPage() {
                 ))}
               </ul>
               
-              <Button 
-                className={`w-full mt-6 ${
-                  plan.popular 
-                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground' 
-                    : 'bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20'
-                }`}
-                onClick={() => handleSelectPlan(plan.id)}
-                disabled={isLoading && selectedPlan === plan.id}
-              >
-                {isLoading && selectedPlan === plan.id ? (
-                  t('processing')
-                ) : (
-                  <>
-                    {plan.price === 0 ? t('getStartedFree') : t('choosePlan')}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </>
-                )}
-              </Button>
+              {plan.price === 0 ? (
+                <Button 
+                  className="w-full mt-6 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
+                  onClick={() => handleSelectPlan(plan.id)}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    t('processing')
+                  ) : (
+                    <>
+                      {currentSubscription?.plan === plan.id ? 'Current Plan' : t('getStartedFree')}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <PayMayaPaymentButton
+                  planId={plan.id}
+                  planName={plan.name}
+                  price={plan.price}
+                  onPaymentStart={handlePaymentStart}
+                  onPaymentSuccess={handlePaymentSuccess}
+                  onPaymentError={handlePaymentError}
+                  disabled={isLoading || currentSubscription?.plan === plan.id}
+                  className={`w-full mt-6 ${
+                    plan.popular 
+                      ? 'bg-primary hover:bg-primary/90 text-primary-foreground' 
+                      : 'bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20'
+                  }`}
+                />
+              )}
             </CardContent>
           </Card>
         ))}
