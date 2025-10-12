@@ -29,7 +29,7 @@ async function testMayaIntegration() {
   // Test 2: Service initialization
   console.log('2. Testing service initialization...');
   try {
-    const mayaService = new MayaCheckoutService();
+    const _mayaService = new MayaCheckoutService();
     console.log('   ✅ Maya Checkout Service initialized successfully');
   } catch (error) {
     console.log('   ❌ Failed to initialize Maya Checkout Service:', error);

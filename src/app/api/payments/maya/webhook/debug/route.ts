@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   return NextResponse.json({
     message: 'Maya webhook debug endpoint',
     usage: 'Send POST requests to this endpoint to debug webhook data',

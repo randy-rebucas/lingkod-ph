@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Star, Crown, Zap, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PaymentMethodSelector } from "@/components/payment-method-selector";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface SubscriptionPlan {
   id: string;

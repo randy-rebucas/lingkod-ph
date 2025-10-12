@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     let user;
     try {
       user = await getAuth().verifyIdToken(token);
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { success: false, error: 'Invalid token' },
         { status: 401 }

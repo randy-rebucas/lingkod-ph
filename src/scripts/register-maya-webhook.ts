@@ -81,7 +81,7 @@ async function main() {
   console.log(`Base URL: ${PaymentConfig.MAYA.environment === 'production' ? 'https://pg.maya.ph' : 'https://pg-sandbox.maya.ph'}\n`);
 
   let successCount = 0;
-  let totalCount = WEBHOOK_EVENTS.length;
+  const totalCount = WEBHOOK_EVENTS.length;
 
   for (const event of WEBHOOK_EVENTS) {
     const success = await registerWebhook(event);
