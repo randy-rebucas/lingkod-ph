@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Star, Crown, Zap, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { PaymentMethodSelector } from "@/components/payment-method-selector";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface SubscriptionPlan {
   id: string;
@@ -42,7 +44,7 @@ const getSubscriptionPlans = (t: any): SubscriptionPlan[] => [
   {
     id: "premium",
     name: t('premium'),
-    price: 499,
+    price: 20,
     period: "month",
     description: t('premiumDescription'),
     features: [
@@ -61,7 +63,7 @@ const getSubscriptionPlans = (t: any): SubscriptionPlan[] => [
   {
     id: "elite",
     name: t('elite'),
-    price: 999,
+    price: 30,
     period: "month",
     description: t('eliteDescription'),
     features: [
@@ -84,6 +86,8 @@ export default function SubscriptionPage() {
   const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan | null>(null);
   
   const subscriptionPlans = getSubscriptionPlans(t);
 
@@ -93,26 +97,45 @@ export default function SubscriptionPage() {
       return;
     }
 
-    setIsLoading(true);
-    setSelectedPlan(planId);
-
-    try {
-      // Here you would typically integrate with your payment system
-      // For now, we'll simulate the process
-      console.log(`User ${user.email} selected plan: ${planId}`);
-      
-      // Redirect to payment processing or success page
-      // router.push(`/payment/subscription?plan=${planId}`);
-      
-      // For demo purposes, show success message
-      alert(`Selected ${planId} plan! Payment integration would be implemented here.`);
-    } catch (error) {
-      console.error('Error selecting plan:', error);
-      alert('Error selecting plan. Please try again.');
-    } finally {
-      setIsLoading(false);
-      setSelectedPlan(null);
+    const plan = subscriptionPlans.find(p => p.id === planId);
+    if (!plan) {
+      return;
     }
+
+    if (plan.price === 0) {
+      // Handle free plan
+      setIsLoading(true);
+      setSelectedPlan(planId);
+      
+      try {
+        // Process free plan subscription
+        console.log(`User ${user.email} selected free plan: ${planId}`);
+        alert(`Successfully subscribed to ${plan.name} plan!`);
+      } catch (error) {
+        console.error('Error selecting free plan:', error);
+        alert('Error selecting plan. Please try again.');
+      } finally {
+        setIsLoading(false);
+        setSelectedPlan(null);
+      }
+    } else {
+      // Show payment dialog for paid plans
+      setCurrentPlan(plan);
+      setShowPaymentDialog(true);
+    }
+  };
+
+  const handlePaymentSuccess = (method: string, transactionId?: string) => {
+    console.log(`Payment successful via ${method}:`, transactionId);
+    setShowPaymentDialog(false);
+    setCurrentPlan(null);
+    // Handle successful payment (update user subscription, etc.)
+    alert(`Payment successful! You are now subscribed to ${currentPlan?.name} plan.`);
+  };
+
+  const handlePaymentError = (method: string, error: string) => {
+    console.error(`Payment failed via ${method}:`, error);
+    // Handle payment error
   };
 
   return (
@@ -220,6 +243,28 @@ export default function SubscriptionPage() {
           </div>
         </div>
       </div>
+
+      {/* Payment Dialog */}
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Complete Your Subscription</DialogTitle>
+            <DialogDescription>
+              Choose your payment method to subscribe to the {currentPlan?.name} plan for ₱{currentPlan?.price}/month
+            </DialogDescription>
+          </DialogHeader>
+          
+          {currentPlan && (
+            <PaymentMethodSelector
+              amount={currentPlan.price}
+              type="subscription"
+              planId={currentPlan.id}
+              onPaymentSuccess={handlePaymentSuccess}
+              onPaymentError={handlePaymentError}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

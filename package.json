@@ -28,6 +28,7 @@
     "seed:learning-hub": "tsx src/scripts/seed-learning-hub.ts",
     "seed:learning-hub:mock": "tsx src/scripts/seed-learning-hub-mock.ts",
     "test-paypal": "tsx src/scripts/test-paypal-integration.ts",
+    "test-maya": "tsx src/scripts/test-maya-integration.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
