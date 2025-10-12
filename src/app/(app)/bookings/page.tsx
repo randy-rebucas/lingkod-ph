@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { fetchUserBookings } from './actions';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
@@ -33,7 +34,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-context";
 import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, or, serverTimestamp, orderBy, addDoc, getDoc } from "firebase/firestore";
+import { collection, doc, updateDoc, Timestamp, serverTimestamp, addDoc, getDoc } from "firebase/firestore";
 import { TableSkeleton } from "@/components/ui/loading-states";
 import { BookingDetailsDialog } from "@/components/booking-details-dialog";
 import { LeaveReviewDialog } from "@/components/leave-review-dialog";
@@ -62,7 +63,7 @@ export type Booking = {
     providerId: string;
     clientAvatar?: string;
     providerAvatar?: string;
-    date: Timestamp;
+    date: Date;
     status: BookingStatus;
     price?: number;
     notes?: string;
@@ -228,7 +229,7 @@ const BookingTableRow = ({ booking, userRole }: { booking: Booking; userRole: st
                 <TableCell>
                     <div className="flex items-center gap-1 text-sm">
                         <Calendar className="h-3 w-3" />
-                        {format(booking.date.toDate(), 'MMM dd, yyyy')}
+                        {format(booking.date, 'MMM dd, yyyy')}
                     </div>
                 </TableCell>
 
@@ -458,7 +459,7 @@ const BookingMobileCard = ({ booking, userRole }: { booking: Booking; userRole: 
                     <div className="grid grid-cols-2 gap-3 text-sm mb-3">
                         <div className="flex items-center gap-1 text-muted-foreground">
                             <Calendar className="h-3 w-3" />
-                            {format(booking.date.toDate(), 'MMM dd')}
+                            {format(booking.date, 'MMM dd')}
                         </div>
                         <div className="flex items-center gap-1 font-medium">
                             <Wallet className="h-3 w-3" />
@@ -631,29 +632,34 @@ export default function BookingsPage() {
     const t = useTranslations('Bookings');
 
     useEffect(() => {
-        if (!user || !getDb()) {
+        if (!user) {
             setLoading(false);
             return;
         };
 
-        setLoading(true);
-        const bookingsRef = collection(getDb(), "bookings");
-        const q = query(bookingsRef, 
-            or(where("clientId", "==", user.uid), where("providerId", "==", user.uid)),
-            orderBy("date", "desc")
-        );
+        const fetchBookings = async () => {
+            setLoading(true);
+            console.log('📞 Calling fetchUserBookings with user.uid:', user.uid);
+            try {
+                const result = await fetchUserBookings(user.uid);
+                console.log('📞 fetchUserBookings result:', result);
+                if (result.success) {
+                    setBookings(result.data || []);
+                } else {
+                    console.error("Error fetching bookings:", result.error);
+                    toast({ variant: 'destructive', title: t('error'), description: result.error || t('failedToFetchBookings') });
+                    setBookings([]);
+                }
+            } catch (error) {
+                console.error("Error fetching bookings:", error);
+                toast({ variant: 'destructive', title: t('error'), description: t('failedToFetchBookings') });
+                setBookings([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-             const bookingsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
-            setBookings(bookingsData);
-            setLoading(false);
-        }, (error) => {
-            console.error("Error fetching bookings:", error);
-            toast({ variant: 'destructive', title: t('error'), description: t('failedToFetchBookings') });
-            setLoading(false);
-        });
-
-        return () => unsubscribe();
+        fetchBookings();
     }, [user, toast, t]);
 
     const pendingPaymentBookings = bookings.filter(b => b.status === 'Pending Payment');
@@ -703,7 +709,7 @@ export default function BookingsPage() {
         
         const todayBookings = bookings.filter(b => {
             const today = new Date();
-            const bookingDate = b.date.toDate();
+            const bookingDate = b.date;
             return bookingDate.toDateString() === today.toDateString();
         }).length;
         
@@ -712,7 +718,7 @@ export default function BookingsPage() {
             weekStart.setDate(weekStart.getDate() - weekStart.getDay());
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekEnd.getDate() + 6);
-            const bookingDate = b.date.toDate();
+            const bookingDate = b.date;
             return bookingDate >= weekStart && bookingDate <= weekEnd;
         }).length;
         
@@ -729,7 +735,7 @@ export default function BookingsPage() {
 
         const monthlyGrowth = bookings.filter(b => {
             const thisMonth = new Date();
-            const bookingMonth = b.date.toDate();
+            const bookingMonth = b.date;
             return bookingMonth.getMonth() === thisMonth.getMonth() && 
                    bookingMonth.getFullYear() === thisMonth.getFullYear();
         }).length;
@@ -737,7 +743,7 @@ export default function BookingsPage() {
         const lastMonth = new Date();
         lastMonth.setMonth(lastMonth.getMonth() - 1);
         const lastMonthBookings = bookings.filter(b => {
-            const bookingDate = b.date.toDate();
+            const bookingDate = b.date;
             return bookingDate.getMonth() === lastMonth.getMonth() && 
                    bookingDate.getFullYear() === lastMonth.getFullYear();
         }).length;
@@ -784,7 +790,7 @@ export default function BookingsPage() {
         if (dateFilter !== 'all') {
             const now = new Date();
             filtered = filtered.filter(booking => {
-                const bookingDate = booking.date.toDate();
+                const bookingDate = booking.date;
                 switch (dateFilter) {
                     case 'today':
                         return bookingDate.toDateString() === now.toDateString();
@@ -820,7 +826,7 @@ export default function BookingsPage() {
             let comparison = 0;
             switch (sortBy) {
                 case "date":
-                    comparison = a.date.toMillis() - b.date.toMillis();
+                    comparison = a.date.getTime() - b.date.getTime();
                     break;
                 case "price":
                     comparison = (a.price || 0) - (b.price || 0);

@@ -87,7 +87,7 @@ describe('Providers Actions', () => {
       const result = await getProvider('provider-123');
 
       expect(result.success).toBe(true);
-      expect(result.data).toEqual({ uid: 'provider-123', ...mockProvider });
+      expect(result.data).toEqual({ ...mockProvider, uid: 'provider-123' });
       expect(result.message).toBe('Provider retrieved successfully');
       expect(mockGetDoc).toHaveBeenCalled();
     });
@@ -402,7 +402,7 @@ describe('Providers Actions', () => {
       const result = await getUserFavoriteProviders('user-123');
       
       expect(result.success).toBe(true);
-      expect(result.data).toEqual([{ uid: 'provider-123', ...mockProvider }]);
+      expect(result.data).toEqual([{ ...mockProvider, uid: 'provider-123' }]);
       expect(result.message).toBe('Favorite providers retrieved successfully');
     });
 

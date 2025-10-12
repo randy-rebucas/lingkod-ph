@@ -636,7 +636,7 @@ describe('PaymentValidator', () => {
       };
 
       // Ensure the mock is called for both database calls
-      mockDb.collection.mockImplementation((collectionName) => {
+      mockDb.collection.mockImplementation((collectionName: string) => {
         if (collectionName === 'bookings') {
           return mockCollection as any;
         }
@@ -700,7 +700,7 @@ describe('PaymentValidator', () => {
       };
 
       // Ensure the mock is called for both database calls
-      mockDb.collection.mockImplementation((collectionName) => {
+      mockDb.collection.mockImplementation((collectionName: string) => {
         if (collectionName === 'bookings') {
           return mockCollection as any;
         }

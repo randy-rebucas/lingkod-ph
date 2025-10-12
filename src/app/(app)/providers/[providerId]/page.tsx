@@ -156,7 +156,7 @@ export default function ProviderProfilePage() {
         };
 
         fetchProviderData();
-    }, [providerId]);
+    }, [providerId, t, toast]);
     
     useEffect(() => {
         if (!user || !providerId) {
@@ -179,7 +179,7 @@ export default function ProviderProfilePage() {
         };
 
         checkFavoriteStatus();
-    }, [user, providerId]);
+    }, [user, providerId, t, toast]);
 
 
     const handleToggleFavorite = async () => {

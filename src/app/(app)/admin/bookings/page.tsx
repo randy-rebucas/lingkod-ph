@@ -18,7 +18,19 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { handleUpdateBookingStatus } from "./actions";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { Timestamp } from "firebase/firestore";
 // import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+
+// Helper function to safely convert Firebase Timestamp or Date to Date object
+const toDate = (dateValue: Timestamp | Date): Date => {
+    if (dateValue && typeof (dateValue as any).toDate === 'function') {
+        return (dateValue as Timestamp).toDate();
+    }
+    if (dateValue instanceof Date) {
+        return dateValue;
+    }
+    return new Date(dateValue.toString());
+};
 
 const getStatusVariant = (status: string) => {
     switch (status) {
@@ -137,7 +149,7 @@ export default function AdminBookingsPage() {
                                 {bookings.length > 0 ? bookings.map(booking => (
                                     <TableRow key={booking.id}>
                                          <TableCell className="text-xs text-muted-foreground">
-                                            {booking.date ? format(booking.date.toDate(), 'PP') : 'N/A'}
+                                            {booking.date ? format(toDate(booking.date), 'PP') : 'N/A'}
                                         </TableCell>
                                         <TableCell className="font-medium">{booking.serviceName}</TableCell>
                                         <TableCell>{booking.clientName}</TableCell>

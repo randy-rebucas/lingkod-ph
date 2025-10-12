@@ -3,8 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/context/auth-context';
-import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, or, Timestamp, addDoc } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -16,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ChevronLeft, ChevronRight, Plus, CheckCircle, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
+import { getCalendarEvents, createCalendarEvent } from './actions';
 
 type BookingEvent = {
     id: string;
@@ -55,35 +54,30 @@ export default function CalendarPage() {
     });
 
     useEffect(() => {
-        if (!user || !getDb()) {
+        if (!user) {
             setLoading(false);
             return;
         }
 
-        const bookingsRef = collection(getDb(), "bookings");
-        const q = query(bookingsRef,
-            or(where("clientId", "==", user.uid), where("providerId", "==", user.uid))
-        );
+        const fetchCalendarEvents = async () => {
+            setLoading(true);
+            try {
+                const result = await getCalendarEvents(user.uid);
+                if (result.success && result.data) {
+                    setEvents(result.data);
+                } else {
+                    console.error("Error fetching calendar events:", result.error);
+                    setEvents([]);
+                }
+            } catch (error) {
+                console.error("Error fetching calendar events:", error);
+                setEvents([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const bookingEvents = snapshot.docs.map(doc => {
-                const data = doc.data();
-                return {
-                    id: doc.id,
-                    title: data.serviceName,
-                    start: (data.date as Timestamp).toDate(),
-                    end: new Date((data.date as Timestamp).toDate().getTime() + 60 * 60 * 1000),
-                    status: data.status,
-                    providerName: data.providerName,
-                    clientName: data.clientName,
-                    serviceName: data.serviceName,
-                };
-            }).filter(event => event.status !== 'Pending' && event.status !== 'Cancelled');
-            setEvents(bookingEvents as BookingEvent[]);
-            setLoading(false);
-        });
-
-        return () => unsubscribe();
+        fetchCalendarEvents();
     }, [user, userRole]);
 
     const calendarGrid = useMemo(() => {
@@ -142,25 +136,27 @@ export default function CalendarPage() {
         serviceName: string;
     }) => {
         try {
-            if (!user || !getDb()) return;
+            if (!user) return;
 
-            const eventToSave = {
+            const result = await createCalendarEvent({
                 title: eventData.title,
                 serviceName: eventData.serviceName,
                 description: eventData.description,
-                date: Timestamp.fromDate(eventData.start),
-                endDate: Timestamp.fromDate(eventData.end),
-                status: 'Upcoming',
-                clientId: userRole === 'client' ? user.uid : '',
-                providerId: userRole === 'provider' ? user.uid : '',
-                clientName: userRole === 'client' ? user.displayName || 'You' : '',
-                providerName: userRole === 'provider' ? user.displayName || 'You' : '',
-                createdAt: Timestamp.now(),
-                updatedAt: Timestamp.now()
-            };
-
-            await addDoc(collection(getDb(), "bookings"), eventToSave);
-            setIsCreateEventOpen(false);
+                start: eventData.start,
+                end: eventData.end,
+                userId: user.uid,
+            });
+            
+            if (result.success) {
+                setIsCreateEventOpen(false);
+                // Refresh the events list
+                const refreshResult = await getCalendarEvents(user.uid);
+                if (refreshResult.success && refreshResult.data) {
+                    setEvents(refreshResult.data);
+                }
+            } else {
+                throw new Error(result.error || 'Failed to create event');
+            }
         } catch (error) {
             console.error('Error creating event:', error);
         }

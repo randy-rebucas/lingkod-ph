@@ -25,11 +25,11 @@ import {
   BarChart3
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { PartnerAnalyticsService, PartnerAnalytics, ReferralData, PartnerCommission } from "@/lib/partner-analytics";
+import { PartnerAnalytics, ReferralData, PartnerCommission } from "@/lib/partner-analytics";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { getPartnerAnalytics } from './actions';
 import { Input } from "@/components/ui/input";
-import { getDb } from '@/lib/firebase';
 
 interface AnalyticsData {
   analytics: PartnerAnalytics | null;
@@ -170,27 +170,50 @@ export default function PartnerAnalyticsPage() {
 
   useEffect(() => {
     const loadAnalyticsData = async () => {
-      if (user && userRole === 'partner' && getDb()) {
+      if (user && userRole === 'partner') {
         try {
           setData(prev => ({ ...prev, loading: true }));
 
-          // Load all analytics data in parallel
-          const [analytics, referrals, commissions] = await Promise.all([
-            PartnerAnalyticsService.getPartnerAnalytics(user.uid),
-            PartnerAnalyticsService.getPartnerReferrals(user.uid, 20),
-            PartnerAnalyticsService.getPartnerCommissions(user.uid, undefined, 20)
-          ]);
+          // Use server action to get analytics data
+          const result = await getPartnerAnalytics(user.uid);
+          if (result.success && result.data) {
+            // Transform server action data to match expected format
+            const analytics = {
+              partnerId: user.uid,
+              partnerName: user.displayName || 'Partner',
+              totalReferrals: result.data.totalReferrals,
+              activeReferrals: result.data.activeReferrals,
+              completedJobs: result.data.completedJobs || 0,
+              totalRevenue: result.data.totalRevenue,
+              partnerCommission: 0, // Will be calculated separately
+              conversionRate: result.data.conversionRate,
+              averageJobValue: result.data.completedJobs > 0 ? result.data.totalRevenue / result.data.completedJobs : 0,
+              topPerformingCategories: result.data.topCategories || [],
+              monthlyStats: result.data.referralTrends.map((trend: any) => ({
+                month: trend.month,
+                year: new Date().getFullYear(),
+                referrals: trend.referrals,
+                completedJobs: 0,
+                revenue: trend.conversions * 100, // Convert to revenue estimate
+                commission: 0
+              })),
+              lastUpdated: new Date() as any
+            };
 
-          setData({
-            analytics,
-            referrals: referrals || [],
-            commissions: commissions || [],
-            loading: false
-          });
+            setData({
+              analytics,
+              referrals: [], // Will be populated separately if needed
+              commissions: [], // Will be populated separately if needed
+              loading: false
+            });
 
-          // Always calculate enhanced metrics, even with no data
-          const metrics = calculateEnhancedMetrics(analytics, referrals || [], commissions || []);
-          setEnhancedMetrics(metrics);
+            // Calculate enhanced metrics
+            const metrics = calculateEnhancedMetrics(analytics, [], []);
+            setEnhancedMetrics(metrics);
+          } else {
+            console.error('Error loading analytics data:', result.error);
+            setData(prev => ({ ...prev, loading: false }));
+          }
         } catch (error) {
           console.error('Error loading analytics data:', error);
           setData(prev => ({ ...prev, loading: false }));

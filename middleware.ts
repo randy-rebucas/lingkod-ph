@@ -8,6 +8,13 @@ const intlMiddleware = createIntlMiddleware({
 });
 
 export async function middleware(request: NextRequest) {
+  // Skip middleware for server actions to prevent interference
+  if (request.nextUrl.pathname.startsWith('/_next/static/') || 
+      request.nextUrl.pathname.includes('server-actions') ||
+      request.headers.get('next-action')) {
+    return NextResponse.next();
+  }
+
   // Security: Rate limiting headers
   const response = NextResponse.next();
   

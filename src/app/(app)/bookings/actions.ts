@@ -1,9 +1,30 @@
 'use server';
 
 import { getDb, getStorageInstance } from '@/lib/firebase';
-import { doc, updateDoc, getDoc, serverTimestamp, collection, addDoc, runTransaction } from 'firebase/firestore';
+import { doc, updateDoc, getDoc, serverTimestamp, collection, addDoc, runTransaction, query, where, getDocs } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { PaymentRetryService } from '@/lib/payment-retry-service';
+
+// Utility function to serialize Firebase Timestamps for client components
+const serializeTimestamps = (data: any): any => {
+  if (!data || typeof data !== 'object') return data;
+  
+  const serialized = { ...data };
+  
+  // Convert common Timestamp fields
+  const timestampFields = [
+    'createdAt', 'updatedAt', 'paidAt', 'date', 'endDate', 'startDate', 
+    'completedAt', 'cancelledAt', 'verifiedAt', 'scheduledAt'
+  ];
+  
+  timestampFields.forEach(field => {
+    if (serialized[field] && typeof serialized[field].toDate === 'function') {
+      serialized[field] = serialized[field].toDate();
+    }
+  });
+  
+  return serialized;
+};
 
 // PayPal payment creation action
 export async function createPayPalPayment(_data: {
@@ -135,17 +156,85 @@ export async function getBooking(bookingId: string): Promise<{ success: boolean;
     const bookingData = bookingDoc.data();
     return { 
       success: true, 
-      data: {
+      data: serializeTimestamps({
         id: bookingDoc.id,
         ...bookingData,
-        createdAt: bookingData.createdAt?.toDate?.()?.toISOString() || bookingData.createdAt,
-        updatedAt: bookingData.updatedAt?.toDate?.()?.toISOString() || bookingData.updatedAt,
-        paidAt: bookingData.paidAt?.toDate?.()?.toISOString() || bookingData.paidAt,
-      }
+      })
     };
   } catch (error) {
     console.error('Error fetching booking:', error);
     return { success: false, error: 'Failed to fetch booking' };
+  }
+}
+
+// Get all bookings for a user (both as client and provider)
+export async function fetchUserBookings(userId: string): Promise<{ success: boolean; data?: any[]; error?: string }> {
+  try {
+    console.log('🚀 fetchUserBookings called with userId:', userId);
+    
+    if (!userId) {
+      console.error('❌ No user ID provided to fetchUserBookings');
+      return { success: false, error: '[NEW CODE] User ID is required for fetchUserBookings' };
+    }
+    
+    const db = getDb();
+    if (!db) {
+      return { success: false, error: 'Database not available' };
+    }
+    
+    console.log('Querying bookings for user:', userId);
+    
+    // Query for bookings where user is either client or provider
+    // Using separate queries to avoid composite index requirements
+    const [clientBookingsQuery, providerBookingsQuery] = [
+      query(collection(db, 'bookings'), where('clientId', '==', userId)),
+      query(collection(db, 'bookings'), where('providerId', '==', userId))
+    ];
+    
+    const [clientBookingsSnapshot, providerBookingsSnapshot] = await Promise.all([
+      getDocs(clientBookingsQuery),
+      getDocs(providerBookingsQuery)
+    ]);
+    
+    console.log('Found', clientBookingsSnapshot.docs.length, 'client bookings');
+    console.log('Found', providerBookingsSnapshot.docs.length, 'provider bookings');
+    
+    // Combine results and remove duplicates
+    const allBookings = new Map();
+    
+    clientBookingsSnapshot.docs.forEach(doc => {
+      allBookings.set(doc.id, doc);
+    });
+    
+    providerBookingsSnapshot.docs.forEach(doc => {
+      allBookings.set(doc.id, doc);
+    });
+    
+    const bookingsSnapshot = { docs: Array.from(allBookings.values()) };
+    console.log('Total unique bookings:', bookingsSnapshot.docs.length);
+    
+    const bookings = bookingsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return serializeTimestamps({
+        id: doc.id,
+        ...data,
+      });
+    });
+    
+    console.log('Processed bookings:', bookings.length);
+    
+    // Return success even if no bookings are found
+    console.log('✅ getUserBookings completed successfully with', bookings.length, 'bookings');
+    return { 
+      success: true, 
+      data: bookings || [] 
+    };
+  } catch (error) {
+    console.error('Error fetching user bookings:', error);
+    return { 
+      success: false, 
+      error: `[NEW CODE] fetchUserBookings error: ${error instanceof Error ? error.message : 'Failed to fetch user bookings'}` 
+    };
   }
 }
 

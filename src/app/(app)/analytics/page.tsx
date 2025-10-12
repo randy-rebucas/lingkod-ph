@@ -23,10 +23,10 @@ import {
 } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useState, useEffect, useMemo } from "react";
-import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, Timestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SkeletonCards } from "@/components/ui/loading-states";
+import { getProviderAnalyticsData } from './actions';
+import { Timestamp } from 'firebase/firestore';
 // import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -315,33 +315,29 @@ export default function AnalyticsPage() {
 
 
     useEffect(() => {
-        if (!user || !getDb()) {
+        if (!user) {
             setLoading(false);
             return;
+        }
+
+        const loadAnalyticsData = async () => {
+            setLoading(true);
+            try {
+                const result = await getProviderAnalyticsData(user.uid);
+                if (result.success && result.data) {
+                    setBookings(result.data.bookings || []);
+                    setReviews(result.data.reviews || []);
+                } else {
+                    console.error("Error loading analytics data:", result.error);
+                }
+            } catch (error) {
+                console.error("Error loading analytics data:", error);
+            } finally {
+                setLoading(false);
+            }
         };
 
-        setLoading(true);
-        const bookingsQuery = query(collection(getDb(), "bookings"), where("providerId", "==", user.uid));
-        const reviewsQuery = query(collection(getDb(), "reviews"), where("providerId", "==", user.uid));
-        
-        const unsubBookings = onSnapshot(bookingsQuery, (snapshot) => {
-            const bookingsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
-            setBookings(bookingsData);
-            setLoading(false);
-        }, (error) => {
-            console.error("Firestore Error (Bookings):", error);
-            setLoading(false);
-        });
-
-        const unsubReviews = onSnapshot(reviewsQuery, (snapshot) => {
-             const reviewsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
-            setReviews(reviewsData);
-        });
-
-        return () => {
-            unsubBookings();
-            unsubReviews();
-        };
+        loadAnalyticsData();
     }, [user]);
 
     const analyticsData = useMemo(() => {

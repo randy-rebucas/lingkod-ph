@@ -6,11 +6,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
-import { collection, getDocs, query, orderBy, getDoc, doc } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from 'next-intl';
+import { getCategories, getJobById } from './actions';
 
 import { postJobAction, type PostJobInput } from "./actions";
 import { generateJobDetails, type JobDetailQuestion } from "@/ai/flows/generate-job-details";
@@ -89,15 +88,15 @@ export default function PostAJobPage() {
 
    useEffect(() => {
         const fetchCategories = async () => {
-            if (!getDb()) return;
             try {
-                const categoriesRef = collection(getDb(), "categories");
-                const q = query(categoriesRef, orderBy("name"));
-                const querySnapshot = await getDocs(q);
-                const fetchedCategories = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
-                setCategories(fetchedCategories);
+                const result = await getCategories();
+                if (result.success && result.data) {
+                    setCategories(result.data);
+                } else {
+                    console.error("Error fetching categories:", result.error);
+                }
             } catch (error) {
-                console.error("Error fetching categories: ", error);
+                console.error("Error fetching categories:", error);
             }
         };
         fetchCategories();
@@ -105,33 +104,60 @@ export default function PostAJobPage() {
     
      useEffect(() => {
         const fetchJobData = async () => {
-            if (!editJobId || !user || !getDb()) return;
+            if (!editJobId || !user) return;
             setIsLoadingJob(true);
-            const jobRef = doc(getDb(), "jobs", editJobId);
-            const jobSnap = await getDoc(jobRef);
-            if (jobSnap.exists() && jobSnap.data().clientId === user.uid) {
-                const jobData = jobSnap.data();
-                form.reset({
-                    title: jobData.title,
-                    description: jobData.description,
-                    categoryId: jobData.categoryId,
-                    budgetAmount: jobData.budget.amount,
-                    budgetType: jobData.budget.type,
-                    isNegotiable: jobData.budget.negotiable,
-                    location: jobData.location,
-                    deadline: jobData.deadline?.toDate(),
-                });
-                if (jobData.additionalDetails) {
-                    const loadedQuestions = jobData.additionalDetails.map((q: any) => ({ question: q.question, example: '', type: 'text' }));
-                    const loadedAnswers = jobData.additionalDetails.reduce((acc: any, q: any) => ({ ...acc, [q.question]: q.answer }), {});
-                    setQuestions(loadedQuestions);
-                    setAnswers(loadedAnswers);
+            try {
+                const result = await getJobById(editJobId, user.uid);
+                if (result.success && result.data) {
+                    const jobData = result.data;
+                    
+                    // Populate form with existing job data
+                    form.reset({
+                        title: jobData.title,
+                        description: jobData.description,
+                        categoryId: jobData.categoryId,
+                        budgetAmount: jobData.budgetAmount,
+                        budgetType: jobData.budgetType,
+                        isNegotiable: jobData.isNegotiable,
+                        location: jobData.location,
+                        deadline: jobData.deadline,
+                    });
+                    
+                    // Load additional details if they exist
+                    if (jobData.additionalDetails) {
+                        try {
+                            const additionalDetails = JSON.parse(jobData.additionalDetails);
+                            if (Array.isArray(additionalDetails)) {
+                                const questions = additionalDetails.map((item: any) => ({
+                                    question: item.question,
+                                    type: 'text' as const,
+                                    example: ''
+                                }));
+                                setQuestions(questions);
+                                
+                                const answersObj: Record<string, string> = {};
+                                additionalDetails.forEach((item: any) => {
+                                    if (item.answer) {
+                                        answersObj[item.question] = item.answer;
+                                    }
+                                });
+                                setAnswers(answersObj);
+                            }
+                        } catch (error) {
+                            console.warn("Failed to parse additional details:", error);
+                        }
+                    }
+                } else {
+                    toast({ variant: "destructive", title: "Error", description: result.error || "Failed to load job data." });
+                    router.push("/my-job-posts");
                 }
-            } else {
-                 toast({ variant: "destructive", title: "Error", description: "Job not found or you don't have permission to edit it." });
-                 router.push("/my-job-posts");
+            } catch (error) {
+                console.error("Error fetching job data:", error);
+                toast({ variant: "destructive", title: "Error", description: "Failed to load job data." });
+                router.push("/my-job-posts");
+            } finally {
+                setIsLoadingJob(false);
             }
-            setIsLoadingJob(false);
         };
         fetchJobData();
     }, [editJobId, user, form, router, toast]);

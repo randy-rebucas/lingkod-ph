@@ -23,11 +23,40 @@ const serializeTimestamps = (data: any): any => {
   const serialized = { ...data };
   
   // Convert common Timestamp fields
-  const timestampFields = ['createdAt', 'updatedAt', 'joinedAt', 'lastActiveAt', 'birthdate', 'lastMessageAt', 'timestamp'];
+  const timestampFields = [
+    'createdAt', 'updatedAt', 'joinedAt', 'lastActiveAt', 'birthdate', 'lastMessageAt', 
+    'timestamp', 'submittedAt', 'endDate', 'date', 'favoritedAt', 'establishedDate'
+  ];
   
+  // Handle top-level timestamp fields
   timestampFields.forEach(field => {
     if (serialized[field] && typeof serialized[field].toDate === 'function') {
       serialized[field] = serialized[field].toDate();
+    }
+  });
+  
+  // Handle nested timestamp fields in verification object
+  if (serialized.verification && typeof serialized.verification === 'object') {
+    const verification = { ...serialized.verification };
+    timestampFields.forEach(field => {
+      if (verification[field] && typeof verification[field].toDate === 'function') {
+        verification[field] = verification[field].toDate();
+      }
+    });
+    serialized.verification = verification;
+  }
+  
+  // Handle nested timestamp fields in other common nested objects
+  const nestedObjects = ['payoutDetails', 'documents', 'metadata'];
+  nestedObjects.forEach(objKey => {
+    if (serialized[objKey] && typeof serialized[objKey] === 'object') {
+      if (Array.isArray(serialized[objKey])) {
+        serialized[objKey] = serialized[objKey].map((item: any) => 
+          typeof item === 'object' ? serializeTimestamps(item) : item
+        );
+      } else {
+        serialized[objKey] = serializeTimestamps(serialized[objKey]);
+      }
     }
   });
   

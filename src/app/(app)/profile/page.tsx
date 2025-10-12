@@ -13,11 +13,25 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LoadingSpinner } from "@/components/ui/loading-states";
 import { Badge } from "@/components/ui/badge";
 import { Camera, Upload, User, Settings, Briefcase, Award, Users, Copy, ShieldCheck, ThumbsUp, ThumbsDown, MapPin, Wallet, Building, FileText, Trash2 } from "lucide-react";
-import { getStorageInstance, getDb   } from '@/lib/firebase';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject, uploadBytes } from "firebase/storage";
-import { updateProfile } from "firebase/auth";
-import { doc, updateDoc, Timestamp, collection, onSnapshot, query, orderBy, runTransaction, serverTimestamp, where, getDocs, arrayUnion, arrayRemove } from "firebase/firestore";
+// Firebase imports removed - now using server actions
 import { useToast } from "@/hooks/use-toast";
+import { 
+    updatePublicProfile, 
+    updatePersonalDetails, 
+    updateProviderDetails, 
+    updatePayoutDetails,
+    uploadProfilePicture,
+    uploadDocument,
+    deleteDocument,
+    redeemLoyaltyReward,
+    getUserProfile,
+    getCategories,
+    getLoyaltyRewards,
+    getLoyaltyTransactions,
+    getReferrals,
+    getAgencyInvites
+} from './actions';
+// any import removed - no longer needed
 // import { useErrorHandler } from "@/hooks/use-error-handler";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -48,14 +62,14 @@ type LoyaltyTransaction = {
     points: number;
     type: 'earn' | 'redeem' | 'referral';
     description: string;
-    createdAt: Timestamp;
+    createdAt: any;
 };
 
 type Referral = {
     id: string;
     referredEmail: string;
     rewardPointsGranted: number;
-    createdAt: Timestamp;
+    createdAt: any;
 };
 
 type Invite = {
@@ -80,7 +94,7 @@ type Category = {
 type Document = {
     name: string;
     url: string;
-    uploadedAt: Timestamp;
+    uploadedAt: any;
 }
 
 const initialAvailability: Availability[] = [
@@ -198,111 +212,115 @@ const ProfilePage = memo(function ProfilePage() {
     }, [state, toast, t]);
 
     useEffect(() => {
-        if (!user || !getDb()) return;
-        
-        const userDocRef = doc(getDb(), "users", user.uid);
-        const unsubscribeUser = onSnapshot(userDocRef, (doc) => {
-            if (doc.exists()) {
-                const data = doc.data();
-                setName(data.displayName || user.displayName || '');
-                setPhone(data.phone || '');
-                setBio(data.bio || '');
-                setAddress(data.address || '');
-                setLatitude(data.latitude || null);
-                setLongitude(data.longitude || null);
-                setGender(data.gender || '');
-                setReferralCode(data.referralCode || '');
-                if (data.birthdate && data.birthdate.toDate) {
-                    const date = data.birthdate.toDate();
-                    setBirthDay(String(date.getDate()));
-                    setBirthMonth(String(date.getMonth()));
-                    setBirthYear(String(date.getFullYear()));
-                }
-                setLoyaltyPoints(data.loyaltyPoints || 0);
+        if (!user) return;
 
-                if (userRole === 'provider' || userRole === 'agency') {
-                    setAvailabilityStatus(data.availabilityStatus || '');
-                    setYearsOfExperience(data.yearsOfExperience || '');
-                    setKeyServices(data.keyServices || []);
-                    setOwnsToolsSupplies(data.ownsToolsSupplies || false);
-                    setIsLicensed(data.isLicensed || false);
-                    setLicenseNumber(data.licenseNumber || '');
-                    setLicenseType(data.licenseType || '');
-                    setLicenseExpirationDate(data.licenseExpirationDate || '');
-                    setLicenseIssuingState(data.licenseIssuingState || '');
-                    setLicenseIssuingCountry(data.licenseIssuingCountry || '');
-                    setAvailabilitySchedule(data.availabilitySchedule || initialAvailability);
-                }
-
-                if (userRole === 'provider' || userRole === 'agency') {
-                    // Load payout details
-                    setPayoutMethod(data.payoutDetails?.method || '');
-                    setPaypalEmail(data.payoutDetails?.paypalEmail || '');
-                    setBankName(data.payoutDetails?.bankName || '');
-                    setBankAccountNumber(data.payoutDetails?.bankAccountNumber || '');
-                    setBankAccountName(data.payoutDetails?.bankAccountName || '');
-                    setDocuments(data.documents || []);
-                }
-            }
-        });
-
-        const fetchCategories = async () => {
-            if (!getDb()) return;
+        const fetchUserData = async () => {
             try {
-                const categoriesRef = collection(getDb(), "categories");
-                const q = query(categoriesRef, orderBy("name"));
-                const querySnapshot = await getDocs(q);
-                const fetchedCategories = querySnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
-                setCategories(fetchedCategories);
+                // Fetch user profile
+                const userResult = await getUserProfile(user.uid);
+                if (userResult.success && userResult.data) {
+                    const data = userResult.data;
+                    setName(data.displayName || user.displayName || '');
+                    setPhone(data.phone || '');
+                    setBio(data.bio || '');
+                    setAddress(data.address || '');
+                    setLatitude(data.latitude || null);
+                    setLongitude(data.longitude || null);
+                    setGender(data.gender || '');
+                    setReferralCode(data.referralCode || '');
+                    
+                    if (data.birthdate) {
+                        const date = data.birthdate instanceof Date ? data.birthdate : new Date(data.birthdate);
+                        setBirthDay(String(date.getDate()));
+                        setBirthMonth(String(date.getMonth()));
+                        setBirthYear(String(date.getFullYear()));
+                    }
+                    
+                    setLoyaltyPoints(data.loyaltyPoints || 0);
+
+                    if (userRole === 'provider' || userRole === 'agency') {
+                        setAvailabilityStatus(data.availabilityStatus || '');
+                        setYearsOfExperience(data.yearsOfExperience || '');
+                        setKeyServices(data.keyServices || []);
+                        setOwnsToolsSupplies(data.ownsToolsSupplies || false);
+                        setIsLicensed(data.isLicensed || false);
+                        setLicenseNumber(data.licenseNumber || '');
+                        setLicenseType(data.licenseType || '');
+                        setLicenseExpirationDate(data.licenseExpirationDate || '');
+                        setLicenseIssuingState(data.licenseIssuingState || '');
+                        setLicenseIssuingCountry(data.licenseIssuingCountry || '');
+                        setAvailabilitySchedule(data.availabilitySchedule || initialAvailability);
+
+                        // Load payout details
+                        setPayoutMethod(data.payoutDetails?.method || '');
+                        setPaypalEmail(data.payoutDetails?.paypalEmail || '');
+                        setBankName(data.payoutDetails?.bankName || '');
+                        setBankAccountNumber(data.payoutDetails?.bankAccountNumber || '');
+                        setBankAccountName(data.payoutDetails?.bankAccountName || '');
+                        setDocuments(data.documents || []);
+                    }
+                }
             } catch (error) {
-                console.error("Error fetching categories: ", error);
+                console.error("Error fetching user data:", error);
             }
         };
 
+        const fetchCategories = async () => {
+            try {
+                const result = await getCategories();
+                if (result.success && result.data) {
+                    setCategories(result.data);
+                }
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+        };
+
+        const fetchLoyaltyData = async () => {
+            try {
+                // Fetch loyalty rewards
+                const rewardsResult = await getLoyaltyRewards();
+                if (rewardsResult.success && rewardsResult.data) {
+                    setRewards(rewardsResult.data);
+                }
+
+                // Fetch loyalty transactions
+                const transactionsResult = await getLoyaltyTransactions(user.uid);
+                if (transactionsResult.success && transactionsResult.data) {
+                    setTransactions(transactionsResult.data);
+                }
+            } catch (error) {
+                console.error("Error fetching loyalty data:", error);
+            }
+        };
+
+        const fetchReferralData = async () => {
+            try {
+                // Fetch referrals
+                const referralsResult = await getReferrals(user.uid);
+                if (referralsResult.success && referralsResult.data) {
+                    setReferrals(referralsResult.data);
+                }
+
+                // Fetch agency invites
+                const invitesResult = await getAgencyInvites(user.uid);
+                if (invitesResult.success && invitesResult.data) {
+                    setInvites(invitesResult.data);
+                }
+            } catch (error) {
+                console.error("Error fetching referral data:", error);
+            }
+        };
+
+        // Fetch all data
+        fetchUserData();
+        
         if (userRole === 'provider' || userRole === 'agency') {
             fetchCategories();
         }
-
-        // Fetch loyalty rewards
-        const rewardsRef = collection(getDb(), "loyaltyRewards");
-        const qRewards = query(rewardsRef, where("isActive", "==", true), orderBy("pointsRequired"));
-        const unsubscribeRewards = onSnapshot(qRewards, (snapshot) => {
-            const rewardsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reward));
-            setRewards(rewardsData);
-        });
-
-        // Fetch loyalty transactions
-        const transactionsRef = collection(getDb(), `users/${user.uid}/loyaltyTransactions`);
-        const qTransactions = query(transactionsRef, orderBy("createdAt", "desc"));
-        const unsubscribeTransactions = onSnapshot(qTransactions, (snapshot) => {
-            const transData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LoyaltyTransaction));
-            setTransactions(transData);
-        });
-
-        // Fetch referrals
-        const referralsRef = collection(getDb(), 'referrals');
-        const qReferrals = query(referralsRef, where("referrerId", "==", user.uid), orderBy("createdAt", "desc"));
-        const unsubscribeReferrals = onSnapshot(qReferrals, (snapshot) => {
-            const referralsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data()} as Referral));
-            setReferrals(referralsData);
-        });
-
-        // Fetch Agency Invites
-        const invitesRef = collection(getDb(), "invites");
-        const qInvites = query(invitesRef, where("providerId", "==", user.uid), where("status", "==", "pending"));
-        const unsubscribeInvites = onSnapshot(qInvites, (snapshot) => {
-            const invitesData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Invite));
-            setInvites(invitesData);
-        });
-
-
-        return () => {
-            unsubscribeUser();
-            unsubscribeRewards();
-            unsubscribeTransactions();
-            unsubscribeReferrals();
-            unsubscribeInvites();
-        };
+        
+        fetchLoyaltyData();
+        fetchReferralData();
     }, [user, userRole]);
 
 
@@ -312,33 +330,30 @@ const ProfilePage = memo(function ProfilePage() {
     };
 
     const handleRedeemReward = async (reward: Reward) => {
-        if (!user || !getDb() || loyaltyPoints < reward.pointsRequired) {
+        if (!user || loyaltyPoints < reward.pointsRequired) {
             toast({ variant: "destructive", title: t('error'), description: t('notEnoughPoints') });
             return;
         }
 
         setIsRedeeming(reward.id);
-        const userRef = doc(getDb(), "users", user.uid);
 
         try {
-            await runTransaction(getDb(), async (transaction) => {
-                const userDoc = await transaction.get(userRef);
-                if (!userDoc.exists()) throw "User document does not exist!";
-
-                const currentPoints = userDoc.data().loyaltyPoints || 0;
-                if (currentPoints < reward.pointsRequired) throw "Not enough points.";
-
-                const newTotalPoints = currentPoints - reward.pointsRequired;
-                transaction.update(userRef, { loyaltyPoints: newTotalPoints });
-
-                const loyaltyTxRef = doc(collection(getDb(), `users/${user.uid}/loyaltyTransactions`));
-                transaction.set(loyaltyTxRef, {
-                    points: reward.pointsRequired, type: 'redeem',
-                    description: `Redeemed: ${reward.title}`,
-                    rewardId: reward.id, createdAt: serverTimestamp()
-                });
+            const result = await redeemLoyaltyReward(user.uid, {
+                id: reward.id,
+                title: reward.title,
+                pointsRequired: reward.pointsRequired
             });
-            toast({ title: t('rewardRedeemed'), description: t('rewardRedeemedDescription', { rewardTitle: reward.title }) });
+
+            if (result.success) {
+                toast({ title: t('rewardRedeemed'), description: t('rewardRedeemedDescription', { rewardTitle: reward.title }) });
+                setLoyaltyPoints(prev => prev - reward.pointsRequired);
+            } else {
+                toast({ 
+                    variant: "destructive", 
+                    title: t('redemptionFailed'), 
+                    description: result.error || t('couldNotRedeemReward')
+                });
+            }
         } catch (error) {
             console.error("Error redeeming reward:", error);
             const errorMessage = error instanceof Error ? error.message : t('couldNotRedeemReward');
@@ -365,21 +380,24 @@ const ProfilePage = memo(function ProfilePage() {
     };
 
     const handlePublicProfileUpdate = async () => {
-        if (!user || !getDb()) return;
+        if (!user) return;
         setIsSavingPublic(true);
+        
         try {
-            const userDocRef = doc(getDb(), "users", user.uid);
-            const updates: Record<string, unknown> = {
+            const result = await updatePublicProfile(user.uid, {
                 displayName: name,
-                bio: bio,
-            };
+                bio: bio
+            });
 
-            if (user.displayName !== name) {
-                await updateProfile(user, { displayName: name });
+            if (result.success) {
+                toast({ title: t('success'), description: t('publicProfileUpdated') });
+            } else {
+                toast({ 
+                    variant: "destructive", 
+                    title: t('updateFailed'), 
+                    description: result.error || 'An error occurred'
+                });
             }
-            
-            await updateDoc(userDocRef, updates as any);
-            toast({ title: t('success'), description: t('publicProfileUpdated') });
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'An error occurred';
             toast({ variant: "destructive", title: t('updateFailed'), description: errorMessage });
@@ -389,11 +407,11 @@ const ProfilePage = memo(function ProfilePage() {
     }
 
     const handlePersonalDetailsUpdate = async () => {
-        if (!user || !getDb()) return;
+        if (!user) return;
         setIsSavingPersonal(true);
+        
         try {
-            const userDocRef = doc(getDb(), "users", user.uid);
-            const updates: Record<string, unknown> = {
+            const updateData: any = {
                 phone: phone,
                 gender: gender,
                 address: address,
@@ -405,11 +423,20 @@ const ProfilePage = memo(function ProfilePage() {
                 const day = parseInt(birthDay, 10);
                 const month = parseInt(birthMonth, 10);
                 const year = parseInt(birthYear, 10);
-                updates.birthdate = Timestamp.fromDate(new Date(year, month, day));
+                updateData.birthdate = new Date(year, month, day);
             }
 
-            await updateDoc(userDocRef, updates as any);
-            toast({ title: t('success'), description: t('personalDetailsUpdated') });
+            const result = await updatePersonalDetails(user.uid, updateData);
+
+            if (result.success) {
+                toast({ title: t('success'), description: t('personalDetailsUpdated') });
+            } else {
+                toast({ 
+                    variant: "destructive", 
+                    title: t('updateFailed'), 
+                    description: result.error || 'An error occurred'
+                });
+            }
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'An error occurred';
             toast({ variant: "destructive", title: t('updateFailed'), description: errorMessage });
@@ -419,13 +446,13 @@ const ProfilePage = memo(function ProfilePage() {
     }
     
     const handleProviderDetailsUpdate = async () => {
-        if (!user || !getDb()) return;
+        if (!user) return;
         setIsSavingProvider(true);
-         try {
-            const userDocRef = doc(getDb(), "users", user.uid);
-            const updates: Record<string, unknown> = {
+        
+        try {
+            const result = await updateProviderDetails(user.uid, {
                 availabilityStatus: availabilityStatus,
-                yearsOfExperience: Number(yearsOfExperience),
+                yearsOfExperience: yearsOfExperience ? String(yearsOfExperience) : undefined,
                 keyServices: keyServices,
                 ownsToolsSupplies: ownsToolsSupplies,
                 isLicensed: isLicensed,
@@ -435,10 +462,17 @@ const ProfilePage = memo(function ProfilePage() {
                 licenseIssuingState: licenseIssuingState,
                 licenseIssuingCountry: licenseIssuingCountry,
                 availabilitySchedule: availabilitySchedule,
-            };
-            
-            await updateDoc(userDocRef, updates as any);
-            toast({ title: t('success'), description: t('detailsUpdated') });
+            });
+
+            if (result.success) {
+                toast({ title: t('success'), description: t('detailsUpdated') });
+            } else {
+                toast({ 
+                    variant: "destructive", 
+                    title: t('updateFailed'), 
+                    description: result.error || 'An error occurred'
+                });
+            }
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'An error occurred';
             toast({ variant: "destructive", title: t('updateFailed'), description: errorMessage });
@@ -448,20 +482,30 @@ const ProfilePage = memo(function ProfilePage() {
     }
 
     const handlePayoutDetailsUpdate = async () => {
-        if (!user || !getDb()) return;
+        if (!user) return;
         setIsSavingPayout(true);
+        
         try {
-            const userDocRef = doc(getDb(), "users", user.uid);
-            const payoutDetails: Record<string, unknown> = { method: payoutMethod };
+            const payoutData: any = { method: payoutMethod };
             if (payoutMethod === 'paypal') {
-                payoutDetails.paypalEmail = paypalEmail;
+                payoutData.paypalEmail = paypalEmail;
             } else if (payoutMethod === 'bank') {
-                payoutDetails.bankName = bankName;
-                payoutDetails.bankAccountNumber = bankAccountNumber;
-                payoutDetails.bankAccountName = bankAccountName;
+                payoutData.bankName = bankName;
+                payoutData.bankAccountNumber = bankAccountNumber;
+                payoutData.bankAccountName = bankAccountName;
             }
-            await updateDoc(userDocRef, { payoutDetails });
-            toast({ title: t('success'), description: t('payoutDetailsUpdated') });
+
+            const result = await updatePayoutDetails(user.uid, payoutData);
+
+            if (result.success) {
+                toast({ title: t('success'), description: t('payoutDetailsUpdated') });
+            } else {
+                toast({ 
+                    variant: "destructive", 
+                    title: t('updateFailed'), 
+                    description: result.error || 'An error occurred'
+                });
+            }
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'An error occurred';
             toast({ variant: "destructive", title: t('updateFailed'), description: errorMessage });
@@ -471,75 +515,56 @@ const ProfilePage = memo(function ProfilePage() {
     };
     
     const handleUpload = async () => {
-        if (!imageFile || !user || !getStorageInstance()) return;
+        if (!imageFile || !user) return;
 
         setIsUploading(true);
         setUploadProgress(0);
 
-        const storagePath = `profile-pictures/${user.uid}/${imageFile.name}`;
-        const storageRef = ref(getStorageInstance(), storagePath);
-        const uploadTask = uploadBytesResumable(storageRef, imageFile);
+        try {
+            const result = await uploadProfilePicture(user.uid, imageFile);
 
-        uploadTask.on(
-            'state_changed',
-            (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                setUploadProgress(progress);
-            },
-            (error) => {
-                console.error("Upload failed", error);
-                toast({ variant: "destructive", title: t('uploadFailed'), description: error.message });
-                setIsUploading(false);
-                setUploadProgress(null);
+            if (result.success) {
+                toast({ title: t('success'), description: t('profilePictureUpdated') });
                 setImageFile(null);
-            },
-            async () => {
-                try {
-                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    await updateProfile(user, { photoURL: downloadURL });
-                    if (getDb()) {
-                        const userDocRef = doc(getDb(), "users", user.uid);
-                        await updateDoc(userDocRef, { photoURL: downloadURL });
-                    }
-                    toast({ title: t('success'), description: t('profilePictureUpdated') });
-                } catch {
-                     toast({ variant: "destructive", title: t('updateFailed'), description: t('failedToUpdateProfilePicture') });
-                } finally {
-                    setIsUploading(false);
-                    setUploadProgress(null);
-                    setImageFile(null);
-                }
+            } else {
+                toast({ 
+                    variant: "destructive", 
+                    title: t('uploadFailed'), 
+                    description: result.error || t('failedToUpdateProfilePicture')
+                });
             }
-        );
+        } catch (error) {
+            console.error('Upload error:', error);
+            toast({ variant: "destructive", title: t('uploadFailed'), description: t('failedToUpdateProfilePicture') });
+        } finally {
+            setIsUploading(false);
+            setUploadProgress(0);
+        }
     };
 
     const handleUploadDocument = async () => {
-        if (!user || !newDocFile || !newDocName || !getStorageInstance() || !getDb()) {
+        if (!user || !newDocFile || !newDocName) {
             toast({ variant: 'destructive', title: t('missingInfo'), description: t('pleaseProvideDocumentInfo') });
             return;
         }
+        
         setIsUploadingDoc(true);
+        
         try {
-            const storagePath = `provider-documents/${user.uid}/${Date.now()}_${newDocFile.name}`;
-            const storageRef = ref(getStorageInstance(), storagePath);
-            const uploadResult = await uploadBytes(storageRef, newDocFile);
-            const url = await getDownloadURL(uploadResult.ref);
+            const result = await uploadDocument(user.uid, newDocFile, newDocName);
 
-            const newDocument = {
-                name: newDocName,
-                url: url,
-                uploadedAt: Timestamp.now()
-            };
-
-            await updateDoc(doc(getDb(), "users", user.uid), {
-                documents: arrayUnion(newDocument)
-            });
-
-            toast({ title: t('success'), description: t('documentUploaded') });
-            setNewDocName("");
-            setNewDocFile(null);
-            if (newDocFileInputRef.current) newDocFileInputRef.current.value = "";
-
+            if (result.success) {
+                toast({ title: t('success'), description: t('documentUploaded') });
+                setNewDocName("");
+                setNewDocFile(null);
+                if (newDocFileInputRef.current) newDocFileInputRef.current.value = "";
+            } else {
+                toast({ 
+                    variant: 'destructive', 
+                    title: t('uploadFailed'), 
+                    description: result.error || t('couldNotDeleteDocument')
+                });
+            }
         } catch (error) {
             console.error("Document upload failed: ", error);
             toast({ variant: 'destructive', title: t('uploadFailed'), description: t('couldNotDeleteDocument') });
@@ -549,19 +574,20 @@ const ProfilePage = memo(function ProfilePage() {
     };
 
     const handleDeleteDocument = async (docToDelete: Document) => {
-        if (!user || !getStorageInstance() || !getDb()) return;
+        if (!user) return;
+        
         try {
-            // Delete from Storage
-            const fileRef = ref(getStorageInstance(), docToDelete.url);
-            await deleteObject(fileRef);
+            const result = await deleteDocument(user.uid, docToDelete);
 
-            // Delete from Firestore
-            const userRef = doc(getDb(), "users", user.uid);
-            await updateDoc(userRef, {
-                documents: arrayRemove(docToDelete)
-            });
-
-            toast({ title: t('success'), description: t('documentDeleted') });
+            if (result.success) {
+                toast({ title: t('success'), description: t('documentDeleted') });
+            } else {
+                toast({ 
+                    variant: 'destructive', 
+                    title: t('error'), 
+                    description: result.error || t('couldNotDeleteDocument')
+                });
+            }
         } catch (error) {
             console.error("Error deleting document: ", error);
             toast({ variant: 'destructive', title: t('error'), description: t('couldNotDeleteDocument') });
@@ -997,7 +1023,7 @@ const ProfilePage = memo(function ProfilePage() {
                                 <TableBody>
                                     {transactions.length > 0 ? transactions.slice(0, 10).map(tx => (
                                          <TableRow key={tx.id}>
-                                            <TableCell className="text-xs text-muted-foreground">{tx.createdAt ? format(tx.createdAt.toDate(), 'MMM d, yyyy') : ''}</TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">{tx.createdAt ? format(tx.createdAt, 'MMM d, yyyy') : ''}</TableCell>
                                             <TableCell>{tx.description}</TableCell>
                                             <TableCell className={cn("text-right font-medium", tx.type === 'earn' || tx.type === 'referral' ? 'text-green-600' : 'text-destructive')}>
                                                 {tx.type === 'earn' || tx.type === 'referral' ? '+' : '-'}{tx.points.toLocaleString()}

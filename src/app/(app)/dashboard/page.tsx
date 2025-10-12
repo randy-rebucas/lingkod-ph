@@ -48,7 +48,7 @@ type Booking = {
     serviceName: string;
     status: "Upcoming" | "Completed" | "Cancelled";
     price: number;
-    date: Timestamp;
+    date: Timestamp | Date;
 };
 
 type Review = {
@@ -139,7 +139,7 @@ const processEarningsData = (bookings: Booking[], t: any) => {
 
     bookings.forEach(booking => {
         if (booking.status === 'Completed') {
-            const date = booking.date.toDate();
+            const date = toDate(booking.date);
             const month = date.getMonth();
             const year = date.getFullYear();
             // Using a "YYYY-MM" key to handle data spanning multiple years
@@ -193,6 +193,30 @@ const getAvatarFallback = (name: string | null | undefined) => {
         return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
+};
+
+// Helper function to safely convert Firebase Timestamp or Date to Date object
+const toDate = (dateValue: Timestamp | Date): Date => {
+    if (dateValue && typeof (dateValue as any).toDate === 'function') {
+        return (dateValue as Timestamp).toDate();
+    }
+    if (dateValue instanceof Date) {
+        return dateValue;
+    }
+    // Handle case where it might be a serialized timestamp or other format
+    return new Date(dateValue.toString());
+};
+
+// Helper function to safely get milliseconds from Firebase Timestamp or Date
+const toMillis = (dateValue: Timestamp | Date): number => {
+    if (dateValue && typeof (dateValue as any).toMillis === 'function') {
+        return (dateValue as Timestamp).toMillis();
+    }
+    if (dateValue instanceof Date) {
+        return dateValue.getTime();
+    }
+    // Handle case where it might be a serialized timestamp or other format
+    return new Date(dateValue.toString()).getTime();
 };
 
 const ProviderCard = ({ provider, isFavorite, onToggleFavorite, t }: { provider: Provider; isFavorite: boolean; onToggleFavorite: (provider: Provider) => void; t: any; }) => {
@@ -726,7 +750,7 @@ const DashboardPage = memo(function DashboardPage() {
     const agencyOverallRating = agencyProviders.length > 0
         ? (agencyProviders.reduce((sum, p) => sum + (p.rating || 0), 0) / agencyProviders.length).toFixed(1)
         : "N/A";
-    const agencyRecentBookings = agencyBookings.sort((a,b) => b.date.toMillis() - a.date.toMillis()).slice(0, 5);
+    const agencyRecentBookings = agencyBookings.sort((a,b) => toMillis(b.date) - toMillis(a.date)).slice(0, 5);
     const topPerformingProviders = [...agencyProviders].sort((a,b) => (b.totalRevenue || 0) - (a.totalRevenue || 0)).slice(0, 5);
 
     const handleToggleFavorite = useCallback(async (provider: Provider) => {
@@ -1245,7 +1269,7 @@ const DashboardPage = memo(function DashboardPage() {
                                 <TableBody>
                                     {todaysJobs.length > 0 ? todaysJobs.map((booking) => (
                                         <TableRow key={booking.id}>
-                                            <TableCell>{format(booking.date.toDate(), 'p')}</TableCell>
+                                            <TableCell>{format(toDate(booking.date), 'p')}</TableCell>
                                             <TableCell className="font-medium">{booking.clientName}</TableCell>
                                             <TableCell>{booking.serviceName}</TableCell>
                                         </TableRow>

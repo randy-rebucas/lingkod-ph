@@ -52,8 +52,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -63,6 +61,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { InvoicePreview } from "@/components/invoice-preview";
 import { useTranslations } from 'next-intl';
 import { formatDistanceToNow } from 'date-fns';
+import { getInvoicesData, updateInvoiceStatus, deleteInvoice } from './actions';
+import { Timestamp } from 'firebase/firestore';
 
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
@@ -116,53 +116,57 @@ function InvoicesPage() {
     const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
 
 
-    const fetchInvoices = React.useCallback(() => {
-        if (!user || !getDb()) {
+    const fetchInvoices = React.useCallback(async () => {
+        if (!user) {
             setLoading(false);
             return;
         }
 
         setLoading(true);
-        const q = query(collection(getDb(), "invoices"), where("providerId", "==", user.uid));
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const invoicesData = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            } as Invoice));
-            setInvoices(invoicesData);
-            setLoading(false);
-        }, (error) => {
+        try {
+            const result = await getInvoicesData(user.uid);
+            if (result.success && result.data) {
+                setInvoices(result.data);
+            } else {
+                console.error("Error fetching invoices:", result.error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch invoices.' });
+                setInvoices([]);
+            }
+        } catch (error) {
             console.error("Error fetching invoices:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch invoices.' });
+            setInvoices([]);
+        } finally {
             setLoading(false);
-        });
-
-        return unsubscribe;
+        }
     }, [user, toast]);
 
     React.useEffect(() => {
-        const unsubscribe = fetchInvoices();
-        return () => unsubscribe?.();
+        fetchInvoices();
     }, [fetchInvoices]);
 
     const handleStatusUpdate = async (invoiceId: string, status: InvoiceStatus) => {
-        if (!getDb()) return;
-        const invoiceRef = doc(getDb(), "invoices", invoiceId);
         try {
-            await updateDoc(invoiceRef, { status });
-            toast({ title: "Success", description: `Invoice marked as ${status.toLowerCase()}.` });
-            } catch {
+            const result = await updateInvoiceStatus(invoiceId, status);
+            if (result.success) {
+                toast({ title: "Success", description: `Invoice marked as ${status.toLowerCase()}.` });
+            } else {
+                throw new Error(result.error || 'Failed to update invoice status');
+            }
+        } catch {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to update invoice status.' });
         }
     };
     
     const handleDeleteInvoice = async (invoiceId: string) => {
-        if (!getDb()) return;
         try {
-            await deleteDoc(doc(getDb(), "invoices", invoiceId));
-            toast({ title: "Success", description: "Invoice deleted successfully." });
-            } catch {
+            const result = await deleteInvoice(invoiceId);
+            if (result.success) {
+                toast({ title: "Success", description: "Invoice deleted successfully." });
+            } else {
+                throw new Error(result.error || 'Failed to delete invoice');
+            }
+        } catch {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete invoice.' });
         }
     };

@@ -6,11 +6,8 @@ import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Briefcase, DollarSign, TrendingUp, Target, Award } from "lucide-react";
 import { useEffect, useState } from "react";
-import { PartnerAnalyticsService } from "@/lib/partner-analytics";
-import { PartnerReferralTracker } from "@/lib/partner-referral-tracker";
-import { PartnerCommissionManager } from "@/lib/partner-commission-manager";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getDb  } from '@/lib/firebase';
+import { getPartnerDashboardData } from './actions';
 import PartnerOnboardingBanner from "@/components/partner-onboarding-banner";
 
 interface PartnerDashboardData {
@@ -37,28 +34,14 @@ export default function PartnersDashboardPage() {
 
     useEffect(() => {
         const loadDashboardData = async () => {
-            if (user && userRole === 'partner' && getDb()) {
+            if (user && userRole === 'partner') {
                 try {
-                    // Get performance metrics
-                    const performanceMetrics = await PartnerAnalyticsService.getPartnerPerformanceMetrics(user.uid);
-                    
-                    // Get referral statistics
-                    const _referralStats = await PartnerReferralTracker.getReferralStatistics(user.uid);
-                    
-                    // Get commission summary
-                    const _commissionSummary = await PartnerCommissionManager.getCommissionSummary(user.uid);
-
-                    setDashboardData({
-                        totalReferrals: performanceMetrics.totalReferrals,
-                        activeReferrals: performanceMetrics.activeReferrals,
-                        completedJobs: performanceMetrics.totalReferrals, // Using total referrals as completed jobs for now
-                        totalRevenue: performanceMetrics.totalRevenue,
-                        totalCommission: performanceMetrics.totalCommission,
-                        conversionRate: performanceMetrics.conversionRate,
-                        averageJobValue: performanceMetrics.averageJobValue,
-                        topCategories: performanceMetrics.topCategories,
-                        monthlyGrowth: performanceMetrics.monthlyGrowth
-                    });
+                    const result = await getPartnerDashboardData(user.uid);
+                    if (result.success && result.data) {
+                        setDashboardData(result.data);
+                    } else {
+                        console.error('Error loading dashboard data:', result.error);
+                    }
                 } catch (error) {
                     console.error('Error loading dashboard data:', error);
                 } finally {

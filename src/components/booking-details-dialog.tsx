@@ -11,6 +11,18 @@ import { Separator } from "./ui/separator";
 import { useAuth } from "@/context/auth-context";
 import Image from "next/image";
 import { useTranslations } from 'next-intl';
+import { Timestamp } from "firebase/firestore";
+
+// Helper function to safely convert Firebase Timestamp or Date to Date object
+const toDate = (dateValue: Timestamp | Date): Date => {
+    if (dateValue && typeof (dateValue as any).toDate === 'function') {
+        return (dateValue as Timestamp).toDate();
+    }
+    if (dateValue instanceof Date) {
+        return dateValue;
+    }
+    return new Date(dateValue.toString());
+};
 
 type BookingDetailsDialogProps = {
     isOpen: boolean;
@@ -67,7 +79,7 @@ export const BookingDetailsDialog = memo(function BookingDetailsDialog({ isOpen,
                     
                     <div className="flex justify-between">
                         <span className="text-muted-foreground">{t('dateTime')}</span>
-                         <span className="font-medium">{format(booking.date.toDate(), 'PPP p')}</span>
+                         <span className="font-medium">{format(toDate(booking.date), 'PPP p')}</span>
                     </div>
 
                     <div className="flex justify-between">

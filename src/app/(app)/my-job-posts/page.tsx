@@ -3,8 +3,11 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { useAuth } from "@/context/auth-context";
-import { getDb  } from '@/lib/firebase';
-import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { 
+  getClientJobs,
+  updateJobStatus,
+  deleteJob
+} from './actions';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -66,25 +69,30 @@ export default function MyJobPostsPage() {
     const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
-        if (!user || (userRole !== 'client' && userRole !== 'agency') || !getDb()) {
+        if (!user || (userRole !== 'client' && userRole !== 'agency')) {
             setLoading(false);
             if (user) router.push('/dashboard'); // Redirect if not a client/agency
             return;
+        }
+
+        const fetchJobs = async () => {
+            setLoading(true);
+            try {
+                const result = await getClientJobs(user.uid);
+                if (result.success && result.data) {
+                    setJobs(result.data);
+                } else {
+                    toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotFetchJobs') });
+                }
+            } catch (error) {
+                console.error("Error fetching jobs:", error);
+                toast({ variant: "destructive", title: t('error'), description: t('couldNotFetchJobs') });
+            } finally {
+                setLoading(false);
+            }
         };
 
-        const jobsQuery = query(collection(getDb(), "jobs"), where("clientId", "==", user.uid));
-
-        const unsubscribe = onSnapshot(jobsQuery, (snapshot) => {
-            const jobsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
-            setJobs(jobsData);
-            setLoading(false);
-        }, (error) => {
-            console.error("Error fetching jobs:", error);
-            toast({ variant: "destructive", title: t('error'), description: t('couldNotFetchJobs') });
-            setLoading(false);
-        });
-
-        return () => unsubscribe();
+        fetchJobs();
     }, [user, userRole, router, toast, t]);
 
     // Simple search filter
@@ -100,14 +108,17 @@ export default function MyJobPostsPage() {
     });
 
     const handleUpdateStatus = async (jobId: string, newStatus: JobStatus) => {
-        if (!getDb()) return;
-
         try {
-            await updateDoc(doc(getDb(), "jobs", jobId), {
-                status: newStatus,
-                updatedAt: new Date()
-            });
-            toast({ title: t('success'), description: t('jobStatusUpdated') });
+            const result = await updateJobStatus(jobId, newStatus);
+            if (result.success) {
+                // Update local state
+                setJobs(prev => prev.map(job => 
+                    job.id === jobId ? { ...job, status: newStatus, updatedAt: new Date() } : job
+                ));
+                toast({ title: t('success'), description: t('jobStatusUpdated') });
+            } else {
+                toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotUpdateJob') });
+            }
         } catch (error) {
             console.error("Error updating job status:", error);
             toast({ variant: "destructive", title: t('error'), description: t('couldNotUpdateJob') });
@@ -115,11 +126,15 @@ export default function MyJobPostsPage() {
     };
 
     const handleDeleteJob = async (jobId: string) => {
-        if (!getDb()) return;
-
         try {
-            await deleteDoc(doc(getDb(), "jobs", jobId));
-            toast({ title: t('success'), description: t('jobDeleted') });
+            const result = await deleteJob(jobId);
+            if (result.success) {
+                // Update local state
+                setJobs(prev => prev.filter(job => job.id !== jobId));
+                toast({ title: t('success'), description: t('jobDeleted') });
+            } else {
+                toast({ variant: "destructive", title: t('error'), description: result.error || t('couldNotDeleteJob') });
+            }
         } catch (error) {
             console.error("Error deleting job:", error);
             toast({ variant: "destructive", title: t('error'), description: t('couldNotDeleteJob') });

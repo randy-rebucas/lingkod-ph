@@ -47,11 +47,11 @@ describe('completeBookingAction', () => {
     
     // Mock Firebase Storage functions
     mockRef.mockReturnValue({} as any);
-    mockUploadString.mockResolvedValue(undefined);
+    mockUploadString.mockResolvedValue({} as any);
     mockGetDownloadURL.mockResolvedValue('https://example.com/photo.jpg');
     
     // Mock Firestore functions
-    mockRunTransaction.mockImplementation(async (callback) => {
+    mockRunTransaction.mockImplementation(async (callback: any) => {
       const mockTransaction = {
         get: jest.fn().mockResolvedValue({
           exists: () => true,
