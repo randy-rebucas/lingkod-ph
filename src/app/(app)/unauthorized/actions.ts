@@ -4,6 +4,24 @@ import { getDb } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { z } from 'zod';
 
+// Utility function to serialize Firebase Timestamps for client components
+const serializeTimestamps = (data: any): any => {
+  if (!data || typeof data !== 'object') return data;
+  
+  const serialized = { ...data };
+  
+  // Convert common Timestamp fields
+  const timestampFields = ['createdAt', 'updatedAt', 'lastLogin'];
+  
+  timestampFields.forEach(field => {
+    if (serialized[field] && typeof serialized[field].toDate === 'function') {
+      serialized[field] = serialized[field].toDate();
+    }
+  });
+  
+  return serialized;
+};
+
 // Validation schemas
 const UserIdSchema = z.string().min(1, 'User ID is required');
 
@@ -37,7 +55,7 @@ export async function getUserAccessInfo(userId: string) {
       accountCreated: userData.createdAt || null,
     };
 
-    return { success: true, data: accessInfo };
+    return { success: true, data: serializeTimestamps(accessInfo) };
   } catch (error) {
     console.error('Error getting user access info:', error);
     return { 
@@ -71,7 +89,7 @@ export async function getAccessRequirements() {
       },
     };
 
-    return { success: true, data: requirements };
+    return { success: true, data: serializeTimestamps(requirements) };
   } catch (error) {
     console.error('Error getting access requirements:', error);
     return { 
@@ -110,7 +128,7 @@ export async function checkVerificationStatus(userId: string) {
       nextStep: getNextVerificationStep(userData),
     };
 
-    return { success: true, data: verificationStatus };
+    return { success: true, data: serializeTimestamps(verificationStatus) };
   } catch (error) {
     console.error('Error checking verification status:', error);
     return { 

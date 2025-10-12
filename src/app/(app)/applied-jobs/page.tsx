@@ -16,7 +16,6 @@ import { CheckSquare, Search, Filter, MapPin, Clock, ShieldCheck, Eye } from "lu
 import { formatBudget } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { getAppliedJobs } from './actions';
-import { Timestamp } from 'firebase/firestore';
 
 // Define the Job type locally to avoid import issues
 type Job = {
@@ -33,7 +32,7 @@ type Job = {
     clientName: string;
     clientId: string;
     clientIsVerified?: boolean;
-    createdAt: Timestamp;
+    createdAt: Date;
     applications?: string[]; // Array of provider IDs
     status?: string;
 };
@@ -119,8 +118,8 @@ export default function AppliedJobsPage() {
                     break;
                 case 'date':
                 default:
-                    aValue = a.createdAt.toDate();
-                    bValue = b.createdAt.toDate();
+                    aValue = a.createdAt;
+                    bValue = b.createdAt;
                     break;
             }
             
@@ -285,7 +284,7 @@ export default function AppliedJobsPage() {
                                             <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                                                 <span className="flex items-center gap-1">
                                                     <Clock className="h-3 w-3" />
-                                                    {formatDistanceToNow(job.createdAt.toDate(), { addSuffix: true })}
+                                                    {formatDistanceToNow(job.createdAt, { addSuffix: true })}
                                                 </span>
                                                 <span className="flex items-center gap-1">
                                                     <MapPin className="h-3 w-3" />

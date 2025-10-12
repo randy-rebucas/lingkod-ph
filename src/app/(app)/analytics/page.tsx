@@ -26,7 +26,6 @@ import { useState, useEffect, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SkeletonCards } from "@/components/ui/loading-states";
 import { getProviderAnalyticsData } from './actions';
-import { Timestamp } from 'firebase/firestore';
 // import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -40,7 +39,7 @@ type Booking = {
     serviceName: string;
     status: "Upcoming" | "Completed" | "Cancelled";
     price: number;
-    date: Timestamp;
+    date: Date;
     location?: string;
     serviceArea?: string;
 };
@@ -48,7 +47,7 @@ type Booking = {
 type Review = {
     id: string;
     rating: number;
-    createdAt: Timestamp;
+    createdAt: Date;
 }
 
 type TimePeriod = '7d' | '30d' | '90d' | '1y' | 'all';
@@ -79,7 +78,7 @@ const processBookingTrends = (bookings: Booking[]) => {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     
     bookings.forEach(booking => {
-        const date = booking.date.toDate();
+        const date = booking.date;
         const key = `${date.getFullYear()}-${date.getMonth()}`;
         if (!monthlyData[key]) {
             monthlyData[key] = { total: 0, completed: 0 };
@@ -141,11 +140,11 @@ const filterDataByTimePeriod = (bookings: Booking[], reviews: Review[], period: 
     }
 
     const filteredBookings = bookings.filter(booking => 
-        booking.date.toDate() >= startDate
+        booking.date >= startDate
     );
     
     const filteredReviews = reviews.filter(review => 
-        review.createdAt && review.createdAt.toDate() >= startDate
+        review.createdAt && review.createdAt >= startDate
     );
 
     return { bookings: filteredBookings, reviews: filteredReviews };
@@ -155,7 +154,7 @@ const processClientAnalytics = (bookings: Booking[]): ClientAnalytics => {
     const clientData: { [key: string]: { firstBooking: Date, totalSpent: number, bookingCount: number } } = {};
     
     bookings.forEach(booking => {
-        const bookingDate = booking.date.toDate();
+        const bookingDate = booking.date;
         if (!clientData[booking.clientId]) {
             clientData[booking.clientId] = {
                 firstBooking: bookingDate,
@@ -201,7 +200,7 @@ const processRevenueAnalytics = (bookings: Booking[]): RevenueAnalytics => {
     const monthlyRevenue: { [key: string]: number } = {};
     
     completedBookings.forEach(booking => {
-        const date = booking.date.toDate();
+        const date = booking.date;
         const key = `${date.getFullYear()}-${date.getMonth()}`;
         if (!monthlyRevenue[key]) {
             monthlyRevenue[key] = 0;

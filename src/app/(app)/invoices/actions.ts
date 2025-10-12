@@ -131,7 +131,7 @@ export async function createInvoice(data: {
 }
 
 // Update invoice status
-export async function updateInvoiceStatus(invoiceId: string, status: 'Draft' | 'Sent' | 'Paid' | 'Overdue'): Promise<{
+export async function updateInvoiceStatus(invoiceId: string, status: 'Draft' | 'Sent' | 'Paid' | 'Overdue' | 'Deleted'): Promise<{
   success: boolean;
   error?: string;
 }> {

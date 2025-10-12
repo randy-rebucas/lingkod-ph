@@ -13,7 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useTranslations } from 'next-intl';
 import { getPaymentsData } from './actions';
-import { Timestamp } from 'firebase/firestore';
 // import Image from "next/image";
 
 type PaymentTransaction = {
@@ -25,10 +24,10 @@ type PaymentTransaction = {
     type: 'booking_payment' | 'payout_request' | 'refund';
     status: 'pending' | 'completed' | 'rejected' | 'failed';
     paymentMethod: string;
-    createdAt: Timestamp;
-    verifiedAt?: Timestamp;
+    createdAt: Date;
+    verifiedAt?: Date;
     verifiedBy?: string;
-    rejectedAt?: Timestamp;
+    rejectedAt?: Date;
     rejectedBy?: string;
     rejectionReason?: string;
     paypalOrderId?: string;
@@ -149,7 +148,7 @@ export default function PaymentHistoryPage() {
                                 {transactions.length > 0 ? transactions.map(transaction => (
                                     <TableRow key={transaction.id}>
                                         <TableCell className="text-sm">
-                                            {format(transaction.createdAt.toDate(), 'PPp')}
+                                            {format(transaction.createdAt, 'PPp')}
                                         </TableCell>
                                         <TableCell className="font-medium">
                                             {getTypeLabel(transaction.type)}
@@ -196,12 +195,12 @@ export default function PaymentHistoryPage() {
                                                             </div>
                                                             <div>
                                                                 <label className="text-sm font-medium text-muted-foreground">{t('date')}</label>
-                                                                <p className="text-sm">{format(transaction.createdAt.toDate(), 'PPp')}</p>
+                                                                <p className="text-sm">{format(transaction.createdAt, 'PPp')}</p>
                                                             </div>
                                                             {transaction.verifiedAt && (
                                                                 <div>
                                                                     <label className="text-sm font-medium text-muted-foreground">{t('verifiedAt')}</label>
-                                                                    <p className="text-sm">{format(transaction.verifiedAt.toDate(), 'PPp')}</p>
+                                                                    <p className="text-sm">{format(transaction.verifiedAt, 'PPp')}</p>
                                                                 </div>
                                                             )}
                                                         </div>

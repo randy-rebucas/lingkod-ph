@@ -7,7 +7,6 @@ import { useAuth } from '@/context/auth-context';
 import { getProviderEarningsData, requestPayout } from './actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Timestamp } from 'firebase/firestore';
 import { 
   XAxis, 
   YAxis, 
@@ -41,14 +40,14 @@ type CompletedBooking = {
     clientName: string;
     serviceName: string;
     price: number;
-    date: Timestamp;
+    date: Date;
 };
 
 type Payout = {
     id: string;
     amount: number;
     status: 'Pending' | 'Paid';
-    requestedAt: Timestamp;
+    requestedAt: Date;
 };
 
 const processChartData = (bookings: CompletedBooking[]) => {
@@ -56,7 +55,7 @@ const processChartData = (bookings: CompletedBooking[]) => {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     bookings.forEach(booking => {
-        const date = booking.date.toDate();
+        const date = booking.date;
         const month = date.getMonth();
         const year = date.getFullYear();
         const key = `${year}-${month}`;
@@ -424,7 +423,7 @@ export default function EarningsPage() {
                                     {payouts.slice(0, 5).length > 0 ? payouts.slice(0, 5).map((payout) => (
                                         <TableRow key={payout.id}>
                                             <TableCell className="text-sm">
-                                                {formatDistanceToNow(payout.requestedAt.toDate(), { addSuffix: true })}
+                                                {formatDistanceToNow(payout.requestedAt, { addSuffix: true })}
                                             </TableCell>
                                             <TableCell>
                                                 <Badge variant={payout.status === 'Paid' ? 'secondary' : 'outline'}>

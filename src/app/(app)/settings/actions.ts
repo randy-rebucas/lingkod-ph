@@ -4,6 +4,24 @@ import { getDb } from '@/lib/firebase';
 import { doc, updateDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { z } from 'zod';
 
+// Utility function to serialize Firebase Timestamps for client components
+const serializeTimestamps = (data: any): any => {
+  if (!data || typeof data !== 'object') return data;
+  
+  const serialized = { ...data };
+  
+  // Convert common Timestamp fields
+  const timestampFields = ['createdAt', 'updatedAt', 'lastLogin', 'suspensionDate'];
+  
+  timestampFields.forEach(field => {
+    if (serialized[field] && typeof serialized[field].toDate === 'function') {
+      serialized[field] = serialized[field].toDate();
+    }
+  });
+  
+  return serialized;
+};
+
 // Validation schemas
 const UserIdSchema = z.string().min(1, 'User ID is required');
 
@@ -70,7 +88,7 @@ export async function getUserSettings(userId: string) {
       },
     };
 
-    return { success: true, data: settings };
+    return { success: true, data: serializeTimestamps(settings) };
   } catch (error) {
     console.error('Error getting user settings:', error);
     return { 
@@ -145,7 +163,7 @@ export async function getAccountStatus(userId: string) {
       accountCreated: userData.createdAt || null,
     };
 
-    return { success: true, data: accountStatus };
+    return { success: true, data: serializeTimestamps(accountStatus) };
   } catch (error) {
     console.error('Error getting account status:', error);
     return { 

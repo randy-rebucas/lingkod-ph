@@ -4,6 +4,24 @@ import { getDb } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { z } from 'zod';
 
+// Utility function to serialize Firebase Timestamps for client components
+const serializeTimestamps = (data: any): any => {
+  if (!data || typeof data !== 'object') return data;
+  
+  const serialized = { ...data };
+  
+  // Convert common Timestamp fields
+  const timestampFields = ['createdAt', 'updatedAt', 'date', 'paymentDate', 'endDate'];
+  
+  timestampFields.forEach(field => {
+    if (serialized[field] && typeof serialized[field].toDate === 'function') {
+      serialized[field] = serialized[field].toDate();
+    }
+  });
+  
+  return serialized;
+};
+
 // Validation schemas
 const BookingIdSchema = z.string().min(1, 'Booking ID is required');
 const UserIdSchema = z.string().min(1, 'User ID is required');
@@ -60,7 +78,7 @@ export async function getPaymentResult(bookingId: string, userId: string) {
       bookingDate: bookingData.date,
     };
 
-    return { success: true, data: paymentResult };
+    return { success: true, data: serializeTimestamps(paymentResult) };
   } catch (error) {
     console.error('Error getting payment result:', error);
     return { 
@@ -155,7 +173,7 @@ export async function getBookingDetails(bookingId: string, userId: string) {
       createdAt: bookingData.createdAt,
     };
 
-    return { success: true, data: bookingDetails };
+    return { success: true, data: serializeTimestamps(bookingDetails) };
   } catch (error) {
     console.error('Error getting booking details:', error);
     return { 
@@ -205,7 +223,7 @@ export async function createPaymentReceipt(bookingId: string, userId: string) {
       generatedAt: new Date(),
     };
 
-    return { success: true, data: receipt };
+    return { success: true, data: serializeTimestamps(receipt) };
   } catch (error) {
     console.error('Error creating payment receipt:', error);
     return { 
@@ -233,7 +251,7 @@ export async function getPaymentHistory(userId: string, _limit: number = 10) {
       currency: 'PHP',
     };
 
-    return { success: true, data: paymentHistory };
+    return { success: true, data: serializeTimestamps(paymentHistory) };
   } catch (error) {
     console.error('Error getting payment history:', error);
     return { 

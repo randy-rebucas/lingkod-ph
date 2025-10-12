@@ -15,7 +15,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { InvoicePreview } from "@/components/invoice-preview";
 import { Input } from "@/components/ui/input";
 import { getProviderInvoices } from './actions';
-import { Timestamp } from 'firebase/firestore';
 
 type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
 
@@ -33,8 +32,8 @@ export type Invoice = {
     clientAddress: string;
     amount: number;
     status: InvoiceStatus;
-    issueDate: Timestamp;
-    dueDate: Timestamp;
+    issueDate: Date;
+    dueDate: Date;
     lineItems: LineItem[];
     taxRate: number;
     providerId: string;
@@ -160,8 +159,8 @@ export default function BillingPage() {
                             {filteredInvoices.length > 0 ? filteredInvoices.map(invoice => (
                                 <TableRow key={invoice.id} className="hover:bg-muted/30 transition-colors border-b border-border/30">
                                     <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
-                                    <TableCell>{format(invoice.issueDate.toDate(), 'PP')}</TableCell>
-                                    <TableCell>{format(invoice.dueDate.toDate(), 'PP')}</TableCell>
+                                    <TableCell>{format(invoice.issueDate, 'PP')}</TableCell>
+                                    <TableCell>{format(invoice.dueDate, 'PP')}</TableCell>
                                     <TableCell className="font-semibold text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">₱{invoice.amount.toFixed(2)}</TableCell>
                                     <TableCell>
                                         <Badge variant={getStatusVariant(invoice.status)} className="shadow-soft">{t(invoice.status.toLowerCase())}</Badge>

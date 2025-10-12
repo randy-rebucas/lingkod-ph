@@ -4,6 +4,24 @@ import { getDb } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { z } from 'zod';
 
+// Utility function to serialize Firebase Timestamps for client components
+const serializeTimestamps = (data: any): any => {
+  if (!data || typeof data !== 'object') return data;
+  
+  const serialized = { ...data };
+  
+  // Convert common Timestamp fields
+  const timestampFields = ['createdAt', 'updatedAt', 'appealDate', 'suspensionDate'];
+  
+  timestampFields.forEach(field => {
+    if (serialized[field] && typeof serialized[field].toDate === 'function') {
+      serialized[field] = serialized[field].toDate();
+    }
+  });
+  
+  return serialized;
+};
+
 // Validation schemas
 const UserIdSchema = z.string().min(1, 'User ID is required');
 
@@ -48,7 +66,7 @@ export async function getAccountSuspensionDetails(userId: string) {
       supportPhone: '+63 2 1234 5678',
     };
 
-    return { success: true, data: suspensionDetails };
+    return { success: true, data: serializeTimestamps(suspensionDetails) };
   } catch (error) {
     console.error('Error getting account suspension details:', error);
     return { 

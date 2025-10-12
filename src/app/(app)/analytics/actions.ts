@@ -17,7 +17,7 @@ const serializeTimestamps = (data: any): any => {
   const serialized = { ...data };
   
   // Convert common Timestamp fields
-  const timestampFields = ['createdAt', 'updatedAt', 'date', 'issueDate', 'dueDate'];
+  const timestampFields = ['createdAt', 'updatedAt', 'date', 'issueDate', 'dueDate', 'endDate'];
   
   timestampFields.forEach(field => {
     if (serialized[field] && typeof serialized[field].toDate === 'function') {

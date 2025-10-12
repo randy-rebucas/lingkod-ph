@@ -62,10 +62,9 @@ import { InvoicePreview } from "@/components/invoice-preview";
 import { useTranslations } from 'next-intl';
 import { formatDistanceToNow } from 'date-fns';
 import { getInvoicesData, updateInvoiceStatus, deleteInvoice } from './actions';
-import { Timestamp } from 'firebase/firestore';
 
 
-type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue";
+type InvoiceStatus = "Draft" | "Sent" | "Paid" | "Overdue" | "Deleted";
 
 type LineItem = {
     description: string;
@@ -81,8 +80,8 @@ export type Invoice = {
   clientAddress: string;
   amount: number; // This will be the calculated total
   status: InvoiceStatus;
-  issueDate: Timestamp;
-  dueDate: Timestamp;
+  issueDate: Date;
+  dueDate: Date;
   lineItems: LineItem[];
   taxRate: number;
   providerId: string;
@@ -94,6 +93,7 @@ const getStatusVariant = (status: InvoiceStatus) => {
     case "Sent": return "default";
     case "Overdue": return "destructive";
     case "Draft": return "outline";
+    case "Deleted": return "destructive";
     default: return "outline";
   }
 };
@@ -114,6 +114,8 @@ function InvoicesPage() {
     const [rowSelection, setRowSelection] = React.useState({});
     
     const [isPreviewOpen, setIsPreviewOpen] = React.useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+    const [invoiceToDelete, setInvoiceToDelete] = React.useState<string | null>(null);
 
 
     const fetchInvoices = React.useCallback(async () => {
@@ -145,7 +147,7 @@ function InvoicesPage() {
         fetchInvoices();
     }, [fetchInvoices]);
 
-    const handleStatusUpdate = async (invoiceId: string, status: InvoiceStatus) => {
+    const handleStatusUpdate = async (invoiceId: string, status: 'Draft' | 'Sent' | 'Paid' | 'Overdue') => {
         try {
             const result = await updateInvoiceStatus(invoiceId, status);
             if (result.success) {
@@ -158,17 +160,29 @@ function InvoicesPage() {
         }
     };
     
-    const handleDeleteInvoice = async (invoiceId: string) => {
+    const handleDeleteInvoice = async () => {
+        if (!invoiceToDelete) return;
+        
         try {
-            const result = await deleteInvoice(invoiceId);
+            const result = await deleteInvoice(invoiceToDelete);
             if (result.success) {
                 toast({ title: "Success", description: "Invoice deleted successfully." });
+                // Refresh the invoices list to reflect the deletion
+                await fetchInvoices();
+                // Close the dialog
+                setDeleteDialogOpen(false);
+                setInvoiceToDelete(null);
             } else {
                 throw new Error(result.error || 'Failed to delete invoice');
             }
         } catch {
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete invoice.' });
         }
+    };
+
+    const openDeleteDialog = (invoiceId: string) => {
+        setInvoiceToDelete(invoiceId);
+        setDeleteDialogOpen(true);
     };
     
     const handleAddInvoice = () => {
@@ -239,12 +253,12 @@ function InvoicesPage() {
         accessorKey: "issueDate",
         header: "Issued",
         cell: ({ row }) => {
-            const date: Timestamp = row.getValue("issueDate");
+            const date: Date = row.getValue("issueDate");
             return (
                 <div className="text-sm">
-                    <div>{date.toDate().toLocaleDateString()}</div>
+                    <div>{date.toLocaleDateString()}</div>
                     <div className="text-muted-foreground text-xs">
-                        {formatDistanceToNow(date.toDate(), { addSuffix: true })}
+                        {formatDistanceToNow(date, { addSuffix: true })}
                     </div>
                 </div>
             )
@@ -254,15 +268,15 @@ function InvoicesPage() {
         accessorKey: "dueDate",
         header: "Due",
         cell: ({ row }) => {
-            const date: Timestamp = row.getValue("dueDate");
-            const isOverdue = date.toDate() < new Date() && row.original.status !== 'Paid';
+            const date: Date = row.getValue("dueDate");
+            const isOverdue = date < new Date() && row.original.status !== 'Paid';
             return (
                 <div className="text-sm">
                     <div className={isOverdue ? "text-red-600 font-medium" : ""}>
-                        {date.toDate().toLocaleDateString()}
+                        {date.toLocaleDateString()}
                     </div>
                     <div className="text-muted-foreground text-xs">
-                        {formatDistanceToNow(date.toDate(), { addSuffix: true })}
+                        {formatDistanceToNow(date, { addSuffix: true })}
                     </div>
                 </div>
             )
@@ -286,7 +300,6 @@ function InvoicesPage() {
         cell: ({ row }) => {
           const invoice = row.original;
           return (
-              <AlertDialog>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -314,39 +327,25 @@ function InvoicesPage() {
                       Mark as Sent
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                     <AlertDialogTrigger asChild>
-                      <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
+                    <DropdownMenuItem 
+                      className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                      onSelect={() => openDeleteDialog(invoice.id)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                 <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete this invoice.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-destructive hover:bg-destructive/90"
-                      onClick={() => handleDeleteInvoice(invoice.id)}
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
           );
         },
       },
     ];
 
+    // Filter out deleted invoices
+    const filteredInvoices = invoices.filter(invoice => invoice.status !== 'Deleted');
+
     const table = useReactTable({
-        data: invoices,
+        data: filteredInvoices,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -682,6 +681,27 @@ function InvoicesPage() {
                   {selectedInvoice && <InvoicePreview invoice={selectedInvoice} />}
               </DialogContent>
           </Dialog>
+
+          {/* Delete Confirmation Dialog */}
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete this invoice.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive hover:bg-destructive/90"
+                  onClick={handleDeleteInvoice}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
       </div>
     );
 }

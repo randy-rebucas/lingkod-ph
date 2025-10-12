@@ -13,7 +13,6 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { getAgencyEarningsData } from './actions';
-import { Timestamp } from 'firebase/firestore';
 
 
 type Booking = {
@@ -30,7 +29,7 @@ type PayoutRequest = {
     providerName: string;
     amount: number;
     status: "Pending" | "Paid";
-    requestedAt: Timestamp;
+    requestedAt: Date;
 };
 
 const getStatusVariant = (status: PayoutRequest['status']) => {
@@ -186,7 +185,7 @@ export default function AgencyEarningsPage() {
                                 {payouts.length > 0 ? payouts.map((payout) => (
                                     <TableRow key={payout.id}>
                                         <TableCell className="font-medium">{payout.providerName}</TableCell>
-                                        <TableCell>{format(payout.requestedAt.toDate(), 'PPP')}</TableCell>
+                                        <TableCell>{format(payout.requestedAt, 'PPP')}</TableCell>
                                         <TableCell>₱{payout.amount.toFixed(2)}</TableCell>
                                         <TableCell className="text-center">
                                             <Badge variant={getStatusVariant(payout.status)}>{payout.status}</Badge>
