@@ -4,8 +4,22 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-11.9.1-orange?style=flat-square&logo=firebase)](https://firebase.google.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.4.1-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
+[![Google AI](https://img.shields.io/badge/Google%20AI-Genkit-blue?style=flat-square&logo=google)](https://ai.google.dev/)
+[![Maya](https://img.shields.io/badge/Maya-Payment%20Gateway-green?style=flat-square)](https://www.maya.ph/)
+[![PayPal](https://img.shields.io/badge/PayPal-Payment%20Gateway-blue?style=flat-square&logo=paypal)](https://www.paypal.com/)
 
-**LocalPro** is a comprehensive service marketplace platform that connects clients with trusted local service providers in the Philippines. Built with modern web technologies, it offers a seamless experience for service discovery, booking management, payment processing, and business growth.
+**LocalPro** is a comprehensive service marketplace platform that connects clients with trusted local service providers in the Philippines. Built with modern web technologies and AI-powered features, it offers a seamless experience for service discovery, booking management, payment processing, and business growth.
+
+## 🚀 Platform Highlights
+
+- **5 User Roles**: Client, Provider, Agency, Admin, Partner with distinct capabilities
+- **AI-Powered Features**: Smart rate suggestions, provider matching, content generation
+- **Multiple Payment Methods**: Maya, PayPal, Bank Transfer with real-time processing
+- **Comprehensive Dashboard**: Role-specific dashboards with analytics and insights
+- **Learning Hub**: Educational content and resources for all user types
+- **Real-time Communication**: In-app messaging and email notifications
+- **Internationalization**: English and Filipino (Tagalog) support
+- **Mobile-First Design**: Responsive design optimized for all devices
 
 ## 🌟 Features
 
@@ -73,9 +87,11 @@
 - **AI Integration**: Google AI (Genkit) for smart features
 
 ### Payment System
-- **Primary Gateway**: PayPal (Subscriptions and Payments)
-- **Manual Payments**: Bank Transfer with proof upload
-- **Security**: Encrypted storage, audit logging
+- **Maya Integration**: Credit/Debit cards, e-wallets, QR codes, bank transfers
+- **PayPal Integration**: Global payments, subscriptions, buyer protection
+- **Bank Transfer**: Manual payments with proof upload and verification
+- **Security**: End-to-end encryption, fraud detection, audit logging
+- **Real-time Processing**: Instant payment confirmation and status updates
 
 ### Development Tools
 - **Package Manager**: npm
@@ -124,6 +140,20 @@
    # PayPal Configuration
    NEXT_PUBLIC_PAYPAL_CLIENT_ID=your_paypal_client_id
    PAYPAL_CLIENT_SECRET=your_paypal_secret
+   
+   # Maya Configuration
+   NEXT_PUBLIC_MAYA_PUBLIC_KEY=your_maya_public_key
+   MAYA_SECRET_KEY=your_maya_secret_key
+   MAYA_ENVIRONMENT=sandbox
+   MAYA_WEBHOOK_SECRET=your_maya_webhook_secret
+   
+   # Google AI Configuration
+   GOOGLE_AI_API_KEY=your_google_ai_api_key
+   GOOGLE_AI_PROJECT_ID=your_project_id
+   
+   # Email Configuration
+   RESEND_API_KEY=your_resend_api_key
+   RESEND_FROM_EMAIL=noreply@localpro.asia
    
    # Application Configuration
    NEXT_PUBLIC_APP_URL=http://localhost:9002
@@ -207,18 +237,29 @@ npm run setup-dev        # Set up development environment
 LocalPro includes a comprehensive payment system supporting multiple payment methods:
 
 ### Supported Payment Methods
-- **PayPal**: Automated payments and subscriptions
-- **Bank Transfer**: Manual payment with proof upload
+- **Maya Checkout**: Credit/Debit cards, e-wallets (GCash, GrabPay), QR codes, bank transfers
+- **PayPal**: Global payments, subscriptions, buyer protection
+- **Bank Transfer**: Manual payment with proof upload and admin verification
 
 ### Payment Features
-- Real-time payment processing
-- Automated commission deduction
-- Payout management for providers
-- Payment verification system
-- Comprehensive audit logging
-- Fraud detection and prevention
+- Real-time payment processing with instant confirmation
+- Automated commission calculation and deduction
+- Secure payout management for providers
+- Multi-layer payment verification system
+- Comprehensive audit logging and transaction history
+- Advanced fraud detection and prevention
+- Webhook integration for real-time status updates
+- Support for recurring payments and subscriptions
 
-For detailed payment system documentation, see [README-PAYMENT-SYSTEM.md](./README-PAYMENT-SYSTEM.md).
+### Payment Security
+- End-to-end encryption for all transactions
+- PCI DSS compliance for card payments
+- IP address verification for webhooks
+- Signature validation for payment confirmations
+- Rate limiting and abuse prevention
+- Secure token-based payment processing
+
+For detailed payment system documentation, see [Payment System Documentation](./docs/payment-system-documentation.md).
 
 ## 🔐 Security Features
 
@@ -308,99 +349,51 @@ LocalPro includes comprehensive documentation covering all aspects of the platfo
 ### 📖 Core Documentation
 
 #### **Getting Started**
-- **[Documentation Index](./docs/README.md)** - Complete guide to all available documentation
-- **[Application Documentation](./docs/application-documentation.md)** - High-level platform overview and architecture
-- **[Blueprint](./docs/blueprint.md)** - Core features and style guidelines
+- **[User Journey Guide](./docs/user-journey-guide.md)** - Complete step-by-step user journeys for all roles
+- **[Comprehensive Role Documentation](./docs/comprehensive-role-documentation.md)** - Detailed guide to all user roles and capabilities
 
-#### **User Guides**
-- **[Comprehensive Role Documentation](./docs/comprehensive-role-documentation.md)** - Complete guide to all user roles and capabilities
-- **[User Journey Guide](./docs/user-journey-guide.md)** - Step-by-step user journeys and workflows
-- **[Role-Based Feature Access Documentation](./docs/role-based-feature-access-documentation.md)** - Feature access matrix by role
-
-### 🔧 Technical Documentation
-
-#### **API & Development**
-- **[API Documentation](./docs/api-documentation.md)** - Complete API reference for developers
-- **[API Endpoints Documentation](./docs/api-endpoints-documentation.md)** - Detailed API endpoint documentation with examples
-- **[Component Documentation](./docs/component-documentation.md)** - Comprehensive React component documentation
-- **[Utility Functions Documentation](./docs/utility-functions-documentation.md)** - Hooks, utilities, and helper functions
-- **[Internationalization](./docs/internationalization.md)** - Multi-language support implementation
-
-#### **AI & Automation**
-- **[AI Flows Documentation](./docs/ai-flows-documentation.md)** - AI-powered features and flows using Google AI (Genkit)
-
-#### **Communication & Notifications**
-- **[Email Templates Documentation](./docs/email-templates-documentation.md)** - Email templates and notification system
-
-#### **Payment System**
+#### **Technical Documentation**
+- **[API Documentation](./docs/api-documentation.md)** - Complete API reference with all endpoints
+- **[Component Documentation](./docs/component-documentation.md)** - Comprehensive React component library
 - **[Payment System Documentation](./docs/payment-system-documentation.md)** - Complete payment system guide
-- **[Payment System Final Summary](./docs/payment-system-final-summary.md)** - Implementation summary
-- **[Payment System Quick Reference](./docs/payment-system-quick-reference.md)** - Quick reference guide
-- **[Payment Production Checklist](./docs/payment-production-checklist.md)** - Production deployment checklist
-- **[Payment Environment Setup](./docs/payment-environment-setup.md)** - Environment configuration guide
-- **[Manual Payment Verification Guide](./docs/manual-payment-verification-guide.md)** - Manual payment process guide
+- **[AI Flows Documentation](./docs/ai-flows-documentation.md)** - AI-powered features using Google AI (Genkit)
+- **[Email Templates Documentation](./docs/email-templates-documentation.md)** - Email system and templates
 
-#### **Payment Integration Details**
-
-### 🔒 Security Documentation
-
-#### **Security Audits & Reports**
-- **[Admin Role Security Audit Report](./docs/admin-role-security-audit-report.md)** - Comprehensive admin security analysis (Rating: 9/10)
-- **[Partner Role Security Audit Report](./docs/partner-role-security-audit-report.md)** - Partner security audit (Rating: 8/10)
-- **[Payment Security Review](./docs/payment-security-review.md)** - Payment system security assessment
-
-#### **Security Enhancements**
-- **[Security Enhancements](./docs/security-enhancements.md)** - General security improvements
-- **[Admin Security Enhancements](./docs/admin-security-enhancements.md)** - Admin-specific security features
-- **[Agency Security Enhancements](./docs/agency-security-enhancements.md)** - Agency security implementations
-
-### 🚀 Implementation & Deployment
-
-#### **Implementation Guides**
-- **[Payment Implementation Complete](./docs/payment-implementation-complete.md)** - Payment system implementation status
-- **[Payment System Implementation Complete](./docs/payment-system-implementation-complete.md)** - Complete implementation guide
-- **[Partner Enhancements Implementation](./docs/partner-enhancements-implementation.md)** - Partner role improvements
-- **[Provider Recommendations Implementation](./docs/provider-recommendations-implementation.md)** - Provider role enhancements
-
-### 📋 Quick Reference Guides
+### 🚀 Quick Start Guides
 
 #### **For Users**
-- **New to LocalPro?** Start with [Documentation Index](./docs/README.md)
+- **New to LocalPro?** Start with [User Journey Guide](./docs/user-journey-guide.md)
 - **Understanding Roles?** Read [Comprehensive Role Documentation](./docs/comprehensive-role-documentation.md)
-- **Need Help with Payments?** Check [Payment System Quick Reference](./docs/payment-system-quick-reference.md)
+- **Need Help with Payments?** Check [Payment System Documentation](./docs/payment-system-documentation.md)
 
 #### **For Developers**
 - **API Integration?** See [API Documentation](./docs/api-documentation.md)
-- **Payment Integration?** Review [Payment System Documentation](./docs/payment-system-documentation.md)
-- **Security Implementation?** Check [Security Enhancements](./docs/security-enhancements.md)
+- **Component Development?** Review [Component Documentation](./docs/component-documentation.md)
+- **AI Features?** Check [AI Flows Documentation](./docs/ai-flows-documentation.md)
 
 #### **For Administrators**
-- **Platform Management?** Read [Admin Role Security Audit Report](./docs/admin-role-security-audit-report.md)
-- **Payment Operations?** See [Manual Payment Verification Guide](./docs/manual-payment-verification-guide.md)
-- **Security Monitoring?** Review [Admin Security Enhancements](./docs/admin-security-enhancements.md)
+- **Platform Management?** Read [Comprehensive Role Documentation](./docs/comprehensive-role-documentation.md)
+- **Payment Operations?** See [Payment System Documentation](./docs/payment-system-documentation.md)
+- **Email Management?** Review [Email Templates Documentation](./docs/email-templates-documentation.md)
 
-### 📊 Documentation Statistics
+### 📊 Documentation Overview
 
-- **Total Documents**: 33 comprehensive guides
-- **Security Audits**: 3 detailed security assessments
-- **Implementation Guides**: 8 step-by-step implementation documents
-- **API Documentation**: Complete REST API reference with endpoint details
-- **User Guides**: 5 role-specific user journey guides
-- **Payment Documentation**: 10 payment system guides
-- **Technical Documentation**: 5 comprehensive technical guides
-- **AI Documentation**: Complete AI flows and automation documentation
-- **Component Documentation**: Detailed React component documentation
-- **Email System**: Complete email templates and notification documentation
+- **User Guides**: Complete user journey documentation for all roles
+- **API Documentation**: REST API reference with all endpoints and examples
+- **Component Library**: Comprehensive React component documentation
+- **Payment System**: Complete payment integration and processing guide
+- **AI Features**: AI-powered features and automation documentation
+- **Email System**: Email templates and notification system guide
 
 ### 🔄 Documentation Updates
 
 This documentation is regularly updated to reflect platform changes and improvements. Key areas of focus:
 
 - **New Features**: Documentation for new platform features
-- **Security Updates**: Security enhancement documentation
 - **API Changes**: API endpoint updates and modifications
 - **User Experience**: Improved user journey documentation
 - **Payment System**: Payment method and process updates
+- **AI Features**: New AI-powered capabilities
 
 ### 📝 Contributing to Documentation
 
@@ -430,12 +423,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Firebase for backend infrastructure
-- PayPal for payment processing
-- Next.js team for the amazing framework
-- Radix UI for accessible component primitives
-- Tailwind CSS for utility-first styling
+- **Firebase** for backend infrastructure and real-time capabilities
+- **Maya (PayMaya)** for Philippine payment processing
+- **PayPal** for global payment solutions
+- **Google AI (Genkit)** for AI-powered features
+- **Next.js** team for the amazing React framework
+- **Radix UI** for accessible component primitives
+- **Tailwind CSS** for utility-first styling
+- **React Email** for beautiful email templates
+- **Resend** for reliable email delivery
 
 ---
 
 **LocalPro** - Connecting communities with trusted local service providers across the Philippines. 🇵🇭
+
+*Built with ❤️ for the Filipino service industry*
