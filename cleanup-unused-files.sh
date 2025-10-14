@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Lingkod PH - Unused Files Cleanup Script
+# Localpro PH - Unused Files Cleanup Script
 # This script removes confirmed unused files to clean up the codebase
 
-echo "🧹 Starting Lingkod PH cleanup process..."
+echo "🧹 Starting Localpro PH cleanup process..."
 
 # Create backup directory
 BACKUP_DIR="backup-$(date +%Y%m%d-%H%M%S)"

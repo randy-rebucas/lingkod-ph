@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MayaCheckoutButton } from '@/components/maya-checkout-button';
+import { PayPalCheckoutButton } from '@/components/paypal-checkout-button';
 import { CreditCard, Smartphone, Building2, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -76,12 +77,16 @@ export function PaymentMethodSelector({
     onPaymentError?.('maya', error);
   };
 
-  const handlePayPalPayment = () => {
-    // PayPal integration would go here
+  const handlePayPalSuccess = (transactionId?: string) => {
+    onPaymentSuccess?.('paypal', transactionId);
     toast({
-      title: "PayPal Payment",
-      description: "PayPal integration will be implemented here.",
+      title: "Payment Successful!",
+      description: "Your PayPal payment has been processed successfully.",
     });
+  };
+
+  const handlePayPalError = (error: string) => {
+    onPaymentError?.('paypal', error);
   };
 
   const handleBankTransfer = () => {
@@ -163,15 +168,15 @@ export function PaymentMethodSelector({
                     </MayaCheckoutButton>
                   )}
                   
-                  {method.id === 'paypal' && (
-                    <Button
-                      onClick={handlePayPalPayment}
+                  {method.id === 'paypal' && bookingId && (
+                    <PayPalCheckoutButton
+                      bookingId={bookingId}
+                      amount={amount}
+                      serviceName={`${type === 'booking' ? 'Booking' : 'Subscription'} Payment`}
+                      onPaymentSuccess={handlePayPalSuccess}
+                      onPaymentError={handlePayPalError}
                       className="w-full"
-                      variant="outline"
-                    >
-                      <Smartphone className="mr-2 h-4 w-4" />
-                      Pay with PayPal
-                    </Button>
+                    />
                   )}
                   
                   {method.id === 'bank' && (

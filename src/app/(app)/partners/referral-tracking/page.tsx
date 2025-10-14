@@ -318,7 +318,7 @@ export default function ReferralTrackingPage() {
       return sortOrder === 'asc' ? comparison : -comparison;
     });
 
-  const referralLink = referralCode ? `https://lingkod-ph.com/signup?ref=${referralCode}` : '';
+  const referralLink = referralCode ? `https://localpro.asia/signup?ref=${referralCode}` : '';
 
    const handleCopyReferralLink = async () => {
      if (!referralLink) {

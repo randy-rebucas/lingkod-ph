@@ -1,6 +1,6 @@
 # Maya Checkout Integration Setup
 
-This document provides instructions for setting up Maya Checkout integration in the Lingkod PH application.
+This document provides instructions for setting up Maya Checkout integration in the Localpro PH application.
 
 ## Overview
 

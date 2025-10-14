@@ -17,8 +17,10 @@ interface PayPalCheckoutButtonProps {
   amount: number;
   serviceName: string;
   onPaymentStart?: () => void;
-  onPaymentSuccess?: () => void;
+  onPaymentSuccess?: (transactionId?: string) => void;
   onPaymentError?: (error: string) => void;
+  className?: string;
+  disabled?: boolean;
 }
 
 export function PayPalCheckoutButton({
@@ -28,6 +30,8 @@ export function PayPalCheckoutButton({
   onPaymentStart,
   onPaymentSuccess,
   onPaymentError,
+  className = "",
+  disabled = false,
 }: PayPalCheckoutButtonProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
@@ -177,18 +181,18 @@ export function PayPalCheckoutButton({
   // Memoize the payment button render to prevent unnecessary re-renders
   const renderPaymentButton = useMemo(() => {
     if (!isConfigured) {
-      return (
-        <Button disabled className="w-full" aria-label="PayPal not configured">
-          <CreditCard className="mr-2 h-4 w-4" />
-          PayPal Not Available
-        </Button>
-      );
+        return (
+          <Button disabled className={`w-full ${className}`} aria-label="PayPal not configured">
+            <CreditCard className="mr-2 h-4 w-4" />
+            PayPal Not Available
+          </Button>
+        );
     }
 
     switch (paymentStatus) {
       case 'processing':
         return (
-          <Button disabled className="w-full" aria-label="Processing payment">
+          <Button disabled className={`w-full ${className}`} aria-label="Processing payment">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Processing Payment...
           </Button>
@@ -196,7 +200,7 @@ export function PayPalCheckoutButton({
       
       case 'success':
         return (
-          <Button disabled className="w-full bg-green-600 hover:bg-green-700" aria-label="Payment successful">
+          <Button disabled className={`w-full bg-green-600 hover:bg-green-700 ${className}`} aria-label="Payment successful">
             <CheckCircle className="mr-2 h-4 w-4" />
             Payment Successful!
           </Button>
@@ -207,8 +211,8 @@ export function PayPalCheckoutButton({
           <div className="space-y-2">
             <Button 
               onClick={handlePayPalPayment}
-              className="w-full"
-              disabled={isProcessing}
+              className={`w-full ${className}`}
+              disabled={isProcessing || disabled}
               aria-label="Retry payment"
             >
               <CreditCard className="mr-2 h-4 w-4" />
@@ -227,8 +231,8 @@ export function PayPalCheckoutButton({
         return (
           <Button 
             onClick={handlePayPalPayment}
-            className="w-full"
-            disabled={isProcessing}
+            className={`w-full ${className}`}
+            disabled={isProcessing || disabled}
             aria-label="Pay with PayPal"
           >
             <CreditCard className="mr-2 h-4 w-4" />
@@ -236,7 +240,7 @@ export function PayPalCheckoutButton({
           </Button>
         );
     }
-  }, [paymentStatus, isProcessing, errorMessage, handlePayPalPayment, isConfigured]);
+  }, [paymentStatus, isProcessing, errorMessage, handlePayPalPayment, isConfigured, className, disabled]);
 
   return (
     <Card>

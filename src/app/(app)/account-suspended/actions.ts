@@ -62,7 +62,7 @@ export async function getAccountSuspensionDetails(userId: string) {
       hasAppeal: userData.hasAppeal || false,
       appealStatus: userData.appealStatus || 'none',
       appealDate: userData.appealDate,
-      contactEmail: 'support@lingkod.ph',
+      contactEmail: 'support@localpro.asia',
       supportPhone: '+63 2 1234 5678',
     };
 

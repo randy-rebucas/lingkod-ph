@@ -89,8 +89,8 @@ export default function SubscriptionFailurePage() {
           <div className="text-center text-sm text-muted-foreground">
             <p>
               Need help? Contact our support team at{' '}
-              <a href="mailto:support@lingkod.ph" className="text-primary hover:underline">
-                support@lingkod.ph
+              <a href="mailto:support@localpro.asia" className="text-primary hover:underline">
+                support@localpro.asia
               </a>
             </p>
           </div>

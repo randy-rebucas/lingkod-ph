@@ -1,5 +1,5 @@
 {
-  "name": "lingkod-ph",
+  "name": "localpro",
   "version": "0.1.0",
   "description": "LocalPro - A comprehensive platform connecting service providers with clients in the Philippines",
   "keywords": [
@@ -29,6 +29,9 @@
     "seed:learning-hub:mock": "tsx src/scripts/seed-learning-hub-mock.ts",
     "test-paypal": "tsx src/scripts/test-paypal-integration.ts",
     "test-maya": "tsx src/scripts/test-maya-integration.ts",
+    "setup-payment-config": "tsx src/scripts/setup-payment-config.ts",
+    "setup-payment-gateways": "tsx src/scripts/setup-payment-gateways.ts",
+    "check-payment-config": "tsx src/scripts/check-payment-config.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

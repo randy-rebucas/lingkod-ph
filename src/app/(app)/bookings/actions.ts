@@ -27,30 +27,28 @@ const serializeTimestamps = (data: any): any => {
 };
 
 // PayPal payment creation action
-export async function createPayPalPayment(_data: {
+export async function createPayPalPayment(data: {
   bookingId: string;
   returnUrl: string;
   cancelUrl: string;
 }): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
-    // Use the existing PaymentRetryService for payment creation
-    const paymentResult = await PaymentRetryService.retryPaymentCreation(async () => {
-      // This would normally call the PayPal API
-      // For now, we'll simulate the response
-      const mockPayment = {
-        success: true,
-        approvalUrl: `https://www.sandbox.paypal.com/checkoutnow?token=MOCK_TOKEN_${Date.now()}`,
-        paymentId: `PAY-${Date.now()}`,
-      };
-      
-      return mockPayment;
+    // Call the PayPal create API endpoint
+    const response = await fetch('/api/payments/paypal/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
     });
 
-    if (!paymentResult.success) {
-      return { success: false, error: paymentResult.error || 'Payment creation failed' };
+    const result = await response.json();
+
+    if (!response.ok) {
+      return { success: false, error: result.error || 'Payment creation failed' };
     }
 
-    return { success: true, data: paymentResult.data };
+    return { success: true, data: result.data };
   } catch (error) {
     console.error('Error creating PayPal payment:', error);
     return { success: false, error: 'Failed to create payment' };
@@ -63,27 +61,22 @@ export async function capturePayPalPayment(data: {
   orderId: string;
 }): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
-    const db = getDb();
-    
-    // Update booking status to paid
-    const bookingRef = doc(db, 'bookings', data.bookingId);
-    await updateDoc(bookingRef, {
-      paymentStatus: 'paid',
-      paymentMethod: 'paypal',
-      paymentId: data.orderId,
-      paidAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+    // Call the PayPal capture API endpoint
+    const response = await fetch('/api/payments/paypal/capture', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
     });
 
-    // Simulate successful payment capture
-    const captureResult = {
-      success: true,
-      transactionId: `TXN-${Date.now()}`,
-      amount: 100.00, // This would come from the actual payment
-      currency: 'PHP',
-    };
+    const result = await response.json();
 
-    return { success: true, data: captureResult };
+    if (!response.ok) {
+      return { success: false, error: result.error || 'Payment capture failed' };
+    }
+
+    return { success: true, data: result.data };
   } catch (error) {
     console.error('Error capturing PayPal payment:', error);
     return { success: false, error: 'Failed to capture payment' };

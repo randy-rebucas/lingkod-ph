@@ -40,7 +40,7 @@ function printInstructions() {
    - Go to "Project Settings" (gear icon)
    - Scroll down to "Your apps" section
    - Click the web app icon (</>) or "Add app" > "Web"
-   - Register your app with a nickname (e.g., "lingkod-ph-web")
+   - Register your app with a nickname (e.g., "localpro-web")
    - Copy the Firebase SDK configuration
 
 5. 📝 Create Environment File
