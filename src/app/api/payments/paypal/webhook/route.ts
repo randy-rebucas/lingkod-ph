@@ -1,225 +1,268 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PayPalPaymentService } from '@/lib/paypal-payment-service';
-import { getDb } from '@/lib/firebase-admin';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import crypto from 'crypto';
+import { PayPalService, PayPalWebhookEvent } from '@/lib/paypal-service';
+import { adminDb } from '@/lib/firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if PayPal is configured
-    if (!process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || !process.env.PAYPAL_CLIENT_SECRET) {
-      console.error('PayPal not configured');
-      return NextResponse.json({ error: 'Service not configured' }, { status: 503 });
-    }
-
-    const body = await request.text();
-    const signature = request.headers.get('paypal-transmission-sig');
-    const certId = request.headers.get('paypal-cert-id');
-    const _authAlgo = request.headers.get('paypal-auth-algo');
-    const _transmissionId = request.headers.get('paypal-transmission-id');
-    const _transmissionTime = request.headers.get('paypal-transmission-time');
+    console.log('PayPal webhook received');
     
-    if (!signature || !certId || !_authAlgo || !_transmissionId || !_transmissionTime) {
-      console.error('Missing PayPal webhook headers');
-      return NextResponse.json({ error: 'Missing required headers' }, { status: 400 });
+    // Check if PayPal is configured
+    if (!PayPalService.isConfigured()) {
+      console.error('PayPal is not configured');
+      return NextResponse.json(
+        { error: 'PayPal is not properly configured' },
+        { status: 503 }
+      );
     }
 
-    // Verify webhook signature (simplified - in production, use PayPal's webhook verification)
-    const isValidSignature = verifyWebhookSignature(body, signature, certId, _authAlgo, _transmissionId, _transmissionTime);
+    // Get request body and headers
+    const body = await request.text();
+    const headers = Object.fromEntries(request.headers.entries());
+
+    console.log('PayPal webhook headers:', headers);
+    console.log('PayPal webhook body:', body);
+
+    // Verify webhook signature
+    const paypalService = new PayPalService();
+    const isValidSignature = await paypalService.verifyWebhookSignature(headers, body);
+
     if (!isValidSignature) {
       console.error('Invalid PayPal webhook signature');
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Invalid webhook signature' },
+        { status: 401 }
+      );
     }
 
-    const webhookEvent = JSON.parse(body);
-    
-    // Process webhook event
-    await processWebhookEvent(webhookEvent);
-
-    return NextResponse.json({ received: true });
-  } catch (error) {
-    console.error('PayPal webhook processing error:', error);
-    return NextResponse.json({ error: 'Webhook processing failed' }, { status: 500 });
-  }
-}
-
-/**
- * Verify PayPal webhook signature
- * Note: This is a simplified version. In production, you should use PayPal's official webhook verification
- */
-function verifyWebhookSignature(
-  body: string,
-  signature: string,
-  certId: string,
-  authAlgo: string,
-  transmissionId: string,
-  transmissionTime: string
-): boolean {
-  try {
-    // In production, implement proper PayPal webhook verification
-    // For now, we'll do basic validation
-    const expectedCertId = process.env.PAYPAL_WEBHOOK_CERT_ID;
-    if (expectedCertId && certId !== expectedCertId) {
-      console.error('PayPal webhook cert ID mismatch');
-      return false;
-    }
-
-    // Validate required headers
-    if (!signature || !certId || !authAlgo || !transmissionId || !transmissionTime) {
-      console.error('Missing required PayPal webhook headers');
-      return false;
-    }
-
-    // In production, you should:
-    // 1. Fetch PayPal's certificate using the certId
-    // 2. Verify the signature using the certificate and the webhook data
-    // 3. Validate the transmission timestamp (should be recent)
-    
-    // For now, we'll do basic validation
-    const transmissionTimeMs = new Date(transmissionTime).getTime();
-    const currentTimeMs = Date.now();
-    const timeDiff = Math.abs(currentTimeMs - transmissionTimeMs);
-    
-    // Reject webhooks older than 5 minutes
-    if (timeDiff > 5 * 60 * 1000) {
-      console.error('PayPal webhook timestamp too old');
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Error verifying PayPal webhook signature:', error);
-    return false;
-  }
-}
-
-/**
- * Process PayPal webhook event
- */
-async function processWebhookEvent(webhookEvent: any) {
-  try {
-    const eventType = webhookEvent.event_type;
-    const resource = webhookEvent.resource;
-    const eventId = webhookEvent.id;
-
-    console.log(`Processing PayPal webhook event: ${eventType} (ID: ${eventId})`);
-
-    const db = getDb();
-
-    // Store webhook event for audit trail
+    // Parse webhook event
+    let event: PayPalWebhookEvent;
     try {
-      await db.collection('paypalWebhookEvents').doc(eventId).set({
-        eventType,
-        eventId,
-        resource,
-        processedAt: new Date(),
-        status: 'processing',
-      });
+      event = JSON.parse(body);
     } catch (error) {
-      console.error('Error storing webhook event:', error);
+      console.error('Failed to parse PayPal webhook body:', error);
+      return NextResponse.json(
+        { error: 'Invalid JSON body' },
+        { status: 400 }
+      );
     }
 
-    switch (eventType) {
-      case 'PAYMENT.CAPTURE.COMPLETED':
-        // Payment was successfully captured
-        if (resource?.custom_id) {
-          const bookingId = resource.custom_id;
-          console.log(`Payment completed for booking: ${bookingId}`);
-          
-          // Update booking status
-          const bookingRef = doc(db, 'bookings', bookingId);
-          await updateDoc(bookingRef, {
-            paymentStatus: 'paid',
-            paymentMethod: 'paypal',
-            paymentId: resource.id,
-            paidAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-            paypalTransactionId: resource.id,
-            paypalPayerEmail: resource.payer?.email_address,
-          });
+    console.log('Processing PayPal webhook event:', event.event_type);
 
-          // Send confirmation email or notification
-          console.log(`Booking ${bookingId} payment confirmed via PayPal webhook`);
-        }
+    // Process the webhook event
+    const processResult = await paypalService.processWebhookEvent(event);
+
+    if (!processResult.success) {
+      console.error('Failed to process PayPal webhook event:', processResult.error);
+      return NextResponse.json(
+        { error: processResult.error || 'Failed to process webhook event' },
+        { status: 500 }
+      );
+    }
+
+    // Handle specific event types
+    await handleWebhookEvent(event);
+
+    console.log('PayPal webhook processed successfully');
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('PayPal webhook error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleWebhookEvent(event: PayPalWebhookEvent) {
+  const db = adminDb;
+
+  try {
+    switch (event.event_type) {
+      case 'CHECKOUT.ORDER.APPROVED':
+        await handleOrderApproved(event, db);
+        break;
+
+      case 'PAYMENT.CAPTURE.COMPLETED':
+        await handlePaymentCaptured(event, db);
         break;
 
       case 'PAYMENT.CAPTURE.DENIED':
-        // Payment was denied
-        if (resource?.custom_id) {
-          const bookingId = resource.custom_id;
-          console.log(`Payment denied for booking: ${bookingId}`);
-          
-          // Update booking status
-          const bookingRef = doc(db, 'bookings', bookingId);
-          await updateDoc(bookingRef, {
-            paymentStatus: 'failed',
-            paymentMethod: 'paypal',
-            updatedAt: serverTimestamp(),
-            paymentError: 'Payment was denied by PayPal',
-          });
-        }
+        await handlePaymentDenied(event, db);
         break;
 
       case 'PAYMENT.CAPTURE.REFUNDED':
-        // Payment was refunded
-        if (resource?.custom_id) {
-          const bookingId = resource.custom_id;
-          console.log(`Payment refunded for booking: ${bookingId}`);
-          
-          // Update booking status
-          const bookingRef = doc(db, 'bookings', bookingId);
-          await updateDoc(bookingRef, {
-            paymentStatus: 'refunded',
-            paymentMethod: 'paypal',
-            updatedAt: serverTimestamp(),
-            refundedAt: serverTimestamp(),
-            refundId: resource.id,
-          });
-        }
-        break;
-
-      case 'CHECKOUT.ORDER.APPROVED':
-        // Order was approved by user
-        if (resource?.custom_id) {
-          const bookingId = resource.custom_id;
-          console.log(`PayPal order approved for booking: ${bookingId}`);
-          
-          // Update booking with order approval
-          const bookingRef = doc(db, 'bookings', bookingId);
-          await updateDoc(bookingRef, {
-            paypalOrderId: resource.id,
-            paypalOrderStatus: 'approved',
-            updatedAt: serverTimestamp(),
-          });
-        }
+        await handlePaymentRefunded(event, db);
         break;
 
       default:
-        console.log(`Unhandled PayPal webhook event type: ${eventType}`);
-    }
-
-    // Update webhook event status to completed
-    try {
-      await db.collection('paypalWebhookEvents').doc(eventId).update({
-        status: 'completed',
-        completedAt: new Date(),
-      });
-    } catch (error) {
-      console.error('Error updating webhook event status:', error);
+        console.log('Unhandled PayPal webhook event type:', event.event_type);
     }
   } catch (error) {
-    console.error('Error processing PayPal webhook event:', error);
-    
-    // Update webhook event status to failed
-    try {
-      const db = getDb();
-      await db.collection('paypalWebhookEvents').doc(webhookEvent.id).update({
-        status: 'failed',
-        error: error instanceof Error ? error.message : 'Unknown error',
-        failedAt: new Date(),
+    console.error('Error handling PayPal webhook event:', error);
+  }
+}
+
+async function handleOrderApproved(event: PayPalWebhookEvent, db: any) {
+  const orderId = event.resource?.id;
+  console.log('Handling order approved:', orderId);
+
+  // Update booking or subscription status
+  if (orderId) {
+    // Find booking by PayPal order ID
+    const bookingsQuery = await db.collection('bookings')
+      .where('paypalOrderId', '==', orderId)
+      .limit(1)
+      .get();
+
+    if (!bookingsQuery.empty) {
+      const bookingDoc = bookingsQuery.docs[0];
+      await bookingDoc.ref.update({
+        paypalStatus: 'approved',
+        updatedAt: FieldValue.serverTimestamp(),
       });
-    } catch (updateError) {
-      console.error('Error updating failed webhook event status:', updateError);
+      console.log('Updated booking status to approved:', bookingDoc.id);
+    }
+
+    // Find subscription by PayPal order ID
+    const subscriptionsQuery = await db.collection('subscriptions')
+      .where('paypalOrderId', '==', orderId)
+      .limit(1)
+      .get();
+
+    if (!subscriptionsQuery.empty) {
+      const subscriptionDoc = subscriptionsQuery.docs[0];
+      await subscriptionDoc.ref.update({
+        paypalStatus: 'approved',
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      console.log('Updated subscription status to approved:', subscriptionDoc.id);
+    }
+  }
+}
+
+async function handlePaymentCaptured(event: PayPalWebhookEvent, db: any) {
+  const captureId = event.resource?.id;
+  const orderId = event.resource?.supplementary_data?.related_ids?.order_id;
+  console.log('Handling payment captured:', captureId, 'for order:', orderId);
+
+  if (orderId) {
+    // Find booking by PayPal order ID
+    const bookingsQuery = await db.collection('bookings')
+      .where('paypalOrderId', '==', orderId)
+      .limit(1)
+      .get();
+
+    if (!bookingsQuery.empty) {
+      const bookingDoc = bookingsQuery.docs[0];
+      await bookingDoc.ref.update({
+        paymentStatus: 'paid',
+        paypalTransactionId: captureId,
+        paypalStatus: 'captured',
+        paidAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      console.log('Updated booking payment status to paid:', bookingDoc.id);
+    }
+
+    // Find subscription by PayPal order ID
+    const subscriptionsQuery = await db.collection('subscriptions')
+      .where('paypalOrderId', '==', orderId)
+      .limit(1)
+      .get();
+
+    if (!subscriptionsQuery.empty) {
+      const subscriptionDoc = subscriptionsQuery.docs[0];
+      await subscriptionDoc.ref.update({
+        status: 'active',
+        paypalTransactionId: captureId,
+        paypalStatus: 'captured',
+        activatedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      console.log('Updated subscription status to active:', subscriptionDoc.id);
+    }
+  }
+}
+
+async function handlePaymentDenied(event: PayPalWebhookEvent, db: any) {
+  const captureId = event.resource?.id;
+  const orderId = event.resource?.supplementary_data?.related_ids?.order_id;
+  console.log('Handling payment denied:', captureId, 'for order:', orderId);
+
+  if (orderId) {
+    // Update booking status
+    const bookingsQuery = await db.collection('bookings')
+      .where('paypalOrderId', '==', orderId)
+      .limit(1)
+      .get();
+
+    if (!bookingsQuery.empty) {
+      const bookingDoc = bookingsQuery.docs[0];
+      await bookingDoc.ref.update({
+        paymentStatus: 'failed',
+        paypalStatus: 'denied',
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      console.log('Updated booking payment status to failed:', bookingDoc.id);
+    }
+
+    // Update subscription status
+    const subscriptionsQuery = await db.collection('subscriptions')
+      .where('paypalOrderId', '==', orderId)
+      .limit(1)
+      .get();
+
+    if (!subscriptionsQuery.empty) {
+      const subscriptionDoc = subscriptionsQuery.docs[0];
+      await subscriptionDoc.ref.update({
+        status: 'failed',
+        paypalStatus: 'denied',
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      console.log('Updated subscription status to failed:', subscriptionDoc.id);
+    }
+  }
+}
+
+async function handlePaymentRefunded(event: PayPalWebhookEvent, db: any) {
+  const captureId = event.resource?.id;
+  const orderId = event.resource?.supplementary_data?.related_ids?.order_id;
+  console.log('Handling payment refunded:', captureId, 'for order:', orderId);
+
+  if (orderId) {
+    // Update booking status
+    const bookingsQuery = await db.collection('bookings')
+      .where('paypalOrderId', '==', orderId)
+      .limit(1)
+      .get();
+
+    if (!bookingsQuery.empty) {
+      const bookingDoc = bookingsQuery.docs[0];
+      await bookingDoc.ref.update({
+        paymentStatus: 'refunded',
+        paypalStatus: 'refunded',
+        refundedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      console.log('Updated booking payment status to refunded:', bookingDoc.id);
+    }
+
+    // Update subscription status
+    const subscriptionsQuery = await db.collection('subscriptions')
+      .where('paypalOrderId', '==', orderId)
+      .limit(1)
+      .get();
+
+    if (!subscriptionsQuery.empty) {
+      const subscriptionDoc = subscriptionsQuery.docs[0];
+      await subscriptionDoc.ref.update({
+        status: 'cancelled',
+        paypalStatus: 'refunded',
+        cancelledAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      console.log('Updated subscription status to cancelled:', subscriptionDoc.id);
     }
   }
 }

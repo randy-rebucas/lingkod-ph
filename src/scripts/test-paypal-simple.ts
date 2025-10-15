@@ -60,7 +60,7 @@ async function testPayPalIntegration() {
       const exists = fs.existsSync(filePath);
       console.log(`   ${exists ? '✅' : '❌'} ${file}: ${exists ? 'Exists' : 'Missing'}`);
     });
-  } catch (error) {
+  } catch {
     console.log('   ⚠️  Could not check file structure (filesystem access not available)');
     requiredFiles.forEach(file => {
       console.log(`   ✅ ${file}: Expected to exist`);

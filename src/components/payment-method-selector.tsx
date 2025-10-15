@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MayaCheckoutButton } from '@/components/maya-checkout-button';
-import { PayPalCheckoutButton } from '@/components/paypal-checkout-button';
+import { PayPalButton } from '@/components/paypal-button';
+import { PayPalSubscriptionButton } from '@/components/paypal-subscription-button';
 import { CreditCard, Smartphone, Building2, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -169,14 +170,31 @@ export function PaymentMethodSelector({
                   )}
                   
                   {method.id === 'paypal' && bookingId && (
-                    <PayPalCheckoutButton
-                      bookingId={bookingId}
+                    <PayPalButton
                       amount={amount}
-                      serviceName={`${type === 'booking' ? 'Booking' : 'Subscription'} Payment`}
+                      description={`${type === 'booking' ? 'Booking' : 'Subscription'} Payment`}
+                      returnUrl={`${window.location.origin}/bookings/${bookingId}/payment/result?method=paypal`}
+                      cancelUrl={`${window.location.origin}/bookings/${bookingId}/payment`}
                       onPaymentSuccess={handlePayPalSuccess}
                       onPaymentError={handlePayPalError}
                       className="w-full"
-                    />
+                    >
+                      Pay with PayPal
+                    </PayPalButton>
+                  )}
+                  
+                  {method.id === 'paypal' && planId && type === 'subscription' && (
+                    <PayPalSubscriptionButton
+                      planId={planId}
+                      planName={`${type === 'subscription' ? 'Subscription' : 'Plan'} Payment`}
+                      amount={amount}
+                      billingCycle="monthly"
+                      onSubscriptionSuccess={(subscriptionId) => handlePayPalSuccess(subscriptionId)}
+                      onSubscriptionError={handlePayPalError}
+                      className="w-full"
+                    >
+                      Subscribe with PayPal
+                    </PayPalSubscriptionButton>
                   )}
                   
                   {method.id === 'bank' && (

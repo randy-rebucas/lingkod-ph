@@ -21,7 +21,7 @@ export function PayPalTestButton({
   bookingId,
   amount,
   serviceName,
-  onPaymentSuccess,
+  onPaymentSuccess: _onPaymentSuccess,
   onPaymentError,
   className = "",
   disabled = false,

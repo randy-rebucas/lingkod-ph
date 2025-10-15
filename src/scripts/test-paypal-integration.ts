@@ -5,7 +5,7 @@
  * Tests the PayPal integration functionality
  */
 
-import { PayPalPaymentService } from '../lib/paypal-payment-service';
+import { PayPalService } from '../lib/paypal-service';
 import { PaymentConfig } from '../lib/payment-config';
 
 async function testPayPalIntegration() {
@@ -13,7 +13,7 @@ async function testPayPalIntegration() {
 
   // Test 1: Configuration Validation
   console.log('1. Testing PayPal Configuration...');
-  const isConfigured = PayPalPaymentService.isConfigured();
+  const isConfigured = PayPalService.isConfigured();
   console.log(`   ✅ PayPal Configuration: ${isConfigured ? 'Valid' : 'Invalid'}`);
   
   if (!isConfigured) {
@@ -37,7 +37,7 @@ async function testPayPalIntegration() {
   // Test 3: Service Instance
   console.log('3. Testing Service Instance...');
   try {
-    const _service = new PayPalPaymentService();
+    const _service = new PayPalService();
     console.log('   ✅ PayPal Service Instance: Created successfully');
   } catch (error) {
     console.log('   ❌ PayPal Service Instance: Failed to create');

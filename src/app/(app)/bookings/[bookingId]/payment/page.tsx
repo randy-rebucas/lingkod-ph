@@ -20,7 +20,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import type { Booking } from "../../page";
 import { PaymentConfig } from "@/lib/payment-config";
 import { PaymentRetryService } from "@/lib/payment-retry-service";
-import { PayPalCheckoutButton } from "@/components/paypal-checkout-button";
+import { PayPalButton } from "@/components/paypal-button";
 import { PayPalTestButton } from "@/components/paypal-test-button";
 import { PayPalConfigCheck } from "@/components/paypal-config-check";
 
@@ -267,10 +267,11 @@ export default function PaymentPage() {
                                 <CreditCard className="h-6 w-6 text-blue-600" />
                                 <h3 className="font-semibold text-lg font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">PayPal Payment</h3>
                             </div>
-                            <PayPalCheckoutButton
-                                bookingId={booking.id}
+                            <PayPalButton
                                 amount={booking.price || 0}
-                                serviceName={booking.serviceName}
+                                description={`Payment for ${booking.serviceName}`}
+                                returnUrl={`${window.location.origin}/bookings/${booking.id}/payment/result?method=paypal`}
+                                cancelUrl={`${window.location.origin}/bookings/${booking.id}/payment`}
                                 onPaymentSuccess={() => {
                                     toast({ title: 'Payment Successful!', description: 'Your booking has been confirmed.' });
                                     router.push('/bookings');
@@ -278,7 +279,9 @@ export default function PaymentPage() {
                                 onPaymentError={(error) => {
                                     toast({ variant: 'destructive', title: 'Payment Failed', description: error });
                                 }}
-                            />
+                            >
+                                Pay with PayPal
+                            </PayPalButton>
                             
                             {/* Debug Test Button */}
                             <div className="mt-4 p-4 border border-yellow-200 bg-yellow-50 rounded-lg">
