@@ -3,7 +3,6 @@
 import { getDb, getStorageInstance } from '@/lib/firebase';
 import { doc, updateDoc, getDoc, serverTimestamp, collection, addDoc, runTransaction, query, where, getDocs } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
-import { PaymentRetryService } from '@/lib/payment-retry-service';
 
 // Utility function to serialize Firebase Timestamps for client components
 const serializeTimestamps = (data: any): any => {

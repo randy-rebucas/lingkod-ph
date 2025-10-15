@@ -1,212 +1,256 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/context/auth-context';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter, useParams } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, CheckCircle, XCircle, ArrowLeft } from 'lucide-react';
+import { CheckCircle, XCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
-import { capturePayPalPayment } from '../../../actions';
 
 export default function PaymentResultPage() {
-  const { bookingId } = useParams();
-  const router = useRouter();
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const params = useParams();
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  const [isLoading, setIsLoading] = useState(true);
+  const [paymentStatus, setPaymentStatus] = useState<'success' | 'failed' | 'cancelled' | 'pending'>('pending');
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [error, setError] = useState<string>('');
 
-  const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'cancelled'>('loading');
-  const [message, setMessage] = useState<string>('');
-  const [orderId, setOrderId] = useState<string>('');
-
-  const handlePayPalResult = useCallback(async (orderId: string) => {
-    try {
-      if (!user) {
-        throw new Error('Authentication required');
-      }
-
-      const token = await user.getIdToken();
-      if (!token) {
-        throw new Error('Authentication required');
-      }
-
-      if (!bookingId || Array.isArray(bookingId)) {
-        throw new Error('Booking ID is required');
-      }
-
-      const result = await capturePayPalPayment({
-        bookingId,
-        orderId,
-      });
-
-      if (result.success) {
-        setStatus('success');
-        setMessage('Your PayPal payment has been successfully processed!');
-        toast({
-          title: 'Payment Successful!',
-          description: 'Your booking has been confirmed.',
-        });
-      } else {
-        setStatus('error');
-        setMessage(result.error || 'Payment processing failed');
-        toast({
-          variant: 'destructive',
-          title: 'Payment Failed',
-          description: result.error || 'Your payment could not be processed.',
-        });
-      }
-    } catch (error) {
-      console.error('Error processing PayPal payment result:', error);
-      setStatus('error');
-      setMessage('An error occurred while processing your payment');
-      toast({
-        variant: 'destructive',
-        title: 'Payment Error',
-        description: 'An error occurred while processing your payment.',
-      });
-    }
-  }, [bookingId, user, toast]);
-
-  const handleOtherPaymentResult = useCallback(() => {
-    // Handle other payment method results
-    const resultCode = searchParams.get('resultCode');
-    
-    if (resultCode === 'Authorised') {
-      setStatus('success');
-      setMessage('Your payment has been successfully processed!');
-    } else {
-      setStatus('error');
-      setMessage('Payment was not successful');
-    }
-  }, [searchParams]);
+  const bookingId = params.bookingId as string;
+  const method = searchParams.get('method');
+  const token = searchParams.get('token');
+  const PayerID = searchParams.get('PayerID');
 
   useEffect(() => {
-    if (!bookingId || !user) return;
-
-    const method = searchParams.get('method');
-    const orderIdParam = searchParams.get('orderId');
-    const _token = searchParams.get('token');
-    const _payerId = searchParams.get('PayerID');
-
-    if (method === 'paypal') {
-      if (orderIdParam) {
-        setOrderId(orderIdParam);
-        handlePayPalResult(orderIdParam);
-      } else {
-        setStatus('error');
-        setMessage('Invalid PayPal payment response');
+    const processPayment = async () => {
+      if (!user) {
+        router.push('/login');
+        return;
       }
-    } else {
-      // Handle other payment methods
-      handleOtherPaymentResult();
-    }
-  }, [bookingId, user, searchParams, handleOtherPaymentResult, handlePayPalResult]);
+
+      try {
+        setIsLoading(true);
+
+        if (method === 'paypal' && token && PayerID) {
+          // Handle PayPal payment result
+          const response = await fetch('/api/payments/paypal/order/capture', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${await user.getIdToken()}`,
+            },
+            body: JSON.stringify({
+              orderId: token,
+              bookingId: bookingId,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            setPaymentStatus('success');
+            setPaymentData(result.data);
+            toast({
+              title: "Payment Successful!",
+              description: "Your payment has been processed successfully.",
+            });
+          } else {
+            setPaymentStatus('failed');
+            setError(result.error || 'Payment processing failed');
+            toast({
+              title: "Payment Failed",
+              description: result.error || 'Payment processing failed',
+              variant: "destructive",
+            });
+          }
+        } else if (method === 'maya') {
+          // Handle Maya payment result
+          const checkoutId = searchParams.get('checkoutId');
+          if (checkoutId) {
+            // Verify Maya payment status
+            const response = await fetch(`/api/payments/maya/status?checkoutId=${checkoutId}`, {
+              headers: {
+                'Authorization': `Bearer ${await user.getIdToken()}`,
+              },
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.data?.status === 'PAYMENT_SUCCESS') {
+              setPaymentStatus('success');
+              setPaymentData(result.data);
+              toast({
+                title: "Payment Successful!",
+                description: "Your payment has been processed successfully.",
+              });
+            } else {
+              setPaymentStatus('failed');
+              setError('Payment verification failed');
+              toast({
+                title: "Payment Failed",
+                description: "Payment verification failed",
+                variant: "destructive",
+              });
+            }
+          } else {
+            setPaymentStatus('cancelled');
+          }
+        } else {
+          setPaymentStatus('cancelled');
+        }
+      } catch (error) {
+        console.error('Error processing payment:', error);
+        setPaymentStatus('failed');
+        setError('An unexpected error occurred');
+        toast({
+          title: "Payment Error",
+          description: "An unexpected error occurred while processing your payment.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    processPayment();
+  }, [user, bookingId, method, token, PayerID, router, toast, searchParams]);
+
+  const handleContinue = () => {
+    router.push('/bookings');
+  };
+
+  const handleRetry = () => {
+    router.push(`/bookings/${bookingId}/payment`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-2xl">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p>Processing your payment...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const getStatusIcon = () => {
-    switch (status) {
-      case 'loading':
-        return <Loader2 className="h-12 w-12 animate-spin text-blue-500" />;
+    switch (paymentStatus) {
       case 'success':
-        return <CheckCircle className="h-12 w-12 text-green-500" />;
-      case 'error':
-        return <XCircle className="h-12 w-12 text-red-500" />;
+        return <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />;
+      case 'failed':
+        return <XCircle className="h-16 w-16 text-red-500 mx-auto" />;
       case 'cancelled':
-        return <XCircle className="h-12 w-12 text-yellow-500" />;
+        return <AlertCircle className="h-16 w-16 text-yellow-500 mx-auto" />;
       default:
-        return <Loader2 className="h-12 w-12 animate-spin text-blue-500" />;
+        return <AlertCircle className="h-16 w-16 text-gray-500 mx-auto" />;
     }
   };
 
   const getStatusTitle = () => {
-    switch (status) {
-      case 'loading':
-        return 'Processing Payment...';
+    switch (paymentStatus) {
       case 'success':
         return 'Payment Successful!';
-      case 'error':
+      case 'failed':
         return 'Payment Failed';
       case 'cancelled':
         return 'Payment Cancelled';
       default:
-        return 'Processing Payment...';
+        return 'Payment Status Unknown';
     }
   };
 
-  const getStatusDescription = () => {
-    switch (status) {
-      case 'loading':
-        return 'Please wait while we process your payment...';
+  const getStatusColor = () => {
+    switch (paymentStatus) {
       case 'success':
-        return message || 'Your payment has been successfully processed and your booking is now confirmed.';
-      case 'error':
-        return message || 'There was an error processing your payment. Please try again.';
+        return 'border-green-200';
+      case 'failed':
+        return 'border-red-200';
       case 'cancelled':
-        return 'You cancelled the payment process. You can try again anytime.';
+        return 'border-yellow-200';
       default:
-        return 'Please wait while we process your payment...';
+        return 'border-gray-200';
     }
   };
 
   return (
-    <div className="container mx-auto max-w-2xl py-8">
-      <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
+    <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <Card className={getStatusColor()}>
+        <CardHeader className="text-center pb-4">
+          <div className="mx-auto mb-4">
             {getStatusIcon()}
           </div>
-          <CardTitle className="text-2xl font-headline bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-            {getStatusTitle()}
-          </CardTitle>
-          <CardDescription className="text-base">
-            {getStatusDescription()}
-          </CardDescription>
+          <CardTitle className="text-2xl">{getStatusTitle()}</CardTitle>
         </CardHeader>
+        
         <CardContent className="space-y-6">
-          {orderId && (
-            <Alert>
-              <AlertDescription>
-                <strong>Transaction ID:</strong> {orderId}
-              </AlertDescription>
-            </Alert>
+          {paymentStatus === 'success' && (
+            <div className="text-center">
+              <p className="text-lg text-muted-foreground mb-4">
+                Thank you for your payment! Your booking has been confirmed.
+              </p>
+              {paymentData && (
+                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                  <h3 className="font-semibold text-sm">Payment Details</h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Transaction ID:</span>
+                      <span className="ml-2 font-medium">{paymentData.transactionId}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Amount:</span>
+                      <span className="ml-2 font-medium">₱{paymentData.amount?.toFixed(2) || '0.00'}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Method:</span>
+                      <span className="ml-2 font-medium capitalize">{method}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Status:</span>
+                      <span className="ml-2 font-medium text-green-600">Completed</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
-          {status === 'success' && (
-            <Alert className="bg-green-50 border-green-200 text-green-800">
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>
-                Your booking has been confirmed! You will receive an email confirmation shortly.
-              </AlertDescription>
-            </Alert>
+          {paymentStatus === 'failed' && (
+            <div className="text-center">
+              <p className="text-lg text-muted-foreground mb-4">
+                {error || 'Your payment could not be processed. Please try again.'}
+              </p>
+            </div>
           )}
 
-          {status === 'error' && (
-            <Alert variant="destructive">
-              <XCircle className="h-4 w-4" />
-              <AlertDescription>
-                If you continue to experience issues, please contact our support team.
-              </AlertDescription>
-            </Alert>
+          {paymentStatus === 'cancelled' && (
+            <div className="text-center">
+              <p className="text-lg text-muted-foreground mb-4">
+                Your payment was cancelled. You can try again or choose a different payment method.
+              </p>
+            </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button
-              onClick={() => router.push('/bookings')}
-              className="flex-1"
-              variant={status === 'success' ? 'default' : 'outline'}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Bookings
-            </Button>
-            
-            {status === 'error' && (
-              <Button
-                onClick={() => router.push(`/bookings/${bookingId}/payment`)}
-                className="flex-1"
-              >
-                Try Again
+          <div className="flex gap-4 justify-center">
+            {paymentStatus === 'success' ? (
+              <Button onClick={handleContinue} className="px-8">
+                Continue to Bookings
               </Button>
+            ) : (
+              <>
+                <Button onClick={handleRetry} variant="outline">
+                  Try Again
+                </Button>
+                <Button onClick={handleContinue}>
+                  Back to Bookings
+                </Button>
+              </>
             )}
           </div>
         </CardContent>
