@@ -21,6 +21,8 @@ import type { Booking } from "../../page";
 import { PaymentConfig } from "@/lib/payment-config";
 import { PaymentRetryService } from "@/lib/payment-retry-service";
 import { PayPalCheckoutButton } from "@/components/paypal-checkout-button";
+import { PayPalTestButton } from "@/components/paypal-test-button";
+import { PayPalConfigCheck } from "@/components/paypal-config-check";
 
 export default function PaymentPage() {
     const { bookingId } = useParams();
@@ -221,6 +223,9 @@ export default function PaymentPage() {
                 </div>
             </div>
 
+            {/* PayPal Configuration Check */}
+            <PayPalConfigCheck />
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">
                     <CardHeader className="border-b border-border/50 bg-gradient-to-r from-background/50 to-muted/20">
@@ -274,6 +279,22 @@ export default function PaymentPage() {
                                     toast({ variant: 'destructive', title: 'Payment Failed', description: error });
                                 }}
                             />
+                            
+                            {/* Debug Test Button */}
+                            <div className="mt-4 p-4 border border-yellow-200 bg-yellow-50 rounded-lg">
+                                <h4 className="text-sm font-medium text-yellow-800 mb-2">Debug PayPal Integration</h4>
+                                <PayPalTestButton
+                                    bookingId={booking.id}
+                                    amount={booking.price || 0}
+                                    serviceName={booking.serviceName}
+                                    onPaymentSuccess={() => {
+                                        toast({ title: 'Test Payment Successful!', description: 'PayPal integration is working.' });
+                                    }}
+                                    onPaymentError={(error) => {
+                                        toast({ variant: 'destructive', title: 'Test Payment Failed', description: error });
+                                    }}
+                                />
+                            </div>
                         </div>
 
                     </CardContent>

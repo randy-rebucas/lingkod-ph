@@ -83,7 +83,7 @@ export async function getAccessRequirements() {
         'Complete identity verification',
       ],
       supportContact: {
-        email: 'support@lingkod.ph',
+        email: 'support@localpro.asia',
         phone: '+63 2 1234 5678',
         hours: 'Monday to Friday, 9:00 AM - 6:00 PM (PST)',
       },

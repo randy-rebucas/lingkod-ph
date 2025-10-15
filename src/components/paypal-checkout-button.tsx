@@ -17,8 +17,10 @@ interface PayPalCheckoutButtonProps {
   amount: number;
   serviceName: string;
   onPaymentStart?: () => void;
-  onPaymentSuccess?: () => void;
+  onPaymentSuccess?: (transactionId?: string) => void;
   onPaymentError?: (error: string) => void;
+  className?: string;
+  disabled?: boolean;
 }
 
 export function PayPalCheckoutButton({
@@ -28,6 +30,8 @@ export function PayPalCheckoutButton({
   onPaymentStart,
   onPaymentSuccess,
   onPaymentError,
+  className = "",
+  disabled = false,
 }: PayPalCheckoutButtonProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
@@ -42,23 +46,32 @@ export function PayPalCheckoutButton({
 
   // Check PayPal configuration on mount
   useEffect(() => {
-    setIsConfigured(!!(process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET));
+    // Only check for client-side environment variable
+    setIsConfigured(!!process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID);
   }, []);
 
   // Memoize the payment handler to prevent unnecessary re-renders
   const handlePayPalPayment = useCallback(async () => {
     try {
+      console.log('PayPal payment initiated for booking:', bookingId);
       setIsProcessing(true);
       setPaymentStatus('processing');
       onPaymentStart?.();
 
+      // Check if PayPal is configured
+      if (!isConfigured) {
+        throw new Error('PayPal is not configured. Please contact support.');
+      }
+
       const token = await getIdToken();
       if (!token) {
-        throw new Error('Authentication required');
+        throw new Error('Authentication required. Please log in again.');
       }
 
       const returnUrl = `${window.location.origin}/bookings/${bookingId}/payment/result?method=paypal`;
       const cancelUrl = `${window.location.origin}/bookings/${bookingId}/payment`;
+      
+      console.log('Creating PayPal payment with:', { bookingId, returnUrl, cancelUrl });
       
       // Use server action for payment creation
       const paymentResult = await createPayPalPayment({
@@ -67,55 +80,53 @@ export function PayPalCheckoutButton({
         cancelUrl,
       });
 
+      console.log('PayPal payment result:', paymentResult);
+
       if (!paymentResult.success) {
         throw new Error(paymentResult.error || 'Payment creation failed');
       }
 
       const result = paymentResult.data;
 
-      if (result.success) {
-        // Payment event tracking will be handled server-side
-
-        if (result.approvalUrl) {
-          // Redirect to PayPal payment page
-          setApprovalUrl(result.approvalUrl);
-          setPaymentStatus('processing');
-          
-          // Open in new tab or redirect
-          window.location.href = result.approvalUrl;
-        } else {
-          // Payment was immediately successful
-          setPaymentStatus('success');
-          onPaymentSuccess?.();
-          toast({
-            title: 'Payment Successful!',
-            description: 'Your PayPal payment has been processed successfully.',
-          });
-          
-          // Redirect to bookings page after a short delay
-          setTimeout(() => {
-            router.push('/bookings');
-          }, 2000);
-        }
+      if (result && result.approvalUrl) {
+        // Redirect to PayPal payment page
+        setApprovalUrl(result.approvalUrl);
+        setPaymentStatus('processing');
+        
+        console.log('Redirecting to PayPal:', result.approvalUrl);
+        
+        // Open in new tab or redirect
+        window.location.href = result.approvalUrl;
       } else {
-        setPaymentStatus('error');
-        setErrorMessage(result.error || 'Payment failed');
-        onPaymentError?.(result.error || 'Payment failed');
+        // Payment was immediately successful
+        setPaymentStatus('success');
+        onPaymentSuccess?.();
         toast({
-          variant: 'destructive',
-          title: 'Payment Failed',
-          description: result.error || 'Your PayPal payment could not be processed.',
+          title: 'Payment Successful!',
+          description: 'Your PayPal payment has been processed successfully.',
         });
+        
+        // Redirect to bookings page after a short delay
+        setTimeout(() => {
+          router.push('/bookings');
+        }, 2000);
       }
     } catch (error) {
+      console.error('PayPal payment error:', error);
       setPaymentStatus('error');
-      const errorMessage = handleError(error, 'PayPal payment');
+      const errorMessage = error instanceof Error ? error.message : 'Payment failed';
       setErrorMessage(errorMessage);
       onPaymentError?.(errorMessage);
+      
+      toast({
+        variant: 'destructive',
+        title: 'Payment Failed',
+        description: errorMessage,
+      });
     } finally {
       setIsProcessing(false);
     }
-  }, [bookingId, getIdToken, onPaymentStart, onPaymentSuccess, onPaymentError, toast, router, handleError]);
+  }, [bookingId, getIdToken, onPaymentStart, onPaymentSuccess, onPaymentError, toast, router, isConfigured]);
 
   const handlePaymentResult = useCallback(async (orderId: string) => {
     try {
@@ -177,18 +188,18 @@ export function PayPalCheckoutButton({
   // Memoize the payment button render to prevent unnecessary re-renders
   const renderPaymentButton = useMemo(() => {
     if (!isConfigured) {
-      return (
-        <Button disabled className="w-full" aria-label="PayPal not configured">
-          <CreditCard className="mr-2 h-4 w-4" />
-          PayPal Not Available
-        </Button>
-      );
+        return (
+          <Button disabled className={`w-full ${className}`} aria-label="PayPal not configured">
+            <CreditCard className="mr-2 h-4 w-4" />
+            PayPal Not Available
+          </Button>
+        );
     }
 
     switch (paymentStatus) {
       case 'processing':
         return (
-          <Button disabled className="w-full" aria-label="Processing payment">
+          <Button disabled className={`w-full ${className}`} aria-label="Processing payment">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Processing Payment...
           </Button>
@@ -196,7 +207,7 @@ export function PayPalCheckoutButton({
       
       case 'success':
         return (
-          <Button disabled className="w-full bg-green-600 hover:bg-green-700" aria-label="Payment successful">
+          <Button disabled className={`w-full bg-green-600 hover:bg-green-700 ${className}`} aria-label="Payment successful">
             <CheckCircle className="mr-2 h-4 w-4" />
             Payment Successful!
           </Button>
@@ -207,8 +218,8 @@ export function PayPalCheckoutButton({
           <div className="space-y-2">
             <Button 
               onClick={handlePayPalPayment}
-              className="w-full"
-              disabled={isProcessing}
+              className={`w-full ${className}`}
+              disabled={isProcessing || disabled}
               aria-label="Retry payment"
             >
               <CreditCard className="mr-2 h-4 w-4" />
@@ -227,8 +238,8 @@ export function PayPalCheckoutButton({
         return (
           <Button 
             onClick={handlePayPalPayment}
-            className="w-full"
-            disabled={isProcessing}
+            className={`w-full ${className}`}
+            disabled={isProcessing || disabled}
             aria-label="Pay with PayPal"
           >
             <CreditCard className="mr-2 h-4 w-4" />
@@ -236,7 +247,7 @@ export function PayPalCheckoutButton({
           </Button>
         );
     }
-  }, [paymentStatus, isProcessing, errorMessage, handlePayPalPayment, isConfigured]);
+  }, [paymentStatus, isProcessing, errorMessage, handlePayPalPayment, isConfigured, className, disabled]);
 
   return (
     <Card>

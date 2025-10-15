@@ -169,7 +169,7 @@ export class PayPalPaymentService {
   /**
    * Capture PayPal order
    */
-  async captureOrder(orderId: string, bookingId: string, db?: any): Promise<PayPalCaptureResponse> {
+  async captureOrder(orderId: string, db?: any): Promise<PayPalCaptureResponse> {
     try {
       if (!PayPalPaymentService.isConfigured()) {
         return {
@@ -204,7 +204,10 @@ export class PayPalPaymentService {
       if (capture.status === 'COMPLETED') {
         // Handle successful payment
         if (db) {
-          await this.handleSuccessfulPayment(bookingId, orderId, capture, db);
+          const bookingId = capture.purchase_units?.[0]?.custom_id;
+          if (bookingId) {
+            await this.handleSuccessfulPayment(bookingId, orderId, capture, db);
+          }
         }
         
         return {
@@ -437,6 +440,198 @@ export class PayPalPaymentService {
       });
     } catch (error) {
       console.error('Error cancelling PayPal order:', error);
+    }
+  }
+
+  /**
+   * Create PayPal subscription
+   */
+  async createSubscription(subscriptionRequest: any, db?: any): Promise<PayPalOrderResponse> {
+    try {
+      if (!PayPalPaymentService.isConfigured()) {
+        return {
+          success: false,
+          error: 'PayPal is not properly configured. Please contact support.',
+        };
+      }
+
+      const accessToken = await this.getAccessToken();
+
+      const subscriptionData = {
+        plan_id: subscriptionRequest.planId,
+        start_time: new Date(Date.now() + 60000).toISOString(), // Start in 1 minute
+        subscriber: {
+          name: {
+            given_name: 'Customer',
+            surname: 'User',
+          },
+          email_address: 'customer@example.com', // This should come from user data
+        },
+        application_context: {
+          brand_name: 'LocalPro',
+          locale: 'en-US',
+          shipping_preference: 'NO_SHIPPING',
+          user_action: 'SUBSCRIBE_NOW',
+          payment_method: {
+            payer_selected: 'PAYPAL',
+            payee_preferred: 'IMMEDIATE_PAYMENT_REQUIRED',
+          },
+          return_url: subscriptionRequest.returnUrl,
+          cancel_url: subscriptionRequest.cancelUrl,
+        },
+      };
+
+      const response = await fetch(`${this.baseUrl}/v1/billing/subscriptions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'PayPal-Request-Id': `subscription_${subscriptionRequest.planId}_${Date.now()}`,
+        },
+        body: JSON.stringify(subscriptionData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('PayPal subscription creation failed:', errorData);
+        return {
+          success: false,
+          error: `PayPal subscription creation failed: ${errorData.message || 'Unknown error'}`,
+        };
+      }
+
+      const subscription = await response.json();
+
+      // Store subscription in database (if db is provided)
+      if (db) {
+        await this.storePayPalSubscription(subscriptionRequest.planId, {
+          subscriptionId: subscription.id,
+          status: subscription.status,
+          amount: subscriptionRequest.amount,
+          billingCycle: subscriptionRequest.billingCycle,
+          createdAt: new Date(),
+          planName: subscriptionRequest.planName,
+        }, db);
+      }
+
+      return {
+        success: true,
+        orderId: subscription.id,
+        approvalUrl: subscription.links?.find((link: any) => link.rel === 'approve')?.href,
+      };
+    } catch (error) {
+      console.error('Error creating PayPal subscription:', error);
+      return {
+        success: false,
+        error: 'Failed to create PayPal subscription. Please try again.',
+      };
+    }
+  }
+
+  /**
+   * Activate PayPal subscription
+   */
+  async activateSubscription(subscriptionId: string, token: string, baToken?: string, db?: any): Promise<PayPalOrderResponse> {
+    try {
+      if (!PayPalPaymentService.isConfigured()) {
+        return {
+          success: false,
+          error: 'PayPal is not properly configured. Please contact support.',
+        };
+      }
+
+      const accessToken = await this.getAccessToken();
+
+      const response = await fetch(`${this.baseUrl}/v1/billing/subscriptions/${subscriptionId}/activate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+          'PayPal-Request-Id': `activate_${subscriptionId}_${Date.now()}`,
+        },
+        body: JSON.stringify({
+          reason: 'Subscription activated by user',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('PayPal subscription activation failed:', errorData);
+        return {
+          success: false,
+          error: `PayPal subscription activation failed: ${errorData.message || 'Unknown error'}`,
+        };
+      }
+
+      const activation = await response.json();
+
+      if (db) {
+        await this.handleSuccessfulSubscription(subscriptionId, activation, db);
+      }
+
+      return {
+        success: true,
+        orderId: subscriptionId,
+      };
+    } catch (error) {
+      console.error('Error activating PayPal subscription:', error);
+      return {
+        success: false,
+        error: 'Failed to activate PayPal subscription. Please try again.',
+      };
+    }
+  }
+
+  /**
+   * Store PayPal subscription in database
+   */
+  private async storePayPalSubscription(planId: string, subscriptionData: any, db: any) {
+    try {
+      await db.collection('paypalSubscriptions').doc(planId).set({
+        ...subscriptionData,
+        planId,
+        updatedAt: db.FieldValue.serverTimestamp(),
+      });
+    } catch (error) {
+      console.error('Error storing PayPal subscription:', error);
+    }
+  }
+
+  /**
+   * Handle successful PayPal subscription
+   */
+  private async handleSuccessfulSubscription(subscriptionId: string, activationData: any, db: any) {
+    try {
+      const batch = db.batch();
+
+      // Update subscription status
+      const subscriptionRef = db.collection('paypalSubscriptions').doc(subscriptionId);
+      batch.update(subscriptionRef, {
+        status: 'ACTIVE',
+        activatedAt: db.FieldValue.serverTimestamp(),
+        activationData,
+      });
+
+      await batch.commit();
+
+      // Send notifications
+      await this.sendSubscriptionSuccessNotification(subscriptionId, db);
+    } catch (error) {
+      console.error('Error handling successful PayPal subscription:', error);
+    }
+  }
+
+  /**
+   * Send subscription success notification
+   */
+  private async sendSubscriptionSuccessNotification(subscriptionId: string, db?: any) {
+    try {
+      if (!db) return;
+      
+      // Add notification logic here
+      console.log(`PayPal subscription ${subscriptionId} activated successfully`);
+    } catch (error) {
+      console.error('Error sending PayPal subscription success notification:', error);
     }
   }
 }

@@ -40,11 +40,11 @@ export function validatePaymentConfiguration(): ValidationResult {
   }
 
   // Check for security configuration
-  if (!process.env.JWT_SECRET) {
+  if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'your-super-secure-jwt-secret-key-here') {
     warnings.push('JWT_SECRET not configured');
   }
 
-  if (!process.env.ENCRYPTION_KEY) {
+  if (!process.env.ENCRYPTION_KEY || process.env.ENCRYPTION_KEY === 'your-32-character-encryption-key-here') {
     warnings.push('ENCRYPTION_KEY not configured');
   }
 
