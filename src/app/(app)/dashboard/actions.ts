@@ -375,6 +375,7 @@ export async function addProviderToFavorites(providerId: string, userId: string)
     const newFavorite = await addDoc(favoritesRef, {
       userId: validatedUserId,
       providerId: validatedProviderId,
+      type: 'provider',
       favoritedAt: serverTimestamp()
     });
     

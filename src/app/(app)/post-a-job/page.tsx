@@ -200,10 +200,84 @@ export default function PostAJobPage() {
               description: "A category, budget, and job-specific questions have been suggested."
             })
         } catch(e) {
-            console.error(e);
-            toast({ variant: 'destructive', title: 'AI Error', description: 'Could not generate details at this time.' });
+            console.error('AI Error:', e);
+            // Fallback: Provide basic category suggestion without AI
+            const suggestedCategory = suggestCategoryFromTitle(jobTitle);
+            if (suggestedCategory) {
+                const matchingCategory = categories.find(cat => cat.name === suggestedCategory);
+                if (matchingCategory) {
+                    form.setValue('categoryId', matchingCategory.id, { shouldValidate: true });
+                }
+            }
+            
+            // Add some basic questions
+            const basicQuestions = [
+                {
+                    question: "What is the specific scope of work needed?",
+                    type: "textarea" as const,
+                    example: "Please describe the specific tasks or deliverables required."
+                },
+                {
+                    question: "What is the preferred timeline for completion?",
+                    type: "text" as const,
+                    example: "e.g., Within 1 week, ASAP, Flexible"
+                }
+            ];
+            setQuestions(basicQuestions);
+            setAnswers({});
+            
+            toast({
+              title: "Basic Suggestions Generated",
+              description: "AI is not available, but we've provided basic category and question suggestions."
+            });
         }
     });
+  }
+
+  // Fallback function to suggest category based on job title keywords
+  const suggestCategoryFromTitle = (title: string): string | null => {
+    const titleLower = title.toLowerCase();
+    
+    // Construction & Building
+    if (titleLower.includes('carpenter') || titleLower.includes('wood') || titleLower.includes('furniture')) return 'Carpenter';
+    if (titleLower.includes('electric') || titleLower.includes('wiring') || titleLower.includes('electrical')) return 'Electrician';
+    if (titleLower.includes('plumb') || titleLower.includes('pipe') || titleLower.includes('water')) return 'Plumber';
+    if (titleLower.includes('weld') || titleLower.includes('metal')) return 'Welder';
+    if (titleLower.includes('hvac') || titleLower.includes('aircon') || titleLower.includes('air conditioning')) return 'HVAC Technician';
+    if (titleLower.includes('roof') || titleLower.includes('roofing')) return 'Roofer';
+    if (titleLower.includes('paint') || titleLower.includes('painting')) return 'Painter (Construction)';
+    if (titleLower.includes('tile') || titleLower.includes('tiling')) return 'Tiler (Tile Setter)';
+    if (titleLower.includes('mason') || titleLower.includes('brick') || titleLower.includes('concrete')) return 'Mason (Panday / Masonero)';
+    
+    // Cleaning Services
+    if (titleLower.includes('clean') || titleLower.includes('cleaning')) {
+        if (titleLower.includes('house') || titleLower.includes('home')) return 'Housekeeper / Kasambahay';
+        if (titleLower.includes('window')) return 'Window Cleaner';
+        if (titleLower.includes('carpet')) return 'Carpet & Upholstery Cleaner';
+        return 'Janitor / Utility Worker';
+    }
+    
+    // Beauty Services
+    if (titleLower.includes('hair') || titleLower.includes('haircut') || titleLower.includes('barber')) return 'Hairdresser / Barber';
+    if (titleLower.includes('makeup') || titleLower.includes('make-up')) return 'Makeup Artist';
+    if (titleLower.includes('nail') || titleLower.includes('manicure') || titleLower.includes('pedicure')) return 'Nail Technician / Manicurist / Pedicurist';
+    if (titleLower.includes('massage')) return 'Massage Therapist';
+    
+    // Technology
+    if (titleLower.includes('computer') || titleLower.includes('pc') || titleLower.includes('laptop') || titleLower.includes('it')) return 'IT Technician/Support Specialist';
+    if (titleLower.includes('network') || titleLower.includes('wifi') || titleLower.includes('internet')) return 'Network Technician';
+    
+    // Automotive
+    if (titleLower.includes('car') || titleLower.includes('auto') || titleLower.includes('vehicle') || titleLower.includes('mechanic')) return 'Automotive Technician';
+    
+    // Cooking/Food
+    if (titleLower.includes('cook') || titleLower.includes('chef') || titleLower.includes('food') || titleLower.includes('catering')) return 'Chef/Cook';
+    if (titleLower.includes('bake') || titleLower.includes('cake') || titleLower.includes('pastry')) return 'Baker/Pastry Chef';
+    
+    // Transportation
+    if (titleLower.includes('drive') || titleLower.includes('driver') || titleLower.includes('delivery')) return 'Commercial Driver';
+    
+    return null;
   }
   
   const handleAnswerChange = (question: string, answer: string) => {

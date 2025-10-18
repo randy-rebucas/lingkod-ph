@@ -44,12 +44,16 @@ export async function getFavoriteProviders(userId: string): Promise<{
     // Get favorite providers for this user (without orderBy to avoid index issues)
     const favoritesQuery = query(
       collection(getDb(), "favorites"), 
-      where("userId", "==", validatedUserId),
-      where("type", "==", "provider")
+      where("userId", "==", validatedUserId)
     );
     const favoritesSnapshot = await getDocs(favoritesQuery);
-    const favorites = favoritesSnapshot.docs.map(doc => 
+    const allFavorites = favoritesSnapshot.docs.map(doc => 
       serializeTimestamps({ id: doc.id, ...doc.data() })
+    );
+
+    // Filter for provider favorites (include those without type field for backward compatibility)
+    const favorites = allFavorites.filter(fav => 
+      fav.type === 'provider' || (fav.providerId && !fav.agencyId)
     );
 
     // Get provider details for each favorite
@@ -116,12 +120,16 @@ export async function getFavoriteAgencies(userId: string): Promise<{
     // Get favorite agencies for this user (without orderBy to avoid index issues)
     const favoritesQuery = query(
       collection(getDb(), "favorites"), 
-      where("userId", "==", validatedUserId),
-      where("type", "==", "agency")
+      where("userId", "==", validatedUserId)
     );
     const favoritesSnapshot = await getDocs(favoritesQuery);
-    const favorites = favoritesSnapshot.docs.map(doc => 
+    const allFavorites = favoritesSnapshot.docs.map(doc => 
       serializeTimestamps({ id: doc.id, ...doc.data() })
+    );
+
+    // Filter for agency favorites
+    const favorites = allFavorites.filter(fav => 
+      fav.type === 'agency' || (fav.agencyId && !fav.providerId)
     );
 
     // Get agency details for each favorite

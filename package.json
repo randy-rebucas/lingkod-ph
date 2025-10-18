@@ -25,6 +25,8 @@
     "email": "email dev",
     "validate-payments": "tsx src/scripts/validate-payment-system.ts",
     "setup-dev": "tsx src/scripts/setup-dev-environment.ts",
+    "setup-ai": "tsx src/scripts/setup-ai-config.ts",
+    "fix-favorites": "tsx src/scripts/fix-favorites-type.ts",
     "seed:learning-hub": "tsx src/scripts/seed-learning-hub.ts",
     "seed:learning-hub:mock": "tsx src/scripts/seed-learning-hub-mock.ts",
     "test-paypal": "tsx src/scripts/test-paypal-integration.ts",

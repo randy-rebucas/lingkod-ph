@@ -492,10 +492,8 @@ console.log(result);
 
 **Required Environment Variables:**
 ```env
-# Google AI Configuration
-GOOGLE_AI_API_KEY=your_api_key
-GOOGLE_AI_PROJECT_ID=your_project_id
-GOOGLE_AI_LOCATION=us-central1
+# Google AI Configuration (Gemini)
+GEMINI_API_KEY=your_gemini_api_key
 
 # Genkit Configuration
 GENKIT_ENVIRONMENT=development # or production
