@@ -9,7 +9,7 @@
  * - RequestPayoutInput: The input type for the flow.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, isAIAvailable } from '@/ai/genkit';
 import { z } from 'zod';
 import { getDb } from '@/lib/firebase';
 import { doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -23,10 +23,51 @@ const RequestPayoutInputSchema = z.object({
 export type RequestPayoutInput = z.infer<typeof RequestPayoutInputSchema>;
 
 export async function handleRequestPayout(input: RequestPayoutInput): Promise<void> {
-  return requestPayoutFlow(input);
+  // If AI is not available, provide a fallback response
+  if (!isAIAvailable || !ai) {
+    return handleRequestPayoutWithoutAI(input);
+  }
+  
+  return requestPayoutFlow!(input);
 }
 
-const requestPayoutFlow = ai.defineFlow(
+// Fallback payout function when AI is not available
+async function handleRequestPayoutWithoutAI(input: RequestPayoutInput): Promise<void> {
+  const db = getDb();
+  const providerRef = doc(db, 'users', input.providerId);
+  const providerDoc = await getDoc(providerRef);
+
+  if (!providerDoc.exists()) {
+    throw new Error('Provider not found.');
+  }
+
+  const providerData = providerDoc.data();
+  const payoutDetails = providerData.payoutDetails;
+
+  if (!payoutDetails || !payoutDetails.method) {
+      throw new Error('Provider has not configured their payout details.');
+  }
+  
+  // Create payout request record
+  await addDoc(collection(db, 'payouts'), {
+    providerId: input.providerId,
+    amount: input.amount,
+    status: 'pending',
+    requestedAt: serverTimestamp(),
+    payoutDetails,
+  });
+  
+  // Send email notification (simplified without AI)
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  await resend.emails.send({
+    from: 'noreply@localpro.ph',
+    to: 'admin@localpro.ph',
+    subject: 'New Payout Request',
+    react: PayoutRequestEmail({ providerData, amount: input.amount }),
+  });
+}
+
+const requestPayoutFlow = ai ? ai.defineFlow(
   {
     name: 'requestPayoutFlow',
     inputSchema: RequestPayoutInputSchema,
@@ -96,6 +137,6 @@ const requestPayoutFlow = ai.defineFlow(
       });
     }
   }
-);
+) : null;
 
     

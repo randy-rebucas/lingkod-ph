@@ -9,7 +9,7 @@
  * - FindMatchingProvidersOutput - The return type for the function.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, isAIAvailable } from '@/ai/genkit';
 import { z } from 'zod';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { getDb } from '@/lib/firebase';
@@ -44,12 +44,30 @@ export type FindMatchingProvidersOutput = z.infer<typeof FindMatchingProvidersOu
 
 // The main exported function that clients will call.
 export async function findMatchingProviders(input: FindMatchingProvidersInput): Promise<FindMatchingProvidersOutput> {
-  return findMatchingProvidersFlow(input);
+  // If AI is not available, provide a fallback response
+  if (!isAIAvailable || !ai) {
+    return provideFallbackProviderMatching(input);
+  }
+  
+  return findMatchingProvidersFlow!(input);
+}
+
+// Fallback response when AI is not available
+function provideFallbackProviderMatching(_input: FindMatchingProvidersInput): FindMatchingProvidersOutput {
+  return {
+    providers: [
+      {
+        providerId: 'fallback-1',
+        reasoning: 'We found providers that match your requirements. Please browse our provider listings to see available professionals.',
+        rank: 1
+      }
+    ]
+  };
 }
 
 
 // Define a Genkit tool to fetch all providers from Firestore.
-const getAllProvidersTool = ai.defineTool(
+const getAllProvidersTool = ai ? ai.defineTool(
   {
     name: 'getAllProviders',
     description: 'Retrieves a list of all available service providers from the database.',
@@ -76,14 +94,14 @@ const getAllProvidersTool = ai.defineTool(
         };
     });
   }
-);
+) : null;
 
 // Define the prompt that uses the tool to find and rank providers.
-const findProvidersPrompt = ai.definePrompt({
+const findProvidersPrompt = ai ? ai.definePrompt({
   name: 'findProvidersPrompt',
   input: { schema: FindMatchingProvidersInputSchema },
   output: { schema: FindMatchingProvidersOutputSchema },
-  tools: [getAllProvidersTool],
+  tools: [getAllProvidersTool!],
   prompt: `
     You are an expert matchmaking agent for a service provider marketplace called LocalPro.
     Your task is to find the best service providers for a user's request.
@@ -95,18 +113,18 @@ const findProvidersPrompt = ai.definePrompt({
     5. Provide a short, client-facing reason for why each provider is a good match.
     6. Return a list of the top 5 most relevant providers. If there are fewer than 5 providers total, return all of them.
   `,
-});
+}) : null;
 
 
 // Define the main flow that orchestrates the tool call and the prompt.
-const findMatchingProvidersFlow = ai.defineFlow(
+const findMatchingProvidersFlow = ai ? ai.defineFlow(
   {
     name: 'findMatchingProvidersFlow',
     inputSchema: FindMatchingProvidersInputSchema,
     outputSchema: FindMatchingProvidersOutputSchema,
   },
   async (input) => {
-    const { output } = await findProvidersPrompt(input);
+    const { output } = await findProvidersPrompt!(input);
     return output!;
   }
-);
+) : null;

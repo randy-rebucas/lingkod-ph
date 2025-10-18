@@ -5,7 +5,7 @@
  * @fileOverview A Genkit flow for creating a backup of key Firestore collections.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, isAIAvailable } from '@/ai/genkit';
 import { z } from 'zod';
 import { collection, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getDb } from '@/lib/firebase';
@@ -41,10 +41,80 @@ export async function createBackup(actor: Actor): Promise<BackupResult> {
     };
   }
   
-  return createBackupFlow({ actor });
+  // If AI is not available, provide a fallback response
+  if (!isAIAvailable || !ai) {
+    return createBackupWithoutAI(actor);
+  }
+  
+  return createBackupFlow!({ actor });
 }
 
-const createBackupFlow = ai.defineFlow(
+// Fallback backup function when AI is not available
+async function createBackupWithoutAI(_actor: Actor): Promise<BackupResult> {
+  try {
+    const backupData: Record<string, any[]> = {};
+    let totalDocuments = 0;
+
+    const db = getDb();
+    for (const collectionName of COLLECTIONS_TO_BACKUP) {
+      const snapshot = await getDocs(collection(db, collectionName));
+      backupData[collectionName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      totalDocuments += snapshot.docs.length;
+    }
+
+    const backupContent = JSON.stringify(backupData, null, 2);
+    const timestamp = new Date().toISOString().replace(/:/g, '-');
+    const fileName = `backup-${timestamp}.json`;
+    const storagePath = `backups/${fileName}`;
+    
+    // Use Firebase Admin SDK for storage operations (bypasses security rules)
+    const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+    if (!bucketName) {
+      throw new Error('Firebase Storage bucket name not configured. Please set NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET environment variable.');
+    }
+    
+    // Get the storage bucket - the client library automatically uses ADC for authentication
+    const bucket = adminStorage.bucket(bucketName);
+    const file = bucket.file(storagePath);
+    
+    // Upload the backup file
+    await file.save(backupContent, {
+      metadata: {
+        contentType: 'application/json',
+      },
+    });
+    
+    // Make the file publicly accessible and generate download URL
+    await file.makePublic();
+    const downloadUrl = `https://storage.googleapis.com/${bucketName}/${storagePath}`;
+
+    // Create a metadata record in Firestore
+    await addDoc(collection(db, 'backups'), {
+      fileName,
+      filePath: storagePath,
+      downloadUrl,
+      collections: COLLECTIONS_TO_BACKUP,
+      documentCount: totalDocuments,
+      createdAt: serverTimestamp(),
+    });
+
+    return {
+      success: true,
+      message: `Successfully backed up ${totalDocuments} documents from ${COLLECTIONS_TO_BACKUP.length} collections.`,
+      backupUrl: downloadUrl,
+      documentCount: totalDocuments
+    };
+  } catch (error: any) {
+    console.error("Backup failed:", error);
+    return {
+      success: false,
+      message: error.message || 'An unknown error occurred during backup.',
+      documentCount: 0
+    };
+  }
+}
+
+const createBackupFlow = ai ? ai.defineFlow(
   {
     name: 'createBackupFlow',
     inputSchema: z.object({
@@ -120,4 +190,4 @@ const createBackupFlow = ai.defineFlow(
       };
     }
   }
-);
+) : null;

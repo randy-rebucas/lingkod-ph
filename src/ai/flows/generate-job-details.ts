@@ -10,7 +10,7 @@
  * - JobDetailQuestion: The structure for a dynamically generated question.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, isAIAvailable} from '@/ai/genkit';
 import {z} from 'zod';
 
 const JobDetailQuestionSchema = z.object({
@@ -40,10 +40,72 @@ const GenerateJobDetailsOutputSchema = z.object({
 export type GenerateJobDetailsOutput = z.infer<typeof GenerateJobDetailsOutputSchema>;
 
 export async function generateJobDetails(input: GenerateJobDetailsInput): Promise<GenerateJobDetailsOutput> {
-  return generateJobDetailsFlow(input);
+  // If AI is not available, provide a fallback response
+  if (!isAIAvailable || !ai) {
+    return provideFallbackJobDetails(input);
+  }
+  
+  return generateJobDetailsFlow!(input);
 }
 
-const prompt = ai.definePrompt({
+// Fallback response when AI is not available
+function provideFallbackJobDetails(input: GenerateJobDetailsInput): GenerateJobDetailsOutput {
+  const { jobTitle, jobDescription } = input;
+  
+  // Basic category suggestion based on keywords
+  const lowerTitle = jobTitle.toLowerCase();
+  const lowerDescription = jobDescription.toLowerCase();
+  const combined = `${lowerTitle} ${lowerDescription}`;
+  
+  let suggestedCategory = "General Services";
+  
+  if (combined.includes('clean') || combined.includes('housekeeper')) {
+    suggestedCategory = "Housekeeper / Kasambahay";
+  } else if (combined.includes('plumb') || combined.includes('pipe')) {
+    suggestedCategory = "Plumber";
+  } else if (combined.includes('electric') || combined.includes('wiring')) {
+    suggestedCategory = "Electrician";
+  } else if (combined.includes('carpent') || combined.includes('wood')) {
+    suggestedCategory = "Carpenter";
+  } else if (combined.includes('massage') || combined.includes('spa')) {
+    suggestedCategory = "Massage Therapist";
+  } else if (combined.includes('beauty') || combined.includes('hair')) {
+    suggestedCategory = "Hairdresser / Barber";
+  }
+  
+  // Basic budget suggestion
+  let suggestedBudget = 1000; // Default budget
+  
+  if (combined.includes('clean') || combined.includes('housekeeper')) {
+    suggestedBudget = 500;
+  } else if (combined.includes('plumb') || combined.includes('electric')) {
+    suggestedBudget = 1500;
+  } else if (combined.includes('carpent') || combined.includes('construction')) {
+    suggestedBudget = 2000;
+  }
+  
+  // Basic questions
+  const questions: JobDetailQuestion[] = [
+    {
+      question: "What is the specific scope of work needed?",
+      type: "textarea",
+      example: "Please describe the specific tasks or deliverables required."
+    },
+    {
+      question: "What is the preferred timeline for completion?",
+      type: "text",
+      example: "e.g., Within 1 week, ASAP, Flexible"
+    }
+  ];
+  
+  return {
+    suggestedCategory,
+    suggestedBudget,
+    questions
+  };
+}
+
+const prompt = ai ? ai.definePrompt({
   name: 'generateJobDetailsPrompt',
   input: {schema: GenerateJobDetailsInputSchema},
   output: {schema: GenerateJobDetailsOutputSchema},
@@ -72,16 +134,16 @@ Available Service Categories:
 Job Title: {{{jobTitle}}}
 Job Description: {{{jobDescription}}}
 `,
-});
+}) : null;
 
-const generateJobDetailsFlow = ai.defineFlow(
+const generateJobDetailsFlow = ai ? ai.defineFlow(
   {
     name: 'generateJobDetailsFlow',
     inputSchema: GenerateJobDetailsInputSchema,
     outputSchema: GenerateJobDetailsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await prompt!(input);
     return output!;
   }
-);
+) : null;

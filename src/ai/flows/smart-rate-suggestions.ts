@@ -8,7 +8,7 @@
  * - SuggestSmartRateOutput - The return type for the suggestSmartRate function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, isAIAvailable} from '@/ai/genkit';
 import {z} from 'zod';
 
 const SuggestSmartRateInputSchema = z.object({
@@ -30,10 +30,45 @@ const SuggestSmartRateOutputSchema = z.object({
 export type SuggestSmartRateOutput = z.infer<typeof SuggestSmartRateOutputSchema>;
 
 export async function suggestSmartRate(input: SuggestSmartRateInput): Promise<SuggestSmartRateOutput> {
-  return suggestSmartRateFlow(input);
+  // If AI is not available, provide a fallback response
+  if (!isAIAvailable || !ai) {
+    return provideFallbackRateSuggestion(input);
+  }
+  
+  return suggestSmartRateFlow!(input);
 }
 
-const prompt = ai.definePrompt({
+// Fallback response when AI is not available
+function provideFallbackRateSuggestion(input: SuggestSmartRateInput): SuggestSmartRateOutput {
+  const { servicesOffered, location } = input;
+  
+  // Basic rate suggestions based on common services
+  const lowerServices = servicesOffered.toLowerCase();
+  let baseRate = 500; // Default base rate
+  
+  if (lowerServices.includes('cleaning') || lowerServices.includes('housekeeper')) {
+    baseRate = 300;
+  } else if (lowerServices.includes('plumber') || lowerServices.includes('electrician')) {
+    baseRate = 800;
+  } else if (lowerServices.includes('carpenter') || lowerServices.includes('construction')) {
+    baseRate = 600;
+  } else if (lowerServices.includes('massage') || lowerServices.includes('beauty')) {
+    baseRate = 400;
+  }
+  
+  // Adjust for location (basic adjustment)
+  const lowerLocation = location.toLowerCase();
+  if (lowerLocation.includes('manila') || lowerLocation.includes('makati') || lowerLocation.includes('quezon')) {
+    baseRate = Math.round(baseRate * 1.2); // 20% higher for major cities
+  }
+  
+  return {
+    suggestedRate: baseRate,
+    reasoning: `Based on the services offered (${servicesOffered}) and location (${location}), I suggest a rate of ₱${baseRate}. This is a competitive rate that considers local market conditions. For more accurate pricing, please research similar services in your area or contact our support team for assistance.`
+  };
+}
+
+const prompt = ai ? ai.definePrompt({
   name: 'suggestSmartRatePrompt',
   input: {schema: SuggestSmartRateInputSchema},
   output: {schema: SuggestSmartRateOutputSchema},
@@ -50,16 +85,16 @@ Respond with a suggested rate and the reasoning behind it.
 
 Ensure the suggested rate allows the service provider to be competitive while maintaining profitability.
 `,
-});
+}) : null;
 
-const suggestSmartRateFlow = ai.defineFlow(
+const suggestSmartRateFlow = ai ? ai.defineFlow(
   {
     name: 'suggestSmartRateFlow',
     inputSchema: SuggestSmartRateInputSchema,
     outputSchema: SuggestSmartRateOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await prompt!(input);
     return output!;
   }
-);
+) : null;

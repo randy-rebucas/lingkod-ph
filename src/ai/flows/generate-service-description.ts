@@ -9,7 +9,7 @@
  * - GenerateServiceDescriptionOutput - The return type for the generateServiceDescription function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, isAIAvailable} from '@/ai/genkit';
 import {z} from 'zod';
 
 const GenerateServiceDescriptionInputSchema = z.object({
@@ -27,10 +27,22 @@ const GenerateServiceDescriptionOutputSchema = z.object({
 export type GenerateServiceDescriptionOutput = z.infer<typeof GenerateServiceDescriptionOutputSchema>;
 
 export async function generateServiceDescription(input: GenerateServiceDescriptionInput): Promise<GenerateServiceDescriptionOutput> {
-  return generateServiceDescriptionFlow(input);
+  // If AI is not available, provide a fallback response
+  if (!isAIAvailable || !ai) {
+    return provideFallbackServiceDescription(input);
+  }
+  
+  return generateServiceDescriptionFlow!(input);
 }
 
-const prompt = ai.definePrompt({
+// Fallback response when AI is not available
+function provideFallbackServiceDescription(input: GenerateServiceDescriptionInput): GenerateServiceDescriptionOutput {
+  return {
+    description: `Professional ${input.serviceName} service. We provide high-quality work with attention to detail and customer satisfaction. Our experienced team ensures reliable and efficient service delivery.`
+  };
+}
+
+const prompt = ai ? ai.definePrompt({
   name: 'generateServiceDescriptionPrompt',
   input: {schema: GenerateServiceDescriptionInputSchema},
   output: {schema: GenerateServiceDescriptionOutputSchema},
@@ -42,16 +54,16 @@ Service Name: {{{serviceName}}}
 
 Focus on the benefits, what's included, and the value the customer will receive.
 `,
-});
+}) : null;
 
-const generateServiceDescriptionFlow = ai.defineFlow(
+const generateServiceDescriptionFlow = ai ? ai.defineFlow(
   {
     name: 'generateServiceDescriptionFlow',
     inputSchema: GenerateServiceDescriptionInputSchema,
     outputSchema: GenerateServiceDescriptionOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await prompt!(input);
     return output!;
   }
-);
+) : null;

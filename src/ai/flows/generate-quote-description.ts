@@ -9,7 +9,7 @@
  * - GenerateQuoteDescriptionOutput - The return type for the generateQuoteDescription function.
  */
 
-import {ai} from '@/ai/genkit';
+import {ai, isAIAvailable} from '@/ai/genkit';
 import {z} from 'zod';
 
 const GenerateQuoteDescriptionInputSchema = z.object({
@@ -27,10 +27,22 @@ const GenerateQuoteDescriptionOutputSchema = z.object({
 export type GenerateQuoteDescriptionOutput = z.infer<typeof GenerateQuoteDescriptionOutputSchema>;
 
 export async function generateQuoteDescription(input: GenerateQuoteDescriptionInput): Promise<GenerateQuoteDescriptionOutput> {
-  return generateQuoteDescriptionFlow(input);
+  // If AI is not available, provide a fallback response
+  if (!isAIAvailable || !ai) {
+    return provideFallbackQuoteDescription(input);
+  }
+  
+  return generateQuoteDescriptionFlow!(input);
 }
 
-const prompt = ai.definePrompt({
+// Fallback response when AI is not available
+function provideFallbackQuoteDescription(input: GenerateQuoteDescriptionInput): GenerateQuoteDescriptionOutput {
+  return {
+    description: `Professional ${input.itemName} service. This includes all necessary materials and labor to complete the job to your satisfaction.`
+  };
+}
+
+const prompt = ai ? ai.definePrompt({
   name: 'generateQuoteDescriptionPrompt',
   input: {schema: GenerateQuoteDescriptionInputSchema},
   output: {schema: GenerateQuoteDescriptionOutputSchema},
@@ -42,16 +54,16 @@ Item Name: {{{itemName}}}
 
 Focus on the value and completeness of the service.
 `,
-});
+}) : null;
 
-const generateQuoteDescriptionFlow = ai.defineFlow(
+const generateQuoteDescriptionFlow = ai ? ai.defineFlow(
   {
     name: 'generateQuoteDescriptionFlow',
     inputSchema: GenerateQuoteDescriptionInputSchema,
     outputSchema: GenerateQuoteDescriptionOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const {output} = await prompt!(input);
     return output!;
   }
-);
+) : null;

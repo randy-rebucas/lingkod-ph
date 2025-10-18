@@ -126,6 +126,15 @@ const nextConfig: NextConfig = {
       net: false,
       tls: false,
       crypto: false,
+      http2: false,
+      dns: false,
+      stream: false,
+      util: false,
+      url: false,
+      querystring: false,
+      path: false,
+      os: false,
+      child_process: false,
     };
 
     // Production optimizations
@@ -155,7 +164,7 @@ const nextConfig: NextConfig = {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
   // Server external packages (moved from experimental)
-  serverExternalPackages: [],
+  serverExternalPackages: ['genkit', '@genkit-ai/googleai', '@genkit-ai/core'],
   
   // Turbopack configuration (moved from experimental.turbo)
   turbopack: {

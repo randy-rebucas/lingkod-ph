@@ -6,7 +6,7 @@
  * - helpCenterAssistant - A function that answers user questions based on FAQs.
  */
 
-import { ai } from '@/ai/genkit';
+import { ai, isAIAvailable } from '@/ai/genkit';
 import { z } from 'zod';
 
 // Define the input schema for the flow
@@ -23,7 +23,53 @@ export type HelpCenterOutput = z.infer<typeof HelpCenterOutputSchema>;
 
 // This is the main function that the client-side component will call
 export async function helpCenterAssistant(input: HelpCenterInput): Promise<HelpCenterOutput> {
-  return helpCenterAssistantFlow(input);
+  // If AI is not available, provide a fallback response
+  if (!isAIAvailable || !ai) {
+    return provideFallbackResponse(input.question);
+  }
+  
+  return helpCenterAssistantFlow!(input);
+}
+
+// Fallback response when AI is not available
+function provideFallbackResponse(question: string): HelpCenterOutput {
+  const lowerQuestion = question.toLowerCase();
+  
+  // Simple keyword matching for common questions
+  if (lowerQuestion.includes('book') || lowerQuestion.includes('booking')) {
+    return {
+      answer: "You can book a service by browsing our provider listings, selecting a provider, choosing a service from their profile, and then clicking the 'Book' button. You'll be prompted to select a date and time that works for you."
+    };
+  }
+  
+  if (lowerQuestion.includes('payment') || lowerQuestion.includes('pay')) {
+    return {
+      answer: "We support a variety of payment methods, including PayPal, Debit/Credit Card, and Bank Transfer, all processed securely through our platform. Some providers may also offer cash on delivery."
+    };
+  }
+  
+  if (lowerQuestion.includes('provider') || lowerQuestion.includes('become')) {
+    return {
+      answer: "Sign up for a 'Client' account first. From your profile page, you will find an option to 'Become a Provider'. Complete the verification process to start offering your services."
+    };
+  }
+  
+  if (lowerQuestion.includes('cancel') || lowerQuestion.includes('reschedule')) {
+    return {
+      answer: "Yes, you can cancel or request to reschedule a booking directly from your 'My Bookings' page. Please be aware of the provider's cancellation policy, as some fees may apply depending on the timing of the cancellation."
+    };
+  }
+  
+  if (lowerQuestion.includes('secure') || lowerQuestion.includes('safety')) {
+    return {
+      answer: "Yes, all online payments are processed through a secure payment gateway. For manual payments, we hold the funds until you confirm the job is complete, providing an extra layer of security."
+    };
+  }
+  
+  // Default response for unrecognized questions
+  return {
+    answer: "I'm sorry, but I'm having trouble processing your question right now. Please try rephrasing your question or contact our support team for assistance. You can also browse our FAQ section for common answers."
+  };
 }
 
 const faqContent = `
@@ -67,8 +113,8 @@ Q: How can I improve my ranking and get more bookings?
 A: High-quality service, positive client reviews, a complete and professional profile, and quick response times to inquiries all contribute to better visibility on our platform. Becoming a verified provider also significantly increases trust.
 `;
 
-// Define the prompt for the assistant
-const assistantPrompt = ai.definePrompt({
+// Define the prompt for the assistant (only if AI is available)
+const assistantPrompt = ai ? ai.definePrompt({
   name: 'helpCenterAssistantPrompt',
   input: { schema: HelpCenterInputSchema },
   output: { schema: HelpCenterOutputSchema },
@@ -83,10 +129,10 @@ const assistantPrompt = ai.definePrompt({
     User's Question:
     {{{question}}}
   `,
-});
+}) : null;
 
-// Define the flow that runs the prompt
-const helpCenterAssistantFlow = ai.defineFlow(
+// Define the flow that runs the prompt (only if AI is available)
+const helpCenterAssistantFlow = ai ? ai.defineFlow(
   {
     name: 'helpCenterAssistantFlow',
     inputSchema: HelpCenterInputSchema,
@@ -96,4 +142,4 @@ const helpCenterAssistantFlow = ai.defineFlow(
     const { output } = await assistantPrompt(input);
     return output!;
   }
-);
+) : null;

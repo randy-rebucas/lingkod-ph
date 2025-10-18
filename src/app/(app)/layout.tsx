@@ -2,7 +2,7 @@
 "use client";
 
 import * as React from "react";
-// import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from 'next-intl';
@@ -86,10 +86,37 @@ import { useTheme } from "next-themes";
 import BroadcastBanner from "@/components/broadcast-banner";
 import { Logo } from "@/components/logo";
 import { ProviderEngagementCard } from "@/components/provider-engagement-card";
+import { helpCenterAssistant } from "@/ai/flows/help-center-assistant";
 
 
 const SidebarSupportChat = () => {
   const _t = useTranslations('AppLayout');
+  const [messages, setMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = { role: 'user' as const, content: input };
+    setMessages(prev => [...prev, userMessage]);
+    const currentInput = input;
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      const response = await helpCenterAssistant({ question: currentInput });
+      const assistantMessage = { role: 'assistant' as const, content: response.answer };
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      const errorMessage = { role: 'assistant' as const, content: "I'm sorry, I'm having trouble processing your question right now. Please try again or contact our support team." };
+      setMessages(prev => [...prev, errorMessage]);
+      console.error("AI assistant error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   return (
     <Popover>
@@ -103,22 +130,70 @@ const SidebarSupportChat = () => {
         <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-blue-100">
           <h4 className="font-semibold text-center text-gray-900">AI Assistant</h4>
         </div>
-        <div className="flex-1 p-4">
-          <div className="text-center text-gray-600 text-sm p-4">
-            Ask me anything about the platform!
-          </div>
+        <div className="flex-1 p-4 overflow-y-auto">
+          {messages.length === 0 ? (
+            <div className="text-center text-gray-600 text-sm p-4">
+              Ask me anything about the platform!
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {messages.map((message, index) => (
+                <div key={index} className={`flex items-start gap-3 ${message.role === 'user' ? 'justify-end' : ''}`}>
+                  {message.role === 'assistant' && (
+                    <div className="h-6 w-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                      AI
+                    </div>
+                  )}
+                  <div className={`rounded-lg p-3 max-w-[80%] text-sm ${
+                    message.role === 'user' 
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-100 text-gray-900'
+                  }`}>
+                    {message.content}
+                  </div>
+                  {message.role === 'user' && (
+                    <div className="h-6 w-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                      U
+                    </div>
+                  )}
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex items-start gap-3">
+                  <div className="h-6 w-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                    AI
+                  </div>
+                  <div className="rounded-lg p-3 bg-gray-100">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
         <div className="p-4 border-t bg-gradient-to-r from-gray-50 to-gray-100">
-          <div className="w-full flex gap-2">
+          <form onSubmit={handleSendMessage} className="w-full flex gap-2">
             <input
               type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
               placeholder="Ask a question..."
-              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-md bg-white focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+              disabled={isLoading}
+              className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-md bg-white focus:border-blue-500 focus:ring-blue-500 focus:outline-none disabled:opacity-50"
             />
-            <Button size="sm" className="bg-blue-500 hover:bg-blue-600">
+            <Button 
+              type="submit" 
+              size="sm" 
+              className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50"
+              disabled={isLoading || !input.trim()}
+            >
               <MessageSquare className="h-4 w-4"/>
             </Button>
-          </div>
+          </form>
         </div>
       </PopoverContent>
     </Popover>
