@@ -63,7 +63,11 @@ async function handleRequestPayoutWithoutAI(input: RequestPayoutInput): Promise<
     from: 'noreply@localpro.ph',
     to: 'admin@localpro.ph',
     subject: 'New Payout Request',
-    react: PayoutRequestEmail({ providerData, amount: input.amount }),
+    react: PayoutRequestEmail({ 
+      providerName: providerData.displayName,
+      amount: input.amount,
+      payoutDetails 
+    }),
   });
 }
 

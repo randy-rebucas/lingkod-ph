@@ -132,14 +132,14 @@ const assistantPrompt = ai ? ai.definePrompt({
 }) : null;
 
 // Define the flow that runs the prompt (only if AI is available)
-const helpCenterAssistantFlow = ai ? ai.defineFlow(
+const helpCenterAssistantFlow = ai && assistantPrompt ? ai.defineFlow(
   {
     name: 'helpCenterAssistantFlow',
     inputSchema: HelpCenterInputSchema,
     outputSchema: HelpCenterOutputSchema,
   },
   async (input) => {
-    const { output } = await assistantPrompt(input);
+    const { output } = await assistantPrompt!(input);
     return output!;
   }
 ) : null;
