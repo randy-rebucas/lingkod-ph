@@ -9,7 +9,6 @@ import {
   addDoc,
   collection,
   getDocs,
-  query,
   writeBatch,
 } from 'firebase/firestore';
 import { AuditLogger } from '@/lib/audit-logger';

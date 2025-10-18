@@ -1,5 +1,5 @@
 
-import { collection, getDocs, writeBatch, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, writeBatch, doc } from "firebase/firestore";
 import { getDb  } from './firebase';
 
 const categories = [
@@ -66,7 +66,7 @@ export async function seedCategories() {
     // Fetch existing categories to avoid duplicates
     const existingCategoriesSnapshot = await getDocs(categoriesRef);
     const existingCategoryNames = new Set(existingCategoriesSnapshot.docs.map(doc => doc.data().name));
-    const existingCategories = existingCategoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const existingCategories = existingCategoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as { id: string; name: string; active?: boolean }));
 
     const batch = writeBatch(getDb());
 

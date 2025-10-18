@@ -6,7 +6,7 @@
  */
 
 import { getDb } from '@/lib/firebase';
-import { collection, getDocs, writeBatch, doc } from 'firebase/firestore';
+import { collection, getDocs, writeBatch } from 'firebase/firestore';
 
 async function fixFavoritesTypeField() {
   console.log('🔧 Fixing favorites type field...\n');
@@ -23,16 +23,16 @@ async function fixFavoritesTypeField() {
     const batch = writeBatch(getDb());
     let updatedCount = 0;
 
-    favoritesSnapshot.docs.forEach(doc => {
-      const data = doc.data();
+    favoritesSnapshot.docs.forEach(favoriteDoc => {
+      const data = favoriteDoc.data();
       
       // If type field is missing, determine it based on the data
       if (!data.type) {
         if (data.providerId && !data.agencyId) {
-          batch.update(doc.ref, { type: 'provider' });
+          batch.update(favoriteDoc.ref, { type: 'provider' });
           updatedCount++;
         } else if (data.agencyId && !data.providerId) {
-          batch.update(doc.ref, { type: 'agency' });
+          batch.update(favoriteDoc.ref, { type: 'agency' });
           updatedCount++;
         }
       }
