@@ -163,7 +163,14 @@ export default function PostAJobPage() {
     }, [editJobId, user, form, router, toast]);
 
   const handleGenerateDetails = () => {
+    const jobTitle = form.getValues('title');
     const jobDescription = form.getValues('description');
+    
+    if (jobTitle.length < 5) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Please provide a job title (at least 5 characters).' });
+        return;
+    }
+    
     if (jobDescription.length < 20) {
         toast({ variant: 'destructive', title: 'Error', description: 'Please provide a more detailed job description (at least 20 characters).' });
         return;
@@ -171,7 +178,16 @@ export default function PostAJobPage() {
 
     startAiTransition(async () => {
         try {
-            const result = await generateJobDetails({ jobDescription });
+            const result = await generateJobDetails({ jobTitle, jobDescription });
+            
+            if (result.suggestedCategory) {
+                // Find the category ID that matches the suggested category name
+                const matchingCategory = categories.find(cat => cat.name === result.suggestedCategory);
+                if (matchingCategory) {
+                    form.setValue('categoryId', matchingCategory.id, { shouldValidate: true });
+                }
+            }
+            
             if (result.suggestedBudget) {
                 form.setValue('budgetAmount', result.suggestedBudget, { shouldValidate: true });
             }
@@ -181,7 +197,7 @@ export default function PostAJobPage() {
             }
             toast({
               title: "AI Details Generated",
-              description: "A budget has been suggested and job-specific questions have been added below."
+              description: "A category, budget, and job-specific questions have been suggested."
             })
         } catch(e) {
             console.error(e);
@@ -303,7 +319,7 @@ export default function PostAJobPage() {
                     <Sparkles className="h-4 w-4" />
                     <AlertTitle>Get AI Assistance!</AlertTitle>
                     <AlertDescription>
-                        Click the button below to generate specific questions and a budget suggestion based on your job description.
+                        Click the button below to generate a category suggestion, budget estimate, and specific questions based on your job title and description.
                     </AlertDescription>
                     <Button type="button" size="sm" onClick={handleGenerateDetails} disabled={isAiPending} className="mt-2">
                         {isAiPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}

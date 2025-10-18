@@ -1,5 +1,5 @@
 
-import { collection, getDocs, writeBatch, doc } from "firebase/firestore";
+import { collection, getDocs, writeBatch, doc, updateDoc } from "firebase/firestore";
 import { getDb  } from './firebase';
 
 const categories = [
@@ -60,28 +60,41 @@ export async function seedCategories() {
         return;
     }
     const categoriesRef = collection(getDb(), "categories");
-    let count = 0;
+    let newCount = 0;
+    let updatedCount = 0;
 
     // Fetch existing categories to avoid duplicates
     const existingCategoriesSnapshot = await getDocs(categoriesRef);
     const existingCategoryNames = new Set(existingCategoriesSnapshot.docs.map(doc => doc.data().name));
+    const existingCategories = existingCategoriesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
     const batch = writeBatch(getDb());
 
+    // Add new categories
     categories.forEach(categoryName => {
         if (!existingCategoryNames.has(categoryName)) {
             const newCategoryRef = doc(categoriesRef); // Create a new doc reference
-            batch.set(newCategoryRef, { name: categoryName });
-            count++;
+            batch.set(newCategoryRef, { name: categoryName, active: true });
+            newCount++;
         }
     });
 
-    if (count > 0) {
+    // Update existing categories that don't have the active field
+    existingCategories.forEach(category => {
+        if (category.active === undefined) {
+            const categoryRef = doc(categoriesRef, category.id);
+            batch.update(categoryRef, { active: true });
+            updatedCount++;
+        }
+    });
+
+    if (newCount > 0 || updatedCount > 0) {
         await batch.commit();
-        console.log(`${count} new categories added.`);
+        if (newCount > 0) console.log(`${newCount} new categories added.`);
+        if (updatedCount > 0) console.log(`${updatedCount} existing categories updated with active field.`);
     } else {
-        console.log("No new categories to add.");
+        console.log("No categories to add or update.");
     }
     
-    return count;
+    return { newCount, updatedCount };
 }

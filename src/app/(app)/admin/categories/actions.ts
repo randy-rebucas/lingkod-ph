@@ -8,6 +8,9 @@ import {
   deleteDoc,
   addDoc,
   collection,
+  getDocs,
+  query,
+  writeBatch,
 } from 'firebase/firestore';
 import { AuditLogger } from '@/lib/audit-logger';
 
@@ -45,7 +48,7 @@ export async function handleUpdateCategory(
 export async function handleAddCategory(name: string, actor: Actor) {
   if (!name) return { error: 'Category name is required.', message: 'Validation failed.' };
   try {
-    const newDoc = await addDoc(collection(getDb(), 'categories'), { name });
+    const newDoc = await addDoc(collection(getDb(), 'categories'), { name, active: true });
 
     await AuditLogger.getInstance().logAction(
       actor.id,
@@ -83,5 +86,47 @@ export async function handleDeleteCategory(categoryId: string, actor: Actor) {
   } catch (e: any) {
     console.error('Error deleting category: ', e);
     return { error: e.message, message: 'Failed to delete category.' };
+  }
+}
+
+export async function handleFixCategoriesActiveField(actor: Actor) {
+  try {
+    const categoriesRef = collection(getDb(), 'categories');
+    const categoriesSnapshot = await getDocs(categoriesRef);
+    
+    const batch = writeBatch(getDb());
+    let updatedCount = 0;
+
+    categoriesSnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.active === undefined) {
+        batch.update(doc.ref, { active: true });
+        updatedCount++;
+      }
+    });
+
+    if (updatedCount > 0) {
+      await batch.commit();
+      
+      await AuditLogger.getInstance().logAction(
+        actor.id,
+        'categories',
+        'CATEGORIES_FIXED',
+        { updatedCount, actorRole: 'admin' }
+      );
+
+      return {
+        error: null,
+        message: `${updatedCount} categories updated with active field.`,
+      };
+    } else {
+      return {
+        error: null,
+        message: 'All categories already have the active field.',
+      };
+    }
+  } catch (e: any) {
+    console.error('Error fixing categories: ', e);
+    return { error: e.message, message: 'Failed to fix categories.' };
   }
 }

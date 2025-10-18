@@ -13,7 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Trash2, Edit, PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { handleUpdateCategory, handleDeleteCategory, handleAddCategory } from "./actions";
+import { handleUpdateCategory, handleDeleteCategory, handleAddCategory, handleFixCategoriesActiveField } from "./actions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -173,6 +173,19 @@ export default function AdminCategoriesPage() {
         setIsDialogOpen(true);
     }
 
+    const onFixCategories = async () => {
+        if (!user) return;
+        const result = await handleFixCategoriesActiveField({ id: user.uid, name: user.displayName });
+        toast({
+            title: result.error ? 'Error' : 'Success',
+            description: result.message,
+            variant: result.error ? 'destructive' : 'default',
+        });
+        if (!result.error) {
+            fetchCategories(currentPage);
+        }
+    }
+
     if (userRole !== 'admin') {
         return (
             <div className="container space-y-8">
@@ -198,7 +211,12 @@ export default function AdminCategoriesPage() {
                             {t('subtitle')}
                         </p>
                     </div>
-                    <Button onClick={openAddDialog} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground"><PlusCircle className="mr-2"/> {t('addCategory')}</Button>
+                    <div className="flex gap-2">
+                        <Button onClick={onFixCategories} variant="outline" className="shadow-soft hover:shadow-glow/20 transition-all duration-300">
+                            Fix Categories
+                        </Button>
+                        <Button onClick={openAddDialog} className="shadow-soft hover:shadow-glow/20 transition-all duration-300 border-2 hover:bg-primary hover:text-primary-foreground"><PlusCircle className="mr-2"/> {t('addCategory')}</Button>
+                    </div>
                 </div>
                 <div className=" mx-auto">
                      <Card className="shadow-soft border-0 bg-background/80 backdrop-blur-sm">

@@ -156,8 +156,7 @@ export async function getCategories(): Promise<{ success: boolean; data?: Array<
   try {
     const db = getDb();
     const categoriesRef = collection(db, 'categories');
-    const q = query(categoriesRef, where('active', '==', true));
-    const snapshot = await getDocs(q);
+    const snapshot = await getDocs(categoriesRef);
     
     const categories = snapshot.docs.map(doc => ({
       id: doc.id,

@@ -21,11 +21,15 @@ const JobDetailQuestionSchema = z.object({
 export type JobDetailQuestion = z.infer<typeof JobDetailQuestionSchema>;
 
 const GenerateJobDetailsInputSchema = z.object({
+  jobTitle: z.string().describe('The job title provided by the user.'),
   jobDescription: z.string().describe('The detailed description of the job provided by the user.'),
 });
 export type GenerateJobDetailsInput = z.infer<typeof GenerateJobDetailsInputSchema>;
 
 const GenerateJobDetailsOutputSchema = z.object({
+  suggestedCategory: z
+    .string()
+    .describe('The most appropriate service category for this job based on the title and description.'),
   suggestedBudget: z
     .number()
     .describe('A suggested budget in Philippine Peso (PHP) for the described job. Should be a reasonable market rate.'),
@@ -45,16 +49,28 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateJobDetailsOutputSchema},
   prompt: `You are an expert assistant for a service marketplace in the Philippines. Your goal is to help users create the most effective job posting possible.
 
-Given the user's job description, you need to do two things:
-1. Suggest a reasonable budget for this job in Philippine Peso (PHP). Consider the complexity and typical rates for such services in the Philippines.
-2. Generate 2-3 specific, important questions that would help a service provider better understand the scope of the work.
+Given the user's job title and description, you need to do three things:
+1. Suggest the most appropriate service category from the available categories below.
+2. Suggest a reasonable budget for this job in Philippine Peso (PHP). Consider the complexity and typical rates for such services in the Philippines.
+3. Generate 2-3 specific, important questions that would help a service provider better understand the scope of the work.
    - Do NOT ask about budget, location, or deadline, as the user will enter those in separate fields.
    - Frame questions to gather details a professional would need (e.g., "What is the floor area in square meters?" for a cleaning job, or "What is the brand and model of the aircon unit?" for a repair job).
    - For each question, provide a short example answer.
    - Determine if the answer is likely to be a short 'text' response or a longer 'textarea' response.
 
-Job Description:
-{{{jobDescription}}}
+Available Service Categories:
+- Carpenter, Electrician, Plumber, Welder, Heavy Equipment Operator, HVAC Technician, Roofer, Drywaller, Sheet Metal Worker, Glazier
+- Machinist, Millwright, Tool and Die Maker, CNC Operator, Automotive Technician, Diesel Mechanic, Aircraft Maintenance Technician, Elevator Technician, Boiler Operator
+- Electronics Technician, Line Installer/Repairer, IT Technician/Support Specialist, Network Technician, Telecommunications Technician
+- Chef/Cook, Baker/Pastry Chef, Butcher/Meat Cutter, Cosmetologist, Tattoo Artist, Tailor/Seamstress, Pet Groomer
+- Commercial Driver, Crane Operator, Forklift Operator, Ship Captain or Marine Engineer, Train Conductor/Engineer
+- Paramedic/EMT, Medical Laboratory Technician, Dental Technician, Pharmacy Technician, Firefighter, Security System Installer
+- Hairdresser / Barber, Makeup Artist, Nail Technician / Manicurist / Pedicurist, Massage Therapist, Esthetician, Eyelash & Brow Technician, Body Waxing Technician
+- Mason (Panday / Masonero), Painter (Construction), Tiler (Tile Setter), Steelman (Rebar Worker), Laborer / Helper
+- Housekeeper / Kasambahay, Janitor / Utility Worker, Window Cleaner, Carpet & Upholstery Cleaner, Post-Construction Cleaner, Laundry Worker
+
+Job Title: {{{jobTitle}}}
+Job Description: {{{jobDescription}}}
 `,
 });
 
